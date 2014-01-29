@@ -6,6 +6,6 @@ package com.ford.syncV4.android.service;
  * Date: 1/29/14
  * Time: 5:02 PM
  */
-public class IProxyServiceBinder {
-
+public interface IProxyServiceBinder {
+    void onServiceBindComplete();
 }

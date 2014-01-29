@@ -41,6 +41,7 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
@@ -57,17 +58,15 @@ import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.ISyncReceiver;
 import com.ford.syncV4.android.receivers.SyncReceiver;
-import com.ford.syncV4.android.service.IProxyServiceConnection;
+import com.ford.syncV4.android.service.ICloseSession;
+import com.ford.syncV4.android.service.IProxyServiceBinder;
+import com.ford.syncV4.android.service.IProxyServiceEvent;
 import com.ford.syncV4.android.service.ProxyService;
-import com.ford.syncV4.android.service.ProxyServiceBinder;
-import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
-import com.ford.syncV4.android.service.ProxyServiceEvent;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
-import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -141,7 +140,6 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.session.Session;
-import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
@@ -172,7 +170,7 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
-        IBluetoothDeviceManager, ConnectionListener, IProxyServiceConnection {
+        IBluetoothDeviceManager, ConnectionListener {
 
     private static final String VERSION = "$Version:$";
     private static final String LOG_TAG = "SyncProxyTester";
@@ -230,7 +228,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_WAKELOCK = 17;
     private ModuleTest _testerMain;
     private ScrollView _scroller = null;
-    private ListView _listview = null;
+    private ListView mListview = null;
     private ArrayAdapter<SyncSubMenu> _submenuAdapter = null;
     private ArrayAdapter<Integer> _commandAdapter = null;
     private Map<Integer, Integer> _commandIdToParentSubmenuMap = null;
@@ -342,8 +340,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private BluetoothDeviceManager mBluetoothDeviceManager;
     private Session rpcSession = new Session();
 
-    private final ProxyServiceConnectionProxy mProxyServiceConnectionProxy =
-            new ProxyServiceConnectionProxy(this);
+    // Get Bound Proxy Service from MainApp
     private ProxyService mBoundProxyService;
 
     public static SyncProxyTester getInstance() {
@@ -404,13 +401,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LOG_TAG, "onCreate");
+        Log.d(LOG_TAG, SyncProxyTester.class.getSimpleName() + " On Create");
 
         _activity = this;
 
         AppPreferencesManager.setAppContext(this);
 
         setContentView(R.layout.main);
+
+        // TODO : Probably improve in future
+        mBoundProxyService = null;
+        mBoundProxyService = MainApp.getsInstance().getBoundProxyService();
 
         addListeners();
 
@@ -428,13 +429,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         imageTypeAdapter = new ArrayAdapter<ImageType>(this, android.R.layout.simple_spinner_item, ImageType.values());
         imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        _listview = (ListView) findViewById(R.id.messageList);
         mLogAdapter = new LogAdapter(LOG_TAG, false, this, R.layout.row, _logMessages);
 
-        _listview.setClickable(true);
-        _listview.setAdapter(mLogAdapter);
-        _listview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        _listview.setOnItemClickListener(new OnItemClickListener() {
+        mListview = (ListView) findViewById(R.id.messageList);
+        mListview.setClickable(true);
+        mListview.setAdapter(mLogAdapter);
+        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        mListview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
@@ -450,7 +451,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                     try {
                         rawJSON = ((RPCMessage) listObj).serializeJSON(
-                                mBoundProxyService.getProxyInstance().getWiProVersion()).toString(2);
+                                mBoundProxyService.syncProxyGetWiProVersion()).toString(2);
                         builder.setTitle("Raw JSON" + (corrId != -1 ? " (Corr ID " + corrId + ")" : ""));
                     } catch (Exception e) {
                         try {
@@ -498,11 +499,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onSetUpDialogResult() {
         setUpReceiver();
         showProtocolPropertiesInTitle();
-
         if (mBoundProxyService != null) {
-            // TODO : Consider the case of NULL
+            mBoundProxyService.setLogAdapter(mLogAdapter);
+            try {
+                mBoundProxyService.syncProxyOpenSession();
+            } catch (SyncException e) {
+                Log.e(LOG_TAG, SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
+            }
         } else {
-            bindProxyService(this, mProxyServiceConnectionProxy);
+            MainApp.getsInstance().bindProxyToMainApp(new IProxyServiceBinder() {
+                @Override
+                public void onServiceBindComplete() {
+                    mBoundProxyService = MainApp.getsInstance().getBoundProxyService();
+                    mBoundProxyService.setLogAdapter(mLogAdapter);
+                }
+            });
         }
     }
 
@@ -543,49 +554,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
-    public void onProxyServiceConnected(ProxyServiceBinder service) {
-        Log.i(LOG_TAG, "ProxyService connected " + service);
-        mBoundProxyService = service.getService();
-        mBoundProxyService.setLogAdapter(mLogAdapter);
-    }
-
-    @Override
-    public void onProxyServiceDisconnected() {
-        Log.i(LOG_TAG, "ProxyService disconnected");
-        mBoundProxyService = null;
-    }
-
-    private void bindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
-        Log.i(LOG_TAG, "Bind ProxyService, connection proxy: " + connectionProxy);
-        context.bindService(new Intent(context, ProxyService.class), connectionProxy, BIND_AUTO_CREATE);
-    }
-
-    private void unbindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
-        if (!connectionProxy.isConnected()) {
-            Log.v(LOG_TAG, "ServiceConnection is not connected, ignoring unbindService: " + connectionProxy);
-            return;
-        }
-        try {
-            Log.i(LOG_TAG, "Unbind Service(), connection proxy: " + connectionProxy);
-            context.unbindService(connectionProxy);
-        } catch (IllegalArgumentException iae) {
-            // sometimes this exception is still thrown, in spite of isConnected() check above
-            // simply ignore this exception
-            Log.w(LOG_TAG, "Unbind IllegalArgumentException: " + iae);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error unbinding from connection: " + connectionProxy, e);
-        }
-    }
-
-    @Override
     public void onBluetoothDeviceRestoreConnection() {
         Log.i(LOG_TAG, "Bluetooth connection restored");
         if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
             return;
         }
-        if (mBoundProxyService == null) {
+        // TODO : Consider this case.
+        /*if (mBoundProxyService == null) {
             bindProxyService(this, mProxyServiceConnectionProxy);
-        }
+        }*/
     }
 
     @Override
@@ -605,7 +582,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
 
         if (mBoundProxyService != null) {
-            mBoundProxyService.destroyService(new ProxyServiceEvent() {
+            mBoundProxyService.destroyService(new IProxyServiceEvent() {
                 @Override
                 public void onDisposeComplete() {
                     Log.d(LOG_TAG, "Service disposed successfully");
@@ -614,7 +591,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
                                 mBluetoothStopServicePostDelayedCallback);
                     }
-                    unbindProxyService(SyncProxyTester.this, mProxyServiceConnectionProxy);
+                    //unbindProxyService(SyncProxyTester.this, mProxyServiceConnectionProxy);
                 }
 
                 @Override
@@ -625,7 +602,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
                                 mBluetoothStopServicePostDelayedCallback);
                     }
-                    unbindProxyService(SyncProxyTester.this, mProxyServiceConnectionProxy);
+                    //unbindProxyService(SyncProxyTester.this, mProxyServiceConnectionProxy);
                 }
             });
         }
@@ -653,9 +630,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (messageSelectCount == null) {
             return;
         }
-
-        SharedPreferences.Editor editor = getSharedPreferences(
-                Const.PREFS_NAME, 0).edit();
+        SharedPreferences.Editor editor = getSharedPreferences(Const.PREFS_NAME, 0).edit();
         for (Entry<String, Integer> entry : messageSelectCount.entrySet()) {
             editor.putInt(MSC_PREFIX + entry.getKey(), entry.getValue());
         }
@@ -744,7 +719,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(LOG_TAG, "onDestroy");
+        Log.d(LOG_TAG, SyncProxyTester.class.getSimpleName() + " On Destroy");
 
         if (mSyncReceiver != null) {
             unregisterReceiver(mSyncReceiver);
@@ -774,8 +749,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         dialog.cancel();
                     }
                 });
-                AlertDialog dialog1 = builder.create();
-                dialog = dialog1;
+                dialog = builder.create();
                 break;
             case 2:
                 break;
@@ -836,12 +810,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     mBtAdapter.enable();
                 }
 
-                // TODO : To be reconsider
+                /*// TODO : To be reconsider
                 if (mBoundProxyService == null) {
                     bindProxyService(this, mProxyServiceConnectionProxy);
                 } else {
                     mBoundProxyService.setLogAdapter(mLogAdapter);
-                }
+                }*/
 
                 if (mBoundProxyService != null) {
                     mBoundProxyService.reset();
@@ -873,10 +847,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             case MNU_TOGGLE_CONSOLE:
                 if (_scroller.getVisibility() == ScrollView.VISIBLE) {
                     _scroller.setVisibility(ScrollView.GONE);
-                    _listview.setVisibility(ListView.VISIBLE);
+                    mListview.setVisibility(ListView.VISIBLE);
                 } else {
                     _scroller.setVisibility(ScrollView.VISIBLE);
-                    _listview.setVisibility(ListView.GONE);
+                    mListview.setVisibility(ListView.GONE);
                 }
                 return true;
             case MNU_CLEAR:
@@ -911,9 +885,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void closeSession() {
-        ProxyService.getProxyInstance().closeSession(true);
-        finish();
-        saveMessageSelectCount();
+        if (mBoundProxyService != null) {
+            mBoundProxyService.setCloseSessionCallback(new ICloseSession() {
+                @Override
+                public void onCloseSessionComplete() {
+                    finishActivity();
+                }
+            });
+            mBoundProxyService.syncProxyCloseSession(true);
+        }
+    }
+
+    private void finishActivity() {
+        super.finish();
     }
 
     private void xmlTest() {
@@ -1033,13 +1017,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 		        
 		        if (isSYNCpaired == true) { 		        	
 		        	_applinkService = new ProxyService();
-		    		if (ProxyService.getInstance() == null) {
+		    		if (ProxyService.getsInstance() == null) {
 		    			Intent startIntent = new Intent(this, ProxyService.class);
 		    			startService(startIntent);
 		    			//bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		    		} else {
 		    			// need to get the instance and add myself as a listener
-		    			ProxyService.getInstance().setLogAdapter(this);
+		    			ProxyService.getsInstance().setLogAdapter(this);
 		    		}
 		        }
 			}
@@ -1113,9 +1097,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     .setTitle("Pick a Function")
                     .setAdapter(adapter, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            if (adapter.getItem(which) == Names.Alert) {
+                            if (adapter.getItem(which).equals(Names.Alert)) {
                                 sendAlert();
-                            } else if (adapter.getItem(which) == Names.Speak) {
+                            } else if (adapter.getItem(which).equals(Names.Speak)) {
                                 //something
                                 AlertDialog.Builder builder;
                                 AlertDialog dlg;
@@ -1159,24 +1143,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         if (speak1.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType1.getSelectedItem(), speak1));
-
                                         }
                                         if (speak2.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType2.getSelectedItem(), speak2));
-
                                         }
                                         if (speak3.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType3.getSelectedItem(), speak3));
-
                                         }
                                         if (speak4.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
-
                                         }
                                         msg.setTtsChunks(chunks);
                                         try {
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1207,13 +1189,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 msg.setCorrelationID(corrId);
                                                 msg.setButtonName(buttonName);
                                                 mLogAdapter.logMessage(msg, true);
-                                                mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                                if (mBoundProxyService != null) {
+                                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                }
                                             } else {
                                                 UnsubscribeButton msg = new UnsubscribeButton();
                                                 msg.setCorrelationID(corrId);
                                                 msg.setButtonName(buttonName);
                                                 mLogAdapter.logMessage(msg, true);
-                                                mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                                if (mBoundProxyService != null) {
+                                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                }
                                             }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -1276,7 +1262,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         try {
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1304,7 +1292,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setInteractionChoiceSetID(commandSetID);
                                         try {
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                             if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
                                                 Log.w(LOG_TAG, "Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
                                             }
@@ -1386,7 +1376,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             currentSoftButtons = null;
                                             chkIncludeSoftButtons = null;
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1434,7 +1426,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setHmiDisplayLanguage((Language) spnHmiDisplayLanguage.getSelectedItem());
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1500,7 +1494,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     msg.setBulkData(data);
 
                                                     mLogAdapter.logMessage(msg, true);
-                                                    mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                                    if (mBoundProxyService != null) {
+                                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                    }
                                                 } catch (SyncException e) {
                                                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                                 }
@@ -1524,7 +1520,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 builder.setView(layout);
                                 dlg = builder.create();
                                 dlg.show();
-                            } else if (adapter.getItem(which) == Names.DeleteFile) {
+                            } else if (adapter.getItem(which).equals(Names.DeleteFile)) {
                                 //DeleteFile
                                 AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
                                 builder.setAdapter(_putFileAdapter, new DialogInterface.OnClickListener() {
@@ -1537,7 +1533,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setSyncFileName(syncFileName);
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1552,7 +1550,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     ListFiles msg = new ListFiles();
                                     msg.setCorrelationID(autoIncCorrId++);
                                     mLogAdapter.logMessage(msg, true);
-                                    mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                    if (mBoundProxyService != null) {
+                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    }
                                 } catch (SyncException e) {
                                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                 }
@@ -1577,7 +1577,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setSyncFileName(syncFileName);
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1599,7 +1601,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     EndAudioPassThru msg = new EndAudioPassThru();
                                     msg.setCorrelationID(autoIncCorrId++);
                                     mLogAdapter.logMessage(msg, true);
-                                    mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                    if (mBoundProxyService != null) {
+                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    }
                                 } catch (SyncException e) {
                                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                 }
@@ -1634,7 +1638,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setEncrypted(chkEncryptedDID.isChecked());
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (NumberFormatException e) {
                                             Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
                                         } catch (SyncException e) {
@@ -1743,7 +1749,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                             currentSoftButtons = null;
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -1778,7 +1786,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCmdID(cmdID);
                                     try {
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -1871,7 +1881,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setSoftButtons(currentSoftButtons);
                                         }
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (NumberFormatException e) {
                                         Toast.makeText(mContext,
                                                 "Couldn't parse number",
@@ -1903,8 +1915,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             msg.setCorrelationID(autoIncCorrId++);
                             mLogAdapter.logMessage(msg, true);
                             try {
-                                mBoundProxyService.getProxyInstance()
-                                        .sendRPCRequest(msg);
+                                if (mBoundProxyService != null) {
+                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                }
                             } catch (SyncException e) {
                                 mLogAdapter.logMessage("Error sending message: " + e,
                                         Log.ERROR, e);
@@ -1929,13 +1942,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setMenuID(menu.getSubMenuId());
                                             try {
                                                 mLogAdapter.logMessage(msg, true);
-                                                mBoundProxyService
-                                                        .getProxyInstance()
-                                                        .sendRPCRequest(msg);
+                                                if (mBoundProxyService != null) {
+                                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                }
                                             } catch (SyncException e) {
                                                 mLogAdapter.logMessage(
-                                                        "Error sending message: " +
-                                                                e, Log.ERROR, e);
+                                                        "Error sending message: " + e, Log.ERROR, e);
                                             }
 
                                             if (_latestDeleteSubmenu != null) {
@@ -1972,7 +1984,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         msg.setCorrelationID(autoIncCorrId++);
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -2018,7 +2032,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
                                         msg.setCorrelationID(autoIncCorrId++);
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (NumberFormatException e) {
                                         Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
                                     } catch (SyncException e) {
@@ -2099,7 +2115,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(autoIncCorrId++);
                                         latestPerformAudioPassThruMsg = msg;
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (NumberFormatException e) {
                                         Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
                                     } catch (SyncException e) {
@@ -2173,7 +2191,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                     try {
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -2285,7 +2305,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                     try {
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -2363,7 +2385,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         mLogAdapter.logMessage(request, true);
 
                                         try {
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(request);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(request);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -2508,7 +2532,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                         }
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (NumberFormatException e) {
                                         Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
                                     } catch (SyncException e) {
@@ -2711,7 +2737,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     asList(customPresetsList)));
                                         }
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -2877,18 +2905,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setVrHelp(vrHelpItems);
                                         }
 
-                                        if (interactionLayoutCheck
-                                                .isChecked()) {
-                                            msg.setInteractionLayout(
-                                                    interactionLayoutAdapter
-                                                            .getItem(
-                                                                    interactionLayoutSpinner
+                                        if (interactionLayoutCheck.isChecked()) {
+                                            msg.setInteractionLayout(interactionLayoutAdapter
+                                                            .getItem(interactionLayoutSpinner
                                                                             .getSelectedItemPosition()));
                                         }
 
                                         try {
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -2991,7 +3018,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         mLogAdapter.logMessage(msg, true);
 
                                         try {
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -3102,7 +3131,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                         msg.setCorrelationID(autoIncCorrId++);
                                         mLogAdapter.logMessage(msg, true);
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (NumberFormatException e) {
                                         Toast.makeText(mContext, "Couldn't parse number", Toast.LENGTH_LONG).show();
                                     } catch (SyncException e) {
@@ -3192,7 +3223,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -3207,7 +3240,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -3282,7 +3317,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 add("b");
                                 add("c");
                             }});
-
 
                             Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
                             btnKbdProperties.setOnClickListener(
@@ -3393,7 +3427,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(autoIncCorrId++);
                                         mLogAdapter.logMessage(msg, true);
                                         try {
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -3469,7 +3505,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(autoIncCorrId++);
                                         mLogAdapter.logMessage(msg, true);
                                         try {
-                                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                            if (mBoundProxyService != null) {
+                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            }
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
@@ -3508,7 +3546,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setDisplayLayout(editDisplayLayout.getText().toString());
                                     mLogAdapter.logMessage(msg, true);
                                     try {
-                                        mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
                                     } catch (SyncException e) {
                                         mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                     }
@@ -3531,7 +3571,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             msg.setCorrelationID(autoIncCorrId++);
                             mLogAdapter.logMessage(msg, true);
                             try {
-                                mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                                if (mBoundProxyService != null) {
+                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                }
                             } catch (SyncException e) {
                                 mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                             }
@@ -3652,17 +3694,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     msg.setAppName(appName.getText().toString());
                 }
                 if (useTTSName.isChecked()) {
-                    msg.setTtsName(
-                            ttsChunksFromString(ttsName.getText().toString()));
+                    msg.setTtsName(ttsChunksFromString(ttsName.getText().toString()));
                 }
                 if (useNgnAppName.isChecked()) {
-                    msg.setNgnMediaScreenAppName(
-                            ngnAppName.getText().toString());
+                    msg.setNgnMediaScreenAppName(ngnAppName.getText().toString());
                 }
                 if (useVRSynonyms.isChecked()) {
                     msg.setVrSynonyms(new Vector<String>(Arrays.asList(
-                            vrSynonyms.getText().toString()
-                                    .split(JOIN_STRING))));
+                            vrSynonyms.getText().toString().split(JOIN_STRING))));
                 }
                 msg.setIsMediaApplication(isMediaApp.isChecked());
                 if (useDesiredLang.isChecked()) {
@@ -3674,8 +3713,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             hmiDesiredLangSpinner.getSelectedItemPosition()));
                 }
                 if (useAppHMITypes.isChecked()) {
-                    msg.setAppType(new Vector<AppHMIType>(
-                            appHMITypeSpinner.getSelectedItems()));
+                    msg.setAppType(new Vector<AppHMIType>(appHMITypeSpinner.getSelectedItems()));
                 }
                 if (useAppID.isChecked()) {
                     msg.setAppID(appID.getText().toString());
@@ -3683,11 +3721,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                 mLogAdapter.logMessage(msg, true);
                 try {
-                    mBoundProxyService.getProxyInstance()
-                            .sendRPCRequest(msg);
+                    if (mBoundProxyService != null) {
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                    }
                 } catch (SyncException e) {
-                    mLogAdapter.logMessage("Error sending message: " + e,
-                            Log.ERROR, e);
+                    mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                 }
             }
         });
@@ -3963,16 +4001,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             }
 
-            if ((Result.RETRY == result)
-                    && (latestPerformAudioPassThruMsg != null)) {
+            if ((Result.RETRY == result) && (latestPerformAudioPassThruMsg != null)) {
                 latestPerformAudioPassThruMsg.setCorrelationID(autoIncCorrId++);
                 try {
                     mLogAdapter.logMessage(latestPerformAudioPassThruMsg, true);
-                    mBoundProxyService.getProxyInstance()
-                            .sendRPCRequest(latestPerformAudioPassThruMsg);
+                    if (mBoundProxyService != null) {
+                        mBoundProxyService.syncProxySendRPCRequest(latestPerformAudioPassThruMsg);
+                    }
                 } catch (SyncException e) {
-                    mLogAdapter.logMessage("Error sending message: " + e,
-                            Log.ERROR, e);
+                    mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                 }
             }
         }
@@ -4050,7 +4087,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         msg.setChoiceSet(choices);
         try {
             mLogAdapter.logMessage(msg, true);
-            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+            if (mBoundProxyService != null) {
+                mBoundProxyService.syncProxySendRPCRequest(msg);
+            }
             if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
                 Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
             }
@@ -4147,17 +4186,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
-            mLogAdapter.logMessage("Should start mobile nav currentSession", true);
-            mBoundProxyService.getProxyInstance().getSyncConnection().startMobileNavService(rpcSession);
+            if (mBoundProxyService != null) {
+                mLogAdapter.logMessage("Should start mobile nav Service", true);
+                mBoundProxyService.syncProxyStartMobileNavService(rpcSession);
+            } else {
+                mLogAdapter.logMessage("Could not start mobile nav Service", true);
+            }
         }
     }
 
     public void onMobileNaviStarted() {
-        SyncProxyALM proxy = ProxyService.getProxyInstance();
-        if (proxy != null) {
-            OutputStream stream = proxy.startH264();
-            MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-            fr.setMobileNaviStateOn(stream);
+        if (mBoundProxyService == null) {
+            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " MobileNaviStarted can not " +
+                    "start with NULL Proxy Service");
+            return;
+        }
+        OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
+        if (outputStream != null) {
+            MobileNavPreviewFragment fr = (MobileNavPreviewFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+            fr.setMobileNaviStateOn(outputStream);
         }
     }
 
@@ -4185,37 +4233,37 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void closeMobileNaviOutputStream() {
-        if (mBoundProxyService.getProxyInstance() != null) {
-            SyncProxyALM proxy = mBoundProxyService.getProxyInstance();
-            proxy.stopH264();
+        if (mBoundProxyService != null) {
+            mBoundProxyService.syncProxyStopH264();
         }
     }
 
     private void closeAudioOutputStream() {
-        if (mBoundProxyService.getProxyInstance() != null) {
-            SyncProxyALM proxy = mBoundProxyService.getProxyInstance();
-            proxy.stopAudioDataTransfer();
+        if (mBoundProxyService != null) {
+            mBoundProxyService.syncProxyStopAudioDataTransfer();
         }
     }
 
     public void stopMobileNavService() {
         if (isProxyReadyForWork()) {
             mLogAdapter.logMessage("Should stop mobile nav currentSession", true);
-            mBoundProxyService.getProxyInstance().stopMobileNaviService();
+            if (mBoundProxyService != null) {
+                mBoundProxyService.syncProxyStopMobileNaviService();
+            }
             closeMobileNaviOutputStream();
         }
     }
 
     public boolean isProxyReadyForWork() {
-        if (mBoundProxyService.getProxyInstance() == null) {
+        if (!mBoundProxyService.isSyncProxyNotNull()) {
             onMobileNaviError("Error. Proxy is null");
             return false;
         }
-        if (!mBoundProxyService.getProxyInstance().getIsConnected()) {
+        if (!mBoundProxyService.isSyncProxyConnected()) {
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (mBoundProxyService.getProxyInstance().getSyncConnection() == null){
+        if (!mBoundProxyService.isSyncProxyConnectionNotNull()) {
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4229,24 +4277,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void startAudioService() {
         if (isProxyReadyForWork()) {
             mLogAdapter.logMessage("Should start audio service", true);
-            mBoundProxyService.getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+            mBoundProxyService.syncProxyStartAudioService(rpcSession);
         }
     }
 
     public void stopAudioService() {
         if (isProxyReadyForWork()) {
             mLogAdapter.logMessage("Should stop audio service", true);
-            mBoundProxyService.getProxyInstance().stopAudioService();
+            mBoundProxyService.syncProxyStopAudioService();
             closeAudioOutputStream();
         }
     }
 
     public void onAudioServiceStarted() {
-        if (mBoundProxyService.getProxyInstance() != null) {
-            SyncProxyALM proxy = mBoundProxyService.getProxyInstance();
-            OutputStream stream = proxy.startAudioDataTransfer();
-            AudioServicePreviewFragment fr = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-            fr.setAudioServiceStateOn(stream);
+        if (mBoundProxyService == null) {
+            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " AudioServiceStarted with NULL" +
+                    "Proxy");
+            return;
+        }
+        OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
+        if (outputStream != null) {
+            AudioServicePreviewFragment fr = (AudioServicePreviewFragment)
+                    getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setAudioServiceStateOn(outputStream);
         }
     }
 
@@ -4296,15 +4349,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         isFirstActivityRun = true;
         //stopService(new Intent(this, ProxyService.class));
         super.finish();
+
+        MainApp.getsInstance().exitApp();
     }
 
+    // TODO : Move this block to MainApp
     /**
      * Stops the proxy service.
      */
     private void stopProxyServiceOnExit() {
         getExitDialog().show();
-
-        saveMessageSelectCount();
 
         if (mStopProxyServiceTimeOutHandler == null) {
             mStopProxyServiceTimeOutHandler = new Handler();
@@ -4313,17 +4367,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
         mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
-        mBoundProxyService.destroyService(new ProxyServiceEvent() {
+        mBoundProxyService.destroyService(new IProxyServiceEvent() {
             @Override
             public void onDisposeComplete() {
                 if (mStopProxyServiceTimeOutHandler != null) {
                     mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
                 }
+                MainApp.getsInstance().unbindProxyFromMainApp();
                 runInUIThread(new Runnable() {
                     @Override
                     public void run() {
                         getExitDialog().dismiss();
-                        unbindProxyService(SyncProxyTester.this, mProxyServiceConnectionProxy);
                         exitApp();
                     }
                 });

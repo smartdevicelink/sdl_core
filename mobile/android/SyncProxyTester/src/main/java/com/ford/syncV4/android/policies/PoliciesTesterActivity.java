@@ -128,7 +128,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 
     public boolean onOptionsItemSelected(MenuItem item) {
         // Refresh the instance
-        //_applinkService = AppLinkService.getInstance();
+        //_applinkService = AppLinkService.getsInstance();
 
         switch (item.getItemId()) {
             case 1:
@@ -267,9 +267,9 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         msg.setData(syncPData);
         msg.setCorrelationID(6000);
 
-        if (mBoundProxyService.getProxyInstance() != null) {
+        if (mBoundProxyService != null) {
             try {
-                mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                mBoundProxyService.syncProxySendRPCRequest(msg);
             } catch (SyncException e) {
                 Log.e(LOG_TAG, "Error sending requestGPStoGetESN: " + e);
             }
@@ -504,7 +504,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                 byte[] databytes;
                 Log.i(LOG_TAG, "data: " + data);
                 if (data != null) {
-                    if (mBoundProxyService.getProxyInstance().getIsConnected() == true) {
+                    if (mBoundProxyService != null && mBoundProxyService.isSyncProxyConnected()) {
                         try {
                             String[] dataspilt4 = data.split("\"");
 
@@ -531,7 +531,9 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             msg.setCorrelationID(6001);
                             Log.i("syncp", "msg: " + msg);
 
-                            mBoundProxyService.getProxyInstance().sendRPCRequest(msg);
+                            if (mBoundProxyService != null) {
+                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                            }
                         } catch (SyncException e) {
                             _msgAdapter.logMessage("Error sending syncp to sync: " + e, Log.ERROR, e);
                         } catch (UnsupportedEncodingException e) {
@@ -880,7 +882,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 		if(_syncProxy != null){
 			//sendRPCRequestPrivate(encodedSyncPDataRequest);
 			try {
-				ProxyService.getInstance().getProxyInstance().sendRPCRequest(encodedSyncPDataRequest);
+				ProxyService.getsInstance().getProxyInstance().sendRPCRequest(encodedSyncPDataRequest);
 			} catch (SyncException e) {
 				_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 			}

@@ -7,5 +7,5 @@ package com.ford.syncV4.android.service;
  * Time: 5:28 PM
  */
 public interface ICloseSession {
-
+    void onCloseSessionComplete();
 }

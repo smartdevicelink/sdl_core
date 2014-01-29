@@ -251,8 +251,11 @@ public class ModuleTest {
 	/** Full path to XML test file or directory with test files. */
 	private String mFilePath;
 
+    private ProxyService mProxyService;
+
     // TODO : Reconsider!
-	public ModuleTest(LogAdapter logAdapter) {
+	public ModuleTest(ProxyService proxyService, LogAdapter logAdapter) {
+        mProxyService = proxyService;
 		mActivityInstance = SyncProxyTester.getInstance();
 		mLogAdapter = logAdapter;
 		
@@ -313,8 +316,7 @@ public class ModuleTest {
 									mLogAdapter.logMessage("Processing "
                                             + filename, Log.INFO, true);
 									try {
-										String fullPath = mFilePath
-												+ File.separator + filename;
+										String fullPath = mFilePath + File.separator + filename;
 										processTestFile(fullPath);
 										paths.add(getTestResultsFilename(fullPath));
 										String testErrorsFilename = getTestErrorsFilename(fullPath);
@@ -944,25 +946,22 @@ public class ModuleTest {
 		
 		Thread newThread = new Thread(new Runnable() {
 			public void run () {
-                if (currentTest != null && currentTest.getRequests() != null) {
+                if (mProxyService != null && currentTest != null && currentTest.getRequests() != null) {
                     threadContext = this;
 
                     int numResponses = expecting.size();
-                    if (numResponses > 0) ProxyService.waiting(true);
+                    if (numResponses > 0) {
+                        mProxyService.waiting(true);
+                    }
 
                     IJsonRPCMarshaller defaultMarshaller =
-                            ProxyService.getProxyInstance()
-                                    .getJsonRPCMarshaller();
-                    IJsonRPCMarshaller invalidMarshaller =
-                            new InvalidJsonRPCMarshaller();
-                    CustomJsonRPCMarshaller customMarshaller =
-                            new CustomJsonRPCMarshaller(null);
+                            mProxyService.syncProxyGetJsonRPCMarshaller();
+                    IJsonRPCMarshaller invalidMarshaller =  new InvalidJsonRPCMarshaller();
+                    CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
 
-                    for (RPCRequestWrapper wrapper : currentTest
-                            .getRequests()) {
+                    for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
                         RPCRequest rpc = wrapper.getRequest();
-                        boolean generateInvalidJSON =
-                                wrapper.isGenerateInvalidJSON();
+                        boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
                         String customJSON = wrapper.getCustomJSON();
                         if (customJSON != null) {
                             customMarshaller.setStubbedValue(customJSON);
@@ -974,33 +973,27 @@ public class ModuleTest {
                                         (generateInvalidJSON ?
                                                 invalidMarshaller :
                                                 defaultMarshaller);
-                        ProxyService.getProxyInstance()
-                                .setJsonRPCMarshaller(currentMarshaller);
+                        mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
                         try {
-                            ProxyService.getProxyInstance().sendRPCRequest(rpc);
+                            mProxyService.syncProxySendRPCRequest(rpc);
                         } catch (SyncException e) {
-                            mLogAdapter
-                                    .logMessage("Error sending RPC", Log.ERROR,
-                                            e, true);
+                            mLogAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
                         }
 
                         // restore the default marshaller
-                        ProxyService.getProxyInstance()
-                                .setJsonRPCMarshaller(defaultMarshaller);
+                        mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
 
                         long pause = wrapper.getPause();
                         if (pause > 0) {
                             Log.v(TAG, "Pause for " + pause + " ms. after " +
-                                    currentTest.getName() + "." +
-                                    rpc.getFunctionName());
+                                    currentTest.getName() + "." + rpc.getFunctionName());
                             try {
                                 // delay between requests of one test
                                 synchronized (this) {
                                     this.wait(pause);
                                 }
                             } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException",
-                                        true);
+                                mLogAdapter.logMessage("InterruptedException", true);
                             }
                         } else {
                             Log.i(TAG,
@@ -1011,16 +1004,14 @@ public class ModuleTest {
 
                     long pause = currentTest.getPause();
                     if (pause > 0) {
-                        Log.v(TAG, "Pause for " + pause + " ms. after " +
-                                currentTest.getName());
+                        Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
                         try {
                             // delay after the test
                             synchronized (this) {
                                 this.wait(pause);
                             }
                         } catch (InterruptedException e) {
-                            mLogAdapter
-                                    .logMessage("InterruptedException", true);
+                            mLogAdapter.logMessage("InterruptedException", true);
                         }
                     } else {
                         Log.i(TAG, "No pause after " + currentTest.getName());
@@ -1035,7 +1026,7 @@ public class ModuleTest {
                         mLogAdapter.logMessage("InterruptedException", true);
                     }
 
-                    ProxyService.waiting(false);
+                    mProxyService.waiting(false);
 
                     if (expecting.equals(responses)) {
                         pass = true;
@@ -1043,8 +1034,7 @@ public class ModuleTest {
                             mActivityInstance.runOnUiThread(new Runnable() {
                                 public void run() {
                                     AlertDialog.Builder alert =
-                                            new AlertDialog.Builder(
-                                                    mActivityInstance);
+                                            new AlertDialog.Builder(mActivityInstance);
                                     alert.setMessage(userPrompt);
                                     alert.setPositiveButton("Yes",
                                             new DialogInterface.OnClickListener() {
@@ -1079,22 +1069,21 @@ public class ModuleTest {
                                     this.wait();
                                 }
                             } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException",
-                                        true);
+                                mLogAdapter.logMessage("InterruptedException", true);
                             }
                         }
                     }
 
                     // restore the default marshaller
-                    ProxyService.getProxyInstance()
-                            .setJsonRPCMarshaller(defaultMarshaller);
+                    mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
                 } else {
                     Log.e(TAG, "Current test " + currentTest +
-                            " or its requests " + currentTest.getRequests() +
-                            " is null!");
+                            " or its requests " + currentTest.getRequests() + " is null!");
                 }
 				
-				synchronized (_instance) { _instance.notify();}
+				synchronized (_instance) {
+                    _instance.notify();
+                }
 				
 				Thread.currentThread().interrupt();
 			}
