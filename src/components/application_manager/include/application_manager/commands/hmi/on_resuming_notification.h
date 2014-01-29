@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,45 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "model/type.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
 
-namespace codegen {
+#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
-// Abstract interface destructor
-TypeCodeGenerator::~TypeCodeGenerator() {
-}
+namespace application_manager {
 
-// Abstract interface destructor
-Type::~Type() {
-}
+namespace commands {
 
-// Default no-op code generator
-void TypeCodeGenerator::GenerateCodeForBoolean(const Boolean* boolean) {
-}
+/**
+ * @brief OnReadyNotification command class
+ **/
+class OnResumingNotification : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnResumingNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnResumingNotification(const MessageSharedPtr& message);
 
-void TypeCodeGenerator::GenerateCodeForInteger(const Integer* integer) {
-}
+  /**
+   * @brief OnResumingNotification class destructor
+   **/
+  virtual ~OnResumingNotification();
 
-void TypeCodeGenerator::GenerateCodeForFloat(const Float* flt) {
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-void TypeCodeGenerator::GenerateCodeForString(const String* string) {
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnResumingNotification);
+};
 
-void TypeCodeGenerator::GenerateCodeForEnum(const Enum* enm) {
-}
+}  // namespace commands
 
-void TypeCodeGenerator::GenerateCodeForArray(const Array* array) {
-}
+}  // namespace application_manager
 
-void TypeCodeGenerator::GenerateCodeForMap(const Map* map) {
-}
-
-void TypeCodeGenerator::GenerateCodeForStruct(const Struct* strct) {
-}
-
-void TypeCodeGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
-}
-
-}  // namespace codegen
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_READY_NOTIFICATION_H_

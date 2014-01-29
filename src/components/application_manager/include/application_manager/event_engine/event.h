@@ -33,7 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_
 
-#include "interfaces/HMI_API.h"
+#include <interfaces/HMI_API.h>
+
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 

@@ -55,6 +55,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       is_app_allowed_(true),
       has_been_activated_(false),
+      flag_tts_speak_work_(false),
       device_(0) {
 }
 
@@ -82,7 +83,7 @@ bool ApplicationImpl::IsFullscreen() const {
 
 bool ApplicationImpl::MakeFullscreen() {
   hmi_level_ = mobile_api::HMILevel::HMI_FULL;
-  if (is_media_) {
+  if (is_media_ && !flag_tts_speak_work_) {
     audio_streaming_state_ = mobile_api::AudioStreamingState::AUDIBLE;
   }
   system_context_ = mobile_api::SystemContext::SYSCTXT_MAIN;
@@ -169,6 +170,10 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
   // from NOT_AUDIBLE
   if (!is_media)
     set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
+}
+
+void ApplicationImpl::set_flag_tts_speak_work(bool flag_tts_speak_work) {
+  flag_tts_speak_work_ = flag_tts_speak_work;
 }
 
 void ApplicationImpl::set_hmi_level(

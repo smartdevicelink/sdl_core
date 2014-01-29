@@ -47,6 +47,8 @@ import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
+import com.ford.syncV4.android.listener.ConnectionListener;
+import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.BluetoothDeviceManager;
 import com.ford.syncV4.android.manager.IBluetoothDeviceManager;
@@ -166,7 +168,7 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
-        IBluetoothDeviceManager {
+        IBluetoothDeviceManager, ConnectionListener {
 
     private static final String VERSION = "$Version:$";
     private static final String LOG_TAG = "SyncProxyTester";
@@ -405,6 +407,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         AppPreferencesManager.setAppContext(this);
 
         setContentView(R.layout.main);
+
+        addListeners();
+
         _scroller = (ScrollView) findViewById(R.id.scrollConsole);
 
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
@@ -573,6 +578,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
+    @Override
+    public void onProxyClosed() {
+        resetAdapters();
+        _msgAdapter.logMessage("Disconnected", true);
+    }
+
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
         messageSelectCount = new Hashtable<String, Integer>();
@@ -715,6 +726,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (mSyncReceiver != null) {
             unregisterReceiver(mSyncReceiver);
         }
+
+        removeListeners();
 
         //endSyncProxyInstance();
         saveMessageSelectCount();
@@ -2780,8 +2793,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             choiceSetIDs.add(_choiceSetAdapter.getItem(i));
                                         }
                                     }
+                                    sendPerformInteractionRequest(choiceSetIDs);
+                                }
 
-                                    if (choiceSetIDs.size() > 0) {
+                                private void sendPerformInteractionRequest(Vector<Integer> choiceSetIDs) {
+
                                         PerformInteraction msg = new PerformInteraction();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setInitialText(initialText.getText().toString());
@@ -2856,9 +2872,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
-                                    } else {
-                                        Toast.makeText(mContext, "No interaction choice set selected", Toast.LENGTH_LONG).show();
-                                    }
+
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -4009,14 +4023,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    /**
-     * Called when a connection to a SYNC device has been closed.
-     */
-    public void onProxyClosed(String message) {
-        resetAdapters();
-        _msgAdapter.logMessage("Disconnected: " + message, true);
-    }
-
     void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
         CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
         msg.setCorrelationID(autoIncCorrId++);
@@ -4128,8 +4134,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onMobileNaviStarted() {
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+        SyncProxyALM proxy = ProxyService.getProxyInstance();
+        if (proxy != null) {
             OutputStream stream = proxy.startH264();
             MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
             fr.setMobileNaviStateOn(stream);
@@ -4173,7 +4179,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
-    public void stopMobileNavSession() {
+    public void stopMobileNavService() {
         if (isProxyReadyForWork()) {
             _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
             ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
@@ -4231,6 +4237,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onKeyboardInputReceived(OnKeyboardInput event) {
 
+    }
+
+    /**
+     * Add all necessary listeners
+     */
+    private void addListeners() {
+        ConnectionListenersManager.addConnectionListener(this);
+    }
+
+    /**
+     * Remove all subscribed listeners
+     */
+    private void removeListeners() {
+        ConnectionListenersManager.removeConnectionListener(this);
     }
 
     /**
@@ -4320,8 +4340,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     };
 
-    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID){
-        // TODO - need to handle end currentSession logic
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
+        if (serviceType == ServiceType.Audio_Service) {
+            _msgAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            _msgAdapter.logMessage("Navi service stopped", true);
+        }
     }
 
     public void onSessionStarted(byte sessionID, String correlationID) {

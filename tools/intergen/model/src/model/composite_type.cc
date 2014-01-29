@@ -292,4 +292,32 @@ Struct::Field::Field(const Type* type, const std::string& name, bool mandatory,
       platform_(platform){
 }
 
+Typedef::Typedef(const std::string& name, const Type* type,
+                 const Description& description)
+    : name_(name),
+      type_(type),
+      description_(description) {
+}
+
+const Description& Typedef::description() const {
+  return description_;
+}
+
+const std::string& Typedef::name() const {
+  return name_;
+}
+
+const Type* Typedef::type() const {
+  return type_;
+}
+
+TypeCodeGenerator* Typedef::Apply(TypeCodeGenerator* code_generator) const {
+  code_generator->GenerateCodeForTypedef(this);
+  return code_generator;
+}
+
+const ConstantsCreator* Typedef::SupportsConstants() const {
+  return NULL;
+}
+
 }  // namespace codegen
