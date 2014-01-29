@@ -556,8 +556,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
       return HandleControlMessageStartSession(connection_id, packet);
     case FRAME_DATA_END_SERVICE:
       return HandleControlMessageEndSession(connection_id, packet);
-    case FRAME_DATA_HEART_BEAT:
+    case FRAME_DATA_HEART_BEAT: {
+      LOG4CXX_INFO(logger_,
+                   "Received heart beat for connection " << connection_id);
       return HandleControlMessageHeartBeat(connection_id, packet);
+    }
     default:
       LOG4CXX_WARN(
           logger_,
@@ -637,7 +640,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     ConnectionID connection_id, const ProtocolPacket& packet) {
-  LOG4CXX_INFO(logger_, "ProtocolHandlerImpl::HandleControlMessageHeartBeat");
+  LOG4CXX_INFO(
+      logger_,
+      "Sending heart beat acknowledgment for connection " << connection_id);
   return SendHeartBeatAck(connection_id, packet.session_id(),
                           packet.message_id());
 }
