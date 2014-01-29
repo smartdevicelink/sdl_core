@@ -419,8 +419,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
     case FRAME_TYPE_SINGLE: {
       LOG4CXX_INFO(
           logger_,
-          "FRAME_TYPE_SINGLE: of size " << packet->data_size() << ";message "
-              << packet->data());
+            "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
+            << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
       if (!session_observer_) {
         LOG4CXX_ERROR(
@@ -651,13 +651,13 @@ void ProtocolHandlerImpl::Handle(
     const impl::RawFordMessageFromMobile& message) {
   LOG4CXX_INFO_EXT(
       logger_,
-      "Message " << message->data() << " from mobile app received of size " << message->data_size());
+      "Message " << ConvertPacketDataToString(message->data(), message->data_size()) <<
+        " from mobile app received of size " << message->data_size());
 
   if ((0 != message->data()) && (0 != message->data_size())
       && (MAXIMUM_FRAME_DATA_SIZE + PROTOCOL_HEADER_V2_SIZE
           >= message->data_size())) {
     ProtocolPacket* packet = new ProtocolPacket;
-    LOG4CXX_INFO_EXT(logger_, "Data: " << packet->data());
     if (packet->deserializePacket(message->data(), message->data_size())
         == RESULT_FAIL) {
       LOG4CXX_ERROR(logger_, "Failed to parse received message.");
@@ -723,6 +723,23 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
   }
   if (message.is_final)
     transport_manager_->Disconnect(connection_handle);
+}
+
+std::string ProtocolHandlerImpl::ConvertPacketDataToString(const uint8_t* data,
+                                                           const std::size_t data_size)
+{
+  if(0==data_size)
+    return std::string();
+  bool is_printable_array = true;
+  std::locale loc;
+  const char* text = reinterpret_cast<const char*>(data);
+  // Check data for printability
+  for (int i = 0; i < data_size; ++i)
+    if (!std::isprint(text[i], loc)) {
+      is_printable_array = false;
+      break;
+      }
+  return is_printable_array ? std::string(text) : std::string("is raw data");
 }
 
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
