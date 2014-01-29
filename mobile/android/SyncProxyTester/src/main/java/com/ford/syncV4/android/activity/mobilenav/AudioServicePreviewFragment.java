@@ -125,7 +125,7 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
     }
 
     private void startFileStreaming() {
-        fileStreamingLogic.setFileResID(R.raw.audio_short);
+        fileStreamingLogic.setFileResID(R.raw.audio_test_data);
         fileStreamingLogic.startFileStreaming();
     }
 

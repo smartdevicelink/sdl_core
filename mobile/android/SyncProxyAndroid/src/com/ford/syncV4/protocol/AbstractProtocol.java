@@ -14,7 +14,6 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 public abstract class AbstractProtocol {
     private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
@@ -22,18 +21,16 @@ public abstract class AbstractProtocol {
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
     private Object _frameLock = new Object();
-    private File audioFile;
-    private File videoFile;
-    private FileOutputStream audioOutputFileStream;
-    private FileOutputStream videoOutputFileStream;
+    private static File audioFile;
+    private static File videoFile;
+    private static FileOutputStream  audioOutputFileStream;
+    private static FileOutputStream videoOutputFileStream;
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
         if (protocolListener == null) {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
-        initAudioDumpStream();
-        initVideoDumpStream();
         _protocolListener = protocolListener;
     }// end-ctor
 
@@ -96,10 +93,6 @@ public abstract class AbstractProtocol {
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
 
             if (data != null) {
-                synchronized (this) {
-                    writeToSdCardAudioFile(header, data);
-                    writeToSdCardVideoFile(header, data);
-                }
                 handleProtocolMessageBytesToSend(data, offset, length);
             }
 
@@ -116,38 +109,44 @@ public abstract class AbstractProtocol {
     }
 
     private void initVideoDumpStream() {
-        String filename = "ford_video.mp4";
+        String filename = "ford_video.txt";
+        if( videoFile == null){
         videoFile = new File(Environment.getExternalStorageDirectory(), filename);
-
+        }
+        if ( videoOutputFileStream == null ){
         try {
             videoOutputFileStream = new FileOutputStream(videoFile);
         } catch (FileNotFoundException e) {
             // handle exception
         }
+        }
     }
 
     private void initAudioDumpStream() {
-        String filename = "ford_audio.wav";
+        String filename = "ford_audio.txt";
+        if (audioFile == null ){
         audioFile = new File(Environment.getExternalStorageDirectory(), filename);
-
+        }
+        if ( audioOutputFileStream == null ){
         try {
             audioOutputFileStream = new FileOutputStream(audioFile);
         } catch (FileNotFoundException e) {
             // handle exception
+        }
         }
     }
 
     private void writeToSdCardAudioFile(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             if (header.getFrameType().equals(FrameType.Single)) {
-                try {
+               /* try {
                     if (audioOutputFileStream != null) {
                         audioOutputFileStream.write(data);
-                        audioOutputFileStream.flush();
                     }
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
-                }
+                }*/
+               // Log.d("ford_audio.txt","audio: " + new String(data));
             } else {
                 Log.w("SyncProxyTester", "wrong frame type for video streaming");
             }
@@ -157,14 +156,14 @@ public abstract class AbstractProtocol {
     private void writeToSdCardVideoFile(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             if (header.getFrameType().equals(FrameType.Single)) {
-                try {
+               /* try {
                     if (videoOutputFileStream != null) {
                         videoOutputFileStream.write(data);
-                        videoOutputFileStream.flush();
                     }
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
-                }
+                }*/
+               // Log.d("ford_video.txt","video: " + new String(data));
             } else {
                 Log.w("SyncProxyTester", "wrong frame type for video streaming");
             }
