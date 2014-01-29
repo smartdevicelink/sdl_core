@@ -66,6 +66,7 @@ void DeleteFileRequest::Run() {
       // DeleteFile request is limited by the configuration profile
       LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
       SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   const std::string& sync_file_name =

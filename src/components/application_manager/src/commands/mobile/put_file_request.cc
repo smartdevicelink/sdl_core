@@ -67,6 +67,7 @@ void PutFileRequest::Run() {
       LOG4CXX_ERROR(logger_,
                     "Too many requests from the app with HMILevel HMI_NONE ");
       SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {

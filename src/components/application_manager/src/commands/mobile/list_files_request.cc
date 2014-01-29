@@ -65,6 +65,7 @@ void ListFilesRequest::Run() {
       // DeleteFile request is limited by the configuration profile
       LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
       SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   application->increment_list_files_in_none_count();
