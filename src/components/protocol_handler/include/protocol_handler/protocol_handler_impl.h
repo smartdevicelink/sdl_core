@@ -388,7 +388,7 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageToMobile& message);
 
     /**
-     *\brief Return packet fata as string.
+     *\brief Return packet data as std::string.
      *\brief If packet data is not printable return error message
      */
     static std::string ConvertPacketDataToString(const uint8_t *data,
