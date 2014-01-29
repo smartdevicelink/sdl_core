@@ -152,7 +152,7 @@ public class MobileNavPreviewFragment extends Fragment implements ServicePreview
         int videoResID = 0;
         switch (videoSource) {
             case Const.KEY_VIDEOSOURCE_MP4:
-                videoResID = R.raw.video_test_data;
+                videoResID = R.raw.faq_welcome_orientation;
                 break;
 
             case Const.KEY_VIDEOSOURCE_H264:
