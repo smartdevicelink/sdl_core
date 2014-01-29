@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
+include(CMakeForceCompiler)
+CMAKE_FORCE_CXX_COMPILER(g++ GNU)
+CMAKE_FORCE_C_COMPILER(gcc GNU)
 project(intergen)
 
 add_definitions(-DOS_POSIX)
