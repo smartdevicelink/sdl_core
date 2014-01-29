@@ -44,6 +44,7 @@ class Enum;
 class Array;
 class Map;
 class Struct;
+class Typedef;
 
 class ConstantsCreator;
 
@@ -65,6 +66,7 @@ class TypeCodeGenerator {
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
+  virtual void GenerateCodeForTypedef(const Typedef* tdef);
   virtual ~TypeCodeGenerator();
 };
 

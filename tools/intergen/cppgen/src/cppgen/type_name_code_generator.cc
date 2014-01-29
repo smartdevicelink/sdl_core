@@ -137,9 +137,15 @@ void TypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
   os_ << struct_decl_begin << strct->name() << struct_decl_end;
 }
 
-RpcTypeNameGenerator::RpcTypeNameGenerator(const Type* type, bool mandatory)
-    : wrap_with_mandatory_(true),
-      mandatory_(mandatory) {
+void TypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
+  const char* typedef_decl_begin = prefer_reference_type_ ? "const " : "";
+  const char* typedef_decl_end = prefer_reference_type_ ? "&" : "";
+  os_ << typedef_decl_begin << tdef->name() << typedef_decl_end;
+}
+
+RpcTypeNameGenerator::RpcTypeNameGenerator(const Type* type, Availability availability)
+    : wrap_with_mandatory_(availability != kUnspecified),
+      mandatory_(availability == kMandatory) {
   type->Apply(this);
 }
 
@@ -224,6 +230,15 @@ void RpcTypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
     WrapWithMandatory(strct);
   } else {
     os_ << strct->name();
+  }
+}
+
+void RpcTypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
+  if (wrap_with_mandatory_) {
+    wrap_with_mandatory_ = false;
+    WrapWithMandatory(tdef);
+  } else {
+    os_ << tdef->name();
   }
 }
 

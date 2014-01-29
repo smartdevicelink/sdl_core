@@ -66,6 +66,7 @@ class TypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
+  virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
   bool prefer_reference_type_;
   std::stringstream os_;
@@ -77,10 +78,18 @@ class TypeNameGenerator: public TypeCodeGenerator {
  */
 class RpcTypeNameGenerator: public TypeCodeGenerator {
  public:
+  // Types
+  // Availability class to wrap type into
+  enum Availability {
+    kUnspecified,
+    kMandatory,
+    kOptional
+  };
+ public:
   // Generates name of type that is able to validate given primitive value
-  // if |mandatory| is specified, generated type is selected so it can
-  // not be left unassigned.
-  RpcTypeNameGenerator(const Type* type, bool mandatory);
+  // Depending on |availability| option optionally wraps declaration into
+  // Mandatory or Optional template
+  RpcTypeNameGenerator(const Type* type, Availability availability);
   ~RpcTypeNameGenerator();
   // Generated type name
   std::string result() const;
@@ -94,6 +103,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);
+  virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
   // Wraps type declaration with "Mandatory" or "Optional" templates
   void WrapWithMandatory(const Type* type);

@@ -67,5 +67,8 @@ void TypeCodeGenerator::GenerateCodeForMap(const Map* map) {
 void TypeCodeGenerator::GenerateCodeForStruct(const Struct* strct) {
 }
 
+void TypeCodeGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
+}
+
 }  // namespace codegen
 

@@ -104,6 +104,10 @@ CppFile& ModuleManager::HeaderForStruct(const Struct& strct) {
   return structs_header_;
 }
 
+CppFile& ModuleManager::HeaderForTypedef(const Typedef& tdef) {
+  return structs_header_;
+}
+
 CppFile& ModuleManager::HeaderForFunction(const Function& function) {
   return functions_header_;
 }

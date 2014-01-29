@@ -59,7 +59,8 @@ class Interface {
   typedef std::vector<const Response*> ResponseList;
   typedef std::vector<const Notification*> NotificationList;
   typedef TypeRegistry::EnumList EnumList;
-  typedef TypeRegistry::StructList StructList;;
+  typedef TypeRegistry::StructList StructList;
+  typedef TypeRegistry::TypedefList TypedefList;
  public:
   // Methods
   Interface(BuiltinTypeRegistry* builtin_type_registry);
@@ -70,6 +71,7 @@ class Interface {
   const ResponseList& generic_responses() const;
   const EnumList& enums() const;
   const StructList& structs() const;
+  const TypedefList& typedefs() const;
   // Special-purpose enum that assigns numerical ID's for all API messages
   const Enum* function_id_enum() const;
 
