@@ -152,21 +152,21 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   }
   if (!HasHmiResponsesToWait()) {
     std::string response_info("");
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
-        !flag_other_component_sent_ && response_success_) {
+    if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_) &&
+        (!flag_other_component_sent_) && response_success_) {
       response_success_ = false;
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
-    } else if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
-        mobile_apis::Result::UNSUPPORTED_RESOURCE == response_result_ &&
-        response_success_) {
+    } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+        tts_speak_response_) && (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+            response_result_) && response_success_) {
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt and "
           "unsupported image sent in soft buttons";
-    } else if (mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_ &&
-        response_success_) {
+    } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+        tts_speak_response_) && response_success_) {
       response_result_ = mobile_apis::Result::WARNINGS;
-            response_info = "Unsupported phoneme type sent in a prompt";
+      response_info = "Unsupported phoneme type sent in a prompt";
     }
     SendResponse(response_success_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),

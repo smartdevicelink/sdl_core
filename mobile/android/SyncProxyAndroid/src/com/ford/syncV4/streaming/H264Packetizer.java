@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public final static String TAG = "H264Packetizer";
-    private static byte[] tail = null;
+    private byte[] tail = null;
 
     private Thread thread = null;
 
@@ -68,7 +68,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    public void doDataReading() throws IOException, IllegalArgumentException {
+    public synchronized void doDataReading() throws IOException, IllegalArgumentException {
         byte[] frameData = readFrameData(byteBuffer, dataBuffer);
         if (frameData != null && frameData.length > 0) {
             createProtocolMessage(frameData);
@@ -82,6 +82,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setFunctionID(0);
         pm.setCorrID(0);
         pm.setData(frameData, frameData.length);
+
         _streamListener.sendH264(pm);
         return pm;
     }
@@ -116,7 +117,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         } else {
             MobileNaviDataFrame frame = null;
             if (data.length == length) {
-                frame = new MobileNaviDataFrame(data);
+                frame = new MobileNaviDataFrame(data.clone());
             } else {
                 frame = new MobileNaviDataFrame(Arrays.copyOf(data, length));
             }
@@ -124,9 +125,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    private synchronized int readDataFromStream(byte[] data) throws IOException {
+    private int readDataFromStream(byte[] data) throws IOException {
         checkPreconditions(data);
-        return is.read(data);
+        int res = is.read(data);
+        return res;
     }
 
     private void checkPreconditions(byte[] data) {

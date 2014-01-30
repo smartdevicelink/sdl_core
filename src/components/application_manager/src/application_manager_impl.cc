@@ -1429,7 +1429,7 @@ void ApplicationManagerImpl::Mute() {
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(state);
-      (*it)->set_flag_tts_speak_work(true);
+      (*it)->set_tts_speak_state(true);
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }
@@ -1442,7 +1442,7 @@ void ApplicationManagerImpl::Unmute() {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(
         mobile_apis::AudioStreamingState::AUDIBLE);
-      (*it)->set_flag_tts_speak_work(false);
+      (*it)->set_tts_speak_state(false);
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }

@@ -301,4 +301,25 @@ public class H264PacketizerTest extends AndroidTestCase {
         ProtocolMessage message = audioPacketizer.createProtocolMessage( generateRandomBytes(10));
         assertEquals("session id should be same", audioPacketizer.getServiceType(), message.getServiceType());
     }
+
+    public void testTwoPacketizersWorkProperly() throws Exception {
+        PipedInputStream inputStreamAudio = new PipedInputStream();
+        PipedOutputStream outputStreamAudio = new PipedOutputStream();
+        PipedInputStream inputStreamVideo = new PipedInputStream();
+        PipedOutputStream outputStreamVideo = new PipedOutputStream();
+        inputStreamAudio.connect(outputStreamAudio);
+        inputStreamVideo.connect(outputStreamVideo);
+        H264Packetizer packetizerAudio = new H264Packetizer(null, inputStreamAudio, (byte) 0, ServiceType.Audio_Service);
+        H264Packetizer packetizerVideo = new H264Packetizer(null, inputStreamVideo, (byte) 0, ServiceType.Mobile_Nav);
+        byte[] sampleDataAudio = generateRandomBytes(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        byte[] sampleDataVideo = generateRandomBytes(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        ByteBuffer bufferAudio = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        ByteBuffer bufferVideo = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        outputStreamAudio.write(sampleDataAudio);
+        outputStreamVideo.write(sampleDataVideo);
+        byte[] dataAudio = packetizerAudio.readFrameData(bufferAudio, new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
+        byte[] dataVideo = packetizerVideo.readFrameData(bufferVideo, new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
+        assertTrue("dataAudio should be == sampleDataAudio", Arrays.equals(sampleDataAudio, dataAudio));
+        assertTrue("dataVideo should be == sampleDataVideo", Arrays.equals(sampleDataVideo, dataVideo));
+    }
 }

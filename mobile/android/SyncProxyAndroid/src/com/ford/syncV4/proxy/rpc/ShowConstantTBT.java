@@ -1,10 +1,10 @@
 package com.ford.syncV4.proxy.rpc;
 
-import java.util.Hashtable;
-import java.util.Vector;
-
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
+
+import java.util.Hashtable;
+import java.util.Vector;
 
 public class ShowConstantTBT extends RPCRequest {
 
@@ -90,6 +90,7 @@ public class ShowConstantTBT extends RPCRequest {
         Object obj = parameters.get(Names.nextTurnIcon);
         if (obj == null) {
             // TODO: add this if to all messages' getters?
+            // TODO: 28.02.2014: Really? Are you sure?
             return null;
         }
         if (obj instanceof Image) {

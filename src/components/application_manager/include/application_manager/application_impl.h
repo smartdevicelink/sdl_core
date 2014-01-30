@@ -78,7 +78,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  void set_flag_tts_speak_work(bool flag_tts_speak_work);
+  void set_tts_speak_state(bool state_tts_speak);
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
@@ -120,7 +120,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool allowed_support_navigation_;
   bool is_app_allowed_;
   bool has_been_activated_;
-  bool flag_tts_speak_work_;
+  bool tts_speak_state_;
 
   mobile_api::HMILevel::eType hmi_level_;
   uint32_t put_file_in_none_count_;
