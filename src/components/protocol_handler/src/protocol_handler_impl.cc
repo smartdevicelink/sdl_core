@@ -751,8 +751,7 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
 }
 
 std::string ConvertPacketDataToString(const uint8_t* data,
-                                      const std::size_t data_size)
-{
+                                      const std::size_t data_size) {
   if (0 == data_size)
     return std::string();
   bool is_printable_array = true;
