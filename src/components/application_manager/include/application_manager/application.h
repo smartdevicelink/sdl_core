@@ -358,7 +358,7 @@ class Application : public virtual InitialApplicationData,
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
-    virtual void set_flag_tts_speak_work(bool flag_tts_speak_work) = 0;
+    virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
