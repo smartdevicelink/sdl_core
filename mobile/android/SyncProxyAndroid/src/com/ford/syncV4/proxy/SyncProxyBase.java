@@ -223,7 +223,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected VehicleType _vehicleType = null;
     protected Boolean firstTimeFull = true;
     protected byte _wiproVersion = 1;
+
     SyncConnection _syncConnection;
+
     // RPC Session ID
     protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID);
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
@@ -271,13 +273,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private TimerTask _currentReconnectTimerTask = null;
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
-
-
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
 
+
     private IProtocolMessageHolder protocolMessageHolder =
             new ProtocolMessageHolder();
+
+    public void setSyncConnection(SyncConnection syncConnection) {
+        this._syncConnection = syncConnection;
+    }
 
     /**
      * Constructor.
@@ -990,7 +995,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (_syncConnection != null) {
             _syncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
             if (!keepConnection) {
-                _syncConnection = null;
+                setSyncConnection(null);
             }
         }
     }
@@ -1039,9 +1044,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             synchronized (CONNECTION_REFERENCE_LOCK) {
                 if (!keepSession) {
                     stopAllServices();
-                    stopSession();
                 }
                 closeSyncConnection(keepConnection);
+                if (!keepSession) {
+                    stopSession();
+                }
             }
         } catch (SyncException e) {
             throw e;
@@ -3727,7 +3734,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (_wiproVersion == 2) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
-                } else if (serviceType.equals(ServiceType.Audio_Service)){
+                } else if (serviceType.equals(ServiceType.Audio_Service)) {
                     startAudioService(sessionID, correlationID);
                 }
             }

@@ -149,6 +149,13 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 }
                 currentSession.setSessionId(sessionID);
             }
+
+            @Override
+            public void setSyncConnection(SyncConnection syncConnection) {
+                if (syncConnection != null) {
+                    super.setSyncConnection(syncConnection);
+                }
+            }
         };
     }
 
@@ -207,7 +214,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         OutputStream stream = proxyALM.startAudioDataTransfer();
-        assertNotNull("stream should not be null" ,stream);
+        assertNotNull("stream should not be null", stream);
     }
 
     public void testStopAudioDataTransferFiresCallback() throws Exception {
@@ -215,5 +222,18 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM._syncConnection = mock(SyncConnection.class);
         proxyALM.stopAudioDataTransfer();
         verify(proxyALM._syncConnection, timeout(1)).stopAudioDataTransfer();
+    }
+
+    public void testCloseSessionCalledWithRightSessionID() throws Exception {
+        SyncProxyBase proxyALM = getSyncProxyBase();
+        proxyALM._syncConnection = mock(SyncConnection.class);
+        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
+        proxyALM.closeSession(false);
+        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Boolean> keepConnectionCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(proxyALM._syncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
+        assertEquals("session id of closed RPC service should be same as initial session id", sessionID, sessionIDCaptor.getValue().byteValue());
+        assertFalse(keepConnectionCaptor.getValue());
     }
 }
