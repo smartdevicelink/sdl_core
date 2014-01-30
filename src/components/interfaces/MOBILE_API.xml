@@ -2714,6 +2714,14 @@
        </description>
      </param>
 
+     <param name="secondaryGraphic" type="Image" mandatory="false">
+       <description>
+       	Image struct determining whether static or dynamic secondary image to display in app.
+       	If omitted on supported displays, the displayed secondary graphic shall not change.
+       </description>       
+     </param>
+
+
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App defined SoftButtons.
