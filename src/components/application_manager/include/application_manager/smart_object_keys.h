@@ -82,6 +82,7 @@ const char time_to_destination[] = "timeToDestination";
 const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
+const char secondary_graphic[] = "secondaryGraphic";
 const char status_bar[] = "statusBar";
 const char media_clock[] = "mediaClock";
 const char media_track[] = "mediaTrack";
