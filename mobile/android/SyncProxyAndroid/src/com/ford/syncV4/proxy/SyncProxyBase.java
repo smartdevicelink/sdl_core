@@ -2490,7 +2490,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
                         }
-                    }else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF){
+                    } else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF) {
                         if (_callbackToUIThread) {
                             // Run in UI thread
                             _mainUIHandler.post(new Runnable() {
@@ -2754,7 +2754,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startAudioService(byte sessionID, String correlationID){
+    protected void startAudioService(byte sessionID, String correlationID) {
         Log.i(TAG, "Audio_Service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service);
         if (_callbackToUIThread) {
@@ -2795,7 +2795,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private boolean removeServiceFromSession(byte sessionID, ServiceType serviceType) {
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
-            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType())) ) {
+            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType()))) {
                 currentSession.removeService(service);
                 return true;
             }
