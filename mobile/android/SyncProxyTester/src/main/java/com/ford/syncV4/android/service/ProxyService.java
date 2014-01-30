@@ -60,6 +60,7 @@ import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
@@ -87,6 +88,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
@@ -1352,6 +1354,23 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onSystemRequestResponse(SystemRequestResponse response) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
+        else Log.i(TAG, "" + response);
+
+        if (isModuleTesting()) {
+            ModuleTest.responses.add(
+                    new Pair<Integer, Result>(response.getCorrelationID(),
+                            response.getResultCode()));
+            synchronized (_testerMain.getThreadContext()) {
+                _testerMain.getThreadContext().notify();
+            }
+        }
+
+    }
+
+    @Override
     public void onMobileNaviStart() {
         createDebugMessageForAdapter("Mobile Navi Service Started");
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
@@ -1419,6 +1438,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mainActivity.onKeyboardInputReceived(event);
             }
         });
+    }
+
+    @Override
+    public void onOnSystemRequest(OnSystemRequest notification) {
+        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
+        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
+        else Log.i(TAG, "" + notification);
     }
 
     @Override
