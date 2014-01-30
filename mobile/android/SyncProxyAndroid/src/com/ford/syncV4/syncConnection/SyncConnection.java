@@ -58,7 +58,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     /**
      * Constructor.
      *
-     * @param listener        Sync connection listener.
+     * @param listener Sync connection listener.
      */
     public SyncConnection(ISyncConnectionListener listener) {
         _connectionListener = listener;
@@ -145,9 +145,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                         _transport.getIsConnected()) {
                     _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                 }
-                if (!keepConnection) {
-                    _protocol = null;
-                }
+
             } // end-if
         }
 
@@ -156,6 +154,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 END_PROTOCOL_SERVICE_RPC_LOCK.wait(1000);
             } catch (InterruptedException e) {
                 // Do nothing
+            }
+        }
+
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (!keepConnection) {
+                _protocol = null;
             }
         }
 
@@ -375,7 +379,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
                                        String correlationID) {
         _connectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
-        if ( _transport != null && serviceType.equals(ServiceType.RPC)){
+        if (_transport != null && serviceType.equals(ServiceType.RPC)) {
             _transport.stopReading();
         }
     }
@@ -444,6 +448,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Set ID of the current active session
+     *
      * @param sessionId
      */
     public void setSessionId(byte sessionId) {
