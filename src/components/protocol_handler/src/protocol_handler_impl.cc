@@ -45,6 +45,14 @@ namespace protocol_handler {
 log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("ProtocolHandler"));
 
+
+/**
+ * Function return packet data as std::string.
+ * If packet data is not printable return error message
+ */
+std::string ConvertPacketDataToString(const uint8_t *data,
+                                      const std::size_t data_size);
+
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     transport_manager::TransportManager* transport_manager_param)
     : protocol_observers_(),
@@ -725,23 +733,6 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
     transport_manager_->Disconnect(connection_handle);
 }
 
-std::string ProtocolHandlerImpl::ConvertPacketDataToString(const uint8_t* data,
-                                                           const std::size_t data_size)
-{
-  if(0==data_size)
-    return std::string();
-  bool is_printable_array = true;
-  std::locale loc;
-  const char* text = reinterpret_cast<const char*>(data);
-  // Check data for printability
-  for (int i = 0; i < data_size; ++i)
-    if (!std::isprint(text[i], loc)) {
-      is_printable_array = false;
-      break;
-      }
-  return is_printable_array ? std::string(text) : std::string("is raw data");
-}
-
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
                                            int32_t number_of_frames) {
   LOG4CXX_INFO(logger_,
@@ -757,6 +748,24 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
   } else {
     LOG4CXX_ERROR(logger_, "MobileNaviAck failed to be sent.");
   }
+}
+
+std::string ConvertPacketDataToString(const uint8_t* data,
+                                      const std::size_t data_size)
+{
+  if(0 == data_size)
+    return std::string();
+  bool is_printable_array = true;
+  std::locale loc;
+  const char* text = reinterpret_cast<const char*>(data);
+  // Check data for printability
+  for (int i = 0; i < data_size; ++i) {
+    if (!std::isprint(text[i], loc)) {
+      is_printable_array = false;
+      break;
+    }
+  }
+  return is_printable_array ? std::string(text) : std::string("is raw data");
 }
 
 }  // namespace protocol_handler

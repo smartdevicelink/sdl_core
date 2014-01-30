@@ -387,12 +387,6 @@ class ProtocolHandlerImpl
     // CALLED ON raw_ford_messages_to_mobile_ thread!
     void Handle(const impl::RawFordMessageToMobile& message);
 
-    /**
-     *\brief Return packet data as std::string.
-     *\brief If packet data is not printable return error message
-     */
-    static std::string ConvertPacketDataToString(const uint8_t *data,
-                                                 const std::size_t data_size);
   private:
     /**
      * \brief For logging.
