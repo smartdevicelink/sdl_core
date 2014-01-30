@@ -50,6 +50,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     // Id of the current active session
     private byte mSessionId = Session.DEFAULT_SESSION_ID;
+    static final Object END_PROTOCOL_SERVICE_AUDIO_LOCK = new Object();
+    static final Object END_PROTOCOL_SERVICE_VIDEO_LOCK = new Object();
+    static final Object END_PROTOCOL_SERVICE_RPC_LOCK = new Object();
+
 
     /**
      * Constructor.
@@ -147,6 +151,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             } // end-if
         }
 
+        synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
+            try {
+                END_PROTOCOL_SERVICE_RPC_LOCK.wait(1000);
+            } catch (InterruptedException e) {
+                // Do nothing
+            }
+        }
+
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.stop();
             _heartbeatMonitor = null;
@@ -155,6 +167,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
             stopH264();
+            stopAudioDataTransfer();
 
             if (!keepConnection) {
 
@@ -180,6 +193,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
             } // end-if
         }
+
+        synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
+            try {
+                END_PROTOCOL_SERVICE_VIDEO_LOCK.wait(1000);
+            } catch (InterruptedException e) {
+                // Do nothing
+            }
+        }
+
     }
 
     public void closeAudioService(byte sessionID) {
@@ -190,6 +212,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
                 }
             } // end-if
+        }
+
+        synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
+            try {
+                END_PROTOCOL_SERVICE_AUDIO_LOCK.wait(1000);
+            } catch (InterruptedException e) {
+                // Do nothing
+            }
         }
     }
 

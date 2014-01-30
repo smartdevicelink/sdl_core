@@ -262,4 +262,16 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         verify(connection._protocol, times(1)).StartProtocolSession(sessionIDCaptor.capture());
         assertEquals("Should start session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
     }
+
+    public void testOnCloseSessionAudioPacketizerStops() throws Exception {
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setSessionId(SESSION_ID);
+        connection.init(config);
+        connection._protocol = mock(WiProProtocol.class);
+        connection._transport = mock(SyncTransport.class);
+        connection.mAudioPacketizer = mock(H264Packetizer.class);
+        when(connection._transport.getIsConnected()).thenReturn(true);
+        connection.closeConnection(SESSION_ID, false);
+        verify(connection.mAudioPacketizer, times(1)).stop();
+    }
 }
