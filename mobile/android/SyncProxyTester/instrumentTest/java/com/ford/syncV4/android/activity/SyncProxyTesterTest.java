@@ -75,7 +75,7 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
 
             }
         });
-        staticFileReader.execute(R.raw.test_video);
+        staticFileReader.execute(R.raw.faq_welcome_orientation);
     }
 
     @Override
