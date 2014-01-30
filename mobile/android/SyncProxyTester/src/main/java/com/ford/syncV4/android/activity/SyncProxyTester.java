@@ -86,14 +86,12 @@ import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.KeyboardProperties;
-import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
-import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
@@ -123,7 +121,6 @@ import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
-import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -170,7 +167,7 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
-        IBluetoothDeviceManager, ConnectionListener {
+        IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener {
 
     private static final String VERSION = "$Version:$";
     private static final String LOG_TAG = "SyncProxyTester";
@@ -193,9 +190,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
     private static final int CREATECHOICESET_MAXCHOICES = 100;
-    private static final int REQUEST_FILE_OPEN = 50;
     private final static int REQUEST_CHOOSE_XML_TEST = 51;
-    private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
     private static final int CHOICESETID_UNSET = -1;
     private static final String MSC_PREFIX = "msc_";
     private static SyncProxyTester _activity;
@@ -229,11 +224,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private ModuleTest _testerMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
-    private ArrayAdapter<SyncSubMenu> _submenuAdapter = null;
-    private ArrayAdapter<Integer> _commandAdapter = null;
-    private Map<Integer, Integer> _commandIdToParentSubmenuMap = null;
-    private ArrayAdapter<Integer> _choiceSetAdapter = null;
-    private ArrayAdapter<String> _putFileAdapter = null;
+    private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
+    private ArrayAdapter<Integer> mCommandAdapter = null;
+    private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
+    private ArrayAdapter<Integer> mChoiceSetAdapter = null;
+    private ArrayAdapter<String> mPutFileAdapter = null;
     /**
      * Latest choiceSetId, required to add it to the adapter when a successful
      * CreateInteractionChoiceSetResponse comes.
@@ -261,7 +256,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private int autoIncChoiceSetIdCmdId = 1;
     private int itemcmdID = 1;
     private int submenucmdID = 1000;
-    private ArrayAdapter<ButtonName> _buttonAdapter = null;
+    private ArrayAdapter<ButtonName> mButtonAdapter = null;
     private boolean[] isButtonSubscribed = null;
     private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
     private boolean[] isVehicleDataSubscribed = null;
@@ -335,6 +330,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
     private final static String APP_SETUP_DIALOG_TAG = "AppSetupDialogTag";
+    private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -411,7 +407,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         // TODO : Probably improve in future
         mBoundProxyService = null;
-        mBoundProxyService = MainApp.getsInstance().getBoundProxyService();
+        mBoundProxyService = MainApp.getInstance().getBoundProxyService();
 
         addListeners();
 
@@ -507,10 +503,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 Log.e(LOG_TAG, SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
             }
         } else {
-            MainApp.getsInstance().bindProxyToMainApp(new IProxyServiceBinder() {
+            MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
                 @Override
                 public void onServiceBindComplete() {
-                    mBoundProxyService = MainApp.getsInstance().getBoundProxyService();
+                    mBoundProxyService = MainApp.getInstance().getBoundProxyService();
                     mBoundProxyService.setLogAdapter(mLogAdapter);
                 }
             });
@@ -614,6 +610,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mLogAdapter.logMessage("Disconnected", true);
     }
 
+    @Override
+    public void onPutFileSelected(String fileName) {
+        if (mPutFileAdapter != null) {
+            mPutFileAdapter.add(fileName);
+        }
+    }
+
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
         messageSelectCount = new Hashtable<String, Integer>();
@@ -656,11 +659,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void resetAdapters() {
         // set up storage for subscription records
         isButtonSubscribed = new boolean[ButtonName.values().length];
-        _buttonAdapter = new ArrayAdapter<ButtonName>(this,
+        mButtonAdapter = new ArrayAdapter<ButtonName>(this,
                 android.R.layout.select_dialog_multichoice, ButtonName.values()) {
             public View getView(int position, View convertView, ViewGroup parent) {
-                CheckedTextView ret = (CheckedTextView) super.getView(position,
-                        convertView, parent);
+                CheckedTextView ret = (CheckedTextView) super.getView(position, convertView, parent);
                 ret.setChecked(isButtonSubscribed[position]);
                 return ret;
             }
@@ -668,27 +670,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         isVehicleDataSubscribed = new boolean[VehicleDataType.values().length];
 
-        _submenuAdapter = new ArrayAdapter<SyncSubMenu>(this,
-                android.R.layout.select_dialog_item);
-        _submenuAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSubmenuAdapter = new ArrayAdapter<SyncSubMenu>(this, android.R.layout.select_dialog_item);
+        mSubmenuAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        _commandAdapter = new ArrayAdapter<Integer>(this,
-                android.R.layout.select_dialog_item);
-        _commandAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mCommandAdapter = new ArrayAdapter<Integer>(this, android.R.layout.select_dialog_item);
+        mCommandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        _commandIdToParentSubmenuMap = new Hashtable<Integer, Integer>();
+        mCommandIdToParentSubmenuMap = new Hashtable<Integer, Integer>();
 
-        _choiceSetAdapter = new ArrayAdapter<Integer>(this,
-                android.R.layout.simple_spinner_item);
-        _choiceSetAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mChoiceSetAdapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_spinner_item);
+        mChoiceSetAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        _putFileAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.select_dialog_item);
-        _putFileAdapter
-                .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mPutFileAdapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
+        mPutFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     }
 
     /**
@@ -1017,13 +1011,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 		        
 		        if (isSYNCpaired == true) { 		        	
 		        	_applinkService = new ProxyService();
-		    		if (ProxyService.getsInstance() == null) {
+		    		if (ProxyService.getInstance() == null) {
 		    			Intent startIntent = new Intent(this, ProxyService.class);
 		    			startService(startIntent);
 		    			//bindService(startIntent, this, Context.BIND_AUTO_CREATE);
 		    		} else {
 		    			// need to get the instance and add myself as a listener
-		    			ProxyService.getsInstance().setLogAdapter(this);
+		    			ProxyService.getInstance().setLogAdapter(this);
 		    		}
 		        }
 			}
@@ -1177,7 +1171,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which).equals(ButtonSubscriptions)) {
                                 //something
                                 AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                                builder.setAdapter(_buttonAdapter, new DialogInterface.OnClickListener() {
+                                builder.setAdapter(mButtonAdapter, new DialogInterface.OnClickListener() {
 
                                     public void onClick(DialogInterface dialog, int which) {
                                         boolean needToSubscribe = !isButtonSubscribed[which];
@@ -1283,12 +1277,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which).equals(Names.DeleteInteractionChoiceSet)) {
                                 //something
                                 AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                                builder.setAdapter(_choiceSetAdapter, new DialogInterface.OnClickListener() {
+                                builder.setAdapter(mChoiceSetAdapter, new DialogInterface.OnClickListener() {
 
                                     public void onClick(DialogInterface dialog, int which) {
                                         DeleteInteractionChoiceSet msg = new DeleteInteractionChoiceSet();
                                         msg.setCorrelationID(autoIncCorrId++);
-                                        int commandSetID = _choiceSetAdapter.getItem(which);
+                                        int commandSetID = mChoiceSetAdapter.getItem(which);
                                         msg.setInteractionChoiceSetID(commandSetID);
                                         try {
                                             mLogAdapter.logMessage(msg, true);
@@ -1443,90 +1437,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 dlg = builder.create();
                                 dlg.show();
                             } else if (adapter.getItem(which).equals(Names.PutFile)) {
-                                //PutFile
-                                AlertDialog.Builder builder;
-                                AlertDialog dlg;
-
-                                final Context mContext = adapter.getContext();
-                                LayoutInflater inflater = (LayoutInflater) mContext
-                                        .getSystemService(LAYOUT_INFLATER_SERVICE);
-                                View layout = inflater.inflate(R.layout.putfile, null);
-
-                                txtLocalFileName = (EditText) layout.findViewById(R.id.putfile_localFileName);
-                                final Button btnSelectLocalFile = (Button) layout.findViewById(R.id.putfile_selectFileButton);
-                                btnSelectLocalFile.setOnClickListener(new OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        // show Choose File dialog
-                                        Intent intent = new Intent(mContext, FileDialog.class);
-                                        intent.putExtra(FileDialog.START_PATH, "/sdcard");
-                                        intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
-                                        intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
-                                        startActivityForResult(intent, REQUEST_FILE_OPEN);
-                                    }
-                                });
-
-                                final EditText txtSyncFileName = (EditText) layout.findViewById(R.id.syncFileName);
-
-                                final Spinner spnFileType = (Spinner) layout.findViewById(R.id.spnFileType);
-                                ArrayAdapter<FileType> spinnerAdapter = new ArrayAdapter<FileType>(adapter.getContext(),
-                                        android.R.layout.simple_spinner_item, FileType.values());
-                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                spnFileType.setAdapter(spinnerAdapter);
-
-                                final CheckBox chkPersistentFile = (CheckBox) layout.findViewById(R.id.chkPersistentFile);
-
-                                builder = new AlertDialog.Builder(mContext);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        String filename = txtLocalFileName.getText().toString();
-                                        long filesize = new File(filename).length();
-                                        if (filesize <= PUTFILE_MAXFILESIZE) {
-                                            byte[] data = contentsOfFile(filename);
-                                            if (data != null) {
-                                                String syncFileName = txtSyncFileName.getText().toString();
-                                                try {
-                                                    PutFile msg = new PutFile();
-                                                    msg.setSyncFileName(syncFileName);
-                                                    msg.setFileType((FileType) spnFileType.getSelectedItem());
-                                                    msg.setPersistentFile(chkPersistentFile.isChecked());
-                                                    msg.setCorrelationID(autoIncCorrId++);
-                                                    msg.setBulkData(data);
-
-                                                    mLogAdapter.logMessage(msg, true);
-                                                    if (mBoundProxyService != null) {
-                                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                                    }
-                                                } catch (SyncException e) {
-                                                    mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                                }
-                                                _putFileAdapter.add(syncFileName);
-                                            } else {
-                                                Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
-                                            }
-                                        } else {
-                                            Toast.makeText(mContext, "The size of the file exceeds the limit of " +
-                                                    (PUTFILE_MAXFILESIZE / (1024 * 1024)) + " MB", Toast.LENGTH_LONG).show();
-                                        }
-                                        txtLocalFileName = null;
-                                    }
-                                });
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        txtLocalFileName = null;
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.setView(layout);
-                                dlg = builder.create();
-                                dlg.show();
+                                DialogFragment putFileDialogFragment = PutFileDialog.newInstance(autoIncCorrId++);
+                                putFileDialogFragment.show(getFragmentManager(), PUT_FILE_DIALOG_TAG);
                             } else if (adapter.getItem(which).equals(Names.DeleteFile)) {
                                 //DeleteFile
                                 AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                                builder.setAdapter(_putFileAdapter, new DialogInterface.OnClickListener() {
+                                builder.setAdapter(mPutFileAdapter, new DialogInterface.OnClickListener() {
 
                                     public void onClick(DialogInterface dialog, int which) {
-                                        String syncFileName = _putFileAdapter.getItem(which);
+                                        String syncFileName = mPutFileAdapter.getItem(which);
 
                                         try {
                                             DeleteFile msg = new DeleteFile();
@@ -1539,22 +1458,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
-                                        _putFileAdapter.remove(syncFileName);
+                                        mPutFileAdapter.remove(syncFileName);
                                     }
                                 });
                                 AlertDialog dlg = builder.create();
                                 dlg.show();
                             } else if (adapter.getItem(which).equals(Names.ListFiles)) {
                                 //ListFiles
-                                try {
-                                    ListFiles msg = new ListFiles();
-                                    msg.setCorrelationID(autoIncCorrId++);
-                                    mLogAdapter.logMessage(msg, true);
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
-                                } catch (SyncException e) {
-                                    mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+                                if (mBoundProxyService != null) {
+                                    mBoundProxyService.commandListFiles();
                                 }
                             } else if (adapter.getItem(which).equals(Names.SetAppIcon)) {
                                 //SetAppIcon
@@ -1777,12 +1689,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          */
                         private void sendDeleteCommand() {
                             AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                            builder.setAdapter(_commandAdapter, new DialogInterface.OnClickListener() {
+                            builder.setAdapter(mCommandAdapter, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     DeleteCommand msg = new DeleteCommand();
                                     msg.setCorrelationID(autoIncCorrId++);
-                                    int cmdID = _commandAdapter.getItem(which);
+                                    int cmdID = mCommandAdapter.getItem(which);
                                     msg.setCmdID(cmdID);
                                     try {
                                         mLogAdapter.logMessage(msg, true);
@@ -1930,13 +1842,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         private void sendDeleteSubMenu() {
                             AlertDialog.Builder builder =
                                     new AlertDialog.Builder(adapter.getContext());
-                            builder.setAdapter(_submenuAdapter,
+                            builder.setAdapter(mSubmenuAdapter,
                                     new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog,
                                                             int which) {
                                             SyncSubMenu menu =
-                                                    _submenuAdapter.getItem(which);
+                                                    mSubmenuAdapter.getItem(which);
                                             DeleteSubMenu msg = new DeleteSubMenu();
                                             msg.setCorrelationID(autoIncCorrId++);
                                             msg.setMenuID(menu.getSubMenuId());
@@ -2231,7 +2143,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkUseMenuParams = (CheckBox) layout.findViewById(R.id.addcommand_useMenuParams);
                             final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
                             final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
-                            s.setAdapter(_submenuAdapter);
+                            s.setAdapter(mSubmenuAdapter);
                             final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addcommand_useMenuPos);
                             final EditText editMenuPos = (EditText) layout.findViewById(R.id.addcommand_menuPos);
                             final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
@@ -2355,7 +2267,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     intent.putExtra(FileDialog.START_PATH, "/sdcard");
                                     intent.putExtra(FileDialog.CAN_SELECT_DIR, false);
                                     intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
-                                    startActivityForResult(intent, REQUEST_FILE_OPEN);
+                                    startActivityForResult(intent, Const.REQUEST_FILE_OPEN);
                                 }
                             });
 
@@ -2804,11 +2716,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             interactionLayoutSpinner
                                     .setAdapter(interactionLayoutAdapter);
 
-                            final String[] choiceSetIDStrings = new String[_choiceSetAdapter.getCount()];
+                            final String[] choiceSetIDStrings = new String[mChoiceSetAdapter.getCount()];
                             final boolean[] choiceSetIDSelections = new boolean[choiceSetIDStrings.length];
 
-                            for (int i = 0; i < _choiceSetAdapter.getCount(); ++i) {
-                                choiceSetIDStrings[i] = _choiceSetAdapter.getItem(i).toString();
+                            for (int i = 0; i < mChoiceSetAdapter.getCount(); ++i) {
+                                choiceSetIDStrings[i] = mChoiceSetAdapter.getItem(i).toString();
                             }
 
                             choiceSetIDs.setOnClickListener(new OnClickListener() {
@@ -2838,7 +2750,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     Vector<Integer> choiceSetIDs = new Vector<Integer>();
                                     for (int i = 0; i < choiceSetIDSelections.length; ++i) {
                                         if (choiceSetIDSelections[i]) {
-                                            choiceSetIDs.add(_choiceSetAdapter.getItem(i));
+                                            choiceSetIDs.add(mChoiceSetAdapter.getItem(i));
                                         }
                                     }
                                     sendPerformInteractionRequest(choiceSetIDs);
@@ -3755,7 +3667,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void addSubMenuToList(final SyncSubMenu sm) {
         runOnUiThread(new Runnable() {
             public void run() {
-                _submenuAdapter.add(sm);
+                mSubmenuAdapter.add(sm);
             }
         });
     }
@@ -3767,9 +3679,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * @param submenuID ID of the command's parent submenu
      */
     private void addCommandToList(Integer cmdID, Integer submenuID) {
-        _commandAdapter.add(cmdID);
+        mCommandAdapter.add(cmdID);
         if (null != submenuID) {
-            _commandIdToParentSubmenuMap.put(cmdID, submenuID);
+            mCommandIdToParentSubmenuMap.put(cmdID, submenuID);
         }
     }
 
@@ -3779,8 +3691,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * @param cmdID ID of the command
      */
     private void removeCommandFromList(Integer cmdID) {
-        _commandAdapter.remove(cmdID);
-        _commandIdToParentSubmenuMap.remove(cmdID);
+        mCommandAdapter.remove(cmdID);
+        mCommandIdToParentSubmenuMap.remove(cmdID);
     }
 
     //upon onDestroy(), dispose current proxy and create a new one to enable auto-start
@@ -3825,7 +3737,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onCreateChoiceSetResponse(boolean success) {
         if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
             if (success) {
-                _choiceSetAdapter.add(_latestCreateChoiceSetId);
+                mChoiceSetAdapter.add(_latestCreateChoiceSetId);
             }
             _latestCreateChoiceSetId = CHOICESETID_UNSET;
         } else {
@@ -3840,7 +3752,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onDeleteChoiceSetResponse(boolean success) {
         if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
             if (success) {
-                _choiceSetAdapter.remove(_latestDeleteChoiceSetId);
+                mChoiceSetAdapter.remove(_latestDeleteChoiceSetId);
             }
             _latestDeleteChoiceSetId = CHOICESETID_UNSET;
         } else {
@@ -3856,13 +3768,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onDeleteSubMenuResponse(boolean success) {
         if (_latestDeleteSubmenu != null) {
             if (success) {
-                _submenuAdapter.remove(_latestDeleteSubmenu);
+                mSubmenuAdapter.remove(_latestDeleteSubmenu);
 
-                for (Iterator<Entry<Integer, Integer>> it = _commandIdToParentSubmenuMap
+                for (Iterator<Entry<Integer, Integer>> it = mCommandIdToParentSubmenuMap
                         .entrySet().iterator(); it.hasNext(); ) {
                     Entry<Integer, Integer> entry = it.next();
                     if (entry.getValue() == _latestDeleteSubmenu.getSubMenuId()) {
-                        _commandAdapter.remove(entry.getKey());
+                        mCommandAdapter.remove(entry.getKey());
                         it.remove();
                     }
                 }
@@ -4122,7 +4034,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
                 break;
 
-            case REQUEST_FILE_OPEN:
+            case Const.REQUEST_FILE_OPEN:
                 if (resultCode == RESULT_OK) {
                     String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
                     if (txtLocalFileName != null) {
@@ -4255,6 +4167,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public boolean isProxyReadyForWork() {
+        if (mBoundProxyService == null) {
+            return false;
+        }
         if (!mBoundProxyService.isSyncProxyNotNull()) {
             onMobileNaviError("Error. Proxy is null");
             return false;
@@ -4350,7 +4265,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         //stopService(new Intent(this, ProxyService.class));
         super.finish();
 
-        MainApp.getsInstance().exitApp();
+        MainApp.getInstance().exitApp();
     }
 
     // TODO : Move this block to MainApp
@@ -4367,13 +4282,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
         mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
+        if (mBoundProxyService == null) {
+            exitApp();
+            return;
+        }
+
         mBoundProxyService.destroyService(new IProxyServiceEvent() {
             @Override
             public void onDisposeComplete() {
                 if (mStopProxyServiceTimeOutHandler != null) {
                     mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
                 }
-                MainApp.getsInstance().unbindProxyFromMainApp();
+                MainApp.getInstance().unbindProxyFromMainApp();
                 runInUIThread(new Runnable() {
                     @Override
                     public void run() {

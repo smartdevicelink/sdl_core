@@ -968,10 +968,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
-
-                // TODO: Set default ID (until opposite not specified)
-                currentSession.setSessionId(Session.DEFAULT_SESSION_ID);
-
                 _syncConnection.setSessionId(currentSession.getSessionId());
                 _syncConnection.init(_transportConfig);
             }

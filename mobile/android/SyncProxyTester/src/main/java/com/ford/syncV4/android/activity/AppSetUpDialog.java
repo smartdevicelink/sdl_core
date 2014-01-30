@@ -41,7 +41,7 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
  */
 public class AppSetUpDialog extends DialogFragment {
 
-    private static final String logTag = "AppSetUpDialog";
+    private static final String LOG_TAG = "AppSetUpDialog";
 
     public static AppSetUpDialog newInstance() {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
@@ -202,7 +202,7 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
                                         autoSetAppIcon).commit();
                         if (!success) {
-                            Log.w(logTag, "Can't save selected protocol properties");
+                            Log.w(LOG_TAG, "Can't save selected protocol properties");
                         }
                         if (isHearBeat.isChecked()) {
                             SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);

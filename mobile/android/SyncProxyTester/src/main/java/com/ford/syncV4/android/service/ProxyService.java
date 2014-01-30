@@ -9,10 +9,12 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
@@ -20,6 +22,7 @@ import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
+import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -47,6 +50,7 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
+import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -148,10 +152,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private IProxyServiceEvent mServiceDestroyEvent;
     private ICloseSession mCloseSessionCallback;
 
-    private int awaitingPutFileResponseCorrelationID;
-
+    private int mAwaitingInitIconResponseCorrelationID;
+    private PutFileTransferManager mPutFileTransferManager;
     private ConnectionListenersManager mConnectionListenersManager;
-
     private final IBinder mBinder = new ProxyServiceBinder(this);
 
     public void onCreate() {
@@ -170,6 +173,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         registerReceiver(mediaButtonReceiver, mediaIntentFilter);
 
         startProxyIfNetworkConnected();
+
+        mPutFileTransferManager = new PutFileTransferManager();
     }
 
     public void showLockMain() {
@@ -452,27 +457,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void setInitAppIcon() {
-        PutFile putFile = new PutFile();
-        putFile.setFileType(FileType.GRAPHIC_PNG);
-        putFile.setSyncFileName(ICON_SYNC_FILENAME);
-        putFile.setCorrelationID(nextCorrID());
-        putFile.setBulkData(contentsOfResource(R.raw.fiesta));
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(putFile, true);
-        }
-
-        try {
-            awaitingPutFileResponseCorrelationID = putFile.getCorrelationID();
-            syncProxySendRPCRequest(putFile);
-        } catch (SyncException e) {
-            Log.e(TAG, "Error init AppIcon -> PutFile request", e);
-            awaitingPutFileResponseCorrelationID = 0;
-        }
+        mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
+        commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, contentsOfResource(R.raw.fiesta),
+                mAwaitingInitIconResponseCorrelationID);
     }
 
     private void show(String mainField1, String mainField2) throws SyncException {
         Show msg = new Show();
-        msg.setCorrelationID(nextCorrID());
+        msg.setCorrelationID(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
         if (mLogAdapter != null) {
@@ -484,7 +476,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void addCommand(Integer cmdId, Vector<String> vrCommands,
                             String menuName) throws SyncException {
         AddCommand addCommand = new AddCommand();
-        addCommand.setCorrelationID(nextCorrID());
+        addCommand.setCorrelationID(getNextCorrelationID());
         addCommand.setCmdID(cmdId);
         addCommand.setVrCommands(vrCommands);
         MenuParams menuParams = new MenuParams();
@@ -498,7 +490,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     private void subscribeToButton(ButtonName buttonName) throws SyncException {
         SubscribeButton msg = new SubscribeButton();
-        msg.setCorrelationID(nextCorrID());
+        msg.setCorrelationID(getNextCorrelationID());
         msg.setButtonName(buttonName);
         if (mLogAdapter != null) {
             mLogAdapter.logMessage(msg, true);
@@ -559,14 +551,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mLogAdapter = logAdapter;
     }
 
-    protected int nextCorrID() {
-        autoIncCorrId++;
-        return autoIncCorrId;
+    protected int getNextCorrelationID() {
+        return autoIncCorrId++;
     }
 
     @Override
     public void onOnHMIStatus(OnHMIStatus notification) {
         createDebugMessageForAdapter(notification);
+        //createDebugMessageForAdapter("HMI level:" + notification.getHmiLevel());
 
         switch (notification.getSystemContext()) {
             case SYSCTXT_MAIN:
@@ -701,16 +693,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void sendIconFromResource(int resource) throws SyncException {
-        PutFile putFile = new PutFile();
-        putFile.setFileType(FileType.GRAPHIC_PNG);
-        putFile.setSyncFileName(getResources().getResourceEntryName(resource)
-                + ICON_FILENAME_SUFFIX);
-        putFile.setCorrelationID(nextCorrID());
-        putFile.setBulkData(contentsOfResource(resource));
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(putFile, true);
-        }
-        syncProxySendRPCRequest(putFile);
+        commandPutFile(FileType.GRAPHIC_PNG,
+                getResources().getResourceEntryName(resource) + ICON_FILENAME_SUFFIX,
+                contentsOfResource(resource));
     }
 
     @Override
@@ -987,11 +972,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onPutFileResponse(PutFileResponse response) {
         createDebugMessageForAdapter(response);
-        if (response.getCorrelationID() == awaitingPutFileResponseCorrelationID &&
-                getAutoSetAppIconFlag()) {
+        int mCorrelationId = response.getCorrelationID();
+        if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
             SetAppIcon setAppIcon = new SetAppIcon();
             setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-            setAppIcon.setCorrelationID(nextCorrID());
+            setAppIcon.setCorrelationID(getNextCorrelationID());
             if (mLogAdapter != null) {
                 mLogAdapter.logMessage(setAppIcon, true);
             }
@@ -1000,15 +985,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             } catch (SyncException e) {
                 Log.e(TAG, "Set InitAppIcon", e);
             }
-            awaitingPutFileResponseCorrelationID = 0;
+            mAwaitingInitIconResponseCorrelationID = 0;
         }
 
         if (isModuleTesting()) {
-            ModuleTest.responses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.responses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
         }
+
+        mPutFileTransferManager.removePutFileFromAwaitArray(mCorrelationId);
     }
 
     @Override
@@ -1031,6 +1018,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mTesterMain.getThreadContext().notify();
             }
         }
+        //Log.d(TAG, "ListFiles:" + response.getFilenames().toString());
     }
 
     @Override
@@ -1355,19 +1343,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onSystemRequestResponse(SystemRequestResponse response) {
-        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        if (_msgAdapter != null) _msgAdapter.logMessage(response, true);
-        else Log.i(TAG, "" + response);
+        createDebugMessageForAdapter(response);
 
         if (isModuleTesting()) {
             ModuleTest.responses.add(
                     new Pair<Integer, Result>(response.getCorrelationID(),
                             response.getResultCode()));
-            synchronized (_testerMain.getThreadContext()) {
-                _testerMain.getThreadContext().notify();
+            synchronized (mTesterMain.getThreadContext()) {
+                mTesterMain.getThreadContext().notify();
             }
         }
-
     }
 
     @Override
@@ -1442,9 +1427,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onOnSystemRequest(OnSystemRequest notification) {
-        if (_msgAdapter == null) _msgAdapter = SyncProxyTester.getMessageAdapter();
-        if (_msgAdapter != null) _msgAdapter.logMessage(notification, true);
-        else Log.i(TAG, "" + notification);
+        createDebugMessageForAdapter(notification);
     }
 
     @Override
@@ -1631,7 +1614,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             writer.write(writeME.toString());
             //writer.write("double yay" + "\n");
 
-
             writer.close();
         } catch (FileNotFoundException e) {
             Log.i("syncp", "FileNotFoundException: " + e);
@@ -1658,6 +1640,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mTesterMain.getThreadContext().notify();
             }
         }
+
+        // Restore a PutFile which has not been sent
+        resendUnsentPutFiles();
     }
 
     @Override
@@ -1699,9 +1684,136 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(notification);
     }
 
+    private void resendUnsentPutFiles() {
+        SparseArray<PutFile> unsentPutFiles = mPutFileTransferManager.getCopy();
+        mPutFileTransferManager.clear();
+        for (int i = 0; i < unsentPutFiles.size(); i++) {
+            commandPutFile(unsentPutFiles.valueAt(i));
+        }
+        unsentPutFiles.clear();
+    }
+
     private void stopServiceBySelf() {
         Log.i(TAG, ProxyService.class.getSimpleName() + " Stop Service By Self");
         stopSelf();
+    }
+
+    // TODO : Set command factory in separate place
+    /**
+     * Commands Section
+     */
+
+    /**
+     * Create and send ListFiles command
+     */
+
+    /**
+     * Create and send ListFiles command
+     */
+    public void commandListFiles() {
+        ListFiles listFiles = new ListFiles();
+        listFiles.setCorrelationID(getNextCorrelationID());
+
+        try {
+            syncProxySendRPCRequest(listFiles);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage(listFiles, true);
+            }
+        } catch (SyncException e) {
+            mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
+        }
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param putFile PurFile to be send
+     */
+    public void commandPutFile(PutFile putFile) {
+        commandPutFile(null, null, null, getNextCorrelationID(), null, putFile);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType Type of the File
+     * @param syncFileName Name of the File
+     * @param bulkData Data of the File
+     */
+    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData) {
+        commandPutFile(fileType, syncFileName, bulkData, -1, null, null);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType Type of the File
+     * @param syncFileName Name of the File
+     * @param bulkData Data of the File
+     * @param correlationId Unique identifier of the command
+     */
+    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
+                               int correlationId) {
+        commandPutFile(fileType, syncFileName, bulkData, correlationId, null, null);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType Type of the File
+     * @param syncFileName Name of the File
+     * @param bulkData Data of the File
+     * @param correlationId Unique identifier of the command
+     * @param doSetPersistent
+     */
+    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
+                               int correlationId, Boolean doSetPersistent) {
+        commandPutFile(fileType, syncFileName, bulkData, correlationId, doSetPersistent, null);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType Type of the File
+     * @param syncFileName Name of the File
+     * @param bulkData Data of the File
+     * @param correlationId Unique identifier of the command
+     * @param doSetPersistent
+     * @param putFile PurFile to be send
+     */
+    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
+                               int correlationId, Boolean doSetPersistent, PutFile putFile) {
+        int mCorrelationId = correlationId;
+        if (correlationId == -1) {
+            mCorrelationId = getNextCorrelationID();
+        }
+
+        PutFile newPutFile = new PutFile();
+
+        if (putFile == null) {
+            newPutFile.setFileType(fileType);
+            newPutFile.setSyncFileName(syncFileName);
+            if (doSetPersistent != null) {
+                newPutFile.setPersistentFile(doSetPersistent);
+            }
+            newPutFile.setBulkData(bulkData);
+        } else {
+            newPutFile = putFile;
+        }
+
+        newPutFile.setCorrelationID(mCorrelationId);
+
+        mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
+
+        try {
+            syncProxySendRPCRequest(newPutFile);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage(newPutFile, true);
+            }
+        } catch (SyncException e) {
+            mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
+            mAwaitingInitIconResponseCorrelationID = 0;
+        }
     }
 
     /**
@@ -1785,7 +1897,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public IJsonRPCMarshaller syncProxyGetJsonRPCMarshaller() {
         if (mSyncProxy != null) {
-            mSyncProxy.getJsonRPCMarshaller();
+            return mSyncProxy.getJsonRPCMarshaller();
         }
         return null;
     }

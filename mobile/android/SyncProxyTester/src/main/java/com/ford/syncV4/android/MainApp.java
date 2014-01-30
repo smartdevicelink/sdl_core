@@ -3,6 +3,8 @@ package com.ford.syncV4.android;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.ford.syncV4.android.service.IProxyServiceBinder;
@@ -26,6 +28,7 @@ public class MainApp extends Application implements IProxyServiceConnection {
             new ProxyServiceConnectionProxy(this);
     private ProxyService mBoundProxyService;
     private IProxyServiceBinder mProxyServiceBinder;
+    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
 
     public MainApp() {
         super();
@@ -36,7 +39,7 @@ public class MainApp extends Application implements IProxyServiceConnection {
      * Double-checked singleton fetching
      * @return
      */
-    public static MainApp getsInstance() {
+    public static MainApp getInstance() {
         if (sInstance == null) {
             synchronized(MainApp.class) {
                 if (sInstance == null) {
@@ -68,6 +71,10 @@ public class MainApp extends Application implements IProxyServiceConnection {
     public void onProxyServiceDisconnected() {
         Log.i(LOG_TAG, MainApp.class.getSimpleName() + " ProxyService disconnected");
         mBoundProxyService = null;
+    }
+
+    public void runInUIThread(Runnable r) {
+        mUIHandler.post(r);
     }
 
     public void exitApp() {

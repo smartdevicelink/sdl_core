@@ -128,7 +128,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 
     public boolean onOptionsItemSelected(MenuItem item) {
         // Refresh the instance
-        //_applinkService = AppLinkService.getsInstance();
+        //_applinkService = AppLinkService.getInstance();
 
         switch (item.getItemId()) {
             case 1:
@@ -882,7 +882,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 		if(_syncProxy != null){
 			//sendRPCRequestPrivate(encodedSyncPDataRequest);
 			try {
-				ProxyService.getsInstance().getProxyInstance().sendRPCRequest(encodedSyncPDataRequest);
+				ProxyService.getInstance().getProxyInstance().sendRPCRequest(encodedSyncPDataRequest);
 			} catch (SyncException e) {
 				_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
 			}
