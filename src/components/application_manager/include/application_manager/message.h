@@ -41,6 +41,8 @@
 #include "smart_objects/smart_object.h"
 #include "protocol_handler/rpc_type.h"
 
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
 namespace application_manager {
 
 typedef std::vector<uint8_t> BinaryData;
@@ -83,7 +85,7 @@ class Message {
   const std::string& json_message() const;
   const BinaryData* binary_data() const;
   bool has_binary_data() const;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject& smart_object();
+  const smart_objects::SmartObject& smart_object() const;
 
   //! --------------------------------------------------------------------------
   void set_function_id(int32_t id);
@@ -93,7 +95,7 @@ class Message {
   void set_binary_data(BinaryData* data);
   void set_json_message(const std::string& json_message);
   void set_protocol_version(ProtocolVersion version);
-  void set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object);
+  void set_smart_object(const smart_objects::SmartObject& object);
 
   protocol_handler::MessagePriority Priority() const { return priority_; }
 
@@ -109,7 +111,7 @@ class Message {
   int32_t connection_key_;
   ProtocolVersion version_;
   std::string json_message_;
-  NsSmartDeviceLink::NsSmartObjects::SmartObject object_;
+  smart_objects::SmartObject smart_object_;
 
   // TODO(akandul): replace with shared_ptr
   BinaryData* binary_data_;

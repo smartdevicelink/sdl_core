@@ -45,6 +45,7 @@
 #include <string>
 #include <sstream>
 #include "config_profile/profile.h"
+#include <errno.h>
 
 uint64_t file_system::GetAvailableDiskSpace() {
   char currentAppPath[FILENAME_MAX];
@@ -53,8 +54,21 @@ uint64_t file_system::GetAvailableDiskSpace() {
 
   struct statvfs fsInfo;
   memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
-  statvfs(currentAppPath, &fsInfo);
-  return fsInfo.f_bsize * fsInfo.f_bfree;
+  if( statvfs(currentAppPath, &fsInfo) == 0) {
+    return fsInfo.f_bsize * fsInfo.f_bfree;
+  } else {
+    return 0;
+  }
+}
+
+uint32_t file_system::FileSize(const std::string &path) {
+  if (file_system::FileExists(path)) {
+    struct stat file_info;
+    memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
+    stat(path.c_str(), &file_info);
+    return file_info.st_size;
+  }
+  return 0;
 }
 
 uint32_t file_system::DirectorySize(const std::string& path) {
@@ -189,14 +203,17 @@ std::ofstream* file_system::Open(const std::string& file_name,
   return NULL;
 }
 
-void file_system::Write(std::ofstream* const file_stream,
+bool file_system::Write(std::ofstream* const file_stream,
                         const uint8_t* data,
                         uint32_t data_size) {
+  bool result = false;
   if (file_stream) {
     for (size_t i = 0; i < data_size; ++i) {
       (*file_stream) << data[i];
     }
+    result = true;
   }
+  return result;
 }
 
 void file_system::Close(std::ofstream* file_stream) {

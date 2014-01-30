@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -103,7 +104,6 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
        msg_params[strings::app_name].asString() << "  hasn't been registered!");
   } else {
-    app->set_mobile_app_id(msg_params[strings::app_id]);
     app->set_is_media_application(
         msg_params[strings::is_media_application].asBool());
 
@@ -134,18 +134,72 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
+	
 
-    SendRegisterAppInterfaceResponseToMobile(*app);
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
-    MessageHelper::SendHMIStatusNotification(*app);
-    MessageHelper::SendVrCommandsOnRegisterAppToHMI(app);
-    MessageHelper::SendTTSChunksToHMI(*app);
+    if (app->vr_synonyms()) {
+      SendVrCommandsOnRegisterAppToHMI(*app);
+    }
+    if (app->tts_name()) {
+      SendTTSChunksToHMI(*app);
+    } else {
+      SendRegisterAppInterfaceResponseToMobile();
+      MessageHelper::SendHMIStatusNotification(*app);
+    }
   }
 }
 
+void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
+(const Application& application_impl) {
+  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  uint32_t app_id = application_impl.app_id();
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] = (max_cmd_id + app_id);
+  msg_params[strings::vr_commands] = *(application_impl.vr_synonyms());
+  if (0 < app_id) {
+    msg_params[strings::app_id] = app_id;
+  }
+  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
+}
+
+void RegisterAppInterfaceRequest::SendTTSChunksToHMI
+(const Application& application_impl) {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = application_impl.app_id();
+  msg_params[strings::tts_chunks] = *(application_impl.tts_name());
+  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+}
+
+void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::on_event");
+  switch (event.id()) {
+    case hmi_apis::FunctionID::TTS_Speak: {
+      const smart_objects::SmartObject& message = event.smart_object();
+
+      mobile_apis::Result::eType tts_result =
+                static_cast<mobile_apis::Result::eType>(
+                message[strings::params][hmi_response::code].asInt());
+
+      SendRegisterAppInterfaceResponseToMobile(tts_result);
+
+      Application* application =
+          ApplicationManagerImpl::instance()->application(connection_key());
+
+      MessageHelper::SendHMIStatusNotification(*application);
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      break;
+    }
+  }
+}
+
+
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-  const Application& application_impl) {
-  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+    mobile_apis::Result::eType result) {
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -176,9 +230,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
 
+    Application* application = ApplicationManagerImpl::instance()->application(
+        connection_key());
+
     LOG4CXX_WARN_EXT(
       logger_,
-      "Wrong language on registering application " << application_impl.name());
+      "Wrong language on registering application " << application->name());
 
     LOG4CXX_ERROR_EXT(
       logger_,

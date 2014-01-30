@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/application_manager_impl.h"
+
 #include <climits>
 #include <string>
 #include <fstream>
@@ -46,7 +48,6 @@
 #include "config_profile/profile.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
-#include "utils/logger.h"
 #include "policies/policy_manager.h"
 
 namespace application_manager {
@@ -78,21 +79,18 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
     request_ctrl_(),
     hmi_capabilities_(this),
-    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET)
-#ifdef MEDIA_MANAGER
-    , media_manager_(NULL)
-#endif
+    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
+    media_manager_(NULL),
+    resume_controler(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-
+  resume_controler.LoadApplications();
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
   }
 
-#ifdef MEDIA_MANAGER
   media_manager_ = media_manager::MediaManagerImpl::instance();
-#endif
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -124,11 +122,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
                   "An error occured during unregistering applications.");
   }
 
-#ifdef MEDIA_MANAGER
   if (media_manager_) {
     media_manager_ = NULL;
   }
-#endif
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -301,6 +297,8 @@ Application* ApplicationManagerImpl::RegisterApplication(
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
+  application->set_mobile_app_id(message[strings::msg_params][strings::app_id]);
+
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   applications_.insert(std::pair<int32_t, Application*>(app_id, application));
@@ -309,7 +307,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // TODO(PV): add asking user to allow application
   // BasicCommunication_AllowApp
   // application->set_app_allowed(result);
-
+  this->resume_controler.RestoreApplicationFiles(application);
   return application;
 }
 
@@ -387,7 +385,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   if (true == profile::Profile::instance()->launch_hmi()) {
     utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady));
+      MessageHelper::CreateModuleInfoSO(
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
     ManageHMICommand(is_vr_ready);
 
     utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
@@ -467,14 +466,12 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
     int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
     int32_t bits_per_sample, int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-#ifdef MEDIA_MANAGER
   if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       std::string("record.wav"),
       max_duration);
   }
-#endif
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
@@ -527,11 +524,9 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
-#ifdef MEDIA_MANAGER
-if (NULL != media_manager_) {
+  if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
   }
-#endif
 }
 
 std::string ApplicationManagerImpl::GetDeviceName(
@@ -623,31 +618,32 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
+
 bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
   protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
-
-  if (protocol_handler::kMovileNav == type) {
-    LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
-
-    // send to HMI startStream request
-    char url[100] = {'\0'};
-    snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
-             profile::Profile::instance()->server_address().c_str(),
-             profile::Profile::instance()->navi_server_port());
-
-    application_manager::MessageHelper::SendNaviStartStream(
-      url, session_key);
-
-#ifdef MEDIA_MANAGER
-    if (media_manager_) {
-      media_manager_->StartVideoStreaming(session_key);
+  switch (type) {
+    case protocol_handler::kMovileNav: {
+      LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+      if (media_manager_) {
+        media_manager_->StartVideoStreaming(session_key);
+      }
+      // !!!!!!!!!!!!!!!!!!!!!!!
+      // TODO(DK): add check if navi streaming allowed for this app.
+      break;
     }
-#endif
-
-    // !!!!!!!!!!!!!!!!!!!!!!!
-    // TODO(DK): add check if navi streaming allowed for this app.
+    case protocol_handler::kAudio: {
+      LOG4CXX_INFO(logger_, "Audio service is about to be started.");
+      if (media_manager_) {
+        media_manager_->StartAudioStreaming(session_key);
+      }
+      break;
+    }
+    default: {
+      LOG4CXX_WARN(logger_, "Unknown type of service to be started.");
+      break;
+    }
   }
   return true;
 }
@@ -656,8 +652,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     protocol_handler::ServiceType type) {
   LOG4CXX_INFO_EXT(
     logger_,
-    "\n\t\t\t\tRemoving session " << session_key << " with first session "
-    << " type " << type);
+    "OnServiceEndedCallback " << type  << " in session " << session_key);
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
@@ -666,10 +661,16 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
     }
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
-      application_manager::MessageHelper::SendNaviStopStream(session_key);
-#ifdef MEDIA_MANAGER
-    media_manager_->StopVideoStreaming(session_key);
-#endif
+      if (media_manager_) {
+        media_manager_->StopVideoStreaming(session_key);
+      }
+      break;
+    }
+    case protocol_handler::kAudio:{
+      LOG4CXX_INFO(logger_, "Stop audio service.");
+      if (media_manager_) {
+        media_manager_->StopAudioStreaming(session_key);
+      }
       break;
     }
     default:
@@ -1152,7 +1153,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     output.set_binary_data(binaryData);
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  LOG4CXX_INFO(logger_, "Successfully parsed smart object into message");
   return true;
 }
 
@@ -1318,7 +1319,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   hmi_cooperating_ = false;
 
   // Saving unregistered app.info to the file system before
-  SaveApplications();
+  resume_controler.SaveAllApplications();
 
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
@@ -1328,6 +1329,10 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id());
     it = application_list_.begin();
   }
+}
+
+bool ApplicationManagerImpl::RestoreApplicationHMILevel(Application *application) {
+  return this->resume_controler.RestoreApplicationHMILevel(application);
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
@@ -1424,6 +1429,7 @@ void ApplicationManagerImpl::Mute() {
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(state);
+      (*it)->set_flag_tts_speak_work(true);
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }
@@ -1436,111 +1442,47 @@ void ApplicationManagerImpl::Unmute() {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(
         mobile_apis::AudioStreamingState::AUDIBLE);
+      (*it)->set_flag_tts_speak_work(false);
       MessageHelper::SendHMIStatusNotification(*(*it));
     }
   }
 }
 
-void ApplicationManagerImpl::SaveApplications() const {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveApplications()");
 
-  std::map<int32_t, Application*>::const_iterator it = applications_.begin();
-  std::map<int32_t, Application*>::const_iterator it_end = applications_.end();
-
-  std::string app_data;
-  for (; it != it_end; ++it) {
-    if (0 == connection_handler_) {
-      LOG4CXX_ERROR(logger_,
-                    "Unable to get necessary parameters during saving "
-                    "applications information.");
-      return;
-    }
-
-    connection_handler::ConnectionHandlerImpl* conn_handler =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_);
-
-    uint32_t device_id = 0;
-    std::string mac_adddress;
-    if (-1 != conn_handler->GetDataOnSessionKey(
-          it->first,
-          NULL,
-          NULL,
-          &device_id)) {
-
-      if (-1 != conn_handler->GetDataOnDeviceID(
-            device_id,
-            NULL,
-            NULL,
-            &mac_adddress)) {
-
-        LOG4CXX_ERROR(logger_,
-                      "There is an error occurs during getting of device MAC.");
-      }
-    }
-
-    const Application* app = it->second;
-
-    int32_t print_result = 0;
-    size_t msg_size = 256;
-
-    do {
-      char message[msg_size];
-
-      print_result = snprintf(
-        message,
-        msg_size,
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%d;"
-        "%s:%s;",
-        strings::app_id, app->mobile_app_id()->asInt(),
-        strings::connection_key, it->first,
-        strings::hmi_level, static_cast<int32_t>(app->hmi_level()),
-        "mac_address", mac_adddress.c_str());
-
-      msg_size += msg_size;
-      app_data = message;
-
-    } while (print_result >= msg_size);
-  }  // end of app.list
-
-  const std::string& storage =
-    profile::Profile::instance()->app_info_storage();
-
-  std::ofstream file(file_system::FullPath(storage).c_str(),
-                     std::ios::out);
-
-  if (file.is_open()) {
-    file_system::Write(
-      &file,
-      reinterpret_cast<const uint8_t*>(app_data.c_str()),
-      app_data.size());
-  } else {
-    LOG4CXX_ERROR(logger_,
-                  "There is an error occurs during saving application info.");
-  }
-
-  file.close();
-}
-
-mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
-                            const std::string& app_name,
-                            const std::vector<uint8_t>& binary_data,
-                            const std::string& save_path) {
-
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
+														    const std::vector<uint8_t>& binary_data,
+                                                            const std::string& save_path,
+                                                            const uint32_t offset) {
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
+               << binary_data.size() << " offset = " << offset);
+  uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
+  std::ofstream* file_stream;
+  if (offset != 0) {
+      if (file_size != offset) {
+          LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+          return mobile_apis::Result::INVALID_DATA;
+        }
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::app);
+    }  else {
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+       // if offset == 0: rewrite file
+      file_stream = file_system::Open(file_system::FullPath(save_path),
+                                      std::ios_base::out);
+    }
 
-  LOG4CXX_INFO(logger_, "######## size " << binary_data.size());
-
-  if (!file_system::Write(file_system::FullPath(save_path), binary_data)) {
-    return mobile_apis::Result::GENERIC_ERROR;
-  }
-
+  if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
+      file_stream->close();
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+  file_stream->close();
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }
+
+
 
 }  // namespace application_manager

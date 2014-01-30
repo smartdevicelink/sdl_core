@@ -3,8 +3,11 @@ package com.ford.syncV4.streaming;
 import android.test.AndroidTestCase;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
@@ -13,6 +16,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by Andrew Batutin on 9/30/13.
@@ -40,7 +45,7 @@ public class H264PacketizerTest extends AndroidTestCase {
         inputStream = new PipedInputStream();
         outputStream = new PipedOutputStream();
         inputStream.connect(outputStream);
-        sut = new H264Packetizer(null, inputStream, (byte) 0);
+        sut = new H264Packetizer(null, inputStream, (byte) 0, ServiceType.Mobile_Nav);
         sampleData = generateRandomBytes(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
         buffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     }
@@ -154,7 +159,7 @@ public class H264PacketizerTest extends AndroidTestCase {
 
     public void testCreateFrameWithNullInputStreamThrowsExp() throws Exception {
         try {
-            H264Packetizer packetizer = new H264Packetizer(null, null, (byte) 0);
+            H264Packetizer packetizer = new H264Packetizer(null, null, (byte) 0, ServiceType.Mobile_Nav);
             byte[] frame = packetizer.readFrameData(buffer, new byte[10]);
             assertNull("should not get here", frame);
         } catch (IllegalArgumentException e) {
@@ -196,7 +201,7 @@ public class H264PacketizerTest extends AndroidTestCase {
                     isTestValid[0] = false;
                 }
             }
-        }, inputStream, (byte) 0);
+        }, inputStream, (byte) 0, ServiceType.Mobile_Nav);
         outputStream.close();
         packetizer.doDataReading();
         assertTrue("ProtocolMessage should be created", isTestValid[0]);
@@ -274,4 +279,47 @@ public class H264PacketizerTest extends AndroidTestCase {
         return map;
     }
 
+    public void testH264ServiceTypeIsSet() throws Exception {
+        OutputStream os = new PipedOutputStream();
+        InputStream is = new PipedInputStream((PipedOutputStream) os);
+        H264Packetizer audioPacketizer = new H264Packetizer(mock(IStreamListener.class), is, (byte) 0, ServiceType.Audio_Service);
+        assertEquals("service type should be Audio",  ServiceType.Audio_Service, audioPacketizer.getServiceType());
+    }
+
+    public void testCreateProtocolMessageUsesSessionID() throws Exception {
+        OutputStream os = new PipedOutputStream();
+        InputStream is = new PipedInputStream((PipedOutputStream) os);
+        H264Packetizer audioPacketizer = new H264Packetizer(mock(IStreamListener.class), is, (byte) 10, ServiceType.Audio_Service);
+        ProtocolMessage message = audioPacketizer.createProtocolMessage( generateRandomBytes(10));
+        assertEquals("session id should be same", audioPacketizer.getSessionID(), message.getSessionID());
+    }
+
+    public void testCreateProtocolMessageUsesServiceType() throws Exception {
+        OutputStream os = new PipedOutputStream();
+        InputStream is = new PipedInputStream((PipedOutputStream) os);
+        H264Packetizer audioPacketizer = new H264Packetizer(mock(IStreamListener.class), is, (byte) 10, ServiceType.Audio_Service);
+        ProtocolMessage message = audioPacketizer.createProtocolMessage( generateRandomBytes(10));
+        assertEquals("session id should be same", audioPacketizer.getServiceType(), message.getServiceType());
+    }
+
+    public void testTwoPacketizersWorkProperly() throws Exception {
+        PipedInputStream inputStreamAudio = new PipedInputStream();
+        PipedOutputStream outputStreamAudio = new PipedOutputStream();
+        PipedInputStream inputStreamVideo = new PipedInputStream();
+        PipedOutputStream outputStreamVideo = new PipedOutputStream();
+        inputStreamAudio.connect(outputStreamAudio);
+        inputStreamVideo.connect(outputStreamVideo);
+        H264Packetizer packetizerAudio = new H264Packetizer(null, inputStreamAudio, (byte) 0, ServiceType.Audio_Service);
+        H264Packetizer packetizerVideo = new H264Packetizer(null, inputStreamVideo, (byte) 0, ServiceType.Mobile_Nav);
+        byte[] sampleDataAudio = generateRandomBytes(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        byte[] sampleDataVideo = generateRandomBytes(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        ByteBuffer bufferAudio = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        ByteBuffer bufferVideo = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
+        outputStreamAudio.write(sampleDataAudio);
+        outputStreamVideo.write(sampleDataVideo);
+        byte[] dataAudio = packetizerAudio.readFrameData(bufferAudio, new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
+        byte[] dataVideo = packetizerVideo.readFrameData(bufferVideo, new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE]);
+        assertTrue("dataAudio should be == sampleDataAudio", Arrays.equals(sampleDataAudio, dataAudio));
+        assertTrue("dataVideo should be == sampleDataVideo", Arrays.equals(sampleDataVideo, dataVideo));
+    }
 }

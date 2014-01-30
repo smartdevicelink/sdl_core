@@ -505,180 +505,175 @@ bool HMICapabilities::load_capabilities_from_file() {
     if (!result) {
       return false;
     }
+    // UI
+    Json::Value ui = root_json.get("UI", "");
+    set_active_ui_language(
+        languages_enum_values.find(ui.get("language", "").asString())->second);
 
-     // UI
-     Json::Value ui = root_json.get("UI", "");
-     set_active_ui_language(
-         languages_enum_values.find(ui.get("language", "").asString())->second);
+    Json::Value languages = ui.get("languages", "");
+    smart_objects::SmartObject ui_languages =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < languages.size(); i++) {
+      ui_languages[i] =
+          languages_enum_values.find(languages[i].asString())->second;
+    }
+    set_ui_supported_languages(ui_languages);
 
-     Json::Value languages = ui.get("languages", "");
-     smart_objects::SmartObject ui_languages =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < languages.size(); i++){
-       ui_languages[i] =
-           languages_enum_values.find(languages[i].asString())->second;
-     }
-     set_ui_supported_languages(ui_languages);
+    Json::Value display_capabilities = ui.get("displayCapabilities", "");
+    smart_objects::SmartObject display_capabilities_so =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    display_capabilities_so["displayType"] =
+        display_capabilities.get("displayType", "").asString();
 
-     Json::Value display_capabilities = ui.get("displayCapabilities", "");
-     smart_objects::SmartObject display_capabilities_so =
-              smart_objects::SmartObject(smart_objects::SmartType_Map);
-     display_capabilities_so["displayType"] =
-         display_capabilities.get("displayType", "").asString();
+    display_capabilities_so["textFields"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
 
-     display_capabilities_so["textFields"] =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
+    Json::Value text_fields = display_capabilities.get("textFields", "");
+    for (int32_t i = 0; i < text_fields.size(); i++) {
 
-     Json::Value text_fields = display_capabilities.get("textFields", "");
-     for (int32_t i = 0; i < text_fields.size(); i++) {
+      // there is an issue with enum to string, therefore used string
+      display_capabilities_so["textFields"][i]["name"] =
+          text_fields_enum_name.find(text_fields[i].asString())->first;
+    }
 
-       // there is an issue with enum to string, therefore used string
-       display_capabilities_so["textFields"][i]["name"] =
-           text_fields_enum_name.find(text_fields[i].asString())->first;
-     }
+    display_capabilities_so["mediaClockFormats"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    Json::Value media_clock_format =
+        display_capabilities.get("mediaClockFormats", "");
+    for (int32_t i = 0; i < media_clock_format.size(); i++) {
+      display_capabilities_so["mediaClockFormats"][i] =
+          media_clock_enum_name.find(media_clock_format[i].asString())->second;
+    }
+    display_capabilities_so["graphicSupported"] =
+        display_capabilities.get("graphicSupported", "").asBool();
 
-     display_capabilities_so["mediaClockFormats"] =
-              smart_objects::SmartObject(smart_objects::SmartType_Array);
-     Json::Value media_clock_format =
-         display_capabilities.get("mediaClockFormats", "");
-     for (int32_t i = 0; i < media_clock_format.size(); i++) {
-       display_capabilities_so["mediaClockFormats"][i] =
-           media_clock_enum_name.find(media_clock_format[i].asString())->second;
-     }
-     display_capabilities_so["graphicSupported"] =
-         display_capabilities.get("graphicSupported", "").asBool();
+    Json::Value image_capabilities =
+        display_capabilities.get("imageCapabilities", "");
+    display_capabilities_so["imageCapabilities"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < image_capabilities.size(); i++) {
+      display_capabilities_so["imageCapabilities"][i] =
+          image_type_enum.find(image_capabilities[i].asString())->second;
+    }
+    set_display_capabilities(display_capabilities_so);
 
-     Json::Value image_capabilities =
-         display_capabilities.get("imageCapabilities", "");
-     display_capabilities_so["imageCapabilities"] =
-              smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < image_capabilities.size(); i++) {
-       display_capabilities_so["imageCapabilities"][i] =
-           image_type_enum.find(image_capabilities[i].asString())->second;
-     }
-     set_display_capabilities(display_capabilities_so);
+    Json::Value audio_capabilities = ui.get("audioPassThruCapabilities", "");
+    smart_objects::SmartObject audio_capabilities_so =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    int32_t i = 0;
+    audio_capabilities_so[i] =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    audio_capabilities_so[i]["samplingRate"] =
+        sampling_rate_enum.find(
+            audio_capabilities.get("samplingRate", "").asString())->second;
+    audio_capabilities_so[i]["bitsPerSample"] =
+        bit_per_sample_enum.find(
+            audio_capabilities.get("bitsPerSample", "").asString())->second;
+    audio_capabilities_so[i]["audioType"] =
+        audio_type_enum.find(
+            audio_capabilities.get("audioType", "").asString())->second;
+    set_audio_pass_thru_capabilities(audio_capabilities_so);
 
-     Json::Value audio_capabilities = ui.get("audioPassThruCapabilities", "");
-     smart_objects::SmartObject audio_capabilities_so =
-              smart_objects::SmartObject(smart_objects::SmartType_Array);
-     int32_t i = 0;
-     audio_capabilities_so[i] =
-                   smart_objects::SmartObject(smart_objects::SmartType_Map);
-     audio_capabilities_so[i]["samplingRate"] =
-         sampling_rate_enum.find(
-             audio_capabilities.get("samplingRate", "").asString())->second;
-     audio_capabilities_so[i]["bitsPerSample"] =
-         bit_per_sample_enum.find(
-             audio_capabilities.get("bitsPerSample", "").asString())->second;
-     audio_capabilities_so[i]["audioType"] =
-         audio_type_enum.find(
-             audio_capabilities.get("audioType", "").asString())->second;
-     set_audio_pass_thru_capabilities(audio_capabilities_so);
+    smart_objects::SmartObject hmi_zone_capabilities_so =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    int32_t index = 0;
+    hmi_zone_capabilities_so[index] =
+        hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())->second;
+    set_hmi_zone_capabilities(hmi_zone_capabilities_so);
 
-     smart_objects::SmartObject hmi_zone_capabilities_so =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     int32_t index = 0;
-     hmi_zone_capabilities_so[index] =
-         hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())->second;
-     set_hmi_zone_capabilities(hmi_zone_capabilities_so);
+    Json::Value soft_button_capabilities = ui.get("softButtonCapabilities", "");
+    smart_objects::SmartObject soft_button_capabilities_so =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    soft_button_capabilities_so["shortPressAvailable"] =
+        soft_button_capabilities.get("shortPressAvailable", "").asBool();
+    soft_button_capabilities_so["longPressAvailable"] =
+        soft_button_capabilities.get("longPressAvailable", "").asBool();
+    soft_button_capabilities_so["upDownAvailable"] =
+        soft_button_capabilities.get("upDownAvailable", "").asBool();
+    soft_button_capabilities_so["imageSupported"] =
+        soft_button_capabilities.get("imageSupported", "").asBool();
+    set_soft_button_capabilities(soft_button_capabilities_so);
 
-     Json::Value soft_button_capabilities = ui.get("softButtonCapabilities", "");
-     smart_objects::SmartObject soft_button_capabilities_so =
-         smart_objects::SmartObject(smart_objects::SmartType_Map);
-     soft_button_capabilities_so["shortPressAvailable"] =
-         soft_button_capabilities.get("shortPressAvailable", "").asBool();
-     soft_button_capabilities_so["longPressAvailable"] =
-         soft_button_capabilities.get("longPressAvailable", "").asBool();
-     soft_button_capabilities_so["upDownAvailable"] =
-         soft_button_capabilities.get("upDownAvailable", "").asBool();
-     soft_button_capabilities_so["imageSupported"] =
-         soft_button_capabilities.get("imageSupported", "").asBool();
-     set_soft_button_capabilities(soft_button_capabilities_so);
+    // VR
+    Json::Value vr = root_json.get("VR", "");
+    set_active_vr_language(
+        languages_enum_values.find(vr.get("language", "").asString())->second);
 
-     // VR
-     Json::Value vr = root_json.get("VR", "");
-     set_active_vr_language(
-         languages_enum_values.find(vr.get("language", "").asString())->second);
+    languages = vr.get("languages", "");
+    smart_objects::SmartObject vr_languages =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < languages.size(); i++) {
+      vr_languages[i] =
+          languages_enum_values.find(languages[i].asString())->second;
+    }
+    set_vr_supported_languages(ui_languages);
 
-     languages = vr.get("languages", "");
-     smart_objects::SmartObject vr_languages =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < languages.size(); i++){
-       vr_languages[i] =
-           languages_enum_values.find(languages[i].asString())->second;
-     }
-     set_vr_supported_languages(ui_languages);
+    Json::Value capabilities = vr.get("capabilities", "");
+    smart_objects::SmartObject vr_capabilities =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < capabilities.size(); i++) {
+      vr_capabilities[i] =
+          vr_enum_capabilities.find(capabilities[i].asString())->second;
+    }
+    set_vr_capabilities(vr_capabilities);
 
-     Json::Value capabilities = vr.get("capabilities", "");
-     smart_objects::SmartObject vr_capabilities =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < capabilities.size(); i++){
-       vr_capabilities[i] =
-           vr_enum_capabilities.find(capabilities[i].asString())->second;
-     }
-     set_vr_capabilities(vr_capabilities);
+    // TTS
+    Json::Value tts = root_json.get("TTS", "");
+    set_active_tts_language(
+        languages_enum_values.find(tts.get("language", "").asString())->second);
 
+    languages = tts.get("languages", "");
+    smart_objects::SmartObject tts_languages =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < languages.size(); i++) {
+      tts_languages[i] =
+          languages_enum_values.find(languages[i].asString())->second;
+    }
+    set_tts_supported_languages(ui_languages);
+    set_speech_capabilities(
+        smart_objects::SmartObject(tts.get("capabilities", "").asString()));
 
-     // TTS
-     Json::Value tts = root_json.get("TTS", "");
-     set_active_tts_language(
-         languages_enum_values.find(tts.get("language", "").asString())->second);
+    // Buttons
+    Json::Value buttons = root_json.get("Buttons", "");
+    Json::Value bt_capabilities = buttons.get("capabilities", "");
+    smart_objects::SmartObject buttons_capabilities =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    for (int32_t i = 0; i < bt_capabilities.size(); i++) {
+      smart_objects::SmartObject button =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      button["name"] =
+          button_enum_name.find(bt_capabilities[i].get("name", "").asString())->second;
+      button["shortPressAvailable"] =
+          bt_capabilities[i].get("shortPressAvailable", "").asBool();
+      button["longPressAvailable"] =
+          bt_capabilities[i].get("longPressAvailable", "").asBool();
+      button["upDownAvailable"] =
+          bt_capabilities[i].get("upDownAvailable", "").asBool();
 
-     languages = tts.get("languages", "");
-     smart_objects::SmartObject tts_languages =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < languages.size(); i++){
-       tts_languages[i] =
-           languages_enum_values.find(languages[i].asString())->second;
-     }
-     set_tts_supported_languages(ui_languages);
-     set_speech_capabilities(
-         smart_objects::SmartObject(tts.get("capabilities", "").asString()));
+      buttons_capabilities[i] = button;
+    }
+    set_button_capabilities(buttons_capabilities);
 
+    Json::Value presetBank = buttons.get("presetBankCapabilities", "");
+    smart_objects::SmartObject preset_bank =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    preset_bank["onScreenPresetsAvailable"] =
+        presetBank.get("onScreenPresetsAvailable", "").asBool();
+    set_preset_bank_capabilities(preset_bank);
 
-     // Buttons
-     Json::Value buttons = root_json.get("Buttons", "");
-     Json::Value bt_capabilities = buttons.get("capabilities", "");
-     smart_objects::SmartObject buttons_capabilities =
-         smart_objects::SmartObject(smart_objects::SmartType_Array);
-     for (int32_t i = 0; i < bt_capabilities.size(); i++){
-       smart_objects::SmartObject button =
-                smart_objects::SmartObject(smart_objects::SmartType_Map);
-       button["name"] =
-           button_enum_name.find(bt_capabilities[i].get("name", "").asString())->second;
-       button["shortPressAvailable"] =
-           bt_capabilities[i].get("shortPressAvailable", "").asBool();
-       button["longPressAvailable"] =
-           bt_capabilities[i].get("longPressAvailable", "").asBool();
-       button["upDownAvailable"] =
-           bt_capabilities[i].get("upDownAvailable", "").asBool();
-
-       buttons_capabilities[i] = button;
-     }
-     set_button_capabilities(buttons_capabilities);
-
-     Json::Value presetBank = buttons.get("presetBankCapabilities", "");
-     smart_objects::SmartObject preset_bank =
-         smart_objects::SmartObject(smart_objects::SmartType_Map);
-     preset_bank["onScreenPresetsAvailable"] =
-         presetBank.get("onScreenPresetsAvailable", "").asBool();
-     set_preset_bank_capabilities(preset_bank);
-
-
-     // VehicleType
-     Json::Value vehicle_info = root_json.get("VehicleInfo", "");
-     smart_objects::SmartObject vehicle_type =
-         smart_objects::SmartObject(smart_objects::SmartType_Map);
-     vehicle_type["make"] = vehicle_info.get("make", "").asString();
-     vehicle_type["model"] = vehicle_info.get("model", "").asString();
-     vehicle_type["modelYear"] = vehicle_info.get("modelYear", "").asString();
-     vehicle_type["trim"] = vehicle_info.get("trim", "").asString();
-     set_vehicle_type(vehicle_type);
+    // VehicleType
+    Json::Value vehicle_info = root_json.get("VehicleInfo", "");
+    smart_objects::SmartObject vehicle_type =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+    vehicle_type["make"] = vehicle_info.get("make", "").asString();
+    vehicle_type["model"] = vehicle_info.get("model", "").asString();
+    vehicle_type["modelYear"] = vehicle_info.get("modelYear", "").asString();
+    vehicle_type["trim"] = vehicle_info.get("trim", "").asString();
+    set_vehicle_type(vehicle_type);
 
   } catch (...) {
     return false;
   }
-
   return true;
 }
 

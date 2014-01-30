@@ -32,10 +32,6 @@
 
 #include "hmi_message_handler/dbus_message_adapter.h"
 
-#include <string>
-
-#include "dbus/schema.h"
-#include "hmi_message_handler/hmi_message_adapter.h"
 #include "formatters/CSmartFactory.hpp"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -58,9 +54,8 @@ std::vector<std::string> &split(const std::string &s, char delim,
     return elems;
 }
 
-DBusMessageAdapter::DBusMessageAdapter(
-    HMIMessageHandler* handler)
-    : HMIMessageAdapter(handler),
+DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
+    : HMIMessageAdapter(hmi_msg_handler),
       DBusMessageController(SDL_SERVICE_NAME, SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME, HMI_OBJECT_PATH) {
   LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");
@@ -69,11 +64,10 @@ DBusMessageAdapter::DBusMessageAdapter(
 DBusMessageAdapter::~DBusMessageAdapter() {
 }
 
-void DBusMessageAdapter::SendMessageToHMI(
-    utils::SharedPtr<application_manager::Message> message) {
+void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
-  smart_objects::SmartObject& smart = message->smart_object();
+  const smart_objects::SmartObject& smart = message->smart_object();
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
     case hmi_apis::messageType::request:
       Request(smart);
@@ -152,7 +146,7 @@ void DBusMessageAdapter::SubscribeTo() {
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 
-void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
+void DBusMessageAdapter::SendMessageToCore(const smart_objects::SmartObject& obj) {
   LOG4CXX_INFO(logger_, "DBusMessageAdapter::SendMessageToCore");
 
   if (!handler()) {
@@ -160,14 +154,14 @@ void DBusMessageAdapter::SendMessageToCore(smart_objects::SmartObject& obj) {
     return;
   }
 
-  application_manager::Message* message = new application_manager::Message(protocol_handler::MessagePriority::kDefault);//todo: ykazakov constant is a temp solution to finish merge MessagePriority::FromServiceType(message.servicetype) shall be used instead
+  MessageSharedPointer message = new application_manager::Message(protocol_handler::MessagePriority::kDefault);//todo: ykazakov constant is a temp solution to finish merge MessagePriority::FromServiceType(message.servicetype) shall be used instead
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");
 }
 
-void DBusMessageAdapter::Request(smart_objects::SmartObject& obj) {
+void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Request");
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
@@ -176,7 +170,7 @@ void DBusMessageAdapter::Request(smart_objects::SmartObject& obj) {
   MethodCall(id, func_id, name, obj[sos::S_MSG_PARAMS]);
 }
 
-void DBusMessageAdapter::Notification(smart_objects::SmartObject& obj) {
+void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
   LOG4CXX_DEBUG(logger_, "Notification");
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
@@ -184,13 +178,13 @@ void DBusMessageAdapter::Notification(smart_objects::SmartObject& obj) {
   Signal(func_id, name, obj[sos::S_MSG_PARAMS]);
 }
 
-void DBusMessageAdapter::Response(smart_objects::SmartObject& obj) {
+void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Response");
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
   MethodReturn(id, obj[sos::S_MSG_PARAMS]);
 }
 
-void DBusMessageAdapter::ErrorResponse(smart_objects::SmartObject& obj) {
+void DBusMessageAdapter::ErrorResponse(const smart_objects::SmartObject &obj) {
   LOG4CXX_DEBUG(logger_, "Error");
   // TODO(KKolodiy): get error and description
   std::string error = "";

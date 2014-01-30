@@ -49,7 +49,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in
 
 option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
-option(BUILD_MEDIA_MANAGER "Build media_manager component" ON)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
@@ -60,15 +59,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   add_definitions(-DOS_QNX)
-  SET(BUILD_MEDIA_MANAGER ON)
   SET(BUILD_BT_SUPPORT OFF)
   SET(BUILD_AVAHI_SUPPORT OFF)
   SET(BUILD_BACKTRACE_SUPPORT OFF)
   SET(DEFAULT_MEDIA_FLAG OFF)
-endif()
-
-if (BUILD_MEDIA_MANAGER)
-  add_definitions(-DMEDIA_MANAGER)
 endif()
 
 if (BUILD_USB_SUPPORT)
@@ -121,7 +115,7 @@ if(NOT PYTHONINTERP_FOUND)
 endif(NOT PYTHONINTERP_FOUND)
 
 if (${HMI2})
-    cmake_minimum_required(VERSION 2.8.9)
+    cmake_minimum_required(VERSION 2.8.11)
     if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
         set(qt_version "4.8.5")
     else ()
@@ -198,6 +192,9 @@ ENDIF (${HMI2})
 
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
+
+# --- Tools
+add_subdirectory(./tools)
 
 # --- Components
 add_subdirectory(./src/components)

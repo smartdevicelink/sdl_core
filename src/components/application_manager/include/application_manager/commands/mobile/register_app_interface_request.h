@@ -71,15 +71,35 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   // virtual void cleanUp() = 0;
 
   /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
+  /**
    * @brief Sends RegisterAppInterface response to mobile
    *
    *@param application_impl application
    *
    **/
   void SendRegisterAppInterfaceResponseToMobile(
-      const Application& application_impl);
+      mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS);
 
  private:
+  /*
+   * @brief Send addVRcommand request to HMI
+   *
+   * @param application_impl application
+   */
+  void SendVrCommandsOnRegisterAppToHMI(const Application& application_impl);
+
+  /*
+   * @brief Send ttsSpeak request to HMI
+   *
+   * @param application_impl application
+   */
+  void SendTTSChunksToHMI(const Application& application_impl);
 
   /*
    * @brief Check new ID along with known mobile application ID

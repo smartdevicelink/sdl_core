@@ -37,9 +37,9 @@
 #include <map>
 #include "dbus/dbus_adapter.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace dbus {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class DBusMessageController : public DBusAdapter {
  public:
@@ -77,7 +77,7 @@ class DBusMessageController : public DBusAdapter {
    * \brief sends message to core
    * \param obj
    */
-  virtual void SendMessageToCore(smart_objects::SmartObject& obj) = 0;
+  virtual void SendMessageToCore(const smart_objects::SmartObject& obj) = 0;
 };
 
 }  // namespace dbus

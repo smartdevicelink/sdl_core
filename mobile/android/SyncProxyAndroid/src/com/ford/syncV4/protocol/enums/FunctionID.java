@@ -77,6 +77,7 @@ public class FunctionID {
             put(Names.ListFiles, 34);
             put(Names.SetAppIcon, 35);
             put(Names.SetDisplayLayout, 36);
+            put(Names.SystemRequest, 38);
 
             /*
                 Base Notifications
@@ -93,6 +94,7 @@ public class FunctionID {
             put(Names.OnPermissionsChange, 32776);
             put(Names.OnAudioPassThru, 32777);
             put(Names.OnLanguageChange, 32778);
+            put(Names.OnSystemRequest, 32781);
 
             /*
                 Ford Specific Request / Response RPCs

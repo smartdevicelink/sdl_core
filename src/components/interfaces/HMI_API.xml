@@ -1788,6 +1788,15 @@
         <description>ID of the application unregistered</description>
       </param>
     </function>
+    <function name="OnResumeResult" messagetype="notification">
+      <description>Issued by HMI to notify SDL about application resumption check.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the registered application that will be resumed</description>
+      </param>
+      <param name="result" type="Boolean" mandatory="true">
+        <description>Flag to indicate if applications data check was successfull</description>
+      </param>
+    </function>
     <function name="OnExitApplication" messagetype="notification">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
       <param name="appID" type="Integer" mandatory="true">
@@ -2587,6 +2596,27 @@
   </function>
   <function name="StopStream" messagetype="response">
   </function>
+
+  <function name="StartAudioStream" messagetype="request">
+    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
+      <description>URL that HMI start playing.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="StartAudioStream" messagetype="response">
+  </function>
+  <function name="StopAudioStream" messagetype="request">
+    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
+  <function name="StopAudioStream" messagetype="response">
+  </function>
+
 </interface>
 
 <interface name="VehicleInfo" version="1.0" date="2013-04-21">

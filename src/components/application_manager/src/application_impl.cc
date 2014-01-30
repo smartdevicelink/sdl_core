@@ -55,6 +55,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       is_app_allowed_(true),
       has_been_activated_(false),
+      flag_tts_speak_work_(false),
       device_(0) {
 }
 
@@ -82,7 +83,7 @@ bool ApplicationImpl::IsFullscreen() const {
 
 bool ApplicationImpl::MakeFullscreen() {
   hmi_level_ = mobile_api::HMILevel::HMI_FULL;
-  if (is_media_) {
+  if (is_media_ && !flag_tts_speak_work_) {
     audio_streaming_state_ = mobile_api::AudioStreamingState::AUDIBLE;
   }
   system_context_ = mobile_api::SystemContext::SYSCTXT_MAIN;
@@ -171,6 +172,10 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
     set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
 }
 
+void ApplicationImpl::set_flag_tts_speak_work(bool flag_tts_speak_work) {
+  flag_tts_speak_work_ = flag_tts_speak_work;
+}
+
 void ApplicationImpl::set_hmi_level(
     const mobile_api::HMILevel::eType& hmi_level) {
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
@@ -236,7 +241,7 @@ bool ApplicationImpl::has_been_activated() const {
 }
 
 bool ApplicationImpl::AddFile(const std::string& file_name,
-                              bool is_persistent) {
+                              bool is_persistent, bool is_download_complete) {
   for (std::vector<AppFile>::iterator it = app_files_.begin();
       app_files_.end() != it;
       ++it) {
@@ -244,9 +249,23 @@ bool ApplicationImpl::AddFile(const std::string& file_name,
       return false;
     }
   }
-  AppFile app_file(file_name, is_persistent);
+  AppFile app_file(file_name, is_persistent, is_download_complete);
   app_files_.push_back(app_file);
   return true;
+}
+
+bool ApplicationImpl::UpdateFile(const std::string &file_name, bool is_persistent, bool is_download_complete)
+{
+  for (std::vector<AppFile>::iterator it = app_files_.begin();
+      app_files_.end() != it;
+      ++it) {
+    if (0 == file_name.compare(it->file_name)) {
+      it->is_persistent = is_persistent;
+      it->is_download_complete = is_download_complete;
+      return true;
+    }
+  }
+  return false;
 }
 
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
@@ -259,6 +278,10 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
     }
   }
   return false;
+}
+
+const std::vector<AppFile>& ApplicationImpl::getAppFiles() const {
+  return this->app_files_;
 }
 
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {

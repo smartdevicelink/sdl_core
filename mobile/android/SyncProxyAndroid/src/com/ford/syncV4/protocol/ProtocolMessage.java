@@ -1,11 +1,11 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 public class ProtocolMessage {
 	private byte version = 1;
-	private SessionType _sessionType = SessionType.RPC;
+	private ServiceType _serviceType = ServiceType.RPC;
 	private MessageType _messageType = MessageType.UNDEFINED;
 	private byte _sessionID = 0;
 	private byte _rpcType;
@@ -21,6 +21,28 @@ public class ProtocolMessage {
     public static byte RPCTYPE_NOTIFICATION = 0x02;
 
 	public ProtocolMessage() {}
+
+    /**
+     * Copy constructor. Makes a deep copy of the given ProtocolMessage object.
+     *
+     * @param that object to copy
+     */
+    public ProtocolMessage(ProtocolMessage that) {
+        this.version = that.version;
+        this._serviceType = that._serviceType;
+        this._messageType = that._messageType;
+        this._sessionID = that._sessionID;
+        this._rpcType = that._rpcType;
+        this._functionID = that._functionID;
+        this._correlationID = that._correlationID;
+        this._jsonSize = that._jsonSize;
+        if (null != that._data) {
+            this._data = that._data.clone();
+        }
+        if (null != that._bulkData) {
+            this._bulkData = that._bulkData.clone();
+        }
+    }
 
 	public byte getVersion() {
 		return version;
@@ -68,12 +90,12 @@ public class ProtocolMessage {
 		//this._bulkData = bulkData;
 	}
 
-	public SessionType getSessionType() {
-		return _sessionType;
+	public ServiceType getServiceType() {
+		return _serviceType;
 	}
 
-	public void setSessionType(SessionType sessionType) {
-		this._sessionType = sessionType;
+	public void setSessionType(ServiceType serviceType) {
+		this._serviceType = serviceType;
 	}
 
 	public MessageType getMessageType() {

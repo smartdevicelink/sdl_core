@@ -53,6 +53,7 @@
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
+#include "application_manager/commands/hmi/on_resuming_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -213,6 +214,10 @@
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 #include "application_manager/commands/hmi/navi_stop_stream_request.h"
 #include "application_manager/commands/hmi/navi_stop_stream_response.h"
+#include "application_manager/commands/hmi/audio_start_stream_request.h"
+#include "application_manager/commands/hmi/audio_start_stream_response.h"
+#include "application_manager/commands/hmi/audio_stop_stream_request.h"
+#include "application_manager/commands/hmi/audio_stop_stream_response.h"
 
 namespace application_manager {
 
@@ -231,11 +236,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
 
   bool is_response = false;
   if ((*message)[strings::params][strings::message_type]
-      == static_cast<int>(MessageType::kResponse)) {
+      == static_cast<int>(application_manager::MessageType::kResponse)) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type]
-      == static_cast<int>(MessageType::kErrorResponse)) {
+      == static_cast<int>(application_manager::MessageType::kErrorResponse)) {
     is_response = true;
     LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
@@ -549,6 +554,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnAppActivated: {
       command.reset(new commands::OnAppActivatedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnResumeResult: {
+      command.reset(new commands::OnResumingNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnExitApplication: {
@@ -1811,6 +1820,22 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviStopStreamResponse(message));
       } else {
         command.reset(new commands::NaviStopStreamRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_StartAudioStream: {
+      if (is_response) {
+        command.reset(new commands::AudioStartStreamResponse(message));
+      } else {
+        command.reset(new commands::AudioStartStreamRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_StopAudioStream: {
+      if (is_response) {
+        command.reset(new commands::AudioStopStreamResponse(message));
+      } else {
+        command.reset(new commands::AudioStopStreamRequest(message));
       }
       break;
     }

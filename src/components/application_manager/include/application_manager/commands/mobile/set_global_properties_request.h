@@ -85,6 +85,16 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    */
   bool IsPendingResponseExist();
 
+  /*
+   * @brief Checks if request has at least one parameter
+   *
+   * @param params request parameters
+   *
+   * @returns true if at least one parameter is present in object
+   */
+  static bool ValidateConditionalMandatoryParameters(
+      const smart_objects::SmartObject& params);
+
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 
   bool is_ui_send_;

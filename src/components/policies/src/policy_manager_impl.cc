@@ -57,7 +57,6 @@ PolicyManagerImpl::PolicyManagerImpl()
 //---------------------------------------------------------------
 
 PolicyManagerImpl::~PolicyManagerImpl() {
-  StorePolicyTable();
   if (NULL != policy_table_) {
     delete policy_table_;
     policy_table_ = NULL;

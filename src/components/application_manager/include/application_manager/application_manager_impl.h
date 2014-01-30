@@ -44,12 +44,11 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/resume_ctrl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
-#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
-#endif
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -74,6 +73,7 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -88,32 +88,6 @@ class Thread;
 class CommandNotificationImpl;
 
 namespace application_manager {
-
-/**
- *@brief Typedef for shared pointer
- */
-typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
-
-/**
- *@brief Map representing hmi request
- *
- *@param int32_t hmi correlation ID
- *@param MessageChainPtr Mobile request temporary data
- */
-typedef std::map<uint32_t, MessageChainPtr> HMIRequest;
-
-/**
- *@brief Map representing mobile request and pending HMI requests
- *
- *@param int32_t mobile correlation ID
- *@param HMIRequest Sent HMI request
- */
-typedef std::map<uint32_t, HMIRequest> MobileRequest;
-
-/**
- *@brief Map of application ID and incoming mobile requests
- */
-typedef std::map<uint32_t, MobileRequest> MessageChain;
 
 class ApplicationManagerImpl;
 
@@ -179,6 +153,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler,
   public impl::ToHmiQueue::Handler {
+  friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
@@ -219,6 +194,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
+    /*
+     * @brief Set application HMI Level as saved in resuming_controller
+     * @param application is applicatint whitch HMI Level is need to restore
+     * @return true if succes, otherwise return false
+     * this method agregete to resuming_controller.RestoreApplicationHMILevel(application)
+     */
+    bool RestoreApplicationHMILevel(Application *application);
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
     bool ActivateApplication(Application* app);
@@ -426,13 +408,15 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param binary file name
      * @param binary data
      * @param path for saving data
+     * @param offset for saving data to existing file with offset. If offset is 0 - create new file ( overrite existing )
      *
      * @return SUCCESS if file was saved, other code otherwise
      */
     mobile_apis::Result::eType SaveBinary(
                                 const std::string& app_name,
                                 const std::vector<uint8_t>& binary_data,
-                                const std::string& save_path);
+                                const std::string& save_path,
+                                const uint32_t offset = 0);
 
   private:
     ApplicationManagerImpl();
@@ -474,13 +458,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
-    bool RemoveMobileRequestFromMessageChain(uint32_t mobile_correlation_id,
-        uint32_t connection_key);
 
-    /*
-     * @brief Save unregistered applications info to the file system
-     */
-    void SaveApplications() const;
+
 
     // threads::MessageLoopThread<*>::Handler implementations
     /*
@@ -501,7 +480,15 @@ class ApplicationManagerImpl : public ApplicationManager,
 
   private:
 
+
     // members
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_controler; // TODO: use UniquePtr
     /**
      * @brief Map of connection keys and associated applications
      */
@@ -528,9 +515,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
-#ifdef MEDIA_MANAGER
-  media_manager::MediaManager* media_manager_;
-#endif
+    media_manager::MediaManager* media_manager_;
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;

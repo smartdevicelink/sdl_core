@@ -47,10 +47,8 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
-#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
 #include "policies/policy_manager_impl.h"
-#endif
 
 #ifdef WEB_HMI
 #  include "CMessageBroker.hpp"
@@ -85,10 +83,8 @@ class LifeCycle {
 #ifdef WEB_HMI
     hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
 #endif  // WEB_HMI
-#ifdef MEDIA_MANAGER
     media_manager::MediaManagerImpl* media_manager_;
     policies::PolicyManagerImpl* policy_manager_;
-#endif
 
 #ifdef WEB_HMI
     NsMessageBroker::CMessageBroker* message_broker_;

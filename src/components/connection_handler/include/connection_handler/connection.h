@@ -190,11 +190,6 @@ class Connection {
   uint8_t session_id_counter_;
 
   /**
-   * \brief Counter to generate session id's.
-   */
-  SessionList session_list_;
-
-  /**
    * \brief session/services map
    */
   SessionMap  session_map_;

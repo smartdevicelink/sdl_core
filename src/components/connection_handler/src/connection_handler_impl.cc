@@ -306,10 +306,15 @@ void ConnectionHandlerImpl::RemoveConnection(
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
       return -1;
     }
+    new_session_id = sessionId;
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
     return -1;
   }
+
+
+   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
+
 
   if (connection_handler_observer_) {
     int32_t session_key = KeyFromPair(connection_handle, new_session_id);
@@ -348,6 +353,12 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
       return result;
     }
+  } else {
+    if (!(it->second)->RemoveService(sessionId, service_type)) {
+      LOG4CXX_ERROR(logger_, "Not possible to remove service!");
+      return result;
+    }
+    result = sessionId;
   }
 
   if (0 != connection_handler_observer_) {
@@ -425,8 +436,8 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
     connection.GetSessionList(session_list);
     LOG4CXX_INFO(
       logger_,
-      "Connection " << static_cast<int32_t>(conn_handle) << "has "
-      << static_cast<int32_t>(session_list.size()) << "sessions.");
+      "Connection " << static_cast<int32_t>(conn_handle) << " has "
+      << static_cast<int32_t>(session_list.size()) << " sessions.");
     if (sessions_list) {
       for (SessionListIterator itr = session_list.begin();
            itr != session_list.end(); ++itr) {
@@ -512,8 +523,11 @@ void ConnectionHandlerImpl::ConnectToDevice(
     LOG4CXX_INFO_EXT(logger_,
                      "Connecting to device with handle " << device_handle);
     if (transport_manager_) {
-      // TODO(PV): change this
-      transport_manager_->ConnectDevice(device_handle);
+      if (transport_manager::E_SUCCESS != transport_manager_->ConnectDevice(device_handle)) {
+        LOG4CXX_WARN(logger_, "Can't connect to device");
+      }
+    } else {
+      LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     }
   } else {
     LOG4CXX_ERROR(
@@ -547,7 +561,7 @@ void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) 
   }
   transport_manager::ConnectionUID connection_uid =
       ConnectionUIDFromHandle(connection_handle);
-  transport_manager_->Disconnect(connection_uid);
+ // transport_manager_->Disconnect(connection_uid);
 }
 
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
@@ -557,6 +571,9 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
 
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
+    LOG4CXX_INFO(
+        logger_,
+        "Resetting heart beat timer for connection " << connection_handle);
     it->second->KeepAlive();
   }
 }

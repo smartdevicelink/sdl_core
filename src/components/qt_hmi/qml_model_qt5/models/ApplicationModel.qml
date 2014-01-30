@@ -82,7 +82,6 @@ QtObject {
         deviceName = ""
         hmiDisplayLanguageDesired = -1
         isMediaApplication = false
-        appType = undefined
         playPauseState = ""
         hmiUIText.reset()
 // no need to reset mediaClock
@@ -97,7 +96,7 @@ QtObject {
         turnListSoftButtons = null
         customPresets = null
         languageTTSVR = -1
-        hmiUITextAlignment = null
+        hmiUITextAlignment = -1
         appType = 0
         console.debug("exit")
     }

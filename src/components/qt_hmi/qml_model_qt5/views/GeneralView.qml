@@ -42,4 +42,7 @@ Item {
     property bool applicationContext: false
     /// View category for AppDeactivated notification (reason)
     property int category: Common.DeactivateReason.GENERAL
+
+    signal enterScreen
+    signal leaveScreen
 }

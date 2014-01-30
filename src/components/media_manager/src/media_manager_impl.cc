@@ -32,15 +32,19 @@
 
 #include "config_profile/profile.h"
 #include "media_manager/media_manager_impl.h"
-#include "media_manager/from_mic_recorder_listener.h"
-#include "media_manager/video_streamer_listener.h"
+#include "media_manager/audio/from_mic_recorder_listener.h"
+#include "media_manager/streamer_listener.h"
+#include "application_manager/message_helper.h"
+#include "utils/file_system.h"
 #if defined(DEFAULT_MEDIA)
-#include "media_manager/a2dp_source_player_adapter.h"
-#include "media_manager/from_mic_recorder_adapter.h"
-#include "./socket_video_streamer_adapter.h"
-#include "./pipe_video_streamer_adapter.h"
+#include "media_manager/audio/a2dp_source_player_adapter.h"
+#include "media_manager/audio/from_mic_recorder_adapter.h"
+#include "media_manager/video/socket_video_streamer_adapter.h"
+#include "media_manager/audio/socket_audio_streamer_adapter.h"
+#include "media_manager/video/pipe_video_streamer_adapter.h"
+#include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #else
-#include "./video_stream_to_file_adapter.h"
+#include "media_manager/video/video_stream_to_file_adapter.h"
 #endif
 
 namespace media_manager {
@@ -57,7 +61,8 @@ MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
   , a2dp_player_(NULL)
   , from_mic_recorder_(NULL)
-  , video_streamer_(NULL) {
+  , video_streamer_(NULL)
+  , audio_streamer_(NULL) {
   Init();
 }
 
@@ -75,6 +80,11 @@ MediaManagerImpl::~MediaManagerImpl() {
   if (video_streamer_) {
     delete video_streamer_;
     video_streamer_ = NULL;
+  }
+
+  if (audio_streamer_) {
+    delete audio_streamer_;
+    audio_streamer_ = NULL;
   }
 }
 
@@ -94,14 +104,26 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new PipeVideoStreamerAdapter();
   }
+  if ("socket" == profile::Profile::instance()->audio_server_type()) {
+    audio_streamer_ = new SocketAudioStreamerAdapter();
+  } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
+    audio_streamer_ = new PipeAudioStreamerAdapter();
+  }
 #else
   video_streamer_ = new VideoStreamToFileAdapter(
     profile::Profile::instance()->video_stream_file());
+  audio_streamer_ = new VideoStreamToFileAdapter(
+      profile::Profile::instance()->audio_stream_file());
 #endif
-  video_streamer_listener_ = new VideoStreamerListener();
+  video_streamer_listener_ = new StreamerListener();
+  audio_streamer_listener_ = new StreamerListener();
 
   if (NULL != video_streamer_) {
     video_streamer_->AddListener(video_streamer_listener_);
+  }
+
+  if (NULL != audio_streamer_) {
+    audio_streamer_->AddListener(audio_streamer_listener_);
   }
 }
 
@@ -159,15 +181,72 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
 
   if (video_streamer_) {
     video_streamer_->StartActivity(application_key);
+
+    char url[100] = {'\0'};
+
+#if defined(DEFAULT_MEDIA)
+    if ("socket" == profile::Profile::instance()->video_server_type()) {
+      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+               profile::Profile::instance()->server_address().c_str(),
+               profile::Profile::instance()->video_streaming_port());
+    } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
+      snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+               profile::Profile::instance()->named_video_pipe_path().c_str());
+    }
+#else
+    snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
+        profile::Profile::instance()->video_stream_file()).c_str());
+#endif
+
+    application_manager::MessageHelper::SendNaviStartStream(url,
+                                                            application_key);
   }
 }
 
 void MediaManagerImpl::StopVideoStreaming(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StopVideoStreaming");
   if (video_streamer_) {
+    application_manager::MessageHelper::SendNaviStopStream(application_key);
     video_streamer_->StopActivity(application_key);
   }
 }
+
+void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StartAudioStreaming");
+
+  if (audio_streamer_) {
+    audio_streamer_->StartActivity(application_key);
+
+    char url[100] = {'\0'};
+
+#if defined(DEFAULT_MEDIA)
+    if ("socket" == profile::Profile::instance()->audio_server_type()) {
+    snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+             profile::Profile::instance()->server_address().c_str(),
+             profile::Profile::instance()->audio_streaming_port());
+    } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
+      snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+               profile::Profile::instance()->named_audio_pipe_path().c_str());
+    }
+#else
+    snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+             file_system::FullPath(profile::Profile::instance()->
+                                   audio_stream_file()).c_str());
+#endif
+
+    application_manager::MessageHelper::SendAudioStartStream(url,
+                                                             application_key);
+  }
+}
+
+void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
+  LOG4CXX_INFO(logger_, "MediaManagerImpl::StopAudioStreaming");
+  if (audio_streamer_) {
+    application_manager::MessageHelper::SendAudioStopStream(application_key);
+    audio_streamer_->StopActivity(application_key);
+  }
+}
+
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
@@ -175,6 +254,11 @@ void MediaManagerImpl::OnMessageReceived(
       == protocol_handler::kMovileNav) {
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
+    }
+  } else if (message->service_type()
+          == protocol_handler::kAudio) {
+    if (audio_streamer_) {
+        audio_streamer_->SendData(message->connection_key(), message);
     }
   }
 }

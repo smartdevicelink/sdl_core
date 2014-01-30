@@ -177,11 +177,11 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
-NsSmartDeviceLink::NsSmartObjects::SmartObject& Message::smart_object() {
-  return object_;
+const smart_objects::SmartObject &Message::smart_object() const {
+  return smart_object_;
 }
 
-void Message::set_smart_object(NsSmartDeviceLink::NsSmartObjects::SmartObject& object) {
-  object_ = object;
+void Message::set_smart_object(const smart_objects::SmartObject& object) {
+  smart_object_ = object;
 }
 }  // namespace application_manager

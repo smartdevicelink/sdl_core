@@ -45,7 +45,6 @@ namespace policies {
 namespace application_manager {
 
 class Application;
-class MessageChaining;
 class HMIMatrix;
 class PoliciesManager;
 

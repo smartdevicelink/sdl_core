@@ -1,7 +1,7 @@
 ############################## Subfolders #####################################
 # --- Policies table test
-add_subdirectory(./policies_manager)
-
+#add_subdirectory(./policies_manager)
+add_subdirectory(./rpc)
 ###############################################################################
 
 include_directories (

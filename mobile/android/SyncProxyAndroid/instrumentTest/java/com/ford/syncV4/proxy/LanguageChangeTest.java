@@ -3,9 +3,7 @@ package com.ford.syncV4.proxy;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
@@ -14,7 +12,6 @@ import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Hashtable;
@@ -30,26 +27,6 @@ import static org.mockito.Mockito.verify;
  */
 public class LanguageChangeTest extends InstrumentationTestCase {
     private static final int CALLBACK_WAIT_TIMEOUT = 500;
-
-    private static ProtocolMessage createProtocolMessage(
-            final String functionName, final Hashtable<String, Object> params,
-            final byte rpcType, final int corrID) throws JSONException {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setCorrID(corrID);
-
-        if (params != null) {
-            JSONObject paramsObject =
-                    JsonRPCMarshaller.serializeHashtable(params);
-            byte[] paramsData = paramsObject.toString().getBytes();
-            pm.setData(paramsData, paramsData.length);
-            pm.setJsonSize(paramsData.length);
-        }
-
-        pm.setFunctionID(FunctionID.getFunctionID(functionName));
-        pm.setRPCType(rpcType);
-
-        return pm;
-    }
 
     @Override
     public void setUp() throws Exception {
@@ -72,7 +49,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final Language hmiLang = Language.CS_CZ;
         params.put(Names.hmiDisplayLanguage, hmiLang);
         proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnLanguageChange, params,
+                TestCommon.createProtocolMessage(Names.OnLanguageChange, params,
                         ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         // send OnAppInterfaceUnregistered second
@@ -80,14 +57,15 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final AppInterfaceUnregisteredReason reason =
                 AppInterfaceUnregisteredReason.LANGUAGE_CHANGE;
         params.put(Names.reason, reason);
-        proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnAppInterfaceUnregistered, params,
-                        ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
 
         ArgumentCaptor<OnLanguageChange> argument =
                 ArgumentCaptor.forClass(OnLanguageChange.class);
-        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).
-                onAppUnregisteredAfterLanguageChange(argument.capture());
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
+                argument.capture());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }
@@ -107,7 +85,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final Language hmiLang = Language.CS_CZ;
         params.put(Names.hmiDisplayLanguage, hmiLang);
         proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnLanguageChange, params,
+                TestCommon.createProtocolMessage(Names.OnLanguageChange, params,
                         ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         // send OnAppInterfaceUnregistered second
@@ -115,12 +93,13 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final AppInterfaceUnregisteredReason reason =
                 AppInterfaceUnregisteredReason.MASTER_RESET;
         params.put(Names.reason, reason);
-        proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnAppInterfaceUnregistered, params,
-                        ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
 
-        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT).never()).
-                onAppUnregisteredAfterLanguageChange(null);
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT).never()).onAppUnregisteredAfterLanguageChange(
+                null);
     }
 
     public void testAppUnregisteredWithoutLanguageChange()
@@ -136,12 +115,13 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final AppInterfaceUnregisteredReason reason =
                 AppInterfaceUnregisteredReason.LANGUAGE_CHANGE;
         params.put(Names.reason, reason);
-        proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnAppInterfaceUnregistered, params,
-                        ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
-        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).
-                onAppUnregisteredAfterLanguageChange(null);
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
+                null);
     }
 
     public void testMessagesBetweenLanguageChangeAndAppUnregistered()
@@ -159,29 +139,31 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         final Language hmiLang = Language.CS_CZ;
         params.put(Names.hmiDisplayLanguage, hmiLang);
         proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnLanguageChange, params,
+                TestCommon.createProtocolMessage(Names.OnLanguageChange, params,
                         ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         // send something in between
         proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnCommand, null,
+                TestCommon.createProtocolMessage(Names.OnCommand, null,
                         ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
-        proxy.dispatchIncomingMessage(createProtocolMessage(Names.Alert, null,
-                ProtocolMessage.RPCTYPE_RESPONSE, 3));
+        proxy.dispatchIncomingMessage(
+                TestCommon.createProtocolMessage(Names.Alert, null,
+                        ProtocolMessage.RPCTYPE_RESPONSE, 3));
 
         // send OnAppInterfaceUnregistered last
         params = new Hashtable<String, Object>();
         final AppInterfaceUnregisteredReason reason =
                 AppInterfaceUnregisteredReason.LANGUAGE_CHANGE;
         params.put(Names.reason, reason);
-        proxy.dispatchIncomingMessage(
-                createProtocolMessage(Names.OnAppInterfaceUnregistered, params,
-                        ProtocolMessage.RPCTYPE_NOTIFICATION, 4));
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 4));
 
         ArgumentCaptor<OnLanguageChange> argument =
                 ArgumentCaptor.forClass(OnLanguageChange.class);
         verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).
-                onAppUnregisteredAfterLanguageChange(argument.capture());
+                                                                         onAppUnregisteredAfterLanguageChange(
+                                                                                 argument.capture());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }

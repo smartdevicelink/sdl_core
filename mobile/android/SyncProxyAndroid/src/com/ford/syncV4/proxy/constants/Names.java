@@ -435,4 +435,11 @@ public class Names {
     public static String tertiaryText = "tertiaryText";
     public static final String keypressMode = "keypressMode";
     public static final String progressIndicator = "progressIndicator";
+    public static final String systemFile = "systemFile";
+    public static final String offset = "offset";
+    public static final String length = "length";
+    public static final String SystemRequest = "SystemRequest";
+    public static final String OnSystemRequest = "OnSystemRequest";
+    public static final String requestType = "requestType";
+    public static final String url = "url";
 }

@@ -41,9 +41,9 @@ struct DBusConnection;
 struct DBusMessage;
 struct DBusMessageIter;
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace dbus {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /**
  * \brief class for work with DBus
@@ -89,7 +89,7 @@ class DBusAdapter {
    * \param obj params for call
    */
   void MethodCall(uint id, const MessageId func_id, const MessageName name,
-                  smart_objects::SmartObject& obj);
+                  const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends signal
@@ -99,14 +99,14 @@ class DBusAdapter {
    * \param obj params for signal
    */
   void Signal(const MessageId func_id, const MessageName name,
-              smart_objects::SmartObject& obj);
+              const smart_objects::SmartObject& obj);
 
   /**
    * \brief returns result of call method to HMI
    * \param id id message
    * \param obj params for return
    */
-  void MethodReturn(uint id, smart_objects::SmartObject& obj);
+  void MethodReturn(uint id, const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends error on message from HMI

@@ -10,6 +10,13 @@
         android:orientation="vertical" >
 
         <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Heartbeat"
+            android:id="@+id/heartbeat"
+            android:checked="true" />
+
+        <CheckBox
             android:id="@+id/selectprotocol_checkMedia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -146,14 +153,12 @@
         </RadioGroup>
 
         <LinearLayout
-
-            android:visibility="gone"
-
             android:id="@+id/nsd_use_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
             <TextView
+                android:id="@+id/nsd_label_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
@@ -170,6 +175,15 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/nsd_unsupported_api_label_view"
+            android:text="@string/nsd_unsupported_api_level_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone"
+            android:layout_marginBottom="20dp"/>
 
         <LinearLayout
             android:id="@+id/ip_address_layout"

@@ -164,7 +164,8 @@ Rectangle {
                             if (appId) {
                                 dataContainer.setCurrentApplication(appId)
                             }
-                            currentLocation = path
+                            item.leaveScreen()
+                            currentLocation = path                            
                             source = path
                         }
                     }
@@ -173,6 +174,7 @@ Rectangle {
 
                 function back() {
                     if (viewTransitionStack.length) {
+                        item.leaveScreen()
                         source = viewTransitionStack.pop().uri
                     }
                     currentLocation = ""

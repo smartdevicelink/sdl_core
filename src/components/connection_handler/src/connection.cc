@@ -61,25 +61,25 @@ Connection::Connection(ConnectionHandle connection_handle,
 }
 
 Connection::~Connection() {
-  session_list_.clear();
   session_map_.clear();
 }
 
 int32_t Connection::AddNewSession() {
   int32_t result = -1;
 
-  if (session_list_.empty()) {
+  if (session_map_.empty()) {
     heartbeat_monitor_.BeginMonitoring();
   }
 
   const uint8_t max_connections = 255;
   if (max_connections > session_id_counter_) {
-    session_list_.push_back(session_id_counter_);
 
     /* whenever new session created RPC and Bulk services are
     established automatically */
-    session_map_[session_id_counter_].push_back(protocol_handler::kRpc);
-    session_map_[session_id_counter_].push_back(protocol_handler::kBulk);
+    session_map_[session_id_counter_].push_back(
+        static_cast<uint8_t>(protocol_handler::kRpc));
+    session_map_[session_id_counter_].push_back(
+        static_cast<uint8_t>(protocol_handler::kBulk));
 
     result = session_id_counter_++;
   }
@@ -89,12 +89,10 @@ int32_t Connection::AddNewSession() {
 
 int32_t Connection::RemoveSession(uint8_t session) {
   int32_t result = -1;
-  SessionListIterator it = std::find(session_list_.begin(), session_list_.end(),
-                                     session);
-  if (session_list_.end() == it) {
+  SessionMapIterator it = session_map_.find(session);
+  if (session_map_.end() == it) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
   } else {
-    session_list_.erase(it);
     session_map_.erase(session);
     result = session;
   }
@@ -155,7 +153,12 @@ DeviceHandle Connection::connection_device_handle() {
 }
 
 void Connection::GetSessionList(SessionList& session_list) {
-  session_list = session_list_;
+
+  SessionMapIterator it = session_map_.begin();
+  for (SessionMapIterator it = session_map_.begin(),
+       end = session_map_.end(); it != end; ++it) {
+    session_list.push_back(it->first);
+  }
 }
 
 void Connection::Close() {

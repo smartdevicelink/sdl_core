@@ -17,13 +17,15 @@ import com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
-import com.ford.syncV4.protocol.enums.MessageType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.converter.IRPCRequestConverter;
+import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
+import com.ford.syncV4.proxy.converter.SyncRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerBase;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -65,6 +67,7 @@ import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncPData;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
@@ -98,6 +101,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
@@ -115,6 +119,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
@@ -123,6 +128,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.service.Service;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.trace.SyncTrace;
@@ -152,7 +159,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Timer;
@@ -189,8 +195,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
-    // Mobile Nav Session ID
-    protected byte _mobileNavSessionID = 100;
+
     // SyncProxy Advanced Lifecycle Management
     protected Boolean _advancedLifecycleManagementEnabled = false;
     // Proxy State Variables
@@ -220,7 +225,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected byte _wiproVersion = 1;
     SyncConnection _syncConnection;
     // RPC Session ID
-    byte _rpcSessionID = 0;
+    protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID);
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
@@ -265,7 +270,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Currently scheduled proxy reconnect task, if any.
      */
     private TimerTask _currentReconnectTimerTask = null;
-    private List<Byte> servicePool = new ArrayList<Byte>();
+    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
+
+
+    private IRPCRequestConverterFactory rpcRequestConverterFactory =
+            new SyncRPCRequestConverterFactory();
+
+    private IProtocolMessageHolder protocolMessageHolder =
+            new ProtocolMessageHolder();
 
     /**
      * Constructor.
@@ -686,6 +698,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         DebugTool.disableDebugTool();
     }
 
+    public static void setHeartBeatInterval(int heartBeatInterval) {
+        SyncProxyBase.heartBeatInterval = heartBeatInterval;
+    }
+
+    public static int getHeartBeatInterval() {
+        return heartBeatInterval;
+    }
+
     public SyncConnection getSyncConnection() {
         return _syncConnection;
     }
@@ -699,7 +719,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public byte getMobileNavSessionID() {
-        return _mobileNavSessionID;
+        return currentSession.getSessionId();
     }
 
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
@@ -943,11 +963,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
-                _syncConnection = new SyncConnection(_interfaceBroker, _transportConfig);
+                _syncConnection = new SyncConnection(_interfaceBroker);
                 final HeartbeatMonitor heartbeatMonitor =
                         new HeartbeatMonitor();
-                heartbeatMonitor.setInterval(HEARTBEAT_INTERVAL);
+                heartbeatMonitor.setInterval(heartBeatInterval);
                 _syncConnection.setHeartbeatMonitor(heartbeatMonitor);
+
+                // TODO: Set default ID (until opposite not specified)
+                currentSession.setSessionId(Session.DEFAULT_SESSION_ID);
+
+                _syncConnection.setSessionId(currentSession.getSessionId());
+                _syncConnection.init(_transportConfig);
             }
             WiProProtocol protocol = (WiProProtocol) _syncConnection.getWiProProtocol();
             protocol.setVersion(_wiproVersion);
@@ -962,11 +988,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void closeSyncConnection(boolean keepConnection) {
         if (_syncConnection != null) {
-            _syncConnection.closeConnection(_rpcSessionID, keepConnection);
+            _syncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
             if (!keepConnection) {
                 _syncConnection = null;
             }
         }
+    }
+
+    private void stopSession() {
+        currentSession.stopSession();
     }
 
     @Deprecated
@@ -975,7 +1005,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void cleanProxy(SyncDisconnectedReason disconnectedReason,
-                            boolean keepConnection) throws SyncException {
+                            boolean keepConnection, boolean keepSession) throws SyncException {
         try {
 
             // ALM Specific Cleanup
@@ -1007,7 +1037,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
             // Clean up SYNC Connection
             synchronized (CONNECTION_REFERENCE_LOCK) {
-                stopAllServices();
+                if (!keepSession) {
+                    stopAllServices();
+                    stopSession();
+                }
                 closeSyncConnection(keepConnection);
             }
         } catch (SyncException e) {
@@ -1018,13 +1051,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void stopAllServices() {
-        if (servicePool.size() > 0) {
-            stopMobileNaviSession();
+        if (getServicePool().size() > 0) {
+            stopMobileNaviService();
+            stopAudioService();
         }
     }
 
     /**
-     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol session, and frees any resources used by the proxy.
+     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol currentSession, and frees any resources used by the proxy.
      */
     public void dispose() throws SyncException {
         if (_proxyDisposed) {
@@ -1037,7 +1071,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         try {
             // Clean the proxy
-            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false);
+            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false, false);
 
             clearReconnectTimer();
 
@@ -1075,8 +1109,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // Method to cycle the proxy, only called in ALM
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
+        Log.d(TAG, "CycleProxy, disconnectedReason:" + disconnectedReason);
         try {
-            cleanProxy(disconnectedReason, false);
+            cleanProxy(disconnectedReason, false, true);
             scheduleInitializeProxy();
             notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
         } catch (SyncException e) {
@@ -1087,13 +1122,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Unregisters the application from SYNC, and closes the session.
+     * Unregisters the application from SYNC, and closes the currentSession.
      * Optionally, closes the transport connection.
      */
     public void closeSession(boolean keepConnection) {
+        Log.d(TAG, "Close Session, keepConnection:" + keepConnection);
         try {
             cleanProxy(
-                    SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection);
+                    SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection, false);
             notifyProxyClosed("Sync Proxy Cycled",
                     new SyncException("Sync Proxy Cycled", SyncExceptionCause.SYNC_PROXY_CYCLED));
         } catch (SyncException e) {
@@ -1133,7 +1169,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 try {
                     Log.d(TAG, "Reconnect task is running, clearing reference");
                     setCurrentReconnectTimerTask(null);
-                    closeSyncConnection(false);
                     initializeProxy();
                 } catch (SyncException e) {
                     Log.e(TAG, "Cycling the proxy failed.", e);
@@ -1150,7 +1185,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Opens a session, and registers the application. The connection must be
+     * Opens a currentSession, and registers the application. The connection must be
      * already opened.
      *
      * @throws SyncException if a transport connection is not opened
@@ -1171,7 +1206,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
             // Dispatching logic
-            if (message.getSessionType().equals(SessionType.RPC)) {
+            if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
                     if (_wiproVersion == 1) {
                         if (message.getVersion() == 2) setWiProVersion(message.getVersion());
@@ -1331,7 +1366,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // with an error on the internalMessageDispatcher, we have no other reliable way of
         // communicating with the application.
         notifyProxyClosed("Proxy callback dispatcher is down. Proxy instance is invalid.", e);
-        _proxyListener.onError("Proxy callback dispatcher is down. Proxy instance is invalid.", e);
+        _proxyListener.onError(
+                "Proxy callback dispatcher is down. Proxy instance is invalid.",
+                e);
     }
 
     /**
@@ -1345,16 +1382,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         try {
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 
-            byte[] msgBytes = _jsonRPCMarshaller.marshall(request, _wiproVersion);
-            Log.d(TAG, "Version: " + _wiproVersion + " | msg: " + new String(msgBytes));
+            final IRPCRequestConverter converter =
+                    rpcRequestConverterFactory.getConverterForFunctionName(
+                            request.getFunctionName());
+            if (converter != null) {
+                List<ProtocolMessage> protocolMessages =
+                        converter.getProtocolMessages(request,
+                                currentSession.getSessionId(),
+                                _jsonRPCMarshaller, _wiproVersion);
 
-            ProtocolMessage pm = createProtocolMessage(request, msgBytes);
+                if (protocolMessages.size() > 0) {
+                    queueOutgoingMessage(protocolMessages.get(0));
+                    protocolMessages.remove(0);
 
-            // Queue this outgoing message
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-                if (_outgoingProxyMessageDispatcher != null) {
-                    _outgoingProxyMessageDispatcher.queueMessage(pm);
+                    if (protocolMessages.size() > 0) {
+                        protocolMessageHolder.saveMessages(protocolMessages);
+                    }
                 }
+            } else {
+                Log.w(TAG,
+                        "Unknown function name " + request.getFunctionName());
             }
         } catch (OutOfMemoryError e) {
             SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
@@ -1362,17 +1409,43 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private ProtocolMessage createProtocolMessage(RPCRequest request, byte[] msgBytes) {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setData(msgBytes);
-        pm.setSessionID(_rpcSessionID);
-        pm.setMessageType(MessageType.RPC);
-        pm.setSessionType(SessionType.RPC);
-        pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-        pm.setCorrID(request.getCorrelationID());
-        if (request.getBulkData() != null)
-            pm.setBulkData(request.getBulkData());
-        return pm;
+    private void queueOutgoingMessage(ProtocolMessage message) {
+        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+            if (_outgoingProxyMessageDispatcher != null) {
+                _outgoingProxyMessageDispatcher.queueMessage(message);
+            }
+        }
+    }
+
+    /**
+     * Handles a response that is a part of partial request (i.e., split into
+     * multiple protocol messages) if it is.
+     *
+     * @param response response from the SDL
+     * @return true if the response has been handled; false when the
+     * corresponding request is not partial or in case of an error
+     */
+    private boolean handlePartialRPCResponse(RPCResponse response) {
+        boolean success = false;
+        final Integer responseCorrelationID = response.getCorrelationID();
+        if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
+            if (Result.SUCCESS == response.getResultCode()) {
+                final ProtocolMessage pm =
+                        protocolMessageHolder.peekNextMessage(
+                                responseCorrelationID);
+                if (pm.getFunctionID() ==
+                        FunctionID.getFunctionID(response.getFunctionName())) {
+                    protocolMessageHolder.popNextMessage(responseCorrelationID);
+                    queueOutgoingMessage(pm);
+
+                    success = true;
+                }
+            } else {
+                protocolMessageHolder.clearMessages(responseCorrelationID);
+            }
+        }
+
+        return success;
     }
 
     private void handleRPCMessage(Hashtable hash) {
@@ -1383,20 +1456,97 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (messageType.equals(Names.response)) {
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCResponse(rpcMsg), SYNC_LIB_TRACE_KEY);
 
-            // Check to ensure response is not from an internal message (reserved correlation ID)
-            if (isCorrelationIDProtected((new RPCResponse(hash)).getCorrelationID())) {
-                // This is a response generated from an internal message, it can be trapped here
-                // The app should not receive a response for a request it did not send
-                if ((new RPCResponse(hash)).getCorrelationID() == REGISTER_APP_INTERFACE_CORRELATION_ID
-                        && _advancedLifecycleManagementEnabled
-                        && functionName.equals(Names.RegisterAppInterface)) {
-                    final RegisterAppInterfaceResponse msg = new RegisterAppInterfaceResponse(hash);
+            final RPCResponse response = new RPCResponse(hash);
+            final Integer responseCorrelationID = response.getCorrelationID();
+            if (!handlePartialRPCResponse(response)) {
+
+                // Check to ensure response is not from an internal message (reserved correlation ID)
+                if (isCorrelationIDProtected(responseCorrelationID)) {
+                    // This is a response generated from an internal message, it can be trapped here
+                    // The app should not receive a response for a request it did not send
+                    if (responseCorrelationID ==
+                            REGISTER_APP_INTERFACE_CORRELATION_ID &&
+                            _advancedLifecycleManagementEnabled &&
+                            functionName.equals(Names.RegisterAppInterface)) {
+                        final RegisterAppInterfaceResponse msg =
+                                new RegisterAppInterfaceResponse(hash);
+                        if (msg.getSuccess()) {
+                            _appInterfaceRegisterd = true;
+                        }
+
+                        //_autoActivateIdReturned = msg.getAutoActivateID();
+                        /*Place holder for legacy support*/
+                        _autoActivateIdReturned = "8675309";
+                        _buttonCapabilities = msg.getButtonCapabilities();
+                        _displayCapabilities = msg.getDisplayCapabilities();
+                        _softButtonCapabilities =
+                                msg.getSoftButtonCapabilities();
+                        _presetBankCapabilities =
+                                msg.getPresetBankCapabilities();
+                        _hmiZoneCapabilities = msg.getHmiZoneCapabilities();
+                        _speechCapabilities = msg.getSpeechCapabilities();
+                        _syncLanguage = msg.getLanguage();
+                        _hmiDisplayLanguage = msg.getHmiDisplayLanguage();
+                        _syncMsgVersion = msg.getSyncMsgVersion();
+                        _vrCapabilities = msg.getVrCapabilities();
+                        _vehicleType = msg.getVehicleType();
+
+                        // Send onSyncConnected message in ALM
+                        _syncConnectionState =
+                                SyncConnectionState.SYNC_CONNECTED;
+
+                        // If registerAppInterface failed, exit with OnProxyUnusable
+                        if (!msg.getSuccess()) {
+                            notifyProxyClosed(
+                                    "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ",
+                                    new SyncException(
+                                            "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " +
+                                                    msg.getResultCode(),
+                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR));
+                        }
+
+                        processRegisterAppInterfaceResponse(msg);
+                    } else if (
+                            responseCorrelationID == POLICIES_CORRELATION_ID &&
+                                    functionName.equals(
+                                            Names.OnEncodedSyncPData)) {
+                        // OnEncodedSyncPData
+
+                        final OnEncodedSyncPData msg =
+                                new OnEncodedSyncPData(hash);
+
+                        // If url is null, then send notification to the app, otherwise, send to URL
+                        if (msg.getUrl() != null) {
+                            // URL has data, attempt to post request to external server
+                            Thread handleOffboardSyncTransmissionTread =
+                                    new Thread() {
+                                        @Override
+                                        public void run() {
+                                            sendEncodedSyncPDataToUrl(
+                                                    msg.getUrl(), msg.getData(),
+                                                    msg.getTimeout());
+                                        }
+                                    };
+
+                            handleOffboardSyncTransmissionTread.start();
+                        }
+                    } else if ((responseCorrelationID ==
+                            UNREGISTER_APP_INTERFACE_CORRELATION_ID) &&
+                            functionName.equals(Names.UnregisterAppInterface)) {
+                        onUnregisterAppInterfaceResponse(hash);
+                    }
+                    return;
+                }
+
+                if (functionName.equals(Names.RegisterAppInterface)) {
+                    final RegisterAppInterfaceResponse msg =
+                            new RegisterAppInterfaceResponse(hash);
                     if (msg.getSuccess()) {
                         _appInterfaceRegisterd = true;
                     }
 
                     //_autoActivateIdReturned = msg.getAutoActivateID();
-                    /*Place holder for legacy support*/
+                /*Place holder for legacy support*/
                     _autoActivateIdReturned = "8675309";
                     _buttonCapabilities = msg.getButtonCapabilities();
                     _displayCapabilities = msg.getDisplayCapabilities();
@@ -1410,640 +1560,653 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _vrCapabilities = msg.getVrCapabilities();
                     _vehicleType = msg.getVehicleType();
 
-                    // Send onSyncConnected message in ALM
-                    _syncConnectionState = SyncConnectionState.SYNC_CONNECTED;
+                    // RegisterAppInterface
+                    if (_advancedLifecycleManagementEnabled) {
 
-                    // If registerAppInterface failed, exit with OnProxyUnusable
-                    if (!msg.getSuccess()) {
-                        notifyProxyClosed("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ",
-                                new SyncException("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " + msg.getResultCode(), SyncExceptionCause.SYNC_REGISTRATION_ERROR));
+                        // Send onSyncConnected message in ALM
+                        _syncConnectionState =
+                                SyncConnectionState.SYNC_CONNECTED;
+
+                        // If registerAppInterface failed, exit with OnProxyUnusable
+                        if (!msg.getSuccess()) {
+                            notifyProxyClosed(
+                                    "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ",
+                                    new SyncException(
+                                            "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " +
+                                                    msg.getResultCode(),
+                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR));
+                        }
                     }
+                    processRegisterAppInterfaceResponse(msg);
+                } else if (functionName.equals(Names.Speak)) {
+                    // SpeakResponse
 
+                    final SpeakResponse msg = new SpeakResponse(hash);
                     if (_callbackToUIThread) {
                         // Run in UI thread
                         _mainUIHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                if (_proxyListener instanceof IProxyListener) {
-                                    ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                                } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                                    ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                                }
+                                _proxyListener.onSpeakResponse(msg);
                             }
                         });
                     } else {
-                        if (_proxyListener instanceof IProxyListener) {
-                            ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                        } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                            ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                        }
+                        _proxyListener.onSpeakResponse(msg);
                     }
-                } else if ((new RPCResponse(hash)).getCorrelationID() == POLICIES_CORRELATION_ID
-                        && functionName.equals(Names.OnEncodedSyncPData)) {
-                    // OnEncodedSyncPData
+                } else if (functionName.equals(Names.Alert)) {
+                    // AlertResponse
 
-                    final OnEncodedSyncPData msg = new OnEncodedSyncPData(hash);
-
-                    // If url is null, then send notification to the app, otherwise, send to URL
-                    if (msg.getUrl() != null) {
-                        // URL has data, attempt to post request to external server
-                        Thread handleOffboardSyncTransmissionTread = new Thread() {
+                    final AlertResponse msg = new AlertResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData(), msg.getTimeout());
+                                _proxyListener.onAlertResponse(msg);
                             }
-                        };
-
-                        handleOffboardSyncTransmissionTread.start();
+                        });
+                    } else {
+                        _proxyListener.onAlertResponse(msg);
                     }
-                } else if (((new RPCResponse(hash)).getCorrelationID() == UNREGISTER_APP_INTERFACE_CORRELATION_ID)
-                        && functionName.equals(Names.UnregisterAppInterface)) {
+                } else if (functionName.equals(Names.Show)) {
+                    // ShowResponse
+
+                    final ShowResponse msg = new ShowResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onShowResponse(
+                                        (ShowResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onShowResponse((ShowResponse) msg);
+                    }
+                } else if (functionName.equals(Names.AddCommand)) {
+                    // AddCommand
+
+                    final AddCommandResponse msg = new AddCommandResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onAddCommandResponse(
+                                        (AddCommandResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onAddCommandResponse(
+                                (AddCommandResponse) msg);
+                    }
+                } else if (functionName.equals(Names.DeleteCommand)) {
+                    // DeleteCommandResponse
+
+                    final DeleteCommandResponse msg =
+                            new DeleteCommandResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onDeleteCommandResponse(
+                                        (DeleteCommandResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onDeleteCommandResponse(
+                                (DeleteCommandResponse) msg);
+                    }
+                } else if (functionName.equals(Names.AddSubMenu)) {
+                    // AddSubMenu
+
+                    final AddSubMenuResponse msg = new AddSubMenuResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onAddSubMenuResponse(
+                                        (AddSubMenuResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onAddSubMenuResponse(
+                                (AddSubMenuResponse) msg);
+                    }
+                } else if (functionName.equals(Names.DeleteSubMenu)) {
+                    // DeleteSubMenu
+
+                    final DeleteSubMenuResponse msg =
+                            new DeleteSubMenuResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onDeleteSubMenuResponse(
+                                        (DeleteSubMenuResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onDeleteSubMenuResponse(
+                                (DeleteSubMenuResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SubscribeButton)) {
+                    // SubscribeButton
+
+                    final SubscribeButtonResponse msg =
+                            new SubscribeButtonResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSubscribeButtonResponse(
+                                        (SubscribeButtonResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSubscribeButtonResponse(
+                                (SubscribeButtonResponse) msg);
+                    }
+                } else if (functionName.equals(Names.UnsubscribeButton)) {
+                    // UnsubscribeButton
+
+                    final UnsubscribeButtonResponse msg =
+                            new UnsubscribeButtonResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onUnsubscribeButtonResponse(
+                                        (UnsubscribeButtonResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onUnsubscribeButtonResponse(
+                                (UnsubscribeButtonResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SetMediaClockTimer)) {
+                    // SetMediaClockTimer
+
+                    final SetMediaClockTimerResponse msg =
+                            new SetMediaClockTimerResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSetMediaClockTimerResponse(
+                                        (SetMediaClockTimerResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSetMediaClockTimerResponse(
+                                (SetMediaClockTimerResponse) msg);
+                    }
+                } else if (functionName.equals(Names.EncodedSyncPData)) {
+                    // EncodedSyncPData
+
+                    final EncodedSyncPDataResponse msg =
+                            new EncodedSyncPDataResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onEncodedSyncPDataResponse(msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onEncodedSyncPDataResponse(msg);
+                    }
+                } else if (functionName.equals(Names.SyncPData)) {
+                    // SyncPData
+
+                    final SyncPDataResponse msg = new SyncPDataResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSyncPDataResponse(msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSyncPDataResponse(msg);
+                    }
+                } else if (functionName.equals(
+                        Names.CreateInteractionChoiceSet)) {
+                    // CreateInteractionChoiceSet
+
+                    final CreateInteractionChoiceSetResponse msg =
+                            new CreateInteractionChoiceSetResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onCreateInteractionChoiceSetResponse(
+                                        (CreateInteractionChoiceSetResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onCreateInteractionChoiceSetResponse(
+                                (CreateInteractionChoiceSetResponse) msg);
+                    }
+                } else if (functionName.equals(
+                        Names.DeleteInteractionChoiceSet)) {
+                    // DeleteInteractionChoiceSet
+
+                    final DeleteInteractionChoiceSetResponse msg =
+                            new DeleteInteractionChoiceSetResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onDeleteInteractionChoiceSetResponse(
+                                        (DeleteInteractionChoiceSetResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onDeleteInteractionChoiceSetResponse(
+                                (DeleteInteractionChoiceSetResponse) msg);
+                    }
+                } else if (functionName.equals(Names.PerformInteraction)) {
+                    // PerformInteraction
+
+                    final PerformInteractionResponse msg =
+                            new PerformInteractionResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onPerformInteractionResponse(
+                                        (PerformInteractionResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onPerformInteractionResponse(
+                                (PerformInteractionResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SetGlobalProperties)) {
+                    final SetGlobalPropertiesResponse msg =
+                            new SetGlobalPropertiesResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSetGlobalPropertiesResponse(
+                                        (SetGlobalPropertiesResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSetGlobalPropertiesResponse(
+                                (SetGlobalPropertiesResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ResetGlobalProperties)) {
+                    // ResetGlobalProperties
+
+                    final ResetGlobalPropertiesResponse msg =
+                            new ResetGlobalPropertiesResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onResetGlobalPropertiesResponse(
+                                        (ResetGlobalPropertiesResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onResetGlobalPropertiesResponse(
+                                (ResetGlobalPropertiesResponse) msg);
+                    }
+                } else if (functionName.equals(Names.UnregisterAppInterface)) {
                     onUnregisterAppInterfaceResponse(hash);
-                }
-                return;
-            }
-
-            if (functionName.equals(Names.RegisterAppInterface)) {
-                final RegisterAppInterfaceResponse msg = new RegisterAppInterfaceResponse(hash);
-                if (msg.getSuccess()) {
-                    _appInterfaceRegisterd = true;
-                }
-
-                //_autoActivateIdReturned = msg.getAutoActivateID();
-                /*Place holder for legacy support*/
-                _autoActivateIdReturned = "8675309";
-                _buttonCapabilities = msg.getButtonCapabilities();
-                _displayCapabilities = msg.getDisplayCapabilities();
-                _softButtonCapabilities = msg.getSoftButtonCapabilities();
-                _presetBankCapabilities = msg.getPresetBankCapabilities();
-                _hmiZoneCapabilities = msg.getHmiZoneCapabilities();
-                _speechCapabilities = msg.getSpeechCapabilities();
-                _syncLanguage = msg.getLanguage();
-                _hmiDisplayLanguage = msg.getHmiDisplayLanguage();
-                _syncMsgVersion = msg.getSyncMsgVersion();
-                _vrCapabilities = msg.getVrCapabilities();
-                _vehicleType = msg.getVehicleType();
-
-                // RegisterAppInterface
-                if (_advancedLifecycleManagementEnabled) {
-
-                    // Send onSyncConnected message in ALM
-                    _syncConnectionState = SyncConnectionState.SYNC_CONNECTED;
-
-                    // If registerAppInterface failed, exit with OnProxyUnusable
-                    if (!msg.getSuccess()) {
-                        notifyProxyClosed("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ",
-                                new SyncException("Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " + msg.getResultCode(), SyncExceptionCause.SYNC_REGISTRATION_ERROR));
-                    }
-                }
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (_proxyListener instanceof IProxyListener) {
-                                ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                                ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(msg);
+                } else if (functionName.equals(Names.GenericResponse)) {
+                    // GenericResponse (Usually and error)
+                    final GenericResponse msg = new GenericResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onGenericResponse(
+                                        (GenericResponse) msg);
                             }
-                        }
-                    });
-                } else {
-                    if (_proxyListener instanceof IProxyListener) {
-                        ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(msg);
-                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                        ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(msg);
+                        });
+                    } else {
+                        _proxyListener.onGenericResponse((GenericResponse) msg);
                     }
-                }
-            } else if (functionName.equals(Names.Speak)) {
-                // SpeakResponse
+                } else if (functionName.equals(Names.Slider)) {
+                    // Slider
+                    final SliderResponse msg = new SliderResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSliderResponse(
+                                        (SliderResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSliderResponse((SliderResponse) msg);
+                    }
+                } else if (functionName.equals(Names.PutFile)) {
+                    // PutFile
+                    final PutFileResponse msg = new PutFileResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onPutFileResponse(
+                                        (PutFileResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onPutFileResponse((PutFileResponse) msg);
+                    }
+                } else if (functionName.equals(Names.DeleteFile)) {
+                    // DeleteFile
+                    final DeleteFileResponse msg = new DeleteFileResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onDeleteFileResponse(
+                                        (DeleteFileResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onDeleteFileResponse(
+                                (DeleteFileResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ListFiles)) {
+                    // ListFiles
+                    final ListFilesResponse msg = new ListFilesResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onListFilesResponse(
+                                        (ListFilesResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onListFilesResponse(
+                                (ListFilesResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SetAppIcon)) {
+                    // SetAppIcon
+                    final SetAppIconResponse msg = new SetAppIconResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSetAppIconResponse(
+                                        (SetAppIconResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSetAppIconResponse(
+                                (SetAppIconResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ScrollableMessage)) {
+                    // ScrollableMessage
+                    final ScrollableMessageResponse msg =
+                            new ScrollableMessageResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onScrollableMessageResponse(
+                                        (ScrollableMessageResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onScrollableMessageResponse(
+                                (ScrollableMessageResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ChangeRegistration)) {
+                    // ChangeLanguageRegistration
+                    final ChangeRegistrationResponse msg =
+                            new ChangeRegistrationResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onChangeRegistrationResponse(
+                                        (ChangeRegistrationResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onChangeRegistrationResponse(
+                                (ChangeRegistrationResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SetDisplayLayout)) {
+                    // SetDisplayLayout
+                    final SetDisplayLayoutResponse msg =
+                            new SetDisplayLayoutResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSetDisplayLayoutResponse(
+                                        (SetDisplayLayoutResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSetDisplayLayoutResponse(
+                                (SetDisplayLayoutResponse) msg);
+                    }
+                } else if (functionName.equals(Names.PerformAudioPassThru)) {
+                    // PerformAudioPassThru
+                    final PerformAudioPassThruResponse msg =
+                            new PerformAudioPassThruResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onPerformAudioPassThruResponse(
+                                        (PerformAudioPassThruResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onPerformAudioPassThruResponse(
+                                (PerformAudioPassThruResponse) msg);
+                    }
+                } else if (functionName.equals(Names.EndAudioPassThru)) {
+                    // EndAudioPassThru
+                    final EndAudioPassThruResponse msg =
+                            new EndAudioPassThruResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onEndAudioPassThruResponse(
+                                        (EndAudioPassThruResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onEndAudioPassThruResponse(
+                                (EndAudioPassThruResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SubscribeVehicleData)) {
+                    // SubscribeVehicleData
+                    final SubscribeVehicleDataResponse msg =
+                            new SubscribeVehicleDataResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSubscribeVehicleDataResponse(
+                                        (SubscribeVehicleDataResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSubscribeVehicleDataResponse(
+                                (SubscribeVehicleDataResponse) msg);
+                    }
+                } else if (functionName.equals(Names.UnsubscribeVehicleData)) {
+                    // UnsubscribeVehicleData
+                    final UnsubscribeVehicleDataResponse msg =
+                            new UnsubscribeVehicleDataResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onUnsubscribeVehicleDataResponse(
+                                        (UnsubscribeVehicleDataResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onUnsubscribeVehicleDataResponse(
+                                (UnsubscribeVehicleDataResponse) msg);
+                    }
+                } else if (functionName.equals(Names.GetVehicleData)) {
+                    // GetVehicleData
+                    final GetVehicleDataResponse msg =
+                            new GetVehicleDataResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onGetVehicleDataResponse(
+                                        (GetVehicleDataResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onGetVehicleDataResponse(
+                                (GetVehicleDataResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ReadDID)) {
+                    // ReadDID
+                    final ReadDIDResponse msg = new ReadDIDResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onReadDIDResponse(
+                                        (ReadDIDResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onReadDIDResponse((ReadDIDResponse) msg);
+                    }
+                } else if (functionName.equals(Names.GetDTCs)) {
+                    // GetDTCs
+                    final GetDTCsResponse msg = new GetDTCsResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onGetDTCsResponse(
+                                        (GetDTCsResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onGetDTCsResponse((GetDTCsResponse) msg);
+                    }
+                } else if (functionName.equals(Names.AlertManeuver)) {
+                    // AlertManeuver
+                    final AlertManeuverResponse msg =
+                            new AlertManeuverResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onAlertManeuverResponse(
+                                        (AlertManeuverResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onAlertManeuverResponse(
+                                (AlertManeuverResponse) msg);
+                    }
+                } else if (functionName.equals(Names.ShowConstantTBT)) {
+                    // ShowConstantTBT
+                    final ShowConstantTBTResponse msg =
+                            new ShowConstantTBTResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onShowConstantTBTResponse(
+                                        (ShowConstantTBTResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onShowConstantTBTResponse(
+                                (ShowConstantTBTResponse) msg);
+                    }
+                } else if (functionName.equals(Names.UpdateTurnList)) {
+                    // UpdateTurnList
+                    final UpdateTurnListResponse msg =
+                            new UpdateTurnListResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onUpdateTurnListResponse(
+                                        (UpdateTurnListResponse) msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onUpdateTurnListResponse(
+                                (UpdateTurnListResponse) msg);
+                    }
+                } else if (functionName.equals(Names.SystemRequest)) {
+                    final SystemRequestResponse msg =
+                            new SystemRequestResponse(hash);
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onSystemRequestResponse(msg);
+                            }
+                        });
+                    } else {
+                        _proxyListener.onSystemRequestResponse(msg);
+                    }
+                } else {
+                    if (_syncMsgVersion != null) {
+                        DebugTool.logError("Unrecognized response Message: " +
+                                functionName.toString() +
+                                "SYNC Message Version = " + _syncMsgVersion);
+                    } else {
+                        DebugTool.logError("Unrecognized response Message: " +
+                                functionName.toString());
+                    }
+                } // end-if
 
-                final SpeakResponse msg = new SpeakResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSpeakResponse(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSpeakResponse(msg);
-                }
-            } else if (functionName.equals(Names.Alert)) {
-                // AlertResponse
-
-                final AlertResponse msg = new AlertResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onAlertResponse(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onAlertResponse(msg);
-                }
-            } else if (functionName.equals(Names.Show)) {
-                // ShowResponse
-
-                final ShowResponse msg = new ShowResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onShowResponse((ShowResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onShowResponse((ShowResponse) msg);
-                }
-            } else if (functionName.equals(Names.AddCommand)) {
-                // AddCommand
-
-                final AddCommandResponse msg = new AddCommandResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onAddCommandResponse((AddCommandResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onAddCommandResponse((AddCommandResponse) msg);
-                }
-            } else if (functionName.equals(Names.DeleteCommand)) {
-                // DeleteCommandResponse
-
-                final DeleteCommandResponse msg = new DeleteCommandResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onDeleteCommandResponse((DeleteCommandResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onDeleteCommandResponse((DeleteCommandResponse) msg);
-                }
-            } else if (functionName.equals(Names.AddSubMenu)) {
-                // AddSubMenu
-
-                final AddSubMenuResponse msg = new AddSubMenuResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onAddSubMenuResponse((AddSubMenuResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onAddSubMenuResponse((AddSubMenuResponse) msg);
-                }
-            } else if (functionName.equals(Names.DeleteSubMenu)) {
-                // DeleteSubMenu
-
-                final DeleteSubMenuResponse msg = new DeleteSubMenuResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onDeleteSubMenuResponse((DeleteSubMenuResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onDeleteSubMenuResponse((DeleteSubMenuResponse) msg);
-                }
-            } else if (functionName.equals(Names.SubscribeButton)) {
-                // SubscribeButton
-
-                final SubscribeButtonResponse msg = new SubscribeButtonResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSubscribeButtonResponse((SubscribeButtonResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSubscribeButtonResponse((SubscribeButtonResponse) msg);
-                }
-            } else if (functionName.equals(Names.UnsubscribeButton)) {
-                // UnsubscribeButton
-
-                final UnsubscribeButtonResponse msg = new UnsubscribeButtonResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onUnsubscribeButtonResponse((UnsubscribeButtonResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onUnsubscribeButtonResponse((UnsubscribeButtonResponse) msg);
-                }
-            } else if (functionName.equals(Names.SetMediaClockTimer)) {
-                // SetMediaClockTimer
-
-                final SetMediaClockTimerResponse msg = new SetMediaClockTimerResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSetMediaClockTimerResponse((SetMediaClockTimerResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSetMediaClockTimerResponse((SetMediaClockTimerResponse) msg);
-                }
-            } else if (functionName.equals(Names.EncodedSyncPData)) {
-                // EncodedSyncPData
-
-                final EncodedSyncPDataResponse msg = new EncodedSyncPDataResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onEncodedSyncPDataResponse(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onEncodedSyncPDataResponse(msg);
-                }
-            } else if (functionName.equals(Names.SyncPData)) {
-                // SyncPData
-
-                final SyncPDataResponse msg = new SyncPDataResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSyncPDataResponse(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSyncPDataResponse(msg);
-                }
-            } else if (functionName.equals(Names.CreateInteractionChoiceSet)) {
-                // CreateInteractionChoiceSet
-
-                final CreateInteractionChoiceSetResponse msg = new CreateInteractionChoiceSetResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onCreateInteractionChoiceSetResponse((CreateInteractionChoiceSetResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onCreateInteractionChoiceSetResponse((CreateInteractionChoiceSetResponse) msg);
-                }
-            } else if (functionName.equals(Names.DeleteInteractionChoiceSet)) {
-                // DeleteInteractionChoiceSet
-
-                final DeleteInteractionChoiceSetResponse msg = new DeleteInteractionChoiceSetResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onDeleteInteractionChoiceSetResponse((DeleteInteractionChoiceSetResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onDeleteInteractionChoiceSetResponse((DeleteInteractionChoiceSetResponse) msg);
-                }
-            } else if (functionName.equals(Names.PerformInteraction)) {
-                // PerformInteraction
-
-                final PerformInteractionResponse msg = new PerformInteractionResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onPerformInteractionResponse((PerformInteractionResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onPerformInteractionResponse((PerformInteractionResponse) msg);
-                }
-            } else if (functionName.equals(Names.SetGlobalProperties)) {
-                final SetGlobalPropertiesResponse msg = new SetGlobalPropertiesResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSetGlobalPropertiesResponse((SetGlobalPropertiesResponse) msg);
-                }
-            } else if (functionName.equals(Names.ResetGlobalProperties)) {
-                // ResetGlobalProperties
-
-                final ResetGlobalPropertiesResponse msg = new ResetGlobalPropertiesResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onResetGlobalPropertiesResponse((ResetGlobalPropertiesResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onResetGlobalPropertiesResponse((ResetGlobalPropertiesResponse) msg);
-                }
-            } else if (functionName.equals(Names.UnregisterAppInterface)) {
-                onUnregisterAppInterfaceResponse(hash);
-            } else if (functionName.equals(Names.GenericResponse)) {
-                // GenericResponse (Usually and error)
-                final GenericResponse msg = new GenericResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onGenericResponse((GenericResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onGenericResponse((GenericResponse) msg);
-                }
-            } else if (functionName.equals(Names.Slider)) {
-                // Slider
-                final SliderResponse msg = new SliderResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSliderResponse((SliderResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSliderResponse((SliderResponse) msg);
-                }
-            } else if (functionName.equals(Names.PutFile)) {
-                // PutFile
-                final PutFileResponse msg = new PutFileResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onPutFileResponse((PutFileResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onPutFileResponse((PutFileResponse) msg);
-                }
-            } else if (functionName.equals(Names.DeleteFile)) {
-                // DeleteFile
-                final DeleteFileResponse msg = new DeleteFileResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onDeleteFileResponse((DeleteFileResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onDeleteFileResponse((DeleteFileResponse) msg);
-                }
-            } else if (functionName.equals(Names.ListFiles)) {
-                // ListFiles
-                final ListFilesResponse msg = new ListFilesResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onListFilesResponse((ListFilesResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onListFilesResponse((ListFilesResponse) msg);
-                }
-            } else if (functionName.equals(Names.SetAppIcon)) {
-                // SetAppIcon
-                final SetAppIconResponse msg = new SetAppIconResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSetAppIconResponse((SetAppIconResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSetAppIconResponse((SetAppIconResponse) msg);
-                }
-            } else if (functionName.equals(Names.ScrollableMessage)) {
-                // ScrollableMessage
-                final ScrollableMessageResponse msg = new ScrollableMessageResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onScrollableMessageResponse((ScrollableMessageResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onScrollableMessageResponse((ScrollableMessageResponse) msg);
-                }
-            } else if (functionName.equals(Names.ChangeRegistration)) {
-                // ChangeLanguageRegistration
-                final ChangeRegistrationResponse msg = new ChangeRegistrationResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onChangeRegistrationResponse((ChangeRegistrationResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onChangeRegistrationResponse((ChangeRegistrationResponse) msg);
-                }
-            } else if (functionName.equals(Names.SetDisplayLayout)) {
-                // SetDisplayLayout
-                final SetDisplayLayoutResponse msg = new SetDisplayLayoutResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSetDisplayLayoutResponse((SetDisplayLayoutResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSetDisplayLayoutResponse((SetDisplayLayoutResponse) msg);
-                }
-            } else if (functionName.equals(Names.PerformAudioPassThru)) {
-                // PerformAudioPassThru
-                final PerformAudioPassThruResponse msg = new PerformAudioPassThruResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onPerformAudioPassThruResponse((PerformAudioPassThruResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onPerformAudioPassThruResponse((PerformAudioPassThruResponse) msg);
-                }
-            } else if (functionName.equals(Names.EndAudioPassThru)) {
-                // EndAudioPassThru
-                final EndAudioPassThruResponse msg = new EndAudioPassThruResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onEndAudioPassThruResponse((EndAudioPassThruResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onEndAudioPassThruResponse((EndAudioPassThruResponse) msg);
-                }
-            } else if (functionName.equals(Names.SubscribeVehicleData)) {
-                // SubscribeVehicleData
-                final SubscribeVehicleDataResponse msg = new SubscribeVehicleDataResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onSubscribeVehicleDataResponse((SubscribeVehicleDataResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onSubscribeVehicleDataResponse((SubscribeVehicleDataResponse) msg);
-                }
-            } else if (functionName.equals(Names.UnsubscribeVehicleData)) {
-                // UnsubscribeVehicleData
-                final UnsubscribeVehicleDataResponse msg = new UnsubscribeVehicleDataResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onUnsubscribeVehicleDataResponse((UnsubscribeVehicleDataResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onUnsubscribeVehicleDataResponse((UnsubscribeVehicleDataResponse) msg);
-                }
-            } else if (functionName.equals(Names.GetVehicleData)) {
-                // GetVehicleData
-                final GetVehicleDataResponse msg = new GetVehicleDataResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onGetVehicleDataResponse((GetVehicleDataResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onGetVehicleDataResponse((GetVehicleDataResponse) msg);
-                }
-            } else if (functionName.equals(Names.ReadDID)) {
-                // ReadDID
-                final ReadDIDResponse msg = new ReadDIDResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onReadDIDResponse((ReadDIDResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onReadDIDResponse((ReadDIDResponse) msg);
-                }
-            } else if (functionName.equals(Names.GetDTCs)) {
-                // GetDTCs
-                final GetDTCsResponse msg = new GetDTCsResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onGetDTCsResponse((GetDTCsResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onGetDTCsResponse((GetDTCsResponse) msg);
-                }
-            } else if (functionName.equals(Names.AlertManeuver)) {
-                // AlertManeuver
-                final AlertManeuverResponse msg = new AlertManeuverResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onAlertManeuverResponse((AlertManeuverResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onAlertManeuverResponse((AlertManeuverResponse) msg);
-                }
-            } else if (functionName.equals(Names.ShowConstantTBT)) {
-                // ShowConstantTBT
-                final ShowConstantTBTResponse msg = new ShowConstantTBTResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onShowConstantTBTResponse((ShowConstantTBTResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onShowConstantTBTResponse((ShowConstantTBTResponse) msg);
-                }
-            } else if (functionName.equals(Names.UpdateTurnList)) {
-                // UpdateTurnList
-                final UpdateTurnListResponse msg = new UpdateTurnListResponse(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onUpdateTurnListResponse((UpdateTurnListResponse) msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onUpdateTurnListResponse((UpdateTurnListResponse) msg);
-                }
-            } else {
-                if (_syncMsgVersion != null) {
-                    DebugTool.logError("Unrecognized response Message: " + functionName.toString() +
-                            "SYNC Message Version = " + _syncMsgVersion);
-                } else {
-                    DebugTool.logError("Unrecognized response Message: " + functionName.toString());
-                }
-            } // end-if
+            }
         } else if (messageType.equals(Names.notification)) {
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCNotification(rpcMsg), SYNC_LIB_TRACE_KEY);
             if (functionName.equals(Names.OnHMIStatus)) {
@@ -2226,7 +2389,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onOnLanguageChange((OnLanguageChange) msg);
+                            _proxyListener.onOnLanguageChange(
+                                    (OnLanguageChange) msg);
                         }
                     });
                 } else {
@@ -2240,7 +2404,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onOnAudioPassThru((OnAudioPassThru) msg);
+                            _proxyListener.onOnAudioPassThru(
+                                    (OnAudioPassThru) msg);
                         }
                     });
                 } else {
@@ -2282,11 +2447,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
+                            _proxyListener.onKeyboardInput(
+                                    (OnKeyboardInput) msg);
                         }
                     });
                 } else {
                     _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
+                }
+            } else if (functionName.equals(Names.OnSystemRequest)) {
+                final OnSystemRequest msg = new OnSystemRequest(hash);
+                if (_callbackToUIThread) {
+                    // Run in UI thread
+                    _mainUIHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            _proxyListener.onOnSystemRequest(msg);
+                        }
+                    });
+                } else {
+                    _proxyListener.onOnSystemRequest(msg);
                 }
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
@@ -2310,6 +2489,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             });
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
+                        }
+                    } else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF) {
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
                         }
                     } else {
                         // This requires the proxy to be cycled
@@ -2386,7 +2577,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.
      *
-     * @param msg
      * @throws SyncException
      */
     public void sendRPCRequest(RPCRequest request) throws SyncException {
@@ -2467,14 +2657,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void passErrorToProxyListener(final String info, final Exception e) {
-
         OnError message = new OnError(info, e);
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolSession(final byte sessionID, final String correlationID) {
-        _rpcSessionID = sessionID;
-        Log.i(TAG, "RPC Session started" + correlationID);
+    private void startRPCProtocolService(final byte sessionID, final String correlationID) {
+        currentSession.setSessionId(sessionID);
+        _syncConnection.setSessionId(sessionID);
+        Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2517,18 +2707,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleEndSessionAck(final SessionType sessionType, final byte sessionId, final String correlationID) {
-        Log.i(TAG, "EndSession Ack received; Session Type " + sessionType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
+    protected void handleEndServiceAck(final ServiceType serviceType, final byte sessionId, final String correlationID) {
+        Log.i(TAG, "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onProtocolSessionEnded(sessionType, sessionId, correlationID);
+                    _proxyListener.onProtocolServiceEnded(serviceType, sessionId, correlationID);
                 }
             });
         } else {
-            _proxyListener.onProtocolSessionEnded(sessionType, sessionId, correlationID);
+            _proxyListener.onProtocolServiceEnded(serviceType, sessionId, correlationID);
         }
     }
 
@@ -2548,10 +2738,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startMobileNavSession(byte sessionID, String correlationID) {
-        Log.i(TAG, "Mobile Nav Session started" + correlationID);
-        servicePool.add(sessionID);
-        _mobileNavSessionID = sessionID;
+    protected void startMobileNaviService(byte sessionID, String correlationID) {
+        Log.i(TAG, "Mobile Nav Session started " + correlationID);
+        createService(sessionID, ServiceType.Mobile_Nav);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2565,10 +2754,53 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    public void stopMobileNaviSession() {
-        Log.i(TAG, "Mobile Nav Session is going to stop" + _mobileNavSessionID);
-        servicePool.remove(servicePool.indexOf(_mobileNavSessionID));
-        getSyncConnection().closeMobileNavSession(_mobileNavSessionID);
+    protected void startAudioService(byte sessionID, String correlationID) {
+        Log.i(TAG, "Audio_Service started  " + sessionID);
+        createService(sessionID, ServiceType.Audio_Service);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onAudioServiceStart();
+                }
+            });
+        } else {
+            _proxyListener.onAudioServiceStart();
+        }
+    }
+
+    private void createService(byte sessionID, ServiceType serviceType) {
+        if (sessionID != currentSession.getSessionId()) {
+            throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
+        }
+        Service service = currentSession.createService(serviceType);
+        currentSession.addService(service);
+    }
+
+    public void stopMobileNaviService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
+            Log.i(TAG, "Mobile Nav Session is going to stop " + currentSession.getSessionId());
+            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+        }
+    }
+
+    public void stopAudioService() {
+        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
+            Log.i(TAG, "Audio service is going to stop " + currentSession.getSessionId());
+            getSyncConnection().closeAudioService(currentSession.getSessionId());
+        }
+    }
+
+    private boolean removeServiceFromSession(byte sessionID, ServiceType serviceType) {
+        List<Service> servicePool = getServicePool();
+        for (Service service : servicePool) {
+            if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType()))) {
+                currentSession.removeService(service);
+                return true;
+            }
+        }
+        return false;
     }
 
     // Queue internal callback message
@@ -2592,7 +2824,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startH264() {
         OutputStream stream = null;
         if (_syncConnection != null) {
-            stream = _syncConnection.startH264(_mobileNavSessionID);
+            stream = _syncConnection.startH264(currentSession.getSessionId());
         }
         return stream;
     }
@@ -2603,44 +2835,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    public boolean sendVideoFrame(byte[] rtpPacket) throws SyncException {
-        if (rtpPacket == null) {
-            throw new SyncException("RTP packet was null", SyncExceptionCause.INVALID_ARGUMENT);
+    public OutputStream startAudioDataTransfer() {
+        OutputStream stream = null;
+        if (_syncConnection != null) {
+            stream = _syncConnection.startAudioDataTransfer(currentSession.getSessionId());
         }
-        checkSyncConnection();
-        return sendRTPPacket(rtpPacket);
+        return stream;
     }
 
-    private boolean sendRTPPacket(byte[] rtpPacket) throws SyncException {
-        ProtocolMessage pm = createMobileNavSessionProtocolMessage(rtpPacket);
-        try {
-            // Queue this outgoing message
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-                if (_outgoingProxyMessageDispatcher != null) {
-                    _outgoingProxyMessageDispatcher.queueMessage(pm);
-                } else {
-                    return false;
-                }
-            }
-        } catch (OutOfMemoryError e) {
-            SyncTrace.logProxyEvent("OutOfMemory exception while sending RTP packet", SYNC_LIB_TRACE_KEY);
-            throw new SyncException("OutOfMemory exception while sending RTP packet ", e, SyncExceptionCause.INVALID_ARGUMENT);
+    public void stopAudioDataTransfer() {
+        if (_syncConnection != null) {
+            _syncConnection.stopAudioDataTransfer();
         }
-        return true;
-    }
-
-    public ProtocolMessage createMobileNavSessionProtocolMessage(byte[] rtpPacket) {
-        return createProtocolMessage(rtpPacket);
-    }
-
-    private ProtocolMessage createProtocolMessage(byte[] rtpPacket) {
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setData(rtpPacket);
-        pm.setSessionID(_mobileNavSessionID);
-        pm.setVersion(getWiProVersion());
-        pm.setMessageType(MessageType.VIDEO);
-        pm.setSessionType(SessionType.Mobile_Nav);
-        return pm;
     }
 
     /**
@@ -3431,12 +3637,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         restartRPCProtocolSession();
     }
 
-    public List<Byte> getServicePool() {
-        return servicePool;
+    // TODO: Need to refactor it
+    public List<Service> getServicePool() {
+        return currentSession.getServiceList();
+    }
+
+    public boolean hasServiceInServicesPool(ServiceType serviceType) {
+        return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
     // Private Class to Interface with SyncConnection
-    protected class SyncInterfaceBroker implements ISyncConnectionListener {
+    public class SyncInterfaceBroker implements ISyncConnectionListener {
 
         @Override
         public void onTransportDisconnected(String info) {
@@ -3467,8 +3678,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onHeartbeatTimedOut() {
             final String msg = "Heartbeat timeout";
             DebugTool.logInfo(msg);
-            notifyProxyClosed(msg, new SyncException(msg,
-                    SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
         @Override
@@ -3476,35 +3686,29 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             try {
                 if (msg.getData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
             try {
                 if (msg.getBulkData().length > 0) queueIncomingMessage(msg);
             } catch (Exception e) {
+
             }
         }
 
         @Override
-        public void onProtocolSessionStarted(SessionType sessionType,
-                                             byte sessionID, byte version, String correlationID) {
+        public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
             if (_wiproVersion == 1) {
                 if (version == 2) setWiProVersion(version);
             }
-            if (sessionType.eq(SessionType.RPC)) {
-                startRPCProtocolSession(sessionID, correlationID);
-            } else if (_wiproVersion == 2) {
-                if (sessionType.equals(SessionType.Mobile_Nav)) {
-                    startMobileNavSession(sessionID, correlationID);
-                } else {
-                    //If version 2 then don't need to specify a Session Type
-                    startRPCProtocolSession(sessionID, correlationID);
-                }
+            if (session.hasService(ServiceType.RPC)) {
+                startRPCProtocolService(session.getSessionId(), correlationID);
             }
         }
 
         @Override
-        public void onProtocolSessionEnded(SessionType sessionType,
+        public void onProtocolServiceEnded(ServiceType serviceType,
                                            byte sessionID, String correlationID) {
-            handleEndSessionAck(sessionType, sessionID, correlationID);
+            handleEndServiceAck(serviceType, sessionID, correlationID);
         }
 
         @Override
@@ -3516,5 +3720,59 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onMobileNavAckReceived(int frameReceivedNumber) {
             handleMobileNavAck(frameReceivedNumber);
         }
+
+        @Override
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
+                                             String correlationID) {
+            if (_wiproVersion == 2) {
+                if (serviceType.equals(ServiceType.Mobile_Nav)) {
+                    startMobileNaviService(sessionID, correlationID);
+                } else if (serviceType.equals(ServiceType.Audio_Service)){
+                    startAudioService(sessionID, correlationID);
+                }
+            }
+        }
     }
-} // end-class
+
+    public IRPCRequestConverterFactory getRpcRequestConverterFactory() {
+        return rpcRequestConverterFactory;
+    }
+
+    public void setRpcRequestConverterFactory(
+            IRPCRequestConverterFactory rpcRequestConverterFactory) {
+        this.rpcRequestConverterFactory = rpcRequestConverterFactory;
+    }
+
+    private void processRegisterAppInterfaceResponse(final RegisterAppInterfaceResponse response) {
+        // Create callback
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (_proxyListener instanceof IProxyListener) {
+                        ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
+                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                        ((IProxyListenerALMTesting) _proxyListener)
+                                .onRegisterAppInterfaceResponse(response);
+                    }
+                }
+            });
+        } else {
+            if (_proxyListener instanceof IProxyListener) {
+                ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
+            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
+                ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(response);
+            }
+        }
+        // Restore Services
+        if (!currentSession.isServicesEmpty() && _syncConnection.getIsConnected()) {
+            if (currentSession.hasService(ServiceType.Mobile_Nav)) {
+                _syncConnection.startMobileNavService(currentSession);
+            }
+            if (currentSession.hasService(ServiceType.Audio_Service)) {
+                _syncConnection.startAudioService(currentSession);
+            }
+        }
+    }
+}

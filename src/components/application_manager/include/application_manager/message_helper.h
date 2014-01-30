@@ -126,14 +126,6 @@ class MessageHelper {
     static void SendHMIStatusNotification(const Application& application_impl);
 
     /**
-     * @brief Sends speak request to HMI
-     *
-     *@param application_impl application
-     *
-     **/
-    static void SendTTSChunksToHMI(const Application& application_impl);
-
-    /**
      * @brief Sends OnAppRegistered notification to HMI
      *
      *@param application_impl application with changed HMI status
@@ -146,12 +138,6 @@ class MessageHelper {
      * @brief Sendss Vr Command 'Help'
      */
     static void SendHelpVrCommand();
-
-    /**
-     * @brief Send Vr Synonyms of application name to HMI
-     * so that app can be activated via VR.
-     */
-    static void SendVrCommandsOnRegisterAppToHMI(Application* app);
 
     /**
      * @brief Removes Vr Synonyms of application name from HMI
@@ -237,6 +223,24 @@ class MessageHelper {
      *
      */
     static void SendNaviStopStream(int32_t connection_key);
+
+    /*
+     * @brief Sends notification to HMI to start audio streaming
+     *
+     * @param url             URL for video streamng
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendAudioStartStream(const std::string& url, int32_t connection_key);
+
+    /*
+     * @brief Sends notification to HMI to stop audio streaming
+     *
+     * @param connection_key  Application connection key
+     *
+     */
+    static void SendAudioStopStream(int32_t connection_key);
+
 
     static smart_objects::SmartObject* CreateNegativeResponse(
       uint32_t connection_key, int32_t function_id, uint32_t correlation_id,

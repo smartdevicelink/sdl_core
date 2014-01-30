@@ -46,6 +46,9 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
+# --- Validated types
+add_subdirectory(./rpc_base)
+
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
@@ -61,13 +64,11 @@ add_subdirectory(./hmi_message_handler)
 # --- Config
 add_subdirectory(./config_profile)
 
-if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
 # --- Policies
 add_subdirectory(./policies)
-endif()
 
 if (${QT_HMI})
 # --- DBus

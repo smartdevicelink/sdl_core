@@ -214,7 +214,7 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
   std::vector<RfcommChannelVector> sdl_rfcomm_channels =
     DiscoverSmartDeviceLinkRFCOMMChannels(bd_addresses);
 
-  for (int i = 0; i < bd_addresses.size(); ++i) {
+  for (size_t i = 0; i < bd_addresses.size(); ++i) {
     if (sdl_rfcomm_channels[i].empty()) {
       continue;
     }
@@ -246,7 +246,7 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
 std::vector<BluetoothDeviceScanner::RfcommChannelVector> BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   const std::vector<bdaddr_t>& device_addresses) {
   LOG4CXX_TRACE_ENTER(logger_);
-  const unsigned size = device_addresses.size();
+  const size_t size = device_addresses.size();
   std::vector<RfcommChannelVector> result(size);
 
   static const int attempts = 4;
@@ -254,7 +254,7 @@ std::vector<BluetoothDeviceScanner::RfcommChannelVector> BluetoothDeviceScanner:
   std::vector<bool> processed(size, false);
   unsigned processed_count = 0;
   for (int nattempt = 0; nattempt < attempts; ++nattempt) {
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       if (processed[i]) {
         continue;
       }

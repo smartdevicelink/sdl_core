@@ -56,7 +56,8 @@ Profile::Profile()
   , hmi_capabilities_file_name_("hmi_capabilities.json")
   , server_address_("127.0.0.1")
   , server_port_(8087)
-  , navi_server_port_(5050)
+  , video_streaming_port_(5050)
+  , audio_streaming_port_(5080)
   , help_promt_()
   , time_out_promt_()
   , min_tread_stack_size_(threads::Thread::kMinStackSize)
@@ -143,8 +144,12 @@ const uint16_t& Profile::server_port() const {
 }
 
 
-const uint16_t& Profile::navi_server_port() const {
-  return navi_server_port_;
+const uint16_t& Profile::video_streaming_port() const {
+  return video_streaming_port_;
+}
+
+const uint16_t& Profile::audio_streaming_port() const {
+  return audio_streaming_port_;
 }
 
 const uint64_t& Profile::thread_min_stach_size() const {
@@ -164,11 +169,19 @@ bool Profile::is_redecoding_enabled() const {
 }
 
 const std::string&  Profile::video_server_type() const {
-  return consumer_type_;
+  return video_consumer_type_;
 }
 
-const std::string& Profile::named_pipe_path() const {
-  return named_pipe_path_;
+const std::string&  Profile::audio_server_type() const {
+  return audio_consumer_type_;
+}
+
+const std::string& Profile::named_video_pipe_path() const {
+  return named_video_pipe_path_;
+}
+
+const std::string& Profile::named_audio_pipe_path() const {
+  return named_audio_pipe_path_;
 }
 
 const uint32_t& Profile::app_hmi_level_none_time_scale() const {
@@ -182,6 +195,10 @@ const uint32_t& Profile::app_hmi_level_none_time_scale_max_requests() const
 
 const std::string& Profile::video_stream_file() const {
   return video_stream_file_;
+}
+
+const std::string& Profile::audio_stream_file() const {
+  return audio_stream_file_;
 }
 
 const uint32_t& Profile::app_time_scale() const {
@@ -267,10 +284,18 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "HMI", "NaviServerPort", value))
+                           "HMI", "VideoStreamingPort", value))
       && ('\0' != *value)) {
-    navi_server_port_ = atoi(value);
-    LOG4CXX_INFO(logger_, "Set navi server port to " << navi_server_port_);
+    video_streaming_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set video streaming port to " << video_streaming_port_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "HMI", "AudioStreamingPort", value))
+      && ('\0' != *value)) {
+    audio_streaming_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set audio streaming port to " << audio_streaming_port_);
   }
 
   *value = '\0';
@@ -298,16 +323,32 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MEDIA MANAGER", "VideoStreamConsumer", value))
       && ('\0' != *value)) {
-    consumer_type_ = value;
-    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << consumer_type_);
+    video_consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set VideoStreamConsumer to " << video_consumer_type_);
   }
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "MEDIA MANAGER", "NamedPipePath", value))
+                           "MEDIA MANAGER", "AudioStreamConsumer", value))
       && ('\0' != *value)) {
-    named_pipe_path_ = value;
-    LOG4CXX_INFO(logger_, "Set server address to " << named_pipe_path_);
+    audio_consumer_type_ = value;
+    LOG4CXX_INFO(logger_, "Set AudioStreamConsumer to " << audio_consumer_type_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedVideoPipePath", value))
+      && ('\0' != *value)) {
+    named_video_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_video_pipe_path_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "NamedAudioPipePath", value))
+      && ('\0' != *value)) {
+    named_audio_pipe_path_ = value;
+    LOG4CXX_INFO(logger_, "Set server address to " << named_audio_pipe_path_);
   }
 
   *value = '\0';
@@ -316,6 +357,14 @@ void Profile::UpdateValues() {
       && ('\0' != *value)) {
     video_stream_file_ = value;
     LOG4CXX_INFO(logger_, "Set video stream file to " << video_stream_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "AudioStreamFile", value))
+      && ('\0' != *value)) {
+    audio_stream_file_ = value;
+    LOG4CXX_INFO(logger_, "Set audio stream file to " << audio_stream_file_);
   }
 
   *value = '\0';

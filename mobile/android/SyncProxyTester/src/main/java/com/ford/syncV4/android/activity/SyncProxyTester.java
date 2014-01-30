@@ -42,10 +42,13 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.adapters.logAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
+import com.ford.syncV4.android.listener.ConnectionListener;
+import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.BluetoothDeviceManager;
 import com.ford.syncV4.android.manager.IBluetoothDeviceManager;
@@ -56,7 +59,7 @@ import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceEvent;
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -133,6 +136,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
@@ -164,7 +168,7 @@ import java.util.Map.Entry;
 import java.util.Vector;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
-        IBluetoothDeviceManager {
+        IBluetoothDeviceManager, ConnectionListener {
 
     private static final String VERSION = "$Version:$";
     private static final String LOG_TAG = "SyncProxyTester";
@@ -332,7 +336,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
-    private byte rpcSessionID = -1;
+    private Session rpcSession = new Session();
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -403,6 +407,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         AppPreferencesManager.setAppContext(this);
 
         setContentView(R.layout.main);
+
+        addListeners();
+
         _scroller = (ScrollView) findViewById(R.id.scrollConsole);
 
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
@@ -571,6 +578,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
+    @Override
+    public void onProxyClosed() {
+        resetAdapters();
+        _msgAdapter.logMessage("Disconnected", true);
+    }
+
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
         messageSelectCount = new Hashtable<String, Integer>();
@@ -629,7 +642,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     try {
                         proxyInstance.openSession();
                     } catch (SyncException e) {
-                        Log.e(LOG_TAG, "Can't open session", e);
+                        Log.e(LOG_TAG, "Can't open currentSession", e);
                     }
                 }
             } else {
@@ -713,6 +726,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (mSyncReceiver != null) {
             unregisterReceiver(mSyncReceiver);
         }
+
+        removeListeners();
 
         //endSyncProxyInstance();
         saveMessageSelectCount();
@@ -2700,6 +2715,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final Context mContext = adapter.getContext();
                             LayoutInflater inflater = (LayoutInflater) mContext
                                     .getSystemService(LAYOUT_INFLATER_SERVICE);
+
                             View layout = inflater.inflate(R.layout.performinteraction,
                                     (ViewGroup) findViewById(R.id.performinteraction_Root));
 
@@ -2777,8 +2793,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             choiceSetIDs.add(_choiceSetAdapter.getItem(i));
                                         }
                                     }
+                                    sendPerformInteractionRequest(choiceSetIDs);
+                                }
 
-                                    if (choiceSetIDs.size() > 0) {
+                                private void sendPerformInteractionRequest(Vector<Integer> choiceSetIDs) {
+
                                         PerformInteraction msg = new PerformInteraction();
                                         msg.setCorrelationID(autoIncCorrId++);
                                         msg.setInitialText(initialText.getText().toString());
@@ -2853,9 +2872,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         } catch (SyncException e) {
                                             _msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
                                         }
-                                    } else {
-                                        Toast.makeText(mContext, "No interaction choice set selected", Toast.LENGTH_LONG).show();
-                                    }
+
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -3539,6 +3556,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 .findViewById(R.id.registerappinterface_useVRSynonyms);
         final EditText vrSynonyms = (EditText) layout
                 .findViewById(R.id.registerappinterface_vrSynonyms);
+
         final CheckBox isMediaApp = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_isMediaApp);
         final CheckBox useDesiredLang = (CheckBox) layout
@@ -4005,14 +4023,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    /**
-     * Called when a connection to a SYNC device has been closed.
-     */
-    public void onProxyClosed(String message) {
-        resetAdapters();
-        _msgAdapter.logMessage("Disconnected: " + message, true);
-    }
-
     void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
         CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
         msg.setCorrelationID(autoIncCorrId++);
@@ -4116,16 +4126,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviSession() {
+    public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should start mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavSession(rpcSessionID);
+            _msgAdapter.logMessage("Should start mobile nav currentSession", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startMobileNavService(rpcSession);
         }
     }
 
     public void onMobileNaviStarted() {
-        if (ProxyService.getInstance().getProxyInstance() != null) {
-            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+        SyncProxyALM proxy = ProxyService.getProxyInstance();
+        if (proxy != null) {
             OutputStream stream = proxy.startH264();
             MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
             fr.setMobileNaviStateOn(stream);
@@ -4141,6 +4151,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
         fr.setMobileNaviStateOff();
         closeMobileNaviOutputStream();
+        AudioServicePreviewFragment audioFragement = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+        audioFragement.setAudioServiceStateOff();
+        closeAudioOutputStream();
     }
 
     public void logError(final Exception e) {
@@ -4150,7 +4163,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 _msgAdapter.logMessage(e.getMessage(), true);
             }
         });
-
     }
 
     private void closeMobileNaviOutputStream() {
@@ -4160,21 +4172,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
-    public void stopMobileNavSession() {
-        if (isProxyReadyForWork()) {
-            _msgAdapter.logMessage("Should stop mobile nav session", true);
-            ProxyService.getInstance().getProxyInstance().stopMobileNaviSession();
-            closeMobileNaviOutputStream();
+    private void closeAudioOutputStream() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            proxy.stopAudioDataTransfer();
         }
     }
 
-    public void sendMobileNaviData(byte[] data, boolean addToUI) {
+    public void stopMobileNavService() {
         if (isProxyReadyForWork()) {
-            try {
-                ProxyService.getInstance().getProxyInstance().sendVideoFrame(data);
-            } catch (SyncException e) {
-                onMobileNaviError(e.getMessage(), false);
-            }
+            _msgAdapter.logMessage("Should stop mobile nav currentSession", true);
+            ProxyService.getInstance().getProxyInstance().stopMobileNaviService();
+            closeMobileNaviOutputStream();
         }
     }
 
@@ -4187,7 +4196,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onMobileNaviError("Error. Proxy is not connected");
             return false;
         }
-        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null) {
+        if (ProxyService.getInstance().getProxyInstance().getSyncConnection() == null){
             onMobileNaviError("Error. sync connection is null");
             return false;
         }
@@ -4198,12 +4207,50 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     }
 
+    public void startAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should start audio service", true);
+            ProxyService.getInstance().getProxyInstance().getSyncConnection().startAudioService(rpcSession);
+        }
+    }
+
+    public void stopAudioService() {
+        if (isProxyReadyForWork()) {
+            _msgAdapter.logMessage("Should stop audio service", true);
+            ProxyService.getInstance().getProxyInstance().stopAudioService();
+            closeAudioOutputStream();
+        }
+    }
+
+    public void onAudioServiceStarted() {
+        if (ProxyService.getInstance().getProxyInstance() != null) {
+            SyncProxyALM proxy = ProxyService.getInstance().getProxyInstance();
+            OutputStream stream = proxy.startAudioDataTransfer();
+            AudioServicePreviewFragment fr = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+            fr.setAudioServiceStateOn(stream);
+        }
+    }
+
     public void onTouchEventReceived(OnTouchEvent notification) {
 
     }
 
     public void onKeyboardInputReceived(OnKeyboardInput event) {
 
+    }
+
+    /**
+     * Add all necessary listeners
+     */
+    private void addListeners() {
+        ConnectionListenersManager.addConnectionListener(this);
+    }
+
+    /**
+     * Remove all subscribed listeners
+     */
+    private void removeListeners() {
+        ConnectionListenersManager.removeConnectionListener(this);
     }
 
     /**
@@ -4293,11 +4340,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     };
 
-    public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID){
-        // TODO - need to handle end session logic
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
+        if (serviceType == ServiceType.Audio_Service) {
+            _msgAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            _msgAdapter.logMessage("Navi service stopped", true);
+        }
     }
 
-    public void onSesionStarted(byte sessionID, String correlationID) {
-        rpcSessionID = sessionID;
+    public void onSessionStarted(byte sessionID, String correlationID) {
+        rpcSession.setSessionId(sessionID);
     }
 }
