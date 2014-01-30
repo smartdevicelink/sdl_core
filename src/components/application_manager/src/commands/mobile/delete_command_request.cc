@@ -145,13 +145,6 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
         (*message_)[strings::msg_params][strings::cmd_id].asInt());
 
     if (command) {
-      if ((((*message_)[strings::msg_params].keyExists(strings::menu_params)) ||
-          ((*message_)[strings::msg_params].keyExists(strings::vr_commands))) &&
-           (hmi_apis::Common_Result::REJECTED != ui_result_)) {
-        application->RemoveCommand(
-            (*message_)[strings::msg_params][strings::cmd_id].asInt());
-      }
-
       mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
       bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
@@ -160,6 +153,11 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
                      (hmi_apis::Common_Result::INVALID_ENUM == vr_result_)) ||
                      ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
                      (hmi_apis::Common_Result::SUCCESS == vr_result_));
+
+      if (result) {
+        application->RemoveCommand(
+          (*message_)[strings::msg_params][strings::cmd_id].asInt());
+      }
 
       if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
         result_code = static_cast<mobile_apis::Result::eType>(vr_result_);
