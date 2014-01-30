@@ -58,6 +58,7 @@ class ModuleManager {
    */
   CppFile& HeaderForEnum(const Enum& enm);
   CppFile& HeaderForStruct(const Struct& strct);
+  CppFile& HeaderForTypedef(const Typedef& tdef);
   CppFile& HeaderForFunction(const Function& function);
   CppFile& HeaderForResponse(const Response& request);
   CppFile& HeaderForNotification(const Notification& notification);

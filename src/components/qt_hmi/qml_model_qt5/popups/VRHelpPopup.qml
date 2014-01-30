@@ -46,14 +46,19 @@ PopUp {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
         text: {
-            if (interactionPopup.performInteractionIsActiveNow) {
-                return dataContainer.currentApplication.vrHelpTitlePerformInteraction
-            } else if (dataContainer.currentApplication.vrHelpTitle) {
-                return dataContainer.currentApplication.vrHelpTitle
-            } else {
+            // not in application
+            if (!dataContainer.applicationContext) {
                 return dataContainer.currentApplication.vrHelpTitleDefault
+            // in application
+            } else {
+                if (interactionPopup.performInteractionIsActiveNow) {
+                    return dataContainer.currentApplication.vrHelpTitlePerformInteraction
+                } else if (dataContainer.currentApplication.vrHelpTitle) {
+                    return dataContainer.currentApplication.vrHelpTitle
+                } else {
+                    return dataContainer.currentApplication.vrHelpTitleDefault
+                }
             }
-
         }
         font.pixelSize: Constants.titleFontSize
         color: Constants.primaryColor
@@ -66,13 +71,19 @@ PopUp {
         anchors.right: parent.right
         anchors.margins: Constants.popupMargin
 
-        model: {
-            if (interactionPopup.performInteractionIsActiveNow) {
-                return dataContainer.currentApplication.vrHelpItemsPerformInteraction
-            } else if (dataContainer.currentApplication.vrHelpItems.count > 0) {
-                return dataContainer.currentApplication.vrHelpItems
-            } else {
+        model: {            
+            // not in application
+            if (!dataContainer.applicationContext) {
                 return dataContainer.currentApplication.vrHelpItemsDefault
+            // in application
+            } else {
+                if (interactionPopup.performInteractionIsActiveNow) {
+                    return dataContainer.currentApplication.vrHelpItemsPerformInteraction
+                } else if (dataContainer.currentApplication.vrHelpItems.count > 0) {
+                    return dataContainer.currentApplication.vrHelpItems
+                } else {
+                    return dataContainer.currentApplication.vrHelpItemsDefault
+                }
             }
         }
 

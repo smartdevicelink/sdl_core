@@ -312,8 +312,8 @@ void ConnectionHandlerImpl::RemoveConnection(
     return -1;
   }
 
-  
-   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()"); 
+
+   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
 
   if (connection_handler_observer_) {
@@ -571,6 +571,9 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
 
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
+    LOG4CXX_INFO(
+        logger_,
+        "Resetting heart beat timer for connection " << connection_handle);
     it->second->KeepAlive();
   }
 }

@@ -52,6 +52,7 @@ CppInterfaceCodeGenerator::~CppInterfaceCodeGenerator() {
 
 void CppInterfaceCodeGenerator::GenerateCode() {
   GenerateEnums();
+  GenerateTypedefs();
   GenerateStructs();
   GenerateFunctions();
   GenerateResponses();
@@ -75,6 +76,15 @@ void CppInterfaceCodeGenerator::GenerateStructs() {
     const Struct* s = *i;
     declaration_generator_.GenerateCodeForStruct(s);
     definition_generator_.GenerateCodeForStruct(s);
+  }
+}
+
+void CppInterfaceCodeGenerator::GenerateTypedefs() {
+  const Interface::TypedefList& typedefs = interface_->typedefs();
+  for (Interface::TypedefList::const_iterator i = typedefs.begin(), end =
+      typedefs.end(); i != end; ++i) {
+    const Typedef* tdef = *i;
+    declaration_generator_.GenerateCodeForTypedef(tdef);
   }
 }
 

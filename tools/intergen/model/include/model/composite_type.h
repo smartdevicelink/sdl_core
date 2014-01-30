@@ -192,6 +192,28 @@ class Struct::Field {
   friend class Struct;
 };
 
+/*
+ * Typedef type
+ */
+
+class Typedef : public Type {
+ public:
+  Typedef(const std::string& name, const Type* type,
+          const Description& description);
+
+  // codegen::Type methods
+  virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
+  virtual const ConstantsCreator* SupportsConstants() const;
+  const Description& description() const;
+  const std::string& name() const;
+  const Type* type() const;
+
+ private:
+  std::string name_;
+  const Type* type_;
+  Description description_;
+};
+
 }  // namespace codegen
 
 #endif /* COMPOSITE_TYPE_H_ */

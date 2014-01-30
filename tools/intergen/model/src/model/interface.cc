@@ -69,6 +69,7 @@ bool codegen::Interface::init(const pugi::xml_node& xml) {
   name_ = xml.attribute("name").value();
   if (name_.empty()) {
     std::cerr << "Interface must have 'name' attribute specified" << '\n';
+    return false;
   }
   if (!type_registry_.init(xml) || !AddFunctions(xml))
     return false;
@@ -97,6 +98,10 @@ const Interface::EnumList& Interface::enums() const {
 
 const Interface::StructList& Interface::structs() const {
   return type_registry_.structs();
+}
+
+const Interface::TypedefList& Interface::typedefs() const {
+  return type_registry_.typedefs();
 }
 
 const Enum* Interface::function_id_enum() const {

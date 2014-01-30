@@ -57,6 +57,7 @@ class CppInterfaceCodeGenerator {
   // Generate code for different interface entities
   void GenerateEnums();
   void GenerateStructs();
+  void GenerateTypedefs();
   void GenerateFunctions();
   void GenerateResponses();
   void GenerateNotifications();

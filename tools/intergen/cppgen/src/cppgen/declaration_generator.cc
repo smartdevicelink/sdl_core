@@ -148,6 +148,18 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   o << "};" << endl;
 }
 
+void DeclarationGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
+  CppFile& header_file = module_manager_->HeaderForTypedef(*tdef);
+  Namespace& types_ns = header_file.types_ns();
+  TypeForwardDeclarator(&types_ns, tdef->type());
+  types_ns.os() << Comment(tdef->description()) << '\n';
+  strmfmt(types_ns.os(), "typedef {0} {1};",
+          RpcTypeNameGenerator(tdef->type(),
+                               RpcTypeNameGenerator::kUnspecified).result(),
+          tdef->name())
+      << '\n';
+}
+
 void DeclarationGenerator::GenerateCodeForEnumConstant(
     const Enum::Constant& enm, CppFile* header_file, bool skip_coma) {
   ostream& o = header_file->types_ns().os();
@@ -164,10 +176,10 @@ void DeclarationGenerator::GenerateCodeForEnumConstant(
 void DeclarationGenerator::GenerateCodeForStructField(
     const Struct::Field& field, Namespace* name_space) {
   ostream& o = name_space->os();
-  o << RpcTypeNameGenerator(
-      field.type(),
-      field.default_value() || field.is_mandatory())
-          .result();
+  RpcTypeNameGenerator::Availability availability =
+      field.default_value() || field.is_mandatory() ?
+          RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
+  o << RpcTypeNameGenerator(field.type(), availability).result();
   o << " " << field.name() << ";";
   if (!field.description().empty()) {
     o << " " << Comment(field.description());
@@ -296,6 +308,26 @@ void DeclarationGenerator::GenerateCodeForStructFields(
     const FunctionMessage::Parameter& param = *i;
     GenerateCodeForStructField(param, name_space);
   }
+}
+
+TypeForwardDeclarator::TypeForwardDeclarator(Namespace* ns, const Type* type)
+    : ns_(ns) {
+  assert(ns_);
+  type->Apply(this);
+}
+
+void TypeForwardDeclarator::GenerateCodeForArray(const Array* array) {
+  array->type()->Apply(this);
+}
+
+void TypeForwardDeclarator::GenerateCodeForMap(const Map* map) {
+  map->type()->Apply(this);
+}
+
+void TypeForwardDeclarator::GenerateCodeForStruct(const Struct* strct) {
+  ns_->ForwardDeclare(
+      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kStruct,
+                                    strct->name()));
 }
 
 }  // namespace codegen

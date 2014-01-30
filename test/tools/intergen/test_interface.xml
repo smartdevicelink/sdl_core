@@ -4824,4 +4824,34 @@
 
   </function>
 
+  <typedef name="TdResult" type="Result">
+    <description>
+      Test typedef over enum
+    </description>
+  </typedef>
+  <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">
+    <description>
+      Test typedef over array
+    </description>
+  </typedef>
+  <typedef name="TdResultArrayMap" type="TdResultArray" map="true" minsize="1" maxsize="5">
+    <description>
+      Test typedef over map of arrays
+    </description>
+  </typedef>
+
+  <struct name="TdStruct" >
+    <description>
+      Test struct containing typedef field
+    </description>
+    <param name="resArrMap" type="TdResultArrayMap" mandatory="true" />
+    <param name="optionalResArrMap" type="TdResultArrayMap" mandatory="false" />
+  </struct>
+
+  <typedef name="TdStructBasedTdef" type="TdStruct" array="true" minsize="1" maxsize="10">
+    <description>
+      Test typedef over struct
+    </description>
+  </typedef>
+
   </interface>
