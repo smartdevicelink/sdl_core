@@ -381,15 +381,8 @@ if $INSTALL_QT_HMI; then
 fi
 
 if $QT5_HMI; then
-    if [ ${ARCH} == "i386" ]; then
-        QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/i386"
-        QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-    elif [ ${ARCH} == "x64" ]; then
-        QT5_RUNFILE_SRC=${APPLINK_SUBVERSION_REPO}"/dist/qt5.1/runfile/x64"
-        QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
-    fi
-    echo "Checking whether Qt5 with QML support is installed"
-
+    echo ""
+    echo "Checking for installed Qt5 with QML support"
     NEED_QT5_INSTALL=false
     qmlscene_binary=`./FindQt.sh -v 5.1.0 -b qmlscene || true`
     if [ -n "$qmlscene_binary" ]; then
@@ -400,6 +393,13 @@ if $QT5_HMI; then
     echo $OK
 
     if $NEED_QT5_INSTALL; then
+        if [ ${ARCH} == "i386" ]; then
+            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
+            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/runfile/i386"
+        elif [ ${ARCH} == "x64" ]; then
+            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
+            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/runfile/x64"
+        fi
         QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
         QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 

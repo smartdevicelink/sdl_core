@@ -561,7 +561,7 @@ void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) 
   }
   transport_manager::ConnectionUID connection_uid =
       ConnectionUIDFromHandle(connection_handle);
- // transport_manager_->Disconnect(connection_uid);
+  transport_manager_->Disconnect(connection_uid);
 }
 
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
