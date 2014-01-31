@@ -7,17 +7,21 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.KeyEvent;
 
-import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.util.DebugTool;
 
 public class SyncReceiver extends BroadcastReceiver {
 
     private static final String TAG = "SyncProxyTester";
 
-    private IBluetoothReceiver iBluetoothReceiverCallback;
+    private IBluetoothReceiver mBluetoothReceiverCallback;
+    private ISyncReceiver mSyncReceiverCallback;
 
-    public void setBluetoothReceiverCallback(IBluetoothReceiver iBluetoothReceiver) {
-        this.iBluetoothReceiverCallback = iBluetoothReceiver;
+    public void setBluetoothReceiverCallback(IBluetoothReceiver bluetoothReceiverCallback) {
+        mBluetoothReceiverCallback = bluetoothReceiverCallback;
+    }
+
+    public void setSyncReceiver(ISyncReceiver syncReceiverCallback) {
+        mSyncReceiverCallback = syncReceiverCallback;
     }
 
     public void onReceive(Context context, Intent intent) {
@@ -32,15 +36,13 @@ public class SyncReceiver extends BroadcastReceiver {
             return;
         }
 
-        ProxyService serviceInstance = ProxyService.getInstance();
-
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int bluetoothState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
             switch (bluetoothState) {
                 case BluetoothAdapter.STATE_TURNING_OFF :
                     Log.i(TAG, "Bluetooth state STATE_TURNING_OFF");
-                    if (iBluetoothReceiverCallback != null) {
-                        iBluetoothReceiverCallback.onBluetoothTurningOff();
+                    if (mBluetoothReceiverCallback != null) {
+                        mBluetoothReceiverCallback.onBluetoothTurningOff();
                     }
                     break;
                 case BluetoothAdapter.STATE_TURNING_ON :
@@ -60,14 +62,14 @@ public class SyncReceiver extends BroadcastReceiver {
                     break;
                 case BluetoothAdapter.STATE_OFF :
                     Log.i(TAG, "Bluetooth state STATE_OFF");
-                    if (iBluetoothReceiverCallback != null) {
-                        iBluetoothReceiverCallback.onBluetoothOff();
+                    if (mBluetoothReceiverCallback != null) {
+                        mBluetoothReceiverCallback.onBluetoothOff();
                     }
                     break;
                 case BluetoothAdapter.STATE_ON :
                     Log.i(TAG, "Bluetooth state STATE_ON");
-                    if (iBluetoothReceiverCallback != null) {
-                        iBluetoothReceiverCallback.onBluetoothOn();
+                    if (mBluetoothReceiverCallback != null) {
+                        mBluetoothReceiverCallback.onBluetoothOn();
                     }
                     break;
             }
@@ -81,9 +83,8 @@ public class SyncReceiver extends BroadcastReceiver {
         }
 
         if (action.equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-            // signal your service to stop playback
-            if (serviceInstance != null) {
-                serviceInstance.pauseAnnoyingRepetitiveAudio();
+            if (mSyncReceiverCallback != null) {
+                mSyncReceiverCallback.onReceive();
             }
         }
     }

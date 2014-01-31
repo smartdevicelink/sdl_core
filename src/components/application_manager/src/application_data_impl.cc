@@ -339,7 +339,7 @@ void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
 
   if (commands_.end() != it) {
     delete it->second;
-    commands_.erase(cmd_id);
+    commands_.erase(it);
   }
 }
 

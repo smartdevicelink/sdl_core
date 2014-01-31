@@ -68,4 +68,6 @@ public class Const {
 
     // Value of the Jellybean API level, to check on devices running API level lower then API 16
     public static final int JELLYBEAN_API_LEVEL = 16;
+
+    public static final int REQUEST_FILE_OPEN = 50;
 }

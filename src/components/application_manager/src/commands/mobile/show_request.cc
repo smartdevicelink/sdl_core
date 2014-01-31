@@ -168,6 +168,11 @@ void ShowRequest::Run() {
         (*message_)[strings::msg_params][strings::graphic];
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
+    msg_params[strings::secondary_graphic] =
+            (*message_)[strings::msg_params][strings::secondary_graphic];
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];

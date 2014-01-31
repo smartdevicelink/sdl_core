@@ -2714,6 +2714,14 @@
        </description>
      </param>
 
+     <param name="secondaryGraphic" type="Image" mandatory="false">
+       <description>
+       	Image struct determining whether static or dynamic secondary image to display in app.
+       	If omitted on supported displays, the displayed secondary graphic shall not change.
+       </description>       
+     </param>
+
+
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App defined SoftButtons.
@@ -2801,6 +2809,15 @@
       	See StartTime.
       	startTime must be provided for "COUNTUP" and "COUNTDOWN".
       	startTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+      </description>
+    </param>
+
+    <param name="endTime" type="StartTime" mandatory="false">
+      <description>
+      	See StartTime.
+      	endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+      	If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+      	endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
       </description>
     </param>
 
