@@ -93,6 +93,36 @@ Item {
         }
     }
 
+    function performInteraction(helpPrompt, initialPrompt, timeoutPrompt, timeout) {
+        console.debug("enter");
+        var helpttsChunksLog = "",
+            initialttsChunkLog = "",
+            timeoutttsChunkLog = "";
+        for (var i = 0; i < helpPrompt.length; i++) {
+            helpttsChunksLog += "{type: " + helpPrompt[i].type + ", " +
+                    "text: '" + helpPrompt[i].text + "'}, ";
+        }
+        for (var i = 0; i < initialPrompt.length; i++) {
+            initialttsChunkLog += "{type: " + initialPrompt[i].type + ", " +
+                    "text: '" + initialPrompt[i].text + "'}, ";
+        }
+        for (var i = 0; i < timeoutPrompt.length; i++) {
+            timeoutttsChunkLog += "{type: " + timeoutPrompt[i].type + ", " +
+                    "text: '" + timeoutPrompt[i].text + "'}, ";
+        }
+        console.log("Message Received - {method: 'TTS.PerformInteraction', params:{ " +
+                    "helpPrompt: [" + helpttsChunksLog + "], " +
+                    "initialPrompt: [" + initialttsChunkLog + "], " +
+                    "timeoutPrompt: [" + timeoutttsChunkLog + "], " +
+                    "timeout: " + timeout +
+                    "}}")
+        ttsPopUp.performInteraction(helpPrompt.map(function(str) { return str.text }).join('\n'),
+                                    initialPrompt.map(function(str) { return str.text }).join('\n'),
+                                    timeoutPrompt.map(function(str) { return str.text }).join('\n'),
+                                    timeout)
+        console.debug("exit");
+    }
+
     function changeRegistration(language, appID) {
         console.debug("enter:", language, appID);
         console.log("Message Received - {method: 'TTS.ChangeRegistration', params:{ " +
