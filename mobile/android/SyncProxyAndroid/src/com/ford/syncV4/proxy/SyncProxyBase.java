@@ -2787,7 +2787,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             try {
                 getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
             } catch (NullPointerException e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, e.toString());
             }
         }
     }
@@ -2798,7 +2798,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             try {
                 getSyncConnection().closeAudioService(currentSession.getSessionId());
             } catch (NullPointerException e) {
-                Log.e(TAG, e.getMessage());
+                Log.e(TAG, e.toString());
             }
         }
     }
