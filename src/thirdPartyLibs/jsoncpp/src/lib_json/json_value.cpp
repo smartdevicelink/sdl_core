@@ -667,6 +667,16 @@ Value::asString() const
       return value_.bool_ ? "true" : "false";
    case intValue:
    case uintValue:
+   {
+      char buf[33];
+      int count = sprintf(buf, "%d", value_.int_);
+      if (count >0)
+      {
+         return std::string(buf, count);
+      } else
+      JSON_ASSERT_MESSAGE( false, "Type is not convertible to string" );
+      break;
+   }
    case realValue:
    case arrayValue:
    case objectValue:

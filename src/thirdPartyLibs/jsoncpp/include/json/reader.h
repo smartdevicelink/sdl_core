@@ -168,6 +168,8 @@ namespace Json {
                        Location end, 
                        CommentPlacement placement );
       void skipCommentTokens( Token &token );
+
+      bool isQuotes ( char c );
    
       typedef std::stack<Value *> Nodes;
       Nodes nodes_;
