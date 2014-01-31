@@ -25,6 +25,7 @@ public class DefaultRPCRequestConverter implements IRPCRequestConverter {
         byte[] msgBytes = marshaller.marshall(request, protocolVersion);
 
         ProtocolMessage pm = new ProtocolMessage();
+        pm.setVersion(protocolVersion);
         pm.setData(msgBytes);
         pm.setSessionID(sessionID);
         pm.setMessageType(MessageType.RPC);

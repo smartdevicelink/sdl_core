@@ -150,7 +150,7 @@ void RegisterAppInterfaceRequest::Run() {
 }
 
 void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
-(const Application& application_impl) {
+(const application_manager::Application& application_impl) {
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
   uint32_t app_id = application_impl.app_id();
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -164,7 +164,7 @@ void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
 }
 
 void RegisterAppInterfaceRequest::SendTTSChunksToHMI
-(const Application& application_impl) {
+(const application_manager::Application& application_impl) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::app_id] = application_impl.app_id();

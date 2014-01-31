@@ -1,4 +1,6 @@
 [CW5]
++ SyncProxyAndroid SDK: Add KEYBOARD value to TriggerSource enum.
+- SyncProxyAndroid SDK: Revert "Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation."
 + SyncProxyAndroid SDK: Add SystemRequest-related RPC classes.
 * SyncProxyAndroid SDK: Fix sending (Un)SubscribeVehicleData with steeringWheelAngle parameter.
 + SyncProxyAndroid SDK: Application resumption, restore session and all service.

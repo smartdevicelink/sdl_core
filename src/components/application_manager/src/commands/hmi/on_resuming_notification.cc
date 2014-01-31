@@ -33,6 +33,7 @@
 #include "application_manager/commands/hmi/on_resuming_notification.h"
 
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"

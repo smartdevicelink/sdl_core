@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
-#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 

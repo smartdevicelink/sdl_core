@@ -6,6 +6,8 @@
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+
 namespace application_manager {
   log4cxx::LoggerPtr ResumeCtrl::logger_ = log4cxx::LoggerPtr(
         log4cxx::Logger::getLogger("ResumeCtrl"));

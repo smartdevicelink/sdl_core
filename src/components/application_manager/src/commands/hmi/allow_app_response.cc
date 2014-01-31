@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/allow_app_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 

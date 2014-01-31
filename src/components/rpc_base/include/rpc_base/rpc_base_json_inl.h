@@ -96,14 +96,15 @@ inline Json::Value Boolean::ToJsonValue() const {
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Json::Value& value)
     : PrimitiveType(!value.isNull(),
-                    value.isInt() && range_.Includes(value.asInt())),
-      value_(valid_ ? value.asInt() : IntType()) {
+                    value.isInt() && range_.Includes(value.asInt64())),
+      value_(valid_ ? value.asInt64() : IntType()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Json::Value& value, IntType def_value)
-    : PrimitiveType(true, value.isInt() || value.isNull()),
-      value_(value.isInt() ? value.asInt() : def_value) {
+    : PrimitiveType(true, (value.isInt() && range_.Includes(value.asInt64()))
+                           || value.isNull()),
+      value_(value.isInt() ? value.asInt64() : def_value) {
 }
 
 // TODO: int64_t support
@@ -122,7 +123,9 @@ Float<minnum, maxnum, minden, maxden>::Float(const Json::Value& value)
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(const Json::Value& value,
                                              double def_value)
-    : PrimitiveType(true, value.isDouble() || value.isNull()),
+    : PrimitiveType(true, (value.isDouble()
+                             && range_.Includes(value.asDouble()))
+                          || value.isNull()),
       value_(value.isDouble() ? value.asDouble() : def_value) {
 }
 
@@ -140,7 +143,9 @@ String<maxlen>::String(const Json::Value& value)
 
 template<size_t maxlen>
 String<maxlen>::String(const Json::Value& value, const std::string& def_value)
-    : PrimitiveType(true, value.isString() || value.isNull()),
+    : PrimitiveType(true, (value.isString()
+                             && value.asString().length() < maxlen)
+                          || value.isNull()),
       value_(value.isString() ? value.asString() : def_value) {
 }
 
@@ -193,7 +198,7 @@ Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
   Json::Value array;
   array.resize(this->size());
   for (size_t i = 0; i != this->size(); ++i) {
-    array[i] = (this->operator [](i)).ToJsonValue();
+    array[Json::ArrayIndex(i)] = (this->operator [](i)).ToJsonValue();
   }
   return array;
 }

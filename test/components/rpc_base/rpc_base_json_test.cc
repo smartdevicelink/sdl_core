@@ -100,6 +100,13 @@ TEST(ValidatedTypesJson, IntegerFromJsonTest) {
   ASSERT_EQ(readback.asInt(), 42);
 }
 
+TEST(ValidatedTypesJson, IntegerFromOverflowingJsonTest) {
+  Value int_val(0xFFFFFFFFFFll);
+  Integer<int32_t, -5, 192> integer(int_val);
+  ASSERT_TRUE(integer.is_initialized());
+  ASSERT_FALSE(integer.is_valid());
+}
+
 TEST(ValidatedTypesJson, IntegerFromInvalidJsonTest) {
   Value str_val("Hello");
   Integer<int8_t, -3, 15> integer(str_val);

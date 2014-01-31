@@ -12,10 +12,11 @@
 #include "interfaces/MOBILE_API_schema.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-#include "application_manager/application_impl.h"
+
 
 namespace application_manager {
 
+class Application;
 class ApplicationManagerImpl;
 class ResumeCtrl {
   public:

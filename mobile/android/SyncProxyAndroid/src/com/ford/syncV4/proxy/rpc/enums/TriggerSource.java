@@ -4,7 +4,8 @@ import java.util.EnumSet;
 
 public enum TriggerSource {
     TS_MENU("MENU"),
-    TS_VR("VR");
+    TS_VR("VR"),
+    TS_KEYBOARD("KEYBOARD");
 
     String internalName;
     

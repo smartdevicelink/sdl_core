@@ -92,14 +92,16 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    *
    * @param application_impl application
    */
-  void SendVrCommandsOnRegisterAppToHMI(const Application& application_impl);
+  void SendVrCommandsOnRegisterAppToHMI(
+      const application_manager::Application& application_impl);
 
   /*
    * @brief Send ttsSpeak request to HMI
    *
    * @param application_impl application
    */
-  void SendTTSChunksToHMI(const Application& application_impl);
+  void SendTTSChunksToHMI(
+      const application_manager::Application& application_impl);
 
   /*
    * @brief Check new ID along with known mobile application ID

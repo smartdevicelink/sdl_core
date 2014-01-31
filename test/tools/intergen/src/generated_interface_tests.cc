@@ -78,4 +78,20 @@ TEST_F(GeneratedInterfaceTests, TypedefTest) {
   ASSERT_EQ(expected_json, serialized);
 }
 
+TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest) {
+  const char* input_json =
+      "{\"messageData\":[300, 20],\"messageLength\":2,\"targetID\":5}";
+  request::DiagnosticMessage dm(JsonValue(input_json));
+  ASSERT_TRUE(dm.is_initialized());
+  ASSERT_FALSE(dm.is_valid());
+}
+
+TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest64) {
+  const char* input_json =
+      "{\"messageData\":[10, 123456789123],\"messageLength\":2,\"targetID\":5}";
+  request::DiagnosticMessage dm(JsonValue(input_json));
+  ASSERT_TRUE(dm.is_initialized());
+  ASSERT_FALSE(dm.is_valid());
+}
+
 }  // namespace test

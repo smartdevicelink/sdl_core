@@ -62,6 +62,28 @@ Item {
     }
 
     function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
+        var softButtonsLog = "",
+            alertStringsLog = "";
+        for (var i = 0; i < alertStrings.length; i++) {
+            alertStringsLog += "{fieldName: '" + alertStrings[i].fieldName + "', " +
+                    "fieldText: '" + alertStrings[i].fieldText + "'},";
+        }
+            for (var i = 0; i < softButtons.length; i++) {
+                softButtonsLog += "{type: '" + softButtons[i].type + "', " +
+                        "text: " + softButtons[i].text + "', ";
+                softButtons[i].image ? softButtonsLog += "image: " + "{value: '" + softButtons[i].image.value + "', imageType: " + softButtons[i].image.imageType + "}, " : softButtonsLog += "";
+                softButtonsLog += "isHighlighted: " + softButtons[i].isHighlighted + "', " +
+                        "softButtonID: " + softButtons[i].softButtonID + "', " +
+                        "systemAction: " + softButtons[i].systemAction +
+                        "},";
+            }
+        console.log("Message Received - {method: 'UI.Alert', params:{ " +
+                    "alertStrings: [" + alertStringsLog + "]," +
+                    "duration: " + duration + "', " +
+                    "softButtons: [" + softButtonsLog + "]," +
+                    "progressIndicator: " + progressIndicator + "', " +
+                    "appID: " + appID + "', " +
+                    "}}")
         var fieldSubstrings = alertStrings
 	    .sort(function(a, b) { return a.fieldName - b.fieldName }) // sorting by fieldName
 	    .map(function(val) { return val.fieldText });              // mapping to array of strings
@@ -80,7 +102,39 @@ Item {
     }
 
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
-        console.debug("enter: " + showStrings + ", " + alignment + ", " + graphic + ", "+ softButtons + ", " + customPresets + ", " + appID)
+        var softButtonsLog = "",
+            showStringsLog = "",
+            customPresetsLog = "";
+        if (showStrings) {
+            for (var i = 0; i < showStrings.length; i++) {
+                showStringsLog += "{fieldName: '" + showStrings[i].fieldName + "', " +
+                        "fieldText: '" + showStrings[i].fieldText + "'},";
+            }
+        }
+        if (customPresets) {
+            for (var i = 0; i < customPresets.length; i++) {
+                customPresetsLog += "'" + customPresets[i] + "', ";
+            }
+        }
+        if (softButtons) {
+            for (var i = 0; i < softButtons.length; i++) {
+                softButtonsLog += "{type: '" + softButtons[i].type + "', " +
+                        "text: " + softButtons[i].text + "', ";
+                softButtons[i].image ? softButtonsLog += "image: " + "{value: '" + softButtons[i].image.value + "', imageType: " + softButtons[i].image.imageType + "}, " : softButtonsLog += "";
+                softButtonsLog += "isHighlighted: " + softButtons[i].isHighlighted + "', " +
+                        "softButtonID: " + softButtons[i].softButtonID + "', " +
+                        "systemAction: " + softButtons[i].systemAction +
+                        "},";
+            }
+        }
+        console.log("Message Received - {method: 'UI.Show', params:{ " +
+                    "showStrings: [" + showStringsLog + "], " +
+                    "alignment: " + alignment + "', " +
+                    "graphic: {value: '" + graphic.value + "', imageType: " + graphic.imageType + "}, " +
+                    "softButtons: [" + softButtonsLog + "], " +
+                    "customPresets: [" + customPresetsLog + "], " +
+                    "appID: " + appID +
+                    "}}")
         var app = dataContainer.getApplication(appID);
 
         app.softButtons.clear()
@@ -143,31 +197,87 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        console.log("Message Received - {method: 'UI.AddCommand', params:{ " +
+                    "appID: " + appID + ", " +
+                    "cmdID: " + cmdID + ", " +
+                    "cmdIcon: {value: '" + cmdIcon.value + "', imageType: " + cmdIcon.imageType + "}, " +
+                    "menuParams: {parentID: " + menuParams.parentID + ", position: " + menuParams.position + "}" + "}}")
         dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
     }
 
     function deleteCommand (cmdID, appID) {
+        console.log("Message Received - {method: 'UI.DeleteCommand', params:{ " +
+                    "appID: " + appID + ", " +
+                    "cmdID: " + cmdID +
+                    "}}")
         dataContainer.deleteCommand(cmdID, appID)
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        console.log("Message Received - {method: 'UI.AddSubMenu', params:{ " +
+                    "appID: " + appID + ", " +
+                    "menuID: " + menuID + ", " +
+                    "menuParams: {menuName: '" + menuParams.menuName + "', position: " + menuParams.position + "}"
+                    + "}}")
         dataContainer.addSubMenu(menuID, menuParams, appID)
     }
 
     function deleteSubMenu (menuID, appID) {
+        console.log("Message Received - {method: 'UI.DeleteSubMenu', params:{ " +
+                    "appID:" + appID + ", " +
+                    "menuID: " + menuID +
+                    "}}")
         dataContainer.deleteSubMenu(menuID, appID)
     }
 
     function performInteraction (initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
         console.debug("enter")
+        var choiseLog = "",
+            vrHelpLog = "";
+        for (var i = 0; i < choiceSet.length; i++) {
+            choiseLog += "{choiceID: " + choiceSet[i].choiceID + ", " +
+                    "menuName: '" + choiceSet[i].menuName + "', " +
+                    "image: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}, " +
+                    "secondaryText: '" + choiceSet[i].secondaryText + "', " +
+                    "tertiaryText: '" + choiceSet[i].tertiaryText + "', " +
+                    "secondaryImage: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}},";
+        }
+        for (var i = 0; i < vrHelp.length; i++) {
+            vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
+                    "image: {value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}, " +
+                    "position: " + vrHelp[i].position +
+                    "},";
+        }
+        console.log("Message Received - {method: 'UI.PerformInteraction', params:{ " +
+                    "appID:" + appID + ", " +
+                    "initialText: {fieldName: " + initialText.fieldName + ", fieldText: '" + initialText.fieldText + "'}, " +
+                    "choiceSet: [" + choiseLog + "], " +
+                    "vrHelpTitle: '" + vrHelpTitle + "', " +
+                    "vrHelp: [" + vrHelpLog + "], " +
+                    "timeout: " + timeout + ", " +
+                    "interactionLayout: " + interactionLayout +
+                    "}}")
         var async = interactionPopup.performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID)
         console.debug("exit")
         return async
     }
 
     function setMediaClockTimer (startTime, endTime, updateMode, appID) {
-        console.debug("enter: {", startTime, ", ", endTime, ", ", updateMode, ", ", appID, "}")
+        var startTimeLog = "",
+            endTimeLog = "";
+        if (startTime) {
+            startTimeLog = "hours: " + startTime.hours + ", minutes: " + startTime.minutes + ", seconds: " + startTime.seconds;
+        }
+        if (endTime) {
+            endTimeLog = "hours: " + endTime.hours + ", minutes: " + endTime.minutes + ", seconds: " + endTime.seconds;
+        }
 
+        console.log("Message Received - {method: 'UI.SetMediaClockTimer', params:{ " +
+                    "startTime: {" + startTimeLog + "}, " +
+                    "endTime: {" + endTimeLog + "}, " +
+                    "updateMode: " + updateMode + ", " +
+                    "appID: " + appID +
+                    "}}")
         var app = dataContainer.getApplication(appID)
         var newStartTime
         var newEndTime
@@ -269,6 +379,23 @@ Item {
 
     function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {
         console.debug("enter")
+        var vrHelpLog = "";
+        for (var i = 0; i < vrHelp.length; i++) {
+            vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
+                    "image: {value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}, " +
+                    "position: " + vrHelp[i].position +
+                    "},";
+        }
+        console.log("Message Received - {method: 'UI.SetGlobalProperties', params:{ " +
+                    "appID:" + appID + ", " +
+                    "vrHelpTitle: '" + vrHelpTitle + "', " +
+                    "vrHelp: [" + vrHelpLog + "], " +
+                    "menuTitle: '" + menuTitle + "', " +
+                    "menuIcon: {value: '" + menuIcon.value + "', imageType: " + menuIcon.imageType + "}, " +
+                    "keyboardProperties: {language: '" + keyboardProperties.language + "', keyboardLayout: '" + keyboardProperties.language +
+                    "', sendDynamicEntry: '" + keyboardProperties.sendDynamicEntry + "', keypressMode: '" + keyboardProperties.keypressMode +
+                    "', limitedCharacterList: '" + keyboardProperties.limitedCharacterList + "', autoCompleteText: '" + keyboardProperties.autoCompleteText + "'" +
+                    "}}")
         var app = dataContainer.getApplication(appID)
         var dataToUpdate = {}
 
@@ -307,33 +434,51 @@ Item {
     }
 
     function isReady () {
+        console.log("Message Received - {method: 'UI.IsReady'}")
         return {
             available: dataContainer.hmiUIAvailable
         }
     }
 
     function getLanguage () {
+        console.log("Message Received - {method: 'UI.GetLanguage'}")
         return {
             language: dataContainer.hmiUILanguage
         }
     }
 
     function getSupportedLanguages () {
+        console.log("Message Received - {method: 'UI.GetSupportedLanguages'}")
         return {
             languages: settingsContainer.sdlLanguagesList
         }
     }
 
     function changeRegistration (language, appID) {
+        console.log("Message Received - {method: 'UI.ChangeRegistration', params:{ " +
+                    "language: " + language + ", " +
+                    "appID: " + appID +
+                    "}}")
         dataContainer.changeRegistrationUI(language, appID)
     }
 
     function setAppIcon (syncFileName, appID) {
+        console.log("Message Received - {method: 'UI.SetAppIcon', params:{ " +
+                    "syncFileName: {value: '" + syncFileName.value + "', imageType: " + syncFileName.imageType + "}, " +
+                    "appID: " + appID +
+                    "}}")
         dataContainer.setApplicationProperties(appID, { icon: syncFileName.value })
     }
 
     function slider (numTicks, position, sliderHeader, sliderFooter, timeout, appID) {
-        console.debug("enter", numTicks, position, sliderHeader, sliderFooter, timeout, appID)
+        console.log("Message Received - {method: 'UI.Slider', params:{ " +
+                    "numTicks: " + numTicks + "', " +
+                    "position: " + position + "', " +
+                    "sliderHeader: '" + sliderHeader + "', " +
+                    "sliderFooter: [" + sliderFooter + "], " +
+                    "timeout: " + timeout + ", " +
+                    "appID: " + appID +
+                    "}}")
         if (dataContainer.uiSlider.running) {
             console.debug("aborted")
             return  {__retCode: Common.Result.ABORTED, sliderPosition: position}
@@ -357,7 +502,24 @@ Item {
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
-        console.debug("enter ", messageText, timeout, softButtons, appID)
+
+        var softButtonsLog = "";
+            for (var i = 0; i < softButtons.length; i++) {
+                softButtonsLog += "{type: '" + softButtons[i].type + "', " +
+                        "text: " + softButtons[i].text + "', ";
+                softButtons[i].image ? softButtonsLog += "image: " + "{value: '" + softButtons[i].image.value + "', imageType: " + softButtons[i].image.imageType + "}, " : softButtonsLog += "";
+                softButtonsLog += "isHighlighted: " + softButtons[i].isHighlighted + "', " +
+                        "softButtonID: " + softButtons[i].softButtonID + "', " +
+                        "systemAction: " + softButtons[i].systemAction +
+                        "},";
+            }
+        console.log("Message Received - {method: 'UI.ScrollableMessage', params:{ " +
+                    "messageText: {fieldName: " + messageText.fieldName + ", fieldText: '" + messageText.fieldText + "'}, " +
+                    "timeout: " + timeout + "', " +
+                    "softButtons: [" + softButtonsLog + "]," +
+                    "appID: " + appID + "', " +
+                    "}}")
+
         // TODO{ALeshin}: Also check HMILevel, when it will be available. It should be FULL otherwise - REJECTED
         if (contentLoader.item.systemContext !== Common.SystemContext.SYSCTXT_MAIN) {
             return { __retCode: Common.Result.REJECTED, __message: "System Context isn't MAIN" }
@@ -386,6 +548,7 @@ Item {
     }
 
     function getCapabilities() {
+        console.log("Message Received - {method: 'UI.GetCapabilities'}")
         return {
             "audioPassThruCapabilities": {
                 "samplingRate": Common.SamplingRate.RATE_44KHZ,
@@ -399,7 +562,15 @@ Item {
     }
 
     function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
-        console.debug("enter", audioPassThruDisplayTexts, timeout)
+        var displayTextsLog = "";
+            for (var i = 0; i < audioPassThruDisplayTexts.length; i++) {
+                displayTextsLog += "{fieldName: '" + audioPassThruDisplayTexts[i].fieldName + "', " +
+                        "fieldText: " + audioPassThruDisplayTexts[i].fieldText + "'},";
+            }
+        console.log("Message Received - {method: 'UI.PerformAudioPassThru', params:{ " +
+                    "audioPassThruDisplayTexts: [" + displayTextsLog + "], " +
+                    "maxDuration: " + timeout +
+                    "}}")
 
         if (dataContainer.uiAudioPassThru.running) {
             console.debug("aborted")
@@ -420,6 +591,8 @@ Item {
 
     function endAudioPassThru () {
         console.debug("enter")
+        console.log("Message Received - {method: 'UI.EndAudioPassThru'}")
+
         if (!dataContainer.uiAudioPassThru.running) {
             console.debug("rejected")
             throw Common.Result.REJECTED
@@ -431,6 +604,9 @@ Item {
 
     function closePopUp (methodName) {
         console.debug("enter")
+        console.log("Message Received - {method: 'UI.ClosePopUp', params:{ " +
+                    "methodName: " + methodName +
+                    "}}")
         var popUpToClose
 
         if (dataContainer.activePopup.length === 0) {

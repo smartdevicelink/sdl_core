@@ -20,7 +20,11 @@ public enum ButtonName{
     SEARCH;
 
     public static ButtonName valueForString(String value) {
-        return valueOf(value);
+        try {
+            return valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
     
     /**

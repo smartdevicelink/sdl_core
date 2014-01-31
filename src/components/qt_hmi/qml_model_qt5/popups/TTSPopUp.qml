@@ -58,8 +58,24 @@ PopUp {
             id: timer
             interval: Constants.ttsSpeakTime
                     onTriggered: deactivate()
+        },
+
+        Timer {
+            id: ttsPerformInteractionTimer
+            interval: Constants.ttsSpeakTime
+            onTriggered: activate(message)
+            property var message: undefined
         }
     ]
+
+    function performInteraction(helpPrompt, initialPrompt, timeoutPrompt, timeout) {
+        activate(initialPrompt);
+        if (timeout * 2 - Constants.ttsSpeakTime > 0) {
+            ttsPerformInteractionTimer.message = timeoutPrompt;
+            ttsPerformInteractionTimer.interval = timeout - Constants.ttsSpeakTime;
+            ttsPerformInteractionTimer.restart()
+        }
+    }
 
     function activate(message) {
         console.debug("Activate TTS popup:", message);

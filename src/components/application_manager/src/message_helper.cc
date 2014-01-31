@@ -34,6 +34,7 @@
 #include <string>
 #include <algorithm>
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
@@ -1055,6 +1056,7 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 
 void MessageHelper::SendAudioStartStream(
   const std::string& url, int32_t connection_key) {
+
   smart_objects::SmartObject* start_stream =
     new smart_objects::SmartObject(smart_objects::SmartType_Map);
 

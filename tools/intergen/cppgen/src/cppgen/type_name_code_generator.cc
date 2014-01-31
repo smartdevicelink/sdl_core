@@ -56,8 +56,6 @@ const char* StdIntTypeFromRagne(const Integer::Range& range) {
       return "int16_t";
     } else if (int32_t_range.Includes(range)) {
       return "int32_t";
-    } else {
-      return "int64_t";
     }
   } else {
     Integer::Range uint8_t_range(0, 255);
@@ -69,10 +67,9 @@ const char* StdIntTypeFromRagne(const Integer::Range& range) {
       return "uint16_t";
     } else if (uint32_t_range.Includes(range)) {
       return "uint32_t";
-    } else {
-      return "uint64_t";
     }
   }
+  return "int64_t";
 }
 }  // namespace
 
