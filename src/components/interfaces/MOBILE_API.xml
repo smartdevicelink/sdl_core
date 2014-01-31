@@ -2812,6 +2812,15 @@
       </description>
     </param>
 
+    <param name="endTime" type="StartTime" mandatory="false">
+      <description>
+      	See StartTime.
+      	endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+      	If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+      	endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+      </description>
+    </param>
+
     <param name="updateMode" type="UpdateMode" mandatory="true">
       <description>
       	Enumeration to control the media clock.

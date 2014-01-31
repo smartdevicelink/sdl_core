@@ -125,7 +125,7 @@ bool TypeRegistry::AddEnums(const pugi::xml_node& xml) {
 }
 
 bool TypeRegistry::AddStructsAndTypedefs(const pugi::xml_node& xml) {
-  for (pugi::xml_node i = xml.child("struct"); i;
+  for (pugi::xml_node i = xml.first_child(); i;
       i = i.next_sibling()) {
     if (std::string("struct") == i.name()) {
       if (!AddStruct(i)) {
