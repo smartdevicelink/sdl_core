@@ -32,9 +32,9 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
                 instanceOf(DefaultRPCRequestConverter.class));
     }
 
-    public void testGetConverterShouldReturnSpecificConverterForPutFile() {
+    public void testGetConverterShouldReturnDefaultConverterForPutFile() {
         assertThat(factory.getConverterForFunctionName("PutFile"),
-                instanceOf(PutFileRPCRequestConverter.class));
+                instanceOf(DefaultRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldCacheConverterForTheSameName() {
