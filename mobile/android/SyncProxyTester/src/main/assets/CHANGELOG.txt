@@ -2,7 +2,7 @@
 + SyncProxyAndroid SDK: Add SystemRequest-related RPC classes.
 * SyncProxyAndroid SDK: Fix sending (Un)SubscribeVehicleData with steeringWheelAngle parameter.
 + SyncProxyAndroid SDK: Application resumption, restore session and all service.
-+ Streaming resumption (Navi Service / Audio Service)
++ Streaming resumption (Navi Service / Audio Service / PutFile)
 
 [CW4]
 + SyncProxyTester: added possibility to send PerformInteraction request without choice set id
