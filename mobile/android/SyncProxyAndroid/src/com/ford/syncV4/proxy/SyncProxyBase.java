@@ -2493,17 +2493,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         } else {
                             _proxyListener.onAppUnregisteredAfterLanguageChange(_lastLanguageChange);
                         }
-                    } else if (msg.getReason() == AppInterfaceUnregisteredReason.IGNITION_OFF) {
+                    } else if (msg.getReason() != null) {
                         if (_callbackToUIThread) {
                             // Run in UI thread
                             _mainUIHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                                    _proxyListener.onAppUnregisteredReason(msg.getReason());
                                 }
                             });
                         } else {
-                            _proxyListener.onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason.IGNITION_OFF);
+                            _proxyListener.onAppUnregisteredReason(msg.getReason());
                         }
                     } else {
                         // This requires the proxy to be cycled
@@ -2784,14 +2784,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
             Log.i(TAG, "Mobile Nav Session is going to stop " + currentSession.getSessionId());
-            getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+            try {
+                getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+            } catch (NullPointerException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
             Log.i(TAG, "Audio service is going to stop " + currentSession.getSessionId());
-            getSyncConnection().closeAudioService(currentSession.getSessionId());
+            try {
+                getSyncConnection().closeAudioService(currentSession.getSessionId());
+            } catch (NullPointerException e) {
+                Log.e(TAG, e.getMessage());
+            }
         }
     }
 

@@ -3,9 +3,13 @@ package com.ford.syncV4.proxy;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
@@ -18,6 +22,7 @@ import org.mockito.Mockito;
 
 import java.io.OutputStream;
 import java.io.PipedOutputStream;
+import java.util.Hashtable;
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -31,6 +36,7 @@ import static org.mockito.Mockito.when;
  */
 public class SyncProxyBaseTest extends InstrumentationTestCase {
 
+    private static final int CALLBACK_WAIT_TIMEOUT = 500;
     private static byte sessionID = (byte) 1;
     public static final byte VERSION = (byte) 2;
     private IProxyListenerALM listenerALM;
@@ -235,5 +241,68 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         verify(proxyALM._syncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
         assertEquals("session id of closed RPC service should be same as initial session id", sessionID, sessionIDCaptor.getValue().byteValue());
         assertFalse(keepConnectionCaptor.getValue());
+    }
+
+    public void testAppUnregisteredWithIgnitionOff()throws Exception{
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+
+        // send OnAppInterfaceUnregistered
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        final AppInterfaceUnregisteredReason reason =
+                AppInterfaceUnregisteredReason.IGNITION_OFF;
+        params.put(Names.reason, reason);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(
+                reason);
+    }
+
+    public void testAppUnregisteredWithMasterReset()throws Exception{
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+
+        // send OnAppInterfaceUnregistered
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        final AppInterfaceUnregisteredReason reason =
+                AppInterfaceUnregisteredReason.MASTER_RESET;
+        params.put(Names.reason, reason);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(
+                reason);
+    }
+
+    public void testAppUnregisteredWithFactoryDefaults()throws Exception{
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+
+        // send OnAppInterfaceUnregistered
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        final AppInterfaceUnregisteredReason reason =
+                AppInterfaceUnregisteredReason.FACTORY_DEFAULTS;
+        params.put(Names.reason, reason);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+
+        verify(proxyListenerMock,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(
+                reason);
     }
 }

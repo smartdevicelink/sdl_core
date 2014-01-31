@@ -167,4 +167,5 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }
+
 }

@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
@@ -1447,9 +1446,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason){
-        Log.i(TAG, "OnAppUnregisteredAfterIgnitionOff:" + reason);
-        createDebugMessageForAdapter("OnAppUnregisteredAfterIgnitionOff:" + reason);
+    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason){
+        Log.i(TAG, "onAppUnregisteredReason:" + reason);
+        createDebugMessageForAdapter("onAppUnregisteredReason:" + reason);
     }
 
     @Override

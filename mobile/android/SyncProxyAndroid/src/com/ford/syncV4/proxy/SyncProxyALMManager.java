@@ -2631,7 +2631,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAppUnregisteredAfterIgnitionOff(AppInterfaceUnregisteredReason reason) {
+        public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason) {
 
         }
 
