@@ -36,8 +36,8 @@ import QtQuick 2.0
 
 Item
 {
-    function getCapabilities()
-    {
+    function getCapabilities() {
+        console.log("Message Received - {method: 'Buttons.GetCapabilities'}")
         return {
             capabilities: settingsContainer.buttonCapabilities,
             presetBankCapabilities: {

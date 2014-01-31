@@ -37,13 +37,22 @@ import "Common.js" as Common
 
 Item {
     function isReady() {
+        console.log("Message Received - {method: 'VR.IsReady'}")
         return {
             available: dataContainer.hmiVRAvailable
         }
     }
 
     function addCommand(cmdID, vrCommands, appID) {
-        console.log("VR.AddCommand: cmd ", cmdID, ", app ", appID);
+        var vrCommandsLog = "";
+        for (var i = 0; i < vrCommands.length; i++) {
+            vrCommandsLog += "'" + vrCommands[i] + "', ";
+        }
+        console.log("Message Received - {method: 'VR.AddCommand', params:{ " +
+                    "vrCommands: [" + vrCommandsLog + "], " +
+                    "cmdID: " + cmdID + ", " +
+                    "appID: " + appID +
+                    "}}")
         for (var i = 0; i < vrCommands.length; ++i) {
             dataContainer.vrCommands.append({
                                                cmdID: cmdID,
@@ -55,7 +64,10 @@ Item {
     }
 
     function deleteCommand(cmdID, appID) {
-        console.log("VR.DeleteCommand: cmd ", cmdID, ", app ", appID);
+        console.log("Message Received - {method: 'VR.DeleteCommand', params:{ " +
+                    "appID: " + appID + ", " +
+                    "cmdID: " + cmdID +
+                    "}}")
         for (var i = 0; i < dataContainer.vrCommands.count; ) {
             if ((dataContainer.vrCommands.get(i).cmdID === cmdID) &&
                     ((appID === undefined) || (dataContainer.vrCommands.get(i).appID === appID))) {
@@ -68,25 +80,32 @@ Item {
     }
 
     function getLanguage() {
+        console.log("Message Received - {method: 'VR.GetLanguage'}")
         return {
             language: dataContainer.hmiTTSVRLanguage
         }
     }
 
     function getSupportedLanguages() {
+        console.log("Message Received - {method: 'VR.GetSupportedLanguages'}")
         return {
             languages: settingsContainer.sdlLanguagesList
         }
     }
 
     function getCapabilities() {
+        console.log("Message Received - {method: 'UI.GetCapabilities'}")
         return {
             vrCapabilities: [ Common.VrCapabilities.VR_TEXT ]
         }
     }
 
     function changeRegistration(language, appID) {
-        console.debug("enter:", language, appID);
+        console.debug("enter");
+        console.log("Message Received - {method: 'VR.ChangeRegistration', params:{ " +
+                    "language: " + language + ", " +
+                    "appID: " + appID +
+                    "}}")
         dataContainer.changeRegistrationTTSVR(language, appID);
         console.debug("exit");
     }
