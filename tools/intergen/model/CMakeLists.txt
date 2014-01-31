@@ -12,6 +12,7 @@ set (SOURCES
   src/model/constant.cc
   src/model/function.cc
   src/model/interface.cc
+  src/model/model_filter.cc
   src/model/scope.cc
   src/model/type.cc
   src/model/type_registry.cc
@@ -26,6 +27,7 @@ set (HEADERS
   include/model/constants_creator.h
   include/model/function.h
   include/model/interface.h
+  include/model/model_filter.h
   include/model/scope.h
   include/model/type.h
   include/model/type_registry.h

@@ -44,13 +44,14 @@ class xml_document;
 }  // namespace pugi
 
 namespace codegen {
+class ModelFilter;
 
 /*
  * Represents single parsed XML file that defines an API
  */
 class API {
  public:
-  API();
+  API(const ModelFilter* model_filter);
   // Follows parsed |xmldoc| collecting and validating API definitions
   // Returns false and prints to cerr on error
   bool init(const pugi::xml_document& xmldoc);
@@ -59,6 +60,7 @@ class API {
   const std::vector<Interface*>& interfaces() const;
 
  private:
+  const ModelFilter* model_filter_;
   BuiltinTypeRegistry builtin_type_registry_;
   std::vector<Interface*> interfaces_;
   utils::StdContainerDeleter<std::vector<Interface*> > interfaces_deleter_;

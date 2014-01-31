@@ -49,6 +49,7 @@ class xml_node;
 
 namespace codegen {
 class BuiltinTypeRegistry;
+class ModelFilter;
 
 /*
  * Type registry is a container holding definitions of all the structs and
@@ -65,7 +66,8 @@ class TypeRegistry {
   typedef std::map<std::string, const Typedef*> TypedefByName;
  public:
   // Methods
-  TypeRegistry(BuiltinTypeRegistry* builtin_type_registry);
+  TypeRegistry(BuiltinTypeRegistry* builtin_type_registry,
+               const ModelFilter* model_filter);
   ~TypeRegistry();
   // Follows given xml_node collectin all the struct and enum definitons
   // Returns false and prints to cerr if invalid type definition was found
@@ -111,6 +113,7 @@ class TypeRegistry {
  private:
   // fields
   BuiltinTypeRegistry* builtin_type_registry_;
+  const ModelFilter* model_filter_;
   std::set<Array> arrays_;
   std::set<Map> maps_;
   EnumList enums_;

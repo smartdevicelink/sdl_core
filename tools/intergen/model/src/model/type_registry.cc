@@ -37,6 +37,7 @@
 
 #include "model/builtin_type_registry.h"
 #include "model/constant.h"
+#include "model/model_filter.h"
 #include "model/scope.h"
 #include "pugixml.hpp"
 #include "utils/safeformat.h"
@@ -51,11 +52,15 @@ const char* kFunctionIdEnumName = "FunctionID";
 
 namespace codegen {
 
-TypeRegistry::TypeRegistry(BuiltinTypeRegistry* builtin_type_registry)
+TypeRegistry::TypeRegistry(BuiltinTypeRegistry* builtin_type_registry,
+                           const ModelFilter* model_filter)
     : builtin_type_registry_(builtin_type_registry),
+      model_filter_(model_filter),
       enums_deleter_(&enums_),
       structs_deleter_(&structs_),
       typedefs_deleter_(&typedefs_) {
+  assert(builtin_type_registry_);
+  assert(model_filter_);
 }
 
 bool TypeRegistry::init(const pugi::xml_node& xml) {
@@ -141,8 +146,11 @@ bool TypeRegistry::AddStructsAndTypedefs(const pugi::xml_node& xml) {
 }
 
 bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
-  std::string name = xml_enum.attribute("name").value();
   Scope scope = ScopeFromLiteral(xml_enum.attribute("scope").value());
+  if (model_filter_->ShouldFilterScope(scope)) {
+    return true;
+  }
+  std::string name = xml_enum.attribute("name").value();
   InternalScope internal_scope = InternalScopeFromLiteral(
       xml_enum.attribute("internal_scope").value());
   Description description = CollectDescription(xml_enum);
@@ -159,8 +167,11 @@ bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
 }
 
 bool TypeRegistry::AddStruct(const pugi::xml_node& xml_struct) {
-  std::string name = xml_struct.attribute("name").value();
   Scope scope = ScopeFromLiteral(xml_struct.attribute("scope").value());
+  if (model_filter_->ShouldFilterScope(scope)) {
+    return true;
+  }
+  std::string name = xml_struct.attribute("name").value();
   Description description = CollectDescription(xml_struct);
   if (IsRegisteredStruct(name)) {
     std::cerr << "Duplicate structure: " << name << std::endl;
@@ -182,6 +193,7 @@ bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
   }
   const Type* type = NULL;
   if (!GetType(xml_typedef, &type)) {
+    std::cerr<< "While parsing typedef " << name << '\n';
     return false;
   }
   Description description = CollectDescription(xml_typedef);
@@ -290,8 +302,11 @@ bool TypeRegistry::IsRegisteredStruct(const std::string& struct_name) {
 bool TypeRegistry::AddEnumConstants(Enum* enm, const pugi::xml_node& xml_enum) {
   for (pugi::xml_node i = xml_enum.child("element"); i;
       i = i.next_sibling("element")) {
-    std::string name = i.attribute("name").value();
     Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    if (model_filter_->ShouldFilterScope(scope)) {
+      continue;
+    }
+    std::string name = i.attribute("name").value();
     std::string internal_name = i.attribute("internal_name").value();
     Description description = CollectDescription(i);
     std::string design_description = i.child_value("designdescription");
@@ -319,15 +334,18 @@ bool TypeRegistry::AddStructureFields(Struct* strct,
                                       const pugi::xml_node& xml_struct) {
   for (pugi::xml_node i = xml_struct.child("param"); i;
       i = i.next_sibling("param")) {
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    if (model_filter_->ShouldFilterScope(scope)) {
+      continue;
+    }
     std::string type_name = i.attribute("type").value();
     const Type* type = NULL;
     if (!GetType(i, &type)) {
-      std::cerr << "Failed to get field type for struct " << strct->name()
+      std::cerr << "While parsing struct " << strct->name()
                 << std::endl;
       return false;
     }
     std::string name = i.attribute("name").value();
-    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
     std::string defvalue = i.attribute("defvalue").value();
     bool mandatory = IsMandatoryParam(i);
     const Constant* defvalue_constant = NULL;

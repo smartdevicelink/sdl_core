@@ -38,6 +38,7 @@
 
 #include "cppgen/cpp_api_code_generator.h"
 #include "model/api.h"
+#include "model/model_filter.h"
 #include "pugixml.hpp"
 #include "utils/safeformat.h"
 
@@ -50,6 +51,7 @@ using std::cerr;
 struct Options {
   char* interface_xml;
   std::set<std::string> requested_interfaces;
+  std::set<std::string> excluded_scopes;
   Options()
       : interface_xml(NULL) {
   }
@@ -58,12 +60,17 @@ struct Options {
 void Usage() {
   cout << "Interface generator" << '\n'
        << "Usage: intergen -f <interface definition xml>"
-       << " -i <interface_name> [-i <another_interface_name>]" << '\n';
+       << " -i <interface_name> [-i <another_interface_name>]"
+       << " -s <excluded_scope_name> [-s <another_excluded_scope_name>]" <<'\n';
 }
 
 int main(int argc, char* argv[]) {
+  if (argc == 1) {
+    Usage();
+    return EXIT_FAILURE;
+  }
   Options options;
-  const char* opts = "f:i:";
+  const char* opts = "f:i:s:";
   for (int opt = getopt(argc, argv, opts); opt != -1;
       opt = getopt(argc, argv, opts)) {
     switch (opt) {
@@ -77,6 +84,10 @@ int main(int argc, char* argv[]) {
         } else {
           cerr << "Option 'f' specified multiple times" << '\n';
         }
+        break;
+      }
+      case 's': {
+        options.excluded_scopes.insert(optarg);
         break;
       }
       default: {
@@ -98,7 +109,8 @@ int main(int argc, char* argv[]) {
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_file(options.interface_xml);
   if (result) {
-    codegen::API api;
+    codegen::ModelFilter model_filter(options.excluded_scopes);
+    codegen::API api(&model_filter);
     if (api.init(doc)) {
       codegen::CppApiCodeGenerator cpp_code_generator(&api);
       std::set<std::string> bad = cpp_code_generator.Generate(
@@ -112,7 +124,7 @@ int main(int argc, char* argv[]) {
         cerr << '\n';
       }
     } else {
-      cerr << "Failed to initialize" << '\n';
+      cerr << "Failed to process xml" << '\n';
     }
   } else {
     std::cerr << "Failed to load xml file " << options.interface_xml << ": "

@@ -46,6 +46,7 @@ class xml_node;
 namespace codegen {
 class BuiltinTypeRegistry;
 class Enum;
+class ModelFilter;
 
 /*
  * An interface found in XML document. Holds a registry of all the
@@ -63,7 +64,8 @@ class Interface {
   typedef TypeRegistry::TypedefList TypedefList;
  public:
   // Methods
-  Interface(BuiltinTypeRegistry* builtin_type_registry);
+  Interface(BuiltinTypeRegistry* builtin_type_registry,
+            const ModelFilter* model_filter);
   ~Interface();
   const std::string& name() const;
   const FunctionsList& functions() const;
@@ -95,6 +97,7 @@ class Interface {
   // Fields
   std::string name_;
   BuiltinTypeRegistry* builtin_type_registry_;
+  const ModelFilter* model_filter_;
   TypeRegistry type_registry_;
   MessagesMap requests_;
   utils::StdMapDeleter<MessagesMap> requests_deleter_;

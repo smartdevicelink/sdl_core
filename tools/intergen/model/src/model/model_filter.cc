@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "model/api.h"
-
-#include <cassert>
-
-#include "model/constant.h"
-#include "pugixml.hpp"
+#include "model/model_filter.h"
 
 namespace codegen {
 
-API::API(const ModelFilter* model_filter)
-    : model_filter_(model_filter),
-      interfaces_deleter_(&interfaces_) {
-  assert(model_filter_);
+ModelFilter::ModelFilter(const std::set<std::string>& filtered_scope_names)
+  : filtered_scopes_(filtered_scope_names) {
 }
 
-bool API::init(const pugi::xml_document& xmldoc) {
-  for (pugi::xml_node i = xmldoc.child("interface"); i;
-      i = xmldoc.next_sibling("interface")) {
-    interfaces_.push_back(new Interface(&builtin_type_registry_, model_filter_));
-    if (!interfaces_.back()->init(i)) {
-      return false;
-    }
-  }
-  return true;
+bool ModelFilter::ShouldFilterScope(const Scope& scope) const {
+  return filtered_scopes_.count(scope) != 0;
 }
 
-API::~API() {
-}
 
-const std::vector<Interface*>& API::interfaces() const {
-  return interfaces_;
-}
 
 }  // namespace codegen

@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +29,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "model/api.h"
+#ifndef MODEL_FILTER_H
+#define MODEL_FILTER_H
 
-#include <cassert>
+#include <set>
 
-#include "model/constant.h"
-#include "pugixml.hpp"
+#include "model/scope.h"
 
 namespace codegen {
 
-API::API(const ModelFilter* model_filter)
-    : model_filter_(model_filter),
-      interfaces_deleter_(&interfaces_) {
-  assert(model_filter_);
-}
-
-bool API::init(const pugi::xml_document& xmldoc) {
-  for (pugi::xml_node i = xmldoc.child("interface"); i;
-      i = xmldoc.next_sibling("interface")) {
-    interfaces_.push_back(new Interface(&builtin_type_registry_, model_filter_));
-    if (!interfaces_.back()->init(i)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-API::~API() {
-}
-
-const std::vector<Interface*>& API::interfaces() const {
-  return interfaces_;
-}
+/*
+ * Class represents modifications that should be done to parsed model while
+ * building it from xml
+ */
+class ModelFilter {
+public:
+  // Creates filter that skips all entities marked with scope
+  ModelFilter(const std::set<std::string>& filtered_scope_names);
+  // Tells whether entity with this scope should be skipped
+  bool ShouldFilterScope(const Scope& scope) const;
+private:
+  const std::set<Scope> filtered_scopes_;
+};
 
 }  // namespace codegen
+
+#endif // MODEL_FILTER_H
