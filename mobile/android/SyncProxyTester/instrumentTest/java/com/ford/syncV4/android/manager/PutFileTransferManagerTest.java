@@ -1,6 +1,6 @@
 package com.ford.syncV4.android.manager;
 
-import android.util.Log;
+import android.util.SparseArray;
 
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
@@ -80,14 +80,35 @@ public class PutFileTransferManagerTest extends TestCase {
             mPutFileTransferManager.addPutFileToAwaitArray(i, newPutFile);
         }
 
-        int counter = 0;
         while (mPutFileTransferManager.hasNext()) {
             newPutFile = mPutFileTransferManager.getNextPutFile();
-            //Log.d(LOG_TAG, "Counter:" + counter++ + " file:" + newPutFile + " hasNext:" +
-            //    mPutFileTransferManager.hasNext());
             assertNotNull(newPutFile);
         }
 
         assertFalse(mPutFileTransferManager.hasNext());
+    }
+
+    public void testGetCopy() {
+        int arraySize = 10;
+        PutFile newPutFile;
+        for (int i = 0; i < arraySize; i++) {
+            newPutFile = new PutFile();
+            newPutFile.setFileType(FileType.AUDIO_MP3);
+            newPutFile.setSyncFileName(mFileName);
+            newPutFile.setCorrelationID(i);
+            mPutFileTransferManager.addPutFileToAwaitArray(i, newPutFile);
+        }
+
+        SparseArray<PutFile> copyArray = mPutFileTransferManager.getCopy();
+        mPutFileTransferManager.clear();
+
+        assertFalse(mPutFileTransferManager.hasNext());
+        assertEquals(arraySize, copyArray.size());
+
+        PutFile copyPutFile;
+        for (int i = 0; i < arraySize; i++) {
+            copyPutFile = copyArray.get(copyArray.keyAt(i));
+            assertEquals(FileType.AUDIO_MP3, copyPutFile.getFileType());
+        }
     }
 }

@@ -10,6 +10,13 @@ import com.ford.syncV4.proxy.rpc.PutFile;
  * Date: 1/30/14
  * Time: 4:30 PM
  */
+
+/**
+ * This class manage a procedure of transfer PutFile. There is a possibility keep reference for
+ * the PutFile which is going to be transmitted in the array, then, upon transfer success, there is
+ * a possibility to remove reference from array. There are also additional helper methods which
+ * allow to manage array of the PutFiles. This class IS NOT thread safe!
+ */
 public class PutFileTransferManager {
 
     // A map to track PutFiles which are send successfully
@@ -79,7 +86,6 @@ public class PutFileTransferManager {
      * @return a copy of the array
      */
     public SparseArray<PutFile> getCopy() {
-        // TODO : Cover with tests
         return mPutFilesArray.clone();
     }
 
@@ -87,7 +93,6 @@ public class PutFileTransferManager {
      * Clear the existed array of PutFiles
      */
     public void clear() {
-        // TODO : Cover with tests
         if (mPutFilesArray != null) {
             mPutFilesArray.clear();
         }
