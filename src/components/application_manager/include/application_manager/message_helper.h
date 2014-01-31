@@ -36,13 +36,19 @@
 #include <map>
 #include <string>
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/application.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 
-namespace application_manager {
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
+}
+}
 
+namespace application_manager {
+class Application;
 namespace mobile_api = mobile_apis;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
  * @brief Typedef for HMI TextFieldName type

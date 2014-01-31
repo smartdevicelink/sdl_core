@@ -32,9 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 

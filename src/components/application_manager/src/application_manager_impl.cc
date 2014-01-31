@@ -49,6 +49,7 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "policies/policy_manager.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 

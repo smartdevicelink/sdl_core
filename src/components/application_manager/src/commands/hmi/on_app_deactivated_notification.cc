@@ -32,8 +32,8 @@
 
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
 #include "config_profile/profile.h"
 
 namespace application_manager {

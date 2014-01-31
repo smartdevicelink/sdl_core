@@ -34,6 +34,7 @@
 #include <string>
 #include <algorithm>
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"

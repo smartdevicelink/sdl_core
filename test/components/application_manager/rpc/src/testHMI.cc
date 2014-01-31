@@ -32,6 +32,7 @@
 
 #include <unistd.h>
 #include "rpc/testHMI.h"
+#include "application_manager/application_impl.h"
 
 namespace test{
 	namespace app_manager_test{
