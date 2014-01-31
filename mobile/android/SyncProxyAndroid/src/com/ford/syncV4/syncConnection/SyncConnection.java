@@ -149,13 +149,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             } // end-if
         }
 
-        synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
-            try {
-                END_PROTOCOL_SERVICE_RPC_LOCK.wait(1000);
-            } catch (InterruptedException e) {
-                // Do nothing
-            }
-        }
+        waitForRpcEndServiceACK();
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!keepConnection) {
@@ -188,6 +182,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    private void waitForRpcEndServiceACK() {
+        synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
+            try {
+                END_PROTOCOL_SERVICE_RPC_LOCK.wait(1000);
+            } catch (InterruptedException e) {
+                // Do nothing
+            }
+        }
+    }
+
     public void closeMobileNaviService(byte mobileNavSessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
@@ -197,7 +201,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
             } // end-if
         }
+        waitForVideoEndServiceACK();
+    }
 
+    private void waitForVideoEndServiceACK() {
         synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
             try {
                 END_PROTOCOL_SERVICE_VIDEO_LOCK.wait(1000);
@@ -205,7 +212,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 // Do nothing
             }
         }
-
     }
 
     public void closeAudioService(byte sessionID) {
@@ -217,7 +223,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
             } // end-if
         }
+        waitForAudioEndServiceACK();
+    }
 
+    private void waitForAudioEndServiceACK() {
         synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
             try {
                 END_PROTOCOL_SERVICE_AUDIO_LOCK.wait(1000);
@@ -379,8 +388,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
                                        String correlationID) {
         _connectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
+        processEndService(serviceType);
+    }
+
+    private void processEndService(ServiceType serviceType) {
         if (_transport != null && serviceType.equals(ServiceType.RPC)) {
+            synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
+                END_PROTOCOL_SERVICE_RPC_LOCK.notifyAll();
+            }
             _transport.stopReading();
+        }else if ( _transport != null && serviceType.equals(ServiceType.Mobile_Nav) ){
+            synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
+                END_PROTOCOL_SERVICE_VIDEO_LOCK.notifyAll();
+            }
+        }else if ( _transport != null && serviceType.equals(ServiceType.Audio_Service) ){
+            synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
+                END_PROTOCOL_SERVICE_AUDIO_LOCK.notifyAll();
+            }
         }
     }
 
