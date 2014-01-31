@@ -27,10 +27,13 @@ public class LogAdapter extends MessageAdapter {
 		Log.i(logTag, m.toString());
     	if(fullUIDebug) addMessageToUI(m);
 	}
-    public void logMessage (final Object m, Boolean addToUI) {
-		Log.i(logTag, m.toString());
+    public void logMessage (Object m, Boolean addToUI) {
+        if (m == null) {
+            m = "NULL";
+        }
+        Log.i(logTag, m.toString());
         if(addToUI){
-    	    addMessageToUI(m);
+            addMessageToUI(m);
         }
     }
     public void logMessage (final Object m, Integer type) {
