@@ -635,17 +635,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     }
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
-<<<<<<< HEAD
-=======
-      char url_audio[100] = {'\0'};
-      snprintf(url_audio, sizeof(url_audio) / sizeof(url_audio[0]),
-               "http://%s:%d",
-               profile::Profile::instance()->server_address().c_str(),
-               profile::Profile::instance()->audio_streaming_port());
-      application_manager::MessageHelper::SendAudioStartStream(
-          url_audio, session_key);
-      #ifdef MEDIA_MANAGER
->>>>>>> APPLINK-4542_Audio_component_implementation
       if (media_manager_) {
         media_manager_->StartAudioStreaming(session_key);
       }
