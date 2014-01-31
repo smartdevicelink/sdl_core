@@ -1840,7 +1840,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void syncProxyOpenSession() throws SyncException {
         if (mSyncProxy != null) {
-            mSyncProxy.openSession();
+            if (mSyncProxy.getIsConnected()) {
+                mSyncProxy.openSession();
+            } else {
+                // TODO : Consider a case when there is no connection
+            }
         }
     }
 
