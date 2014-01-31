@@ -3,7 +3,10 @@
 Requires Python 2.6
 
 Example of invocation (use to test the script):
-python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -ublep 0.5.0 0.6.0-dev
+python makerelease.py --platform=msvc6,msvc71,msvc80,msvc90,mingw -ublep 0.6.0 0.7.0-dev
+
+When testing this script:
+python makerelease.py --force --retag --platform=msvc6,msvc71,msvc80,mingw -ublep test-0.6.0 test-0.6.1-dev
 
 Example of invocation when doing a release:
 python makerelease.py 0.5.0 0.6.0-dev
@@ -20,6 +23,7 @@ import tempfile
 import os
 import time
 from devtools import antglob, fixeol, tarball
+import amalgamate
 
 SVN_ROOT = 'https://jsoncpp.svn.sourceforge.net/svnroot/jsoncpp/'
 SVN_TAG_ROOT = SVN_ROOT + 'tags/jsoncpp'
@@ -318,6 +322,14 @@ Warning: --force should only be used when developping/testing the release script
         source_tarball_path = 'dist/%s.tar.gz' % source_dir
         print 'Generating source tarball to', source_tarball_path
         tarball.make_tarball( source_tarball_path, [export_dir], export_dir, prefix_dir=source_dir )
+
+        amalgamation_tarball_path = 'dist/%s-amalgamation.tar.gz' % source_dir
+        print 'Generating amalgamation source tarball to', amalgamation_tarball_path
+        amalgamation_dir = 'dist/amalgamation'
+        amalgamate.amalgamate_source( export_dir, '%s/jsoncpp.cpp' % amalgamation_dir, 'json/json.h' )
+        amalgamation_source_dir = 'jsoncpp-src-amalgamation' + release_version
+        tarball.make_tarball( amalgamation_tarball_path, [amalgamation_dir],
+                              amalgamation_dir, prefix_dir=amalgamation_source_dir )
 
         # Decompress source tarball, download and install scons-local
         distcheck_dir = 'dist/distcheck'

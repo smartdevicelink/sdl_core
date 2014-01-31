@@ -127,6 +127,8 @@ def build_doc( options,  make_release=False ):
         tarball_sources = [
             output_dir,
             'README.txt',
+            'LICENSE',
+            'NEWS.txt',
             'version'
             ]
         tarball_basedir = os.path.join( output_dir, html_output_dirname )
