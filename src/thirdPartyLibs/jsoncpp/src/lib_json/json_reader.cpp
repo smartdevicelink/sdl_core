@@ -277,8 +277,7 @@ Reader::readToken( Token &token )
    token.start_ = current_;
    Char c = getNextChar();
    bool ok = true;
-   //locale loc;
-   switch ( tolower(c) )
+   switch ( c )
    {
    case '{':
       token.type_ = tokenObjectBegin;
@@ -470,10 +469,10 @@ Reader::readString()
       c = getNextChar();
       if ( c == '\\' )
          getNextChar();
-      else if ( isQuotes( c ) )
+      else if ( c == '"' )
          break;
    }
-   return isQuotes( c );
+   return c == '"';
 }
 
 
@@ -664,7 +663,7 @@ Reader::decodeString( Token &token, std::string &decoded )
    while ( current != end )
    {
       Char c = *current++;
-      if ( isQuotes( c ) )
+      if ( c == '"' )
          break;
       else if ( c == '\\' )
       {
@@ -674,7 +673,6 @@ Reader::decodeString( Token &token, std::string &decoded )
          switch ( escape )
          {
          case '"': decoded += '"'; break;
-         case '\'': decoded += '\''; break;
          case '/': decoded += '/'; break;
          case '\\': decoded += '\\'; break;
          case 'b': decoded += '\b'; break;
@@ -871,13 +869,6 @@ Reader::getFormatedErrorMessages() const
          formattedMessage += "See " + getLocationLineAndColumn( error.extra_ ) + " for detail.\n";
    }
    return formattedMessage;
-}
-
-bool
-Reader::isQuotes ( char c ) {
-	if ( c == '"' ) //c == '\'' || 
-			return true;
-	return false;
 }
 
 

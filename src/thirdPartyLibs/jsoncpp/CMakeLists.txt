@@ -3,9 +3,9 @@ include_directories (
 )
 
 set (SOURCES
-  ./src/json_value.cpp
-  ./src/json_writer.cpp
-  ./src/json_reader.cpp
+  ./src/lib_json/json_value.cpp
+  ./src/lib_json/json_writer.cpp
+  ./src/lib_json/json_reader.cpp
 )
 
 add_library("jsoncpp" ${SOURCES})
