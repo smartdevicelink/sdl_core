@@ -88,7 +88,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
 
   for (; commands.end() != it; ++it) {
 
-    if (!(*it->second).keyExists(strings::menu_params)) {
+    if (!(*it->second).keyExists(strings::vr_commands)) {
       continue;
     }
 
