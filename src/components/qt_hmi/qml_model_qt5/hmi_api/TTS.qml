@@ -35,6 +35,10 @@ import "Common.js" as Common
 import "Async.js" as Async
 
 Item {
+    function ttsChunksToString(ttsChunks){
+        return ttsChunks.map(function(str) { return str.text }).join('\n')
+    }
+
     function isReady() {
         console.log("Message Received - {method: 'TTS.IsReady'}")
         return {
@@ -58,7 +62,7 @@ Item {
             console.log('speak send abort');
             throw Common.Result.ABORTED;
         }
-        var message = ttsChunks.map(function(str) { return str.text }).join('\n');
+        var message = ttsChunksToString(ttsChunks);
         ttsPopUp.activate(message);
         ttsPopUp.async = new Async.AsyncCall();
         console.debug('exit');
@@ -116,9 +120,9 @@ Item {
                     "timeoutPrompt: [" + timeoutttsChunkLog + "], " +
                     "timeout: " + timeout +
                     "}}")
-        ttsPopUp.performInteraction(helpPrompt.map(function(str) { return str.text }).join('\n'),
-                                    initialPrompt.map(function(str) { return str.text }).join('\n'),
-                                    timeoutPrompt.map(function(str) { return str.text }).join('\n'),
+        ttsPopUp.performInteraction(ttsChunksToString(helpPrompt),
+                                    ttsChunksToString(initialPrompt),
+                                    ttsChunksToString(timeoutPrompt),
                                     timeout)
         console.debug("exit");
     }
