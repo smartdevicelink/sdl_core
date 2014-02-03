@@ -114,11 +114,13 @@ import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
@@ -128,6 +130,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
@@ -165,7 +169,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
+public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
+        ISystemRequestProxy {
     // Used for calls to Android Log class.
     public static final String TAG = "SyncProxy";
     // Synchronization Objects
@@ -275,10 +280,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
-
-
     private IProtocolMessageHolder protocolMessageHolder =
             new ProtocolMessageHolder();
+
+    /**
+     * Handler for OnSystemRequest notifications.
+     */
+    private IOnSystemRequestHandler onSystemRequestHandler;
 
     public void setSyncConnection(SyncConnection syncConnection) {
         this._syncConnection = syncConnection;
@@ -2463,18 +2471,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
                 }
             } else if (functionName.equals(Names.OnSystemRequest)) {
-                final OnSystemRequest msg = new OnSystemRequest(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onOnSystemRequest(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onOnSystemRequest(msg);
-                }
+                handleOnSystemRequest(hash);
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
 
@@ -2533,6 +2530,39 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } // end-if notification
 
         SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SYNC_LIB_TRACE_KEY);
+    }
+
+    private void handleOnSystemRequest(Hashtable hash) {
+        final OnSystemRequest msg = new OnSystemRequest(hash);
+
+        if (RequestType.HTTP == msg.getRequestType()) {
+            Runnable request = new Runnable() {
+                @Override
+                public void run() {
+                    onSystemRequestHandler.onFilesDownloadRequest(
+                            SyncProxyBase.this, msg.getUrl(),
+                            msg.getFileType());
+                }
+            };
+
+            if (_callbackToUIThread) {
+                _mainUIHandler.post(request);
+            } else {
+                request.run();
+            }
+        } else {
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _proxyListener.onOnSystemRequest(msg);
+                    }
+                });
+            } else {
+                _proxyListener.onOnSystemRequest(msg);
+            }
+        }
     }
 
     private void notifyOnAppInterfaceUnregistered(final OnAppInterfaceUnregistered msg) {
@@ -3802,5 +3832,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnection.startAudioService(currentSession);
             }
         }
+    }
+
+    public IOnSystemRequestHandler getOnSystemRequestHandler() {
+        return onSystemRequestHandler;
+    }
+
+    public void setOnSystemRequestHandler(
+            IOnSystemRequestHandler onSystemRequestHandler) {
+        this.onSystemRequestHandler = onSystemRequestHandler;
+    }
+
+    @Override
+    public void putSystemFile(String filename, byte[] data, FileType fileType) {
+        throw new UnsupportedOperationException("not implemented yet");
     }
 }
