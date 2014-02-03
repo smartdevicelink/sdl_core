@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
+#include "application_manager/mobile_command_factory.h"
 
 namespace application_manager {
 
@@ -69,7 +70,13 @@ void ListFilesRequest::Run() {
   }
 
   application->increment_list_files_in_none_count();
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+  (*message)[strings::params] = (*message_)[strings::params];
+  (*message)[strings::params][strings::message_type] =
+      application_manager::MessageType::kResponse;
+  CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message);
+  responseCommand->Run();
 }
 
 }  // namespace commands

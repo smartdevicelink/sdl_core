@@ -67,18 +67,12 @@ void ListFilesResponse::Run() {
   }
   (*message_)[strings::msg_params][strings::space_available] =
         static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
-  if (file_system::DirectoryExists(application->name())) {
-    const std::string full_directory_path = file_system::FullPath(
-        application->name());
-    std::vector < std::string > list_files = file_system::ListFiles(
-        full_directory_path);
-    if (!list_files.empty()) {
-      int32_t i = 0;
-      for (std::vector<std::string>::iterator it = list_files.begin();
-          list_files.end() != it; ++it) {
-        (*message_)[strings::msg_params][strings::filenames][i] = *it;
-        ++i;
-      }
+  int32_t i = 0;
+  const std::vector<AppFile>& app_files = application->getAppFiles();
+  for (std::vector<AppFile>::const_iterator it = app_files.begin();
+       it !=app_files.end(); ++it) {
+    if ((*it).is_persistent) {
+      (*message_)[strings::msg_params][strings::filenames][i++] = (*it).file_name;
     }
   }
   SendResponse(true);
