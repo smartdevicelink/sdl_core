@@ -46,10 +46,6 @@ VRAddCommandRequest::~VRAddCommandRequest() {
 void VRAddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "VRAddCommandRequest::Run");
 
-  // Quick fix for APPLINK-3624
-  // TODO(AK): Seems like codegeneration issues.
-  (*message_)["msg_params"].erase("appID");
-
   SendRequest();
 }
 
