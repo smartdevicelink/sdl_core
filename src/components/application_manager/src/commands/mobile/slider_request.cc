@@ -107,20 +107,20 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "SliderRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
-  const event_engine::Event::EventID eventId = event.id();
-  if(eventId == hmi_apis::FunctionID::UI_OnResetTimeout) {
+  const event_engine::Event::EventID event_id = event.id();
+  if(event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
       correlation_id(),
       default_timeout());
     return;
     }
-  if(eventId != hmi_apis::FunctionID::UI_Slider) {
+  if(event_id != hmi_apis::FunctionID::UI_Slider) {
     LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
     return;
   }
 
-  //eventId == hmi_apis::FunctionID::UI_Slider:
+  //event_id == hmi_apis::FunctionID::UI_Slider:
   LOG4CXX_INFO(logger_, "Received UI_Slider event");
 
   const int response_code =
