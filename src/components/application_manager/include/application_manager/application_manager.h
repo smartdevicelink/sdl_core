@@ -53,6 +53,13 @@ class ApplicationManager {
     virtual ~ApplicationManager() {
     }
 
+    /**
+     * @brief Stop work.
+     *
+     * @return TRUE on success otherwise FALSE.
+     **/
+    virtual bool Stop() = 0;
+
     virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
     virtual void set_protocol_handler(
