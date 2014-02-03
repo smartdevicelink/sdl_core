@@ -144,7 +144,6 @@ void RegisterAppInterfaceRequest::Run() {
       SendTTSChunksToHMI(*app);
     } else {
       SendRegisterAppInterfaceResponseToMobile();
-      MessageHelper::SendHMIStatusNotification(*app);
     }
   }
 }
@@ -184,10 +183,6 @@ void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
 
       SendRegisterAppInterfaceResponseToMobile(tts_result);
 
-      Application* application =
-          ApplicationManagerImpl::instance()->application(connection_key());
-
-      MessageHelper::SendHMIStatusNotification(*application);
       break;
     }
     default: {
