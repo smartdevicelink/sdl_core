@@ -164,8 +164,10 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -288,6 +290,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Handler for OnSystemRequest notifications.
      */
     private IOnSystemRequestHandler onSystemRequestHandler;
+
+    /**
+     * A set of internal requests' correlation IDs that are currently in
+     * progress.
+     */
+    private Set<Integer> internalRequestCorrelationIDs;
 
     /**
      * Correlation ID that was last used for messages created internally.
@@ -979,6 +987,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void initializeProxy() throws SyncException {
         initState();
 
+        internalRequestCorrelationIDs = new HashSet<Integer>();
+
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
@@ -1469,6 +1479,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return success;
     }
 
+    /**
+     * Handles an internal response, if it is, that is last in sequence. Such a
+     * response shouldn't be exposed to the user. For example, a PutFile
+     * responded for OnSystemRequest.
+     *
+     * @param response response from the SDL
+     * @return true if the response has been handled; false when the
+     * corresponding request is not internal or in case of an error
+     */
+    private boolean handleLastInternalResponse(RPCResponse response) {
+        final Integer correlationID = response.getCorrelationID();
+        final boolean contains = internalRequestCorrelationIDs.contains(
+                correlationID);
+        if (contains) {
+            internalRequestCorrelationIDs.remove(correlationID);
+        }
+
+        return contains;
+    }
+
     private void handleRPCMessage(Hashtable hash) {
         RPCMessage rpcMsg = new RPCMessage(hash);
         String functionName = rpcMsg.getFunctionName();
@@ -1479,7 +1509,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationID();
-            if (!handlePartialRPCResponse(response)) {
+            if (!handlePartialRPCResponse(response) &&
+                    !handleLastInternalResponse(response)) {
 
                 // Check to ensure response is not from an internal message (reserved correlation ID)
                 if (isCorrelationIDProtected(responseCorrelationID)) {
@@ -3865,8 +3896,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         putFile.setFileType(fileType);
         putFile.setBulkData(data);
         putFile.setSystemFile(true);
-        putFile.setCorrelationID(nextCorrelationId());
+        final int correlationID = nextCorrelationId();
+        putFile.setCorrelationID(correlationID);
 
         sendRPCRequest(putFile);
+        internalRequestCorrelationIDs.add(correlationID);
     }
 }
