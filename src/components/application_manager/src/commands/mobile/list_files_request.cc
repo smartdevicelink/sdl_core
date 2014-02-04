@@ -78,14 +78,13 @@ void ListFilesRequest::Run() {
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
        it != app_files.end(); ++it) {
-    if (it->second.is_persistent) {
       (*message_)[strings::msg_params][strings::filenames][i++] = it->second.file_name;
-    }
   }
   (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;
-  CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message_);
-  responseCommand->Run();
+  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(*message_)[strings::msg_params]);
+  //CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message_);
+  //responseCommand->Run();
 }
 
 }  // namespace commands
