@@ -21,4 +21,18 @@ public interface ISystemRequestProxy {
      */
     public void putSystemFile(String filename, byte[] data, FileType fileType)
             throws SyncException;
+
+    /**
+     * Uploads a requested part of a downloaded file to the SDL.
+     *
+     * @param filename the requested file's name
+     * @param data     file's contents, in the requested range (the length is
+     *                 equal to the array's length)
+     * @param offset   the offset at which the data starts
+     * @param fileType optional file type
+     * @throws SyncException if there is an error during preparations to send
+     *                       the request
+     */
+    public void putSystemFile(String filename, byte[] data, Integer offset,
+                              FileType fileType) throws SyncException;
 }

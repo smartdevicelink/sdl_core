@@ -163,6 +163,84 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
     }
 
+    public void testOnSystemRequestWithRequestTypeFileResumeShouldCallHandler()
+            throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final String filename = "dummy";
+        final List<String> urls = Arrays.asList(filename);
+        final FileType fileType = FileType.GRAPHIC_PNG;
+        final int offset = 4000;
+        final int length = 8800;
+
+        OnSystemRequest onSysRq = new OnSystemRequest();
+        onSysRq.setRequestType(RequestType.FILE_RESUME);
+        onSysRq.setUrl(new Vector<String>(urls));
+        onSysRq.setFileType(fileType);
+        onSysRq.setOffset(offset);
+        onSysRq.setLength(length);
+
+        ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
+                ONSYSTEMREQUEST_FUNCTIONID);
+        emulateIncomingMessage(proxy, pm);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verify(handlerMock, times(1)).onFileResumeRequest(
+                notNull(ISystemRequestProxy.class), eq(filename), eq(offset),
+                eq(length), eq(fileType));
+    }
+
+    public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCallProxyListener()
+            throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final String filename = "dummy";
+        final List<String> urls = Arrays.asList(filename);
+        final FileType fileType = FileType.GRAPHIC_PNG;
+        final int offset = 4000;
+        final int length = 8800;
+
+        OnSystemRequest onSysRq = new OnSystemRequest();
+        onSysRq.setRequestType(RequestType.FILE_RESUME);
+        onSysRq.setUrl(new Vector<String>(urls));
+        onSysRq.setFileType(fileType);
+        onSysRq.setOffset(offset);
+        onSysRq.setLength(length);
+
+        ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
+                ONSYSTEMREQUEST_FUNCTIONID);
+        emulateIncomingMessage(proxy, pm);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verifyZeroInteractions(proxyListenerMock);
+    }
+
+    public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCrashWhenHandlerNotSet()
+            throws InterruptedException {
+        proxy.setOnSystemRequestHandler(null);
+
+        final String filename = "dummy";
+        final List<String> urls = Arrays.asList(filename);
+        final FileType fileType = FileType.GRAPHIC_PNG;
+        final int offset = 4000;
+        final int length = 8800;
+
+        OnSystemRequest onSysRq = new OnSystemRequest();
+        onSysRq.setRequestType(RequestType.FILE_RESUME);
+        onSysRq.setUrl(new Vector<String>(urls));
+        onSysRq.setFileType(fileType);
+        onSysRq.setOffset(offset);
+        onSysRq.setLength(length);
+
+        ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
+                ONSYSTEMREQUEST_FUNCTIONID);
+        emulateIncomingMessage(proxy, pm);
+
+        Thread.sleep(WAIT_TIMEOUT);
+    }
+
     public void testPutSystemFileShouldSendCorrectFirstProtocolMessage()
             throws InterruptedException, JSONException, SyncException {
         // fake data for PutFile

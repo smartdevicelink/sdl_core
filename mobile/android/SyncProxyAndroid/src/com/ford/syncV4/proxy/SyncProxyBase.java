@@ -2586,6 +2586,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 request.run();
             }
+        } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
+            final Vector<String> urls = msg.getUrl();
+            Runnable request = new Runnable() {
+                @Override
+                public void run() {
+                    onSystemRequestHandler.onFileResumeRequest(
+                            SyncProxyBase.this, urls.get(0), msg.getOffset(),
+                            msg.getLength(), msg.getFileType());
+                }
+            };
+
+            if (_callbackToUIThread) {
+                _mainUIHandler.post(request);
+            } else {
+                request.run();
+            }
         } else {
             if (_callbackToUIThread) {
                 // Run in UI thread
@@ -3901,5 +3917,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         sendRPCRequest(putFile);
         internalRequestCorrelationIDs.add(correlationID);
+    }
+
+    @Override
+    public void putSystemFile(String filename, byte[] data, Integer offset,
+                              FileType fileType) throws SyncException {
+        throw new UnsupportedOperationException();
     }
 }

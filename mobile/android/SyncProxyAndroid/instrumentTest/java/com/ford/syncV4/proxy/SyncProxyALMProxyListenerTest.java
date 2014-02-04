@@ -69,7 +69,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
     public void testOnOnSystemRequestShouldBeCalledOnNotification()
             throws SyncException, JSONException {
-        final RequestType requestType = RequestType.FILE_RESUME;
+        final RequestType requestType = RequestType.AUTH_ACK;
         final Vector<String> urls = new Vector<String>();
         urls.add("https://x.y/");
         final FileType fileType = FileType.GRAPHIC_PNG;
