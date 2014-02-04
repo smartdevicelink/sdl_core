@@ -1,3 +1,6 @@
+[CW6]
++ SyncProxyAndroid SDK: changed reconnection scheduling logic
+
 [CW5]
 + SyncProxyAndroid SDK: Add KEYBOARD value to TriggerSource enum.
 - SyncProxyAndroid SDK: Revert "Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation."
