@@ -2671,6 +2671,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void startRPCProtocolService(final byte sessionID, final String correlationID) {
         currentSession.setSessionId(sessionID);
+        addIfNotExsistRpcServiceToSession();
         _syncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         if (_callbackToUIThread) {
@@ -2686,6 +2687,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         restartRPCProtocolSession();
+    }
+
+    private void addIfNotExsistRpcServiceToSession() {
+        if (!currentSession.hasService(ServiceType.RPC)) {
+            Service service = new Service();
+            service.setServiceType(ServiceType.RPC);
+            service.setSession(currentSession);
+            currentSession.addService(service);
+        }
     }
 
     private void restartRPCProtocolSession() {

@@ -331,4 +331,33 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
         assertNotNull("timerTask should not be null", timerTask);
     }
+
+    public void testInCaseSessionRestartedRpcServiceShouldBeRecreated() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.closeSession(false);
+        proxy.setSyncConnection(mock(SyncConnection.class));
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        assertFalse(proxy.currentSession.isServicesEmpty());
+        assertTrue(proxy.currentSession.hasService(ServiceType.RPC));
+    }
+
+    public void testSessionHasOnlyOneRPCService() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.closeSession(false);
+        proxy.setSyncConnection(mock(SyncConnection.class));
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        assertEquals("only one rpc service should be in service list",1, proxy.currentSession.getServiceList().size());
+    }
+
 }
