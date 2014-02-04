@@ -347,7 +347,8 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final String filename = "fake";
         final List<String> filenames = Arrays.asList(filename);
         final FileType fileType = FileType.GRAPHIC_PNG;
-/*
+        final int offset = 4000;
+
         IOnSystemRequestHandler handlerMock =
                 mock(IOnSystemRequestHandler.class);
         doAnswer(new Answer() {
@@ -356,20 +357,20 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                     throws Throwable {
                 final ISystemRequestProxy proxy =
                         (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putSystemFile(filename, data, fileType);
+                proxy.putSystemFile(filename, data, offset, fileType);
                 return null;
             }
         }).when(handlerMock)
-          .onFilesDownloadRequest(notNull(ISystemRequestProxy.class), eq(filenames),
-                  eq(fileType));
-        proxy.setOnSystemRequestHandler(handlerMock);*/
+          .onFileResumeRequest(notNull(ISystemRequestProxy.class), eq(filename),
+                  eq(offset), eq(dataSize), eq(fileType));
+        proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with FILE_RESUME
         OnSystemRequest onSysRq = new OnSystemRequest();
         onSysRq.setRequestType(RequestType.FILE_RESUME);
         onSysRq.setUrl(new Vector<String>(filenames));
         onSysRq.setFileType(fileType);
-        onSysRq.setOffset(4000);
+        onSysRq.setOffset(offset);
         onSysRq.setLength(dataSize);
 
         ProtocolMessage incomingOnSysRqPM0 =
@@ -391,7 +392,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
 
         final ProtocolMessage pm0 = pmCaptor0.getValue();
         assertThat(pm0.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm0.getData(), 0, maxDataSize, filename,
+        checkSystemPutFileJSON(pm0.getData(), offset, maxDataSize, filename,
                 fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
@@ -426,7 +427,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
 
         final ProtocolMessage pm1 = pmCaptor1.getValue();
         assertThat(pm1.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm1.getData(), maxDataSize, maxDataSize,
+        checkSystemPutFileJSON(pm1.getData(), offset + maxDataSize, maxDataSize,
                 filename, fileType);
         final byte[] data1 =
                 Arrays.copyOfRange(data, maxDataSize, maxDataSize * 2);
@@ -456,8 +457,8 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
 
         final ProtocolMessage pm2 = pmCaptor2.getValue();
         assertThat(pm2.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm2.getData(), maxDataSize * 2, extraDataSize,
-                filename, fileType);
+        checkSystemPutFileJSON(pm2.getData(), offset + (maxDataSize * 2),
+                extraDataSize, filename, fileType);
         final byte[] data2 = Arrays.copyOfRange(data, maxDataSize * 2,
                 (maxDataSize * 2) + extraDataSize);
         assertThat(pm2.getBulkData(), is(data2));
