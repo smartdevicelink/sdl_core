@@ -293,9 +293,7 @@ void ConnectionHandlerImpl::RemoveConnection(
     return -1;
   }
 
-  bool is_first_in_connection = false;
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
-    is_first_in_connection = true;
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
@@ -323,8 +321,11 @@ void ConnectionHandlerImpl::RemoveConnection(
                      (it->second)->connection_device_handle(),
                      session_key, service_type);
 
-    if (!success && is_first_in_connection) {
+    if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
+      new_session_id = -1;
+    } else if (!success) {
+      (it->second)->RemoveService(sessionId, service_type);
       new_session_id = -1;
     }
   }

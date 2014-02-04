@@ -659,20 +659,30 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
   protocol_handler::ServiceType type) {
   LOG4CXX_INFO(logger_, "Started session with type " << type);
+
+  Application* app = application(session_key);
+
   switch (type) {
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
       if (media_manager_) {
-        media_manager_->StartVideoStreaming(session_key);
+        if (app->allowed_support_navigation()) {
+          media_manager_->StartVideoStreaming(session_key);
+        } else {
+          return false;
+        }
       }
-      // !!!!!!!!!!!!!!!!!!!!!!!
-      // TODO(DK): add check if navi streaming allowed for this app.
+
       break;
     }
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
       if (media_manager_) {
-        media_manager_->StartAudioStreaming(session_key);
+        if (app->allowed_support_navigation()) {
+          media_manager_->StartAudioStreaming(session_key);
+        } else {
+          return false;
+        }
       }
       break;
     }
