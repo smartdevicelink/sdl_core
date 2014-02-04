@@ -3715,12 +3715,12 @@
       	If omitted on supported displays, no footer text shall be displayed.
       </description>
     </param>
-    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="10000" mandatory="false">
+    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="10000" mandatory="false">
       <description>
       	App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
       	If omitted, the value is set to 10000.
       </description>
-    </param>
+    </param>   
   </function>
 
   <function name="Slider" functionID="SliderID" messagetype="response">
@@ -3730,7 +3730,8 @@
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
-      <element name="SAVED"/>
+      <element name="SUCCESS"/>
+      <element name="SAVED"/>        
       <element name="INVALID_DATA"/>
       <element name="OUT_OF_MEMORY"/>
       <element name="TOO_MANY_PENDING_REQUESTS"/>
@@ -3746,7 +3747,7 @@
       <description>Provides additional human readable info regarding the result.</description>
     </param>
 
-    <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26">
+    <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="false">
       <description>
       	Current slider value returned when saved or canceled (aborted)
       	This value is only returned for resultCodes "SAVED" or "ABORTED"
