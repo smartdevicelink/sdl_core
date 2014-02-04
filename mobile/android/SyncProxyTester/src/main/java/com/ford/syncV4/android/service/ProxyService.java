@@ -1991,9 +1991,23 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
-    public void onFileResumeRequest(ISystemRequestProxy proxy, String filename,
-                                    Integer offset, Integer length,
-                                    FileType fileType) {
-        createErrorMessageForAdapter("onFileResumeRequest not implemented yet");
+    public void onFileResumeRequest(final ISystemRequestProxy proxy,
+                                    String filename, final Integer offset,
+                                    final Integer length, FileType fileType) {
+        createDebugMessageForAdapter("files resume request");
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final byte[] data = Arrays.copyOfRange(
+                        contentsOfResource(R.raw.audio_short), offset,
+                        offset + length);
+                try {
+                    proxy.putSystemFile("system.update", data, offset,
+                            FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    createErrorMessageForAdapter("Can't upload system file", e);
+                }
+            }
+        }, 500);
     }
 }
