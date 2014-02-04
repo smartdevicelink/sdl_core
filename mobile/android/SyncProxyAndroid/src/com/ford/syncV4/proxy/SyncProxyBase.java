@@ -75,6 +75,7 @@ import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
@@ -287,6 +288,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Handler for OnSystemRequest notifications.
      */
     private IOnSystemRequestHandler onSystemRequestHandler;
+
+    /**
+     * Correlation ID that was last used for messages created internally.
+     */
+    private int lastCorrelationId = 40000;
 
     public void setSyncConnection(SyncConnection syncConnection) {
         this._syncConnection = syncConnection;
@@ -3842,8 +3848,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this.onSystemRequestHandler = onSystemRequestHandler;
     }
 
+    /**
+     * Returns the next correlation ID used for internal messages.
+     *
+     * @return next correlation ID
+     */
+    private int nextCorrelationId() {
+        return ++lastCorrelationId;
+    }
+
     @Override
-    public void putSystemFile(String filename, byte[] data, FileType fileType) {
-        throw new UnsupportedOperationException("not implemented yet");
+    public void putSystemFile(String filename, byte[] data, FileType fileType)
+            throws SyncException {
+        PutFile putFile = new PutFile();
+        putFile.setSyncFileName(filename);
+        putFile.setFileType(fileType);
+        putFile.setBulkData(data);
+        putFile.setSystemFile(true);
+        putFile.setCorrelationID(nextCorrelationId());
+
+        sendRPCRequest(putFile);
     }
 }

@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy.systemrequest;
 
+import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 
 /**
@@ -15,6 +16,9 @@ public interface ISystemRequestProxy {
      * @param filename filename as received from the server
      * @param data     file's contents
      * @param fileType optional file type
+     * @throws SyncException if there is an error during preparations to send
+     *                       the request
      */
-    public void putSystemFile(String filename, byte[] data, FileType fileType);
+    public void putSystemFile(String filename, byte[] data, FileType fileType)
+            throws SyncException;
 }
