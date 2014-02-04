@@ -962,7 +962,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // Function to initialize new proxy connection
-    protected void initializeProxy() throws SyncException {
+    public void initializeProxy() throws SyncException {
         initState();
 
         // Setup SyncConnection
@@ -1158,8 +1158,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private void scheduleInitializeProxy() {
+    protected void scheduleInitializeProxy() {
         Log.d(TAG, "Scheduling proxy initialization");
+        if (currentSession.isServicesEmpty()) {
+            Log.d(TAG, "Service list is empty. Scheduling proxy initialization canceled");
+            return;
+        }
 
         if (getCurrentReconnectTimerTask() != null) {
             Log.d(TAG, "Current reconnect task is already scheduled, canceling it first");
@@ -1185,6 +1189,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         Timer timer = getReconnectTimer();
         timer.schedule(reconnectTask, PROXY_RECONNECT_DELAY);
+
     }
 
     /**
@@ -3587,7 +3592,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._jsonRPCMarshaller = jsonRPCMarshaller;
     }
 
-    private TimerTask getCurrentReconnectTimerTask() {
+    protected TimerTask getCurrentReconnectTimerTask() {
         TimerTask task;
         synchronized (RECONNECT_TIMER_TASK_LOCK) {
             task = _currentReconnectTimerTask;

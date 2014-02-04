@@ -44,7 +44,7 @@ public class TestCommon {
         return new SyncProxyALM(proxyListener, "!", null, null, true, null,
                 null, null, null, null, false, null) {
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
             }
         };
     }

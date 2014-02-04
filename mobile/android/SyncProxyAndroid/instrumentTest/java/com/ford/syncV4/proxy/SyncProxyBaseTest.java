@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.TimerTask;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -132,7 +133,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 2,
                 conf) {
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -304,5 +305,30 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(
                 reason);
+    }
+
+    public void testScheduleInitializeProxyNotCalledIfServiceListIsEmpty() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.currentSession.stopSession();
+        proxy.scheduleInitializeProxy();
+        TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
+        assertNull("timerTask should be null", timerTask);
+    }
+
+    public void testScheduleInitializeProxyCalledIfServiceListIsNotEmpty() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.scheduleInitializeProxy();
+        TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
+        assertNotNull("timerTask should not be null", timerTask);
     }
 }

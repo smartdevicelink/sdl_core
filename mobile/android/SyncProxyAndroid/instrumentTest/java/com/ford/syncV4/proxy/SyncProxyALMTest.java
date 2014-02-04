@@ -71,7 +71,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -129,7 +129,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -188,7 +188,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -252,7 +252,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -313,7 +313,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
@@ -373,7 +373,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
 
             @Override
-            protected void initializeProxy() throws SyncException {
+            public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
                 _haveReceivedFirstNonNoneHMILevel = false;
                 _haveReceivedFirstFocusLevel = false;
