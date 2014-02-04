@@ -4,15 +4,17 @@ import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
-import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCNotification;
+import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
+import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
+import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
@@ -20,21 +22,29 @@ import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
 
+import org.hamcrest.core.IsNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -82,10 +92,15 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                 false, null, null, null, null, null, null, false, false, 2,
                 null, connectionMock);
 
-        WiProProtocol protocol =
-                new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setVersion(PROTOCOL_VERSION);
-        maxDataSize = WiProProtocol.MAX_DATA_SIZE;
+        final SystemPutFileRPCRequestConverter converter =
+                new SystemPutFileRPCRequestConverter();
+        maxDataSize = 64;
+        converter.setMaxDataSize(maxDataSize);
+        IRPCRequestConverterFactory factoryMock =
+                mock(IRPCRequestConverterFactory.class);
+        when(factoryMock.getConverterForRequest(
+                notNull(RPCRequest.class))).thenReturn(converter);
+        proxy.setRpcRequestConverterFactory(factoryMock);
     }
 
     public void testOnSystemRequestRequestTypeHTTPShouldSendPartialPutFile()
@@ -95,12 +110,31 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final int dataSize = maxDataSize + extraDataSize;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
+        final String filename = "fake";
+        final List<String> urls = Arrays.asList("http://example.com/");
+        final FileType fileType = FileType.GRAPHIC_PNG;
+
+        IOnSystemRequestHandler handlerMock =
+                mock(IOnSystemRequestHandler.class);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                final ISystemRequestProxy proxy =
+                        (ISystemRequestProxy) invocationOnMock.getArguments()[0];
+                proxy.putSystemFile(filename, data, fileType);
+                return null;
+            }
+        }).when(handlerMock)
+          .onFilesDownloadRequest(notNull(ISystemRequestProxy.class), eq(urls),
+                  eq(fileType));
+        proxy.setOnSystemRequestHandler(handlerMock);
+
         // emulate incoming OnSystemRequest notification with HTTP
         OnSystemRequest onSysRq = new OnSystemRequest();
         onSysRq.setRequestType(RequestType.HTTP);
-        onSysRq.setUrl(
-                new Vector<String>(Arrays.asList("http://example.com/")));
-        onSysRq.setFileType(FileType.GRAPHIC_PNG);
+        onSysRq.setUrl(new Vector<String>(urls));
+        onSysRq.setFileType(fileType);
 
         ProtocolMessage incomingOnSysRqPM0 =
                 createNotificationProtocolMessage(onSysRq,
@@ -115,9 +149,14 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                 ArgumentCaptor.forClass(ProtocolMessage.class);
         verify(connectionMock, times(1)).sendMessage(pmCaptor0.capture());
 
+        // set another connection mock to be able to verify the second time below
+        final SyncConnection connectionMock2 = createNewSyncConnectionMock();
+        setSyncConnection(proxy, connectionMock2);
+
         final ProtocolMessage pm0 = pmCaptor0.getValue();
         assertThat(pm0.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm0.getData(), 0, maxDataSize);
+        checkSystemPutFileJSON(pm0.getData(), 0, maxDataSize, filename,
+                fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
         final int putFileRequestCorrID = pm0.getCorrID();
@@ -141,11 +180,12 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         // expect the second part of PutFile to be sent
         ArgumentCaptor<ProtocolMessage> pmCaptor1 =
                 ArgumentCaptor.forClass(ProtocolMessage.class);
-        verify(connectionMock, times(1)).sendMessage(pmCaptor1.capture());
+        verify(connectionMock2, times(1)).sendMessage(pmCaptor1.capture());
 
         final ProtocolMessage pm1 = pmCaptor1.getValue();
         assertThat(pm1.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm1.getData(), maxDataSize, extraDataSize);
+        checkSystemPutFileJSON(pm1.getData(), maxDataSize, extraDataSize,
+                filename, fileType);
         final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, dataSize);
         assertThat(pm1.getBulkData(), is(data1));
         assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
@@ -167,11 +207,14 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         // the listener should not be called for PutFile
-        verifyZeroInteractions(proxyListenerMock);
+        verify(proxyListenerMock, never()).onPutFileResponse(
+                any(PutFileResponse.class));
+//        verifyZeroInteractions(proxyListenerMock);
 
         // phew, done
     }
 
+    // TODO check resuming
     // TODO what if PutFile response is error?
     // TODO check the rest is not sent after reconnect
 
@@ -231,9 +274,10 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         syncConnection.set(proxy, connection);
     }
 
-    private void checkSystemPutFileJSON(byte[] data, int offset, int length)
+    private void checkSystemPutFileJSON(byte[] data, int offset, int length,
+                                        String filename, FileType fileType)
             throws JSONException {
-        assertThat("JSON data must not be null", data, notNullValue());
+        assertThat("JSON data must not be null", data, IsNull.notNullValue());
 
         JSONObject jsonObject =
                 new JSONObject(new String(data, Charset.defaultCharset()));
@@ -242,10 +286,10 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         assertThat("length doesn't match", jsonObject.getInt(LENGTH),
                 is(length));
         assertThat("filename must be set", jsonObject.getString(SYNC_FILENAME),
-                notNullValue());
+                is(filename));
         assertThat("systemFile must be true",
                 jsonObject.getBoolean(SYSTEM_FILE), is(true));
-        assertThat("fileType must be set", jsonObject.getJSONObject(FILE_TYPE),
-                notNullValue());
+        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
+                is(fileType.toString()));
     }
 }
