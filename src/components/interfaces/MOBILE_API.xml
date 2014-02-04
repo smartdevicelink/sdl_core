@@ -1337,8 +1337,13 @@
     <param name="rolloverEvent" type="VehicleDataEventStatus">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="maximumChangeVelocity" type="VehicleDataEventStatus">
-      <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
+    
+    <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
+      <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+        0x00 No event
+        0xFE Not supported
+        0xFF Fault
+      </description>
 	</param>
     <param name="multipleEvents" type="VehicleDataEventStatus">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -1685,7 +1690,7 @@
   </struct>
 
   <struct name="MenuParams">
-    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
       <description>
       	unique ID of the sub menu, the command will be added to.
       	If not provided, it will be provided to the top level of the in application menu.
