@@ -28,18 +28,18 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.Mockito.mock;
 
 /**
- * Tests for PutFileRPCRequestConverter class.
+ * Tests for SystemPutFileRPCRequestConverter class.
  *
  * Created by enikolsky on 2014-01-21.
  */
-public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
+public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCase {
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final int PUTFILE_FUNCTIONID = 32;
     private static final String NUMBER_OF_OBJECTS_IS_INCORRECT =
             "Number of objects is incorrect";
     private static final String OFFSET = "offset";
     private static final String LENGTH = "length";
-    private PutFileRPCRequestConverter converter;
+    private SystemPutFileRPCRequestConverter converter;
     private JsonRPCMarshaller marshaller;
 
     @Override
@@ -47,7 +47,7 @@ public class PutFileRPCRequestConverterTest extends InstrumentationTestCase {
         super.setUp();
         TestCommon.setupMocking(this);
 
-        converter = new PutFileRPCRequestConverter();
+        converter = new SystemPutFileRPCRequestConverter();
         marshaller = new JsonRPCMarshaller();
     }
 

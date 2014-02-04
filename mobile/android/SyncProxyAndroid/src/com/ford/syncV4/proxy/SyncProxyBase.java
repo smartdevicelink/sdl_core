@@ -1399,8 +1399,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 
             final IRPCRequestConverter converter =
-                    rpcRequestConverterFactory.getConverterForFunctionName(
-                            request.getFunctionName());
+                    rpcRequestConverterFactory.getConverterForRequest(request);
             if (converter != null) {
                 List<ProtocolMessage> protocolMessages =
                         converter.getProtocolMessages(request,

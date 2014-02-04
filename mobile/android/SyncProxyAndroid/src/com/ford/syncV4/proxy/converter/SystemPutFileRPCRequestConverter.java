@@ -18,7 +18,7 @@ import java.util.List;
  *
  * Created by enikolsky on 2014-01-21.
  */
-public class PutFileRPCRequestConverter implements IRPCRequestConverter {
+public class SystemPutFileRPCRequestConverter implements IRPCRequestConverter {
     /**
      * Maximum number of bulk data bytes to fit into each ProtocolMessage.
      */
