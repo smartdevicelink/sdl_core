@@ -337,7 +337,157 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         // phew, done
     }
 
-    // TODO check resuming
+    public void testOnSystemRequestRequestTypeFileResumeShouldSendPartialPutFile()
+            throws Exception {
+        // fake data for PutFile
+        final int extraDataSize = 30;
+        final int dataSize = (maxDataSize * 2) + extraDataSize;
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
+
+        final String filename = "fake";
+        final List<String> filenames = Arrays.asList(filename);
+        final FileType fileType = FileType.GRAPHIC_PNG;
+/*
+        IOnSystemRequestHandler handlerMock =
+                mock(IOnSystemRequestHandler.class);
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                final ISystemRequestProxy proxy =
+                        (ISystemRequestProxy) invocationOnMock.getArguments()[0];
+                proxy.putSystemFile(filename, data, fileType);
+                return null;
+            }
+        }).when(handlerMock)
+          .onFilesDownloadRequest(notNull(ISystemRequestProxy.class), eq(filenames),
+                  eq(fileType));
+        proxy.setOnSystemRequestHandler(handlerMock);*/
+
+        // emulate incoming OnSystemRequest notification with FILE_RESUME
+        OnSystemRequest onSysRq = new OnSystemRequest();
+        onSysRq.setRequestType(RequestType.FILE_RESUME);
+        onSysRq.setUrl(new Vector<String>(filenames));
+        onSysRq.setFileType(fileType);
+        onSysRq.setOffset(4000);
+        onSysRq.setLength(dataSize);
+
+        ProtocolMessage incomingOnSysRqPM0 =
+                createNotificationProtocolMessage(onSysRq,
+                        ONSYSTEMREQUEST_FUNCTIONID);
+        emulateIncomingMessage(proxy, incomingOnSysRqPM0);
+
+        // wait for processing
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // expect the first part of PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> pmCaptor0 =
+                ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock, times(1)).sendMessage(pmCaptor0.capture());
+
+        // set another connection mock to be able to verify the second time below
+        final SyncConnection connectionMock2 = createNewSyncConnectionMock();
+        setSyncConnection(proxy, connectionMock2);
+
+        final ProtocolMessage pm0 = pmCaptor0.getValue();
+        assertThat(pm0.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        checkSystemPutFileJSON(pm0.getData(), 0, maxDataSize, filename,
+                fileType);
+        final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
+        assertThat(pm0.getBulkData(), is(data0));
+        final int putFileRequestCorrID = pm0.getCorrID();
+
+        // the listener should not be called for OnSystemRequest
+        verify(proxyListenerMock, never()).onOnSystemRequest(
+                any(OnSystemRequest.class));
+        verifyZeroInteractions(proxyListenerMock);
+
+        // emulate incoming PutFile response for first part
+        PutFileResponse putFileResponse1 = new PutFileResponse();
+        putFileResponse1.setResultCode(Result.SUCCESS);
+        putFileResponse1.setCorrelationID(putFileRequestCorrID);
+
+        ProtocolMessage incomingPutFileResponsePM1 =
+                createResponseProtocolMessage(putFileResponse1,
+                        putFileRequestCorrID, PUTFILE_FUNCTIONID);
+        emulateIncomingMessage(proxy, incomingPutFileResponsePM1);
+
+        // wait for processing
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // expect the second part of PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> pmCaptor1 =
+                ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock2, times(1)).sendMessage(pmCaptor1.capture());
+
+        // set another connection mock to be able to verify the third time below
+        final SyncConnection connectionMock3 = createNewSyncConnectionMock();
+        setSyncConnection(proxy, connectionMock3);
+
+        final ProtocolMessage pm1 = pmCaptor1.getValue();
+        assertThat(pm1.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        checkSystemPutFileJSON(pm1.getData(), maxDataSize, maxDataSize,
+                filename, fileType);
+        final byte[] data1 =
+                Arrays.copyOfRange(data, maxDataSize, maxDataSize * 2);
+        assertThat(pm1.getBulkData(), is(data1));
+        assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
+
+        // the listener should not be called for PutFile
+        verifyZeroInteractions(proxyListenerMock);
+
+        // emulate incoming PutFile response for second part
+        PutFileResponse putFileResponse2 = new PutFileResponse();
+        putFileResponse2.setResultCode(Result.SUCCESS);
+        putFileResponse2.setCorrelationID(putFileRequestCorrID);
+
+        ProtocolMessage incomingPutFileResponsePM2 =
+                createResponseProtocolMessage(putFileResponse2,
+                        putFileRequestCorrID, PUTFILE_FUNCTIONID);
+        emulateIncomingMessage(proxy, incomingPutFileResponsePM2);
+
+        // wait for processing
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // expect the third part of PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> pmCaptor2 =
+                ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock3, times(1)).sendMessage(pmCaptor2.capture());
+
+        final ProtocolMessage pm2 = pmCaptor2.getValue();
+        assertThat(pm2.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        checkSystemPutFileJSON(pm2.getData(), maxDataSize * 2, extraDataSize,
+                filename, fileType);
+        final byte[] data2 = Arrays.copyOfRange(data, maxDataSize * 2,
+                (maxDataSize * 2) + extraDataSize);
+        assertThat(pm2.getBulkData(), is(data2));
+        assertThat(pm2.getCorrID(), is(putFileRequestCorrID));
+
+        // the listener should not be called for PutFile
+        verifyZeroInteractions(proxyListenerMock);
+
+        // emulate incoming PutFile response for third part
+        PutFileResponse putFileResponse3 = new PutFileResponse();
+        putFileResponse3.setResultCode(Result.SUCCESS);
+        putFileResponse3.setCorrelationID(putFileRequestCorrID);
+
+        ProtocolMessage incomingPutFileResponsePM3 =
+                createResponseProtocolMessage(putFileResponse3,
+                        putFileRequestCorrID, PUTFILE_FUNCTIONID);
+        emulateIncomingMessage(proxy, incomingPutFileResponsePM3);
+
+        // wait for processing
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // the listener should not be called for PutFile or OnSystemRequest
+        verify(proxyListenerMock, never()).onPutFileResponse(
+                any(PutFileResponse.class));
+        verify(proxyListenerMock, never()).onOnSystemRequest(
+                any(OnSystemRequest.class));
+
+        // phew, done
+    }
+
     // TODO check the rest is not sent after reconnect
 
     private SyncConnection createNewSyncConnectionMock() {
