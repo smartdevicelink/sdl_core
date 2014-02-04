@@ -184,12 +184,15 @@ Item {
                     "url: '" + url + "'" +
                     "appID: " + appID +
                     "}}")
+        stream.source = url;
+        stream.play();
     }
 
     function stopAudioStream(appID) {
         console.log("Message Received - {method: 'Navigation.StopAudioStream', params:{ " +
                     "appID: " + appID +
                     "}}")
+        stream.stop();
     }
 
     function fillSoftButtons(element, index, array) {
