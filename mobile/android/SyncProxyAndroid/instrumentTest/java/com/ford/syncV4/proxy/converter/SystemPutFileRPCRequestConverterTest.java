@@ -3,16 +3,14 @@ package com.ford.syncV4.proxy.converter;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
-import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
 
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,23 +20,27 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.mockito.Mockito.mock;
 
 /**
  * Tests for SystemPutFileRPCRequestConverter class.
  *
  * Created by enikolsky on 2014-01-21.
  */
-public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCase {
+public class SystemPutFileRPCRequestConverterTest
+        extends InstrumentationTestCase {
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final int PUTFILE_FUNCTIONID = 32;
     private static final String NUMBER_OF_OBJECTS_IS_INCORRECT =
             "Number of objects is incorrect";
     private static final String OFFSET = "offset";
     private static final String LENGTH = "length";
+    private static final String SYNC_FILENAME = "syncFileName";
+    private static final String SYSTEM_FILE = "systemFile";
+    private static final String FILE_TYPE = "fileType";
     private SystemPutFileRPCRequestConverter converter;
     private JsonRPCMarshaller marshaller;
 
@@ -51,13 +53,12 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         marshaller = new JsonRPCMarshaller();
     }
 
-    public void testDefaultMaxDataSizeShouldBeLessThanProtocolMaxDataSize() {
-        WiProProtocol protocol =
-                new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setVersion(PROTOCOL_VERSION);
+    public void testDefaultMaxDataSizeShouldBeLargeEnough() {
+        // how much large is enough?
+        final int minMaxDataSize = 10000;
 
         MatcherAssert.assertThat(converter.getMaxDataSize(),
-                Matchers.lessThanOrEqualTo(WiProProtocol.MAX_DATA_SIZE));
+                greaterThanOrEqualTo(minMaxDataSize));
     }
 
     public void testGetProtocolMessagesShouldReturnEmptyListIfRequestIsNotPutFile() {
@@ -131,8 +132,13 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         final int dataSize = maxDataSize + extraDataSize;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
+        final String fileName = "file2";
+        final FileType fileType = FileType.AUDIO_MP3;
+
         PutFile msg = new PutFile();
         msg.setBulkData(data);
+        msg.setSyncFileName(fileName);
+        msg.setFileType(fileType);
         msg.setCorrelationID(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
@@ -145,7 +151,7 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         ProtocolMessage pm0 = protocolMessages.get(0);
         commonPutFileProtocolMessageAsserts(pm0);
         final byte[] json0 = pm0.getData();
-        checkOffsetAndLengthInJSON(json0, 0, maxDataSize);
+        checkSystemPutFileJSON(json0, 0, maxDataSize, fileName, fileType);
         assertThat(pm0.getJsonSize(), is(json0.length));
         assertThat(pm0.getSessionID(), is(sessionID));
         assertThat(pm0.getCorrID(), is(correlationID));
@@ -155,7 +161,8 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         ProtocolMessage pm1 = protocolMessages.get(1);
         commonPutFileProtocolMessageAsserts(pm1);
         final byte[] json1 = pm1.getData();
-        checkOffsetAndLengthInJSON(json1, maxDataSize, dataSize - maxDataSize);
+        checkSystemPutFileJSON(json1, maxDataSize, dataSize - maxDataSize,
+                fileName, fileType);
         assertThat(pm1.getJsonSize(), is(json1.length));
         assertThat(pm1.getSessionID(), is(sessionID));
         assertThat(pm1.getCorrID(), is(correlationID));
@@ -176,8 +183,13 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         final int dataSize = maxDataSize * N;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
+        final String fileName = "file2";
+        final FileType fileType = FileType.AUDIO_MP3;
+
         PutFile msg = new PutFile();
         msg.setBulkData(data);
+        msg.setSyncFileName(fileName);
+        msg.setFileType(fileType);
         msg.setCorrelationID(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
@@ -190,7 +202,7 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         ProtocolMessage pm0 = protocolMessages.get(0);
         commonPutFileProtocolMessageAsserts(pm0);
         final byte[] json0 = pm0.getData();
-        checkOffsetAndLengthInJSON(json0, 0, maxDataSize);
+        checkSystemPutFileJSON(json0, 0, maxDataSize, fileName, fileType);
         assertThat(pm0.getJsonSize(), is(json0.length));
         assertThat(pm0.getSessionID(), is(sessionID));
         assertThat(pm0.getCorrID(), is(correlationID));
@@ -200,7 +212,8 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         ProtocolMessage pm1 = protocolMessages.get(1);
         commonPutFileProtocolMessageAsserts(pm1);
         final byte[] json1 = pm1.getData();
-        checkOffsetAndLengthInJSON(json1, maxDataSize, dataSize - maxDataSize);
+        checkSystemPutFileJSON(json1, maxDataSize, dataSize - maxDataSize,
+                fileName, fileType);
         assertThat(pm1.getJsonSize(), is(json1.length));
         assertThat(pm1.getSessionID(), is(sessionID));
         assertThat(pm1.getCorrID(), is(correlationID));
@@ -219,8 +232,13 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         final int dataSize = (maxDataSize * dataCopies) + extraDataSize;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
+        final String fileName = "file2";
+        final FileType fileType = FileType.AUDIO_MP3;
+
         PutFile msg = new PutFile();
         msg.setBulkData(data);
+        msg.setSyncFileName(fileName);
+        msg.setFileType(fileType);
         msg.setCorrelationID(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
@@ -233,23 +251,33 @@ public class SystemPutFileRPCRequestConverterTest extends InstrumentationTestCas
         for (int i = 0; i < dataCopies; ++i) {
             final ProtocolMessage pm = protocolMessages.get(i);
             final byte[] json = pm.getData();
-            checkOffsetAndLengthInJSON(json, i * maxDataSize, maxDataSize);
+            checkSystemPutFileJSON(json, i * maxDataSize, maxDataSize, fileName,
+                    fileType);
         }
 
         final ProtocolMessage pm = protocolMessages.get(dataCopies);
         final byte[] json = pm.getData();
-        checkOffsetAndLengthInJSON(json, dataCopies * maxDataSize,
-                extraDataSize);
+        checkSystemPutFileJSON(json, dataCopies * maxDataSize, extraDataSize,
+                fileName, fileType);
     }
 
-    private void checkOffsetAndLengthInJSON(byte[] data, int offset, int length)
+    private void checkSystemPutFileJSON(byte[] data, int offset, int length,
+                                        String filename, FileType fileType)
             throws JSONException {
-        assertThat(data, notNullValue());
+        assertThat("JSON data must not be null", data, notNullValue());
 
         JSONObject jsonObject =
                 new JSONObject(new String(data, Charset.defaultCharset()));
-        assertThat(jsonObject.getInt(OFFSET), is(offset));
-        assertThat(jsonObject.getInt(LENGTH), is(length));
+        assertThat("offset doesn't match", jsonObject.getInt(OFFSET),
+                is(offset));
+        assertThat("length doesn't match", jsonObject.getInt(LENGTH),
+                is(length));
+        assertThat("filename must be set", jsonObject.getString(SYNC_FILENAME),
+                is(filename));
+        assertThat("systemFile must be true",
+                jsonObject.getBoolean(SYSTEM_FILE), is(true));
+        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
+                is(fileType.toString()));
     }
 
     private void commonPutFileProtocolMessageAsserts(

@@ -13,8 +13,9 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A converter for the PutFile request which splits it into ProtocolMessage
- * objects that should be small enough to fit into single frames.
+ * A converter for the PutFile request for system files which splits it into
+ * ProtocolMessage objects by maximum size. This is done to allow the SDK to
+ * continue transferring big files after errors.
  *
  * Created by enikolsky on 2014-01-21.
  */
@@ -22,7 +23,7 @@ public class SystemPutFileRPCRequestConverter implements IRPCRequestConverter {
     /**
      * Maximum number of bulk data bytes to fit into each ProtocolMessage.
      */
-    private int maxDataSize = 1000;
+    private int maxDataSize = 100000;
 
     @Override
     public List<ProtocolMessage> getProtocolMessages(RPCRequest request,
@@ -46,6 +47,7 @@ public class SystemPutFileRPCRequestConverter implements IRPCRequestConverter {
                             Arrays.copyOfRange(bulkData, start, end);
                     tempMsg.setOffset(start);
                     tempMsg.setLength(end - start);
+                    tempMsg.setSystemFile(true);
                     ProtocolMessage pm =
                             createProtocolMessage(tempMsg, sessionID,
                                     protocolVersion, bulkDataRange, marshaller);
