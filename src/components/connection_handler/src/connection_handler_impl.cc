@@ -305,7 +305,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       success = connection_handler_observer_->OnServiceStartedCallback(
           (it->second)->connection_device_handle(), session_key, service_type);
     }
-
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
       new_session_id = -1;
