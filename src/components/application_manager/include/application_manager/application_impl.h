@@ -94,10 +94,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
 
-  bool AddFile(const std::string& file_name, bool is_persistent, bool is_download_complete);
-  bool UpdateFile(const std::string& file_name, bool is_persistent, bool is_download_complete);
+  bool AddFile(AppFile& file);
+  bool UpdateFile(AppFile& file);
+
   bool DeleteFile(const std::string& file_name);
-  virtual const std::vector<AppFile> &getAppFiles() const;
+  virtual const AppFilesMap& getAppFiles() const;
 
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
@@ -131,7 +132,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
 
-  std::vector<AppFile> app_files_;
+  AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t> subscribed_vehicle_info_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);

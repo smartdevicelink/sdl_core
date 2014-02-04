@@ -12,7 +12,7 @@ namespace application_manager {
   log4cxx::LoggerPtr ResumeCtrl::logger_ = log4cxx::LoggerPtr(
         log4cxx::Logger::getLogger("ResumeCtrl"));
 
-ResumeCtrl::ResumeCtrl(ApplicationManagerImpl *application_manager)
+ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* application_manager)
           :application_manager_(application_manager) {
 }
 
@@ -54,7 +54,7 @@ void ResumeCtrl::SaveAllApplications() {
   }  // end of app.list
 }
 
-void ResumeCtrl::SaveApplication(Application *application) {
+void ResumeCtrl::SaveApplication(Application* application) {
 
   LOG4CXX_INFO(logger_, " ResumeCtrl::SaveApplication");
 
@@ -64,7 +64,7 @@ void ResumeCtrl::SaveApplication(Application *application) {
                   <<application->app_id());
     return;
   }
-  Json::Value *curr_app = NULL;
+  Json::Value* curr_app = NULL;
   uint32_t app_id = application->mobile_app_id()->asInt();
   for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
             it != saved_applications_vector.end(); it++) {
@@ -84,19 +84,20 @@ void ResumeCtrl::SaveApplication(Application *application) {
   (*curr_app)[strings::connection_key] = application->app_id();
   (*curr_app)[strings::hmi_level] = static_cast<int32_t>(application->hmi_level());
   (*curr_app)["mac_address"] = mac_adddress; // in case of Wifi it is IP adress
-  Json::Value app_files_data;
-  const std::vector<AppFile> &app_files = application->getAppFiles();
-  for(std::vector<AppFile>::const_iterator file_it = app_files.begin();
-                                file_it != app_files.end(); file_it++) {
-    if ((*file_it).is_persistent) {
-      Json::Value file_data;
-      file_data["is_persistent"] = (*file_it).is_persistent;
-      file_data["is_download_complete"] = (*file_it).is_download_complete;
-      file_data["file_name"] = (*file_it).file_name;
-      app_files_data.append(file_data);
-    }
-  }
-  (*curr_app)["app_files"] = app_files_data;
+// Need to move this funtional to other instance
+//  Json::Value app_files_data;
+//  const std::vector<AppFile> &app_files = application->getAppFiles();
+//  for(std::vector<AppFile>::const_iterator file_it = app_files.begin();
+//                                file_it != app_files.end(); file_it++) {
+//    if ((*file_it).is_persistent) {
+//      Json::Value file_data;
+//      file_data["is_persistent"] = (*file_it).is_persistent;
+//      file_data["is_download_complete"] = (*file_it).is_download_complete;
+//      file_data["file_name"] = (*file_it).file_name;
+//      app_files_data.append(file_data);
+//    }
+//  }
+//  (*curr_app)["app_files"] = app_files_data;
   (*curr_app)["ing_off_count"] = 0;
 }
 
@@ -128,39 +129,40 @@ void ResumeCtrl::LoadApplications() {
   }
 }
 
-bool ResumeCtrl::RestoreApplicationFiles(Application *application,
+bool ResumeCtrl::RestoreApplicationFiles(Application* application,
                                                                  bool only_persistent) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::RestoreApplicationPercictentData");
   for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
             it != saved_applications_vector.end(); it++) {
     if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
-      std::string relative_file_path =
-          file_system::CreateDirectory(application->name());
-      relative_file_path += "/";
-      for (Json::Value::iterator files_it = (*it)["app_files"].begin();
-          files_it != (*it)["app_files"].end(); files_it++) {
-        if (!file_system::FileExists(relative_file_path + (*files_it)["file_name"].asString())) {
-          continue;
-        }
-        if ( !only_persistent | (*files_it)["is_persistent"].asBool()) {
-          if (application->AddFile((*files_it)["file_name"].asString(),
-                                   (*files_it)["is_persistent"].asBool(),
-                                   (*files_it)["is_download_complete"].asBool())) {
-            LOG4CXX_INFO(logger_,"File restored: " << (*files_it).toStyledString() <<
-                         "For application " <<  application->mobile_app_id()->asInt());
-          }
-        }
-      }
+// Need to move this funtional to other instance
+//      std::string relative_file_path =
+//          file_system::CreateDirectory(application->name());
+//      relative_file_path += "/";
+//      for (Json::Value::iterator files_it = (*it)["app_files"].begin();
+//          files_it != (*it)["app_files"].end(); files_it++) {
+//        if (!file_system::FileExists(relative_file_path + (*files_it)["file_name"].asString())) {
+//          continue;
+//        }
+//        if ( !only_persistent | (*files_it)["is_persistent"].asBool()) {
+//          if (application->AddFile((*files_it)["file_name"].asString(),
+//                                   (*files_it)["is_persistent"].asBool(),
+//                                   (*files_it)["is_download_complete"].asBool())) {
+//            LOG4CXX_INFO(logger_, "File restored: " << (*files_it).toStyledString() <<
+//                         "For application " <<  application->mobile_app_id()->asInt());
+//          }
+//        }
+//      }
       //saved_applications_vector.erase(it);
-      LOG4CXX_INFO(logger_,"Restore Succesfull!");
+      LOG4CXX_INFO(logger_, "Restore Succesfull!");
       return true;
     }
   }
-  LOG4CXX_INFO(logger_,"Couldn't Restore!");
+  LOG4CXX_INFO(logger_, "Couldn't Restore!");
   return false;
 }
 
-bool ResumeCtrl::RestoreApplicationHMILevel(Application *application) {
+bool ResumeCtrl::RestoreApplicationHMILevel(Application* application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::RestoreApplicationHMILevel");
   for (std::vector<Json::Value>::iterator it = this->saved_applications_vector.begin();
             it != saved_applications_vector.end(); it++) {
@@ -174,7 +176,7 @@ bool ResumeCtrl::RestoreApplicationHMILevel(Application *application) {
 }
 
 
-std::string ResumeCtrl::GetMacAddress(Application *application) {
+std::string ResumeCtrl::GetMacAddress(Application* application) {
    LOG4CXX_INFO(logger_, "ResumeCtrl::GetMacAddress");
    if (0 == this->application_manager_->connection_handler_) {
      LOG4CXX_ERROR(logger_,

@@ -217,13 +217,10 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
-  for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it;
-      ++it) {
-    if (0 == it->file_name.compare(path.substr(path.find_last_of("/")+1))) {
-      app_icon_path_ = path;
-      return true;
-    }
+  std::string file_name = path.substr(path.find_last_of("/") + 1);
+  if (app_files_.find(file_name) != app_files_.end()) {
+    app_icon_path_ = path;
+    return true;
   }
   return false;
 }
@@ -240,47 +237,32 @@ bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
 
-bool ApplicationImpl::AddFile(const std::string& file_name,
-                              bool is_persistent, bool is_download_complete) {
-  for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it;
-      ++it) {
-    if (0 == file_name.compare(it->file_name)) {
-      return false;
-    }
+bool ApplicationImpl::AddFile(AppFile& file) {
+  if (app_files_.count(file.file_name) == 0) {
+    app_files_[file.file_name] = file;
+    return true;
   }
-  AppFile app_file(file_name, is_persistent, is_download_complete);
-  app_files_.push_back(app_file);
-  return true;
+  return false;
 }
 
-bool ApplicationImpl::UpdateFile(const std::string &file_name, bool is_persistent, bool is_download_complete)
-{
-  for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it;
-      ++it) {
-    if (0 == file_name.compare(it->file_name)) {
-      it->is_persistent = is_persistent;
-      it->is_download_complete = is_download_complete;
-      return true;
-    }
+bool ApplicationImpl::UpdateFile(AppFile& file) {
+  if (app_files_.count(file.file_name) != 0) {
+    app_files_[file.file_name] = file;
+    return true;
   }
   return false;
 }
 
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
-  for (std::vector<AppFile>::iterator it = app_files_.begin();
-      app_files_.end() != it;
-      ++it) {
-    if (0 == it->file_name.compare(file_name)) {
-      app_files_.erase(it);
-      return true;
-    }
+  AppFilesMap::const_iterator it = app_files_.find(file_name);
+  if (it != app_files_.end()) {
+    app_files_.erase(it);
+    return true;
   }
   return false;
 }
 
-const std::vector<AppFile>& ApplicationImpl::getAppFiles() const {
+const AppFilesMap& ApplicationImpl::getAppFiles() const {
   return this->app_files_;
 }
 
@@ -321,11 +303,12 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
 void ApplicationImpl::CleanupFiles() {
   std::string directory_name = file_system::FullPath(name());
   if (file_system::DirectoryExists(directory_name)) {
-    for (size_t i = 0; i < app_files_.size(); ++i) {
-      if (!app_files_[i].is_persistent) {
+    for (AppFilesMap::const_iterator it = app_files_.begin();
+        it != app_files_.end(); ++it) {
+      if (!it->second.is_persistent) {
         std::string file_name = directory_name;
         file_name += "/";
-        file_name += app_files_[i].file_name;
+        file_name += it->second.file_name;
         file_system::DeleteFile(file_name);
       }
     }

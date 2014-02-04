@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
 #include "application_manager/mobile_command_factory.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -70,12 +71,20 @@ void ListFilesRequest::Run() {
   }
 
   application->increment_list_files_in_none_count();
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
-  (*message)[strings::params] = (*message_)[strings::params];
-  (*message)[strings::params][strings::message_type] =
+
+  (*message_)[strings::msg_params][strings::space_available] =
+        static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
+  int32_t i = 0;
+  const AppFilesMap& app_files = application->getAppFiles();
+  for (AppFilesMap::const_iterator it = app_files.begin();
+       it != app_files.end(); ++it) {
+    if (it->second.is_persistent) {
+      (*message_)[strings::msg_params][strings::filenames][i++] = it->second.file_name;
+    }
+  }
+  (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;
-  CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message);
+  CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message_);
   responseCommand->Run();
 }
 
