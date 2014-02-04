@@ -37,9 +37,12 @@
 #include <signal.h>
 #include <errno.h>
 
+#include "resumption/last_state.h"
+
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
+#include "transport_manager/tcp/tcp_device.h"
 
 #ifdef AVAHI_SUPPORT
 #include "transport_manager/tcp/dnssd_service_browser.h"
@@ -64,6 +67,56 @@ TcpTransportAdapter::~TcpTransportAdapter() {
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
   return "sdl-tcp";
+}
+
+void TcpTransportAdapter::Store(void) const {
+  LOG4CXX_TRACE_ENTER(logger_);
+  DeviceList device_ids = GetDeviceList();
+  resumption::LastState::TcpDeviceStateContainer states;
+  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
+    DeviceUID device_id = *i;
+    DeviceSptr device = FindDevice(device_id);
+    utils::SharedPtr<TcpDevice> tcp_device =
+      DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    resumption::LastState::TcpDeviceState state;
+    state.in_addr = tcp_device->in_addr();
+    state.name = tcp_device->name();
+    ApplicationList app_ids = tcp_device->GetApplicationList();
+    for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
+      ApplicationHandle app_handle = *j;
+      uint16_t port = tcp_device->GetApplicationPort(app_handle);
+      resumption::LastState::TcpDeviceApplicationState app_state;
+      app_state.port = port;
+      state.applications.push_back(app_state);
+    }
+    states.push_back(state);
+  }
+  resumption::LastState::instance()->StoreTcpDeviceStates(states);
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
+bool TcpTransportAdapter::Restore(void) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  bool errors_occured = false;
+  resumption::LastState::TcpDeviceStateContainer tcp_device_states =
+    resumption::LastState::instance()->tcp_device_states();
+  for (resumption::LastState::TcpDeviceStateContainer::const_iterator i =
+    tcp_device_states.begin(); i != tcp_device_states.end(); ++i) {
+    TcpDevice* tcp_device = new TcpDevice(i->in_addr, i->name);
+    DeviceSptr device(tcp_device);
+    AddDevice(device);
+    resumption::LastState::TcpDeviceApplicationStateContainer applications =
+      i->applications;
+    for (resumption::LastState::TcpDeviceApplicationStateContainer::const_iterator j =
+      applications.begin(); j != applications.end(); ++j) {
+      ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(j->port);
+      if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
+        errors_occured = true;
+      }
+    }
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
+  return !errors_occured;
 }
 
 }  // namespace transport_adapter

@@ -3,6 +3,8 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include
   ../connection_handler/include
+  ../config_profile/include
+  ../resumption/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
 )
 if (BUILD_BT_SUPPORT)
@@ -77,3 +79,4 @@ if (BUILD_BT_SUPPORT)
   target_link_libraries("TransportManager" bluetooth)
 endif()
 
+target_link_libraries("TransportManager" Resumption)

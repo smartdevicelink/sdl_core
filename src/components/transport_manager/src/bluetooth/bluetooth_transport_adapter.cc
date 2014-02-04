@@ -42,9 +42,12 @@
 #include <set>
 #include <bluetooth/bluetooth.h>
 
+#include "resumption/last_state.h"
+
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/bluetooth/bluetooth_device_scanner.h"
 #include "transport_manager/bluetooth/bluetooth_connection_factory.h"
+#include "transport_manager/bluetooth/bluetooth_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -59,6 +62,63 @@ BluetoothTransportAdapter::BluetoothTransportAdapter()
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return "sdl-bluetooth";
+}
+
+void BluetoothTransportAdapter::Store(void) const {
+  LOG4CXX_TRACE_ENTER(logger_);
+  DeviceList device_ids = GetDeviceList();
+  resumption::LastState::BluetoothDeviceStateContainer states;
+  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
+    DeviceUID device_id = *i;
+    DeviceSptr device = FindDevice(device_id);
+    utils::SharedPtr<BluetoothDevice> bluetooth_device =
+      DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
+    resumption::LastState::BluetoothDeviceState state;
+    state.address = bluetooth_device->address();
+    state.name = bluetooth_device->name();
+    ApplicationList app_ids = bluetooth_device->GetApplicationList();
+    for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
+      ApplicationHandle app_handle = *j;
+      uint8_t rfcomm_channel;
+      bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
+      resumption::LastState::BluetoothDeviceApplicationState app_state;
+      app_state.rfcomm_channel = rfcomm_channel;
+      state.applications.push_back(app_state);
+    }
+    states.push_back(state);
+  }
+  resumption::LastState::instance()->StoreBluetoothDeviceStates(states);
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
+bool BluetoothTransportAdapter::Restore(void) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  bool errors_occured = false;
+  resumption::LastState::BluetoothDeviceStateContainer bluetooth_device_states =
+    resumption::LastState::instance()->bluetooth_device_states();
+  for (resumption::LastState::BluetoothDeviceStateContainer::const_iterator i =
+    bluetooth_device_states.begin(); i != bluetooth_device_states.end(); ++i) {
+    resumption::LastState::BluetoothDeviceApplicationStateContainer applications =
+      i->applications;
+    RfcommChannelVector rfcomm_channels;
+    for (resumption::LastState::BluetoothDeviceApplicationStateContainer::const_iterator j =
+      applications.begin(); j != applications.end(); ++j) {
+      rfcomm_channels.push_back(j->rfcomm_channel);
+    }
+    BluetoothDevice* bluetooth_device =
+      new BluetoothDevice(i->address, i->name.c_str(), rfcomm_channels);
+    DeviceSptr device(bluetooth_device);
+    AddDevice(device);
+    for (RfcommChannelVector::const_iterator j =
+      rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
+      ApplicationHandle app_handle = *j; // for Bluetooth device app_handle is just RFCOMM channel
+      if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
+        errors_occured = true;
+      }
+    }
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
+  return !errors_occured;
 }
 
 }  // namespace transport_adapter

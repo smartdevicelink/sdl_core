@@ -75,7 +75,9 @@ Profile::Profile()
   , delete_file_in_none_(5)
   , list_files_in_none_(5)
   , app_info_storage_("app_info.dat")
-  , heart_beat_timeout_(kDefaultHeartBeatTimeout) {
+  , heart_beat_timeout_(kDefaultHeartBeatTimeout)
+  , transport_manager_disconnect_timeout_(0)
+  , use_last_state_(false) {
   UpdateValues();
 }
 
@@ -227,6 +229,14 @@ const std::string& Profile::app_info_storage() const {
 
 const int32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
+}
+
+unsigned long Profile::transport_manager_disconnect_timeout(void) const {
+    return transport_manager_disconnect_timeout_;
+}
+
+bool Profile::use_last_state(void) const {
+    return use_last_state_;
 }
 
 void Profile::UpdateValues() {

@@ -74,10 +74,6 @@ enum {
   E_INTERNAL_ERROR,
 };
 
-struct TransportManagerAttr {
-  unsigned long disconnectTimeout; /**> milliseconds */
-};
-
 /**
  * @brief Implementation of transport manager.
  */
@@ -249,16 +245,10 @@ class TransportManagerImpl : public TransportManager {
 
   /**
    * @brief Constructor.
-   *
-   * @param config Information about transport manager state.
    **/
-  explicit TransportManagerImpl(const TransportManagerAttr& config);
+  explicit TransportManagerImpl(void);
 
  protected:
-  /**
-   * @brief Information about transport manager state.
-   */
-  TransportManagerAttr config_;
 
   template <class Proc, class... Args>
   void RaiseEvent(Proc proc, Args... args) {

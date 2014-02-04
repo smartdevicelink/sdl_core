@@ -146,6 +146,10 @@ class SharedPtr {
     template<typename OtherObjectType>
     SharedPtr<ObjectType>& operator =(const SharedPtr<OtherObjectType>& Other);
 
+    template<typename OtherObjectType>
+    static SharedPtr<OtherObjectType> static_pointer_cast(
+      const SharedPtr<ObjectType>& pointer);
+
     /**
      * @brief Member access operator.
      *
@@ -264,6 +268,24 @@ utils::SharedPtr<ObjectType>::operator=(
   }
 
   return *this;
+}
+
+template<typename ObjectType>
+template<typename OtherObjectType>
+utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_cast(const SharedPtr<ObjectType>& pointer) {
+  SharedPtr<OtherObjectType> casted_pointer;
+  casted_pointer.mObject = static_cast<OtherObjectType*>(pointer.mObject);
+  casted_pointer.mReferenceCounter = pointer.mReferenceCounter;
+
+  if (0 != casted_pointer.mReferenceCounter) {
+#if  defined(__QNX__) || defined(__QNXNTO__)
+    atomic_add(casted_pointer.mReferenceCounter, 1);
+#else
+    __sync_add_and_fetch(casted_pointer.mReferenceCounter, 1);
+#endif
+  }
+
+  return casted_pointer;
 }
 
 template<typename ObjectType> ObjectType*
