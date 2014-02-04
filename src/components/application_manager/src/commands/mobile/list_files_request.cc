@@ -83,8 +83,6 @@ void ListFilesRequest::Run() {
   (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;
   SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(*message_)[strings::msg_params]);
-  //CommandSharedPtr responseCommand = MobileCommandFactory::CreateCommand(message_);
-  //responseCommand->Run();
 }
 
 }  // namespace commands

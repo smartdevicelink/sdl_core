@@ -1037,7 +1037,18 @@
     <element name="FAULT" internal_name="VDAS_FAULT">
     </element>
   </enum>
-
+  <enum name="AmbientLightStatus">
+    <description>Reflects the status of the ambient light sensor.</description>
+    <element name="NIGHT" />
+    <element name="TWILIGHT_1" />
+    <element name="TWILIGHT_2" />
+    <element name="TWILIGHT_3" />
+    <element name="TWILIGHT_4" />
+    <element name="DAY" />
+    <element name="UNKNOWN" />
+    <element name="INVALID" />
+  </enum>
+  
   <struct name="BeltStatus">
     <param name="driverBeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -1152,6 +1163,9 @@
 	</param>
     <param name="highBeamsOn" type="Boolean">
       <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
+	</param>
+    <param name="ambientLightSensorStatus" type="AmbientLightStatus">
+      <description>Status of the ambient light sensor.</description>
 	</param>
   </struct>
 
@@ -1323,8 +1337,13 @@
     <param name="rolloverEvent" type="VehicleDataEventStatus">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="maximumChangeVelocity" type="VehicleDataEventStatus">
-      <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
+    
+    <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
+      <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+        0x00 No event
+        0xFE Not supported
+        0xFF Fault
+      </description>
 	</param>
     <param name="multipleEvents" type="VehicleDataEventStatus">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -1671,7 +1690,7 @@
   </struct>
 
   <struct name="MenuParams">
-    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
       <description>
       	unique ID of the sub menu, the command will be added to.
       	If not provided, it will be provided to the top level of the in application menu.
