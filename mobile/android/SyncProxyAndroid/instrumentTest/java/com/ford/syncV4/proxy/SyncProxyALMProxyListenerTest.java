@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy;
 
+import android.test.InstrumentationTestCase;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
@@ -30,7 +32,7 @@ import static org.mockito.Mockito.verify;
  *
  * Created by enikolsky on 2014-01-24.
  */
-public class SyncProxyALMProxyListenerTest extends TestCase {
+public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
     private static final int CALLBACK_WAIT_TIMEOUT = 100;
     private IProxyListenerALM proxyListenerMock;
     private SyncProxyALM proxy;
@@ -38,6 +40,7 @@ public class SyncProxyALMProxyListenerTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        TestCommon.setupMocking(this);
 
         proxyListenerMock = mock(IProxyListenerALM.class);
         proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
