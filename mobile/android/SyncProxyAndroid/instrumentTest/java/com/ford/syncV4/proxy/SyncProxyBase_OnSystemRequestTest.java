@@ -267,6 +267,33 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         assertThat(pm.getBulkData(), is(data0));
     }
 
+    public void testPutSystemFileWithOffsetShouldSendCorrectFirstProtocolMessage()
+            throws InterruptedException, JSONException, SyncException {
+        // fake data for PutFile
+        final int extraDataSize = 10;
+        final int dataSize = maxDataSize + extraDataSize;
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
+
+        final String filename = "file";
+        final FileType fileType = FileType.GRAPHIC_JPEG;
+        final int offset = 4000;
+        proxy.putSystemFile(filename, data, offset, fileType);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        // expect the first part of PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> pmCaptor =
+                ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock, times(1)).sendMessage(pmCaptor.capture());
+
+        final ProtocolMessage pm = pmCaptor.getValue();
+        assertThat(pm.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        checkSystemPutFileJSON(pm.getData(), offset, maxDataSize, filename,
+                fileType);
+        final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
+        assertThat(pm.getBulkData(), is(data0));
+    }
+
     // TODO other request types
     // TODO check on main thread
 

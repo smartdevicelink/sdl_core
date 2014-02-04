@@ -261,6 +261,90 @@ public class SystemPutFileRPCRequestConverterTest
                 fileName, fileType);
     }
 
+    public void testGetProtocolMessagesForSmallPutFileWithOffsetShouldReturnCorrectProtocolMessage()
+            throws Exception {
+        final int correlationID = 1;
+        final byte sessionID = (byte) 0;
+        final byte[] data = TestCommon.getRandomBytes(32);
+
+        final int offset = 4000;
+        final String fileName = "file";
+
+        PutFile msg = new PutFile();
+        msg.setSyncFileName(fileName);
+        msg.setBulkData(data);
+        msg.setOffset(offset);
+        msg.setCorrelationID(correlationID);
+
+        final List<ProtocolMessage> protocolMessages =
+                converter.getProtocolMessages(msg, sessionID, marshaller,
+                        PROTOCOL_VERSION);
+
+        assertThat(NUMBER_OF_OBJECTS_IS_INCORRECT, protocolMessages.size(),
+                is(1));
+
+        ProtocolMessage pm = protocolMessages.get(0);
+        commonPutFileProtocolMessageAsserts(pm);
+        final byte[] data1 = pm.getData();
+        checkSystemPutFileJSON(data1, offset, data.length, fileName, null);
+        assertThat(pm.getJsonSize(), is(data1.length));
+        assertThat(pm.getSessionID(), is(sessionID));
+        assertThat(pm.getCorrID(), is(correlationID));
+        assertThat(pm.getBulkData(), is(data));
+    }
+
+    public void testMediumPutFileWithOffsetShouldBeSplitIntoTwoProtocolMessages()
+            throws Exception {
+        final int correlationID = 1;
+        final byte sessionID = (byte) 0;
+
+        converter.setMaxDataSize(100);
+
+        final int extraDataSize = 10;
+        final int maxDataSize = converter.getMaxDataSize();
+        final int dataSize = maxDataSize + extraDataSize;
+        final byte[] data = TestCommon.getRandomBytes(dataSize);
+
+        final String fileName = "file2";
+        final FileType fileType = FileType.AUDIO_MP3;
+        final int offset = 4000;
+
+        PutFile msg = new PutFile();
+        msg.setBulkData(data);
+        msg.setSyncFileName(fileName);
+        msg.setFileType(fileType);
+        msg.setOffset(offset);
+        msg.setCorrelationID(correlationID);
+
+        final List<ProtocolMessage> protocolMessages =
+                converter.getProtocolMessages(msg, sessionID, marshaller,
+                        PROTOCOL_VERSION);
+
+        assertThat(NUMBER_OF_OBJECTS_IS_INCORRECT, protocolMessages.size(),
+                is(2));
+
+        ProtocolMessage pm0 = protocolMessages.get(0);
+        commonPutFileProtocolMessageAsserts(pm0);
+        final byte[] json0 = pm0.getData();
+        checkSystemPutFileJSON(json0, offset, maxDataSize, fileName, fileType);
+        assertThat(pm0.getJsonSize(), is(json0.length));
+        assertThat(pm0.getSessionID(), is(sessionID));
+        assertThat(pm0.getCorrID(), is(correlationID));
+        final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
+        assertThat(pm0.getBulkData(), is(data0));
+
+        ProtocolMessage pm1 = protocolMessages.get(1);
+        commonPutFileProtocolMessageAsserts(pm1);
+        final byte[] json1 = pm1.getData();
+        checkSystemPutFileJSON(json1, offset + maxDataSize,
+                dataSize - maxDataSize, fileName, fileType);
+        assertThat(pm1.getJsonSize(), is(json1.length));
+        assertThat(pm1.getSessionID(), is(sessionID));
+        assertThat(pm1.getCorrID(), is(correlationID));
+        final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, dataSize);
+        assertThat(pm1.getBulkData(), is(data1));
+    }
+
     private void checkSystemPutFileJSON(byte[] data, int offset, int length,
                                         String filename, FileType fileType)
             throws JSONException {
@@ -276,8 +360,11 @@ public class SystemPutFileRPCRequestConverterTest
                 is(filename));
         assertThat("systemFile must be true",
                 jsonObject.getBoolean(SYSTEM_FILE), is(true));
-        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
-                is(fileType.toString()));
+
+        if (fileType != null) {
+            assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
+                    is(fileType.toString()));
+        }
     }
 
     private void commonPutFileProtocolMessageAsserts(

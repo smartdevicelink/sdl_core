@@ -38,14 +38,18 @@ public class SystemPutFileRPCRequestConverter implements IRPCRequestConverter {
                 final int frameCount =
                         (int) Math.ceil(bulkData.length * 1.0 / maxDataSize);
 
-                PutFile tempMsg = copyRequest((PutFile) request);
+                final PutFile putFile = (PutFile) request;
+                final Integer offset = putFile.getOffset();
+                final int baseOffset = (offset != null) ? offset : 0;
+
+                PutFile tempMsg = copyRequest(putFile);
                 for (int i = 0; i < frameCount; ++i) {
                     final int start = i * maxDataSize;
                     final int end =
                             Math.min((i + 1) * maxDataSize, bulkData.length);
                     final byte[] bulkDataRange =
                             Arrays.copyOfRange(bulkData, start, end);
-                    tempMsg.setOffset(start);
+                    tempMsg.setOffset(baseOffset + start);
                     tempMsg.setLength(end - start);
                     tempMsg.setSystemFile(true);
                     ProtocolMessage pm =

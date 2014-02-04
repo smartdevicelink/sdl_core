@@ -3907,6 +3907,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     @Override
     public void putSystemFile(String filename, byte[] data, FileType fileType)
             throws SyncException {
+        putSystemFile(filename, data, null, fileType);
+    }
+
+    @Override
+    public void putSystemFile(String filename, byte[] data, Integer offset,
+                              FileType fileType) throws SyncException {
         PutFile putFile = new PutFile();
         putFile.setSyncFileName(filename);
         putFile.setFileType(fileType);
@@ -3915,13 +3921,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         final int correlationID = nextCorrelationId();
         putFile.setCorrelationID(correlationID);
 
+        if (offset != null) {
+            putFile.setOffset(offset);
+            putFile.setLength(data.length);
+        }
+
         sendRPCRequest(putFile);
         internalRequestCorrelationIDs.add(correlationID);
-    }
-
-    @Override
-    public void putSystemFile(String filename, byte[] data, Integer offset,
-                              FileType fileType) throws SyncException {
-        throw new UnsupportedOperationException();
     }
 }
