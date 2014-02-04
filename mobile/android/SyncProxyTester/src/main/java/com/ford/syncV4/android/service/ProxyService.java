@@ -1842,7 +1842,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (mSyncProxy.getIsConnected()) {
                 mSyncProxy.openSession();
             } else {
-                // TODO : Consider a case when there is no connection
+                mSyncProxy.initializeProxy();
             }
         }
     }
