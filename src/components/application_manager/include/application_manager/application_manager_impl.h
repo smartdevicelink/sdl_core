@@ -158,6 +158,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
 
+    /**
+     * @brief Stop work.
+     *
+     * @return TRUE on success otherwise FALSE.
+     **/
+    virtual bool Stop();
+
     /////////////////////////////////////////////////////
 
     Application* application(int32_t app_id);

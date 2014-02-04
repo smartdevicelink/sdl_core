@@ -58,7 +58,10 @@ class DefinitionGenerator {
   void GenerateCodeForResponse(const Response& response);
   void GenerateCodeForNotification(const Notification& notification);
  private:
+  // Methods
   void GenerateCodeForRequest(const Request& request, CppFile* source_file);
+private:
+  // Fields
   ModuleManager* module_manager_;
 };
 

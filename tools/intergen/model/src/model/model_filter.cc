@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+#include "model/model_filter.h"
 
-#include <set>
-#include "hmi_message_handler/hmi_message_handler.h"
-#include "connection_handler/connection_handler.h"
-#include "protocol_handler/protocol_handler.h"
+namespace codegen {
 
-namespace policies {
-  class PolicyManager;
-}  // namespace policies
+ModelFilter::ModelFilter(const std::set<std::string>& filtered_scope_names)
+  : filtered_scopes_(filtered_scope_names) {
+}
 
-namespace application_manager {
+bool ModelFilter::ShouldFilterScope(const Scope& scope) const {
+  return filtered_scopes_.count(scope) != 0;
+}
 
-class Application;
-class HMIMatrix;
-class PoliciesManager;
 
-class ApplicationManager {
-  public:
-    virtual ~ApplicationManager() {
-    }
 
-    /**
-     * @brief Stop work.
-     *
-     * @return TRUE on success otherwise FALSE.
-     **/
-    virtual bool Stop() = 0;
-
-    virtual void set_hmi_message_handler(
-      hmi_message_handler::HMIMessageHandler* handler) = 0;
-    virtual void set_protocol_handler(
-      protocol_handler::ProtocolHandler* handler) = 0;
-    virtual void set_connection_handler(
-      connection_handler::ConnectionHandler* handler) = 0;
-  virtual void set_policy_manager(
-      policies::PolicyManager* policy_manager) = 0;
-
-  protected:
-    virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
-    virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
-};
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+}  // namespace codegen

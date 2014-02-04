@@ -34,8 +34,6 @@
 #include "application_manager/commands/mobile/slider_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -109,40 +107,40 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "SliderRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
-  switch (event.id()) {
-    case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-          correlation_id(),
-          default_timeout());
-      break;
-    }
-    case hmi_apis::FunctionID::UI_Slider: {
-      LOG4CXX_INFO(logger_, "Received UI_Slider event");
-
-      mobile_apis::Result::eType code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-
-      if ((mobile_apis::Result::SUCCESS == code) ||
-          (mobile_apis::Result::ABORTED == code)) {
-        SendResponse(true,
-                     mobile_apis::Result::eType(code),
-                     0,
-                     &(message[strings::msg_params]));
-      } else {
-        SendResponse(false,
-                     mobile_apis::Result::eType(code),
-                     0,
-                     &(message[strings::msg_params]));
-      }
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
-      break;
-    }
+  const event_engine::Event::EventID event_id = event.id();
+  if (event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
+    LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+      correlation_id(),
+      default_timeout());
+    return;
   }
+  if (event_id != hmi_apis::FunctionID::UI_Slider) {
+    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    return;
+  }
+
+  //event_id == hmi_apis::FunctionID::UI_Slider:
+  LOG4CXX_INFO(logger_, "Received UI_Slider event");
+
+  const int response_code =
+      message[strings::params][hmi_response::code].asInt();
+
+  smart_objects::SmartObject response_msg_params = message[strings::msg_params];
+  if (response_code == hmi_apis::Common_Result::ABORTED)
+    //Copy slider_position info to msg_params section
+    response_msg_params[strings::slider_position] =
+        message[strings::params][strings::data][strings::slider_position];
+
+  const bool is_response_success =
+      (mobile_apis::Result::SUCCESS == response_code) ||
+      //Aborted has slider_position data
+      (mobile_apis::Result::ABORTED == response_code);
+
+  SendResponse(is_response_success,
+               mobile_apis::Result::eType(response_code),
+               0,
+               &response_msg_params);
 }
 
 }  // namespace commands

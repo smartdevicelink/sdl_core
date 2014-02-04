@@ -104,7 +104,8 @@ Item {
     function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
         var softButtonsLog = "",
             showStringsLog = "",
-            customPresetsLog = "";
+            customPresetsLog = "",
+            graphiLog = "";
         if (showStrings) {
             for (var i = 0; i < showStrings.length; i++) {
                 showStringsLog += "{fieldName: '" + showStrings[i].fieldName + "', " +
@@ -127,10 +128,14 @@ Item {
                         "},";
             }
         }
+        if (graphic) {
+            graphiLog = "{value: '" + graphic.value + "', imageType: " + graphic.imageType + "}";
+        }
+
         console.log("Message Received - {method: 'UI.Show', params:{ " +
                     "showStrings: [" + showStringsLog + "], " +
                     "alignment: " + alignment + "', " +
-                    "graphic: {value: '" + graphic.value + "', imageType: " + graphic.imageType + "}, " +
+                    "graphic: " + graphiLog + ", " +
                     "softButtons: [" + softButtonsLog + "], " +
                     "customPresets: [" + customPresetsLog + "], " +
                     "appID: " + appID +

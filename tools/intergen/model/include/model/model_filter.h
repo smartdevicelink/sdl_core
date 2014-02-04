@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +29,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+#ifndef MODEL_FILTER_H
+#define MODEL_FILTER_H
 
 #include <set>
-#include "hmi_message_handler/hmi_message_handler.h"
-#include "connection_handler/connection_handler.h"
-#include "protocol_handler/protocol_handler.h"
 
-namespace policies {
-  class PolicyManager;
-}  // namespace policies
+#include "model/scope.h"
 
-namespace application_manager {
+namespace codegen {
 
-class Application;
-class HMIMatrix;
-class PoliciesManager;
-
-class ApplicationManager {
-  public:
-    virtual ~ApplicationManager() {
-    }
-
-    /**
-     * @brief Stop work.
-     *
-     * @return TRUE on success otherwise FALSE.
-     **/
-    virtual bool Stop() = 0;
-
-    virtual void set_hmi_message_handler(
-      hmi_message_handler::HMIMessageHandler* handler) = 0;
-    virtual void set_protocol_handler(
-      protocol_handler::ProtocolHandler* handler) = 0;
-    virtual void set_connection_handler(
-      connection_handler::ConnectionHandler* handler) = 0;
-  virtual void set_policy_manager(
-      policies::PolicyManager* policy_manager) = 0;
-
-  protected:
-    virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
-    virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
+/*
+ * Class represents modifications that should be done to parsed model while
+ * building it from xml
+ */
+class ModelFilter {
+public:
+  // Creates filter that skips all entities marked with scope
+  ModelFilter(const std::set<std::string>& filtered_scope_names);
+  // Tells whether entity with this scope should be skipped
+  bool ShouldFilterScope(const Scope& scope) const;
+private:
+  const std::set<Scope> filtered_scopes_;
 };
 
-}  // namespace application_manager
+}  // namespace codegen
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
+#endif // MODEL_FILTER_H

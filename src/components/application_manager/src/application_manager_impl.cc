@@ -115,6 +115,48 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
+
+  if (media_manager_) {
+    media_manager_ = NULL;
+  }
+
+  if (hmi_handler_) {
+    hmi_handler_ = NULL;
+  }
+
+  if (connection_handler_) {
+    connection_handler_ = NULL;
+  }
+
+  if (policy_manager_) {
+    policy_manager_ = NULL;
+  }
+
+  if (hmi_so_factory_) {
+    hmi_so_factory_ = NULL;
+  }
+
+  if (mobile_so_factory_) {
+    mobile_so_factory_ = NULL;
+  }
+
+  if (protocol_handler_) {
+    protocol_handler_ = NULL;
+  }
+
+  if (media_manager_) {
+    media_manager_ = NULL;
+  }
+
+}
+
+ApplicationManagerImpl* ApplicationManagerImpl::instance() {
+  static ApplicationManagerImpl instance;
+  return &instance;
+}
+
+bool ApplicationManagerImpl::Stop() {
+  LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   try {
     UnregisterAllApplications();
   }
@@ -123,14 +165,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
                   "An error occured during unregistering applications.");
   }
 
-  if (media_manager_) {
-    media_manager_ = NULL;
-  }
-}
-
-ApplicationManagerImpl* ApplicationManagerImpl::instance() {
-  static ApplicationManagerImpl instance;
-  return &instance;
+  return true;
 }
 
 Application* ApplicationManagerImpl::application(int32_t app_id) {

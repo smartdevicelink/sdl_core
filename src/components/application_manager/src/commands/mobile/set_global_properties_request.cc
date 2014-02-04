@@ -171,7 +171,9 @@ void SetGlobalPropertiesRequest::Run() {
         return;
       }
       // use only first
-      vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      vr_help_items[index][strings::position] = (index + 1);
+      vr_help_items[index++][strings::text] =
+          (*command_it->second)[strings::vr_commands][0];
     }
 
     app->set_vr_help_title(smart_objects::SmartObject(app->name()));

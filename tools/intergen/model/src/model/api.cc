@@ -39,14 +39,16 @@
 
 namespace codegen {
 
-API::API()
-    : interfaces_deleter_(&interfaces_) {
+API::API(const ModelFilter* model_filter)
+    : model_filter_(model_filter),
+      interfaces_deleter_(&interfaces_) {
+  assert(model_filter_);
 }
 
 bool API::init(const pugi::xml_document& xmldoc) {
   for (pugi::xml_node i = xmldoc.child("interface"); i;
       i = xmldoc.next_sibling("interface")) {
-    interfaces_.push_back(new Interface(&builtin_type_registry_));
+    interfaces_.push_back(new Interface(&builtin_type_registry_, model_filter_));
     if (!interfaces_.back()->init(i)) {
       return false;
     }

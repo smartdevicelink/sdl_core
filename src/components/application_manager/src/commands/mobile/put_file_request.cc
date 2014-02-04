@@ -90,24 +90,41 @@ void PutFileRequest::Run() {
   }
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
-  const std::string& file_type =
-      (*message_)[strings::msg_params][strings::file_type].asString();
-
+  const mobile_apis::FileType::eType& file_type =
+      static_cast<mobile_apis::FileType::eType>(
+      (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
   uint32_t offset = 0;
+  bool is_persistent_file = false;
+  bool is_system_file = false;
+  uint32_t length = binary_data.size();
+  bool is_download_compleate = true;
   bool offset_exist = (*message_)[strings::msg_params].keyExists(strings::offset);
 
   if (offset_exist) {
     offset = (*message_)[strings::msg_params][strings::offset].asInt();
   }
-  uint32_t length = binary_data.size();
   if ((*message_)[strings::msg_params].keyExists(strings::length)) {
       length =
             (*message_)[strings::msg_params][strings::length].asInt();
-     }
+  }
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::persistent_file)) {
+    is_persistent_file =
+        (*message_)[strings::msg_params][strings::persistent_file].asBool();
+  }
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::system_file)) {
+    is_system_file =
+        (*message_)[strings::msg_params][strings::system_file].asBool();
+  }
 
+  if (is_system_file & (file_type != mobile_apis::FileType::BINARY)) {
+    LOG4CXX_INFO(logger_, "File is System but not binary");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+  }
   std::string relative_file_path =
       file_system::CreateDirectory(application->name());
   relative_file_path += "/";
@@ -122,27 +139,16 @@ void PutFileRequest::Run() {
 
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      bool is_persistent_file = false;
-      bool is_system_file = false;
-
-      if ((*message_)[strings::msg_params].
-          keyExists(strings::persistent_file)) {
-        is_persistent_file =
-            (*message_)[strings::msg_params][strings::persistent_file].asBool();
-      }
-      if ((*message_)[strings::msg_params].
-          keyExists(strings::system_file)) {
-        is_system_file =
-            (*message_)[strings::msg_params][strings::system_file].asBool();
-      }
+      AppFile file(sync_file_name, is_persistent_file, is_download_compleate, file_type);
       if (offset == 0) {
         LOG4CXX_INFO(logger_, "New file downloading");
-        if (!application->AddFile(sync_file_name, is_persistent_file, false)) {
+        if (!application->AddFile(file)) {
           LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
           // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
-          if (!application->UpdateFile(sync_file_name, is_persistent_file, false)) {
+          if (!application->UpdateFile(file)) {
+            LOG4CXX_INFO(logger_, "Couldn't update file");
             // If it is impossible to update file, application doesn't know about existing this file
-            SendResponse(false,mobile_apis::Result::INVALID_DATA);
+            SendResponse(false, mobile_apis::Result::INVALID_DATA);
             return;
           }
         } else {
@@ -151,20 +157,22 @@ void PutFileRequest::Run() {
           application->increment_put_file_in_none_count();
         }
       }
-      if (offset + binary_data.size() == length) {
-        LOG4CXX_INFO(logger_, "File is Fully downloaded");
-        if (!application->UpdateFile(sync_file_name, is_persistent_file, true)) {
-          // If it is impossible to update file, application doesn't know about existing this file
-          SendResponse(false,mobile_apis::Result::INVALID_DATA);
-          return;
-        }
-      } else {
-        //TODO: Maybe need to save in AppFile information about downloading progress
-      }
+//      For future implementation ( when length will contains file size)
+//      if (offset + binary_data.size() == length) {
+//        LOG4CXX_INFO(logger_, "File is Fully downloaded");
+//        if (!application->UpdateFile(file)) {
+//          // If it is impossible to update file, application doesn't know about existing this file
+//          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+//          return;
+//        }
+//      } else {
+//        //TODO: Maybe need to save in AppFile information about downloading progress
+//      }
       SendResponse(true, save_result);
       break;
     }
     default:
+      LOG4CXX_INFO(logger_, "Save in unsuccesfull result = " << save_result);
       SendResponse(false, save_result);
       break;
   }

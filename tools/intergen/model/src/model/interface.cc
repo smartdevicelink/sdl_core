@@ -37,6 +37,7 @@
 #include <iostream>
 
 #include "model/constant.h"
+#include "model/model_filter.h"
 #include "model/scope.h"
 #include "pugixml.hpp"
 #include "utils/safeformat.h"
@@ -53,13 +54,18 @@ using typesafe_format::format;
 using typesafe_format::strmfmt;
 
 namespace codegen {
+class ModelFilter;
 
-Interface::Interface(BuiltinTypeRegistry* builtin_type_registry)
+Interface::Interface(BuiltinTypeRegistry* builtin_type_registry,
+                     const ModelFilter* model_filter)
     : builtin_type_registry_(builtin_type_registry),
-      type_registry_(builtin_type_registry_),
+      model_filter_(model_filter),
+      type_registry_(builtin_type_registry_, model_filter),
       requests_deleter_(&requests_),
       responses_deleter_(&responses_),
       notifications_deleter_(&notifications_) {
+  assert(builtin_type_registry_);
+  assert(model_filter_);
 }
 
 Interface::~Interface() {
@@ -143,6 +149,10 @@ bool codegen::Interface::AddFunctions(const pugi::xml_node& xml_interface) {
 bool Interface::AddFunctionMessage(MessagesMap* list,
                                    FunctionMessage::MessageType message_type,
                                    const pugi::xml_node& xml_message) {
+  Scope scope = ScopeFromLiteral(xml_message.attribute("scope").value());
+  if (model_filter_->ShouldFilterScope(scope)) {
+    return true;
+  }
   std::string name = xml_message.attribute("name").value();
   std::string func_id_str = xml_message.attribute("functionID").value();
   if (name.empty()) {
@@ -165,7 +175,6 @@ bool Interface::AddFunctionMessage(MessagesMap* list,
     return false;
   }
   Description description = CollectDescription(xml_message);
-  Scope scope = ScopeFromLiteral(xml_message.attribute("scope").value());
   pair<MessagesMap::iterator, bool> res = list->insert(
       make_pair(
           name,
@@ -176,13 +185,21 @@ bool Interface::AddFunctionMessage(MessagesMap* list,
             message_type) << endl;
     return false;
   }
-  return AddFunctionMessageParameters(res.first->second, xml_message);
+  if (!AddFunctionMessageParameters(res.first->second, xml_message)) {
+    std::cerr << "While parsing function " << name << '\n';
+    return false;
+  }
+  return true;
 }
 
 bool Interface::AddFunctionMessageParameters(
     FunctionMessage* function_message, const pugi::xml_node& xml_message) {
   for (pugi::xml_node i = xml_message.child("param"); i;
       i = i.next_sibling("param")) {
+    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
+    if (model_filter_->ShouldFilterScope(scope)) {
+      continue;
+    }
     std::string name = i.attribute("name").value();
     if (name.empty()) {
       strmfmt(cerr, "Function message {0}, has parameter with empty name",
@@ -191,6 +208,7 @@ bool Interface::AddFunctionMessageParameters(
     }
     const Type* type = NULL;
     if (!type_registry_.GetType(i, &type)) {
+      std::cerr << "While parsing function parameter " << name << '\n';
       return false;
     }
     const Constant* default_value = NULL;
@@ -211,7 +229,6 @@ bool Interface::AddFunctionMessageParameters(
     }
     bool is_mandatory = TypeRegistry::IsMandatoryParam(i);
     Description description = CollectDescription(i);
-    Scope scope = ScopeFromLiteral(i.attribute("scope").value());
     Platform platform = PlatformFromLiteral(i.attribute("platform").value());
     if (!function_message->AddParameter(name, type, default_value, is_mandatory,
                                         description, scope, platform)) {

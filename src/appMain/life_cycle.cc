@@ -253,20 +253,32 @@ void LifeCycle::StopComponents(int32_t params) {
   utils::ResetSubscribeToTerminateSignal();
   instance()->hmi_handler_->set_message_observer(NULL);
   instance()->connection_handler_->set_connection_handler_observer(NULL);
-  instance()->protocol_handler_->RemoveProtocolObserver(
-    instance()->app_manager_);
-
-  instance()->transport_manager_->Stop();
-
-  LOG4CXX_INFO(logger_, "Destroying Media Manager");
-  instance()->media_manager_->SetProtocolHandler(NULL);
-  instance()->media_manager_->~MediaManagerImpl();
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  instance()->app_manager_->~ApplicationManagerImpl();
+  instance()->app_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
   instance()->policy_manager_->~PolicyManager();
+
+  instance()->transport_manager_->Stop();
+  instance()->protocol_handler_->RemoveProtocolObserver(
+    instance()->app_manager_);
+
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
+  instance()->protocol_handler_->RemoveProtocolObserver(
+      instance()->media_manager_);
+  instance()->media_manager_->SetProtocolHandler(NULL);
+  instance()->media_manager_->~MediaManagerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  instance()->protocol_handler_->set_session_observer(NULL);
+  instance()->connection_handler_->~ConnectionHandlerImpl();
+
+  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  delete instance()->protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying TM");
+  delete instance()->transport_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef QT_HMI
@@ -295,16 +307,6 @@ void LifeCycle::StopComponents(int32_t params) {
   instance()->message_broker_->stopMessageBroker();
   delete instance()->mb_server_thread_;
   instance()->message_broker_->~CMessageBroker();
-
-  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  instance()->protocol_handler_->set_session_observer(NULL);
-  instance()->connection_handler_->~ConnectionHandlerImpl();
-
-  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  delete instance()->protocol_handler_;
-
-  LOG4CXX_INFO(logger_, "Destroying TM");
-  delete instance()->transport_manager_;
 
   networking::cleanup();
 #endif  // WEB_HMI
