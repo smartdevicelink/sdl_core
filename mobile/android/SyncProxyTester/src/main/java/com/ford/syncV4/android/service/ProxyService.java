@@ -10,7 +10,9 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -31,6 +33,7 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.SyncProxy;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -103,6 +106,8 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -118,9 +123,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
-public class ProxyService extends Service implements IProxyListenerALMTesting {
+public class ProxyService extends Service implements IProxyListenerALMTesting,
+        IOnSystemRequestHandler {
 
     static final String TAG = "SyncProxyTester";
 
@@ -347,6 +354,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*preRegister*/ false,
                         versionNumber,
                         config);
+                mSyncProxy.setOnSystemRequestHandler(this);
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -1962,5 +1970,30 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 Log.i(TAG, messageObject.toString());
             }
         }
+    }
+
+    @Override
+    public void onFilesDownloadRequest(final ISystemRequestProxy proxy,
+                                       List<String> urls, FileType fileType) {
+        createDebugMessageForAdapter("files download request");
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final byte[] data = contentsOfResource(R.raw.audio_short);
+                try {
+                    proxy.putSystemFile("system.update", data,
+                            FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    createErrorMessageForAdapter("Can't upload system file", e);
+                }
+            }
+        }, 500);
+    }
+
+    @Override
+    public void onFileResumeRequest(ISystemRequestProxy proxy, String filename,
+                                    Integer offset, Integer length,
+                                    FileType fileType) {
+        createErrorMessageForAdapter("onFileResumeRequest not implemented yet");
     }
 }
