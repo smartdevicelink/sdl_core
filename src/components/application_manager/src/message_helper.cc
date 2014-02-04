@@ -965,7 +965,9 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   for (; cmdMap.end() != command_it; ++command_it) {
     if (true == (*command_it->second).keyExists(strings::vr_commands)) {
       // use only first
-      vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      vr_help_items[index][strings::position] = (index + 1);
+      vr_help_items[index++][strings::text] =
+          (*command_it->second)[strings::vr_commands][0];
     }
   }
 
