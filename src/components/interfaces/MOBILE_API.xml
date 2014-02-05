@@ -863,8 +863,12 @@
     </element>
     <element name="SEVENTH">
     </element>
-    <element name="EIGTH">
+    <element name="EIGHTH">
     </element>
+    <element name="UNKNOWN">
+    </element>
+    <element name="FAULT">
+    </element>    
   </enum>
 
   <enum name="ComponentVolumeStatus">
@@ -897,6 +901,8 @@
     </element>
     <element name="FLASH" internal_name="WLS_FLASH">
     </element>
+    <element name="NOT_USED" internal_name="WLS_NOT_USED">
+    </element>
   </enum>
 
   <enum name="VehicleDataNotificationStatus">
@@ -906,6 +912,8 @@
     <element name="NORMAL" internal_name="VDNS_NORMAL">
     </element>
     <element name="ACTIVE" internal_name="VDNS_ACTIVE">
+    </element>
+    <element name="NOT_USED" internal_name="VDNS_NOT_USED">
     </element>
   </enum>
 
@@ -1037,6 +1045,7 @@
     <element name="FAULT" internal_name="VDAS_FAULT">
     </element>
   </enum>
+
   <enum name="AmbientLightStatus">
     <description>Reflects the status of the ambient light sensor.</description>
     <element name="NIGHT" />
@@ -1048,7 +1057,7 @@
     <element name="UNKNOWN" />
     <element name="INVALID" />
   </enum>
-  
+
   <struct name="BeltStatus">
     <param name="driverBeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -1166,7 +1175,7 @@
 	</param>
     <param name="ambientLightSensorStatus" type="AmbientLightStatus">
       <description>Status of the ambient light sensor.</description>
-	</param>
+    </param>
   </struct>
 
   <struct name="engineInfo">
@@ -1337,14 +1346,14 @@
     <param name="rolloverEvent" type="VehicleDataEventStatus">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    
+
     <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
       <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
         0x00 No event
         0xFE Not supported
         0xFF Fault
       </description>
-	</param>
+    </param>
     <param name="multipleEvents" type="VehicleDataEventStatus">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
@@ -4253,7 +4262,7 @@
     <param name="gps" type="GPSData" mandatory="false">
       <description>See GPSData</description>
     </param>
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="false">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
     <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
@@ -4280,7 +4289,7 @@
     <param name="tirePressure" type="TireStatus" mandatory="false">
       <description>See TireStatus</description>
     </param>
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="false">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
       <description>Odometer in km</description>
     </param>
     <param name="beltStatus" type="BeltStatus" mandatory="false">
