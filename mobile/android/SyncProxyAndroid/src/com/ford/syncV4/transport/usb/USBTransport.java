@@ -785,9 +785,7 @@ public class USBTransport extends SyncTransport {
                 }
 
                 if (bytesRead > 0) {
-                    synchronized (USBTransport.this) {
-                        handleReceivedBytes(buffer, bytesRead);
-                    }
+                    handleReceivedBytes(buffer, bytesRead);
                 }
             }
         }

@@ -3790,9 +3790,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             if (_advancedLifecycleManagementEnabled) {
                 // Cycle the proxy
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
-                }
+                cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
             } else {
                 notifyProxyClosed(info, e);
             }

@@ -415,9 +415,7 @@ public class TCPTransport extends SyncTransport {
                         logInfo("TCPTransport.run: Received zero bytes");
                     } else {
                         logInfo(String.format("TCPTransport.run: Received %d bytes", bytesRead));
-                        synchronized (TCPTransport.this) {
                             handleReceivedBytes(buffer, bytesRead);
-                        }
                     }
                 }
             }
