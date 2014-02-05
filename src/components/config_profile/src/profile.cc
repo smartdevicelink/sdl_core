@@ -231,11 +231,11 @@ const int32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 
-unsigned long Profile::transport_manager_disconnect_timeout(void) const {
+uint32_t Profile::transport_manager_disconnect_timeout() const {
     return transport_manager_disconnect_timeout_;
 }
 
-bool Profile::use_last_state(void) const {
+bool Profile::use_last_state() const {
     return use_last_state_;
 }
 

@@ -72,14 +72,14 @@ class TcpTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Store adapter state in last state singleton
    */
-  virtual void Store(void) const;
+  virtual void Store() const;
 
   /**
    * @brief Restore adapter state from last state singleton
    *
    * @return True on success false otherwise
    */
-  virtual bool Restore(void);
+  virtual bool Restore();
 };
 
 }  // namespace transport_adapter

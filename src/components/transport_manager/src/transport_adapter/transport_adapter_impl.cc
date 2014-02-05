@@ -536,10 +536,10 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   }
 }
 
-void TransportAdapterImpl::Store(void) const {
+void TransportAdapterImpl::Store() const {
 }
 
-bool TransportAdapterImpl::Restore(void) {
+bool TransportAdapterImpl::Restore() {
   return true;
 }
 

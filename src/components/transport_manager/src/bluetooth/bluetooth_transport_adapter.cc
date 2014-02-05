@@ -64,7 +64,7 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return "sdl-bluetooth";
 }
 
-void BluetoothTransportAdapter::Store(void) const {
+void BluetoothTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
   DeviceList device_ids = GetDeviceList();
   resumption::LastState::BluetoothDeviceStateContainer states;
@@ -91,7 +91,7 @@ void BluetoothTransportAdapter::Store(void) const {
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-bool BluetoothTransportAdapter::Restore(void) {
+bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
   resumption::LastState::BluetoothDeviceStateContainer bluetooth_device_states =

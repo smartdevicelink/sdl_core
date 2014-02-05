@@ -69,7 +69,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
   return "sdl-tcp";
 }
 
-void TcpTransportAdapter::Store(void) const {
+void TcpTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
   DeviceList device_ids = GetDeviceList();
   resumption::LastState::TcpDeviceStateContainer states;
@@ -84,10 +84,12 @@ void TcpTransportAdapter::Store(void) const {
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      uint16_t port = tcp_device->GetApplicationPort(app_handle);
-      resumption::LastState::TcpDeviceApplicationState app_state;
-      app_state.port = port;
-      state.applications.push_back(app_state);
+      int port = tcp_device->GetApplicationPort(app_handle);
+      if (port != -1) { // don't want to store incoming applications
+        resumption::LastState::TcpDeviceApplicationState app_state;
+        app_state.port = static_cast<uint16_t>(port);
+        state.applications.push_back(app_state);
+      }
     }
     states.push_back(state);
   }
@@ -95,7 +97,7 @@ void TcpTransportAdapter::Store(void) const {
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-bool TcpTransportAdapter::Restore(void) {
+bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
   resumption::LastState::TcpDeviceStateContainer tcp_device_states =

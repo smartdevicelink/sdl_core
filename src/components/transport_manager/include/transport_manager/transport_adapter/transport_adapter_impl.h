@@ -372,14 +372,14 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Store adapter state where applicable
    */
-  virtual void Store(void) const;
+  virtual void Store() const;
 
   /**
    * @brief Restore adapter state where applicable
    *
    * @return True on success false otherwise (or vacuous true)
    */
-  virtual bool Restore(void);
+  virtual bool Restore();
 
  private:
   /**

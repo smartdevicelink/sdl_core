@@ -241,12 +241,12 @@ class Profile {
     /*
      * @brief Timeout in transport manager before disconnect
      */
-    unsigned long transport_manager_disconnect_timeout(void) const;
+    uint32_t transport_manager_disconnect_timeout() const;
 
     /*
      * @brief Returns true if last state singleton is used
      */
-    bool use_last_state(void) const;
+    bool use_last_state() const;
 
     // Members section
 
@@ -366,7 +366,7 @@ class Profile {
     uint32_t                    list_files_in_none_;
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
-    unsigned long                   transport_manager_disconnect_timeout_;
+    uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);

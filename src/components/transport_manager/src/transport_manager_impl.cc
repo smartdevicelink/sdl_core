@@ -131,7 +131,7 @@ class TransportManagerImpl::IncomingDataHandler {
   TransportManagerImpl* tm_impl_;
 };
 
-TransportManagerImpl::TransportManagerImpl(void)
+TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
       all_thread_active_(false),
       message_queue_thread_(),
@@ -275,7 +275,9 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   if (messages_count > 0) {
     connection->messages_count = messages_count;
     connection->shutDown = true;
-    connection->timer->start(profile::Profile::instance()->transport_manager_disconnect_timeout());
+    connection->timer->start(
+      profile::Profile::instance()->transport_manager_disconnect_timeout()
+    );
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                               connection->application);

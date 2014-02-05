@@ -246,7 +246,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Constructor.
    **/
-  explicit TransportManagerImpl(void);
+  TransportManagerImpl();
 
  protected:
 
