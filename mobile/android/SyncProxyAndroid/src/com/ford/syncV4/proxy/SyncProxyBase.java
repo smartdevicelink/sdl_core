@@ -75,6 +75,7 @@ import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
@@ -114,11 +115,13 @@ import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
@@ -128,6 +131,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
@@ -159,13 +164,16 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> {
+public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
+        ISystemRequestProxy {
     // Used for calls to Android Log class.
     public static final String TAG = "SyncProxy";
     // Synchronization Objects
@@ -275,10 +283,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
-
-
     private IProtocolMessageHolder protocolMessageHolder =
             new ProtocolMessageHolder();
+
+    /**
+     * Handler for OnSystemRequest notifications.
+     */
+    private IOnSystemRequestHandler onSystemRequestHandler;
+
+    /**
+     * A set of internal requests' correlation IDs that are currently in
+     * progress.
+     */
+    private Set<Integer> internalRequestCorrelationIDs;
+
+    /**
+     * Correlation ID that was last used for messages created internally.
+     */
+    private int lastCorrelationId = 40000;
 
     public void setSyncConnection(SyncConnection syncConnection) {
         this._syncConnection = syncConnection;
@@ -965,6 +987,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void initializeProxy() throws SyncException {
         initState();
 
+        internalRequestCorrelationIDs = new HashSet<Integer>();
+
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (_syncConnection == null) {
@@ -1391,8 +1415,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
 
             final IRPCRequestConverter converter =
-                    rpcRequestConverterFactory.getConverterForFunctionName(
-                            request.getFunctionName());
+                    rpcRequestConverterFactory.getConverterForRequest(request);
             if (converter != null) {
                 List<ProtocolMessage> protocolMessages =
                         converter.getProtocolMessages(request,
@@ -1456,6 +1479,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return success;
     }
 
+    /**
+     * Handles an internal response, if it is, that is last in sequence. Such a
+     * response shouldn't be exposed to the user. For example, a PutFile
+     * responded for OnSystemRequest.
+     *
+     * @param response response from the SDL
+     * @return true if the response has been handled; false when the
+     * corresponding request is not internal or in case of an error
+     */
+    private boolean handleLastInternalResponse(RPCResponse response) {
+        final Integer correlationID = response.getCorrelationID();
+        final boolean contains = internalRequestCorrelationIDs.contains(
+                correlationID);
+        if (contains) {
+            internalRequestCorrelationIDs.remove(correlationID);
+        }
+
+        return contains;
+    }
+
     private void handleRPCMessage(Hashtable hash) {
         RPCMessage rpcMsg = new RPCMessage(hash);
         String functionName = rpcMsg.getFunctionName();
@@ -1466,7 +1509,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationID();
-            if (!handlePartialRPCResponse(response)) {
+            if (!handlePartialRPCResponse(response) &&
+                    !handleLastInternalResponse(response)) {
 
                 // Check to ensure response is not from an internal message (reserved correlation ID)
                 if (isCorrelationIDProtected(responseCorrelationID)) {
@@ -2463,18 +2507,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _proxyListener.onKeyboardInput((OnKeyboardInput) msg);
                 }
             } else if (functionName.equals(Names.OnSystemRequest)) {
-                final OnSystemRequest msg = new OnSystemRequest(hash);
-                if (_callbackToUIThread) {
-                    // Run in UI thread
-                    _mainUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            _proxyListener.onOnSystemRequest(msg);
-                        }
-                    });
-                } else {
-                    _proxyListener.onOnSystemRequest(msg);
-                }
+                handleOnSystemRequest(hash);
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
 
@@ -2533,6 +2566,68 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } // end-if notification
 
         SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SYNC_LIB_TRACE_KEY);
+    }
+
+    private void handleOnSystemRequest(Hashtable hash) {
+        final OnSystemRequest msg = new OnSystemRequest(hash);
+
+        if (RequestType.HTTP == msg.getRequestType()) {
+            final Vector<String> urls = msg.getUrl();
+            if (urls != null) {
+                Runnable request = new Runnable() {
+                    @Override
+                    public void run() {
+                        onSystemRequestHandler.onFilesDownloadRequest(
+                                SyncProxyBase.this, urls, msg.getFileType());
+                    }
+                };
+
+                if (_callbackToUIThread) {
+                    _mainUIHandler.post(request);
+                } else {
+                    request.run();
+                }
+            } else {
+                Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+            }
+        } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
+            final Vector<String> urls = msg.getUrl();
+            final Integer offset = msg.getOffset();
+            final Integer length = msg.getLength();
+            final boolean allRequiredParamsSet =
+                    (urls != null) && (offset != null) && (length != null);
+            if (allRequiredParamsSet) {
+                Runnable request = new Runnable() {
+                    @Override
+                    public void run() {
+                        onSystemRequestHandler.onFileResumeRequest(
+                                SyncProxyBase.this, urls.get(0), offset, length,
+                                msg.getFileType());
+                    }
+                };
+
+                if (_callbackToUIThread) {
+                    _mainUIHandler.post(request);
+                } else {
+                    request.run();
+                }
+            } else {
+                Log.w(TAG,
+                        "OnSystemRequest FILE_RESUME: a required parameter is missing");
+            }
+        } else {
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _proxyListener.onOnSystemRequest(msg);
+                    }
+                });
+            } else {
+                _proxyListener.onOnSystemRequest(msg);
+            }
+        }
     }
 
     private void notifyOnAppInterfaceUnregistered(final OnAppInterfaceUnregistered msg) {
@@ -3802,5 +3897,49 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnection.startAudioService(currentSession);
             }
         }
+    }
+
+    public IOnSystemRequestHandler getOnSystemRequestHandler() {
+        return onSystemRequestHandler;
+    }
+
+    public void setOnSystemRequestHandler(
+            IOnSystemRequestHandler onSystemRequestHandler) {
+        this.onSystemRequestHandler = onSystemRequestHandler;
+    }
+
+    /**
+     * Returns the next correlation ID used for internal messages.
+     *
+     * @return next correlation ID
+     */
+    private int nextCorrelationId() {
+        return ++lastCorrelationId;
+    }
+
+    @Override
+    public void putSystemFile(String filename, byte[] data, FileType fileType)
+            throws SyncException {
+        putSystemFile(filename, data, null, fileType);
+    }
+
+    @Override
+    public void putSystemFile(String filename, byte[] data, Integer offset,
+                              FileType fileType) throws SyncException {
+        PutFile putFile = new PutFile();
+        putFile.setSyncFileName(filename);
+        putFile.setFileType(fileType);
+        putFile.setBulkData(data);
+        putFile.setSystemFile(true);
+        final int correlationID = nextCorrelationId();
+        putFile.setCorrelationID(correlationID);
+
+        if (offset != null) {
+            putFile.setOffset(offset);
+            putFile.setLength(data.length);
+        }
+
+        sendRPCRequest(putFile);
+        internalRequestCorrelationIDs.add(correlationID);
     }
 }

@@ -5,15 +5,20 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.syncConnection.SyncConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Hashtable;
 import java.util.Random;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Common methods for testing classes.
@@ -39,14 +44,14 @@ public class TestCommon {
 
     public static SyncProxyALM getSyncProxyALMNoTransport(
             IProxyListenerALM proxyListener) throws SyncException {
-        // we use custom subclass here to override the initializeProxy() method
-        // to avoid using a transport
-        return new SyncProxyALM(proxyListener, "!", null, null, true, null,
-                null, null, null, null, false, null) {
-            @Override
-            public void initializeProxy() throws SyncException {
-            }
-        };
+        SyncConnection connectionMock = mock(SyncConnection.class);
+        when(connectionMock.getIsConnected()).thenReturn(true);
+        WiProProtocol protocolMock = mock(WiProProtocol.class);
+        when(connectionMock.getWiProProtocol()).thenReturn(protocolMock);
+
+        return new SyncProxyALM(proxyListener, null, "!", null, null, true,
+                null, null, null, null, null, null, false, false, 2, null,
+                connectionMock);
     }
 
     public static byte[] getRandomBytes(int dataSize) {
