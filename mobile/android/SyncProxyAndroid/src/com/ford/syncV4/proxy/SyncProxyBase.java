@@ -2572,35 +2572,48 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         final OnSystemRequest msg = new OnSystemRequest(hash);
 
         if (RequestType.HTTP == msg.getRequestType()) {
-            Runnable request = new Runnable() {
-                @Override
-                public void run() {
-                    onSystemRequestHandler.onFilesDownloadRequest(
-                            SyncProxyBase.this, msg.getUrl(),
-                            msg.getFileType());
-                }
-            };
+            final Vector<String> urls = msg.getUrl();
+            if (urls != null) {
+                Runnable request = new Runnable() {
+                    @Override
+                    public void run() {
+                        onSystemRequestHandler.onFilesDownloadRequest(
+                                SyncProxyBase.this, urls, msg.getFileType());
+                    }
+                };
 
-            if (_callbackToUIThread) {
-                _mainUIHandler.post(request);
+                if (_callbackToUIThread) {
+                    _mainUIHandler.post(request);
+                } else {
+                    request.run();
+                }
             } else {
-                request.run();
+                Log.w(TAG, "OnSystemRequest HTTP: no urls set");
             }
         } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
             final Vector<String> urls = msg.getUrl();
-            Runnable request = new Runnable() {
-                @Override
-                public void run() {
-                    onSystemRequestHandler.onFileResumeRequest(
-                            SyncProxyBase.this, urls.get(0), msg.getOffset(),
-                            msg.getLength(), msg.getFileType());
-                }
-            };
+            final Integer offset = msg.getOffset();
+            final Integer length = msg.getLength();
+            final boolean allRequiredParamsSet =
+                    (urls != null) && (offset != null) && (length != null);
+            if (allRequiredParamsSet) {
+                Runnable request = new Runnable() {
+                    @Override
+                    public void run() {
+                        onSystemRequestHandler.onFileResumeRequest(
+                                SyncProxyBase.this, urls.get(0), offset, length,
+                                msg.getFileType());
+                    }
+                };
 
-            if (_callbackToUIThread) {
-                _mainUIHandler.post(request);
+                if (_callbackToUIThread) {
+                    _mainUIHandler.post(request);
+                } else {
+                    request.run();
+                }
             } else {
-                request.run();
+                Log.w(TAG,
+                        "OnSystemRequest FILE_RESUME: a required parameter is missing");
             }
         } else {
             if (_callbackToUIThread) {
