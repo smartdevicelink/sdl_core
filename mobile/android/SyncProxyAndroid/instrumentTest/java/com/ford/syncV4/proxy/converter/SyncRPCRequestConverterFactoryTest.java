@@ -7,7 +7,6 @@ import com.ford.syncV4.proxy.rpc.Show;
 import junit.framework.TestCase;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -26,9 +25,10 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
         factory = new SyncRPCRequestConverterFactory();
     }
 
-    public void testGetConverterShouldReturnNullForUnknownRequest() {
+    public void testGetConverterShouldReturnDefaultConverterForUnknownRequest() {
         AwesomeRequest msg = new AwesomeRequest();
-        assertThat(factory.getConverterForRequest(msg), nullValue());
+        assertThat(factory.getConverterForRequest(msg),
+                instanceOf(DefaultRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldReturnDefaultConverterForKnownRequest() {

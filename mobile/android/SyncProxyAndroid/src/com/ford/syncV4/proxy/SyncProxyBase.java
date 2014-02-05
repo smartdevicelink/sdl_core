@@ -1416,23 +1416,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             final IRPCRequestConverter converter =
                     rpcRequestConverterFactory.getConverterForRequest(request);
-            if (converter != null) {
-                List<ProtocolMessage> protocolMessages =
-                        converter.getProtocolMessages(request,
-                                currentSession.getSessionId(),
-                                _jsonRPCMarshaller, _wiproVersion);
+            List<ProtocolMessage> protocolMessages =
+                    converter.getProtocolMessages(request,
+                            currentSession.getSessionId(), _jsonRPCMarshaller,
+                            _wiproVersion);
+
+            if (protocolMessages.size() > 0) {
+                queueOutgoingMessage(protocolMessages.get(0));
+                protocolMessages.remove(0);
 
                 if (protocolMessages.size() > 0) {
-                    queueOutgoingMessage(protocolMessages.get(0));
-                    protocolMessages.remove(0);
-
-                    if (protocolMessages.size() > 0) {
-                        protocolMessageHolder.saveMessages(protocolMessages);
-                    }
+                    protocolMessageHolder.saveMessages(protocolMessages);
                 }
-            } else {
-                Log.w(TAG,
-                        "Unknown function name " + request.getFunctionName());
             }
         } catch (OutOfMemoryError e) {
             SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
