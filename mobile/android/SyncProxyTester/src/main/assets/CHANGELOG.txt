@@ -1,4 +1,5 @@
 [CW6]
++ SyncProxyAndroid SDK: Allow to send requests with unknown function names.
 + SyncProxyAndroid SDK: Implement integration of OnSystemRequest notification and system PutFile request.
 + SyncProxyAndroid SDK: changed reconnection scheduling logic
 
