@@ -80,58 +80,6 @@ Rectangle {
         id: stream
 
         property real bufferProgress: 0.0
-
-        Component.onCompleted: {
-            audioNotifier.start()
-        }
-        onStopped: {
-            audioNotifier.start()
-        }
-        onErrorChanged:
-        {
-            console.debug("Error: ", error)
-            console.debug(errorString)
-
-            switch ( error )
-            {
-                case Audio.NoError:
-                    console.debug("there is no current error.")
-                    break
-                case Audio.ResourceError:
-                    console.debug("the audio cannot be played due to a problem allocating resources.")
-                    break
-                case Audio.FormatError:
-                    console.debug("the audio format is not supported.")
-                    break
-                case Audio.NetworkError:
-                    console.debug("the audio cannot be played due to network issues.")
-                    break
-                case Audio.AccessDenied:
-                    console.debug("the audio cannot be played due to insufficient permissions.")
-                    break
-                case Audio.ServiceMissing:
-                    console.debug("the audio cannot be played because the media service could not be instantiated.")
-                    break
-
-                default:
-                    console.debug("GEBASZ!!!")
-            }
-        }
-    }
-
-    NamedPipeNotifier {
-        id: audioNotifier
-        // we need absolute path here
-        // because relative paths differ for Video and NamedPipeNotifier
-        // we use url.toString() to obtain absolute path
-        // and we use substring() to remove "file://" prefix
-        property url pipeAudio: "/tmp/audio_stream_pipe"
-        name: pipeAudio.toString().substring(7)
-        onReadyRead: {
-            stream.source = pipeAudio.toString().substring(7)
-            console.log(stream.source)
-            stream.play()
-        }
     }
 
     SettingsStorage {
