@@ -1047,27 +1047,28 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         waitForInterfaceUnregistered = true;
                         unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
                     }
-                }
 
-                // Wait for the app interface to be unregistered
-                if (waitForInterfaceUnregistered) {
-                    synchronized (APP_INTERFACE_REGISTERED_LOCK) {
-                        try {
-                            APP_INTERFACE_REGISTERED_LOCK.wait(1000);
-                        } catch (InterruptedException e) {
-                            // Do nothing
+
+                    // Wait for the app interface to be unregistered
+                    if (waitForInterfaceUnregistered) {
+                        synchronized (APP_INTERFACE_REGISTERED_LOCK) {
+                            try {
+                                APP_INTERFACE_REGISTERED_LOCK.wait(1000);
+                            } catch (InterruptedException e) {
+                                // Do nothing
+                            }
                         }
                     }
-                }
-            }
-            // Clean up SYNC Connection
-            synchronized (CONNECTION_REFERENCE_LOCK) {
-                if (!keepSession) {
-                    stopAllServices();
-                }
-                closeSyncConnection(keepConnection);
-                if (!keepSession) {
-                    stopSession();
+
+                    // Clean up SYNC Connection
+
+                    if (!keepSession) {
+                        stopAllServices();
+                    }
+                    closeSyncConnection(keepConnection);
+                    if (!keepSession) {
+                        stopSession();
+                    }
                 }
             }
         } catch (SyncException e) {
