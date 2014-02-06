@@ -39,6 +39,7 @@
 
 #include <map>
 #include <vector>
+#include <list>
 
 #include "utils/logger.h"
 #include "connection_handler/device.h"
@@ -77,6 +78,16 @@ typedef std::vector<uint8_t> SessionList;
  * \brief Type for Sessions vector iterator
  */
 typedef std::vector<uint8_t>::iterator SessionListIterator;
+
+/**
+ * \brief Type for Resume Sessions list
+ */
+typedef std::list<uint32_t> ResumeSessionList;
+
+/**
+ * \brief Type for Resume Sessions list iterator
+ */
+typedef std::list<uint32_t>::iterator ResumeSessionListIt;
 
 /**
  * \brief Type for Session Services

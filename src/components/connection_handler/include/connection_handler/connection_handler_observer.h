@@ -87,6 +87,19 @@ class ConnectionHandlerObserver {
 
     /**
      * \brief Callback function used by connection_handler
+     * when Mobile Application initiates resume of RPC service(session).
+     * \param deviceHandle Device identifier within which session has to be started.
+     * \param old_session_key Old Key of session.
+     * \param new_session_key New Key of session.
+     * \param type Established service type
+     */
+    virtual bool OnServiceResumedCallback(
+        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+        int32_t new_session_key, protocol_handler::ServiceType type =
+            protocol_handler::kRpc) = 0;
+
+    /**
+     * \brief Callback function used by connection_handler
      * when Mobile Application initiates service ending.
      * \param sessionKey Key of session which should be ended
      */

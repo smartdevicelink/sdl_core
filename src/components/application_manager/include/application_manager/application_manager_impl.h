@@ -348,7 +348,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int32_t session_key,
                                   protocol_handler::ServiceType type);
-
+    bool OnServiceResumedCallback(
+        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+        int32_t new_session_key, protocol_handler::ServiceType type);
     void OnServiceEndedCallback(int32_t session_key,
                                 protocol_handler::ServiceType type);
 

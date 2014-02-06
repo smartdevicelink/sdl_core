@@ -116,38 +116,14 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
-  if (media_manager_) {
-    media_manager_ = NULL;
-  }
-
-  if (hmi_handler_) {
-    hmi_handler_ = NULL;
-  }
-
-  if (connection_handler_) {
-    connection_handler_ = NULL;
-  }
-
-  if (policy_manager_) {
-    policy_manager_ = NULL;
-  }
-
-  if (hmi_so_factory_) {
-    hmi_so_factory_ = NULL;
-  }
-
-  if (mobile_so_factory_) {
-    mobile_so_factory_ = NULL;
-  }
-
-  if (protocol_handler_) {
-    protocol_handler_ = NULL;
-  }
-
-  if (media_manager_) {
-    media_manager_ = NULL;
-  }
-
+  media_manager_ = NULL;
+  hmi_handler_ = NULL;
+  connection_handler_ = NULL;
+  policy_manager_ = NULL;
+  hmi_so_factory_ = NULL;
+  mobile_so_factory_ = NULL;
+  protocol_handler_ = NULL;
+  media_manager_ = NULL;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -343,7 +319,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // TODO(PV): add asking user to allow application
   // BasicCommunication_AllowApp
   // application->set_app_allowed(result);
-  this->resume_controler.RestoreApplicationFiles(application);
+  resume_controler.RestoreApplicationFiles(application);
   return application;
 }
 
@@ -654,7 +630,6 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
-
 bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
   protocol_handler::ServiceType type) {
@@ -663,8 +638,12 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   Application* app = application(session_key);
 
   switch (type) {
+    case protocol_handler::kRpc: {
+      LOG4CXX_INFO(logger_, "RPC service is about to be started.");
+      break;
+    }
     case protocol_handler::kMovileNav: {
-      LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+      LOG4CXX_INFO(logger_, "Video service is about to be started.");
       if (media_manager_) {
         if (app->allowed_support_navigation()) {
           media_manager_->StartVideoStreaming(session_key);
@@ -672,7 +651,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
           return false;
         }
       }
-
       break;
     }
     case protocol_handler::kAudio: {
@@ -691,6 +669,16 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
       break;
     }
   }
+
+  return true;
+}
+
+bool ApplicationManagerImpl::OnServiceResumedCallback(
+    connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+    int32_t new_session_key, protocol_handler::ServiceType type) {
+  LOG4CXX_INFO_EXT(logger_, "OnServiceResumedCallback previous sessionId= "
+                   << old_session_key << " new sessionId= " << new_session_key);
+
   return true;
 }
 
@@ -1377,8 +1365,12 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   }
 }
 
-bool ApplicationManagerImpl::RestoreApplicationHMILevel(Application *application) {
-  return this->resume_controler.RestoreApplicationHMILevel(application);
+
+bool ApplicationManagerImpl::RestoreApplicationHMILevel(
+    Application *application) {
+  resume_controler.RestoreApplicationHMILevel(application);
+
+  return true;
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
@@ -1494,7 +1486,6 @@ void ApplicationManagerImpl::Unmute() {
   }
 }
 
-
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
 														    const std::vector<uint8_t>& binary_data,
                                                             const std::string& save_path,
@@ -1528,7 +1519,5 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }
-
-
 
 }  // namespace application_manager

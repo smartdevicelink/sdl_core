@@ -120,7 +120,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnConnectionClosedFailure(
       transport_manager::ConnectionUID connection_id,
       const transport_manager::DisconnectError& error);
-
+    virtual void OnUnexpectedDisconnect(
+        transport_manager::ConnectionUID connection_id,
+        const transport_manager::CommunicationError& error);
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
@@ -291,6 +293,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of connections
      */
     ConnectionList connection_list_;
+
+    /**
+     * \brief List of sessions that must be resumed
+     */
+    ResumeSessionList    resume_session_list;
+
     /*
      * \brief Cleans connection list on destruction
      */
