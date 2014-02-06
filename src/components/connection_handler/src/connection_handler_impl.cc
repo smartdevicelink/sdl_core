@@ -208,6 +208,8 @@ void ConnectionHandlerImpl::OnConnectionFailed(
 
 void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
+
   LOG4CXX_INFO(logger_, "Delete Connection: " <<
                static_cast<int32_t>(connection_id) << " from the list.");
 
@@ -222,10 +224,9 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     (itr->second)->GetSessionList(session_list);
     for (SessionListIterator i = session_list.begin(),
          end = session_list.end(); i != end; ++i) {
-
-      uint32_t session_id = KeyFromPair(connection_id, *i);
-      resume_session_list.push_back(session_id);
-      connection_handler_observer_->OnServiceEndedCallback(session_id);
+      uint32_t session_key = KeyFromPair(connection_id, *i);
+      resume_session_map_.insert(std::pair<uint8_t, uint32_t>(*i,session_key));
+      connection_handler_observer_->OnServiceEndedCallback(session_key);
     }
 
   }
@@ -298,6 +299,8 @@ void ConnectionHandlerImpl::RemoveConnection(
 
   int32_t new_session_id = -1;
   bool is_session_resumption = false;
+  ResumeSessionMapIt resume_session_it;
+
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
@@ -311,14 +314,14 @@ void ConnectionHandlerImpl::RemoveConnection(
       return -1;
     }
   } else if ((0 != sessionId) && (protocol_handler::kRpc == service_type)) {
-    ResumeSessionListIt i = find(resume_session_list.begin(),
-                                   resume_session_list.end(), sessionId);
-    if (i == resume_session_list.end()) {
-      LOG4CXX_ERROR(logger_, "Not possible to establish service!");
+    resume_session_it = resume_session_map_.find(sessionId);
+    if (resume_session_it == resume_session_map_.end()) {
+      LOG4CXX_ERROR(logger_, "Unable to establish service!");
       return -1;
     }
 
-    LOG4CXX_INFO(logger_, "Start resuming session" << sessionId);
+    LOG4CXX_INFO(logger_,
+                 "Start resume session " << static_cast<int32_t>(sessionId));
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to resume session!");
@@ -344,8 +347,8 @@ void ConnectionHandlerImpl::RemoveConnection(
 
     if (is_session_resumption) {
       success = connection_handler_observer_->OnServiceResumedCallback(
-          (it->second)->connection_device_handle(), sessionId, session_key,
-          service_type);
+          (it->second)->connection_device_handle(), resume_session_it->second,
+          session_key, service_type);
     } else {
       success = connection_handler_observer_->OnServiceStartedCallback(
           (it->second)->connection_device_handle(), session_key, service_type);
@@ -565,6 +568,12 @@ void ConnectionHandlerImpl::ConnectToDevice(
       logger_,
       "Application Manager wanted to connect to non-existing device");
   }
+}
+
+void ConnectionHandlerImpl::set_resume_session_map(ResumeSessionMap& map) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_resume_session_map()");
+
+  resume_session_map_ = map;
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {

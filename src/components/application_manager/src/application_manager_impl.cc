@@ -702,8 +702,10 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 bool ApplicationManagerImpl::OnServiceResumedCallback(
     connection_handler::DeviceHandle device_handle, int32_t old_session_key,
     int32_t new_session_key, protocol_handler::ServiceType type) {
-  LOG4CXX_INFO_EXT(logger_, "OnServiceResumedCallback previous sessionId= "
-                   << old_session_key << " new sessionId= " << new_session_key);
+  LOG4CXX_INFO_EXT(logger_,
+                   "OnServiceResumedCallback previous session key= "
+                   << old_session_key << " new session key= "
+                   << new_session_key);
 
   return true;
 }

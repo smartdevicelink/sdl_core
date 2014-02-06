@@ -226,6 +226,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
+    /**
+     * \brief Sets resume session map. Used on start up by AppMngr to identify
+     * session that must be resumed.
+     * \param map Map of sessions Id and session_key to be resumed
+     **/
+    virtual void set_resume_session_map(ResumeSessionMap& map);
+
     virtual void StartTransportManager();
 
     /*
@@ -297,7 +304,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief List of sessions that must be resumed
      */
-    ResumeSessionList    resume_session_list;
+    ResumeSessionMap    resume_session_map_;
 
     /*
      * \brief Cleans connection list on destruction

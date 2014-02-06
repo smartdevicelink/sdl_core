@@ -80,14 +80,16 @@ typedef std::vector<uint8_t> SessionList;
 typedef std::vector<uint8_t>::iterator SessionListIterator;
 
 /**
- * \brief Type for Resume Sessions list
+ * \brief Type for Resume Session Map
+ * @param uint8_t  session ID
+ * @param uint32_t session_key
  */
-typedef std::list<uint32_t> ResumeSessionList;
+typedef std::map<uint8_t, uint32_t> ResumeSessionMap;
 
 /**
- * \brief Type for Resume Sessions list iterator
+ * \brief Type for Resume Sessions iterator
  */
-typedef std::list<uint32_t>::iterator ResumeSessionListIt;
+typedef std::map<uint8_t, uint32_t>::iterator ResumeSessionMapIt;
 
 /**
  * \brief Type for Session Services
