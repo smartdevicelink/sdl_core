@@ -75,7 +75,7 @@ class ConnectionHandler {
    * session that must be resumed.
    * \param map Map of sessions Id and session_key to be resumed
    **/
-  virtual void set_resume_session_map(ResumeSessionMap& map) = 0;
+  virtual void set_resume_session_map(const ResumeSessionMap& map) = 0;
 
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;

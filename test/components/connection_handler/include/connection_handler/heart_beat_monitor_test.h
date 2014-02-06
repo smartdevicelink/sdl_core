@@ -49,7 +49,7 @@ class ConnectionHandlerMock: public ConnectionHandler {
  public:
   MOCK_METHOD1(set_connection_handler_observer, void(ConnectionHandlerObserver*));
   MOCK_METHOD1(set_transport_manager, void(transport_manager::TransportManager*));
-  MOCK_METHOD1(set_resume_session_map, void(ResumeSessionMap&));
+  MOCK_METHOD1(set_resume_session_map, void(const ResumeSessionMap&));
   MOCK_METHOD0(StartTransportManager,void());
   MOCK_METHOD1(ConnectToDevice, void(DeviceHandle device_handle));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));

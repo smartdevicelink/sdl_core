@@ -570,7 +570,8 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
-void ConnectionHandlerImpl::set_resume_session_map(ResumeSessionMap& map) {
+void ConnectionHandlerImpl::set_resume_session_map(
+    const ResumeSessionMap& map) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_resume_session_map()");
 
   resume_session_map_ = map;
