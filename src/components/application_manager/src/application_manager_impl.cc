@@ -624,6 +624,7 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle& device_handle) {
 }
 
+
 bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
 
