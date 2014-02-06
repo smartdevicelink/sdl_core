@@ -55,7 +55,7 @@ GeneralView {
         id: timer
         interval: dataContainer.scrollableMessageModel.timeout
         onTriggered: {
-            dataContainer.scrollableMessageModel.result = Common.Result.TIMED_OUT
+            dataContainer.scrollableMessageModel.result = Common.Result.SUCCESS
             contentLoader.back()
         }
     }
