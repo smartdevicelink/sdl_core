@@ -119,6 +119,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("TTS.Started");
   MessageBrokerController::subscribeTo("TTS.Stopped");
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
 }
 
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
