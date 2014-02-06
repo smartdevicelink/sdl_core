@@ -35,6 +35,7 @@
 #include <climits>
 #include <string>
 #include <fstream>
+
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/command_impl.h"
@@ -319,7 +320,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // TODO(PV): add asking user to allow application
   // BasicCommunication_AllowApp
   // application->set_app_allowed(result);
-  resume_controler.RestoreApplicationFiles(application);
   return application;
 }
 
@@ -690,7 +690,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(session_key);
+      UnregisterApplication(session_key, true);
       break;
     }
     case protocol_handler::kMovileNav: {
@@ -897,7 +897,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key,
           mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
 
-        UnregisterApplication(connection_key);
+        UnregisterApplication(connection_key, true);
         return false;
       } else if (result ==
                  request_controller::RequestController::
@@ -909,7 +909,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key, mobile_api::AppInterfaceUnregisteredReason::
           REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
-        UnregisterApplication(connection_key);
+        UnregisterApplication(connection_key, true);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1354,26 +1354,18 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   // Saving unregistered app.info to the file system before
   resume_controler.SaveAllApplications();
-
+  resume_controler.SavetoFS();
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
-    UnregisterApplication((*it)->app_id());
+    UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
 }
 
-
-bool ApplicationManagerImpl::RestoreApplicationHMILevel(
-    Application *application) {
-  resume_controler.RestoreApplicationHMILevel(application);
-
-  return true;
-}
-
-void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
+void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1386,8 +1378,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
   }
 
   MessageHelper::RemoveAppDataFromHMI(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
   Application* app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
@@ -1454,6 +1445,10 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 
   hmi_handler_->SendMessageToHMI(message);
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
+}
+
+ResumeCtrl* ApplicationManagerImpl::GetResumeController() {
+  return &resume_controler;
 }
 
 void ApplicationManagerImpl::Mute() {

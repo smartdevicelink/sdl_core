@@ -132,6 +132,11 @@ class Profile {
     const uint32_t& default_timeout() const;
 
     /**
+     * @brief Default timeout for waiting for resuming
+     */
+    const uint32_t& app_resuming_timeout() const;
+
+    /**
      * @brief Returns desirable thread stack size
      */
     const uint64_t& thread_min_stach_size() const;
@@ -344,6 +349,7 @@ class Profile {
     bool                            is_redecoding_enabled_;
     uint32_t                        max_cmd_id_;
     uint32_t                        default_timeout_;
+    uint32_t                        app_resuming_timeout_;
     std::string                     vr_help_title_;
     uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;

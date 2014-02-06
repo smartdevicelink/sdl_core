@@ -30,44 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
-
-#include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/hmi/get_resume_result_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief OnReadyNotification command class
- **/
-class OnResumingNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnResumingNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnResumingNotification(const MessageSharedPtr& message);
+GetResumeResultRequest::GetResumeResultRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-  /**
-   * @brief OnResumingNotification class destructor
-   **/
-  virtual ~OnResumingNotification();
+GetResumeResultRequest::~GetResumeResultRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void GetResumeResultRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetResumeResultRequest::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnResumingNotification);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_READY_NOTIFICATION_H_

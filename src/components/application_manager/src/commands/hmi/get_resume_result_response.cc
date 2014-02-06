@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/on_resuming_notification.h"
+#include "application_manager/commands/hmi/get_resume_result_response.h"
+#include "application_manager/application_manager_impl.h"
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -38,47 +38,33 @@
 #include "interfaces/HMI_API.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/resume_ctrl.h"
+#include "application_manager/event_engine/event.h"
+
 namespace application_manager {
 
 namespace commands {
 
-OnResumingNotification::OnResumingNotification(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+GetResumeResultResponse::GetResumeResultResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-OnResumingNotification::~OnResumingNotification() {
+GetResumeResultResponse::~GetResumeResultResponse() {
 }
 
-void OnResumingNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnResumingNotification::Run");
+void GetResumeResultResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetResumeResultResponse::Run");
+
   const hmi_apis::Common_Result::eType result =
       static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_notification::result].asInt());
-
-  if (hmi_apis::Common_Result::SUCCESS == result) {
-    int32_t correlation_id = (*message_)[strings::params][strings::app_id].asInt();
-    const uint32_t app_id = ApplicationManagerImpl::instance()->
-        application_id(correlation_id);
-    if (!app_id) {
-      LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
-      return;
-    }
-    Application* application = ApplicationManagerImpl::instance()->application(app_id);
-    if (application) {
-      if (ApplicationManagerImpl::instance()->RestoreApplicationHMILevel(application)) {
-        if (application->hmi_level() == mobile_apis::HMILevel::HMI_FULL) {
-          MessageHelper::SendActivateAppToHMI(app_id);
-        }
-        MessageHelper::SendHMIStatusNotification(*application);
-      }
-    } else {
-      LOG4CXX_ERROR(logger_, "Application cannot be resumed");
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Error result code"<<code);
+        (*message_)[strings::params][hmi_response::code].asInt());
+  if (hmi_apis::Common_Result::SUCCESS != result) {
+    LOG4CXX_ERROR(logger_, "Error. result code : " << code);
   }
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_GetResumeResult);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 }  // namespace commands
 
 }  // namespace application_manager
-

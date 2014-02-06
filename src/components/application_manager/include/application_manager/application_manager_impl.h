@@ -184,8 +184,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
+     * @param is_resuming describes - is this unregister
+     *        is normal or need to be resumed
      */
-    void UnregisterApplication(const uint32_t& app_id);
+    void UnregisterApplication(const uint32_t& app_id, bool is_resuming = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -201,13 +203,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
-    /*
-     * @brief Set application HMI Level as saved in resuming_controller
-     * @param application is applicatint whitch HMI Level is need to restore
-     * @return true if succes, otherwise return false
-     * this method agregete to resuming_controller.RestoreApplicationHMILevel(application)
-     */
-    bool RestoreApplicationHMILevel(Application *application);
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
     bool ActivateApplication(Application* app);
@@ -427,6 +422,7 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const std::string& save_path,
                                 const uint32_t offset = 0);
 
+    ResumeCtrl* GetResumeController();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);

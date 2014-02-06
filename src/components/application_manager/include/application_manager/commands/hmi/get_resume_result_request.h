@@ -1,6 +1,4 @@
 /**
- * \file sdlproxy.h
- * \brief SdlProxy class header file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,45 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
-#define SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_RESUME_RESULT_REQUEST_H
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_RESUME_RESULT_REQUEST_H
 
-#include "qml_dbus.h"
-#include "qt_version.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
-#include <QtDBus/QDBusInterface>
-#if QT_4
-# include <QtDeclarative/QDeclarativeItem>
-typedef QDeclarativeItem Item;
-#elif QT_5
-#  include <QtQuick/QQuickItem>
-typedef QQuickItem Item;
-#endif  // QT_VERSION
+namespace application_manager {
 
-class SdlProxy: public Item {
-  Q_OBJECT
-  Q_DISABLE_COPY(SdlProxy)
+namespace commands {
 
+/**
+ * @brief AllowAllAppsRequest command class
+ **/
+class GetResumeResultRequest : public RequestToHMI {
  public:
-  explicit SdlProxy(Item* parent = 0);
+  /**
+   * @brief GetResumeResultRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit GetResumeResultRequest(const MessageSharedPtr& message);
+
+  /**
+   * @brief GetResumeResultRequest class destructor
+   **/
+  virtual ~GetResumeResultRequest();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
  private:
-  QDBusInterface *sdlBasicCommunicationInterface;
-
- signals:
-  void appRegistered(QVariant application);
-  void appUnregistered(int appId, QVariant resume);
-  void playTone();
-  void showNotification(QVariant text, QVariant icon, int timeout);
-
- private slots:
-  void OnAppRegistered(Common_HMIApplication);
-  void OnAppUnregistered(int appId, OptionalArgument<bool> resume);
-  void OnShowNotification(Common_TextFieldStruct text,
-                          OptionalArgument<Common_Image> image,
-                          int timeout);
+  DISALLOW_COPY_AND_ASSIGN(GetResumeResultRequest);
 };
 
-QML_DECLARE_TYPE(SdlProxy)
+}  // namespace commands
 
-#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_SDL_PROXY_H_
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_RESUME_RESULT_REQUEST_H

@@ -65,6 +65,7 @@ Profile::Profile()
   , is_redecoding_enabled_(false)
   , max_cmd_id_(2000000000)
   , default_timeout_(10000)
+  , app_resuming_timeout_(5)
   , app_dir_quota_(104857600)
   , app_hmi_level_none_time_scale_max_requests_(100)
   , app_hmi_level_none_requests_time_scale_(10)
@@ -133,6 +134,10 @@ const uint32_t& Profile::max_cmd_id() const {
 
 const uint32_t& Profile::default_timeout() const {
   return default_timeout_;
+}
+
+const uint32_t &Profile::app_resuming_timeout() const {
+  return app_resuming_timeout_;
 }
 
 const std::string& Profile::vr_help_title() const {
@@ -433,6 +438,17 @@ void Profile::UpdateValues() {
       default_timeout_ = 10000;
     }
     LOG4CXX_INFO(logger_, "Set Default timeout to " << default_timeout_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "ApplicationResumingTimeout", value))
+      && ('\0' != *value)) {
+    app_resuming_timeout_ = atoi(value);
+    if (app_resuming_timeout_ <= 0) {
+      app_resuming_timeout_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Set Resuming timeout to " << app_resuming_timeout_);
   }
 
   *value = '\0';

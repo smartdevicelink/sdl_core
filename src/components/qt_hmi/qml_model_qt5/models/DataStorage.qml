@@ -55,6 +55,17 @@ QtObject {
         console.log("exit");
     }
 
+    function getStashedApplication(appId) {
+        console.log("enter");
+        for(var i = 0; i < stashedApplicationsList.count; i++) {
+            if(stashedApplicationsList.get(i).appId === appId) {
+                console.log("Application found", stashedApplicationsList.get(i));
+                return stashedApplicationsList.get(i);
+            }
+        }
+        console.log("exit");
+    }
+
     onApplicationListChanged: {
         console.log("onApplicationListChanged()");
         setCurrentApplication(appId);
@@ -287,6 +298,77 @@ QtObject {
         console.log("exit");
     }
 
+    function stashApplication(appId) {
+        console.log("stashApplication enter");
+        stashedApplicationsList.append(getApplication(appId))
+        console.log("stashApplication exit");
+    }
+
+    function getResumeResult (appID) {
+
+        if (getStashedApplication(appId) && getApplication(appID)) {
+            var stashedApp = getStashedApplication(appId),
+                app = getApplication(appID);
+            if (stashedApp.options.count == app.options.count) {
+                for (var optionIndex = 0; optionIndex < stashedApp.options.count; optionIndex++) {
+                    if (app.options.get(optionIndex).type === Internal.MenuItemType.MI_SUBMENU) {
+                        //comparison subMenu compare
+
+                        if ( !((app.options.get(optionIndex).id === stashedApp.options.get(optionIndex).id) &&
+                             (app.options.get(optionIndex).name === stashedApp.options.get(optionIndex).name) &&
+                             (app.options.get(optionIndex).position === stashedApp.options.get(optionIndex).position) &&
+                             (app.options.get(optionIndex).icon === stashedApp.options.get(optionIndex).icon))) {
+                            return {
+                                result: false
+                            }
+                        }
+
+                        var stashedAppSubMenu = stashedApp.options.get(optionIndex).subMenu,
+                            appSubMenuArray = app.options.get(optionIndex).subMenu;
+
+                        if (stashedAppSubMenu.length != appSubMenuArray.length) {
+                            return {
+                                result: false
+                            }
+                        }
+
+                        for (var subMenuIndex = 0; subMenuIndex < stashedAppSubMenu.length; subMenuIndex++) {
+                            if ( !((appSubMenuArray[subMenuIndex].id === stashedAppSubMenu[subMenuIndex].id) &&
+                                 (appSubMenuArray[subMenuIndex].name === stashedAppSubMenu[subMenuIndex].name) &&
+                                 (appSubMenuArray[subMenuIndex].position === stashedAppSubMenu[subMenuIndex].position) &&
+                                 (appSubMenuArray[subMenuIndex].icon === stashedAppSubMenu[subMenuIndex].icon)
+                                )) {
+                                return {
+                                    result: false
+                                }
+                            }
+                        }
+                    } else {
+                        //comparison Command compare
+                       if ( !((app.options.get(optionIndex).id === stashedApp.options.get(optionIndex).id) &&
+                            (app.options.get(optionIndex).name === stashedApp.options.get(optionIndex).name) &&
+                            (app.options.get(optionIndex).position === stashedApp.options.get(optionIndex).position) &&
+                            (app.options.get(optionIndex).icon === stashedApp.options.get(optionIndex).icon)
+                        )) {
+                           return {
+                               result: false
+                           }
+                       }
+                    }
+                }
+                // if all commands and subMenus were same
+                // rerturn SUCCESS result
+                return {
+                    result: true
+                }
+            }
+        }
+
+        return {
+            result: false
+        }
+    }
+
     property int systemContext
     property int hmiContext
     property bool applicationContext: false
@@ -354,6 +436,7 @@ QtObject {
 
     property ListModel deviceList: ListModel { }
     property ListModel applicationList: ListModel { }
+    property ListModel stashedApplicationsList: ListModel { }
     property ListModel vrCommands: ListModel {}
 
     function reset () {

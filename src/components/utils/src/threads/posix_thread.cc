@@ -137,7 +137,9 @@ void Thread::stop() {
 
   if (NULL != delegate_) {
     if (!delegate_->exitThreadMain()) {
-      pthread_cancel(thread_handle_);
+      if (thread_handle_ != pthread_self()) {
+        pthread_cancel(thread_handle_);
+      }
     }
   }
 
