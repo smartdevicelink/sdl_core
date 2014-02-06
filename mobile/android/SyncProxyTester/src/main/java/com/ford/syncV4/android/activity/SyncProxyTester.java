@@ -310,7 +310,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Time out in milliseconds for exit from application. If application is not correctly
      * destroyed within specified timeout - then we force destroy procedure
      */
-    private static final int EXIT_TIMEOUT = 3000;
+    private static final int EXIT_TIMEOUT = 10000;
     /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
