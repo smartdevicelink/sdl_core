@@ -465,7 +465,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("", correlationIdCaptor.getValue());
     }
 
-    public void testStartSessionWithIdSetsId() throws Exception {
+    public void testStartServiceWithSessionId() throws Exception {
         final byte id = 13;
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)) {
             @Override
@@ -477,6 +477,18 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         Session session = new Session();
         session.setSessionId(id);
         protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+    }
+
+    public void testStartSessionWithSessionId() throws Exception {
+        final byte id = 13;
+        WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)) {
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+                assertEquals("Session ID should be same", id, header.getSessionID());
+            }
+        };
+        protocol.StartProtocolSession(id);
     }
 
     public void testStartSessionNavigationWith0SessionIDThrowsExp() throws Exception {

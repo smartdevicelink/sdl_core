@@ -69,8 +69,7 @@ public class WiProProtocol extends AbstractProtocol {
         if (session.getSessionId() == 0) {
             throw new IllegalArgumentException("currentSession id 0 should be used to start currentSession only");
         }
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, 0, _version);
-        header.setSessionID(session.getSessionId());
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, session.getSessionId(), _version);
         sendFrameToTransport(header);
     } // end-method
 
