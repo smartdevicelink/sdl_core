@@ -292,6 +292,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_start_stream_response.cc
 ./src/commands/hmi/audio_stop_stream_request.cc
 ./src/commands/hmi/audio_stop_stream_response.cc
+./src/commands/hmi/on_system_request_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_WEBHMI

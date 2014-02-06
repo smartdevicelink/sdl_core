@@ -218,6 +218,7 @@
 #include "application_manager/commands/hmi/audio_start_stream_response.h"
 #include "application_manager/commands/hmi/audio_stop_stream_request.h"
 #include "application_manager/commands/hmi/audio_stop_stream_response.h"
+#include "application_manager/commands/hmi/on_system_request_notification.h"
 
 namespace application_manager {
 
@@ -1845,6 +1846,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::TTSPerformInteractionRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSystemRequest: {
+      command.reset(new commands::OnSystemRequestNotification(message));
       break;
     }
   }
