@@ -35,6 +35,7 @@
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application_manager_impl.h"
 #include "utils/file_system.h"
 #if defined(DEFAULT_MEDIA)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
@@ -250,6 +251,12 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
+
+  if (!(application_manager::ApplicationManagerImpl::instance()->
+      IsStreamingAllowed(message->connection_key()))) {
+    return;
+  }
+
   if (message->service_type()
       == protocol_handler::kMovileNav) {
     if (video_streamer_) {
@@ -258,7 +265,7 @@ void MediaManagerImpl::OnMessageReceived(
   } else if (message->service_type()
           == protocol_handler::kAudio) {
     if (audio_streamer_) {
-        audio_streamer_->SendData(message->connection_key(), message);
+      audio_streamer_->SendData(message->connection_key(), message);
     }
   }
 }

@@ -630,6 +630,24 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
+bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) {
+  Application* app = application(connection_key);
+
+  if (!app) {
+    LOG4CXX_INFO(logger_, "An application is not registered.");
+    return false;
+  }
+
+  const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
+
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level ||
+      mobile_api::HMILevel::HMI_LIMITED == hmi_level) {
+    return true;
+  }
+
+  return false;
+}
+
 bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
   protocol_handler::ServiceType type) {
@@ -645,6 +663,10 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     case protocol_handler::kMovileNav: {
       LOG4CXX_INFO(logger_, "Video service is about to be started.");
       if (media_manager_) {
+        if (!app) {
+            LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+            return false;
+        }
         if (app->allowed_support_navigation()) {
           media_manager_->StartVideoStreaming(session_key);
         } else {
@@ -656,6 +678,10 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
       if (media_manager_) {
+        if (!app) {
+          LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+          return false;
+        }
         if (app->allowed_support_navigation()) {
           media_manager_->StartAudioStreaming(session_key);
         } else {
