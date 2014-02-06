@@ -30,36 +30,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-
 #include "utils/dict.h"
 
-namespace resumption {
+namespace utils {
 
-class LastState {
- public:
-  utils::Dictionary dictionary;
- private:
-/**
- * @brief Private default constructor
- */
-  LastState();
-/**
- * @brief Private copy constructor - intentionally not implemented
- */
-  LastState(const LastState& other);
-/**
- * @brief Private assign operator - intentionally not implemented
- */
-  LastState& operator = (const LastState& other);
- public:
-/**
- * @brief Returns the singleton of class
- */
-  static LastState* instance();
-};
+void Dictionary::AddItem(const Key& key, const Record& record) {
+  items_.insert(std::make_pair(key, record));
+}
 
-}  // namespace resumption
+void Dictionary::AddSubitem(const Key& key, const Dictionary& subitem) {
+  subitems_.insert(std::make_pair(key, subitem));
+}
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+Dictionary::Record& Dictionary::ItemAt(const Key& key) {
+  return items_.at(key);
+}
+
+const Dictionary::Record& Dictionary::ItemAt(const Key& key) const {
+  return items_.at(key);
+}
+
+Dictionary& Dictionary::SubitemAt(const Key& key) {
+  return subitems_.at(key);
+}
+
+const Dictionary& Dictionary::SubitemAt(const Key& key) const {
+  return subitems_.at(key);
+}
+
+Dictionary::iterator Dictionary::begin() {
+  return subitems_.begin();
+}
+
+Dictionary::const_iterator Dictionary::begin() const {
+  return subitems_.begin();
+}
+
+Dictionary::iterator Dictionary::end() {
+  return subitems_.end();
+}
+
+Dictionary::const_iterator Dictionary::end() const {
+  return subitems_.end();
+}
+
+}  // namespace utils

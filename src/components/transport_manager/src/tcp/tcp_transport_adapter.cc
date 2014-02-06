@@ -71,47 +71,59 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 
 void TcpTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
+  utils::Dictionary tcp_adapter_dictionary;
   DeviceList device_ids = GetDeviceList();
-  resumption::LastState::TcpDeviceStateContainer states;
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
     utils::SharedPtr<TcpDevice> tcp_device =
       DeviceSptr::static_pointer_cast<TcpDevice>(device);
-    resumption::LastState::TcpDeviceState state;
-    state.in_addr = tcp_device->in_addr();
-    state.name = tcp_device->name();
+    utils::Dictionary device_dictionary;
+    struct in_addr address;
+    address.s_addr = tcp_device->in_addr();
+    device_dictionary.AddItem("address", std::string(inet_ntoa(address)));
+    utils::Dictionary applications_dictionary;
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
       int port = tcp_device->GetApplicationPort(app_handle);
       if (port != -1) { // don't want to store incoming applications
-        resumption::LastState::TcpDeviceApplicationState app_state;
-        app_state.port = static_cast<uint16_t>(port);
-        state.applications.push_back(app_state);
+        utils::Dictionary application_dictionary;
+        application_dictionary.AddItem("port", std::to_string(port));
+        applications_dictionary.AddSubitem(std::to_string(port), application_dictionary);
       }
     }
-    states.push_back(state);
+    device_dictionary.AddSubitem("applications", applications_dictionary);
+    tcp_adapter_dictionary.AddSubitem(tcp_device->name(), device_dictionary);
   }
-  resumption::LastState::instance()->StoreTcpDeviceStates(states);
+  resumption::LastState::instance()->dictionary.AddSubitem(
+    "TcpAdapter", tcp_adapter_dictionary
+  );
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
-  resumption::LastState::TcpDeviceStateContainer tcp_device_states =
-    resumption::LastState::instance()->tcp_device_states();
-  for (resumption::LastState::TcpDeviceStateContainer::const_iterator i =
-    tcp_device_states.begin(); i != tcp_device_states.end(); ++i) {
-    TcpDevice* tcp_device = new TcpDevice(i->in_addr, i->name);
+  utils::Dictionary tcp_adapter_dictionary =
+    resumption::LastState::instance()->dictionary.SubitemAt("TcpAdapter");
+  for (utils::Dictionary::const_iterator i =
+    tcp_adapter_dictionary.begin(); i != tcp_adapter_dictionary.end(); ++i) {
+    utils::Dictionary::Key name = i->first;
+    utils::Dictionary device_dictionary = i->second;
+    utils::Dictionary::Record address_record = device_dictionary.ItemAt("address");
+    in_addr_t address = inet_addr(address_record.c_str());
+    TcpDevice* tcp_device = new TcpDevice(address, name);
     DeviceSptr device(tcp_device);
     AddDevice(device);
-    resumption::LastState::TcpDeviceApplicationStateContainer applications =
-      i->applications;
-    for (resumption::LastState::TcpDeviceApplicationStateContainer::const_iterator j =
-      applications.begin(); j != applications.end(); ++j) {
-      ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(j->port);
+    utils::Dictionary applications_dictionary =
+      device_dictionary.SubitemAt("applications");
+    for (utils::Dictionary::const_iterator j =
+      applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
+      utils::Dictionary application_dictionary = j->second;
+      utils::Dictionary::Record port_record = application_dictionary.ItemAt("port");
+      int port = atoi(port_record.c_str());
+      ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occured = true;
       }

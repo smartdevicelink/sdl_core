@@ -1,5 +1,6 @@
 include_directories (
   ./include
+  ../utils/include
 )
 
 set (SOURCES

@@ -30,36 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_H_
 
-#include "utils/dict.h"
+#include <map>
+#include <string>
 
-namespace resumption {
+namespace utils {
 
-class LastState {
+class Dictionary {
  public:
-  utils::Dictionary dictionary;
+  typedef std::string Key;
+  typedef std::string Record;
  private:
-/**
- * @brief Private default constructor
- */
-  LastState();
-/**
- * @brief Private copy constructor - intentionally not implemented
- */
-  LastState(const LastState& other);
-/**
- * @brief Private assign operator - intentionally not implemented
- */
-  LastState& operator = (const LastState& other);
+  typedef std::map<Key, Record> ItemContainer;
+  typedef std::map<Key, Dictionary> SubitemContainer;
  public:
-/**
- * @brief Returns the singleton of class
- */
-  static LastState* instance();
+  typedef SubitemContainer::iterator iterator;
+  typedef SubitemContainer::const_iterator const_iterator;
+ private:
+  ItemContainer items_;
+  SubitemContainer subitems_;
+ public:
+  void AddItem(const Key& key, const Record& record);
+  void AddSubitem(const Key& key, const Dictionary& subitem);
+
+  Record& ItemAt(const Key& key);
+  const Record& ItemAt(const Key& key) const;
+
+  Dictionary& SubitemAt(const Key& key);
+  const Dictionary& SubitemAt(const Key& key) const;
+
+  iterator begin();
+  const_iterator begin() const;
+  iterator end();
+  const_iterator end() const;
 };
 
-}  // namespace resumption
+}  // namespace utils
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_H_

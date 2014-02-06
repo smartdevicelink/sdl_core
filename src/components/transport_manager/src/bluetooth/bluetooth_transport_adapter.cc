@@ -66,47 +66,62 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 
 void BluetoothTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
+  utils::Dictionary bluetooth_adapter_dictionary;
   DeviceList device_ids = GetDeviceList();
-  resumption::LastState::BluetoothDeviceStateContainer states;
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
     utils::SharedPtr<BluetoothDevice> bluetooth_device =
       DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
-    resumption::LastState::BluetoothDeviceState state;
-    state.address = bluetooth_device->address();
-    state.name = bluetooth_device->name();
+    utils::Dictionary device_dictionary;
+    char address[18];
+    ba2str(&bluetooth_device->address(), address);
+    device_dictionary.AddItem("address", std::string(address));
+    utils::Dictionary applications_dictionary;
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
       uint8_t rfcomm_channel;
       bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
-      resumption::LastState::BluetoothDeviceApplicationState app_state;
-      app_state.rfcomm_channel = rfcomm_channel;
-      state.applications.push_back(app_state);
+      utils::Dictionary application_dictionary;
+      application_dictionary.AddItem("rfcomm_channel", std::to_string(rfcomm_channel));
+      applications_dictionary.AddSubitem(std::to_string(rfcomm_channel), application_dictionary);
     }
-    states.push_back(state);
+    device_dictionary.AddSubitem("applications", applications_dictionary);
+    bluetooth_adapter_dictionary.AddSubitem(bluetooth_device->name(), device_dictionary);
   }
-  resumption::LastState::instance()->StoreBluetoothDeviceStates(states);
+  resumption::LastState::instance()->dictionary.AddSubitem(
+    "BluetoothAdapter", bluetooth_adapter_dictionary
+  );
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
-  resumption::LastState::BluetoothDeviceStateContainer bluetooth_device_states =
-    resumption::LastState::instance()->bluetooth_device_states();
-  for (resumption::LastState::BluetoothDeviceStateContainer::const_iterator i =
-    bluetooth_device_states.begin(); i != bluetooth_device_states.end(); ++i) {
-    resumption::LastState::BluetoothDeviceApplicationStateContainer applications =
-      i->applications;
+  utils::Dictionary bluetooth_adapter_dictionary =
+    resumption::LastState::instance()->dictionary.SubitemAt("BluetoothAdapter");
+  for (utils::Dictionary::const_iterator i =
+    bluetooth_adapter_dictionary.begin(); i != bluetooth_adapter_dictionary.end(); ++i) {
+    utils::Dictionary::Key name = i->first;
+    utils::Dictionary device_dictionary = i->second;
+    utils::Dictionary::Record address_record = device_dictionary.ItemAt("address");
+    bdaddr_t address;
+    str2ba(address_record.c_str(), &address);
     RfcommChannelVector rfcomm_channels;
-    for (resumption::LastState::BluetoothDeviceApplicationStateContainer::const_iterator j =
-      applications.begin(); j != applications.end(); ++j) {
-      rfcomm_channels.push_back(j->rfcomm_channel);
+    utils::Dictionary applications_dictionary =
+      device_dictionary.SubitemAt("applications");
+    for (utils::Dictionary::const_iterator j =
+      applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
+      utils::Dictionary application_dictionary = j->second;
+      utils::Dictionary::Record rfcomm_channel_record =
+        application_dictionary.ItemAt("rfcomm_channel");
+      uint8_t rfcomm_channel =
+        static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
+      rfcomm_channels.push_back(rfcomm_channel);
     }
     BluetoothDevice* bluetooth_device =
-      new BluetoothDevice(i->address, i->name.c_str(), rfcomm_channels);
+      new BluetoothDevice(address, name.c_str(), rfcomm_channels);
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
     for (RfcommChannelVector::const_iterator j =
