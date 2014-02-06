@@ -1038,43 +1038,44 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
 
                 firstTimeFull = true;
-
-                // Should we wait for the interface to be unregistered?
-                Boolean waitForInterfaceUnregistered = false;
-                // Unregister app interface
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_appInterfaceRegisterd == true && _syncConnection != null && _syncConnection.getIsConnected()) {
-                        waitForInterfaceUnregistered = true;
-                        unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
-                    }
-
-
-                    // Wait for the app interface to be unregistered
-                    if (waitForInterfaceUnregistered) {
-                        synchronized (APP_INTERFACE_REGISTERED_LOCK) {
-                            try {
-                                APP_INTERFACE_REGISTERED_LOCK.wait(1000);
-                            } catch (InterruptedException e) {
-                                // Do nothing
-                            }
-                        }
-                    }
-
-                    // Clean up SYNC Connection
-
-                    if (!keepSession) {
-                        stopAllServices();
-                    }
-                    closeSyncConnection(keepConnection);
-                    if (!keepSession) {
-                        stopSession();
-                    }
-                }
+                exitSession(keepConnection, keepSession);
             }
         } catch (SyncException e) {
             throw e;
         } finally {
             SyncTrace.logProxyEvent("SyncProxy cleaned.", SYNC_LIB_TRACE_KEY);
+        }
+    }
+
+    private void exitSession(boolean keepConnection, boolean keepSession) throws SyncException {
+        // Should we wait for the interface to be unregistered?
+        Boolean waitForInterfaceUnregistered = false;
+        synchronized (CONNECTION_REFERENCE_LOCK) {
+            if (_appInterfaceRegisterd == true && _syncConnection != null && _syncConnection.getIsConnected()) {
+                waitForInterfaceUnregistered = true;
+                unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
+            }
+
+            // Wait for the app interface to be unregistered
+            if (waitForInterfaceUnregistered) {
+                synchronized (APP_INTERFACE_REGISTERED_LOCK) {
+                    try {
+                        APP_INTERFACE_REGISTERED_LOCK.wait(1000);
+                    } catch (InterruptedException e) {
+                        // Do nothing
+                    }
+                }
+            }
+
+            // Clean up SYNC Connection
+
+            if (!keepSession) {
+                stopAllServices();
+            }
+            closeSyncConnection(keepConnection);
+            if (!keepSession) {
+                stopSession();
+            }
         }
     }
 
@@ -2633,6 +2634,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void notifyOnAppInterfaceUnregistered(final OnAppInterfaceUnregistered msg) {
         notifyProxyClosed("OnAppInterfaceUnregistered", null);
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2647,13 +2649,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void onUnregisterAppInterfaceResponse(Hashtable hash) {
-        // UnregisterAppInterface
+        stopAllServices();
+        closeSyncConnection(true);
+        stopSession();
 
+        // UnregisterAppInterface
         _appInterfaceRegisterd = false;
         synchronized (APP_INTERFACE_REGISTERED_LOCK) {
             APP_INTERFACE_REGISTERED_LOCK.notify();
         }
-
         final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2724,7 +2728,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
         }
-
         sendRPCRequestPrivate(request);
     } // end-method
 

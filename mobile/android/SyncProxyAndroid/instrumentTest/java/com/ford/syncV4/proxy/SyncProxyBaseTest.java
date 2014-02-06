@@ -11,6 +11,7 @@ import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
@@ -244,7 +245,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertFalse(keepConnectionCaptor.getValue());
     }
 
-    public void testAppUnregisteredWithIgnitionOff()throws Exception{
+    public void testAppUnregisteredWithIgnitionOff() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -265,7 +266,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 reason);
     }
 
-    public void testAppUnregisteredWithMasterReset()throws Exception{
+    public void testAppUnregisteredWithMasterReset() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -286,7 +287,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 reason);
     }
 
-    public void testAppUnregisteredWithFactoryDefaults()throws Exception{
+    public void testAppUnregisteredWithFactoryDefaults() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -357,7 +358,30 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.setSyncConnection(mock(SyncConnection.class));
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
-        assertEquals("only one rpc service should be in service list",1, proxy.currentSession.getServiceList().size());
+        assertEquals("only one rpc service should be in service list", 1, proxy.currentSession.getServiceList().size());
     }
 
+    public void testUnregisterAppResponseTriggersStopServicesAndSession() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, (byte) 2, "");
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+
+        params.put(Names.resultCode, Result.SUCCESS);
+        params.put(Names.success, true);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.UnregisterAppInterface, params,
+                ProtocolMessage.RPCTYPE_RESPONSE, 1));
+        verify(proxy.getSyncConnection(), times(1)).closeMobileNaviService(sessionID);
+        verify(proxy.getSyncConnection(), times(1)).closeAudioService(sessionID);
+        verify(proxy.getSyncConnection(), times(1)).closeConnection(sessionID, true);
+        assertNotNull(proxy.getSyncConnection());
+        assertEquals("Service pool should be empty", 0, proxy.getServicePool().size());
+        assertEquals("Session id should be 0"  ,0, proxy.currentSession.getSessionId());
+    }
 }
