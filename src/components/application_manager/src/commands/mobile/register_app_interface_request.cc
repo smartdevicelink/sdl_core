@@ -266,6 +266,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::media_clock_formats);
 
+    display_caps[hmi_response::templates_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::templates_available);
+
+    display_caps[hmi_response::screen_params] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::screen_params);
+
+    display_caps[hmi_response::num_custom_presets_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::num_custom_presets_available);
+
     if (hmi_capabilities.display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
 
