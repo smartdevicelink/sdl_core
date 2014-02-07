@@ -1,5 +1,5 @@
 [CW6]
-+ SyncProxyAndroid SDK: Add WarningLightStatus enum.
++ SyncProxyAndroid SDK: Add WarningLightStatus enum (replaces TirePressureTellTale enum). Update TireStatus struct.
 * SyncProxyAndroid SDK: Update PRNDL enum's values from the spec.
 * SyncProxyAndroid SDK: Fix session id at application resumption.
 + SyncProxyAndroid SDK: Allow to send requests with unknown function names.

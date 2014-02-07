@@ -223,7 +223,7 @@ public class Names {
 	public static final String pressure = "pressure";
 	public static final String hours = "hours";
 	public static final String rows = "rows";
-	public static final String pressureTellTale = "pressureTellTale";
+	public static final String pressureTelltale = "pressureTelltale";
 	public static final String leftFront = "leftFront";
 	public static final String rightFront = "rightFront";
 	public static final String leftRear = "leftRear";

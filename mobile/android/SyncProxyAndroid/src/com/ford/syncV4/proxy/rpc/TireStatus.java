@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.TirePressureTellTale;
+import com.ford.syncV4.proxy.rpc.enums.WarningLightStatus;
 import com.ford.syncV4.util.DebugTool;
 
 public class TireStatus extends RPCStruct {
@@ -13,28 +13,33 @@ public class TireStatus extends RPCStruct {
     public TireStatus(Hashtable hash) {
         super(hash);
     }
-    public void setPressureTellTale(TirePressureTellTale pressureTellTale) {
-    	if (pressureTellTale != null) {
-    		store.put(Names.pressureTellTale, pressureTellTale);
-    	} else {
-    		store.remove(Names.pressureTellTale);
-    	}
+
+    public void setPressureTelltale(WarningLightStatus pressureTellTale) {
+        if (pressureTellTale != null) {
+            store.put(Names.pressureTelltale, pressureTellTale);
+        } else {
+            store.remove(Names.pressureTelltale);
+        }
     }
-    public TirePressureTellTale getPressureTellTale() {
-        Object obj = store.get(Names.pressureTellTale);
-        if (obj instanceof TirePressureTellTale) {
-            return (TirePressureTellTale) obj;
+
+    public WarningLightStatus getPressureTelltale() {
+        Object obj = store.get(Names.pressureTelltale);
+        if (obj instanceof WarningLightStatus) {
+            return (WarningLightStatus) obj;
         } else if (obj instanceof String) {
-        	TirePressureTellTale theCode = null;
+            WarningLightStatus theCode = null;
             try {
-                theCode = TirePressureTellTale.valueForString((String) obj);
+                theCode = WarningLightStatus.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.pressureTellTale, e);
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.pressureTelltale, e);
             }
             return theCode;
         }
         return null;
     }
+
     public void setLeftFront(SingleTireStatus leftFront) {
     	if (leftFront != null) {
     		store.put(Names.leftFront, leftFront);
