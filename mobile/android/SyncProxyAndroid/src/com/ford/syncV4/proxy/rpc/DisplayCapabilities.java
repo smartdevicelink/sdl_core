@@ -58,6 +58,34 @@ public class DisplayCapabilities extends RPCStruct {
             store.put(Names.textFields, textFields );
         }
     }
+
+    public Vector<ImageField> getImageFields() {
+        if (store.get(Names.imageFields) instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>) store.get(Names.imageFields);
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof ImageField) {
+                    return (Vector<ImageField>) list;
+                } else if (obj instanceof Hashtable) {
+                    Vector<ImageField> newList = new Vector<ImageField>();
+                    for (Object hashObj : list) {
+                        newList.add(new ImageField((Hashtable) hashObj));
+                    }
+                    return newList;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setImageFields(Vector<ImageField> imageFields) {
+        if (imageFields != null) {
+            store.put(Names.imageFields, imageFields);
+        } else {
+            store.remove(Names.imageFields);
+        }
+    }
+
     public Vector<MediaClockFormat> getMediaClockFormats() {
         if (store.get(Names.mediaClockFormats) instanceof Vector<?>) {
 	    	Vector<?> list = (Vector<?>)store.get(Names.mediaClockFormats);
@@ -89,5 +117,21 @@ public class DisplayCapabilities extends RPCStruct {
         if (mediaClockFormats != null) {
             store.put(Names.mediaClockFormats, mediaClockFormats );
         }
+    }
+
+    public void setGraphicSupported(Boolean graphicSupported) {
+        if (graphicSupported != null) {
+            store.put(Names.graphicSupported, graphicSupported);
+        } else {
+            store.remove(Names.graphicSupported);
+        }
+    }
+
+    public Boolean getGraphicSupported() {
+        final Object o = store.get(Names.graphicSupported);
+        if (o instanceof Boolean) {
+            return (Boolean) o;
+        }
+        return null;
     }
 }

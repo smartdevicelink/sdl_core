@@ -444,4 +444,6 @@ public class Names {
     public static final String url = "url";
     public static final String imageTypeSupported = "imageTypeSupported";
     public static final String imageResolution = "imageResolution";
+    public static final String imageFields = "imageFields";
+    public static final String graphicSupported = "graphicSupported";
 }
