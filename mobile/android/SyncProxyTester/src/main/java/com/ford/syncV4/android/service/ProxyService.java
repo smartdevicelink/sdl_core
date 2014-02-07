@@ -33,7 +33,6 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
-import com.ford.syncV4.proxy.SyncProxy;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -1463,19 +1462,30 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
-    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
+    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version,
+                                       final String correlationID) {
         String response = "EndService Ack received; Session Type " + serviceType.getName() + "; " +
                 "Session ID " + version + "; Correlation ID " + correlationID;
         createDebugMessageForAdapter(response);
 
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onProtocolServiceEnded(serviceType, version, correlationID);
-                }
-            });
+        if (serviceType == ServiceType.Audio_Service) {
+            mLogAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            mLogAdapter.logMessage("Navi service stopped", true);
+        } else if (serviceType == ServiceType.Bulk_Data) {
+            mLogAdapter.logMessage("Bulk Data service stopped", true);
+        } else if (serviceType == ServiceType.RPC) {
+            mLogAdapter.logMessage("RPC service stopped", true);
+
+            if (mServiceDestroyEvent != null) {
+                mServiceDestroyEvent.onDisposeComplete();
+            }
+
+            if (mCloseSessionCallback != null) {
+                mCloseSessionCallback.onCloseSessionComplete();
+            }
+        } else {
+            mLogAdapter.logMessage("Unknown service '" + serviceType + "' stopped", true);
         }
     }
 
@@ -1664,16 +1674,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
-        }
-
-        if (mServiceDestroyEvent != null) {
-            mServiceDestroyEvent.onDisposeComplete();
-
-            //stopServiceBySelf();
-        }
-
-        if (mCloseSessionCallback != null) {
-            mCloseSessionCallback.onCloseSessionComplete();
         }
     }
 
