@@ -33,49 +33,9 @@
 #Exit immediately if a command exits with a non-zero status.
 set -e
 
-if [ $EUID != 0 ]; then
-    echo "This script should be run using sudo or as the root user"
-    exit 1
-fi
-
-CMAKE_BUILD_SYSTEM="cmake"
-SUBVERSION="subversion"
-GIT="git"
-GDEBI="gdebi"
-GNU_CPP_COMPILER="g++"
-BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
-LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
-CHROMIUM_BROWSER="chromium-browser"
-CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
-PULSEAUDIO_DEV="libpulse-dev"
-UPDATE_SOURCES=false
-OPENGL_DEV="libgl1-mesa-dev"
-APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
-APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
-CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
-CMAKE_DEB_DST="/tmp/cmake"
-TEMP_FOLDER="/tmp/APPLINK"
 INSTALL_ALL=false
 INSTALL_QT_HMI=false
 INSTALL_QNX_TOOLS=false
-AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
-DOXYGEN="doxygen"
-GRAPHVIZ="graphviz"
-MSCGEN="mscgen"
-BLUEZ_TOOLS="bluez-tools"
-GSTREAMER="gstreamer1.0*"
-USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
-LIB_UDEV="libudev-dev"
-GSTREAMER="gstreamer1.0*"
-USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
-DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
-LIBXML2="libxml2-dev"
-
-GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
-GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
-
-FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
-FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 
 while test $# -gt 0; do
         case "$1" in
@@ -106,6 +66,47 @@ while test $# -gt 0; do
     shift
 done
 
+#Check sudo
+if [ $EUID != 0 ]; then
+    echo "This script should be run using sudo or as the root user"
+    exit 1
+fi
+
+CMAKE_BUILD_SYSTEM="cmake"
+SUBVERSION="subversion"
+GIT="git"
+GDEBI="gdebi"
+GNU_CPP_COMPILER="g++"
+BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
+LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
+CHROMIUM_BROWSER="chromium-browser"
+CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
+PULSEAUDIO_DEV="libpulse-dev"
+UPDATE_SOURCES=false
+OPENGL_DEV="libgl1-mesa-dev"
+APPLINK_SUBVERSION_REPO="https://adc.luxoft.com/svn/APPLINK"
+APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
+CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
+CMAKE_DEB_DST="/tmp/cmake"
+TEMP_FOLDER="/tmp/APPLINK"
+AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
+DOXYGEN="doxygen"
+GRAPHVIZ="graphviz"
+MSCGEN="mscgen"
+BLUEZ_TOOLS="bluez-tools"
+GSTREAMER="gstreamer1.0*"
+USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
+LIB_UDEV="libudev-dev"
+GSTREAMER="gstreamer1.0*"
+USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
+DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
+LIBXML2="libxml2-dev"
+
+GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
+GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
+
+FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
+FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
