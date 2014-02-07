@@ -722,7 +722,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
 
     @Override
     public void onProxyClosed(final String info, Exception e) {
-        createErrorMessageForAdapter("OnProxyClosed: " + info, e);
+        if (e != null) {
+            createErrorMessageForAdapter("OnProxyClosed:" + info + ", msg:" + e.getMessage());
+        } else {
+            createErrorMessageForAdapter("OnProxyClosed:" + info);
+        }
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
