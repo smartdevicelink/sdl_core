@@ -8,7 +8,9 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -26,6 +28,7 @@ import java.io.PipedOutputStream;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.Vector;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -384,4 +387,121 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals("Service pool should be empty", 0, proxy.getServicePool().size());
         assertEquals("Session id should be 0"  ,0, proxy.currentSession.getSessionId());
     }
+
+    public void testSyncMsgVersionRequestSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        proxy.setSyncMsgVersionRequest(syncMsgVersion);
+        SyncMsgVersion real  = proxy.getSyncMsgVersionRequest();
+        assertEquals("msg version should be equal", real, syncMsgVersion);
+    }
+
+    public void testApplicationNameSetTest() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String name = "name";
+        proxy.setApplicationName(name);
+        String real = proxy.getApplicationName();
+        assertEquals("names should be the same", real, name);
+    }
+
+    public void testTtsNameSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<TTSChunk> ttsChunkVector = new Vector<TTSChunk>();
+        TTSChunk ttsChunk = new TTSChunk();
+        ttsChunk.setText("Text");
+        ttsChunkVector.add(ttsChunk);
+        proxy.setTTSName(ttsChunkVector);
+        Vector<TTSChunk> real = proxy.getTTSName();
+        assertEquals(real, ttsChunkVector);
+    }
+
+    public void testNgnMediaScreenAppNameSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String mediaScreenName = "name";
+        proxy.setNgnMediaScreenAppName(mediaScreenName);
+        String real = proxy.getNgnMediaScreenAppName();
+        assertEquals(real, mediaScreenName);
+    }
+
+    public void testVrSynonymsSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<String> vrSynonums = new Vector<String>();
+        vrSynonums.add("name");
+        proxy.setVrSynonyms(vrSynonums);
+        Vector<String> real = proxy.getVrSynonyms();
+        assertEquals(real, vrSynonums);
+    }
+
+    public void testIsMediaAppSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Boolean isMediaApp = false;
+        proxy.setIsMediApp(isMediaApp);
+        Boolean real = proxy.getIsMediaApp();
+        assertEquals(real, isMediaApp);
+    }
+
+    public void testSyncLanguageDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Language language = Language.AR_SA;
+        proxy.setSyncLanguageDesired(language);
+        Language real = proxy.getSyncLanguageDesired();
+        assertEquals(real, language);
+    }
+
+    public void testHmiDisplayLanguageDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Language language = Language.AR_SA;
+        proxy.setHmiDisplayLanguageDesired(language);
+        Language real = proxy.getHmiDisplayLanguageDesired();
+        assertEquals(real, language);
+    }
+
+    public void testAppHMITypeSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
+        proxy.setAppHMIType(appHMITypeVector);
+        Vector<AppHMIType> real = proxy.getAppHMIType();
+        assertEquals(real, appHMITypeVector);
+    }
+
+    public void testAppIDSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String appID = "appID";
+        proxy.setAppID(appID);
+        String real = proxy.getAppID();
+        assertEquals(real, appID);
+    }
+
+    public void testAutoActivateIdDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String autoActivateIdDesired = "_autoActivateIdDesired";
+        proxy.setAutoActivateIdDesired(autoActivateIdDesired);
+        String real = proxy.getAutoActivateIdDesired();
+        assertEquals(real, autoActivateIdDesired);
+    }
+
 }
