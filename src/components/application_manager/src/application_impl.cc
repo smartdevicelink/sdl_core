@@ -254,7 +254,7 @@ bool ApplicationImpl::UpdateFile(AppFile& file) {
 }
 
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
-  AppFilesMap::const_iterator it = app_files_.find(file_name);
+  AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
     app_files_.erase(it);
     return true;

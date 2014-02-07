@@ -104,9 +104,10 @@
 
 ==========================================================================================================
 7. Common run on QNX host.
-  7.1. QnxServ: run terminal.
-  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
-  7.3. QnxServ: start SDL “./smartDeviceLinkCore”.
+  7.1. Make sure you are not running Photon
+  7.2. QnxServ: run terminal.
+  7.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
+  7.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
