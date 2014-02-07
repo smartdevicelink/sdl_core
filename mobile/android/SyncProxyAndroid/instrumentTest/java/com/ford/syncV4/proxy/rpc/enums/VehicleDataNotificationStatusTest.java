@@ -16,7 +16,6 @@ public class VehicleDataNotificationStatusTest extends TestCase {
     public void testAllValuesFromSpecificationShouldBeDefined() {
         assertThat(VehicleDataNotificationStatus.values(),
                 IsArrayContainingInAnyOrder.arrayContainingInAnyOrder(
-
                         VehicleDataNotificationStatus.NOT_SUPPORTED,
                         VehicleDataNotificationStatus.NORMAL,
                         VehicleDataNotificationStatus.ACTIVE,

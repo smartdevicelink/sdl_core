@@ -1,12 +1,14 @@
 package com.ford.syncV4.proxy.rpc.enums;
 
 public enum AmbientLightStatus {
-	DARK,
-	LIGHT,
-	TWILIGHT,
-	TUNNEL_ON,
-	TUNNEL_OFF,
-	NO_DATA_EXISTS;
+    NIGHT,
+    TWILIGHT_1,
+    TWILIGHT_2,
+    TWILIGHT_3,
+    TWILIGHT_4,
+    DAY,
+    UNKNOWN,
+    INVALID;
 
     public static AmbientLightStatus valueForString(String value) {
         return valueOf(value);
