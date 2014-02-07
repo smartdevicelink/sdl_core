@@ -21,7 +21,11 @@ public class ImageResolution extends RPCStruct {
     }
     
     public Integer getResolutionWidth() {
-        return (Integer) store.get(Names.resolutionWidth);
+        final Object o = store.get(Names.resolutionWidth);
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+        return null;
     }
     
     public void setResolutionHeight(Integer resolutionHeight) {
@@ -33,6 +37,10 @@ public class ImageResolution extends RPCStruct {
     }
     
     public Integer getResolutionHeight() {
-        return (Integer) store.get(Names.resolutionHeight);
+        final Object o = store.get(Names.resolutionHeight);
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+        return null;
     }
 }
