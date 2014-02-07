@@ -1,4 +1,5 @@
 [CW6]
++ SyncProxyAndroid SDK: Add ImageFieldName enum.
 + SyncProxyAndroid SDK: changed video for Alice build
 + SyncProxyAndroid SDK: changed registration/unregistration procedure.
 + SyncProxyAndroid SDK: changed sync logic at transports
