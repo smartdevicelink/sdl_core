@@ -26,7 +26,7 @@
   3.1.4. Clone git repository with "git clone git@adc.luxoft.com:applink".
     Note: the permissions to download the repository are required. Apply PSavyelyev@luxoft.com on this matter.
   3.1.5. Switch to <Main_Develop> branch: "git checkout <Main_Develop>".
-  3.1.6. Run "./setup_env.sh -a" to install all mandatory and optional packages.
+  3.1.6. Run "sudo ./setup_env.sh -a" to install all mandatory and optional packages.
     Note: read the built-in setup environment help ("./setup_env.sh --help") which provides the description of predefined options:
       a) for Web HMI, b) for QML HMI, c) for QNX support.
 
@@ -38,18 +38,19 @@
       3.2.2.1. Install Open-SSH server (For Xubuntu run "sudo apt-get install ssh", for Ubuntu run "sudo apt-get install openssh-server"). 
       3.2.2.1. Restart computer if necessary.
 
-  3.3. To run QNX in virtual machine:
+  3.3. To run specially prepared QNX in virtual machine:
     3.3.1. Download and install VMware Player from https://my.vmware.com/web/vmware/downloads
     3.3.2. Download the archived QNX image for VMware from ftp://ford-applink.luxoft.com/Distrs/QNX/?????????
-    3.3.3. De-archive the image and open it in VMware
-    Note: QNX image has root with empty pass and user with pass 'user'. SSH is configurat
+    3.3.3. Extract image from archive and open it in VMware
+      Note: QNX image has root with empty pass and user with pass 'user'. SSH is configured
     3.3.4. Run ssh server if it is not running "/usr/sbin/sshd".
 
-  3.4. To make own QNX virtual machine:
+  3.4. To make QNX virtual machine from scratch:
     3.4.2. SSH configuration on QNX server:
       3.4.1. Download VMware Player https://my.vmware.com/web/vmware/downloads
       3.4.2. Download the QNX Software Development Platform 6.5.0 bootable iso image from http://www.qnx.com/download/download/21182/qnxsdp-6.5.0-x86-201007091524-nto.iso
       3.4.3. Create new VMware virtual machine and boot from QNX Software Development Platform bootable iso image
+        Note: it is necessary to obtain license key: either trial or commercial one (Register on http://www.qnx.com/ website, enter 'QNX product evaluation' and apply for a license key).
     3.4.2. SSH configuration on QNX server:
       3.4.2.1. Run “passwd user” and set the new user id (just press enter), group (just press enter) and non-empty password.
       3.4.2.2. Run "ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key".
@@ -116,5 +117,6 @@
 
 ==========================================================================================================
 9. Run SDL on QNX Server and QML HMI on Linux host.
-  9.1. Perform step 7.
-  9.2. Run "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml".
+  9.1. LinHost: make "<Project_Root_Bin>/bin/start_hmi.sh" file empty
+  9.2. Perform step 7.
+  9.3. LinHost: goto "<Project_Root_Bin>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
