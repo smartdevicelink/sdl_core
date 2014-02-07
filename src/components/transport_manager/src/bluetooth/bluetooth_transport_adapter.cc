@@ -66,24 +66,27 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 
 void BluetoothTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
-  utils::Dictionary bluetooth_adapter_dictionary;
+  resumption::LastState::Dictionary bluetooth_adapter_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
+    if (!device) { // device could have been disconnected
+      continue;
+    }
     utils::SharedPtr<BluetoothDevice> bluetooth_device =
       DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
-    utils::Dictionary device_dictionary;
+    resumption::LastState::Dictionary device_dictionary;
     char address[18];
     ba2str(&bluetooth_device->address(), address);
     device_dictionary.AddItem("address", std::string(address));
-    utils::Dictionary applications_dictionary;
+    resumption::LastState::Dictionary applications_dictionary;
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
       uint8_t rfcomm_channel;
       bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
-      utils::Dictionary application_dictionary;
+      resumption::LastState::Dictionary application_dictionary;
       application_dictionary.AddItem("rfcomm_channel", std::to_string(rfcomm_channel));
       applications_dictionary.AddSubitem(std::to_string(rfcomm_channel), application_dictionary);
     }
@@ -99,22 +102,22 @@ void BluetoothTransportAdapter::Store() const {
 bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
-  utils::Dictionary bluetooth_adapter_dictionary =
+  resumption::LastState::Dictionary bluetooth_adapter_dictionary =
     resumption::LastState::instance()->dictionary.SubitemAt("BluetoothAdapter");
-  for (utils::Dictionary::const_iterator i =
+  for (resumption::LastState::Dictionary::const_iterator i =
     bluetooth_adapter_dictionary.begin(); i != bluetooth_adapter_dictionary.end(); ++i) {
-    utils::Dictionary::Key name = i->first;
-    utils::Dictionary device_dictionary = i->second;
-    utils::Dictionary::Record address_record = device_dictionary.ItemAt("address");
+    std::string name = i->first;
+    resumption::LastState::Dictionary device_dictionary = i->second;
+    std::string address_record = device_dictionary.ItemAt("address");
     bdaddr_t address;
     str2ba(address_record.c_str(), &address);
     RfcommChannelVector rfcomm_channels;
-    utils::Dictionary applications_dictionary =
+    resumption::LastState::Dictionary applications_dictionary =
       device_dictionary.SubitemAt("applications");
-    for (utils::Dictionary::const_iterator j =
+    for (resumption::LastState::Dictionary::const_iterator j =
       applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
-      utils::Dictionary application_dictionary = j->second;
-      utils::Dictionary::Record rfcomm_channel_record =
+      resumption::LastState::Dictionary application_dictionary = j->second;
+      std::string rfcomm_channel_record =
         application_dictionary.ItemAt("rfcomm_channel");
       uint8_t rfcomm_channel =
         static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));

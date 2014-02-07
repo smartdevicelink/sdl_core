@@ -32,6 +32,10 @@
 
 #include <pthread.h>
 
+#if  defined(__QNX__) || defined(__QNXNTO__)
+#include <sys/cpuinline.h>
+#endif
+
 #include "resumption/last_state.h"
 
 namespace resumption {
@@ -43,15 +47,28 @@ LastState* LastState::instance() {
   static LastState* instance = 0;
   static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-  if (!instance) {
+  LastState* temp = instance;
+#if  defined(__QNX__) || defined(__QNXNTO__)
+  __cpu_membarrier();
+#else
+  __sync_synchronize();
+#endif
+  if (!temp) {
     pthread_mutex_lock(&lock);
-    if (!instance) {
-      instance = new LastState();
+    temp = instance;
+    if (!temp) {
+      temp = new LastState();
+#if  defined(__QNX__) || defined(__QNXNTO__)
+      __cpu_membarrier();
+#else
+      __sync_synchronize();
+#endif
+      instance = temp;
     }
     pthread_mutex_unlock(&lock);
   }
 
-  return instance;
+  return temp;
 }
 
 }

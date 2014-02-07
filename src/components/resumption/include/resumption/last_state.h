@@ -33,13 +33,27 @@
 #ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
 #define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
 
+#include <string>
+
 #include "utils/dict.h"
 
 namespace resumption {
 
 class LastState {
  public:
-  utils::Dictionary dictionary;
+/**
+ * @brief Typedef for string-driven dictionary
+ */
+  typedef utils::Dictionary<std::string, std::string> Dictionary;
+/**
+ * @brief public dictionary
+ */
+  Dictionary dictionary;
+/**
+ * @brief Returns the singleton of class
+ */
+  static LastState* instance();
+
  private:
 /**
  * @brief Private default constructor
@@ -53,11 +67,6 @@ class LastState {
  * @brief Private assign operator - intentionally not implemented
  */
   LastState& operator = (const LastState& other);
- public:
-/**
- * @brief Returns the singleton of class
- */
-  static LastState* instance();
 };
 
 }  // namespace resumption

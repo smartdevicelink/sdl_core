@@ -34,38 +34,135 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_H_
 
 #include <map>
-#include <string>
 
 namespace utils {
 
+template<typename Key, typename Record>
 class Dictionary {
- public:
-  typedef std::string Key;
-  typedef std::string Record;
  private:
   typedef std::map<Key, Record> ItemContainer;
   typedef std::map<Key, Dictionary> SubitemContainer;
+
  public:
-  typedef SubitemContainer::iterator iterator;
-  typedef SubitemContainer::const_iterator const_iterator;
- private:
-  ItemContainer items_;
-  SubitemContainer subitems_;
- public:
+/**
+ * @brief Typedef for subitems iterator
+ */
+  typedef typename SubitemContainer::iterator iterator;
+/**
+  * @brief Typedef for subitems const iterator
+  */
+  typedef typename SubitemContainer::const_iterator const_iterator;
+/**
+ * @brief add an item to the dictionary
+ * @param key - item key
+ * @param record - item value
+ */
   void AddItem(const Key& key, const Record& record);
+/**
+ * @brief add a subitem to the dictionary
+ * @param key - subitem key
+ * @param subitem - subitem dictionary
+ */
   void AddSubitem(const Key& key, const Dictionary& subitem);
-
+/**
+ * @brief item under specified key
+ * @param key - item key
+ * @return item with specified key of default-constructed item
+ */
   Record& ItemAt(const Key& key);
+/**
+ * @brief item under specified key
+ * @param key - item key
+ * @return item with specified key of default-constructed item
+   */
   const Record& ItemAt(const Key& key) const;
-
+/**
+ * @brief subitem under specified key
+ * @param key - subitem key
+ * @return subitem with specified key of default-constructed dictionary
+ */
   Dictionary& SubitemAt(const Key& key);
+/**
+ * @brief subitem under specified key
+ * @param key - subitem key
+ * @return subitem with specified key of default-constructed dictionary
+ */
   const Dictionary& SubitemAt(const Key& key) const;
-
+/**
+ * @brief first subitem
+ * @return iterator pointing to the first subitem
+ */
   iterator begin();
+/**
+ * @brief first subitem
+ * @return const iterator pointing to the first subitem
+ */
   const_iterator begin() const;
+/**
+ * @brief end of subitem list
+ * @return iterator pointing to the end of subitem list
+ */
   iterator end();
+/**
+ * @brief end of subitem list
+ * @return const iterator pointing to the end of subitem list
+ */
   const_iterator end() const;
+
+private:
+ ItemContainer items_;
+ SubitemContainer subitems_;
 };
+
+template<typename Key, typename Record>
+void Dictionary<Key, Record>::AddItem(const Key& key, const Record& record) {
+  items_.insert(std::make_pair(key, record));
+}
+
+template<typename Key, typename Record>
+void Dictionary<Key, Record>::AddSubitem(const Key& key, const Dictionary& subitem) {
+  subitems_.insert(std::make_pair(key, subitem));
+}
+
+template<typename Key, typename Record>
+Record& Dictionary<Key, Record>::ItemAt(const Key& key) {
+  return items_.at(key);
+}
+
+template<typename Key, typename Record>
+const Record& Dictionary<Key, Record>::ItemAt(const Key& key) const {
+  return items_.at(key);
+}
+
+template<typename Key, typename Record>
+Dictionary<Key, Record>& Dictionary<Key, Record>::SubitemAt(const Key& key) {
+  return subitems_.at(key);
+}
+
+template<typename Key, typename Record>
+const Dictionary<Key, Record>& Dictionary<Key, Record>::SubitemAt(const Key& key) const {
+  return subitems_.at(key);
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::iterator Dictionary<Key, Record>::begin() {
+  return subitems_.begin();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::const_iterator Dictionary<Key, Record>::begin() const {
+  return subitems_.begin();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::iterator Dictionary<Key, Record>::end() {
+  return subitems_.end();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::const_iterator Dictionary<Key, Record>::end() const {
+  return subitems_.end();
+}
 
 }  // namespace utils
 
