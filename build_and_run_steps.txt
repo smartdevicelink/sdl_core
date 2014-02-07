@@ -40,7 +40,7 @@
 
   3.3. To run specially prepared QNX in virtual machine:
     3.3.1. Download and install VMware Player from https://my.vmware.com/web/vmware/downloads
-    3.3.2. Download the archived QNX image for VMware from ftp://ford-applink.luxoft.com/Distrs/QNX/?????????
+    3.3.2. Download the archived QNX image for VMware from ftp://ford-applink.luxoft.com/Distrs/QNX/QNX_SDP_6.5.0.tar.gz
     3.3.3. Extract image from archive and open it in VMware
       Note: QNX image has root with empty pass and user with pass 'user'. SSH is configured
     3.3.4. Run ssh server if it is not running "/usr/sbin/sshd".
