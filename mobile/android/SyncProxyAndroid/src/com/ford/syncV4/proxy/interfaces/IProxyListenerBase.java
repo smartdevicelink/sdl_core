@@ -1,6 +1,6 @@
 package com.ford.syncV4.proxy.interfaces;
 
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.OnHMIStatus;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
@@ -45,9 +46,11 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 
 
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
@@ -298,6 +301,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	
 	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
 
+    public void onSystemRequestResponse(SystemRequestResponse response);
+
     public void onMobileNaviStart();
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
@@ -306,11 +311,17 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onKeyboardInput(OnKeyboardInput msg);
 
+    public void onOnSystemRequest(OnSystemRequest notification);
+
     void onRegisterAppRequest(RegisterAppInterface msg);
 
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
 
-    public void onProtocolSessionEnded(SessionType sessionType, Byte version, String correlationID);
+    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason);
+
+    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
     public void onSessionStarted(byte sessionID, String correlationID);
+
+    public void onAudioServiceStart();
 }

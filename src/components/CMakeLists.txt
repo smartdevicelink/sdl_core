@@ -46,6 +46,9 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
+# --- Validated types
+add_subdirectory(./rpc_base)
+
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
@@ -70,7 +73,7 @@ add_subdirectory(./media_manager)
 
 # --- Policies
 add_subdirectory(./policies)
-endif()
+endif (BUILD_MEDIA_MANAGER)
 
 if (${QT_HMI})
 # --- DBus

@@ -46,6 +46,8 @@ class MediaManager {
     virtual void StopMicrophoneRecording(int32_t application_key) = 0;
     virtual void StartVideoStreaming(int32_t application_key) = 0;
     virtual void StopVideoStreaming(int32_t application_key) = 0;
+    virtual void StartAudioStreaming(int32_t application_key) = 0;
+    virtual void StopAudioStreaming(int32_t application_key) = 0;
 
     virtual ~MediaManager(){}
 };

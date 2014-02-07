@@ -1,5 +1,5 @@
 # --- RequestWatchdog
-add_subdirectory(./request_watchdog)
+#add_subdirectory(./request_watchdog)
 
 # --- TransportManager
 add_subdirectory(./transport_manager)
@@ -31,6 +31,9 @@ add_subdirectory(./utils)
 
 # --- policies (Policy Manager)
 add_subdirectory(./policies)
+
+# -- rpc_base
+add_subdirectory(./rpc_base)
 
 # --- DBus
 IF (${QT_HMI})

@@ -616,6 +616,31 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         }
         return null;
     }
+
+    public void setSteeringWheelAngle(VehicleDataResult steeringWheelAngle) {
+        if (steeringWheelAngle != null) {
+            parameters.put(Names.steeringWheelAngle, steeringWheelAngle);
+        } else {
+            parameters.remove(Names.steeringWheelAngle);
+        }
+    }
+
+    public VehicleDataResult getSteeringWheelAngle() {
+        Object obj = parameters.get(Names.steeringWheelAngle);
+        if (obj instanceof VehicleDataResult) {
+            return (VehicleDataResult) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new VehicleDataResult((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.steeringWheelAngle, e);
+            }
+        }
+        return null;
+    }
+
     public void setClutchPedalPosition(VehicleDataResult clutchPedalPosition) {
         if (clutchPedalPosition != null) {
             parameters.put(Names.clutchPedalPosition, clutchPedalPosition);

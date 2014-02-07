@@ -39,6 +39,7 @@
 
 #include <map>
 #include <vector>
+#include <list>
 
 #include "utils/logger.h"
 #include "connection_handler/device.h"
@@ -77,6 +78,18 @@ typedef std::vector<uint8_t> SessionList;
  * \brief Type for Sessions vector iterator
  */
 typedef std::vector<uint8_t>::iterator SessionListIterator;
+
+/**
+ * \brief Type for Resume Session Map
+ * @param uint8_t  session ID
+ * @param uint32_t session_key
+ */
+typedef std::map<uint8_t, uint32_t> ResumeSessionMap;
+
+/**
+ * \brief Type for Resume Sessions iterator
+ */
+typedef std::map<uint8_t, uint32_t>::iterator ResumeSessionMapIt;
 
 /**
  * \brief Type for Session Services
@@ -188,11 +201,6 @@ class Connection {
    * \brief Counter to generate session id's.
    */
   uint8_t session_id_counter_;
-
-  /**
-   * \brief Counter to generate session id's.
-   */
-  SessionList session_list_;
 
   /**
    * \brief session/services map

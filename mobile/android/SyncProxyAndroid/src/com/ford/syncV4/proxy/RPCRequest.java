@@ -18,6 +18,12 @@ public class RPCRequest extends RPCMessage {
 		super(hash);
 	}
 
+    public RPCRequest(RPCRequest that) {
+        // FIXME test this!
+        super(that);
+        this.setCorrelationID(that.getCorrelationID());
+    }
+
 	public Integer getCorrelationID() {
 		return (Integer)function.get(Names.correlationID);
 	}

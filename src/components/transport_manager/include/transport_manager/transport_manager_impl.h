@@ -55,7 +55,6 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
@@ -71,6 +70,7 @@ enum {
   E_INVALID_HANDLE,
   E_CONNECTION_IS_TO_SHUTDOWN,
   E_CONNECTION_EXISTS,
+  E_ADAPTER_EXISTS,
   E_INTERNAL_ERROR,
 };
 

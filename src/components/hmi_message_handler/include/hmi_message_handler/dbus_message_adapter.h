@@ -38,9 +38,9 @@
 #include "dbus/dbus_message_controller.h"
 #include "smart_objects/smart_object.h"
 
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace hmi_message_handler {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /**
  * \brief adapter for DBus
@@ -50,7 +50,7 @@ class DBusMessageAdapter
       public dbus::DBusMessageController {
  public:
   typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
-  explicit DBusMessageAdapter(HMIMessageHandler* hmi_message_handler);
+  explicit DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler);
   ~DBusMessageAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 

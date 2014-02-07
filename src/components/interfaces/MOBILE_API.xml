@@ -648,7 +648,53 @@
   	</element>
 
   </enum>
+  
+  <enum name="ImageFieldName">
+    <element name="softButtonImage">
+      <description>The image field for SoftButton</description>
+    </element>
 
+    <element name="choiceImage">
+      <description>The first image field for Choice</description>
+    </element>
+
+    <element name="choiceSecondaryImage">
+      <description>The secondary image field for Choice</description>
+    </element>
+
+    <element name="vrHelpItem">
+      <description>The image field for vrHelpItem</description>
+    </element>
+
+    <element name="turnIcon">
+      <description>The image field for Turn</description>
+    </element>
+
+    <element name="menuIcon">
+      <description>The image field for the menu icon in SetGlobalProperties</description>
+    </element>
+
+    <element name="cmdIcon">
+      <description>The image field for AddCommand</description>
+    </element>
+
+    <element name="appIcon">
+      <description>The image field for the app icon (set by setAppIcon)</description>
+    </element>
+
+    <element name="graphic">
+      <description>The image field for Show</description>
+    </element>
+
+    <element name="showConstantTBTIcon">
+      <description>The primary image field for ShowConstantTBT</description>
+    </element>
+
+    <element name="showConstantTBTNextTurnIcon">
+      <description>The secondary image field for ShowConstantTBT</description>
+    </element>
+  </enum>
+  
   <enum name="CharacterSet">
     <description>The list of potential character sets</description>
     <element name="TYPE2SET">
@@ -863,8 +909,12 @@
     </element>
     <element name="SEVENTH">
     </element>
-    <element name="EIGTH">
+    <element name="EIGHT">
     </element>
+    <element name="UNKNOWN">
+    </element>
+    <element name="FAULT">
+    </element>    
   </enum>
 
   <enum name="ComponentVolumeStatus">
@@ -897,6 +947,8 @@
     </element>
     <element name="FLASH" internal_name="WLS_FLASH">
     </element>
+    <element name="NOT_USED" internal_name="WLS_NOT_USED">
+    </element>
   </enum>
 
   <enum name="VehicleDataNotificationStatus">
@@ -906,6 +958,8 @@
     <element name="NORMAL" internal_name="VDNS_NORMAL">
     </element>
     <element name="ACTIVE" internal_name="VDNS_ACTIVE">
+    </element>
+    <element name="NOT_USED" internal_name="VDNS_NOT_USED">
     </element>
   </enum>
 
@@ -1038,6 +1092,18 @@
     </element>
   </enum>
 
+  <enum name="AmbientLightStatus">
+    <description>Reflects the status of the ambient light sensor.</description>
+    <element name="NIGHT" />
+    <element name="TWILIGHT_1" />
+    <element name="TWILIGHT_2" />
+    <element name="TWILIGHT_3" />
+    <element name="TWILIGHT_4" />
+    <element name="DAY" />
+    <element name="UNKNOWN" />
+    <element name="INVALID" />
+  </enum>
+
   <struct name="BeltStatus">
     <param name="driverBeltDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBelt_D_Ltchd". See VehicleDataEventStatus.</description>
@@ -1153,6 +1219,9 @@
     <param name="highBeamsOn" type="Boolean">
       <description>Status of the high beam lamps.  References signal "HeadLghtHiOn_B_Stat".</description>
 	</param>
+    <param name="ambientLightSensorStatus" type="AmbientLightStatus">
+      <description>Status of the ambient light sensor.</description>
+    </param>
   </struct>
 
   <struct name="engineInfo">
@@ -1228,6 +1297,18 @@
     </element>
   </enum>
 
+  <enum name="FileType">
+    <description>Enumeration listing possible file types.</description>
+    <element name="GRAPHIC_BMP" />   
+    <element name="GRAPHIC_JPEG" />   
+    <element name="GRAPHIC_PNG" />
+    <element name="AUDIO_WAVE" />   
+    <element name="AUDIO_MP3" />
+    <element name="AUDIO_AAC" />
+    <element name="BINARY" />
+    <element name="JSON" />
+  </enum>
+  
   <enum name="PowerModeQualificationStatus" scope="internal">
     <description>Reflects the status of the current power mode qualification.</description>
     <element name="POWER_MODE_UNDEFINED">
@@ -1323,9 +1404,14 @@
     <param name="rolloverEvent" type="VehicleDataEventStatus">
       <description>References signal "VedsEvntRoll_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
-    <param name="maximumChangeVelocity" type="VehicleDataEventStatus">
-      <description>References signal "VedsMaxDeltaV_D_Ltchd". See VehicleDataEventStatus.</description>
-	</param>
+
+    <param name="maximumChangeVelocity" type="Integer" minvalue="0" maxvalue="255">
+      <description>References signal "VedsMaxDeltaV_D_Ltchd". Change in velocity in KPH.  Additional reserved values:
+        0x00 No event
+        0xFE Not supported
+        0xFF Fault
+      </description>
+    </param>
     <param name="multipleEvents" type="VehicleDataEventStatus">
       <description>References signal "VedsMultiEvnt_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
@@ -1512,6 +1598,18 @@
     </param>
   </struct>
 
+  <struct name="ImageField">
+    <param name="name" type="ImageFieldName">
+      <description>The name that identifies the field. See ImageFieldName.</description>
+    </param>
+    <param name="imageTypeSupported" type="FileType" array="true">
+      <description>The image types that are supported in this field. See FileType.</description>
+    </param>
+    <param name="imageResolution" type="ImageResolution">
+      <description>The image resolution of this field.</description>
+    </param>
+  </struct>
+  
   <struct name="TouchCoord">
     <param name="x" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
       <description>The x coordinate of the touch.</description>
@@ -1561,6 +1659,24 @@
 		</param>
   </struct>
 
+  <struct name="TouchEventCapabilities">
+	<param name="pressAvailable" type="Boolean" mandatory="true">
+	</param>
+	<param name="multiTouchAvailable" type="Boolean" mandatory="true">
+	</param>
+	<param name="doublePressAvailable" type="Boolean" mandatory="true">
+	</param>
+  </struct>
+  
+  <struct name="ScreenParams" scope="partner">
+    <param name="resolution" type="ImageResolution" mandatory="true">
+      <description>The resolution of the prescribed screen area.</description>
+    </param>    
+    <param name="touchEventAvailable" type="TouchEventCapabilities" mandatory="false">
+      <description>Types of screen touch events available in screen area.</description>    
+	</param>    
+  </struct>
+  
   <enum name="PermissionStatus">
     <description>Enumeration that describes possible permission states of a policy table entry.</description>
     <element name="ALLOWED" internal_name="PS_ALLOWED"/>
@@ -1608,6 +1724,15 @@
     </param>
     <param name="graphicSupported" type="Boolean">
       <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+    </param>
+    <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" scope="partner">
+      <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
+    </param>
+	<param name="screenParams" type="ScreenParams" mandatory="false">
+      <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
+  	</param>
+    <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+      <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
     </param>
   </struct>
 
@@ -1671,7 +1796,7 @@
   </struct>
 
   <struct name="MenuParams">
-    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+    <param name="parentID" type="Integer" minvalue="0" maxvalue="2000000000" defvalue="0" mandatory="false">
       <description>
       	unique ID of the sub menu, the command will be added to.
       	If not provided, it will be provided to the top level of the in application menu.
@@ -1790,18 +1915,6 @@
       <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
     </param>   
   </struct>
-
-  <enum name="FileType">
-    <description>Enumeration listing possible file types.</description>
-    <element name="GRAPHIC_BMP" />
-    <element name="GRAPHIC_JPEG" />
-    <element name="GRAPHIC_PNG" />
-    <element name="AUDIO_WAVE" />
-    <element name="AUDIO_MP3" />
-    <element name="AUDIO_AAC" />
-    <element name="BINARY" />
-    <element name="JSON" />
-  </enum>
 
   <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
@@ -2714,6 +2827,14 @@
        </description>
      </param>
 
+     <param name="secondaryGraphic" type="Image" mandatory="false">
+       <description>
+       	Image struct determining whether static or dynamic secondary image to display in app.
+       	If omitted on supported displays, the displayed secondary graphic shall not change.
+       </description>       
+     </param>
+
+
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App defined SoftButtons.
@@ -2801,6 +2922,15 @@
       	See StartTime.
       	startTime must be provided for "COUNTUP" and "COUNTDOWN".
       	startTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+      </description>
+    </param>
+
+    <param name="endTime" type="StartTime" mandatory="false">
+      <description>
+      	See StartTime.
+      	endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+      	If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+      	endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
       </description>
     </param>
 
@@ -3545,18 +3675,18 @@
 
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="request">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="request" scope="partner">
     <description>Non periodic vehicle data read request</description>
 
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of ECU.</description>
     </param>
-    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
+    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="1" maxsize="1000" array="true" mandatory="true">
       <description>Get raw data from vehicle data DID location(s)</description>
     </param>
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="response">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="response" scope="partner">
 
     <param name="success" type="Boolean" platform="documentation">
 		<description> true, if successful; false, if failed </description>
@@ -3641,9 +3771,9 @@
     <param name="scrollableMessageBody" type="String" maxlength="500">
       <description>Body of text that can include newlines and tabs.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="false">
+    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="false">
       <description>App defined timeout.  Indicates how long of a timeout from the last action (i.e. scrolling message resets timeout).</description>
-    </param>
+    </param>   
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App defined SoftButtons.
@@ -3698,12 +3828,12 @@
       	If omitted on supported displays, no footer text shall be displayed.
       </description>
     </param>
-    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="10000" mandatory="false">
+    <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="10000" mandatory="false">
       <description>
       	App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
       	If omitted, the value is set to 10000.
       </description>
-    </param>
+    </param>   
   </function>
 
   <function name="Slider" functionID="SliderID" messagetype="response">
@@ -3713,7 +3843,8 @@
 
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
-      <element name="SAVED"/>
+      <element name="SUCCESS"/>
+      <element name="SAVED"/>        
       <element name="INVALID_DATA"/>
       <element name="OUT_OF_MEMORY"/>
       <element name="TOO_MANY_PENDING_REQUESTS"/>
@@ -3729,7 +3860,7 @@
       <description>Provides additional human readable info regarding the result.</description>
     </param>
 
-    <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26">
+    <param name="sliderPosition" type="Integer" minvalue="1" maxvalue="26" mandatory="false">
       <description>
       	Current slider value returned when saved or canceled (aborted)
       	This value is only returned for resultCodes "SAVED" or "ABORTED"
@@ -4216,7 +4347,7 @@
     <param name="gps" type="GPSData" mandatory="false">
       <description>See GPSData</description>
     </param>
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="false">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
     <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
@@ -4243,7 +4374,7 @@
     <param name="tirePressure" type="TireStatus" mandatory="false">
       <description>See TireStatus</description>
     </param>
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="false">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
       <description>Odometer in km</description>
     </param>
     <param name="beltStatus" type="BeltStatus" mandatory="false">
@@ -4398,7 +4529,7 @@
     	Legacy / v1 Protocol implementation; use SyncPData instead.
     </description>
 
-    <param name="data" type="String" maxlength="100000" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
       <todo>What is the maxlength?</todo>
     </param>
@@ -4459,7 +4590,7 @@
     	Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
     	Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
     </description>
-    <param name="data" type="String" maxlength="100000" minsize="1" maxsize="100" mandatory="true" array="true">
+    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" mandatory="true" array="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
     </param>
     <param name="URL" type="String" maxlength="1000" mandatory="false">

@@ -154,36 +154,21 @@ GeneralView {
             width: parent.width
             property bool clickProcessed
 
-            Timer {
-                id: timer
-                interval: Constants.presetButtonTimer
-                repeat: false
-                triggeredOnStart: false
-            }
-
             onPresetButtonPressed: {
-                timer.start()
-                clickProcessed  = false
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONDOWN, undefined)
             }
 
             onPresetButtonReleased: {
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
-                timer.stop()
-                if (!clickProcessed) {
-                    sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
-                }
             }
 
-            Connections {
-                target: timer
-                onTriggered: {
-                    if(!clickProcessed) {
-                        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
-                        clickProcessed = true
-                    }
-                }
-            }
+	    onPresetButtonClicked: {
+	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
+	    }
+
+	    onPresetButtonHold: {
+	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
+	    }
         }
     }
 

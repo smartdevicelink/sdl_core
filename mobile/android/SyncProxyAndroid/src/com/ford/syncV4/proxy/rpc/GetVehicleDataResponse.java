@@ -466,6 +466,26 @@ public class GetVehicleDataResponse extends RPCResponse {
     public Float getAccPedalPosition() {
     	return (Float) parameters.get(Names.accPedalPosition);
     }
+
+    public void setSteeringWheelAngle(Float steeringWheelAngle) {
+        if (steeringWheelAngle != null) {
+            parameters.put(Names.steeringWheelAngle, steeringWheelAngle);
+        } else {
+            parameters.remove(Names.steeringWheelAngle);
+        }
+    }
+
+    public Float getSteeringWheelAngle() {
+        final Object o = parameters.get(Names.steeringWheelAngle);
+        if (o instanceof Float) {
+            return (Float) o;
+        }
+        if (o instanceof Double) {
+            return ((Double) o).floatValue();
+        }
+        return null;
+    }
+
     public void setClutchPedalPosition(Float clutchPedalPosition) {
         if (clutchPedalPosition != null) {
             parameters.put(Names.clutchPedalPosition, clutchPedalPosition);
@@ -525,28 +545,6 @@ public class GetVehicleDataResponse extends RPCResponse {
             } catch (Exception e) {
             	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.evInfo, e);
             }
-        }
-        return null;
-    }
-    public void setAmbientLightStatus(AmbientLightStatus ambientLightStatus) {
-        if (ambientLightStatus != null) {
-            parameters.put(Names.ambientLightStatus, ambientLightStatus);
-        } else {
-        	parameters.remove(Names.ambientLightStatus);
-        }
-    }
-    public AmbientLightStatus getAmbientLightStatus() {
-        Object obj = parameters.get(Names.ambientLightStatus);
-        if (obj instanceof AmbientLightStatus) {
-            return (AmbientLightStatus) obj;
-        } else if (obj instanceof String) {
-        	AmbientLightStatus theCode = null;
-            try {
-                theCode = AmbientLightStatus.valueForString((String) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.ambientLightStatus, e);
-            }
-            return theCode;
         }
         return null;
     }

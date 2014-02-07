@@ -67,6 +67,23 @@ struct Version {
   }
 };
 
+struct AppFile {
+    // need to use in std::map;
+    AppFile() {
+    }
+    AppFile(const std::string& name, bool persistent, bool download_complete,
+          mobile_apis::FileType::eType  type)
+      : is_persistent(persistent),
+        is_download_complete(download_complete),
+        file_name(name),
+        file_type(type){
+  }
+  std::string file_name;
+  bool is_persistent;
+  bool is_download_complete;
+  mobile_apis::FileType::eType file_type;
+};
+typedef std::map<std::string, AppFile> AppFilesMap;
 class InitialApplicationData {
   public:
     virtual ~InitialApplicationData() {
@@ -347,7 +364,7 @@ class Application : public virtual InitialApplicationData,
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
-
+    virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
@@ -363,7 +380,9 @@ class Application : public virtual InitialApplicationData,
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
 
-    virtual bool AddFile(const std::string& file_name, bool is_persistent, bool is_download_complete) = 0;
+    virtual bool AddFile(AppFile& file) = 0;
+    virtual const AppFilesMap& getAppFiles() const = 0;
+
     /**
      * @brief Updates fields of existing file
      * @param file_name File name, that need to update
@@ -371,7 +390,7 @@ class Application : public virtual InitialApplicationData,
      * @param is_download_complete Bollean describes is file downloaded fully on need to finish downloading?
      * @return TRUE if file exist and updated sucsesfuly, othervise return false
      */
-    virtual bool UpdateFile(const std::string& file_name, bool is_persistent, bool is_download_complete) = 0;
+    virtual bool UpdateFile(AppFile& file) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
 
     virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;

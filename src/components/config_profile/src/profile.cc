@@ -65,6 +65,7 @@ Profile::Profile()
       is_redecoding_enabled_(false),
       max_cmd_id_(2000000000),
       default_timeout_(10000),
+      app_resuming_timeout_(5),
       app_dir_quota_(104857600),
       app_hmi_level_none_time_scale_max_requests_(100),
       app_hmi_level_none_requests_time_scale_(10),
@@ -137,6 +138,10 @@ const uint32_t& Profile::default_timeout() const {
   return default_timeout_;
 }
 
+const uint32_t &Profile::app_resuming_timeout() const {
+  return app_resuming_timeout_;
+}
+
 const std::string& Profile::vr_help_title() const {
   return vr_help_title_;
 }
@@ -195,6 +200,10 @@ const uint32_t& Profile::app_hmi_level_none_time_scale_max_requests() const {
 
 const std::string& Profile::video_stream_file() const {
   return video_stream_file_;
+}
+
+const std::string& Profile::audio_stream_file() const {
+  return audio_stream_file_;
 }
 
 const uint32_t& Profile::app_time_scale() const {
@@ -369,9 +378,17 @@ void Profile::UpdateValues() {
   }
 
   *value = '\0';
-  if ((0
-      != ini_read_value(config_file_name_.c_str(), "MAIN",
-                        "MixingAudioSupported", value)) && ('\0' != *value)) {
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MEDIA MANAGER", "AudioStreamFile", value))
+      && ('\0' != *value)) {
+    audio_stream_file_ = value;
+    LOG4CXX_INFO(logger_, "Set audio stream file to " << audio_stream_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "MixingAudioSupported", value))
+      && ('\0' != *value)) {
     if (0 == strcmp("true", value)) {
       is_mixing_audio_supported_ = true;
     }
@@ -436,9 +453,20 @@ void Profile::UpdateValues() {
   }
 
   *value = '\0';
-  if ((0
-      != ini_read_value(config_file_name_.c_str(), "MAIN", "SpaceAvailable",
-                        value)) && ('\0' != *value)) {
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "ApplicationResumingTimeout", value))
+      && ('\0' != *value)) {
+    app_resuming_timeout_ = atoi(value);
+    if (app_resuming_timeout_ <= 0) {
+      app_resuming_timeout_ = 5;
+    }
+    LOG4CXX_INFO(logger_, "Set Resuming timeout to " << app_resuming_timeout_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "SpaceAvailable", value))
+      && ('\0' != *value)) {
     app_dir_quota_ = atoi(value);
     if (app_dir_quota_ <= 0) {
       app_dir_quota_ = 104857600;

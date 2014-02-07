@@ -36,6 +36,7 @@
  */
 #include <string>
 #include <list>
+#include <algorithm>
 
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
@@ -91,6 +92,8 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(
   const std::vector<transport_manager::DeviceInfo>& device_info_list) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
+
   bool list_actually_changed = false;
   for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
        ++itr) {
@@ -205,6 +208,8 @@ void ConnectionHandlerImpl::OnConnectionFailed(
 
 void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
+
   LOG4CXX_INFO(logger_, "Delete Connection: " <<
                static_cast<int32_t>(connection_id) << " from the list.");
 
@@ -219,9 +224,9 @@ void ConnectionHandlerImpl::OnConnectionClosed(
     (itr->second)->GetSessionList(session_list);
     for (SessionListIterator i = session_list.begin(),
          end = session_list.end(); i != end; ++i) {
-
-      uint32_t session_id = KeyFromPair(connection_id, *i);
-      connection_handler_observer_->OnServiceEndedCallback(session_id);
+      uint32_t session_key = KeyFromPair(connection_id, *i);
+      resume_session_map_.insert(std::pair<uint8_t, uint32_t>(*i,session_key));
+      connection_handler_observer_->OnServiceEndedCallback(session_key);
     }
 
   }
@@ -234,7 +239,13 @@ void ConnectionHandlerImpl::OnConnectionClosedFailure(
   transport_manager::ConnectionUID connection_id,
   const transport_manager::DisconnectError& error) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Connection closed failure");
+  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnConnectionClosedFailure");
+}
+
+void ConnectionHandlerImpl::OnUnexpectedDisconnect(
+    transport_manager::ConnectionUID connection_id,
+    const transport_manager::CommunicationError& error) {
+  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnUnexpectedDisconnect");
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
@@ -287,21 +298,38 @@ void ConnectionHandlerImpl::RemoveConnection(
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
   int32_t new_session_id = -1;
+  bool is_session_resumption = false;
+  ResumeSessionMapIt resume_session_it;
+
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return -1;
   }
 
-  bool is_first_in_connection = false;
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
-    is_first_in_connection = true;
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
     }
-  } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)){
+  } else if ((0 != sessionId) && (protocol_handler::kRpc == service_type)) {
+    resume_session_it = resume_session_map_.find(sessionId);
+    if (resume_session_it == resume_session_map_.end()) {
+      LOG4CXX_ERROR(logger_, "Unable to establish service!");
+      return -1;
+    }
+
+    LOG4CXX_INFO(logger_,
+                 "Start resume session " << static_cast<int32_t>(sessionId));
+    new_session_id = (it->second)->AddNewSession();
+    if (0 > new_session_id) {
+      LOG4CXX_ERROR(logger_, "Not possible to resume session!");
+      return -1;
+    }
+    is_session_resumption = true;
+
+  } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)) {
     if (!(it->second)->AddNewService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
       return -1;
@@ -312,19 +340,25 @@ void ConnectionHandlerImpl::RemoveConnection(
     return -1;
   }
 
-  
-   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()"); 
-
-
   if (connection_handler_observer_) {
     int32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
-    bool success = connection_handler_observer_->OnServiceStartedCallback(
-                     (it->second)->connection_device_handle(),
-                     session_key, service_type);
+    bool success = false;
 
-    if (!success && is_first_in_connection) {
+    if (is_session_resumption) {
+      success = connection_handler_observer_->OnServiceResumedCallback(
+          (it->second)->connection_device_handle(), resume_session_it->second,
+          session_key, service_type);
+    } else {
+      success = connection_handler_observer_->OnServiceStartedCallback(
+          (it->second)->connection_device_handle(), session_key, service_type);
+    }
+
+    if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
+      new_session_id = -1;
+    } else if (!success) {
+      (it->second)->RemoveService(sessionId, service_type);
       new_session_id = -1;
     }
   }
@@ -353,6 +387,12 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
       return result;
     }
+  } else {
+    if (!(it->second)->RemoveService(sessionId, service_type)) {
+      LOG4CXX_ERROR(logger_, "Not possible to remove service!");
+      return result;
+    }
+    result = sessionId;
   }
 
   if (0 != connection_handler_observer_) {
@@ -517,14 +557,24 @@ void ConnectionHandlerImpl::ConnectToDevice(
     LOG4CXX_INFO_EXT(logger_,
                      "Connecting to device with handle " << device_handle);
     if (transport_manager_) {
-      // TODO(PV): change this
-      transport_manager_->ConnectDevice(device_handle);
+      if (transport_manager::E_SUCCESS != transport_manager_->ConnectDevice(device_handle)) {
+        LOG4CXX_WARN(logger_, "Can't connect to device");
+      }
+    } else {
+      LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     }
   } else {
     LOG4CXX_ERROR(
       logger_,
       "Application Manager wanted to connect to non-existing device");
   }
+}
+
+void ConnectionHandlerImpl::set_resume_session_map(
+    const ResumeSessionMap& map) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_resume_session_map()");
+
+  resume_session_map_ = map;
 }
 
 void ConnectionHandlerImpl::StartTransportManager() {
@@ -552,7 +602,7 @@ void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) 
   }
   transport_manager::ConnectionUID connection_uid =
       ConnectionUIDFromHandle(connection_handle);
- // transport_manager_->Disconnect(connection_uid);
+  transport_manager_->Disconnect(connection_uid);
 }
 
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
@@ -562,6 +612,9 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
 
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
+    LOG4CXX_INFO(
+        logger_,
+        "Resetting heart beat timer for connection " << connection_handle);
     it->second->KeepAlive();
   }
 }

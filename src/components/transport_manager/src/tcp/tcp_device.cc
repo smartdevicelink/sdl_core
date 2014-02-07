@@ -61,10 +61,10 @@ ApplicationList TcpDevice::GetApplicationList() const {
   return app_list;
 }
 
-ApplicationHandle TcpDevice::AddIncomingApplication(const int socket) {
+ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   Application app;
   app.incoming = true;
-  app.socket = socket;
+  app.socket = socket_fd;
   pthread_mutex_lock(&applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
@@ -72,7 +72,7 @@ ApplicationHandle TcpDevice::AddIncomingApplication(const int socket) {
   return app_handle;
 }
 
-ApplicationHandle TcpDevice::AddDiscoveredApplication(const int port) {
+ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
   Application app;
   app.incoming = false;
   app.port = port;

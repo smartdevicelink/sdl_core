@@ -3,7 +3,7 @@ package com.ford.syncV4.streaming;
 import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,19 +12,26 @@ import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public final static String TAG = "H264Packetizer";
-    private static byte[] tail = null;
-    private Thread t = null;
+    private byte[] tail = null;
+
+    private Thread thread = null;
+
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
 
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
+    public Thread getThread() {
+        return thread;
+    }
+
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType) throws IOException {
         super(streamListener, is, rpcSessionID);
+        _serviceType = serviceType;
     }
 
     public void start() throws IOException {
-        if (t == null) {
-            t = new Thread(this);
-            t.start();
+        if (thread == null) {
+            thread = new Thread(this);
+            thread.start();
         }
     }
 
@@ -35,9 +42,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             }
         } catch (IOException ignore) {
         }
-        if (t != null) {
-            t.interrupt();
-            t = null;
+        if (thread != null) {
+            thread.interrupt();
+            thread = null;
         }
     }
 
@@ -46,6 +53,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             while (!Thread.interrupted()) {
                 try {
                     doDataReading();
+
                 } catch (IllegalArgumentException e) {
                     Log.e(TAG, e.toString());
                     break;
@@ -60,7 +68,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    public void doDataReading() throws IOException, IllegalArgumentException {
+    public synchronized void doDataReading() throws IOException, IllegalArgumentException {
         byte[] frameData = readFrameData(byteBuffer, dataBuffer);
         if (frameData != null && frameData.length > 0) {
             createProtocolMessage(frameData);
@@ -70,10 +78,11 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setSessionID(_rpcSessionID);
-        pm.setSessionType(SessionType.Mobile_Nav);
+        pm.setSessionType(_serviceType);
         pm.setFunctionID(0);
         pm.setCorrID(0);
         pm.setData(frameData, frameData.length);
+
         _streamListener.sendH264(pm);
         return pm;
     }
@@ -104,11 +113,11 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     private MobileNaviDataFrame createFramePayload(byte[] data) throws IOException, IllegalArgumentException {
         int length = readDataFromStream(data);
         if (length == -1) {
-            return MobileNaviDataFrame.createEndOfSessionFrame();
+            return MobileNaviDataFrame.createEndOfServiceFrame();
         } else {
             MobileNaviDataFrame frame = null;
             if (data.length == length) {
-                frame = new MobileNaviDataFrame(data);
+                frame = new MobileNaviDataFrame(data.clone());
             } else {
                 frame = new MobileNaviDataFrame(Arrays.copyOf(data, length));
             }
@@ -116,9 +125,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
-    private synchronized int readDataFromStream(byte[] data) throws IOException {
+    private int readDataFromStream(byte[] data) throws IOException {
         checkPreconditions(data);
-        return is.read(data);
+        int res = is.read(data);
+        return res;
     }
 
     private void checkPreconditions(byte[] data) {

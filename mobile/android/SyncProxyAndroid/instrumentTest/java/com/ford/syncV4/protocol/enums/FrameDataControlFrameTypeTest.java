@@ -67,23 +67,23 @@ public class FrameDataControlFrameTypeTest extends TestCase {
     }
 
     public void testFrameDataEndSession() throws Exception {
-        assertNotNull("enum should have EndSession value", FrameDataControlFrameType.EndSession);
+        assertNotNull("enum should have EndService value", FrameDataControlFrameType.EndService);
     }
 
     public void testFrameDataEndSessionACK() throws Exception {
-        assertNotNull("enum should have EndSession value", FrameDataControlFrameType.EndSessionACK);
+        assertNotNull("enum should have EndService value", FrameDataControlFrameType.EndServiceACK);
     }
 
     public void testEndSessionACKValueIs0x005() throws Exception {
-        assertEquals("EndSessionACK should have 0x005 value", (byte) 0x05, FrameDataControlFrameType.EndSessionACK.getValue());
+        assertEquals("EndServiceACK should have 0x005 value", (byte) 0x05, FrameDataControlFrameType.EndServiceACK.getValue());
     }
 
     public void testGetValueReturnsEndSessionACK() throws Exception {
-        assertEquals("value of EndSessionACK string should be FrameData.EndSessionACK", FrameDataControlFrameType.EndSessionACK, FrameDataControlFrameType.valueOf("EndSessionACK"));
+        assertEquals("value of EndServiceACK string should be FrameData.EndServiceACK", FrameDataControlFrameType.EndServiceACK, FrameDataControlFrameType.valueOf("EndServiceACK"));
     }
 
     public void testFrameDataValuesHasEndSessionACKValue() throws Exception {
-        assertTrue("FrameData list should have EndSessionACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSessionACK));
+        assertTrue("FrameData list should have EndServiceACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndServiceACK));
     }
 
     public void testMobileNaviACKIs0xFE() throws Exception {
@@ -92,11 +92,11 @@ public class FrameDataControlFrameTypeTest extends TestCase {
     }
 
     public void testEndSessionNACKValueIs0x06() throws Exception {
-        assertThat(FrameDataControlFrameType.EndSessionNACK.getValue(),
+        assertThat(FrameDataControlFrameType.EndServiceNACK.getValue(),
                 is((byte) 0x06));
     }
 
     public void testFrameDataValuesHasEndSessionNACKValue() throws Exception {
-        assertTrue("FrameData list should have EndSessionNACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndSessionNACK));
+        assertTrue("FrameData list should have EndServiceNACK value", Arrays.asList(FrameDataControlFrameType.values()).contains(FrameDataControlFrameType.EndServiceNACK));
     }
 }

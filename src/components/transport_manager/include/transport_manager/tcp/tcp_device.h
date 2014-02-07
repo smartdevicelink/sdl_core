@@ -44,7 +44,6 @@
 #include <errno.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -87,14 +86,14 @@ class TcpDevice : public Device {
    *
    * @param socket Value of socket.
    */
-  ApplicationHandle AddIncomingApplication(const int socket);
+  ApplicationHandle AddIncomingApplication(int socket_fd);
 
   /**
    * @brief Add application that was discovered before.
    *
    * @param Port No.
    */
-  ApplicationHandle AddDiscoveredApplication(const int port);
+  ApplicationHandle AddDiscoveredApplication(int port);
 
   /**
    * @brief Remove application from the container of applications.

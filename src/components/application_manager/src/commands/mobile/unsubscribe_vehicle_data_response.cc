@@ -32,8 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 
 namespace application_manager {
 namespace commands {

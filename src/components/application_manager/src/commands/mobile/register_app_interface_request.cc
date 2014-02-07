@@ -73,8 +73,16 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (IsApplicationRegistered()) {
+  Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+
+  if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  if (IsApplicationWithSameAppIdRegistered()) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -104,7 +112,6 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
        msg_params[strings::app_name].asString() << "  hasn't been registered!");
   } else {
-    app->set_mobile_app_id(msg_params[strings::app_id]);
     app->set_is_media_application(
         msg_params[strings::is_media_application].asBool());
 
@@ -135,21 +142,24 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-	
-    SendRegisterAppInterfaceResponseToMobile(*app);
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
-    MessageHelper::SendHMIStatusNotification(*app);
+
+    ResumeCtrl* resume_ctrl = ApplicationManagerImpl::instance()->GetResumeController();
+
+    bool resumption = resume_ctrl->StartResumption(app);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, resumption);
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
     if (app->tts_name()) {
       SendTTSChunksToHMI(*app);
+    } else {
+      SendRegisterAppInterfaceResponseToMobile();
     }
   }
 }
 
 void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
-(const Application& application_impl) {
+(const application_manager::Application& application_impl) {
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
   uint32_t app_id = application_impl.app_id();
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -159,11 +169,11 @@ void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
   if (0 < app_id) {
     msg_params[strings::app_id] = app_id;
   }
-  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
 }
 
 void RegisterAppInterfaceRequest::SendTTSChunksToHMI
-(const Application& application_impl) {
+(const application_manager::Application& application_impl) {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::app_id] = application_impl.app_id();
@@ -174,10 +184,15 @@ void RegisterAppInterfaceRequest::SendTTSChunksToHMI
 void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::on_event");
   switch (event.id()) {
-    case hmi_apis::FunctionID::VR_AddCommand: {
-      break;
-    }
     case hmi_apis::FunctionID::TTS_Speak: {
+      const smart_objects::SmartObject& message = event.smart_object();
+
+      mobile_apis::Result::eType tts_result =
+                static_cast<mobile_apis::Result::eType>(
+                message[strings::params][hmi_response::code].asInt());
+
+      SendRegisterAppInterfaceResponseToMobile(tts_result);
+
       break;
     }
     default: {
@@ -189,8 +204,7 @@ void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
 
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-  const Application& application_impl) {
-  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+    mobile_apis::Result::eType result) {
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -221,9 +235,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
 
+    Application* application = ApplicationManagerImpl::instance()->application(
+        connection_key());
+
     LOG4CXX_WARN_EXT(
       logger_,
-      "Wrong language on registering application " << application_impl.name());
+      "Wrong language on registering application " << application->name());
 
     LOG4CXX_ERROR_EXT(
       logger_,
@@ -258,6 +275,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     display_caps[hmi_response::media_clock_formats] =
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::media_clock_formats);
+
+    display_caps[hmi_response::templates_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::templates_available);
+
+    display_caps[hmi_response::screen_params] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::screen_params);
+
+    display_caps[hmi_response::num_custom_presets_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::num_custom_presets_available);
 
     if (hmi_capabilities.display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
@@ -500,7 +529,7 @@ RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
   return std::string(param_name.begin(), param_name_new_end);
 }
 
-bool RegisterAppInterfaceRequest::IsApplicationRegistered() {
+bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 

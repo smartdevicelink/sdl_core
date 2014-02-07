@@ -74,7 +74,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  if (!msg_params.length()) {
+  if (!ValidateConditionalMandatoryParameters(msg_params)) {
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "There are no parameters present in request.");
@@ -171,7 +171,9 @@ void SetGlobalPropertiesRequest::Run() {
         return;
       }
       // use only first
-      vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      vr_help_items[index][strings::position] = (index + 1);
+      vr_help_items[index++][strings::text] =
+          (*command_it->second)[strings::vr_commands][0];
     }
 
     app->set_vr_help_title(smart_objects::SmartObject(app->name()));
@@ -315,6 +317,17 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
 
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
+}
+
+bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
+    const smart_objects::SmartObject& params) {
+  return params.keyExists(strings::help_prompt)
+      || params.keyExists(strings::timeout_prompt)
+      || params.keyExists(strings::vr_help_title)
+      || params.keyExists(strings::vr_help)
+      || params.keyExists(strings::menu_title)
+      || params.keyExists(strings::menu_icon)
+      || params.keyExists(strings::keyboard_properties);
 }
 
 }  // namespace commands

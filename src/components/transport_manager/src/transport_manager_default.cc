@@ -39,7 +39,6 @@
 #ifdef BLUETOOTH_SUPPORT
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
-#include "transport_manager/tcp/tcp_transport_adapter.h"
 
 #ifdef USB_SUPPORT
 #include "transport_manager/usb/usb_aoa_adapter.h"

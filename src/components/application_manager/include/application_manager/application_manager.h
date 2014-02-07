@@ -45,7 +45,6 @@ namespace policies {
 namespace application_manager {
 
 class Application;
-class MessageChaining;
 class HMIMatrix;
 class PoliciesManager;
 
@@ -53,6 +52,13 @@ class ApplicationManager {
   public:
     virtual ~ApplicationManager() {
     }
+
+    /**
+     * @brief Stop work.
+     *
+     * @return TRUE on success otherwise FALSE.
+     **/
+    virtual bool Stop() = 0;
 
     virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;

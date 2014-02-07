@@ -35,7 +35,12 @@ import "Common.js" as Common
 import "Async.js" as Async
 
 Item {
+    function ttsChunksToString(ttsChunks){
+        return ttsChunks.map(function(str) { return str.text }).join('\n')
+    }
+
     function isReady() {
+        console.log("Message Received - {method: 'TTS.IsReady'}")
         return {
             available: dataContainer.hmiTTSAvailable
         }
@@ -44,11 +49,20 @@ Item {
     function speak(ttsChunks, appID) {
         // appID unused
         console.debug('enter:', ttsChunks, appID);
+        var ttsChunksLog = "";
+        for (var i = 0; i < ttsChunks.length; i++) {
+            ttsChunksLog += "{type: " + ttsChunks[i].type + ", " +
+                    "text: '" + ttsChunks[i].text + "'}, ";
+        }
+        console.log("Message Received - {method: 'TTS.Speak', params:{ " +
+                    "ttsChunks: [" + ttsChunksLog + "], " +
+                    "appID: " + appID + "', " +
+                    "}}")
         if (ttsPopUp.async) {
             console.log('speak send abort');
             throw Common.Result.ABORTED;
         }
-        var message = ttsChunks.map(function(str) { return str.text }).join('\n');
+        var message = ttsChunksToString(ttsChunks);
         ttsPopUp.activate(message);
         ttsPopUp.async = new Async.AsyncCall();
         console.debug('exit');
@@ -57,36 +71,88 @@ Item {
 
     function stopSpeaking() {
         console.debug("enter");
+        console.log("Message Received - {method: 'TTS.StopSpeaking'}")
         ttsPopUp.deactivate();
         console.debug("exit");
     }
 
     function getLanguage() {
+        console.log("Message Received - {method: 'TTS.GetLanguage'}")
         return {
             language: dataContainer.hmiTTSVRLanguage
         }
     }
 
     function getSupportedLanguages() {
+        console.log("Message Received - {method: 'TTS.GetSupportedLanguages'}")
         return {
             languages: settingsContainer.sdlLanguagesList
         }
     }
 
     function getCapabilities() {
+        console.log("Message Received - {method: 'TTS.GetCapabilities'}")
         return {
             capabilities: Common.SpeechCapabilities.SC_TEXT
         }
     }
 
+    function performInteraction(helpPrompt, initialPrompt, timeoutPrompt, timeout) {
+        console.debug("enter");
+        var helpttsChunksLog = "",
+            initialttsChunkLog = "",
+            timeoutttsChunkLog = "";
+        for (var i = 0; i < helpPrompt.length; i++) {
+            helpttsChunksLog += "{type: " + helpPrompt[i].type + ", " +
+                    "text: '" + helpPrompt[i].text + "'}, ";
+        }
+        for (var i = 0; i < initialPrompt.length; i++) {
+            initialttsChunkLog += "{type: " + initialPrompt[i].type + ", " +
+                    "text: '" + initialPrompt[i].text + "'}, ";
+        }
+        for (var i = 0; i < timeoutPrompt.length; i++) {
+            timeoutttsChunkLog += "{type: " + timeoutPrompt[i].type + ", " +
+                    "text: '" + timeoutPrompt[i].text + "'}, ";
+        }
+        console.log("Message Received - {method: 'TTS.PerformInteraction', params:{ " +
+                    "helpPrompt: [" + helpttsChunksLog + "], " +
+                    "initialPrompt: [" + initialttsChunkLog + "], " +
+                    "timeoutPrompt: [" + timeoutttsChunkLog + "], " +
+                    "timeout: " + timeout +
+                    "}}")
+        ttsPopUp.performInteraction(ttsChunksToString(helpPrompt),
+                                    ttsChunksToString(initialPrompt),
+                                    ttsChunksToString(timeoutPrompt),
+                                    timeout)
+        console.debug("exit");
+    }
+
     function changeRegistration(language, appID) {
         console.debug("enter:", language, appID);
+        console.log("Message Received - {method: 'TTS.ChangeRegistration', params:{ " +
+                    "language: " + language + ", " +
+                    "appID: " + appID +
+                    "}}")
         dataContainer.changeRegistrationTTSVR(language, appID);
         console.debug("exit");
     }
 
     function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
-        console.debug("enter: " + helpPrompt + ", " + timeoutPrompt + ", " + appID)
+        var helpPromptLog = "",
+            timeoutPromptLog = "";
+        for (var i = 0; i < helpPrompt.length; i++) {
+            helpPromptLog += "{type: " + helpPrompt[i].type + ", " +
+                    "text: '" + helpPrompt[i].text + "'}, ";
+        }
+        for (var i = 0; i < timeoutPrompt.length; i++) {
+            timeoutPromptLog += "{type: " + timeoutPrompt[i].type + ", " +
+                    "text: '" + timeoutPrompt[i].text + "'}, ";
+        }
+        console.log("Message Received - {method: 'TTS.SetGlobalProperties', params:{ " +
+                    "appID:" + appID + ", " +
+                    "helpPrompt: [" + helpPromptLog + "], " +
+                    "timeoutPrompt: [" + timeoutPromptLog + "]" +
+                    "}}")
 
         var newHelpPropmt = helpPrompt ?
                     helpPrompt.map(

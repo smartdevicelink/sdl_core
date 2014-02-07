@@ -39,8 +39,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "smart_objects/smart_object.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -236,7 +234,7 @@ bool CreateInteractionChoiceSetRequest::compareStr(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str1,
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
 
-  return 0 == strcasecmp(str1.asString().c_str(), str2.asString().c_str());
+  return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
 

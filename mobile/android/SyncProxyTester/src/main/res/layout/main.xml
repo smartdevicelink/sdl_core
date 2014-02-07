@@ -64,6 +64,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:layout="@layout/activity_mobile_nav_preview" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/LinearLayout06"
+            android:layout_width="fill_parent"
+            android:paddingTop="5dip"
+            android:layout_height="wrap_content">
+            <fragment
+                android:id="@+id/audioFragment"
+                android:name="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/activity_audio_service_preview" />
 
         </TableRow>
 

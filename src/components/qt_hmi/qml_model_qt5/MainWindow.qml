@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -76,6 +76,12 @@ Rectangle {
         source: "res/initial.wav"
     }
 
+    Audio {
+        id: stream
+
+        property real bufferProgress: 0.0
+    }
+
     SettingsStorage {
         id: settingsContainer
     }
@@ -103,7 +109,7 @@ Rectangle {
             height: parent.height * 0.90
             width: parent.width
             anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent.horizontalCenter                       
+            anchors.horizontalCenter: parent.horizontalCenter
 
             Video {
                 id: player
@@ -339,6 +345,10 @@ Rectangle {
 
         onAppUnregistered: {
             console.debug("enter")
+            console.debug("Resume unregister:", resume)
+            if (resume) {
+                dataContainer.stashApplication(appId);
+            }
             dataContainer.removeApplication(appId);
             if ((dataContainer.currentApplication.appId === appId)) {
                 if (dataContainer.applicationContext) {

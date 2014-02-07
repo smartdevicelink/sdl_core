@@ -27,6 +27,7 @@ set (SOURCES
 ./src/hmi_capabilities.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/resume_ctrl.cpp
 ./src/mobile_message_handler.cc
 )
 
@@ -153,6 +154,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/allow_app_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/get_resume_result_request.cc
+./src/commands/hmi/get_resume_result_response.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/update_app_list_request.cc

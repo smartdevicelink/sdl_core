@@ -34,6 +34,7 @@
 #include <string>
 #include <algorithm>
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "application_manager/commands/command_impl.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
@@ -156,7 +157,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl) {
+  const Application& application_impl, bool is_resumption) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -168,6 +169,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params][strings::resume] = is_resumption;
 
   message[strings::msg_params][strings::application][strings::app_name] =
     application_impl.name();
@@ -770,7 +772,7 @@ void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
+void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app, bool is_resuming) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -783,7 +785,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
     hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
-
+  message[strings::msg_params][strings::resume] = is_resuming;
   message[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
@@ -964,7 +966,9 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
   for (; cmdMap.end() != command_it; ++command_it) {
     if (true == (*command_it->second).keyExists(strings::vr_commands)) {
       // use only first
-      vr_help_items[index++] = (*command_it->second)[strings::vr_commands][0];
+      vr_help_items[index][strings::position] = (index + 1);
+      vr_help_items[index++][strings::text] =
+          (*command_it->second)[strings::vr_commands][0];
     }
   }
 
@@ -976,6 +980,7 @@ void MessageHelper::ResetGlobalproperties(Application* const app) {
 
 void MessageHelper::SendNaviStartStream(
   const std::string& url, int32_t connection_key) {
+  LOG4CXX_INFO(g_logger, "MessageHelper::SendNaviStartStream");
   smart_objects::SmartObject* start_stream =
     new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -1054,6 +1059,7 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 
 void MessageHelper::SendAudioStartStream(
   const std::string& url, int32_t connection_key) {
+
   smart_objects::SmartObject* start_stream =
     new smart_objects::SmartObject(smart_objects::SmartType_Map);
 

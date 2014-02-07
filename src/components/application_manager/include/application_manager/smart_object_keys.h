@@ -49,6 +49,7 @@ const char error_msg[] = "message";
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
+const char resume[] = "resume";
 const char app_id[] = "appID";
 const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
@@ -82,12 +83,16 @@ const char time_to_destination[] = "timeToDestination";
 const char total_distance[] = "totalDistance";
 const char alignment[] = "alignment";
 const char graphic[] = "graphic";
+const char secondary_graphic[] = "secondaryGraphic";
 const char status_bar[] = "statusBar";
 const char media_clock[] = "mediaClock";
 const char media_track[] = "mediaTrack";
 const char properties[] = "properties";
 const char cmd_id[] = "cmdID";
 const char menu_params[] = "menuParams";
+const char menu_title[] = "menuTitle";
+const char menu_icon[] = "menuIcon";
+const char keyboard_properties[] = "keyboardProperties";
 const char vr_commands[] = "vrCommands";
 const char position[] = "position";
 const char num_ticks[] = "numTicks";
@@ -130,6 +135,10 @@ const char hmi_display_language[] = "hmiDisplayLanguage";
 const char language[] = "language";
 const char data[] = "data";
 const char start_time[] = "startTime";
+const char end_time[] = "endTime";
+const char hours[] = "hours";
+const char minutes[] = "minutes";
+const char seconds [] = "seconds";
 const char update_mode[] = "updateMode";
 const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
@@ -266,6 +275,9 @@ const char display_type[] = "displayType";
 const char text_fields[] = "textFields";
 const char media_clock_formats[] = "mediaClockFormats";
 const char graphic_supported[] = "graphicSupported";
+const char templates_available[] = "templatesAvailable";
+const char screen_params[] = "screenParams";
+const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 }  // namespace hmi_response
 
 namespace hmi_notification {
@@ -273,6 +285,8 @@ const char prndl[] = "prndl";
 const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
+const char result[] = "result";
+
 }  // namespace hmi_notification
 
 }  // namespace application_manager

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
 import com.ford.syncV4.streaming.MobileNaviDataFrame;
@@ -45,7 +46,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
         inputStream = new PipedInputStream();
         outputStream = new PipedOutputStream();
         inputStream.connect(outputStream);
-        sut = new H264Packetizer(this, inputStream, (byte) 0);
+        sut = new H264Packetizer(this, inputStream, (byte) 0, ServiceType.Mobile_Nav);
     }
 
     public void testStressTest() throws Exception {

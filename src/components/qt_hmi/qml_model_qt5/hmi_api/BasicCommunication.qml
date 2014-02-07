@@ -36,6 +36,16 @@ import QtQuick 2.0
 
 Item {
     function updateDeviceList (deviceList) {
+        var deviceListLog = "";
+        if (deviceList) {
+            for (var i = 0; i < deviceList.length; i++) {
+                deviceListLog += "{name: '" + deviceList[i].name + "', " +
+                        "id: '" + deviceList[i].id + "'},";
+            }
+        }
+        console.log("Message Received - {method: 'BasicCommunication.UpdateDeviceList', params:{ " +
+                    "deviceList: [" + deviceListLog + "]" +
+                    "}}")
         dataContainer.deviceList.clear();
         for(var i = 0; i < deviceList.length; i++) {
             dataContainer.deviceList.append({ name: deviceList[i].name, devid: deviceList[i].id })
@@ -43,6 +53,33 @@ Item {
     }
 
     function updateAppList (applications) {
+        var applicationsLog = "",
+            appTypeLog = "";
+        if (applications) {
+            for (var i = 0; i < applications.length; i++) {
+                appTypeLog = "";
+
+                for (var j = 0; j < applications[i].appType.length; i++) {
+                    appTypeLog += "'" + applications[i].appType + "', "
+                }
+
+                applicationsLog += "{name: '" + applications[i].name + "', " +
+                        "appName: '" + applications[i].appName + "', " +
+                        "ngnMediaScreenAppName: '" + applications[i].ngnMediaScreenAppName + "', " +
+                        "icon: '" + applications[i].icon + "', " +
+                        "deviceName: '" + applications[i].deviceName + "', " +
+                        "appID: " + applications[i].appID + ", " +
+                        "hmiDisplayLanguageDesired: '" + applications[i].hmiDisplayLanguageDesired + "', " +
+                        "isMediaApplication: " + applications[i].isMediaApplication + ", " +
+                        "appType: [" + applications[i].deviceName + "]" +
+                        "},";
+            }
+        }
+        console.log("Message Received - {method: 'BasicCommunication.UpdateAppList', params:{ " +
+                    "applications: [" + applicationsLog + "]" +
+                    "}}")
+
+
         dataContainer.applicationList.clear();
         for(var i = 0; i < applications.length; i++) {
             dataContainer.applicationList.append({
@@ -58,31 +95,45 @@ Item {
         }
     }
 
+    function getResumeResult (appID) {
+        return dataContainer.getResumeResult(appID)
+    }
+
     function allowDeviceToConnect (device) {
+        console.log("Message Received - {method: 'BasicCommunication.AllowDeviceToConnect', params:{ " +
+                    "device: {name: '" + device.name + "', " +
+                        "id: '" + device.id + "'}," +
+                    "}}")
         return {
             allow: true
         }
     }
 
     function mixingAudioSupported() {
+        console.log("Message Received - {method: 'BasicCommunication.MixingAudioSupported'}")
         return {
             attenuatedSupport: true
         }
     }
 
     function allowAllApps() {
+        console.log("Message Received - {method: 'BasicCommunication.AllowAllApps'}")
         return {
             allowed: true
         }
     }
 
     function allowApp(app, appPermissions) {
+        console.log("Message Received - {method: 'BasicCommunication.AllowApp'}")
         return {
             allowed: true
         }
     }
 
     function activateApp() {
+        console.log("Message Received - {method: 'BasicCommunication.ActivateApp', params:{ " +
+                    //"appID: " + appID +
+                    "}}")
         contentLoader.go("views/SDLPlayerView.qml", appID);
     }
 }

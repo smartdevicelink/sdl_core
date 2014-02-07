@@ -29,8 +29,10 @@ include_directories (
   #../../../../test/components/application_manager/rpc/include
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   #${LibXML2_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/src/components/dbus/include
 )
 
 set(LIBRARIES

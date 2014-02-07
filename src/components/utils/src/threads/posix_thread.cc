@@ -50,7 +50,7 @@ static void* threadFunc(void* closure) {
 }
 
 namespace threads {
-size_t Thread::kMinStackSize = PTHREAD_STACK_MIN;
+size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 log4cxx::LoggerPtr Thread::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::Thread"));
 
@@ -120,6 +120,8 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
+  pthread_setname_np(thread_handle_, name_.c_str());
+  LOG4CXX_INFO(logger_,"Created thread: " << name_);
   ThreadManager::instance().RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
@@ -135,7 +137,9 @@ void Thread::stop() {
 
   if (NULL != delegate_) {
     if (!delegate_->exitThreadMain()) {
-      pthread_cancel(thread_handle_);
+      if (thread_handle_ != pthread_self()) {
+        pthread_cancel(thread_handle_);
+      }
     }
   }
 

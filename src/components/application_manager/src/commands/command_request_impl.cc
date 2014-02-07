@@ -43,7 +43,6 @@ namespace commands {
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
  : CommandImpl(message),
-   msg_chaining_(NULL),
    default_timeout_(profile::Profile::instance()->default_timeout()) {
 
 }

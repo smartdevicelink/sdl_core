@@ -37,12 +37,14 @@ import "Common.js" as Common
 
 Item {
     function isReady () {
+        console.log("Message Received - {method: 'VehicleInfo.IsReady'}")
         return {
             available: dataContainer.hmiVehicleInfoAvailable
         }
     }
 
     function getVehicleType() {
+        console.log("Message Received - {method: 'VehicleInfo.GetVehicleType'}")
         return {
             "vehicleType": {
                 "make": "Ford",
@@ -214,6 +216,11 @@ Item {
     }
 
     function getDTCs(ecuName, dtcMask, appID) {
+        console.log("Message Received - {method: 'VehicleInfo.GetDTCs', params:{ " +
+                    "ecuName: " + ecuName + ", " +
+                    "dtcMask: " + dtcMask + ", " +
+                    "appID: " + appID +
+                    "}}")
         var ecuHeader = 2
         var dtc = []
 
@@ -225,6 +232,11 @@ Item {
 
     function readDID(ecuName, didLocation, appID) {
         console.debug("Enter")
+        console.log("Message Received - {method: 'VehicleInfo.ReadDID', params:{ " +
+                    "ecuName: " + ecuName + ", " +
+                    "didLocation: " + didLocation + ", " +
+                    "appID: " + appID +
+                    "}}")
         //TODO{ALeshin}: refactoring of this function, when we'll have Vehicle Info module
         var didResult = []
 

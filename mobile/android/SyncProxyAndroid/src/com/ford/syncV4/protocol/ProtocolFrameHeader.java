@@ -1,14 +1,14 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.FrameType;
-import com.ford.syncV4.protocol.enums.SessionType;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.util.BitConverter;
 
 public class ProtocolFrameHeader {
 	private byte version = 1;
 	private boolean compressed = false;
 	private FrameType frameType = FrameType.Control;
-	private SessionType sessionType = SessionType.RPC;
+	private ServiceType serviceType = ServiceType.RPC;
 	private byte frameData = 0;
 	private byte sessionID;
 	private int dataSize;
@@ -33,7 +33,7 @@ public class ProtocolFrameHeader {
 		msg.setFrameType(FrameType.valueOf(frameType));
 		
 		byte serviceType = header[1];
-		msg.setSessionType(SessionType.valueOf(serviceType));
+		msg.setServiceType(ServiceType.valueOf(serviceType));
 		
 		byte frameData = header[2];
 		msg.setFrameData(frameData);
@@ -64,7 +64,7 @@ public class ProtocolFrameHeader {
 		header <<= 3;
 		header |= (frameType.value() & 0x07);
 		header <<= 8;
-		header |= (sessionType.value() & 0xFF);
+		header |= (serviceType.value() & 0xFF);
 		header <<= 8;
 		header |= (frameData & 0xFF);
 		header <<= 8;
@@ -89,7 +89,7 @@ public class ProtocolFrameHeader {
 	public String toString() {
 		String ret = "";
 		ret += "version " + version + ", " + (compressed ? "compressed" : "uncompressed") + "\n";
-		ret += "frameType " + frameType.getName() + ", serviceType " + sessionType.getName();
+		ret += "frameType " + frameType.getName() + ", serviceType " + serviceType.getName();
 		ret += "\nframeData " + frameData;
 		ret += ", sessionID " + sessionID;
 		ret += ", dataSize " + dataSize;
@@ -153,11 +153,11 @@ public class ProtocolFrameHeader {
 		this.frameType = frameType;
 	}
 
-	public SessionType getSessionType() {
-		return sessionType;
+	public ServiceType getServiceType() {
+		return serviceType;
 	}
 
-	public void setSessionType(SessionType sessionType) {
-		this.sessionType = sessionType;
+	public void setServiceType(ServiceType serviceType) {
+		this.serviceType = serviceType;
 	}
 }

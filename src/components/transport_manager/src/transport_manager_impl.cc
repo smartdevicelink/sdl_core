@@ -48,11 +48,11 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "config_profile/profile.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
@@ -397,6 +397,11 @@ int TransportManagerImpl::AddTransportAdapter(
                             << transport_adapter << "["
                             << transport_adapter->GetDeviceType() << "]");
 
+  if (transport_adapter_listeners_.find(transport_adapter) !=
+          transport_adapter_listeners_.end()) {
+      LOG4CXX_ERROR(logger_, "Adapter already exists.");
+      return E_ADAPTER_EXISTS;
+  }
   transport_adapter_listeners_[transport_adapter] =
       new TransportAdapterListenerImpl(this, transport_adapter);
   transport_adapter->AddListener(
@@ -422,7 +427,7 @@ int TransportManagerImpl::SearchDevices(void) {
            transport_adapters_.begin();
        it != transport_adapters_.end(); ++it) {
     LOG4CXX_INFO(logger_, "Iterating over transport adapters");
-    int scanResult = (*it)->SearchDevices();
+    TransportAdapter::Error scanResult = (*it)->SearchDevices();
     if (scanResult != transport_adapter::TransportAdapter::OK) {
       LOG4CXX_ERROR(logger_, "Transport Adapter search failed "
                                  << *it << "[" << (*it)->GetDeviceType()
@@ -441,6 +446,7 @@ int TransportManagerImpl::SearchDevices(void) {
           break;
         }
       }
+      // TODO(KKolodiy): I think return error from TA is bad
       return scanResult;
     }
   }
@@ -478,7 +484,7 @@ int TransportManagerImpl::Init(void) {
 }
 
 int TransportManagerImpl::Visibility(const bool& on_off) const {
-  bool ret;
+  TransportAdapter::Error ret;
 
   LOG4CXX_INFO(logger_, "Visibility change requested to " << on_off);
   if (false == this->is_initialized_) {
@@ -962,6 +968,10 @@ void TransportManagerImpl::MessageQueueThread(void) {
             active_msg->set_waiting(true);
           } else {
             LOG4CXX_ERROR(logger_, "Data sent error");
+	    RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+	             DataSendError("Send failed - message removed"),
+		     active_msg);
+            message_queue_.remove(active_msg);
           }
         }
       }

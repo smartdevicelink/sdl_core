@@ -65,4 +65,9 @@ public class Const {
 
     // Request id for KeyboardPropertiesActivity
 	public static final int REQUEST_EDIT_KBDPROPERTIES = 44;
+
+    // Value of the Jellybean API level, to check on devices running API level lower then API 16
+    public static final int JELLYBEAN_API_LEVEL = 16;
+
+    public static final int REQUEST_FILE_OPEN = 50;
 }

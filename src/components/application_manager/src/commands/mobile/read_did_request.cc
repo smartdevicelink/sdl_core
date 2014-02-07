@@ -67,6 +67,12 @@ void ReadDIDRequest::Run() {
     return;
   }
 
+  if (0 == (*message_)[strings::msg_params][strings::did_location].length()) {
+    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();

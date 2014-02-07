@@ -47,7 +47,6 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC. 
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
 	 * @throws SyncException
 	 */
 	public SyncProxy(IProxyListener listener, SyncProxyConfigurationResources syncProxyConfigurationResources) 
@@ -104,7 +103,6 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC.
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC.
-	 * @param applicationContext - Context of the application. Used to access application specific resources. 
 	 * @param callbackToUIThread - If true, all callbacks will occur on the UI thread.
 	 * @throws SyncException
 	 */
@@ -164,7 +162,6 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC. 
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
 	 * @param transportConfig Initial configuration for transport.
 	 * @throws SyncException
 	 */
@@ -224,7 +221,6 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC.
 	 * 
 	 * @param listener - Reference to the object in the App listening to callbacks from SYNC.
-	 * @param applicationContext - Context of the application. Used to access application specific resources. 
 	 * @param callbackToUIThread - If true, all callbacks will occur on the UI thread.
 	 * @param transportConfig Initial configuration for transport.
 	 * @throws SyncException

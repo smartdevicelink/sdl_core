@@ -43,17 +43,6 @@ namespace application_manager {
 
 namespace mobile_api = mobile_apis;
 
-struct AppFile {
-  AppFile(const std::string& name, bool persistent, bool download_complete)
-      : is_persistent(persistent),
-        is_download_complete(download_complete),
-        file_name(name) {
-  }
-  std::string file_name;
-  bool is_persistent;
-  bool is_download_complete;
-};
-
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
@@ -89,7 +78,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-
+  void set_tts_speak_state(bool state_tts_speak);
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
@@ -105,10 +94,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
 
-  bool AddFile(const std::string& file_name, bool is_persistent, bool is_download_complete);
-  bool UpdateFile(const std::string& file_name, bool is_persistent, bool is_download_complete);
+  bool AddFile(AppFile& file);
+  bool UpdateFile(AppFile& file);
 
   bool DeleteFile(const std::string& file_name);
+  virtual const AppFilesMap& getAppFiles() const;
 
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
@@ -131,6 +121,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool allowed_support_navigation_;
   bool is_app_allowed_;
   bool has_been_activated_;
+  bool tts_speak_state_;
 
   mobile_api::HMILevel::eType hmi_level_;
   uint32_t put_file_in_none_count_;
@@ -141,7 +132,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
 
-  std::vector<AppFile> app_files_;
+  AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t> subscribed_vehicle_info_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);

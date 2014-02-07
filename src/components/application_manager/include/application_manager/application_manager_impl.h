@@ -41,15 +41,13 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
+#include "application_manager/resume_ctrl.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
-#ifdef MEDIA_MANAGER
 #include "media_manager/media_manager_impl.h"
-#endif
 
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -74,6 +72,7 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -88,32 +87,7 @@ class Thread;
 class CommandNotificationImpl;
 
 namespace application_manager {
-
-/**
- *@brief Typedef for shared pointer
- */
-typedef utils::SharedPtr<MessageChaining> MessageChainPtr;
-
-/**
- *@brief Map representing hmi request
- *
- *@param int32_t hmi correlation ID
- *@param MessageChainPtr Mobile request temporary data
- */
-typedef std::map<uint32_t, MessageChainPtr> HMIRequest;
-
-/**
- *@brief Map representing mobile request and pending HMI requests
- *
- *@param int32_t mobile correlation ID
- *@param HMIRequest Sent HMI request
- */
-typedef std::map<uint32_t, HMIRequest> MobileRequest;
-
-/**
- *@brief Map of application ID and incoming mobile requests
- */
-typedef std::map<uint32_t, MobileRequest> MessageChain;
+namespace mobile_api = mobile_apis;
 
 class ApplicationManagerImpl;
 
@@ -179,9 +153,17 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler,
   public impl::ToHmiQueue::Handler {
+  friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
     static ApplicationManagerImpl* instance();
+
+    /**
+     * @brief Stop work.
+     *
+     * @return TRUE on success otherwise FALSE.
+     **/
+    virtual bool Stop();
 
     /////////////////////////////////////////////////////
 
@@ -202,8 +184,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
+     * @param is_resuming describes - is this unregister
+     *        is normal or need to be resumed
      */
-    void UnregisterApplication(const uint32_t& app_id);
+    void UnregisterApplication(const uint32_t& app_id, bool is_resuming = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -359,7 +343,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int32_t session_key,
                                   protocol_handler::ServiceType type);
-
+    bool OnServiceResumedCallback(
+        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+        int32_t new_session_key, protocol_handler::ServiceType type);
     void OnServiceEndedCallback(int32_t session_key,
                                 protocol_handler::ServiceType type);
 
@@ -420,6 +406,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     void Unmute();
 
     /*
+     * @brief Checks HMI level and returns true if audio/video streaming is allowed
+     */
+    bool IsStreamingAllowed(uint32_t connection_key);
+
+    /*
      * @brief Save binary data to specified directory
      *
      * @param application name
@@ -436,6 +427,7 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const std::string& save_path,
                                 const uint32_t offset = 0);
 
+    ResumeCtrl* GetResumeController();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -476,13 +468,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
-    bool RemoveMobileRequestFromMessageChain(uint32_t mobile_correlation_id,
-        uint32_t connection_key);
 
-    /*
-     * @brief Save unregistered applications info to the file system
-     */
-    void SaveApplications() const;
+
 
     // threads::MessageLoopThread<*>::Handler implementations
     /*
@@ -503,7 +490,15 @@ class ApplicationManagerImpl : public ApplicationManager,
 
   private:
 
+
     // members
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_controler; // TODO: use UniquePtr
     /**
      * @brief Map of connection keys and associated applications
      */
@@ -530,9 +525,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool is_vr_session_strated_;
     bool hmi_cooperating_;
     bool is_all_apps_allowed_;
-#ifdef MEDIA_MANAGER
-  media_manager::MediaManager* media_manager_;
-#endif
+    media_manager::MediaManager* media_manager_;
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;

@@ -211,8 +211,7 @@ TransportAdapter::Error TransportAdapterImpl::SendData(
 
   ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
   if (connection.get() != 0) {
-    connection->SendData(data);
-    return OK;
+    return connection->SendData(data);
   } else {
     return BAD_PARAM;
   }
@@ -451,10 +450,10 @@ DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
 void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,
                                        const ApplicationHandle& app_handle) {
   pthread_mutex_lock(&connections_mutex_);
-  ConnectionMap::iterator it =
+  ConnectionMap::iterator it_conn =
       connections_.find(std::make_pair(device_id, app_handle));
-  if (it != connections_.end()) {
-    ConnectionInfo& info = it->second;
+  if (it_conn != connections_.end()) {
+    ConnectionInfo& info = it_conn->second;
     info.state = ConnectionInfo::ESTABLISHED;
   }
   pthread_mutex_unlock(&connections_mutex_);

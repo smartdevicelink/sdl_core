@@ -35,7 +35,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
         return null;
     }
 
-    private void readFileFromRaw(Integer id) {
+    private synchronized void readFileFromRaw(Integer id) {
         // Open the input stream
         InputStream is = mContext.getResources().openRawResource(id);
         byte[] buffer = new byte[1000];
@@ -66,6 +66,4 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
         super.onCancelled();
         mListener.onCancelReading();
     }
-
-
 }

@@ -31,8 +31,14 @@
  */
 #include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/connection.h"
+#include "log4cxx/logger.h"
 
 namespace connection_handler {
+
+namespace {
+log4cxx::LoggerPtr g_logger =
+    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
+}
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection* connection)
@@ -47,10 +53,12 @@ HeartBeatMonitor::~HeartBeatMonitor() {
 
 void HeartBeatMonitor::BeginMonitoring() {
   AssertRunningOnCreationThread();
+  LOG4CXX_INFO(g_logger, "Heart beat monitor: started");
   timer_.start(heartbeat_timeout_seconds_);
 }
 
 void HeartBeatMonitor::TimeOut() {
+  LOG4CXX_INFO(g_logger, "Heart beat monitor: connection timed out, closing");
   connection_->Close();
 }
 

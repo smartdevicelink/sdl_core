@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,97 +15,87 @@ import com.ford.syncV4.android.constants.Const;
 
 import java.io.OutputStream;
 
-public class MobileNavPreviewFragment extends Fragment{
-    private static final String TAG =
-            MobileNavPreviewFragment.class.getSimpleName();
-    private CheckBoxState mobileNavSessionCheckBoxState;
-    private Button dataStreamingButton;
-    private FileStreamingLogic fileStreamingLogic;
-    private SyncProxyTester context;
+public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
+
+    private static final String TAG = MobileNavPreviewFragment.class.getSimpleName();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_mobile_nav_preview,
-                container, true);
-        context = (SyncProxyTester) getActivity();
-        fileStreamingLogic = new FileStreamingLogic(this);
-        return view;
+        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, true);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initiateVideoCheckBox(view);
-    }
-
-    private void initiateVideoCheckBox(View view) {
-        dataStreamingButton = (Button) getView().findViewById(R.id.file_streaming);
-        dataStreamingButton.setOnClickListener(new VideoActionListener());
-        CheckBox checkBox = (CheckBox) view.findViewById(R.id.mobileNavCheckBox);
-        checkBox.setOnClickListener(new MobileNaviSessionCheckBoxOnClickListener());
-        mobileNavSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mobileNavSessionCheckBoxState.setStateOff();
+        initiateView(view);
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
         changeMobileNaviCheckBoxState();
     }
 
-    private void changeMobileNaviCheckBoxState() {
-        if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
-            mobileNavSessionCheckBoxState.setStateDisabled();
-            SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviSession();
-        } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
-            SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopMobileNavSession();
-            mobileNavSessionCheckBoxState.setStateOff();
-            Button button = (Button) getView().findViewById(R.id.videobutton);
-            button.setEnabled(false);
-            dataStreamingButton.setEnabled(false);
-        }
-    }
-
-    public void setMobileNaviStateOff(){
-        mobileNavSessionCheckBoxState.setStateOff();
+    public void setMobileNaviStateOff() {
+        mSessionCheckBoxState.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
         box.setChecked(false);
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(false);
-        dataStreamingButton.setEnabled(false);
+        mDataStreamingButton.setEnabled(false);
     }
 
-    public void setMobileNaviStateOn(OutputStream stream){
-        mobileNavSessionCheckBoxState.setStateOn();
+    public void setMobileNaviStateOn(OutputStream stream) {
+        mSessionCheckBoxState.setStateOn();
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(true);
-        dataStreamingButton.setEnabled(true);
-        fileStreamingLogic.setOutputStream(stream);
-        fileStreamingLogic.createStaticFileReader();
-    }
+        mDataStreamingButton.setEnabled(true);
 
-    public void dataStreamingStarted() {
-        dataStreamingButton.setEnabled(false);
-        dataStreamingButton.setText("Data is streaming");
-    }
-
-    public void dataStreamingStopped() {
-        if (mobileNavSessionCheckBoxState.getState() == CheckBoxStateValue.ON){
-            dataStreamingButton.setEnabled(true);
-        }else{
-            dataStreamingButton.setEnabled(false);
+        mFileStreamingLogic.setOutputStream(stream);
+        mFileStreamingLogic.createStaticFileReader();
+        if (mFileStreamingLogic.isStreamingInProgress()) {
+            startFileStreaming();
         }
-        dataStreamingButton.setText("Start File Streaming");
+    }
+
+    private void initiateView(View view) {
+        mDataStreamingButton = (Button) getView().findViewById(R.id.file_streaming);
+        mDataStreamingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startFileStreaming();
+            }
+        });
+        CheckBox checkBox = (CheckBox) view.findViewById(R.id.mobileNavCheckBox);
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onMobileNaviCheckBoxAction(view);
+            }
+        });
+        mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
+        mSessionCheckBoxState.setStateOff();
+    }
+
+    private void changeMobileNaviCheckBoxState() {
+        if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
+            mSessionCheckBoxState.setStateDisabled();
+            SyncProxyTester tester = (SyncProxyTester) getActivity();
+            tester.startMobileNaviService();
+        } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            mFileStreamingLogic.resetStreaming();
+            SyncProxyTester tester = (SyncProxyTester) getActivity();
+            tester.stopMobileNavService();
+            mSessionCheckBoxState.setStateOff();
+            Button button = (Button) getView().findViewById(R.id.videobutton);
+            button.setEnabled(false);
+        }
     }
 
     private void startFileStreaming() {
-        SharedPreferences prefs =
-                context.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
         int videoSource = prefs.getInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE,
                 Const.PREFS_DEFAULT_NAVI_VIDEOSOURCE);
-
-        int videoResID = 0;
+        int videoResID;
         switch (videoSource) {
             case Const.KEY_VIDEOSOURCE_MP4:
                 videoResID = R.raw.faq_welcome_orientation;
@@ -118,27 +107,8 @@ public class MobileNavPreviewFragment extends Fragment{
 
             default:
                 Log.e(TAG, "Unknown video source " + videoSource);
-                break;
+                return;
         }
-
-        fileStreamingLogic.setFileResID(videoResID);
-        fileStreamingLogic.startFileStreaming();
+        startBaseFileStreaming(videoResID);
     }
-
-    private class MobileNaviSessionCheckBoxOnClickListener implements View.OnClickListener{
-
-        @Override
-        public void onClick(View v) {
-            onMobileNaviCheckBoxAction(v);
-        }
-    }
-
-    private class VideoActionListener implements View.OnClickListener{
-
-        @Override
-        public void onClick(View v) {
-            startFileStreaming();
-        }
-    }
-
 }

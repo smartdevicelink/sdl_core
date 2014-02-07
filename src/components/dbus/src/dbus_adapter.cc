@@ -474,6 +474,12 @@ bool DBusAdapter::SetArrayValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ArrayDescription* rules,
     const smart_objects::SmartObject& param) {
+  smart_objects::SmartType type = param.getType();
+  if (type != smart_objects::SmartType_Array &&
+      type != smart_objects::SmartType_Invalid) {
+    LOG4CXX_ERROR(logger_, "DBus: SmartObject is not a map");
+    return false;
+  }
   DBusMessageIter sub_iter;
   if (!dbus_message_iter_open_container(iter, DBUS_TYPE_ARRAY,
                                         rules->element_dbus_signature,
@@ -498,6 +504,12 @@ bool DBusAdapter::SetStructValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::StructDescription* rules,
     const smart_objects::SmartObject& structure) {
+  smart_objects::SmartType type = structure.getType();
+  if (type != smart_objects::SmartType_Map &&
+      type != smart_objects::SmartType_Invalid) {
+    LOG4CXX_ERROR(logger_, "DBus: SmartObject is not a map");
+    return false;
+  }
   DBusMessageIter sub_iter;
   if (!dbus_message_iter_open_container(iter, DBUS_TYPE_STRUCT, NULL,
                                         &sub_iter)) {

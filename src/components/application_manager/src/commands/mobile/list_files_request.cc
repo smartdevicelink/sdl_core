@@ -35,6 +35,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
+#include "application_manager/mobile_command_factory.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -65,10 +67,22 @@ void ListFilesRequest::Run() {
       // DeleteFile request is limited by the configuration profile
       LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
       SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
   }
 
   application->increment_list_files_in_none_count();
-  SendResponse(true, mobile_apis::Result::SUCCESS);
+
+  (*message_)[strings::msg_params][strings::space_available] =
+        static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
+  int32_t i = 0;
+  const AppFilesMap& app_files = application->getAppFiles();
+  for (AppFilesMap::const_iterator it = app_files.begin();
+       it != app_files.end(); ++it) {
+      (*message_)[strings::msg_params][strings::filenames][i++] = it->second.file_name;
+  }
+  (*message_)[strings::params][strings::message_type] =
+      application_manager::MessageType::kResponse;
+  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(*message_)[strings::msg_params]);
 }
 
 }  // namespace commands

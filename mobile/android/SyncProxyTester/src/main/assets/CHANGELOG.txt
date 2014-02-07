@@ -1,8 +1,29 @@
+[CW6]
++ SyncProxyAndroid SDK: Add WarningLightStatus enum (replaces TirePressureTellTale enum). Update TireStatus struct.
+* SyncProxyAndroid SDK: Update PRNDL enum's values from the spec.
+* SyncProxyAndroid SDK: Fix session id at application resumption.
++ SyncProxyAndroid SDK: Allow to send requests with unknown function names.
++ SyncProxyAndroid SDK: Implement integration of OnSystemRequest notification and system PutFile request.
++ SyncProxyAndroid SDK: changed reconnection scheduling logic
+
+[CW5]
++ SyncProxyAndroid SDK: Add KEYBOARD value to TriggerSource enum.
+- SyncProxyAndroid SDK: Revert "Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation."
++ SyncProxyAndroid SDK: Add SystemRequest-related RPC classes.
+* SyncProxyAndroid SDK: Fix sending (Un)SubscribeVehicleData with steeringWheelAngle parameter.
++ SyncProxyAndroid SDK: Application resumption, restore session and all service.
++ Streaming resumption (Navi Service / Audio Service / PutFile)
+
+[CW4]
++ SyncProxyTester: added possibility to send PerformInteraction request without choice set id
++ SyncProxyAndroid SDK: Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation.
++ SyncProxyAndroid SDK: added audio streaming service support
++ SyncProxyAndroid SDK: added getter and setter for heartbeat.
+
 [CW3]
 + SyncProxyAndroid SDK: Heartbeat is sent every 5 seconds unconditionally.
 + SyncProxyTester: Different apk flavors have different app id by default.
 + Add Network Service Discovery functionality.
-
 
 [CW2]
 + SyncProxyAndroid SDK: Add EndSessionACK handling logic.
