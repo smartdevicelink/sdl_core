@@ -43,7 +43,8 @@
     3.3.2. Download the archived QNX image for VMware from ftp://ford-applink.luxoft.com/Distrs/QNX/QNX_SDP_6.5.0.tar.gz
     3.3.3. Extract image from archive and open it in VMware
       Note: QNX image has root with empty pass and user with pass 'user'. SSH is configured
-    3.3.4. Run ssh server if it is not running "/usr/sbin/sshd".
+    3.3.4. Log as root.
+    3.3.5. Run ssh server if it is not running "/usr/sbin/sshd".
 
   3.4. To make QNX virtual machine from scratch:
     3.4.2. SSH configuration on QNX server:
@@ -104,8 +105,8 @@
 
 ==========================================================================================================
 7. Common run on QNX host.
-  7.1. Make sure you are not running Photon
-  7.2. QnxServ: run terminal.
+  7.1. Log as root and make sure you are not running Photon
+  7.2. Run command ". /root/.profile".
   7.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
   7.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
