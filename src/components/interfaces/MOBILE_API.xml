@@ -4590,7 +4590,7 @@
     	Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
     	Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
     </description>
-    <param name="data" type="String" maxlength="100000" minsize="1" maxsize="100" mandatory="true" array="true">
+    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" mandatory="true" array="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
     </param>
     <param name="URL" type="String" maxlength="1000" mandatory="false">
