@@ -35,6 +35,7 @@
 
 #include <string>
 
+#include "utils/macro.h"
 #include "utils/dict.h"
 
 namespace resumption {
@@ -59,14 +60,8 @@ class LastState {
  * @brief Private default constructor
  */
   LastState();
-/**
- * @brief Private copy constructor - intentionally not implemented
- */
-  LastState(const LastState& other);
-/**
- * @brief Private assign operator - intentionally not implemented
- */
-  LastState& operator = (const LastState& other);
+
+  DISALLOW_COPY_AND_ASSIGN(LastState);
 };
 
 }  // namespace resumption

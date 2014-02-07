@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <pthread.h>
-
 #if  defined(__QNX__) || defined(__QNXNTO__)
 #include <sys/cpuinline.h>
 #endif
+
+#include "utils/lock.h"
 
 #include "resumption/last_state.h"
 
@@ -45,7 +45,7 @@ LastState::LastState() {
 
 LastState* LastState::instance() {
   static LastState* instance = 0;
-  static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+  static sync_primitives::Lock lock;
 
   LastState* temp = instance;
 #if  defined(__QNX__) || defined(__QNXNTO__)
@@ -54,7 +54,7 @@ LastState* LastState::instance() {
   __sync_synchronize();
 #endif
   if (!temp) {
-    pthread_mutex_lock(&lock);
+    lock.Ackquire();
     temp = instance;
     if (!temp) {
       temp = new LastState();
@@ -65,7 +65,7 @@ LastState* LastState::instance() {
 #endif
       instance = temp;
     }
-    pthread_mutex_unlock(&lock);
+    lock.Release();
   }
 
   return temp;
