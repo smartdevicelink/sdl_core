@@ -136,17 +136,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         closeConnection(rpcSessionID, keepConnection, true);
     }
 
-    public void closeConnection(byte rpcSessionID, boolean keepConnection,
+    private void closeConnection(byte rpcSessionID, boolean keepConnection,
                                 boolean sendFinishMessages) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
-                if (sendFinishMessages && (_transport != null) &&
-                        _transport.getIsConnected()) {
+                if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
                     _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                 }
-
-            } // end-if
+            }
         }
 
         waitForRpcEndServiceACK();
@@ -279,12 +277,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
-
-        // If _transport is null, then it can't be connected
         if (_transport == null) {
             return false;
         }
-
         return _transport.getIsConnected();
     }
 
