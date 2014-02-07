@@ -73,8 +73,16 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (IsApplicationRegistered()) {
+  Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+
+  if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  if (IsApplicationWithSameAppIdRegistered()) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -521,7 +529,7 @@ RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
   return std::string(param_name.begin(), param_name_new_end);
 }
 
-bool RegisterAppInterfaceRequest::IsApplicationRegistered() {
+bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
