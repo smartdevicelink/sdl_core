@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/set_display_layout_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -47,8 +49,17 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
+  Application* app = application_manager::ApplicationManagerImpl::instance()
+  ->application((*message_)[strings::params][strings::connection_key].asUInt());
+  if (NULL == app) {
+    LOG4CXX_ERROR(logger_, "Application is not registered");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
 
-  SendResponse(false, mobile_apis::Result::UNSUPPORTED_REQUEST);
+  SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
+                 &((*message_)[strings::msg_params]));
+
 }
 
 }  // namespace commands

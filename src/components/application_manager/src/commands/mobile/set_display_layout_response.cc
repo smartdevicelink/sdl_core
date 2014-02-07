@@ -47,14 +47,12 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutResponse::Run");
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
+  bool result = false;
+  if (static_cast<int>(mobile_apis::Result::SUCCESS) ==
+      (*message_)[strings::msg_params][strings::result_code].asInt()) {
+    result = true;
   }
-  SendResponse(true);
+  SendResponse(result);
 }
 
 }  // namespace commands
