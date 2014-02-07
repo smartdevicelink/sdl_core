@@ -4529,7 +4529,7 @@
     	Legacy / v1 Protocol implementation; use SyncPData instead.
     </description>
 
-    <param name="data" type="String" maxlength="100000" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" array="true" mandatory="true">
       <description>Contains base64 encoded string of SyncP packets.</description>
       <todo>What is the maxlength?</todo>
     </param>
