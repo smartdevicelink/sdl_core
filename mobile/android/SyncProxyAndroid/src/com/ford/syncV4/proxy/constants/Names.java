@@ -397,7 +397,7 @@ public class Names {
     public static final String averageTripFuelEconomy = "averageTripFuelEconomy";
     public static final String currentCycleFuelEconomy = "currentCycleFuelEconomy";
 
-    public static final String lightSwitchStatus = "lightSwitchStatus";
+    public static final String ambientLightSensorStatus = "ambientLightSensorStatus";
     public static final String highBeamsOn = "highBeamsOn";
 
     public static final String electricFuelConsumption = "electricFuelConsumption";
