@@ -3675,18 +3675,18 @@
 
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="request">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="request" scope="partner">
     <description>Non periodic vehicle data read request</description>
 
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of ECU.</description>
     </param>
-    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="0" maxsize="1000" array="true" mandatory="true">
+    <param name="didLocation" type="Integer" minvalue="0" maxvalue="65535" minsize="1" maxsize="1000" array="true" mandatory="true">
       <description>Get raw data from vehicle data DID location(s)</description>
     </param>
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="response">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="response" scope="partner">
 
     <param name="success" type="Boolean" platform="documentation">
 		<description> true, if successful; false, if failed </description>
