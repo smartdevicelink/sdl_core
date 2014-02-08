@@ -33,7 +33,6 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
-import com.ford.syncV4.proxy.SyncProxy;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -1880,6 +1879,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         }
     }
 
+    public void syncProxySendRegisterRequest(RegisterAppInterface msg)throws SyncException {
+        if (mSyncProxy != null) {
+            // TODO it's seems stupid in order to register send onTransportConnected
+            mSyncProxy.updateRegisterAppInterfaceParameters(msg);
+            mSyncProxy.getSyncConnection().onTransportConnected();
+        }
+    }
+
     public byte syncProxyGetWiProVersion() {
         if (mSyncProxy != null) {
             return mSyncProxy.getWiProVersion();
@@ -2010,4 +2017,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             }
         }, 500);
     }
+
+
 }

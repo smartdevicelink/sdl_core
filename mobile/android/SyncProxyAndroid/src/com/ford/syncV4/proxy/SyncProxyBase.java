@@ -1014,6 +1014,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void closeSyncConnection(boolean keepConnection) {
         if (_syncConnection != null) {
             _syncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
+            _syncConnection.setSessionId((byte) 0);
             if (!keepConnection) {
                 setSyncConnection(null);
             }
@@ -3857,6 +3858,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public String getAutoActivateIdDesired() {
         return _autoActivateIdReturned;
+    }
+
+    public void updateRegisterAppInterfaceParameters(RegisterAppInterface msg) {
+        _syncMsgVersionRequest = msg.getSyncMsgVersion();
+        _applicationName = msg.getAppName();
+        _ttsName = msg.getTtsName();
+        _ngnMediaScreenAppName = msg.getNgnMediaScreenAppName();
+        _vrSynonyms = msg.getVrSynonyms();
+        _isMediaApp = msg.getIsMediaApplication();
+        _syncLanguageDesired = msg.getLanguageDesired();
+        _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
+        _appHMIType = msg.getAppType();
+        _appID = msg.getAppID();
     }
 
     // Private Class to Interface with SyncConnection

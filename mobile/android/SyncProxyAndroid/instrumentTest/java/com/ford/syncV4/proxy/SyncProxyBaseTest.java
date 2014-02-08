@@ -7,6 +7,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -385,7 +386,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         verify(proxy.getSyncConnection(), times(1)).closeConnection(sessionID, true);
         assertNotNull(proxy.getSyncConnection());
         assertEquals("Service pool should be empty", 0, proxy.getServicePool().size());
-        assertEquals("Session id should be 0"  ,0, proxy.currentSession.getSessionId());
+        assertEquals("Session id should be 0", 0, proxy.currentSession.getSessionId());
     }
 
     public void testSyncMsgVersionRequestSet() throws Exception {
@@ -396,7 +397,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         syncMsgVersion.setMajorVersion(2);
         syncMsgVersion.setMinorVersion(2);
         proxy.setSyncMsgVersionRequest(syncMsgVersion);
-        SyncMsgVersion real  = proxy.getSyncMsgVersionRequest();
+        SyncMsgVersion real = proxy.getSyncMsgVersionRequest();
         assertEquals("msg version should be equal", real, syncMsgVersion);
     }
 
@@ -479,6 +480,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
+        appHMITypeVector.add(AppHMIType.DEFAULT);
         proxy.setAppHMIType(appHMITypeVector);
         Vector<AppHMIType> real = proxy.getAppHMIType();
         assertEquals(real, appHMITypeVector);
@@ -504,4 +506,47 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals(real, autoActivateIdDesired);
     }
 
+    public void testSyncConnectionSessionIdIsSetToNullAfterStopSession() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        proxy.closeSession(true);
+        byte realSessionId = proxy.getSyncConnection().getSessionId();
+        assertEquals(0, realSessionId);
+    }
+
+    public void testUpdateRegisterAppInterfaceParametersChangesRegisterParameters() throws Exception {
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        Vector<TTSChunk> ttsChunkVector = new Vector<TTSChunk>();
+        TTSChunk ttsChunk = new TTSChunk();
+        ttsChunk.setText("Text");
+        ttsChunkVector.add(ttsChunk);
+        Vector<String> vrSynonyms = new Vector<String>();
+        vrSynonyms.add("name");
+        Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
+        appHMITypeVector.add(AppHMIType.DEFAULT);
+
+        RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
+                syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
+                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1);
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.updateRegisterAppInterfaceParameters(msg);
+
+        assertEquals(syncMsgVersion, proxy.getSyncMsgVersionRequest());
+        assertEquals("appName", proxy.getApplicationName());
+        assertEquals(ttsChunkVector, proxy.getTTSName());
+        // screen app name length is limited
+        assertEquals("ngnMe", proxy.getNgnMediaScreenAppName());
+        assertEquals(vrSynonyms, proxy.getVrSynonyms());
+        assertEquals((Boolean) true, proxy.getIsMediaApp());
+        assertEquals(Language.AR_SA, proxy.getSyncLanguageDesired());
+        assertEquals( Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
+        assertEquals( appHMITypeVector, proxy.getAppHMIType());
+        assertEquals( "appID", proxy.getAppID());
+    }
 }

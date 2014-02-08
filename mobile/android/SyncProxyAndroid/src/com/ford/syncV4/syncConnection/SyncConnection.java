@@ -477,6 +477,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _connectionListener.onHeartbeatTimedOut();
     }
 
+    public byte getSessionId() {
+        return mSessionId;
+    }
+
     /**
      * Set ID of the current active session
      *
