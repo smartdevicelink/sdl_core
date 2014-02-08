@@ -57,7 +57,7 @@ using ::protocol_handler::RawMessage;
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::TransportManager;
-using ::transport_manager::TransportManagerAttr;
+//sing ::transport_manager::TransportManagerAttr;
 using ::transport_manager::TransportManagerImpl;
 using ::transport_manager::DeviceUID;
 using ::transport_manager::DeviceInfo;
@@ -94,7 +94,7 @@ class TransportManagerTest : public ::testing::Test {
     pthread_cond_init(&test_cond, NULL);
     mock_adapter = new MockTransportAdapter();
     mock_adapter->Init();
-    TransportManagerAttr cfg{0};
+    //TransportManagerAttr cfg{0};
 
     tm = new TransportManagerImpl(cfg);
 
