@@ -30,44 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUMING_NOTIFICATION_H_
+#if  defined(__QNX__) || defined(__QNXNTO__)
+#include <sys/cpuinline.h>
+#endif
 
-#include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "utils/lock.h"
 
-namespace application_manager {
+#include "resumption/last_state.h"
 
-namespace commands {
+namespace resumption {
 
-/**
- * @brief OnReadyNotification command class
- **/
-class OnResumingNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnResumingNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnResumingNotification(const MessageSharedPtr& message);
+LastState::LastState() {
+}
 
-  /**
-   * @brief OnResumingNotification class destructor
-   **/
-  virtual ~OnResumingNotification();
+LastState* LastState::instance() {
+  static LastState* instance = 0;
+  static sync_primitives::Lock lock;
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  LastState* temp = instance;
+#if  defined(__QNX__) || defined(__QNXNTO__)
+  __cpu_membarrier();
+#else
+  __sync_synchronize();
+#endif
+  if (!temp) {
+    lock.Ackquire();
+    temp = instance;
+    if (!temp) {
+      temp = new LastState();
+#if  defined(__QNX__) || defined(__QNXNTO__)
+      __cpu_membarrier();
+#else
+      __sync_synchronize();
+#endif
+      instance = temp;
+    }
+    lock.Release();
+  }
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnResumingNotification);
-};
+  return temp;
+}
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_READY_NOTIFICATION_H_
+}

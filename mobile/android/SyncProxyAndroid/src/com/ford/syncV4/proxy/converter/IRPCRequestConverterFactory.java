@@ -13,8 +13,8 @@ public interface IRPCRequestConverterFactory {
      * should be stateless, the implementation caches them between calls.
      *
      * @param request RPCRequest to convert; must not be null
-     * @return a converter for the request, or null in case of an error (e.g.,
-     * the request is invalid)
+     * @return a converter for the request, or a default one in case of an error
+     * (e.g., the request is invalid)
      */
     public IRPCRequestConverter getConverterForRequest(RPCRequest request);
 }

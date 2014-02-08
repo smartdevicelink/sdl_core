@@ -157,7 +157,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl) {
+  const Application& application_impl, bool is_resumption) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -169,6 +169,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params][strings::resume] = is_resumption;
 
   message[strings::msg_params][strings::application][strings::app_name] =
     application_impl.name();
@@ -771,7 +772,7 @@ void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
+void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app, bool is_resuming) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -784,7 +785,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
     hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
-
+  message[strings::msg_params][strings::resume] = is_resuming;
   message[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);

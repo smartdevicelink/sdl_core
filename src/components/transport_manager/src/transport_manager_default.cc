@@ -65,11 +65,8 @@ int TransportManagerDefault::Init() {
 
 TransportManagerDefault::~TransportManagerDefault() {}
 
-TransportManagerAttr default_config_ = {0};
-
-TransportManagerDefault::TransportManagerDefault(
-    const TransportManagerAttr& config)
-    : TransportManagerImpl(config) {}
+TransportManagerDefault::TransportManagerDefault()
+    : TransportManagerImpl() {}
 
 TransportManagerDefault* TransportManagerDefault::Instance() {
   static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -78,7 +75,7 @@ TransportManagerDefault* TransportManagerDefault::Instance() {
   if (tm_default_instance == NULL) {
     pthread_mutex_lock(&tm_default_instance_mutex);
     if (tm_default_instance == NULL) {
-      tm_default_instance = new TransportManagerDefault(default_config_);
+      tm_default_instance = new TransportManagerDefault();
     }
     pthread_mutex_unlock(&tm_default_instance_mutex);
   }

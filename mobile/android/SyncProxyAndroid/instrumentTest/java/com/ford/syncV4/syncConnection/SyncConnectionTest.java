@@ -65,7 +65,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, 0x00, VERSION);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, VERSION);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -175,7 +175,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, 0x00, VERSION);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, VERSION);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {

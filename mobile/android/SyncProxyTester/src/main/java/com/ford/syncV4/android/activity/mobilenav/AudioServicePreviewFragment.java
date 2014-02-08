@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,66 +9,44 @@ import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
-import com.ford.syncV4.android.listener.ConnectionListener;
-import com.ford.syncV4.android.listener.ConnectionListenersManager;
 
 import java.io.OutputStream;
 
 /**
  * Created by Andrew Batutin on 1/23/14.
  */
-public class AudioServicePreviewFragment extends Fragment implements ServicePreviewFragmentInterface,
-        ConnectionListener {
-    private static final String TAG =
-            AudioServicePreviewFragment.class.getSimpleName();
-    private CheckBoxState mobileNavSessionCheckBoxState;
-    private Button dataStreamingButton;
-    private FileStreamingLogic fileStreamingLogic;
-    private SyncProxyTester context;
+public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        addListeners();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_audio_service_preview, container, true);
-        context = (SyncProxyTester) getActivity();
-        fileStreamingLogic = new FileStreamingLogic(this);
-        return view;
+        return inflater.inflate(R.layout.activity_audio_service_preview, container, true);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initiateVideoCheckBox(view);
+        initiateView(view);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        removeListeners();
-    }
-
-    @Override
-    public void onProxyClosed() {
-        if (fileStreamingLogic != null && fileStreamingLogic.isStreamingInProgress()) {
-            fileStreamingLogic.cancelStreaming();
-        }
-    }
-
-    private void initiateVideoCheckBox(View view) {
-        dataStreamingButton = (Button) getView().findViewById(R.id.audio_file_streaming);
-        dataStreamingButton.setOnClickListener(new VideoActionListener());
+    private void initiateView(View view) {
+        mDataStreamingButton = (Button) getView().findViewById(R.id.audio_file_streaming);
+        mDataStreamingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startBaseFileStreaming(R.raw.audio_pcm);
+            }
+        });
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.audioServiceCheckBox);
-        checkBox.setOnClickListener(new MobileNaviSessionCheckBoxOnClickListener());
-        mobileNavSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
-        mobileNavSessionCheckBoxState.setStateOff();
+        checkBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onMobileNaviCheckBoxAction(view);
+            }
+        });
+        mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
+        mSessionCheckBoxState.setStateOff();
     }
 
     public void onMobileNaviCheckBoxAction(View v) {
@@ -77,85 +54,34 @@ public class AudioServicePreviewFragment extends Fragment implements ServicePrev
     }
 
     private void changeMobileNaviCheckBoxState() {
-        if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
-            mobileNavSessionCheckBoxState.setStateDisabled();
+        if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
+            mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startAudioService();
-        } else if (mobileNavSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
-            fileStreamingLogic.resetStreaming();
+        } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
+            mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopAudioService();
-            mobileNavSessionCheckBoxState.setStateOff();
-            dataStreamingButton.setEnabled(false);
+            mSessionCheckBoxState.setStateOff();
+            mDataStreamingButton.setEnabled(false);
         }
     }
 
     public void setAudioServiceStateOff() {
-        mobileNavSessionCheckBoxState.setStateOff();
+        mSessionCheckBoxState.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.audioServiceCheckBox);
         box.setChecked(false);
-        dataStreamingButton.setEnabled(false);
+        mDataStreamingButton.setEnabled(false);
     }
 
     public void setAudioServiceStateOn(OutputStream stream) {
-        mobileNavSessionCheckBoxState.setStateOn();
-        dataStreamingButton.setEnabled(true);
+        mSessionCheckBoxState.setStateOn();
+        mDataStreamingButton.setEnabled(true);
 
-        fileStreamingLogic.setOutputStream(stream);
-        fileStreamingLogic.createStaticFileReader();
-        if (fileStreamingLogic.isStreamingInProgress()) {
-            startFileStreaming();
+        mFileStreamingLogic.setOutputStream(stream);
+        mFileStreamingLogic.createStaticFileReader();
+        if (mFileStreamingLogic.isStreamingInProgress()) {
+            startBaseFileStreaming(R.raw.audio_pcm);
         }
-    }
-
-    @Override
-    public void dataStreamingStarted() {
-        dataStreamingButton.setEnabled(false);
-        dataStreamingButton.setText("Data is streaming");
-    }
-
-    @Override
-    public void dataStreamingStopped() {
-        if (mobileNavSessionCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            dataStreamingButton.setEnabled(true);
-        } else {
-            dataStreamingButton.setEnabled(false);
-        }
-        dataStreamingButton.setText("Start File Streaming");
-    }
-
-    private void startFileStreaming() {
-        fileStreamingLogic.setFileResID(R.raw.audio_pcm);
-        fileStreamingLogic.startFileStreaming();
-    }
-
-    private class MobileNaviSessionCheckBoxOnClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            onMobileNaviCheckBoxAction(v);
-        }
-    }
-
-    private class VideoActionListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            startFileStreaming();
-        }
-    }
-
-    /**
-     * Add all necessary listeners
-     */
-    private void addListeners() {
-        ConnectionListenersManager.addConnectionListener(this);
-    }
-
-    /**
-     * Remove all subscribed listeners
-     */
-    private void removeListeners() {
-        ConnectionListenersManager.removeConnectionListener(this);
     }
 }

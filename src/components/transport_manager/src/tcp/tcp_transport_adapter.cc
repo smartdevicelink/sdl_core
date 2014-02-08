@@ -37,9 +37,12 @@
 #include <signal.h>
 #include <errno.h>
 
+#include "resumption/last_state.h"
+
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
+#include "transport_manager/tcp/tcp_device.h"
 
 #ifdef AVAHI_SUPPORT
 #include "transport_manager/tcp/dnssd_service_browser.h"
@@ -64,6 +67,73 @@ TcpTransportAdapter::~TcpTransportAdapter() {
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
   return "sdl-tcp";
+}
+
+void TcpTransportAdapter::Store() const {
+  LOG4CXX_TRACE_ENTER(logger_);
+  resumption::LastState::Dictionary tcp_adapter_dictionary;
+  DeviceList device_ids = GetDeviceList();
+  for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
+    DeviceUID device_id = *i;
+    DeviceSptr device = FindDevice(device_id);
+    if (!device) { // device could have been disconnected
+      continue;
+    }
+    utils::SharedPtr<TcpDevice> tcp_device =
+      DeviceSptr::static_pointer_cast<TcpDevice>(device);
+    resumption::LastState::Dictionary device_dictionary;
+    struct in_addr address;
+    address.s_addr = tcp_device->in_addr();
+    device_dictionary.AddItem("address", std::string(inet_ntoa(address)));
+    resumption::LastState::Dictionary applications_dictionary;
+    ApplicationList app_ids = tcp_device->GetApplicationList();
+    for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
+      ApplicationHandle app_handle = *j;
+      int port = tcp_device->GetApplicationPort(app_handle);
+      if (port != -1) { // don't want to store incoming applications
+        resumption::LastState::Dictionary application_dictionary;
+        application_dictionary.AddItem("port", std::to_string(port));
+        applications_dictionary.AddSubitem(std::to_string(port), application_dictionary);
+      }
+    }
+    device_dictionary.AddSubitem("applications", applications_dictionary);
+    tcp_adapter_dictionary.AddSubitem(tcp_device->name(), device_dictionary);
+  }
+  resumption::LastState::instance()->dictionary.AddSubitem(
+    "TcpAdapter", tcp_adapter_dictionary
+  );
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
+bool TcpTransportAdapter::Restore() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  bool errors_occured = false;
+  resumption::LastState::Dictionary tcp_adapter_dictionary =
+    resumption::LastState::instance()->dictionary.SubitemAt("TcpAdapter");
+  for (resumption::LastState::Dictionary::const_iterator i =
+    tcp_adapter_dictionary.begin(); i != tcp_adapter_dictionary.end(); ++i) {
+    std::string name = i->first;
+    resumption::LastState::Dictionary device_dictionary = i->second;
+    std::string address_record = device_dictionary.ItemAt("address");
+    in_addr_t address = inet_addr(address_record.c_str());
+    TcpDevice* tcp_device = new TcpDevice(address, name);
+    DeviceSptr device(tcp_device);
+    AddDevice(device);
+    resumption::LastState::Dictionary applications_dictionary =
+      device_dictionary.SubitemAt("applications");
+    for (resumption::LastState::Dictionary::const_iterator j =
+      applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
+      resumption::LastState::Dictionary application_dictionary = j->second;
+      std::string port_record = application_dictionary.ItemAt("port");
+      int port = atoi(port_record.c_str());
+      ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
+      if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
+        errors_occured = true;
+      }
+    }
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
+  return !errors_occured;
 }
 
 }  // namespace transport_adapter

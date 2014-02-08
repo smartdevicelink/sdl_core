@@ -59,12 +59,13 @@ class SdlProxy: public Item {
 
  signals:
   void appRegistered(QVariant application);
-  void appUnregistered(int appId);
+  void appUnregistered(int appId, QVariant resume);
   void playTone();
   void showNotification(QVariant text, QVariant icon, int timeout);
 
  private slots:
   void OnAppRegistered(Common_HMIApplication);
+  void OnAppUnregistered(int appId, OptionalArgument<bool> resume);
   void OnShowNotification(Common_TextFieldStruct text,
                           OptionalArgument<Common_Image> image,
                           int timeout);

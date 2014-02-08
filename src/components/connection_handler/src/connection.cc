@@ -72,7 +72,8 @@ int32_t Connection::AddNewSession() {
   }
 
   const uint8_t max_connections = 255;
-  if (max_connections > session_id_counter_) {
+  int32_t size = session_map_.size();
+  if (max_connections > size) {
 
     /* whenever new session created RPC and Bulk services are
     established automatically */
@@ -81,7 +82,7 @@ int32_t Connection::AddNewSession() {
     session_map_[session_id_counter_].push_back(
         static_cast<uint8_t>(protocol_handler::kBulk));
 
-    result = session_id_counter_++;
+    result = ++size;
   }
 
   return result;
@@ -153,8 +154,6 @@ DeviceHandle Connection::connection_device_handle() {
 }
 
 void Connection::GetSessionList(SessionList& session_list) {
-
-  SessionMapIterator it = session_map_.begin();
   for (SessionMapIterator it = session_map_.begin(),
        end = session_map_.end(); it != end; ++it) {
     session_list.push_back(it->first);

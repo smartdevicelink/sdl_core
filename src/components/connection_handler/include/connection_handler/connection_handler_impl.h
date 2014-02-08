@@ -120,7 +120,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnConnectionClosedFailure(
       transport_manager::ConnectionUID connection_id,
       const transport_manager::DisconnectError& error);
-
+    virtual void OnUnexpectedDisconnect(
+        transport_manager::ConnectionUID connection_id,
+        const transport_manager::CommunicationError& error);
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
@@ -137,7 +139,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session has to be started.
-     * \param sessionId Identifier of the session to be ended
+     * \param sessionId Identifier of the session to be started
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
@@ -224,6 +226,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
+    /**
+     * \brief Sets resume session map. Used on start up by AppMngr to identify
+     * session that must be resumed.
+     * \param map Map of sessions Id and session_key to be resumed
+     **/
+    virtual void set_resume_session_map(const ResumeSessionMap& map);
+
     virtual void StartTransportManager();
 
     /*
@@ -291,6 +300,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of connections
      */
     ConnectionList connection_list_;
+
+    /**
+     * \brief List of sessions that must be resumed
+     */
+    ResumeSessionMap    resume_session_map_;
+
     /*
      * \brief Cleans connection list on destruction
      */

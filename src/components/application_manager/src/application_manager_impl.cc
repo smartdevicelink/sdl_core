@@ -35,6 +35,7 @@
 #include <climits>
 #include <string>
 #include <fstream>
+
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/commands/command_impl.h"
@@ -116,38 +117,14 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
-  if (media_manager_) {
-    media_manager_ = NULL;
-  }
-
-  if (hmi_handler_) {
-    hmi_handler_ = NULL;
-  }
-
-  if (connection_handler_) {
-    connection_handler_ = NULL;
-  }
-
-  if (policy_manager_) {
-    policy_manager_ = NULL;
-  }
-
-  if (hmi_so_factory_) {
-    hmi_so_factory_ = NULL;
-  }
-
-  if (mobile_so_factory_) {
-    mobile_so_factory_ = NULL;
-  }
-
-  if (protocol_handler_) {
-    protocol_handler_ = NULL;
-  }
-
-  if (media_manager_) {
-    media_manager_ = NULL;
-  }
-
+  media_manager_ = NULL;
+  hmi_handler_ = NULL;
+  connection_handler_ = NULL;
+  policy_manager_ = NULL;
+  hmi_so_factory_ = NULL;
+  mobile_so_factory_ = NULL;
+  protocol_handler_ = NULL;
+  media_manager_ = NULL;
 }
 
 ApplicationManagerImpl* ApplicationManagerImpl::instance() {
@@ -343,7 +320,6 @@ Application* ApplicationManagerImpl::RegisterApplication(
   // TODO(PV): add asking user to allow application
   // BasicCommunication_AllowApp
   // application->set_app_allowed(result);
-  this->resume_controler.RestoreApplicationFiles(application);
   return application;
 }
 
@@ -654,6 +630,23 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle device_handle) {
 }
 
+bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) {
+  Application* app = application(connection_key);
+
+  if (!app) {
+    LOG4CXX_INFO(logger_, "An application is not registered.");
+    return false;
+  }
+
+  const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
+
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level ||
+      mobile_api::HMILevel::HMI_LIMITED == hmi_level) {
+    return true;
+  }
+
+  return false;
+}
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(
   connection_handler::DeviceHandle device_handle, int32_t session_key,
@@ -663,21 +656,32 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   Application* app = application(session_key);
 
   switch (type) {
+    case protocol_handler::kRpc: {
+      LOG4CXX_INFO(logger_, "RPC service is about to be started.");
+      break;
+    }
     case protocol_handler::kMovileNav: {
-      LOG4CXX_INFO(logger_, "Mobile Navi session is about to be started.");
+      LOG4CXX_INFO(logger_, "Video service is about to be started.");
       if (media_manager_) {
+        if (!app) {
+            LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+            return false;
+        }
         if (app->allowed_support_navigation()) {
           media_manager_->StartVideoStreaming(session_key);
         } else {
           return false;
         }
       }
-
       break;
     }
     case protocol_handler::kAudio: {
       LOG4CXX_INFO(logger_, "Audio service is about to be started.");
       if (media_manager_) {
+        if (!app) {
+          LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+          return false;
+        }
         if (app->allowed_support_navigation()) {
           media_manager_->StartAudioStreaming(session_key);
         } else {
@@ -691,6 +695,18 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
       break;
     }
   }
+
+  return true;
+}
+
+bool ApplicationManagerImpl::OnServiceResumedCallback(
+    connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+    int32_t new_session_key, protocol_handler::ServiceType type) {
+  LOG4CXX_INFO_EXT(logger_,
+                   "OnServiceResumedCallback previous session key= "
+                   << old_session_key << " new session key= "
+                   << new_session_key);
+
   return true;
 }
 
@@ -702,7 +718,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(session_key);
+      UnregisterApplication(session_key, true);
       break;
     }
     case protocol_handler::kMovileNav: {
@@ -909,7 +925,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key,
           mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
 
-        UnregisterApplication(connection_key);
+        UnregisterApplication(connection_key, true);
         return false;
       } else if (result ==
                  request_controller::RequestController::
@@ -921,7 +937,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key, mobile_api::AppInterfaceUnregisteredReason::
           REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
-        UnregisterApplication(connection_key);
+        UnregisterApplication(connection_key, true);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1366,22 +1382,18 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   // Saving unregistered app.info to the file system before
   resume_controler.SaveAllApplications();
-
+  resume_controler.SavetoFS();
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
-    UnregisterApplication((*it)->app_id());
+    UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
 }
 
-bool ApplicationManagerImpl::RestoreApplicationHMILevel(Application *application) {
-  return this->resume_controler.RestoreApplicationHMILevel(application);
-}
-
-void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
+void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1394,8 +1406,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id) {
   }
 
   MessageHelper::RemoveAppDataFromHMI(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
   Application* app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
@@ -1464,6 +1475,10 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 
+ResumeCtrl* ApplicationManagerImpl::GetResumeController() {
+  return &resume_controler;
+}
+
 void ApplicationManagerImpl::Mute() {
   mobile_apis::AudioStreamingState::eType state =
       hmi_capabilities_.attenuated_supported()
@@ -1493,7 +1508,6 @@ void ApplicationManagerImpl::Unmute() {
     }
   }
 }
-
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
 														    const std::vector<uint8_t>& binary_data,
@@ -1528,7 +1542,5 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }
-
-
 
 }  // namespace application_manager

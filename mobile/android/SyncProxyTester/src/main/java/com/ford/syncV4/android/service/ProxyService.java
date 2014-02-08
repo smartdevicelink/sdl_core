@@ -721,7 +721,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
 
     @Override
     public void onProxyClosed(final String info, Exception e) {
-        createErrorMessageForAdapter("OnProxyClosed: " + info, e);
+        if (e != null) {
+            createErrorMessageForAdapter("OnProxyClosed:" + info + ", msg:" + e.getMessage());
+        } else {
+            createErrorMessageForAdapter("OnProxyClosed:" + info);
+        }
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
@@ -740,10 +744,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
                     (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                 reset();
             }
-
-            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
+            /*if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
                 mLogAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e, true);
-            }
+            }*/
         }
     }
 
@@ -1459,19 +1462,30 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
-    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
+    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version,
+                                       final String correlationID) {
         String response = "EndService Ack received; Session Type " + serviceType.getName() + "; " +
                 "Session ID " + version + "; Correlation ID " + correlationID;
         createDebugMessageForAdapter(response);
 
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onProtocolServiceEnded(serviceType, version, correlationID);
-                }
-            });
+        if (serviceType == ServiceType.Audio_Service) {
+            mLogAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            mLogAdapter.logMessage("Navi service stopped", true);
+        } else if (serviceType == ServiceType.Bulk_Data) {
+            mLogAdapter.logMessage("Bulk Data service stopped", true);
+        } else if (serviceType == ServiceType.RPC) {
+            mLogAdapter.logMessage("RPC service stopped", true);
+
+            if (mServiceDestroyEvent != null) {
+                mServiceDestroyEvent.onDisposeComplete();
+            }
+
+            if (mCloseSessionCallback != null) {
+                mCloseSessionCallback.onCloseSessionComplete();
+            }
+        } else {
+            mLogAdapter.logMessage("Unknown service '" + serviceType + "' stopped", true);
         }
     }
 
@@ -1660,16 +1674,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
-        }
-
-        if (mServiceDestroyEvent != null) {
-            mServiceDestroyEvent.onDisposeComplete();
-
-            //stopServiceBySelf();
-        }
-
-        if (mCloseSessionCallback != null) {
-            mCloseSessionCallback.onCloseSessionComplete();
         }
     }
 

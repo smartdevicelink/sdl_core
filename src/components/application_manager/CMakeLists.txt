@@ -154,6 +154,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/allow_app_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/get_resume_result_request.cc
+./src/commands/hmi/get_resume_result_response.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/update_app_list_request.cc
@@ -258,7 +260,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
 ./src/commands/hmi/navi_show_constant_tbt_response.cc
 ./src/commands/hmi/on_ready_notification.cc
-./src/commands/hmi/on_resuming_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
 ./src/commands/hmi/on_update_device_list.cc

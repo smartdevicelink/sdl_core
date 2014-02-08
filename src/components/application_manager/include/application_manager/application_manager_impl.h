@@ -184,8 +184,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
+     * @param is_resuming describes - is this unregister
+     *        is normal or need to be resumed
      */
-    void UnregisterApplication(const uint32_t& app_id);
+    void UnregisterApplication(const uint32_t& app_id, bool is_resuming = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -201,13 +203,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
-    /*
-     * @brief Set application HMI Level as saved in resuming_controller
-     * @param application is applicatint whitch HMI Level is need to restore
-     * @return true if succes, otherwise return false
-     * this method agregete to resuming_controller.RestoreApplicationHMILevel(application)
-     */
-    bool RestoreApplicationHMILevel(Application *application);
     bool RemoveAppDataFromHMI(Application* app);
     bool LoadAppDataToHMI(Application* app);
     bool ActivateApplication(Application* app);
@@ -348,7 +343,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
                                   int32_t session_key,
                                   protocol_handler::ServiceType type);
-
+    bool OnServiceResumedCallback(
+        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
+        int32_t new_session_key, protocol_handler::ServiceType type);
     void OnServiceEndedCallback(int32_t session_key,
                                 protocol_handler::ServiceType type);
 
@@ -409,6 +406,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     void Unmute();
 
     /*
+     * @brief Checks HMI level and returns true if audio/video streaming is allowed
+     */
+    bool IsStreamingAllowed(uint32_t connection_key);
+
+    /*
      * @brief Save binary data to specified directory
      *
      * @param application name
@@ -425,6 +427,7 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const std::string& save_path,
                                 const uint32_t offset = 0);
 
+    ResumeCtrl* GetResumeController();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);

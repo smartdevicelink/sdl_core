@@ -367,6 +367,20 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+ protected:
+
+  /**
+   * @brief Store adapter state where applicable
+   */
+  virtual void Store() const;
+
+  /**
+   * @brief Restore adapter state where applicable
+   *
+   * @return True on success false otherwise (or vacuous true)
+   */
+  virtual bool Restore();
+
  private:
   /**
    * @brief Find connection that has state - ESTABLISHED.

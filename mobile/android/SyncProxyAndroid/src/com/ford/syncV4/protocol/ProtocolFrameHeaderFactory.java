@@ -20,13 +20,14 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, int messageID, byte version) {
+    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, byte sessionID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
-        msg.setMessageID(messageID);
+        msg.setMessageID(0);
+        msg.setSessionID(sessionID);
 
         return msg;
     }

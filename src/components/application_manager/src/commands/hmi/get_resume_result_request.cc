@@ -30,54 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_resuming_notification.h"
+#include "application_manager/commands/hmi/get_resume_result_request.h"
 
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
-#include "application_manager/commands/hmi/response_from_hmi.h"
-#include "application_manager/message_helper.h"
 namespace application_manager {
 
 namespace commands {
 
-OnResumingNotification::OnResumingNotification(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+GetResumeResultRequest::GetResumeResultRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
-OnResumingNotification::~OnResumingNotification() {
+GetResumeResultRequest::~GetResumeResultRequest() {
 }
 
-void OnResumingNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnResumingNotification::Run");
-  const hmi_apis::Common_Result::eType result =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_notification::result].asInt());
+void GetResumeResultRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetResumeResultRequest::Run");
 
-  if (hmi_apis::Common_Result::SUCCESS == result) {
-    int32_t correlation_id = (*message_)[strings::params][strings::app_id].asInt();
-    const uint32_t app_id = ApplicationManagerImpl::instance()->
-        application_id(correlation_id);
-    if (!app_id) {
-      LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
-      return;
-    }
-    Application* application = ApplicationManagerImpl::instance()->application(app_id);
-    if (application) {
-      if (ApplicationManagerImpl::instance()->RestoreApplicationHMILevel(application)) {
-        if (application->hmi_level() == mobile_apis::HMILevel::HMI_FULL) {
-          MessageHelper::SendActivateAppToHMI(app_id);
-        }
-        MessageHelper::SendHMIStatusNotification(*application);
-      }
-    } else {
-      LOG4CXX_ERROR(logger_, "Application cannot be resumed");
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Error result code"<<code);
-  }
+  SendRequest();
 }
+
 }  // namespace commands
 
 }  // namespace application_manager

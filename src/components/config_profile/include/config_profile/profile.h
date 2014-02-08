@@ -132,6 +132,11 @@ class Profile {
     const uint32_t& default_timeout() const;
 
     /**
+     * @brief Default timeout for waiting for resuming
+     */
+    const uint32_t& app_resuming_timeout() const;
+
+    /**
      * @brief Returns desirable thread stack size
      */
     const uint64_t& thread_min_stach_size() const;
@@ -243,6 +248,16 @@ class Profile {
      */
     const int32_t heart_beat_timeout() const;
 
+    /*
+     * @brief Timeout in transport manager before disconnect
+     */
+    uint32_t transport_manager_disconnect_timeout() const;
+
+    /*
+     * @brief Returns true if last state singleton is used
+     */
+    bool use_last_state() const;
+
     // Members section
 
   protected:
@@ -344,6 +359,7 @@ class Profile {
     bool                            is_redecoding_enabled_;
     uint32_t                        max_cmd_id_;
     uint32_t                        default_timeout_;
+    uint32_t                        app_resuming_timeout_;
     std::string                     vr_help_title_;
     uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;
@@ -362,6 +378,8 @@ class Profile {
     uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
+    uint32_t                        transport_manager_disconnect_timeout_;
+    bool                            use_last_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 };

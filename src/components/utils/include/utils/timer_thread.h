@@ -67,13 +67,20 @@ class TimerThread {
   public:
 
     friend class TimerDelegate;
+    friend class TimerLooperDelegate;
+
     /*
      * @brief Default constructor
      *
      * @param callee A class that use timer
-     * @param arg    CallBackFunction which will be called on timeout
+     * @param f    CallBackFunction which will be called on timeout
+     *  Atantion! "f()" will be called not in main thread but in timer thread
+     *  Never use stop() and start() methods inside f
+     * @param is_looper    Define this timer as looer,
+     *  if true, TimerThread will call "f()" function every time out
+     *  until stop()
      */
-    TimerThread(T* callee , void (T::*f)());
+    TimerThread(T* callee , void (T::*f)(),bool is_looper = false);
 
     /*
      * @brief Destructor
@@ -84,6 +91,7 @@ class TimerThread {
      * @brief Starts timer for specified timeout.
      * Previously started timeout will be set to new value.
      * On timeout TimerThread::onTimeOut interface will be called.
+     * Must not be used in callback function!
      *
      * @param timeout_seconds Timeout in seconds to be set
      */
@@ -91,6 +99,7 @@ class TimerThread {
 
     /*
      * @brief Stops timer execution
+     * Must not be used in callback function!
      */
     virtual void stop();
 
@@ -103,6 +112,9 @@ class TimerThread {
 
   private:
 
+    /**
+     * @brief Delegate release timer, will call callback function one time
+     */
     class TimerDelegate : public threads::ThreadDelegate {
       public:
 
@@ -137,17 +149,40 @@ class TimerThread {
         virtual void setTimeOut(uint32_t timeout_seconds);
 
       protected:
-
-      private:
         const TimerThread*                               timer_thread_;
-        uint32_t                                     timeout_seconds_;
+        uint32_t                                         timeout_seconds_;
         sync_primitives::Lock                            state_lock_;
         sync_primitives::ConditionalVariable             termination_condition_;
         volatile bool                                    stop_flag_;
 
+      private:
         DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
     };
 
+
+    /**
+     * @brief Delegate release looper timer.
+     * Will call delegate every timeot function while stop()
+     * won't be called
+     */
+    class TimerLooperDelegate : public TimerDelegate {
+      public:
+
+        /*
+         * @brief Default constructor
+         *
+         * @param timer_thread The Timer_thread pointer
+         * @param timeout      Timeout to be set
+         */
+        TimerLooperDelegate(const TimerThread* timer_thread);
+
+        /*
+         * @brief Thread main function.
+         */
+        virtual void threadMain();
+      private:
+        DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
+    };
     void (T::*callback_)();
     T*                                                 callee_;
     TimerDelegate*                                     delegate_;
@@ -158,14 +193,18 @@ class TimerThread {
 };
 
 template <class T>
-TimerThread<T>::TimerThread(T* callee, void (T::*f)())
+TimerThread<T>::TimerThread(T* callee, void (T::*f)(), bool is_looper)
   : callback_(f),
     callee_(callee),
     delegate_(NULL),
     thread_(NULL),
     is_running_(false) {
+  if (is_looper) {
+    delegate_ = new TimerLooperDelegate(this);
+  } else {
+    delegate_ = new TimerDelegate(this);
+  }
 
-  delegate_ = new TimerDelegate(this);
   if (delegate_) {
     thread_ = new threads::Thread("TimerThread", delegate_);
   }
@@ -223,6 +262,11 @@ TimerThread<T>::TimerDelegate::TimerDelegate(const TimerThread* timer_thread)
 }
 
 template <class T>
+TimerThread<T>::TimerLooperDelegate::TimerLooperDelegate(const TimerThread* timer_thread)
+  : TimerDelegate(timer_thread) {
+}
+
+template <class T>
 TimerThread<T>::TimerDelegate::~TimerDelegate() {
   timer_thread_ = NULL;
 }
@@ -249,6 +293,28 @@ void TimerThread<T>::TimerDelegate::threadMain() {
   }
   stop_flag_ = false;
 }
+
+template <class T>
+void TimerThread<T>::TimerLooperDelegate::threadMain() {
+  using sync_primitives::ConditionalVariable;
+  sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
+  time_t end_time = time(NULL) + TimerDelegate::timeout_seconds_;
+  int32_t wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
+  while (!TimerDelegate::stop_flag_) {
+    // Sleep
+    ConditionalVariable::WaitStatus wait_status =
+        TimerDelegate::termination_condition_.WaitFor(auto_lock, wait_seconds_left * 1000);
+    wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
+    // Quit sleeping or continue sleeping in case of spurious wake up
+    if (ConditionalVariable::kTimeout == wait_status ||
+        wait_seconds_left <= 0) {
+      TimerDelegate::timer_thread_->onTimeOut();
+      end_time = time(NULL) + TimerDelegate::timeout_seconds_;
+    }
+  }
+  TimerDelegate::stop_flag_ = false;
+}
+
 
 template <class T>
 bool TimerThread<T>::TimerDelegate::exitThreadMain() {

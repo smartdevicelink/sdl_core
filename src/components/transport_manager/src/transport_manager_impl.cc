@@ -51,6 +51,7 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "config_profile/profile.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
@@ -130,7 +131,7 @@ class TransportManagerImpl::IncomingDataHandler {
   TransportManagerImpl* tm_impl_;
 };
 
-TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
+TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
       all_thread_active_(false),
       message_queue_thread_(),
@@ -138,7 +139,6 @@ TransportManagerImpl::TransportManagerImpl(const TransportManagerAttr& config)
       device_listener_thread_wakeup_(),
       is_initialized_(false),
       connection_id_counter_(0),
-      config_(config),
       incoming_data_handler_(new IncomingDataHandler(this)) {
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
@@ -275,7 +275,9 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   if (messages_count > 0) {
     connection->messages_count = messages_count;
     connection->shutDown = true;
-    connection->timer->start(config_.disconnectTimeout);
+    connection->timer->start(
+      profile::Profile::instance()->transport_manager_disconnect_timeout()
+    );
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                               connection->application);

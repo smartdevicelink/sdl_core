@@ -138,7 +138,8 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      bool result = mobile_apis::Result::SUCCESS == result_code ||
+                    mobile_apis::Result::RETRY == result_code;
 
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
         int32_t session_key =
