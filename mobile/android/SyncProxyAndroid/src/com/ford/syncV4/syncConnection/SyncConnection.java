@@ -136,7 +136,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         closeConnection(rpcSessionID, keepConnection, true);
     }
 
-    private void closeConnection(byte rpcSessionID, boolean keepConnection,
+    public void closeConnection(byte rpcSessionID, boolean keepConnection,
                                 boolean sendFinishMessages) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
