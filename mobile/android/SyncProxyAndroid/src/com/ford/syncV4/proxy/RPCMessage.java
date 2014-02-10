@@ -11,8 +11,6 @@ public class RPCMessage extends RPCStruct {
     }
 
     protected RPCMessage(RPCMessage rpcm) {
-//		this(rpcm.store);
-        // FIXME test this!
         this.store = new Hashtable<String, Object>();
         this.messageType = rpcm.messageType;
         this.function = (Hashtable) rpcm.function.clone();
@@ -21,7 +19,9 @@ public class RPCMessage extends RPCStruct {
             this.parameters = (Hashtable) rpcm.parameters.clone();
             this.function.put(Names.parameters, this.parameters);
         }
-        this.function.put(Names.function_name, rpcm.getFunctionName());
+        if (rpcm.getFunctionName() != null) {
+            this.function.put(Names.function_name, rpcm.getFunctionName());
+        }
     }
 
     protected RPCMessage(RPCStruct rpcs) {
