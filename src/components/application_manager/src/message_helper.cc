@@ -383,7 +383,6 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
   SendAddCommandRequestToHMI(app);
-  SendChangeRegistrationRequestToHMI(app);
 }
 
 void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {

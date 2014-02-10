@@ -353,8 +353,6 @@ bool ApplicationManagerImpl::ActivateApplication(Application* app) {
           curr_app->hmi_level()) {
         if (curr_app->has_been_activated()) {
           MessageHelper::SendAppDataToHMI(curr_app);
-        } else {
-          MessageHelper::SendChangeRegistrationRequestToHMI(curr_app);
         }
       }
       if (!curr_app->MakeFullscreen()) {

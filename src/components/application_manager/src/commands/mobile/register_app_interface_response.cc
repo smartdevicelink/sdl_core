@@ -64,6 +64,7 @@ void RegisterAppInterfaceResponse::Run() {
             (*message_)[strings::params][strings::connection_key].asInt());
 
     MessageHelper::SendHMIStatusNotification(*application);
+    MessageHelper::SendChangeRegistrationRequestToHMI(application);
   }
 }
 
