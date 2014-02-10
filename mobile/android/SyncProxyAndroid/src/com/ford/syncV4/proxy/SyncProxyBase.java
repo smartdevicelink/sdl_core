@@ -1008,7 +1008,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private void closeSyncConnection(boolean keepConnection) {
+    private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
             mSyncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
             mSyncConnection.setSessionId((byte) 0);
@@ -1201,10 +1201,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     setCurrentReconnectTimerTask(null);
                     initializeProxy();
                 } catch (SyncException e) {
-                    Log.e(TAG, "Cycling the proxy failed.", e);
+                    Log.e(TAG, "Cycling the proxy failed with SyncException.", e);
                     handleCyclingSyncException(e);
                 } catch (Exception e) {
-                    notifyProxyClosed("Cycling the proxy failed.", e);
+                    notifyProxyClosed("Cycling the proxy failed with Exception.", e);
                 }
             }
         };

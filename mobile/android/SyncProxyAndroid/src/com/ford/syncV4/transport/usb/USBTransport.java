@@ -217,8 +217,8 @@ public class USBTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset,
                                              int length) {
-        logD("SendBytes: array size " + msgBytes.length + ", offset " + offset +
-                ", length " + length);
+        //logD("SendBytes: array size " + msgBytes.length + ", offset " + offset +
+        //        ", length " + length);
 
         boolean result = false;
         final State state = getState();
@@ -231,7 +231,7 @@ public class USBTransport extends SyncTransport {
                 mOutputStream.write(msgBytes, offset, length);
                 result = true;
 
-                logI("Bytes successfully sent");
+                //logI("Bytes successfully sent");
                 SyncTrace.logTransportEvent(TAG + ": bytes sent",
                         null, InterfaceActivityDirection.Transmit,
                         msgBytes, offset, length,
@@ -330,7 +330,7 @@ public class USBTransport extends SyncTransport {
      */
     private void disconnect(String msg, Exception ex) {
         final State state = getState();
-        if (state != State.LISTENING || state != State.CONNECTED) {
+        if (state != State.LISTENING && state != State.CONNECTED) {
             logW("Disconnect called from state " + state + "; doing nothing");
             return;
         }
@@ -725,7 +725,7 @@ public class USBTransport extends SyncTransport {
                     return;
                 }
 
-                logD("Read " + bytesRead + " bytes");
+                //logD("Read " + bytesRead + " bytes");
                 SyncTrace.logTransportEvent(TAG + ": read bytes", null,
                         InterfaceActivityDirection.Receive, buffer, bytesRead,
                         SYNC_LIB_TRACE_KEY);
