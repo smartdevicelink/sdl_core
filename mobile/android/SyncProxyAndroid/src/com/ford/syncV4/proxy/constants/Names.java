@@ -399,6 +399,7 @@ public class Names {
 
     public static final String ambientLightSensorStatus = "ambientLightSensorStatus";
     public static final String highBeamsOn = "highBeamsOn";
+    public static final String lowBeamsOn = "lowBeamsOn";
 
     public static final String electricFuelConsumption = "electricFuelConsumption";
     public static final String stateOfCharge = "stateOfCharge";
