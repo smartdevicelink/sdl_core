@@ -71,7 +71,7 @@ class ConnectionHandlerObserver {
      * \param DeviceHandle Handle of removed device.
      **/
     virtual void RemoveDevice(
-      const connection_handler::DeviceHandle device_handle) = 0;
+      const connection_handler::DeviceHandle& device_handle) = 0;
 
     /**
      * \brief Callback function used by connection_handler
@@ -81,9 +81,9 @@ class ConnectionHandlerObserver {
      * \param type Established service type
      */
     virtual bool OnServiceStartedCallback(
-        connection_handler::DeviceHandle device_handle, int32_t session_key,
-        protocol_handler::ServiceType type =
-            protocol_handler::kRpc) = 0;
+        const connection_handler::DeviceHandle& device_handle,
+        const int32_t& session_key,
+        const protocol_handler::ServiceType& type) = 0;
 
     /**
      * \brief Callback function used by connection_handler
@@ -94,9 +94,9 @@ class ConnectionHandlerObserver {
      * \param type Established service type
      */
     virtual bool OnServiceResumedCallback(
-        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
-        int32_t new_session_key, protocol_handler::ServiceType type =
-            protocol_handler::kRpc) = 0;
+        const connection_handler::DeviceHandle& device_handle,
+        const int32_t& old_session_key, const int32_t new_session_key,
+        const protocol_handler::ServiceType& type) = 0;
 
     /**
      * \brief Callback function used by connection_handler
@@ -104,9 +104,8 @@ class ConnectionHandlerObserver {
      * \param sessionKey Key of session which should be ended
      */
     virtual void OnServiceEndedCallback(
-      int32_t session_key,
-      protocol_handler::ServiceType type =
-          protocol_handler::kRpc) = 0;
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type) = 0;
 
   protected:
     /**
