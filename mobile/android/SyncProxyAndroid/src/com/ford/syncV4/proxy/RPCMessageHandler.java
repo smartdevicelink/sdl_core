@@ -77,7 +77,6 @@ import java.util.Hashtable;
  */
 public class RPCMessageHandler implements IRPCMessageHandler {
 
-
     private SyncProxyBase syncProxyBase;
 
     public RPCMessageHandler(SyncProxyBase syncProxyBase) {
@@ -86,7 +85,9 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
     @Override
     public void handleRPCMessage(Hashtable hash) {
-        handleRPCMessageInt(hash);
+        if (hash != null) {
+            handleRPCMessageInt(hash);
+        }
     }
 
     private void handleRPCMessageInt(Hashtable hash) {
