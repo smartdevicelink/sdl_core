@@ -33,7 +33,6 @@
 #include "rpc/initStartData.h"
 #include "../../../../../src/appMain/life_cycle.h"
 
-
 void initStartData()
 {
 	transport_manager::TransportManager* transport_manager_;
@@ -71,8 +70,8 @@ void initStartData()
 	
 	// --------------------------------------------------------------------------
 	// Components initialization
-	transport_manager::TransportManagerAttr tma;
-	tma.disconnectTimeout = 1000;
+//  transport_manager::TransportManagerAttr tma;
+//	tma.disconnectTimeout = 1000;
 	transport_manager_ =
 	//				new transport_manager::TransportManagerImpl(tma);
 			transport_manager::TransportManagerDefault::Instance();

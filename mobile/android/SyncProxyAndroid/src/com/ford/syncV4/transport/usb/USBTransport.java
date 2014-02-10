@@ -727,10 +727,10 @@ public class USBTransport extends SyncTransport {
                                 SYNC_LIB_TRACE_KEY);
                     }
 
-                    synchronized (USBTransport.this) {
+
                         setState(State.CONNECTED);
                         handleTransportConnected();
-                    }
+
                     break;
 
                 default:
@@ -785,9 +785,7 @@ public class USBTransport extends SyncTransport {
                 }
 
                 if (bytesRead > 0) {
-                    synchronized (USBTransport.this) {
-                        handleReceivedBytes(buffer, bytesRead);
-                    }
+                    handleReceivedBytes(buffer, bytesRead);
                 }
             }
         }

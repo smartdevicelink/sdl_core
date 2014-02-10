@@ -6,6 +6,7 @@ import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.transport.SyncTransport;
@@ -277,5 +278,22 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         when(connection._transport.getIsConnected()).thenReturn(true);
         connection.closeConnection(SESSION_ID, false);
         verify(connection.mAudioPacketizer, times(1)).stop();
+    }
+
+    public void testHeartbeatMonitorStoppedIfConnectionClosedWithoutKeepConnection() throws Exception {
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setHeartbeatMonitor(mock(IHeartbeatMonitor.class));
+        assertNotNull(connection.getHeartbeatMonitor());
+        connection.closeConnection((byte) 0, false, true);
+        assertNull("heartbeat monitor should be stopped and null",connection.getHeartbeatMonitor());
+    }
+
+    public void testHeartbeatMonitorNotStoppedIfConnectionClosedWithKeepConnection() throws Exception {
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setHeartbeatMonitor(mock(IHeartbeatMonitor.class));
+        assertNotNull(connection.getHeartbeatMonitor());
+        connection.closeConnection((byte) 0, true, true);
+        verify(connection.getHeartbeatMonitor(), never()).stop();
+        assertNotNull("heartbeat monitor should not be null",connection.getHeartbeatMonitor());
     }
 }

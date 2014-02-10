@@ -64,11 +64,11 @@ void OnVRLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const std::set<Application*>& applications =
+  const std::set<Application*> applications =
       ApplicationManagerImpl::instance()->applications();
 
   std::set<Application*>::iterator it = applications.begin();
-  while (applications.end() != it) {
+  for (;applications.end() != it; ++it) {
     Application* app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
@@ -82,8 +82,6 @@ void OnVRLanguageChangeNotification::Run() {
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
       ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
     }
-
-    it = applications.begin();
   }
 }
 

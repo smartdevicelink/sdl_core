@@ -128,6 +128,7 @@ char* ini_read_value(const char *fname,
           tag[i] = toupper(tag[i]);
       }
     } else {
+      // FIXME (dchmerev@gmail.com): Unnecessary condition
       if ((INI_RIGHT_CHAPTER == result) || (INI_WRONG_CHAPTER == result)) {
         fclose(fp);
         return NULL;
@@ -179,16 +180,21 @@ char ini_write_value(const char *fname,
     char             *temp_str;
     int32_t fd = -1;
     temp_str = static_cast<char*>(getenv("TMPDIR"));
-    if (temp_str)
+    if (temp_str) {
       snprintf(temp_fname, PATH_MAX,
                "%s/ini.XXXXXX", temp_str);
 
-    if (-1 == (fd = mkstemp(temp_str)) ||
-        NULL == (wr_fp = fdopen(fd, "w"))) {
-      if (-1 != fd) {
+      fd = mkstemp(temp_fname);
+      if (-1 == fd) {
+        return FALSE;
+      }
+      wr_fp = fdopen(fd, "w");
+      if (NULL == wr_fp) {
         unlink(temp_fname);
         close(fd);
+        return FALSE;
       }
+    } else {
       return FALSE;
     }
   }

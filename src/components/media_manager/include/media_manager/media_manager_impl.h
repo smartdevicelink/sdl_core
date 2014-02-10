@@ -70,13 +70,15 @@ class MediaManagerImpl : public MediaManager,
     MediaManagerImpl();
     virtual void Init();
     protocol_handler::ProtocolHandler* protocol_handler_;
-    MediaAdapter* a2dp_player_;
-    MediaAdapterImpl* from_mic_recorder_;
-    MediaListenerPtr from_mic_listener_;
-    MediaAdapterImpl* video_streamer_;
-    MediaAdapterImpl* audio_streamer_;
-    MediaListenerPtr video_streamer_listener_;
-    MediaListenerPtr audio_streamer_listener_;
+    MediaAdapter*                      a2dp_player_;
+    MediaAdapterImpl*                  from_mic_recorder_;
+    MediaListenerPtr                   from_mic_listener_;
+    MediaAdapterImpl*                  video_streamer_;
+    MediaAdapterImpl*                  audio_streamer_;
+    MediaListenerPtr                   video_streamer_listener_;
+    MediaListenerPtr                   audio_streamer_listener_;
+    bool                               video_stream_active_;
+    bool                               audio_stream_active_;
 
   private:
     static log4cxx::LoggerPtr logger_;
