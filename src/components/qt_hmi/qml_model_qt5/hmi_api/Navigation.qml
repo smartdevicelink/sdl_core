@@ -179,6 +179,18 @@ Item {
         }
     }
 
+    function startStream(url, appID) {
+        console.debug("enter")
+        player.startStream(url)
+        console.debug("exit")
+    }
+
+    function stopStream(appID) {
+        console.debug("enter")
+        player.stop()
+        console.debug("exit")
+    }
+
     function startAudioStream(url, appID) {
         console.log("Message Received - {method: 'Navigation.StartAudioStream', params:{ " +
                     "url: '" + url + "'" +
