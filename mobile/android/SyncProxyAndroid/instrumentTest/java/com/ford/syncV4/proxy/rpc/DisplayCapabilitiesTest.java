@@ -27,6 +27,7 @@ public class DisplayCapabilitiesTest extends TestCase {
     private static final String TEMPLATES_AVAILABLE = "templatesAvailable";
     private static final String NUM_CUSTOM_PRESETS_AVAILABLE =
             "numCustomPresetsAvailable";
+    private static final String SCREEN_PARAMS = "screenParams";
 
     public void testMessageShouldBeCreated() {
         DisplayCapabilities msg = new DisplayCapabilities();
@@ -43,11 +44,13 @@ public class DisplayCapabilitiesTest extends TestCase {
         final Vector<String> templatesAvailable =
                 new Vector<String>(Arrays.asList("ABC", "ZYX"));
         final int numCustomPresetsAvailable = 45;
+        final ScreenParams screenParams = new ScreenParams();
 
         msg.setImageFields(imageFields);
         msg.setGraphicSupported(graphicSupported);
         msg.setTemplatesAvailable(templatesAvailable);
         msg.setNumCustomPresetsAvailable(numCustomPresetsAvailable);
+        msg.setScreenParams(screenParams);
 
         JSONObject jsonObject = msg.serializeJSON();
         final JSONArray imgsJsonArray = jsonObject.getJSONArray(IMAGE_FIELDS);
@@ -59,6 +62,7 @@ public class DisplayCapabilitiesTest extends TestCase {
         assertThat(tmplsJsonArray.length(), is(templatesAvailable.size()));
         assertThat(jsonObject.getInt(NUM_CUSTOM_PRESETS_AVAILABLE),
                 is(numCustomPresetsAvailable));
+        assertThat(jsonObject.has(SCREEN_PARAMS), is(true));
     }
 
     public void testDeserializedMessageWithoutParamsShouldContainNullFields()
@@ -72,6 +76,7 @@ public class DisplayCapabilitiesTest extends TestCase {
         assertThat(msg.getGraphicSupported(), nullValue());
         assertThat(msg.getTemplatesAvailable(), nullValue());
         assertThat(msg.getNumCustomPresetsAvailable(), nullValue());
+        assertThat(msg.getScreenParams(), nullValue());
     }
 
     public void testImageFieldsGetterShouldReturnSetValue()
@@ -96,7 +101,7 @@ public class DisplayCapabilitiesTest extends TestCase {
         assertThat(msg.getImageFields(), nullValue());
     }
 
-    public void testDeserializedImageFieldsAsStructShouldContainValue()
+    public void testDeserializedImageFieldsAsVectorShouldContainValue()
             throws JSONException {
         JSONObject jsonObject = new JSONObject();
         final Vector<ImageField> imageFields =
@@ -206,7 +211,7 @@ public class DisplayCapabilitiesTest extends TestCase {
         assertThat(msg.getTemplatesAvailable(), nullValue());
     }
 
-    public void testDeserializedTemplatesAvailableAsStructShouldContainValue()
+    public void testDeserializedTemplatesAvailableAsVectorShouldContainValue()
             throws JSONException {
         JSONObject jsonObject = new JSONObject();
         final Vector<String> templatesAvailable =
@@ -239,6 +244,60 @@ public class DisplayCapabilitiesTest extends TestCase {
                 JsonRPCMarshaller.deserializeJSONObject(jsonObject));
         assertThat(msg, notNullValue());
         assertThat(msg.getTemplatesAvailable(), nullValue());
+    }
+
+    public void testScreenParamsGetterShouldReturnSetValue()
+            throws JSONException {
+        DisplayCapabilities msg = new DisplayCapabilities();
+
+        final ScreenParams screenParams = new ScreenParams();
+        msg.setScreenParams(screenParams);
+
+        assertThat(msg.getScreenParams(), is(screenParams));
+    }
+
+    public void testSettingNullScreenParamsShouldRemoveValue()
+            throws JSONException {
+        DisplayCapabilities msg = new DisplayCapabilities();
+
+        msg.setScreenParams(new ScreenParams());
+        msg.setScreenParams(null);
+
+        assertThat(msg.getScreenParams(), nullValue());
+    }
+
+    public void testDeserializedScreenParamsAsStructShouldContainValue()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        final ScreenParams screenParams = new ScreenParams();
+        jsonObject.put(SCREEN_PARAMS, screenParams);
+
+        DisplayCapabilities msg = new DisplayCapabilities(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getScreenParams(), is(screenParams));
+    }
+
+    public void testDeserializedScreenParamsAsStringShouldBeNull()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(SCREEN_PARAMS, "image");
+
+        DisplayCapabilities msg = new DisplayCapabilities(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getScreenParams(), nullValue());
+    }
+
+    public void testDeserializedScreenParamsAsIntShouldBeNull()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(SCREEN_PARAMS, 1);
+
+        DisplayCapabilities msg = new DisplayCapabilities(
+                JsonRPCMarshaller.deserializeJSONObject(jsonObject));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getScreenParams(), nullValue());
     }
 
     public void testNumCustomPresetsAvailableGetterShouldReturnSetValue()

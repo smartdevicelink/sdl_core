@@ -15,6 +15,7 @@ public class DisplayCapabilities extends RPCStruct {
     public DisplayCapabilities(Hashtable hash) {
         super(hash);
     }
+
     public DisplayType getDisplayType() {
         Object obj = store.get(Names.displayType);
         if (obj instanceof DisplayType) {
@@ -153,6 +154,30 @@ public class DisplayCapabilities extends RPCStruct {
             store.put(Names.templatesAvailable, templatesAvailable);
         } else {
             store.remove(Names.templatesAvailable);
+        }
+    }
+
+    public ScreenParams getScreenParams() {
+        Object obj = store.get(Names.screenParams);
+        if (obj instanceof ScreenParams) {
+            return (ScreenParams) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new ScreenParams((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.screenParams, e);
+            }
+        }
+        return null;
+    }
+
+    public void setScreenParams(ScreenParams screenParams) {
+        if (screenParams != null) {
+            store.put(Names.screenParams, screenParams);
+        } else {
+            store.remove(Names.screenParams);
         }
     }
 
