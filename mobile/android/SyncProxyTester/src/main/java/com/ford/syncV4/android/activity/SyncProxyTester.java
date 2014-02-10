@@ -63,6 +63,7 @@ import com.ford.syncV4.android.service.IProxyServiceBinder;
 import com.ford.syncV4.android.service.IProxyServiceEvent;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -4314,8 +4315,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             return;
         }
 
-        stopAudioService();
-        stopMobileNavService();
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
