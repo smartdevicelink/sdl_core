@@ -1348,7 +1348,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
 
   switch (object.getType()) {
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
-      for (int32_t i = 0; i < object.length(); i++) {
+      for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
         printf("\n%s%d: ", tab_buffer.c_str(), i);
