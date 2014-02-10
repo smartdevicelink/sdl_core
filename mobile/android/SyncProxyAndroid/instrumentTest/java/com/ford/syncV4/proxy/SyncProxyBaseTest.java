@@ -501,8 +501,8 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         String autoActivateIdDesired = "_autoActivateIdDesired";
-        proxy.setAutoActivateIdDesired(autoActivateIdDesired);
-        String real = proxy.getAutoActivateIdDesired();
+        proxy.setAutoActivateIdReturned(autoActivateIdDesired);
+        String real = proxy.getAutoActivateIdReturned();
         assertEquals(real, autoActivateIdDesired);
     }
 
