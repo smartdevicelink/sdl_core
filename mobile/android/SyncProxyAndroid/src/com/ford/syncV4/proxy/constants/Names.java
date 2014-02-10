@@ -446,4 +446,5 @@ public class Names {
     public static final String imageResolution = "imageResolution";
     public static final String imageFields = "imageFields";
     public static final String graphicSupported = "graphicSupported";
+    public static final String numCustomPresetsAvailable = "numCustomPresetsAvailable";
 }

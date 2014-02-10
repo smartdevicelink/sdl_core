@@ -134,4 +134,43 @@ public class DisplayCapabilities extends RPCStruct {
         }
         return null;
     }
+
+    public Vector<String> getTemplatesAvailable() {
+        if (store.get(Names.templatesAvailable) instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>) store.get(Names.templatesAvailable);
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof String) {
+                    return (Vector<String>) list;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setTemplatesAvailable(Vector<String> templatesAvailable) {
+        if (templatesAvailable != null) {
+            store.put(Names.templatesAvailable, templatesAvailable);
+        } else {
+            store.remove(Names.templatesAvailable);
+        }
+    }
+
+    public void setNumCustomPresetsAvailable(
+            Integer numCustomPresetsAvailable) {
+        if (numCustomPresetsAvailable != null) {
+            store.put(Names.numCustomPresetsAvailable,
+                    numCustomPresetsAvailable);
+        } else {
+            store.remove(Names.numCustomPresetsAvailable);
+        }
+    }
+
+    public Integer getNumCustomPresetsAvailable() {
+        final Object o = store.get(Names.numCustomPresetsAvailable);
+        if (o instanceof Integer) {
+            return (Integer) o;
+        }
+        return null;
+    }
 }
