@@ -3184,19 +3184,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false">
+    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal"> 
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false">
+    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false">
+    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 
@@ -3286,19 +3286,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
+    <param name="eCallInfo" type="VehicleDataResult" mandatory="false" scope="internal">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="VehicleDataResult" mandatory="false">
+    <param name="airbagStatus" type="VehicleDataResult" mandatory="false" scope="internal">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false">
+    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false" scope="internal">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="VehicleDataResult" mandatory="false">
+    <param name="myKey" type="VehicleDataResult" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3367,19 +3367,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false">
+    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false">
+    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false">
+    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3467,19 +3467,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
+    <param name="eCallInfo" type="VehicleDataResult" mandatory="false" scope="internal">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="VehicleDataResult" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false">
+    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false" scope="internal">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="VehicleDataResult" mandatory="false">
+    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->

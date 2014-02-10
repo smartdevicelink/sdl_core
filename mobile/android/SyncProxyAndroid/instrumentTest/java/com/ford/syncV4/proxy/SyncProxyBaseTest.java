@@ -148,16 +148,16 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
                 currentSession.setSessionId(sessionID);
@@ -210,19 +210,19 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testStartAudioDataTransferClassConnectionMethod() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         proxyALM.startAudioDataTransfer();
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(proxyALM._syncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
+        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
     }
 
     public void testStartAudioDataTransferReturnsStream() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
-        when(proxyALM._syncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
+        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
@@ -232,20 +232,20 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testStopAudioDataTransferFiresCallback() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         proxyALM.stopAudioDataTransfer();
-        verify(proxyALM._syncConnection, timeout(1)).stopAudioDataTransfer();
+        verify(proxyALM.mSyncConnection, timeout(1)).stopAudioDataTransfer();
     }
 
     public void testCloseSessionCalledWithRightSessionID() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.closeSession(false);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Boolean> keepConnectionCaptor = ArgumentCaptor.forClass(Boolean.class);
-        verify(proxyALM._syncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
+        verify(proxyALM.mSyncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
         assertEquals("session id of closed RPC service should be same as initial session id", sessionID, sessionIDCaptor.getValue().byteValue());
         assertFalse(keepConnectionCaptor.getValue());
     }

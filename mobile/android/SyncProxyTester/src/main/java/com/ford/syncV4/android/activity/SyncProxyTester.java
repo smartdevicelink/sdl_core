@@ -165,10 +165,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
         IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener {
@@ -314,7 +312,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Time out in milliseconds for exit from application. If application is not correctly
      * destroyed within specified timeout - then we force destroy procedure
      */
-    private static final int EXIT_TIMEOUT = 10000;
+    private static final int EXIT_TIMEOUT = 3000;
     /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
@@ -583,6 +581,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
         mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
                 mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
+
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
 
         if (mBoundProxyService != null) {
             mBoundProxyService.destroyService(new IProxyServiceEvent() {
@@ -4105,7 +4110,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
             if (mBoundProxyService != null) {
-                mLogAdapter.logMessage("Should start mobile nav Service", true);
+                mLogAdapter.logMessage("Should start Mobile Navi Service", true);
 
                 /*mStreamCommandsExecutorService.submit(new Runnable() {
                     @Override
@@ -4123,7 +4128,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onMobileNaviStarted() {
         if (mBoundProxyService == null) {
-            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " MobileNaviStarted can not " +
+            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " Mobile Navi service can not " +
                     "start with NULL Proxy Service");
             return;
         }
@@ -4175,7 +4180,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void run() {
                 if (isProxyReadyForWork()) {
-                    mLogAdapter.logMessage("Should stop mobile nav currentSession", true);
+                    mLogAdapter.logMessage("Should stop Mobile Navi service", true);
                     if (mBoundProxyService != null) {
                         mBoundProxyService.syncProxyStopMobileNaviService();
                     }
@@ -4210,7 +4215,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void startAudioService() {
         if (isProxyReadyForWork()) {
-            mLogAdapter.logMessage("Should start audio service", true);
+            mLogAdapter.logMessage("Should start Mobile Audio service", true);
 
             mStreamCommandsExecutorService.submit(new Runnable() {
                 @Override
@@ -4226,7 +4231,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void run() {
                 if (isProxyReadyForWork()) {
-                    mLogAdapter.logMessage("Should stop audio service", true);
+                    mLogAdapter.logMessage("Should stop Mobile Audio service", true);
                     mBoundProxyService.syncProxyStopAudioService();
                     closeAudioOutputStream();
                 }
@@ -4316,8 +4321,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             return;
         }
 
-        stopAudioService();
-        stopMobileNavService();
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {

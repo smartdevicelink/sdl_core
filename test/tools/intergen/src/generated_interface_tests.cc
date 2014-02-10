@@ -71,7 +71,7 @@ TEST_F(GeneratedInterfaceTests, TypedefTest) {
 
   TdStruct ts;
   ts.resArrMap["Hello"].push_back(R_SUCCESS);
-  (*ts.optionalResArrMap)["World"].push_back(R_INVALID_DATA);
+  ts.optionalResArrMap["World"].push_back(R_INVALID_DATA);
   ASSERT_TRUE(ts.is_initialized());
   ASSERT_TRUE(ts.is_valid());
   std::string serialized = writer.write(ts.ToJsonValue());

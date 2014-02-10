@@ -178,6 +178,31 @@ public class OnVehicleData extends RPCNotification {
     public Integer getBatteryPackTemperature() {
     	return (Integer) store.get(Names.batteryPackTemperature);
     }
+
+    public void setHeadLampStatus(HeadLampStatus headLampStatus) {
+        if (headLampStatus != null) {
+            parameters.put(Names.headLampStatus, headLampStatus);
+        } else {
+            parameters.remove(Names.headLampStatus);
+        }
+    }
+
+    public HeadLampStatus getHeadLampStatus() {
+        Object obj = parameters.get(Names.headLampStatus);
+        if (obj instanceof HeadLampStatus) {
+            return (HeadLampStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new HeadLampStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.headLampStatus, e);
+            }
+        }
+        return null;
+    }
+
     public void setEngineTorque(Integer engineTorque) {
     	if (engineTorque != null) {
     		store.put(Names.engineTorque, engineTorque);

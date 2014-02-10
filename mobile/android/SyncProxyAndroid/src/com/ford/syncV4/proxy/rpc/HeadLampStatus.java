@@ -41,6 +41,22 @@ public class HeadLampStatus extends RPCStruct {
         return null;
     }
 
+    public void setLowBeamsOn(Boolean lowBeamsOn) {
+        if (lowBeamsOn != null) {
+            store.put(Names.lowBeamsOn, lowBeamsOn);
+        } else {
+            store.remove(Names.lowBeamsOn);
+        }
+    }
+
+    public Boolean getLowBeamsOn() {
+        final Object o = store.get(Names.lowBeamsOn);
+        if (o instanceof Boolean) {
+            return (Boolean) o;
+        }
+        return null;
+    }
+
     public void setHighBeamsOn(Boolean highBeamsOn) {
         if (highBeamsOn != null) {
             store.put(Names.highBeamsOn, highBeamsOn);

@@ -2,11 +2,11 @@
 
 1. General
   1.1. To build SDL for QNX, cross-compiling only shall be used.
-  1.2. To run SDL under Linux with Web HMI please follow         steps: 3.1; 5; 6.
-  1.3. To run SDL under Linux with QML HMI please follow         steps: 3.1; 5; 6.
-  1.4. To run SDL under virtualized QNX with Web HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.1; 5; 7; 8.
-  1.5. To run SDL under virtualized QNX with QML HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.2; 5; 9.
-  1.6. To run SDL under virtualized QNX with QML HMI under QNX Host please follow     steps: 3.1; 3.2; 3.3; 5; 7.
+  1.2. To run SDL under Linux with Web HMI please follow         steps: 3.1; 5.3; 5.5; 6.
+  1.3. To run SDL under Linux with QML HMI please follow         steps: 3.1; 5.4; 5.5; 6.
+  1.4. To run SDL under virtualized QNX with Web HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.1; 5.1; 5.5; 7; 8.
+  1.5. To run SDL under virtualized QNX with QML HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.2; 5.2; 5.5; 5.4; 5.5; 9.
+  1.6. To run SDL under virtualized QNX with QML HMI under QNX Host please follow     steps: 3.1; 3.2; 3.3; 5.2; 5.5; 7.
   1.7. To turn media features (like audio/video streaming) on/off please set DEFAULT_MEDIA_FLAG to ON/OFF (e.g. "cmake -DEFAULT_MEDIA_FLAG=OFF").
 
 ==========================================================================================================
@@ -44,7 +44,8 @@
     3.3.3. Extract image from archive and open it in VMware
       Note: QNX image has root with empty pass and user with pass 'user'. SSH is configured
     3.3.4. Log as root.
-      Note: Ssh server shall be started automatically. (Common command is "/usr/sbin/sshd").
+      Note: ssh server shall be started automatically. (Common command is "/usr/sbin/sshd").
+      Note: verify that you QNX host ip adress is 192.168.243.131 (if not change see step 4.2.1.)
 
   3.4. To make QNX virtual machine from scratch:
     3.4.2. SSH configuration on QNX server:
@@ -89,43 +90,53 @@
   4.2. Use this step if QML HMI and SDL are running on separate computers (virtualized QNX is also considered to be running on a separate computer):
     4.2.1. QNXServer: add the following lines in the file "/usr/etc/dbus-1/session.conf":
       "<listen>tcp:host=IP-OF-YOUR-QNX-PC,port=PORT-FOR-LISTEN</listen><allow_anonymous/>"
-      (e.g. "<listen>tcp:host=192.168.177.128,port=8087</listen><allow_anonymous/>).
-  4.2.2. LinHost: set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.177.128,port=8087").
+      (e.g. "<listen>tcp:host=192.168.243.131,port=8087</listen><allow_anonymous/>).
+    4.2.2. LinHost: set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.243.131,port=8087").
 
 ==========================================================================================================
-5. Build SDL from source.
-  5.1. LinHost: create a build folder <Project_Root_Bin> somewhere at a disk.
-  5.1. LinHost: enter the <Project_Root_Bin> directory.
-  5.2. LinHost: create the build files choosing the appropriate step among the following depending on the target OS:
-    5.2.1. for QNX with Web HMI:   “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake ”.
-    5.2.2. for QNX with QML HMI:   “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON”.
-    5.2.3. for Linux with Web HMI: "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON".
-    5.2.4. for Linux with QML HMI: "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON -DHMI2=ON".
-      Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
-  5.3. LinHost: run build process “make install”.
+5. Build SDL from source on Linux Host.
+    Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
+  5.1. For QNX with Web HMI run command
+    "mkdir <Project_QNX_Build_WebHMI>  && cd <Project_QNX_Build_WebHMI>
+    "cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake".
+  5.2. For QNX with QML HMI run command
+    "mkdir <Project_QNX_Build_Qt>  && cd <Project_QNX_Build_Qt>
+    “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON”.
+  5.3. For Linux with Web HMI run command
+    "mkdir <Project_Linux_Build_WebHMI>  && cd <Project_Linux_Build_WebHMI>
+    "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON".
+  5.4. For Linux with QML HMI run command
+    "mkdir <Project_Linux_Build_Qt>  && cd <Project_Linux_Build_Qt>
+    "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON -DHMI2=ON".
+  5.5. Run build process “make install” in previous directory.
 
 ==========================================================================================================
 6. Common run on Linux host (SDL + HMI).
-  6.1. Go to the binary folder "cd <Project_Root_Bin>/bin".
+  6.1. Go to the binary folder "cd <Project_Linux_Build_WebHMI>/bin" or <Project_Linux_Build_Qt>/bin".
   6.2. Run SDL "./smartDeviceLinkCore".
     Note: HMI shall be started automatically. Type of started HMI depends on build options described in 5.2.
 
 ==========================================================================================================
-7. Common run on QNX host.
+7. Common run on QNX host with Qt HMI.
   7.1. Log as root and make sure you are not running Photon
-  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
-      Note: Ssh server shall be started automatically. (Common command is "/usr/sbin/sshd").
+  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.
-  8.1. Perform step 7.
-  8.2. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
+  8.1. Log as root and make sure you are not running Photon
+  8.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_WebHMI>/bin/* ./” .
+  8.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+  8.4. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
     Note: in case there is no connection with Web HMI probably it is necessary to add QNX Server IP to "no_proxy" config.
 
 ==========================================================================================================
 9. Run SDL on QNX Server and QML HMI on Linux host.
-  9.1. LinHost: make "<Project_Root_Bin>/bin/start_hmi.sh" file empty
-  9.2. Perform step 7.
-  9.3. LinHost: goto "<Project_Root_Bin>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
+  9.1. LinHost: make "<Project_QNX_Build_Qt>/bin/start_hmi.sh" file empty
+  9.2. Log as root and make sure you are not running Photon
+  9.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
+  9.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+  9.5. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.

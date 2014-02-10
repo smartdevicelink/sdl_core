@@ -80,16 +80,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }
@@ -138,16 +138,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }
@@ -197,16 +197,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }
@@ -261,16 +261,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }
@@ -322,16 +322,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }
@@ -382,16 +382,16 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
             }

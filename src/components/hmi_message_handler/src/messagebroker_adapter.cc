@@ -118,6 +118,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   MessageBrokerController::subscribeTo("TTS.Started");
   MessageBrokerController::subscribeTo("TTS.Stopped");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
+
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
 

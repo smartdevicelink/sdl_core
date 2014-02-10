@@ -1,3 +1,9 @@
+[CW7]
+* Fix 'USB: Application is not recognizable by SDLCore' if the application is closed when the stream is opened.
+* SyncProxyAndroid SDK: Update HeadLampStatus struct. Add headLampStatus parameter to OnVehicleData notification.
+* SyncProxyAndroid SDK: Add displayCapabilities parameter to SetDisplayLayoutResponse class.
++ SyncProxyAndroid SDK: Add ImageFieldName enum, ImageField struct, ScreenParams struct. Update DisplayCapabilities struct.
+
 [CW6]
 + SyncProxyAndroid SDK: changed video for Alice build
 + SyncProxyAndroid SDK: changed registration/unregistration procedure.

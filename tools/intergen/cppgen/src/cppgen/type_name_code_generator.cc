@@ -141,8 +141,14 @@ void TypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
 }
 
 RpcTypeNameGenerator::RpcTypeNameGenerator(const Type* type, Availability availability)
-    : wrap_with_mandatory_(availability != kUnspecified),
+    : skip_availaiblity_specifier_(availability == kUnspecified),
       mandatory_(availability == kMandatory) {
+  if (!skip_availaiblity_specifier_) {
+    // Arrays, map and typedefs of arrays and maps doesn't need to be marked as
+    // optional or mandatory because their minimal size indicates whether
+    // container contents is optional
+    skip_availaiblity_specifier_ = TypeProperties(type).is_container();
+  }
   type->Apply(this);
 }
 
@@ -154,19 +160,14 @@ std::string RpcTypeNameGenerator::result() const {
 }
 
 void RpcTypeNameGenerator::GenerateCodeForBoolean(const Boolean* boolean) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(boolean);
+  if (MaybeWrapWithAvailabilitySpecifier(boolean)) {
   } else {
     os_ << "Boolean";
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForInteger(const Integer* integer) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(integer);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(integer)) {
     const char* int_type = StdIntTypeFromRagne(integer->range());
     strmfmt(os_, "Integer<{0}, {1}, {2}>", int_type, integer->range().min(),
             integer->range().max());
@@ -174,10 +175,7 @@ void RpcTypeNameGenerator::GenerateCodeForInteger(const Integer* integer) {
 }
 
 void RpcTypeNameGenerator::GenerateCodeForFloat(const Float* flt) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(flt);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(flt)) {
     const Fraction& minval = flt->range().min_fract();
     const Fraction& maxval = flt->range().max_fract();
     strmfmt(os_, "Float<{0}, {1}", minval.numer(), maxval.numer());
@@ -190,59 +188,90 @@ void RpcTypeNameGenerator::GenerateCodeForFloat(const Float* flt) {
 }
 
 void RpcTypeNameGenerator::GenerateCodeForString(const String* string) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(string);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(string)) {
     strmfmt(os_, "String<{0}>", string->max_length());
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(enm);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(enm)) {
     strmfmt(os_, "Enum<{0}>", enm->name());
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForArray(const Array* array) {
-  wrap_with_mandatory_ = false;
   os_ << "Array    < ";
   array->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", array->range().min(), array->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
-  wrap_with_mandatory_ = false;
   os_ << "Map      < ";
   map->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", map->range().min(), map->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(strct);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(strct)) {
     os_ << strct->name();
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
-  if (wrap_with_mandatory_) {
-    wrap_with_mandatory_ = false;
-    WrapWithMandatory(tdef);
-  } else {
+  if (!MaybeWrapWithAvailabilitySpecifier(tdef)) {
     os_ << tdef->name();
   }
 }
 
-void RpcTypeNameGenerator::WrapWithMandatory(const Type* type) {
-  os_ << (mandatory_ ? "Mandatory< " : "Optional < ");
+bool RpcTypeNameGenerator::MaybeWrapWithAvailabilitySpecifier(const Type* type) {
+  if (skip_availaiblity_specifier_) {
+    return false;
+  } else {
+    skip_availaiblity_specifier_ = true;
+    os_ << (mandatory_ ? "Mandatory< " : "Optional < ");
+    type->Apply(this);
+    os_ << " >";
+    return true;
+  }
+}
+
+TypeProperties::TypeProperties(const Type* type)
+  : container_(false) {
   type->Apply(this);
-  os_ << " >";
+}
+
+bool TypeProperties::is_container() const {
+  return container_;
+}
+
+void TypeProperties::GenerateCodeForBoolean(const Boolean* boolean) {
+}
+
+void TypeProperties::GenerateCodeForInteger(const Integer* integer) {
+}
+
+void TypeProperties::GenerateCodeForFloat(const Float* flt) {
+}
+
+void TypeProperties::GenerateCodeForString(const String* string) {
+}
+
+void TypeProperties::GenerateCodeForEnum(const Enum* enm) {
+}
+
+void TypeProperties::GenerateCodeForArray(const Array* array) {
+  container_ = true;
+}
+
+void TypeProperties::GenerateCodeForMap(const Map* map) {
+  container_ = true;
+}
+
+void TypeProperties::GenerateCodeForStruct(const Struct* strct) {
+}
+
+void TypeProperties::GenerateCodeForTypedef(const Typedef* tdef) {
+  tdef->type()->Apply(this);
 }
 
 }  // namespace codegen
