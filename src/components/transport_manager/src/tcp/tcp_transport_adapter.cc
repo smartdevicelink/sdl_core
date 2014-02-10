@@ -36,6 +36,8 @@
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
+#include <sstream>
+#include <cstdlib>
 
 #include "resumption/last_state.h"
 
@@ -89,11 +91,14 @@ void TcpTransportAdapter::Store() const {
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      int port = tcp_device->GetApplicationPort(app_handle);
+      const int port = tcp_device->GetApplicationPort(app_handle);
+      std::string port_string;
+      std::stringstream stream(port_string);
+      stream << port;
       if (port != -1) { // don't want to store incoming applications
         resumption::LastState::Dictionary application_dictionary;
-        application_dictionary.AddItem("port", std::to_string(port));
-        applications_dictionary.AddSubitem(std::to_string(port), application_dictionary);
+        application_dictionary.AddItem("port", port_string);
+        applications_dictionary.AddSubitem(port_string, application_dictionary);
       }
     }
     device_dictionary.AddSubitem("applications", applications_dictionary);
