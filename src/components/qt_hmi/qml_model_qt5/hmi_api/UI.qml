@@ -502,6 +502,7 @@ Item {
             console.debug("exit")
             return sliderPopup.async;
         } else {
+            console.debug("exit")
             return { sliderPosition: position }
         }
     }

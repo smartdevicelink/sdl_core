@@ -55,7 +55,9 @@ ContextPopup {
 
         dataContainer.uiSlider.running = true
         dataContainer.applicationSavedContext = dataContainer.applicationContext
-        if(dataContainer.uiSlider.footer.length === 0 || dataContainer.uiSlider.position === 0 ) {
+        if(dataContainer.uiSlider.footer === undefined ||
+                dataContainer.uiSlider.footer.length === 0 ||
+                dataContainer.uiSlider.position === 0 ) {
             footerText.text = ""
         } else {
             footerText.text = dataContainer.uiSlider.footer.length === 1 ? dataContainer.uiSlider.footer[0] : dataContainer.uiSlider.footer[dataContainer.uiSlider.position - 1]
