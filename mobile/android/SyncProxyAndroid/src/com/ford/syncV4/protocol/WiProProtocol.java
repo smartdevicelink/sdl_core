@@ -61,11 +61,13 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public void StartProtocolSession(byte sessionId) {
+        DebugTool.logInfo("Protocol session should start: " + sessionId);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC, sessionId, _version);
         sendFrameToTransport(header);
     } // end-method
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
+        DebugTool.logInfo("Protocol service should start: " + serviceType);
         if (session.getSessionId() == 0) {
             throw new IllegalArgumentException("currentSession id 0 should be used to start currentSession only");
         }
@@ -204,7 +206,12 @@ public class WiProProtocol extends AbstractProtocol {
                 receivedBytesReadPos += headerBytesNeeded;
                 _haveHeader = true;
                 _currentHeader = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
-                _dataBuf = new byte[_currentHeader.getDataSize()];
+                try {
+                    _dataBuf = new byte[_currentHeader.getDataSize()];
+                }catch (OutOfMemoryError e){
+                    // TODO - some terrible things is going on. _currentHeader.getDataSize() returns awfully big number during unregister - register cycle
+                    DebugTool.logError(e.toString() + " No memory - no regrets.");
+                }
                 _dataBufWritePos = 0;
             }
         }

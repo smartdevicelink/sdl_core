@@ -384,9 +384,8 @@ public class TCPTransport extends SyncTransport {
                 }
 
                 setCurrentState(TCPTransportState.CONNECTED);
-                synchronized (TCPTransport.this) {
-                    handleTransportConnected();
-                }
+                handleTransportConnected();
+
 
                 byte[] buffer = new byte[READ_BUFFER_SIZE];
 
@@ -415,9 +414,7 @@ public class TCPTransport extends SyncTransport {
                         logInfo("TCPTransport.run: Received zero bytes");
                     } else {
                         logInfo(String.format("TCPTransport.run: Received %d bytes", bytesRead));
-                        synchronized (TCPTransport.this) {
-                            handleReceivedBytes(buffer, bytesRead);
-                        }
+                        handleReceivedBytes(buffer, bytesRead);
                     }
                 }
             }

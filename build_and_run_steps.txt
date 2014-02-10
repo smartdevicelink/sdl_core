@@ -43,7 +43,8 @@
     3.3.2. Download the archived QNX image for VMware from ftp://ford-applink.luxoft.com/Distrs/QNX/QNX_SDP_6.5.0.tar.gz
     3.3.3. Extract image from archive and open it in VMware
       Note: QNX image has root with empty pass and user with pass 'user'. SSH is configured
-    3.3.4. Run ssh server if it is not running "/usr/sbin/sshd".
+    3.3.4. Log as root.
+      Note: Ssh server shall be started automatically. (Common command is "/usr/sbin/sshd").
 
   3.4. To make QNX virtual machine from scratch:
     3.4.2. SSH configuration on QNX server:
@@ -65,6 +66,13 @@
       3.4.4.2. Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
       3.4.4.3. Download log4cxx runtime archive to QNX “scp <linuxhost_user>@<linuxhost_ip>:/<Delivery_Package_Path>/ log4cxx.qnx.runtime.files.zip ./”
       3.4.4.4. Unpack on QNX server log4cxx binary files of log4cxx QNX port “unzip ./log4cxx.qnx.runtime.files.zip -d /” (this file is also located in git)
+    3.4.5. Set up dbus-daemon and sshd to run at time login
+      3.4.5.1 Create file "/etc/profile.d/sshd.sh" with command "/usr/sbin/sshd"
+      3.4.5.1 Create file "/etc/profile.d/dbus.sh" with command
+        "if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
+          DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --fork --session --print-address`
+          export DBUS_SESSION_BUS_ADDRESS
+        fi"
 
   3.5. To set up Android Simulator for using instead of real device:
     3.5.1. Install and configure the Android Simulator in keeping with the following instructions https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+and+setup+android+emulator+on+Ubuntu
@@ -104,10 +112,10 @@
 
 ==========================================================================================================
 7. Common run on QNX host.
-  7.1. Make sure you are not running Photon
-  7.2. QnxServ: run terminal.
-  7.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
-  7.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  7.1. Log as root and make sure you are not running Photon
+  7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_Root_Bin>/bin/* ./” .
+      Note: Ssh server shall be started automatically. (Common command is "/usr/sbin/sshd").
+  7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================

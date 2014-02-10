@@ -1,7 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import android.util.Log;
-
 import com.ford.syncV4.proxy.constants.Names;
 
 import junit.framework.TestCase;
@@ -153,5 +151,14 @@ public class RPCMessageTest extends TestCase {
         // nextInt is normally exclusive of the top value,
         // so add 1 to make it inclusive
         return rand.nextInt((max - min) + 1) + min;
+    }
+
+    public void testRECMessageCopyConstructor() throws Exception {
+        messageHashTable.put(Names.bulkData, BULK_DATA);
+        messageHashTable.put(Names.request, getRandomData());
+        RPCMessage message = new RPCMessage(messageHashTable);
+        RPCMessage real = new RPCMessage(message);
+        assertEquals(message.getFunctionName(), real.getFunctionName());
+        assertEquals(message.getMessageType(), real.getMessageType());
     }
 }

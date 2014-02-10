@@ -1883,6 +1883,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         }
     }
 
+    public void syncProxySendRegisterRequest(RegisterAppInterface msg)throws SyncException {
+        if (mSyncProxy != null) {
+            // TODO it's seems stupid in order to register send onTransportConnected
+            mSyncProxy.updateRegisterAppInterfaceParameters(msg);
+            mSyncProxy.getSyncConnection().onTransportConnected();
+        }
+    }
+
     public byte syncProxyGetWiProVersion() {
         if (mSyncProxy != null) {
             return mSyncProxy.getWiProVersion();
@@ -2013,4 +2021,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             }
         }, 500);
     }
+
+
 }

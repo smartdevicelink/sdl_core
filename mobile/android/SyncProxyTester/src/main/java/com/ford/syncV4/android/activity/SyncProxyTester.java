@@ -3636,10 +3636,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     msg.setAppID(appID.getText().toString());
                 }
 
-                mLogAdapter.logMessage(msg, true);
                 try {
                     if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                        mBoundProxyService.syncProxySendRegisterRequest(msg);
                     }
                 } catch (SyncException e) {
                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);

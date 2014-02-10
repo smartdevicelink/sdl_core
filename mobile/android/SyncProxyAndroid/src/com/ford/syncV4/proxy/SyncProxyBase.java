@@ -1011,6 +1011,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
             mSyncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
+            mSyncConnection.setSessionId((byte) 0);
             if (!keepConnection) {
                 setSyncConnection(null);
             }
@@ -1035,43 +1036,43 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
 
                 firstTimeFull = true;
-
-                // Should we wait for the interface to be unregistered?
-                Boolean waitForInterfaceUnregistered = false;
-                // Unregister app interface
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_appInterfaceRegisterd == true && mSyncConnection != null && mSyncConnection.getIsConnected()) {
-                        waitForInterfaceUnregistered = true;
-                        unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
-                    }
-                }
-
-                // Wait for the app interface to be unregistered
-                if (waitForInterfaceUnregistered) {
-                    synchronized (APP_INTERFACE_REGISTERED_LOCK) {
-                        try {
-                            APP_INTERFACE_REGISTERED_LOCK.wait(1000);
-                        } catch (InterruptedException e) {
-                            // Do nothing
-                        }
-                    }
-                }
-            }
-
-            // Clean up SYNC Connection
-            synchronized (CONNECTION_REFERENCE_LOCK) {
-                if (!keepSession) {
-                    stopAllServices();
-                }
-                closeSyncConnection(keepConnection);
-                if (!keepSession) {
-                    stopSession();
-                }
+                exitSession(keepConnection, keepSession);
             }
         } catch (SyncException e) {
             throw e;
         } finally {
             SyncTrace.logProxyEvent("SyncProxy cleaned.", SYNC_LIB_TRACE_KEY);
+        }
+    }
+
+    private void exitSession(boolean keepConnection, boolean keepSession) throws SyncException {
+        // Should we wait for the interface to be unregistered?
+        Boolean waitForInterfaceUnregistered = false;
+        synchronized (CONNECTION_REFERENCE_LOCK) {
+            if (_appInterfaceRegisterd == true && mSyncConnection != null && mSyncConnection.getIsConnected()) {
+                waitForInterfaceUnregistered = true;
+                unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
+            }
+            // Wait for the app interface to be unregistered
+            if (waitForInterfaceUnregistered) {
+                synchronized (APP_INTERFACE_REGISTERED_LOCK) {
+                    try {
+                        APP_INTERFACE_REGISTERED_LOCK.wait(1000);
+                    } catch (InterruptedException e) {
+                        // Do nothing
+                    }
+                }
+            }
+
+            // Clean up SYNC Connection
+
+            if (!keepSession) {
+                stopAllServices();
+            }
+            closeSyncConnection(keepConnection);
+            if (!keepSession) {
+                stopSession();
+            }
         }
     }
 
@@ -2628,6 +2629,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void notifyOnAppInterfaceUnregistered(final OnAppInterfaceUnregistered msg) {
         notifyProxyClosed("OnAppInterfaceUnregistered", null);
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2642,13 +2644,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void onUnregisterAppInterfaceResponse(Hashtable hash) {
-        // UnregisterAppInterface
+        stopAllServices();
+        closeSyncConnection(true);
+        stopSession();
 
+        // UnregisterAppInterface
         _appInterfaceRegisterd = false;
         synchronized (APP_INTERFACE_REGISTERED_LOCK) {
             APP_INTERFACE_REGISTERED_LOCK.notify();
         }
-
         final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2719,7 +2723,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
         }
-
         sendRPCRequestPrivate(request);
     } // end-method
 
@@ -3763,6 +3766,107 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
+    public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
+        _syncMsgVersionRequest = syncMsgVersionRequest;
+    }
+
+    public SyncMsgVersion getSyncMsgVersionRequest() {
+        return _syncMsgVersionRequest;
+    }
+
+    public void setApplicationName(String applicationName) {
+       _applicationName = applicationName;
+    }
+
+    public String getApplicationName() {
+        return _applicationName;
+    }
+
+    public void setTTSName(Vector<TTSChunk> TTSName) {
+        this._ttsName = TTSName;
+    }
+
+    public Vector<TTSChunk> getTTSName() {
+        return _ttsName;
+    }
+
+    public void setNgnMediaScreenAppName(String ngnMediaScreenAppName) {
+        this._ngnMediaScreenAppName = ngnMediaScreenAppName;
+    }
+
+    public String getNgnMediaScreenAppName() {
+        return _ngnMediaScreenAppName;
+    }
+
+    public void setVrSynonyms(Vector<String> vrSynonyms) {
+        this._vrSynonyms = vrSynonyms;
+    }
+
+    public Vector<String> getVrSynonyms() {
+        return _vrSynonyms;
+    }
+
+    public void setIsMediApp(Boolean isMediApp) {
+        this._isMediaApp = isMediApp;
+    }
+
+    public Boolean getIsMediaApp() {
+        return _isMediaApp;
+    }
+
+    public void setSyncLanguageDesired(Language syncLanguageDesired) {
+        this._syncLanguageDesired = syncLanguageDesired;
+    }
+
+    public Language getSyncLanguageDesired() {
+        return _syncLanguageDesired;
+    }
+
+    public void setHmiDisplayLanguageDesired(Language hmiDisplayLanguageDesired) {
+        this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+    }
+
+    public Language getHmiDisplayLanguageDesired() {
+        return _hmiDisplayLanguageDesired;
+    }
+
+    public void setAppHMIType(Vector<AppHMIType> appHMIType) {
+        this._appHMIType = appHMIType;
+    }
+
+    public Vector<AppHMIType> getAppHMIType() {
+        return _appHMIType;
+    }
+
+    public void setAppID(String appID) {
+        this._appID = appID;
+    }
+
+    public String getAppID() {
+        return _appID;
+    }
+
+    public void setAutoActivateIdDesired(String autoActivateIdDesired) {
+        this._autoActivateIdReturned = autoActivateIdDesired;
+    }
+
+    public String getAutoActivateIdDesired() {
+        return _autoActivateIdReturned;
+    }
+
+    public void updateRegisterAppInterfaceParameters(RegisterAppInterface msg) {
+        _syncMsgVersionRequest = msg.getSyncMsgVersion();
+        _applicationName = msg.getAppName();
+        _ttsName = msg.getTtsName();
+        _ngnMediaScreenAppName = msg.getNgnMediaScreenAppName();
+        _vrSynonyms = msg.getVrSynonyms();
+        _isMediaApp = msg.getIsMediaApplication();
+        _syncLanguageDesired = msg.getLanguageDesired();
+        _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
+        _appHMIType = msg.getAppType();
+        _appID = msg.getAppID();
+    }
+
     // Private Class to Interface with SyncConnection
     public class SyncInterfaceBroker implements ISyncConnectionListener {
 
@@ -3785,9 +3889,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             if (_advancedLifecycleManagementEnabled) {
                 // Cycle the proxy
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
-                }
+                cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
             } else {
                 notifyProxyClosed(info, e);
             }
