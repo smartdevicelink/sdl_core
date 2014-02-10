@@ -582,6 +582,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
                 mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
 
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
+
         if (mBoundProxyService != null) {
             mBoundProxyService.destroyService(new IProxyServiceEvent() {
                 @Override
