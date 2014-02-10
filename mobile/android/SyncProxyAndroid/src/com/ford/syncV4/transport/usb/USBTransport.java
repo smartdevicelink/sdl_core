@@ -350,24 +350,24 @@ public class USBTransport extends SyncTransport {
                     mOutputStream.close();
                 } catch (IOException e) {
                     logW("Can't close output stream", e);
-                    mOutputStream = null;
                 }
+                mOutputStream = null;
             }
             if (mInputStream != null) {
                 try {
                     mInputStream.close();
                 } catch (IOException e) {
                     logW("Can't close input stream", e);
-                    mInputStream = null;
                 }
+                mInputStream = null;
             }
             if (mParcelFD != null) {
                 try {
                     mParcelFD.close();
                 } catch (IOException e) {
                     logW("Can't close file descriptor", e);
-                    mParcelFD = null;
                 }
+                mParcelFD = null;
             }
 
             mAccessory = null;
