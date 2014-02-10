@@ -342,6 +342,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler = new Handler(Looper.getMainLooper());
         }
 
+
         // Set variables for Advanced Lifecycle Management
         _advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
         _applicationName = appName;
@@ -356,22 +357,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _appID = appID;
         _autoActivateIdDesired = autoActivateID;
         _transportConfig = transportConfig;
+        checkConditionsInvalidateProxy(listener);
 
-        // Test conditions to invalidate the proxy
-        if (listener == null) {
-            throw new IllegalArgumentException("IProxyListener listener must be provided to instantiate SyncProxy object.");
-        }
-        if (_advancedLifecycleManagementEnabled) {
-            if (_applicationName == null) {
-                throw new IllegalArgumentException("To use SyncProxyALM, an application name, appName, must be provided");
-            }
-            if (_applicationName.length() < 1 || _applicationName.length() > 100) {
-                throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
-            }
-            if (_isMediaApp == null) {
-                throw new IllegalArgumentException("isMediaApp must not be null when using SyncProxyALM.");
-            }
-        }
 
         _proxyListener = listener;
 
@@ -391,6 +378,64 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } // end-if
         } // end-if
 
+        setupInternalProxyMessageDispatcher();
+        setupIncomingProxyMessageDispatcher();
+        setupOutgoingMessageDispatcher();
+        tryInitialiseProxy();
+
+        // Trace that ctor has fired
+        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    private void checkConditionsInvalidateProxy(proxyListenerType listener) {
+        // Test conditions to invalidate the proxy
+        if (listener == null) {
+            throw new IllegalArgumentException("IProxyListener listener must be provided to instantiate SyncProxy object.");
+        }
+        if (_advancedLifecycleManagementEnabled) {
+            if (_applicationName == null) {
+                throw new IllegalArgumentException("To use SyncProxyALM, an application name, appName, must be provided");
+            }
+            if (_applicationName.length() < 1 || _applicationName.length() > 100) {
+                throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
+            }
+            if (_isMediaApp == null) {
+                throw new IllegalArgumentException("isMediaApp must not be null when using SyncProxyALM.");
+            }
+        }
+    }
+
+    private void setupOutgoingMessageDispatcher() {
+        // Setup Outgoing ProxyMessage Dispatcher
+        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+            // Ensure outgoingProxyMessageDispatcher is null
+            if (_outgoingProxyMessageDispatcher != null) {
+                _outgoingProxyMessageDispatcher.dispose();
+                _outgoingProxyMessageDispatcher = null;
+            }
+
+            _outgoingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("OUTGOING_MESSAGE_DISPATCHER",
+                    new OutgoingProtocolMessageComparitor(),
+                    new IDispatchingStrategy<ProtocolMessage>() {
+                        @Override
+                        public void dispatch(ProtocolMessage message) {
+                            dispatchOutgoingMessage((ProtocolMessage) message);
+                        }
+
+                        @Override
+                        public void handleDispatchingError(String info, Exception ex) {
+                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
+                        }
+
+                        @Override
+                        public void handleQueueingError(String info, Exception ex) {
+                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
+                        }
+                    });
+        }
+    }
+
+    private void setupInternalProxyMessageDispatcher() {
         // Setup Internal ProxyMessage Dispatcher
         synchronized (INTERNAL_MESSAGE_QUEUE_THREAD_LOCK) {
             // Ensure internalProxyMessageDispatcher is null
@@ -419,87 +464,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
         }
-
-        // Setup Incoming ProxyMessage Dispatcher
-        synchronized (INCOMING_MESSAGE_QUEUE_THREAD_LOCK) {
-            // Ensure incomingProxyMessageDispatcher is null
-            if (_incomingProxyMessageDispatcher != null) {
-                _incomingProxyMessageDispatcher.dispose();
-                _incomingProxyMessageDispatcher = null;
-            }
-
-            _incomingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("INCOMING_MESSAGE_DISPATCHER",
-                    new IncomingProtocolMessageComparitor(),
-                    new IDispatchingStrategy<ProtocolMessage>() {
-                        @Override
-                        public void dispatch(ProtocolMessage message) {
-                            dispatchIncomingMessage((ProtocolMessage) message);
-                        }
-
-                        @Override
-                        public void handleDispatchingError(String info, Exception ex) {
-                            handleErrorsFromIncomingMessageDispatcher(info, ex);
-                        }
-
-                        @Override
-                        public void handleQueueingError(String info, Exception ex) {
-                            handleErrorsFromIncomingMessageDispatcher(info, ex);
-                        }
-                    });
-        }
-
-        // Setup Outgoing ProxyMessage Dispatcher
-        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-            // Ensure outgoingProxyMessageDispatcher is null
-            if (_outgoingProxyMessageDispatcher != null) {
-                _outgoingProxyMessageDispatcher.dispose();
-                _outgoingProxyMessageDispatcher = null;
-            }
-
-            _outgoingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("OUTGOING_MESSAGE_DISPATCHER",
-                    new OutgoingProtocolMessageComparitor(),
-                    new IDispatchingStrategy<ProtocolMessage>() {
-                        @Override
-                        public void dispatch(ProtocolMessage message) {
-                            dispatchOutgoingMessage((ProtocolMessage) message);
-                        }
-
-                        @Override
-                        public void handleDispatchingError(String info, Exception ex) {
-                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
-                        }
-
-                        @Override
-                        public void handleQueueingError(String info, Exception ex) {
-                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
-                        }
-                    });
-        }
-
-        // Initialize the proxy
-        try {
-            initializeProxy();
-        } catch (SyncException e) {
-            // Couldn't initialize the proxy
-            // Dispose threads and then rethrow exception
-
-            if (_internalProxyMessageDispatcher != null) {
-                _internalProxyMessageDispatcher.dispose();
-                _internalProxyMessageDispatcher = null;
-            }
-            if (_incomingProxyMessageDispatcher != null) {
-                _incomingProxyMessageDispatcher.dispose();
-                _incomingProxyMessageDispatcher = null;
-            }
-            if (_outgoingProxyMessageDispatcher != null) {
-                _outgoingProxyMessageDispatcher.dispose();
-                _outgoingProxyMessageDispatcher = null;
-            }
-            throw e;
-        }
-
-        // Trace that ctor has fired
-        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
     /**
@@ -560,20 +524,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _transportConfig = transportConfig;
 
         // Test conditions to invalidate the proxy
-        if (listener == null) {
-            throw new IllegalArgumentException("IProxyListener listener must be provided to instantiate SyncProxy object.");
-        }
-        if (_advancedLifecycleManagementEnabled) {
-            if (_applicationName == null) {
-                throw new IllegalArgumentException("To use SyncProxyALM, an application name, appName, must be provided");
-            }
-            if (_applicationName.length() < 1 || _applicationName.length() > 100) {
-                throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
-            }
-            if (_isMediaApp == null) {
-                throw new IllegalArgumentException("isMediaApp must not be null when using SyncProxyALM.");
-            }
-        }
+        checkConditionsInvalidateProxy(listener);
 
         _proxyListener = listener;
         _syncConnection = connection;
@@ -594,35 +545,41 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } // end-if
         } // end-if
 
-        // Setup Internal ProxyMessage Dispatcher
-        synchronized (INTERNAL_MESSAGE_QUEUE_THREAD_LOCK) {
-            // Ensure internalProxyMessageDispatcher is null
+        setupInternalProxyMessageDispatcher();
+        setupIncomingProxyMessageDispatcher();
+        setupOutgoingMessageDispatcher();
+        tryInitialiseProxy();
+
+
+        // Trace that ctor has fired
+        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    private void tryInitialiseProxy() throws SyncException {
+        // Initialize the proxy
+        try {
+            initializeProxy();
+        } catch (SyncException e) {
+            // Couldn't initialize the proxy
+            // Dispose threads and then rethrow exception
+
             if (_internalProxyMessageDispatcher != null) {
                 _internalProxyMessageDispatcher.dispose();
                 _internalProxyMessageDispatcher = null;
             }
-
-            _internalProxyMessageDispatcher = new ProxyMessageDispatcher<InternalProxyMessage>("INTERNAL_MESSAGE_DISPATCHER",
-                    new InternalProxyMessageComparitor(),
-                    new IDispatchingStrategy<InternalProxyMessage>() {
-
-                        @Override
-                        public void dispatch(InternalProxyMessage message) {
-                            dispatchInternalMessage((InternalProxyMessage) message);
-                        }
-
-                        @Override
-                        public void handleDispatchingError(String info, Exception ex) {
-                            handleErrorsFromInternalMessageDispatcher(info, ex);
-                        }
-
-                        @Override
-                        public void handleQueueingError(String info, Exception ex) {
-                            handleErrorsFromInternalMessageDispatcher(info, ex);
-                        }
-                    });
+            if (_incomingProxyMessageDispatcher != null) {
+                _incomingProxyMessageDispatcher.dispose();
+                _incomingProxyMessageDispatcher = null;
+            }
+            if (_outgoingProxyMessageDispatcher != null) {
+                _outgoingProxyMessageDispatcher.dispose();
+                _outgoingProxyMessageDispatcher = null;
+            }
+            throw e;
         }
+    }
 
+    private void setupIncomingProxyMessageDispatcher() {
         // Setup Incoming ProxyMessage Dispatcher
         synchronized (INCOMING_MESSAGE_QUEUE_THREAD_LOCK) {
             // Ensure incomingProxyMessageDispatcher is null
@@ -650,59 +607,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
         }
-
-        // Setup Outgoing ProxyMessage Dispatcher
-        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
-            // Ensure outgoingProxyMessageDispatcher is null
-            if (_outgoingProxyMessageDispatcher != null) {
-                _outgoingProxyMessageDispatcher.dispose();
-                _outgoingProxyMessageDispatcher = null;
-            }
-
-            _outgoingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("OUTGOING_MESSAGE_DISPATCHER",
-                    new OutgoingProtocolMessageComparitor(),
-                    new IDispatchingStrategy<ProtocolMessage>() {
-                        @Override
-                        public void dispatch(ProtocolMessage message) {
-                            dispatchOutgoingMessage((ProtocolMessage) message);
-                        }
-
-                        @Override
-                        public void handleDispatchingError(String info, Exception ex) {
-                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
-                        }
-
-                        @Override
-                        public void handleQueueingError(String info, Exception ex) {
-                            handleErrorsFromOutgoingMessageDispatcher(info, ex);
-                        }
-                    });
-        }
-
-        // Initialize the proxy
-        try {
-            initializeProxy();
-        } catch (SyncException e) {
-            // Couldn't initialize the proxy
-            // Dispose threads and then rethrow exception
-
-            if (_internalProxyMessageDispatcher != null) {
-                _internalProxyMessageDispatcher.dispose();
-                _internalProxyMessageDispatcher = null;
-            }
-            if (_incomingProxyMessageDispatcher != null) {
-                _incomingProxyMessageDispatcher.dispose();
-                _incomingProxyMessageDispatcher = null;
-            }
-            if (_outgoingProxyMessageDispatcher != null) {
-                _outgoingProxyMessageDispatcher.dispose();
-                _outgoingProxyMessageDispatcher = null;
-            }
-            throw e;
-        }
-
-        // Trace that ctor has fired
-        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
     // Public method to enable the siphon transport
@@ -3776,7 +3680,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void setApplicationName(String applicationName) {
-       _applicationName = applicationName;
+        _applicationName = applicationName;
     }
 
     public String getApplicationName() {
