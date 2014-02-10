@@ -334,17 +334,31 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig)
             throws SyncException {
 
-        _interfaceBroker = new SyncInterfaceBroker();
-
-        _callbackToUIThread = callbackToUIThread;
-
-        if (_callbackToUIThread) {
-            _mainUIHandler = new Handler(Looper.getMainLooper());
-        }
+        setupSyncProxyBaseComponents(callbackToUIThread);
 
 
         // Set variables for Advanced Lifecycle Management
-        _advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
+        setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
+        updateRegisterAppInterfaceParametrs(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        setTransportConfig(transportConfig);
+        checkConditionsInvalidateProxy(listener);
+
+
+        setProxyListener(listener);
+
+        // Get information from syncProxyConfigurationResources
+        setupTelephoneManager(syncProxyConfigurationResources);
+
+        setupInternalProxyMessageDispatcher();
+        setupIncomingProxyMessageDispatcher();
+        setupOutgoingMessageDispatcher();
+        tryInitialiseProxy();
+
+        // Trace that ctor has fired
+        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    private void updateRegisterAppInterfaceParametrs(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
         _applicationName = appName;
         _ttsName = ttsName;
         _ngnMediaScreenAppName = ngnMediaScreenAppName;
@@ -356,35 +370,92 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _appHMIType = appHMIType;
         _appID = appID;
         _autoActivateIdDesired = autoActivateID;
-        _transportConfig = transportConfig;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param listener                          Type of listener for this proxy base.
+     * @param syncProxyConfigurationResources   Configuration resources for this proxy.
+     * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
+     * @param appName                           Client application name.
+     * @param ttsName                           TTS name.
+     * @param ngnMediaScreenAppName             Media Screen Application name.
+     * @param vrSynonyms                        List of synonyms.
+     * @param isMediaApp                        Flag that indicates that client application if media application or not.
+     * @param syncMsgVersion                    Version of Sync Message.
+     * @param languageDesired                   Desired language.
+     * @param hmiDisplayLanguageDesired         Desired language for HMI.
+     * @param appHMIType                        Type of application.
+     * @param appID                             Application identifier.
+     * @param autoActivateID                    Auto activation identifier.
+     * @param callbackToUIThread                Flag that indicates that this proxy should send callback to UI thread or not.
+     * @param preRegister                       Flag that indicates that this proxy should be pre-registerd or not.
+     * @param version                           Version of Sync protocol to be used by the underlying connection.
+     * @param transportConfig                   Configuration of transport to be used by underlying connection.
+     * @throws SyncException
+     */
+    protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
+                            boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
+                            String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
+                            Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
+                            String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
+                            BaseTransportConfig transportConfig, SyncConnection connection)
+            throws SyncException {
+
+        setWiProVersion((byte) version);
+        setAppInterfacePreRegiter(preRegister);
+
+        setupSyncProxyBaseComponents(callbackToUIThread);
+
+        // Set variables for Advanced Lifecycle Management
+        setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
+        updateRegisterAppInterfaceParametrs(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        setTransportConfig(transportConfig);
+
+        // Test conditions to invalidate the proxy
         checkConditionsInvalidateProxy(listener);
 
+        setProxyListener(listener);
+        setSyncConnection(connection);
 
-        _proxyListener = listener;
+        setupTelephoneManager(syncProxyConfigurationResources);
 
-        // Get information from syncProxyConfigurationResources
-        TelephonyManager telephonyManager = null;
-        if (syncProxyConfigurationResources != null) {
-            telephonyManager = syncProxyConfigurationResources.getTelephonyManager();
-        }
-
-        // Use the telephonyManager to get and log phone info
-        if (telephonyManager != null) {
-            // Following is not quite thread-safe (because m_traceLogger could notifyOnAppInterfaceUnregistered null twice),
-            // so we need to fix this, but vulnerability (i.e. two instances of listener) is
-            // likely harmless.
-            if (_traceDeviceInterrogator == null) {
-                _traceDeviceInterrogator = new TraceDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
-            } // end-if
-        } // end-if
 
         setupInternalProxyMessageDispatcher();
         setupIncomingProxyMessageDispatcher();
         setupOutgoingMessageDispatcher();
         tryInitialiseProxy();
 
+
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    private void setTransportConfig(BaseTransportConfig transportConfig) {
+        _transportConfig = transportConfig;
+    }
+
+    private void setAdvancedLifecycleManagementEnabled(boolean enableAdvancedLifecycleManagement) {
+        _advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
+    }
+
+    private void setProxyListener(proxyListenerType listener) {
+        _proxyListener = listener;
+    }
+
+    private void setAppInterfacePreRegiter(boolean preRegister) {
+        if (preRegister) _appInterfaceRegisterd = preRegister;
+    }
+
+    private void setupSyncProxyBaseComponents(boolean callbackToUIThread) {
+        _interfaceBroker = new SyncInterfaceBroker();
+
+        _callbackToUIThread = callbackToUIThread;
+
+        if (_callbackToUIThread) {
+            _mainUIHandler = new Handler(Looper.getMainLooper());
+        }
     }
 
     private void checkConditionsInvalidateProxy(proxyListenerType listener) {
@@ -466,69 +537,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    /**
-     * Constructor.
-     *
-     * @param listener                          Type of listener for this proxy base.
-     * @param syncProxyConfigurationResources   Configuration resources for this proxy.
-     * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
-     * @param appName                           Client application name.
-     * @param ttsName                           TTS name.
-     * @param ngnMediaScreenAppName             Media Screen Application name.
-     * @param vrSynonyms                        List of synonyms.
-     * @param isMediaApp                        Flag that indicates that client application if media application or not.
-     * @param syncMsgVersion                    Version of Sync Message.
-     * @param languageDesired                   Desired language.
-     * @param hmiDisplayLanguageDesired         Desired language for HMI.
-     * @param appHMIType                        Type of application.
-     * @param appID                             Application identifier.
-     * @param autoActivateID                    Auto activation identifier.
-     * @param callbackToUIThread                Flag that indicates that this proxy should send callback to UI thread or not.
-     * @param preRegister                       Flag that indicates that this proxy should be pre-registerd or not.
-     * @param version                           Version of Sync protocol to be used by the underlying connection.
-     * @param transportConfig                   Configuration of transport to be used by underlying connection.
-     * @throws SyncException
-     */
-    protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
-                            boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
-                            String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
-                            Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
-                            BaseTransportConfig transportConfig, SyncConnection connection)
-            throws SyncException {
-
-        setWiProVersion((byte) version);
-        if (preRegister) _appInterfaceRegisterd = preRegister;
-
-        _interfaceBroker = new SyncInterfaceBroker();
-
-        _callbackToUIThread = callbackToUIThread;
-
-        if (_callbackToUIThread) {
-            _mainUIHandler = new Handler(Looper.getMainLooper());
-        }
-
-        // Set variables for Advanced Lifecycle Management
-        _advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
-        _applicationName = appName;
-        _ttsName = ttsName;
-        _ngnMediaScreenAppName = ngnMediaScreenAppName;
-        _isMediaApp = isMediaApp;
-        _syncMsgVersionRequest = syncMsgVersion;
-        _vrSynonyms = vrSynonyms;
-        _syncLanguageDesired = languageDesired;
-        _hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-        _appHMIType = appHMIType;
-        _appID = appID;
-        _autoActivateIdDesired = autoActivateID;
-        _transportConfig = transportConfig;
-
-        // Test conditions to invalidate the proxy
-        checkConditionsInvalidateProxy(listener);
-
-        _proxyListener = listener;
-        _syncConnection = connection;
-
+    private void setupTelephoneManager(SyncProxyConfigurationResources syncProxyConfigurationResources) {
         // Get information from syncProxyConfigurationResources
         TelephonyManager telephonyManager = null;
         if (syncProxyConfigurationResources != null) {
@@ -544,15 +553,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _traceDeviceInterrogator = new TraceDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
             } // end-if
         } // end-if
-
-        setupInternalProxyMessageDispatcher();
-        setupIncomingProxyMessageDispatcher();
-        setupOutgoingMessageDispatcher();
-        tryInitialiseProxy();
-
-
-        // Trace that ctor has fired
-        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
     private void tryInitialiseProxy() throws SyncException {
