@@ -51,7 +51,6 @@ void OnSystemRequestNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
           static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
   SendNotificationToMobile(message_);
-
 }
 
 }  // namespace commands
