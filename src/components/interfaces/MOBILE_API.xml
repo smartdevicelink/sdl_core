@@ -2194,6 +2194,10 @@
       <description>See SpeechCapabilities</description>
     </param>
 
+    <param name="prerecordedSpeech" type="PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="false">
+       <description>See PrerecordedSpeech</description>
+     </param>
+
     <param name="vrCapabilities" type="VrCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>See VrCapabilities</description>
     </param>
