@@ -67,13 +67,11 @@ add_subdirectory(./config_profile)
 # --- Resumption
 add_subdirectory(./resumption)
 
-if (BUILD_MEDIA_MANAGER)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
 # --- Policies
 add_subdirectory(./policies)
-endif (BUILD_MEDIA_MANAGER)
 
 if (${QT_HMI})
 # --- DBus
