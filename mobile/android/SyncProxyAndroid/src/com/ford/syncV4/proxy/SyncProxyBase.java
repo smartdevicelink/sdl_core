@@ -335,41 +335,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             throws SyncException {
 
         setupSyncProxyBaseComponents(callbackToUIThread);
-
-
         // Set variables for Advanced Lifecycle Management
         setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParametrs(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
         setTransportConfig(transportConfig);
         checkConditionsInvalidateProxy(listener);
-
-
         setProxyListener(listener);
-
         // Get information from syncProxyConfigurationResources
         setupTelephoneManager(syncProxyConfigurationResources);
-
-        setupInternalProxyMessageDispatcher();
-        setupIncomingProxyMessageDispatcher();
-        setupOutgoingMessageDispatcher();
+        setupMessageDispatchers();
         tryInitialiseProxy();
-
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
-    }
-
-    private void updateRegisterAppInterfaceParametrs(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
-        _applicationName = appName;
-        _ttsName = ttsName;
-        _ngnMediaScreenAppName = ngnMediaScreenAppName;
-        _isMediaApp = isMediaApp;
-        _syncMsgVersionRequest = syncMsgVersion;
-        _vrSynonyms = vrSynonyms;
-        _syncLanguageDesired = languageDesired;
-        _hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-        _appHMIType = appHMIType;
-        _appID = appID;
-        _autoActivateIdDesired = autoActivateID;
     }
 
     /**
@@ -410,7 +387,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         // Set variables for Advanced Lifecycle Management
         setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParametrs(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
         setTransportConfig(transportConfig);
 
         // Test conditions to invalidate the proxy
@@ -422,14 +399,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         setupTelephoneManager(syncProxyConfigurationResources);
 
 
-        setupInternalProxyMessageDispatcher();
-        setupIncomingProxyMessageDispatcher();
-        setupOutgoingMessageDispatcher();
+        setupMessageDispatchers();
         tryInitialiseProxy();
 
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
+        _applicationName = appName;
+        _ttsName = ttsName;
+        _ngnMediaScreenAppName = ngnMediaScreenAppName;
+        _isMediaApp = isMediaApp;
+        _syncMsgVersionRequest = syncMsgVersion;
+        _vrSynonyms = vrSynonyms;
+        _syncLanguageDesired = languageDesired;
+        _hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+        _appHMIType = appHMIType;
+        _appID = appID;
+        _autoActivateIdDesired = autoActivateID;
+    }
+
+    private void setupMessageDispatchers() {
+        setupInternalProxyMessageDispatcher();
+        setupIncomingProxyMessageDispatcher();
+        setupOutgoingMessageDispatcher();
     }
 
     private void setTransportConfig(BaseTransportConfig transportConfig) {
