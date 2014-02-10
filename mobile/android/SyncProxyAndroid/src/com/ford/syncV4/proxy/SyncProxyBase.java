@@ -203,6 +203,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
+    private IRPCMessageHandler rpcMessageHandler;
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -628,6 +629,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (_callbackToUIThread) {
             _mainUIHandler = new Handler(Looper.getMainLooper());
         }
+
+        rpcMessageHandler = new RPCMessageHandler(this);
+
     }
 
     private void checkConditionsInvalidateProxy(proxyListenerType listener) {
@@ -1573,7 +1577,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return contains;
     }
 
-    private void handleRPCMessage(Hashtable hash) {
+    private void handleRPCMessage(Hashtable hash){
+        getRPCMessageHandler().handleRPCMessage(hash);
+    }
+
+    private void handleRPCMessageOld(Hashtable hash) {
         RPCMessage rpcMsg = new RPCMessage(hash);
         String functionName = rpcMsg.getFunctionName();
         String messageType = rpcMsg.getMessageType();
@@ -3940,6 +3948,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
         _appHMIType = msg.getAppType();
         _appID = msg.getAppID();
+    }
+
+    public IRPCMessageHandler getRPCMessageHandler() {
+        return rpcMessageHandler;
+    }
+
+    public void setRPCMessageHandler(IRPCMessageHandler RPCMessageHandler) {
+        this.rpcMessageHandler = RPCMessageHandler;
     }
 
     // Private Class to Interface with SyncConnection
