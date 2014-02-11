@@ -6,15 +6,16 @@ import android.util.Log;
 
 /**
  * Concrete heartbeat monitor that runs on a separate, created thread.
- *
+ * <p/>
  * Created by enikolsky on 2013-12-26.
  */
 public class HeartbeatMonitor implements IHeartbeatMonitor {
     private static final String TAG = HeartbeatMonitor.class.getSimpleName();
-    private final Object LOCK = new Object();
+    private final Object HeartbeatThreadHandler_Lock = new Object();
+    private final Object Listener_Lock = new Object();
     //
     private int interval;
-    private IHeartbeatMonitorListener delegate;
+    private IHeartbeatMonitorListener listener;
     private boolean ackReceived;
     private Thread heartbeatThread;
     private Looper heartbeatThreadLooper;
@@ -22,14 +23,14 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private Runnable heartbeatTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (LOCK) {
+            synchronized (HeartbeatThreadHandler_Lock) {
                 Log.d(TAG, "run()");
 
                 if (ackReceived) {
                     Log.d(TAG,
                             "ACK has been received, sending and scheduling heartbeat");
-                    if (delegate != null) {
-                        delegate.sendHeartbeat(HeartbeatMonitor.this);
+                    if (listener != null) {
+                        listener.sendHeartbeat(HeartbeatMonitor.this);
                     } else {
                         Log.w(TAG,
                                 "Delegate is not set, scheduling heartbeat anyway");
@@ -37,12 +38,13 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     ackReceived = false;
                 } else {
                     Log.d(TAG, "ACK has not been received");
-                    if (delegate != null) {
-                        delegate.heartbeatTimedOut(HeartbeatMonitor.this);
+                    if (listener != null) {
+                        listener.heartbeatTimedOut(HeartbeatMonitor.this);
                     }
                     // TODO stop?
                 }
-
+            }
+            synchronized (HeartbeatThreadHandler_Lock) {
                 if (heartbeatThreadHandler != null) {
                     if (!Thread.interrupted()) {
                         Log.d(TAG, "Rescheduling run()");
@@ -65,7 +67,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void start() {
-        synchronized (LOCK) {
+        synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThread == null) {
                 heartbeatThread = new Thread(new Runnable() {
                     @Override
@@ -100,7 +102,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void stop() {
-        synchronized (LOCK) {
+        synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThread != null) {
                 heartbeatThread.interrupt();
                 heartbeatThread = null;
@@ -140,17 +142,17 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public IHeartbeatMonitorListener getListener() {
-        return delegate;
+        return listener;
     }
 
     @Override
     public void setListener(IHeartbeatMonitorListener listener) {
-        this.delegate = listener;
+        this.listener = listener;
     }
 
     @Override
     public void notifyTransportActivity() {
-        synchronized (LOCK) {
+        synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThreadHandler != null) {
                 heartbeatThreadHandler.removeCallbacks(
                         heartbeatTimeoutRunnable);
@@ -164,7 +166,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatACKReceived() {
-        synchronized (LOCK) {
+        synchronized (HeartbeatThreadHandler_Lock) {
             Log.d(TAG, "ACK received");
             ackReceived = true;
         }
