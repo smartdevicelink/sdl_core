@@ -57,8 +57,9 @@ while test $# -gt 0; do
                     echo "Options:"
                     echo "-h, --help            show brief help"
                     echo "-a, --all             all mandatory and optional packages will be installed"
-                    echo "-qt                   install additional packages for Qt HMI"
+                    echo "-qt                   install additional packages Qt HMI Qt5"
                     echo "-qnx                  install additional packages for QNX"
+                    echo "-qnx -qt              install additional packages Qt HMI Qt4 and for QNX"
 
                     exit 0
                     ;;
@@ -263,14 +264,6 @@ if ${INSTALL_CMAKE_2_8_11_2}; then
     gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
     gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
-
-echo "Installing Subversion"
-apt-install ${SUBVERSION}
-echo $OK
-
-echo "Installing Git"
-apt-install ${GIT}
-echo $OK
 
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
@@ -522,6 +515,14 @@ if $INSTALL_ALL; then
     echo " "
     echo "Installing optional packages..."
     echo " "
+
+    echo "Installing Subversion"
+    apt-install ${SUBVERSION}
+    echo $OK
+
+    echo "Installing Git"
+    apt-install ${GIT}
+    echo $OK
 
     echo "Installing Doxygen"
     apt-install ${DOXYGEN}
