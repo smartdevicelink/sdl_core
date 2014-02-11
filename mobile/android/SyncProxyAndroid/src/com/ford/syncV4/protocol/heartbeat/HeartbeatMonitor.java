@@ -23,7 +23,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private Runnable heartbeatTimeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            synchronized (HeartbeatThreadHandler_Lock) {
+            synchronized (Listener_Lock) {
                 Log.d(TAG, "run()");
 
                 if (ackReceived) {
