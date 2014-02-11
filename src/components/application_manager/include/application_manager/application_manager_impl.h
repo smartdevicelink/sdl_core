@@ -499,7 +499,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * about persistent application data on disk, and save session ID for resuming
      * application in case INGITION_OFF or MASTER_RESSET
      */
-    ResumeCtrl resume_controler; // TODO: use UniquePtr
+
     /**
      * @brief Map of connection keys and associated applications
      */

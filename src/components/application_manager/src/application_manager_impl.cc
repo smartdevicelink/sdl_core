@@ -82,11 +82,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL),
-    resume_controler(this)
+    media_manager_(NULL)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  resume_controler.LoadApplications();
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -1378,9 +1376,6 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
-  // Saving unregistered app.info to the file system before
-  resume_controler.SaveAllApplications();
-  resume_controler.SavetoFS();
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
