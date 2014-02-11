@@ -448,4 +448,5 @@ public class Names {
     public static final String imageFields = "imageFields";
     public static final String graphicSupported = "graphicSupported";
     public static final String numCustomPresetsAvailable = "numCustomPresetsAvailable";
+    public static final String prerecordedSpeech = "prerecordedSpeech";
 }
