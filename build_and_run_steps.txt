@@ -37,6 +37,8 @@
     3.2.2. SSH configuration on Linux host:
       3.2.2.1. Install Open-SSH server (For Xubuntu run "sudo apt-get install ssh", for Ubuntu run "sudo apt-get install openssh-server"). 
       3.2.2.1. Restart computer if necessary.
+    3.2.3 Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
+      Note: log4cxx crossbuild archive "log4cxx.qnx.cross.build.files.zip" is located in git folder git@adc.luxoft.com:applink/src/thirdPartyLibs/ 
 
   3.3. To run specially prepared QNX in virtual machine:
     3.3.1. Download and install VMware Player from https://my.vmware.com/web/vmware/downloads
