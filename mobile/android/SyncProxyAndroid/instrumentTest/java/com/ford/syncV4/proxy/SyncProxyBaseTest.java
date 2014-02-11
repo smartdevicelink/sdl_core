@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -501,8 +502,8 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         String autoActivateIdDesired = "_autoActivateIdDesired";
-        proxy.setAutoActivateIdDesired(autoActivateIdDesired);
-        String real = proxy.getAutoActivateIdDesired();
+        proxy.setAutoActivateIdReturned(autoActivateIdDesired);
+        String real = proxy.getAutoActivateIdReturned();
         assertEquals(real, autoActivateIdDesired);
     }
 
@@ -548,5 +549,29 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals( Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
         assertEquals( appHMITypeVector, proxy.getAppHMIType());
         assertEquals( "appID", proxy.getAppID());
+    }
+
+    public void testRPCMessageHandlerIsSetAfterCreation() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        IRPCMessageHandler messageHandler = proxy.getRPCMessageHandler();
+        assertNotNull("message handler should be not null", messageHandler);
+    }
+
+    public void testRPCMessageHandlerCalledOnIncomingMessage() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.setRPCMessageHandler(mock(IRPCMessageHandler.class));
+        // send OnAppInterfaceUnregistered
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        final AppInterfaceUnregisteredReason reason =
+                AppInterfaceUnregisteredReason.IGNITION_OFF;
+        params.put(Names.reason, reason);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+        verify(proxy.getRPCMessageHandler(), times(1)).handleRPCMessage(any(Hashtable.class));
     }
 }

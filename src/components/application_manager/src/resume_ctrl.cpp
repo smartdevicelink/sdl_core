@@ -250,21 +250,22 @@ bool ResumeCtrl::StartResumption(Application* application) {
 
 
 void ResumeCtrl::onTimer() {
-  for(std::list<ResumingApp*>::iterator it = resuming_applications_.begin();
-      it != resuming_applications_.end(); ++it) {
-    if (! ((*it)->is_waiting_for_timer )) {
-      LOG4CXX_INFO(logger_, " " << (*it)->app->app_id() 
-					<< "Is wiat for response"
-					 << (*it)->is_waiting_for_timer);
-      // if correlation_id has some state - 
-      //it means that this application whait for response
-      continue;
-    }
-    time_t expired = time(NULL) - (*it)->start_resuming_time ;
-    if (expired >= profile::Profile::instance()->app_resuming_timeout()) {
-      sendResumptionRequest((*it));
-    }
-  }
+  timer_.stop();
+//  for(std::list<ResumingApp*>::iterator it = resuming_applications_.begin();
+//      it != resuming_applications_.end(); ++it) {
+//    if (! ((*it)->is_waiting_for_timer )) {
+//      LOG4CXX_INFO(logger_, " " << (*it)->app->app_id()
+//          << "Is wiat for response"
+//           << (*it)->is_waiting_for_timer);
+//      // if correlation_id has some state -
+//      //it means that this application whait for response
+//      continue;
+//    }
+//    time_t expired = time(NULL) - (*it)->start_resuming_time ;
+//    if (expired >= profile::Profile::instance()->app_resuming_timeout()) {
+//      sendResumptionRequest((*it));
+//    }
+//  }
 }
 
 void ResumeCtrl::sendResumptionRequest(ResumingApp* application) {

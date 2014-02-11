@@ -1,4 +1,6 @@
 [CW7]
+* SyncProxyAndroid SDK: Update FileType enum.
+* SyncProxyAndroid SDK: Add prerecordedSpeech parameter to RegisterAppInterfaceResponse class.
 * Fix 'USB: Application is not recognizable by SDLCore' if the application is closed when the stream is opened.
 * SyncProxyAndroid SDK: Update HeadLampStatus struct. Add headLampStatus parameter to OnVehicleData notification.
 * SyncProxyAndroid SDK: Add displayCapabilities parameter to SetDisplayLayoutResponse class.

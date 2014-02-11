@@ -39,7 +39,6 @@
 
 #include <map>
 #include <vector>
-#include <list>
 
 #include "utils/logger.h"
 #include "connection_handler/device.h"
@@ -70,16 +69,6 @@ typedef std::map<int32_t, Connection*> ConnectionList;
 typedef ConnectionList::iterator ConnectionListIterator;
 
 /**
- * \brief Type for Sessions vector
- */
-typedef std::vector<uint8_t> SessionList;
-
-/**
- * \brief Type for Sessions vector iterator
- */
-typedef std::vector<uint8_t>::iterator SessionListIterator;
-
-/**
  * \brief Type for Resume Session Map
  * @param uint8_t  session ID
  * @param uint32_t session_key
@@ -104,12 +93,22 @@ typedef std::vector<uint8_t>::iterator ServiceListIterator;
 /**
  * \brief Type for Services iterator
  */
+typedef std::vector<uint8_t>::const_iterator ServiceListConstIterator;
+
+/**
+ * \brief Type for Services iterator
+ */
 typedef std::map<uint8_t, ServiceList> SessionMap;
 
 /**
  * \brief Type for Services iterator
  */
 typedef std::map<uint8_t, ServiceList>::iterator SessionMapIterator;
+
+/**
+ * \brief Type for Services const iterator
+ */
+typedef std::map<uint8_t, ServiceList>::const_iterator SessionMapConstIterator;
 
 /**
  * \class Connection
@@ -169,11 +168,10 @@ class Connection {
   bool RemoveService(uint8_t session, uint8_t service);
 
   /**
-   * \brief Returns list of sessions which have been opened in
+   * \brief Returns map of sessions which have been opened in
    *  current connection.
-   * \param session_list list of sessions
    */
-  void GetSessionList(SessionList & session_list);
+  const SessionMap& session_map();
 
   /*
    * \brief Close this connection and all associated sessions
@@ -187,6 +185,7 @@ class Connection {
 
  private:
   ConnectionHandler* connection_handler_;
+
   /**
    * \brief Current connection handle.
    */
@@ -196,11 +195,6 @@ class Connection {
    * \brief DeviceHandle of this connection.
    */
   DeviceHandle connection_device_handle_;
-
-  /**
-   * \brief Counter to generate session id's.
-   */
-  uint8_t session_id_counter_;
 
   /**
    * \brief session/services map

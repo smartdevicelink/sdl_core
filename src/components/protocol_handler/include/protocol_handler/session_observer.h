@@ -62,9 +62,9 @@ class SessionObserver {
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t sessionId,
-      ServiceType service_type) = 0;
+      const transport_manager::ConnectionUID& connection_handle,
+      const uint8_t& sessionId,
+      const ServiceType& service_type) = 0;
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -76,10 +76,10 @@ class SessionObserver {
      * \return uint32_t 0 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t sessionId,
-      uint32_t hashCode,
-      ServiceType service_type) = 0;
+      const transport_manager::ConnectionUID& connection_handle,
+      const uint8_t& sessionId,
+      const uint32_t& hashCode,
+      const ServiceType& service_type) = 0;
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
