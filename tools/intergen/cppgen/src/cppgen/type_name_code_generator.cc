@@ -189,7 +189,8 @@ void RpcTypeNameGenerator::GenerateCodeForFloat(const Float* flt) {
 
 void RpcTypeNameGenerator::GenerateCodeForString(const String* string) {
   if (!MaybeWrapWithAvailabilitySpecifier(string)) {
-    strmfmt(os_, "String<{0}>", string->max_length());
+    strmfmt(os_, "String<{0}, {1}>", string->length_range().min(),
+            string->length_range().max());
   }
 }
 

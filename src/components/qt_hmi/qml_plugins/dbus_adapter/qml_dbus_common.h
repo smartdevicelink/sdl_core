@@ -38,6 +38,7 @@
 #include <QtDBus/QDBusContext>
 #include "optional_argument.h"
 #include "stream_qvariant.h"
+#include "metatype.h"
 
 enum ErrorCode {
   Success = 0,
@@ -150,6 +151,26 @@ inline bool VariantToValue(const QVariant& variant, QStringList& v) {
     v.append(i->toString());
   }
   return true;
+}
+
+template<typename T>
+bool VariantToValue(const QVariant& variant, QList<T>& v) {
+    if (variant.type() != QVariant::List) return false;
+    QList<T> spare;
+    QList<QVariant> list = variant.toList();
+    for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {
+        QVariant::Type type = i->type();
+// Although this function is declared as returning QVariant::Type(obsolete),
+// the return value should be interpreted as QMetaType::Type.
+// (http://qt-project.org/doc/qt-5.0/qtcore/qvariant.html#type)
+        QMetaType::Type type_casted = static_cast<QMetaType::Type>(type);
+        if (type_casted != metatype<T>()) {
+          return false;
+        }
+        spare.append(i->value<T>());
+    }
+    v.swap(spare);
+    return true;
 }
 
 template<typename T>

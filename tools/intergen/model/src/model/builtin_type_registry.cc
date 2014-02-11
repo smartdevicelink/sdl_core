@@ -63,8 +63,8 @@ const Float* BuiltinTypeRegistry::GetFloat(const Float::Range& range) {
   return &*floats_.insert(flt).first;
 }
 
-const String* BuiltinTypeRegistry::GetString(int64_t max_length) {
-  String string(max_length);
+const String* BuiltinTypeRegistry::GetString(const String::Range& length_range) {
+  String string(length_range);
   return &*strings_.insert(string).first;
 }
 
@@ -92,10 +92,12 @@ bool BuiltinTypeRegistry::GetType(BuiltInType type_id,
       return true;
     }
     case kString: {
+      std::string min_length_str = params.attribute("minlength").as_string("1");
       std::string max_length_str = params.attribute("maxlength").as_string("0");
-      int64_t max_length;
-      if (StringToNumber(max_length_str, &max_length)) {
-        *type = GetString(max_length);
+      int64_t min_length, max_length;
+      if (StringToNumber(min_length_str, &min_length)
+          && StringToNumber(max_length_str, &max_length)) {
+        *type = GetString(String::Range(min_length, max_length));
         return true;
       } else {
         std::cerr << "Incorrect length value provided for string: "

@@ -1,4 +1,4 @@
-set(INTERGEN_CMD ${CMAKE_BINARY_DIR}/tools/intergen/tool/intergen)
+set(INTERGEN_CMD ${CMAKE_BINARY_DIR}/tools/intergen/bin/intergen)
 set(GENERATED_LIB_DEPENDENCIES rpc_base jsoncpp)
 set(GENERATED_LIB_HEADER_DEPENDENCIES
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
