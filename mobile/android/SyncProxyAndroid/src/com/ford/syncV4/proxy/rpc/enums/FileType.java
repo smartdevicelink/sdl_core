@@ -6,8 +6,9 @@ public enum FileType {
     GRAPHIC_PNG,
     AUDIO_WAVE,
     AUDIO_MP3,
-    VIDEO_H264,
-    AUDIO_AAC;
+    AUDIO_AAC,
+    BINARY,
+    JSON;
 
     public static FileType valueForString(String value) {
         return valueOf(value);
