@@ -28,42 +28,46 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 
-#include <string>
+#include "lock.h"
+#include "memory_barrier.h"
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+namespace utils {
 
-namespace resumption {
-
-class LastState : public utils::Singleton<LastState> {
+template<typename T>
+class Singleton {
  public:
 /**
- * @brief Typedef for string-driven dictionary
+ * @brief Returns the singleton of class
  */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
-
- private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  friend LastState* utils::Singleton<LastState>::instance();
+  static T* instance();
 };
 
-}  // namespace resumption
+template<typename T>
+T* Singleton<T>::instance() {
+  static T* instance = 0;
+  static sync_primitives::Lock lock;
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+  T* local_instance = instance;
+  memory_barrier();
+  if (!local_instance) {
+    lock.Ackquire();
+    local_instance = instance;
+    if (!local_instance) {
+      local_instance = new T();
+      memory_barrier();
+      instance = local_instance;
+    }
+    lock.Release();
+  }
+
+  return local_instance;
+}
+
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_

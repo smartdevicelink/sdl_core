@@ -28,47 +28,27 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#if  defined(__QNX__) || defined(__QNXNTO__)
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_
+
+#ifdef __QNXNTO__
 #include <sys/cpuinline.h>
 #endif
 
-#include "utils/lock.h"
+namespace utils {
 
-#include "resumption/last_state.h"
-
-namespace resumption {
-
-LastState::LastState() {
-}
-
-LastState* LastState::instance() {
-  static LastState* instance = 0;
-  static sync_primitives::Lock lock;
-
-  LastState* temp = instance;
-#if  defined(__QNX__) || defined(__QNXNTO__)
+inline void memory_barrier() {
+#if defined(__QNXNTO__)
   __cpu_membarrier();
-#else
+#elif defined(__GNUG__)
   __sync_synchronize();
-#endif
-  if (!temp) {
-    lock.Ackquire();
-    temp = instance;
-    if (!temp) {
-      temp = new LastState();
-#if  defined(__QNX__) || defined(__QNXNTO__)
-      __cpu_membarrier();
 #else
-      __sync_synchronize();
+#warning "memory_barrier() implementation does nothing"
 #endif
-      instance = temp;
-    }
-    lock.Release();
-  }
-
-  return temp;
 }
 
-}
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_
