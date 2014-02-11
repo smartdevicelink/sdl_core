@@ -263,4 +263,123 @@ public class OnVehicleData extends RPCNotification {
         return null;
     }
 
+    public void setECallInfo(ECallInfo eCallInfo) {
+        if (eCallInfo != null) {
+            parameters.put(Names.eCallInfo, eCallInfo);
+        } else {
+            parameters.remove(Names.eCallInfo);
+        }
+    }
+
+    public ECallInfo getECallInfo() {
+        Object obj = parameters.get(Names.eCallInfo);
+        if (obj instanceof ECallInfo) {
+            return (ECallInfo) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new ECallInfo((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.eCallInfo, e);
+            }
+        }
+        return null;
+    }
+
+    public void setAirbagStatus(AirbagStatus airbagStatus) {
+        if (airbagStatus != null) {
+            parameters.put(Names.airbagStatus, airbagStatus);
+        } else {
+            parameters.remove(Names.airbagStatus);
+        }
+    }
+
+    public AirbagStatus getAirbagStatus() {
+        Object obj = parameters.get(Names.airbagStatus);
+        if (obj instanceof AirbagStatus) {
+            return (AirbagStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new AirbagStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.airbagStatus, e);
+            }
+        }
+        return null;
+    }
+
+    public void setEmergencyEvent(EmergencyEvent emergencyEvent) {
+        if (emergencyEvent != null) {
+            parameters.put(Names.emergencyEvent, emergencyEvent);
+        } else {
+            parameters.remove(Names.emergencyEvent);
+        }
+    }
+
+    public EmergencyEvent getEmergencyEvent() {
+        Object obj = parameters.get(Names.emergencyEvent);
+        if (obj instanceof EmergencyEvent) {
+            return (EmergencyEvent) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new EmergencyEvent((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.emergencyEvent, e);
+            }
+        }
+        return null;
+    }
+
+    public void setClusterModeStatus(ClusterModeStatus clusterModeStatus) {
+        if (clusterModeStatus != null) {
+            parameters.put(Names.clusterModeStatus, clusterModeStatus);
+        } else {
+            parameters.remove(Names.clusterModeStatus);
+        }
+    }
+
+    public ClusterModeStatus getClusterModeStatus() {
+        Object obj = parameters.get(Names.clusterModeStatus);
+        if (obj instanceof ClusterModeStatus) {
+            return (ClusterModeStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new ClusterModeStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.clusterModeStatus, e);
+            }
+        }
+        return null;
+    }
+
+    public void setMyKey(MyKey myKey) {
+        if (myKey != null) {
+            parameters.put(Names.myKey, myKey);
+        } else {
+            parameters.remove(Names.myKey);
+        }
+    }
+
+    public MyKey getMyKey() {
+        Object obj = parameters.get(Names.myKey);
+        if (obj instanceof MyKey) {
+            return (MyKey) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new MyKey((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.myKey, e);
+            }
+        }
+        return null;
+    }
 }
