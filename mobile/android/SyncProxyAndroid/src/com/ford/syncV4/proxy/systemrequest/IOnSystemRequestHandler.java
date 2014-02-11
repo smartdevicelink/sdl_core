@@ -37,4 +37,9 @@ public interface IOnSystemRequestHandler {
     public void onFileResumeRequest(ISystemRequestProxy proxy, String filename,
                                     Integer offset, Integer length,
                                     FileType fileType);
+
+    /**
+     * @param url URL of the Policy Table Snapshot file
+     */
+    public void onPolicyTableSnapshotRequest(String url);
 }

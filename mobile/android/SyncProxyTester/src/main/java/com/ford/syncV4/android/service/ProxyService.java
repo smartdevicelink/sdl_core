@@ -1986,6 +1986,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
+    public void onPolicyTableSnapshotRequest(String url) {
+        createDebugMessageForAdapter("Policy Table Snapshot download request");
+    }
+
+    @Override
     public void onFilesDownloadRequest(final ISystemRequestProxy proxy,
                                        List<String> urls, FileType fileType) {
         createDebugMessageForAdapter("files download request");

@@ -1538,11 +1538,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 Runnable request = new Runnable() {
                     @Override
                     public void run() {
-                        onSystemRequestHandler.onFilesDownloadRequest(
-                                SyncProxyBase.this, urls, msg.getFileType());
+                        if (msg.getFileType() == FileType.JSON) {
+                            onSystemRequestHandler.onPolicyTableSnapshotRequest(msg.getUrl().get(0));
+                        } else {
+                            onSystemRequestHandler.onFilesDownloadRequest(
+                                    SyncProxyBase.this, urls, msg.getFileType());
+                        }
                     }
                 };
-
                 if (_callbackToUIThread) {
                     _mainUIHandler.post(request);
                 } else {
