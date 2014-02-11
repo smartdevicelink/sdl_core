@@ -48,8 +48,6 @@
 #include "./appMain.h"
 #include "./life_cycle.h"
 
-#include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 

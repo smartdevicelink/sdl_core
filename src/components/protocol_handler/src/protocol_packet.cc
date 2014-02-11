@@ -36,6 +36,7 @@
 #include <memory.h>
 #include <iostream>  // TODO(AK): cpplink error - Streams are highly discouraged.
 #include "protocol_handler/protocol_packet.h"
+#include "utils/macro.h"
 
 namespace protocol_handler {
 
@@ -57,7 +58,7 @@ ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
       total_packet_size_(0),
       data_offset_(0),
       packet_id_(packet_id) {
-  serializePacket(version, compress, frameType, serviceType, frameData,
+  IGNORE_RETURN serializePacket(version, compress, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
 }
 

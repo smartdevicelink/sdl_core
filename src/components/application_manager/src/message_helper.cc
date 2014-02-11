@@ -153,7 +153,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(application_impl.system_context());
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -206,7 +206,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
       *app_type;
   }
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
 smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
@@ -262,7 +262,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
@@ -278,10 +278,10 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
     return NULL;
   }
 
-  (*response)[strings::params][strings::function_id] = function_id;
-  (*response)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*response)[strings::params][strings::function_id] = static_cast<int>(function_id);
+  (*response)[strings::params][strings::message_type] = static_cast<int>(MessageType::kResponse);
   (*response)[strings::msg_params][strings::success] = false;
-  (*response)[strings::msg_params][strings::result_code] = result;
+  (*response)[strings::msg_params][strings::result_code] = static_cast<int>(result);
   (*response)[strings::params][strings::correlation_id] = correlation_id;
   (*response)[strings::params][strings::connection_key] = connection_key;
   (*response)[strings::params][strings::protocol_type] =
@@ -1084,7 +1084,7 @@ void MessageHelper::SendAudioStartStream(
 
   (*start_stream)[strings::msg_params] = msg_params;
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {
