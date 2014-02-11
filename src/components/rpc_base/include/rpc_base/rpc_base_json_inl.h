@@ -196,7 +196,7 @@ Array<T, minsize, maxsize>::Array(const Json::Value& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
-  Json::Value array;
+  Json::Value array(Json::arrayValue);
   array.resize(this->size());
   for (size_t i = 0; i != this->size(); ++i) {
     array[Json::ArrayIndex(i)] = (this->operator [](i)).ToJsonValue();
@@ -221,7 +221,7 @@ Map<T, minsize, maxsize>::Map(const Json::Value& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Map<T, minsize, maxsize>::ToJsonValue() const {
-  Json::Value map;
+  Json::Value map(Json::objectValue);
   for (typename MapType::const_iterator i = this->begin(); i != this->end(); ++i) {
     map[i->first] = i->second.ToJsonValue();
   }

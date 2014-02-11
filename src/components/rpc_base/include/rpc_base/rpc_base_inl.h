@@ -181,6 +181,13 @@ String<minlen, maxlen>::String(const std::string& value)
 }
 
 template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const char* value)
+    : PrimitiveType(true, true),
+      value_(value) {
+  valid_ = length_range_.Includes(value_.length());
+}
+
+template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new_val) {
   value_ = new_val;
   initialized_ = true;

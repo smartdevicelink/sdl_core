@@ -72,7 +72,7 @@ StructTypeToJsonMethod::~StructTypeToJsonMethod() {
 }
 
 void StructTypeToJsonMethod::DefineBody(std::ostream* os) const {
-  *os << "Json::Value result;" << '\n';
+  *os << "Json::Value result(Json::objectValue);" << '\n';
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
