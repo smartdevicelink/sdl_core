@@ -41,6 +41,7 @@
 #include "utils/prioritized_queue.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/threads/thread.h"
+#include "utils/singleton.h"
 
 namespace hmi_message_handler {
 
@@ -79,9 +80,9 @@ class FromHMIThreadImpl;
 class HMIMessageHandlerImpl
     : public HMIMessageHandler,
       public impl::FromHmiQueue::Handler,
-      public impl::ToHmiQueue::Handler {
+      public impl::ToHmiQueue::Handler,
+      public utils::Singleton<HMIMessageHandlerImpl> {
  public:
-  static HMIMessageHandlerImpl* instance();
   ~HMIMessageHandlerImpl();
   void OnMessageReceived(MessageSharedPointer message);
   void SendMessageToHMI(MessageSharedPointer message);
@@ -115,6 +116,8 @@ class HMIMessageHandlerImpl
   static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
+
+  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 

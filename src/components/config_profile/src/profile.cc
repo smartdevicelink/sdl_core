@@ -85,11 +85,6 @@ Profile::Profile()
 Profile::~Profile() {
 }
 
-Profile* Profile::instance() {
-  static Profile instance;
-  return &instance;
-}
-
 void Profile::config_file_name(const std::string& fileName) {
   if (false == fileName.empty()) {
     LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);

@@ -45,12 +45,6 @@ EventDispatcher::EventDispatcher()
 EventDispatcher::~EventDispatcher() {
 }
 
-EventDispatcher* EventDispatcher::instance()
-{
-   static EventDispatcher instance;
-   return &instance;
-}
-
 void EventDispatcher::raise_event(const Event& event) {
   // create local list
   ObserverList list;

@@ -127,11 +127,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   media_manager_ = NULL;
 }
 
-ApplicationManagerImpl* ApplicationManagerImpl::instance() {
-  static ApplicationManagerImpl instance;
-  return &instance;
-}
-
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   try {

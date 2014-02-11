@@ -65,11 +65,6 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ConnectionHandler"));
 
-ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
-  static ConnectionHandlerImpl instance;
-  return &instance;
-}
-
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
