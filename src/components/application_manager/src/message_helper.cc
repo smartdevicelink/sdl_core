@@ -650,41 +650,35 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
       ToCommonLanguage(app->language());
   const HMICapabilities& hmi_capabilities =
   ApplicationManagerImpl::instance()->hmi_capabilities();
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_vr_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
           app->app_id());
 
-    if (!vr_command) {
-      return;
+    if (vr_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_tts_language() != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
 
-    if (!tts_command) {
-      return;
+    if (tts_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_ui_language()!= app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->ui_language()) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
 
-    if (!ui_command) {
-      return;
+if (ui_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
+
   }
 }
 
