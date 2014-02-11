@@ -39,7 +39,7 @@ public interface IOnSystemRequestHandler {
                                     FileType fileType);
 
     /**
-     * @param url URL of the Policy Table Snapshot file
+     * @param data Raw bytes data of the Policy Table Snapshot file
      */
-    public void onPolicyTableSnapshotRequest(String url);
+    public void onPolicyTableSnapshotRequest(byte[] data);
 }

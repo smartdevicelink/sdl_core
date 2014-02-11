@@ -18,6 +18,7 @@ import android.util.Pair;
 import android.util.SparseArray;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -28,6 +29,7 @@ import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
+import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
@@ -114,12 +116,10 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -464,7 +464,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
 
     private void setInitAppIcon() {
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
-        commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, contentsOfResource(R.raw.fiesta),
+        commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
                 mAwaitingInitIconResponseCorrelationID);
     }
 
@@ -666,42 +666,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         return mWaitingForResponse && mTesterMain.getThreadContext() != null;
     }
 
-    /**
-     * Returns the file contents from the specified resource.
-     *
-     * @param resource Resource id (in res/ directory)
-     * @return The resource file's contents
-     */
-    private byte[] contentsOfResource(int resource) {
-        InputStream is = null;
-        try {
-            is = getResources().openRawResource(resource);
-            ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
-            final int buffersize = 4096;
-            final byte[] buffer = new byte[buffersize];
-            int available = 0;
-            while ((available = is.read(buffer)) >= 0) {
-                os.write(buffer, 0, available);
-            }
-            return os.toByteArray();
-        } catch (IOException e) {
-            Log.w(TAG, "Can't read icon file", e);
-            return null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
-        }
-    }
-
     private void sendIconFromResource(int resource) throws SyncException {
         commandPutFile(FileType.GRAPHIC_PNG,
                 getResources().getResourceEntryName(resource) + ICON_FILENAME_SUFFIX,
-                contentsOfResource(resource));
+                AppUtils.contentsOfResource(resource));
     }
 
     @Override
@@ -1986,8 +1954,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
-    public void onPolicyTableSnapshotRequest(String url) {
+    public void onPolicyTableSnapshotRequest(byte[] data) {
         createDebugMessageForAdapter("Policy Table Snapshot download request");
+
+        final byte[] fileData = AppUtils.contentsOfResource(R.raw.policy_table_shanpshot);
+
+        String mTMPFilePath = Environment.getExternalStorageDirectory() +
+                "/policyTableSnapshot.json";
+
+        boolean result = AppUtils.saveDataToFile(fileData, mTMPFilePath);
+        if (result) {
+            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' successfully saved");
+        } else {
+            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' could not be save");
+        }
+
+
     }
 
     @Override
@@ -1997,7 +1979,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                final byte[] data = contentsOfResource(R.raw.audio_short);
+                final byte[] data = AppUtils.contentsOfResource(R.raw.audio_short);
                 try {
                     proxy.putSystemFile("system.update", data,
                             FileType.AUDIO_WAVE);
@@ -2017,7 +1999,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             @Override
             public void run() {
                 final byte[] data = Arrays.copyOfRange(
-                        contentsOfResource(R.raw.audio_short), offset,
+                        AppUtils.contentsOfResource(R.raw.audio_short), offset,
                         offset + length);
                 try {
                     proxy.putSystemFile("system.update", data, offset,

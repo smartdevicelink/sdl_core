@@ -1539,7 +1539,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     @Override
                     public void run() {
                         if (msg.getFileType() == FileType.JSON) {
-                            onSystemRequestHandler.onPolicyTableSnapshotRequest(msg.getUrl().get(0));
+                            onSystemRequestHandler.onPolicyTableSnapshotRequest(new byte[256]);
                         } else {
                             onSystemRequestHandler.onFilesDownloadRequest(
                                     SyncProxyBase.this, urls, msg.getFileType());

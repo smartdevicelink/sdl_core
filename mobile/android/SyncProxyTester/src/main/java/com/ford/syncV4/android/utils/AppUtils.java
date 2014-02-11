@@ -6,6 +6,8 @@ import android.util.Log;
 import com.ford.syncV4.android.MainApp;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -17,6 +19,8 @@ import java.io.InputStream;
  */
 public class AppUtils {
 
+    private static final String TAG = "AppUtils";
+
     public static boolean isRunningUIThread() {
         return Looper.myLooper() == Looper.getMainLooper();
     }
@@ -27,14 +31,14 @@ public class AppUtils {
      * @param resource Resource id (in res/ directory)
      * @return The resource file's contents
      */
-    private byte[] contentsOfResource(int resource) {
+    public static byte[] contentsOfResource(int resource) {
         InputStream is = null;
         try {
             is = MainApp.getInstance().getResources().openRawResource(resource);
             ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
-            final int buffersize = 4096;
-            final byte[] buffer = new byte[buffersize];
-            int available = 0;
+            final int bufferSize = 4096;
+            final byte[] buffer = new byte[bufferSize];
+            int available;
             while ((available = is.read(buffer)) >= 0) {
                 os.write(buffer, 0, available);
             }
@@ -51,5 +55,38 @@ public class AppUtils {
                 }
             }
         }
+    }
+
+    /**
+     * Save bytes to a file
+     * @param data
+     * @param filePath
+     * @return
+     */
+    public static boolean saveDataToFile(byte[] data, String filePath) {
+        File mFile = new File(filePath);
+        Log.d(TAG, "Saving data to file '" + filePath + "', exists:" + mFile.exists());
+        if (mFile.exists()) {
+            mFile.delete();
+        }
+        FileOutputStream mFileOutputStream = null;
+        boolean result = false;
+        try {
+            mFileOutputStream = new FileOutputStream(mFile.getPath());
+            mFileOutputStream.write(data);
+
+            result = true;
+        } catch (IOException e) {
+            Log.e(TAG, "Save Data To File IOException", e);
+        } finally {
+            if (mFileOutputStream != null) {
+                try {
+                    mFileOutputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return result;
     }
 }

@@ -1,8 +1,8 @@
 package com.ford.syncV4.integrationtest;
 
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
-import com.ford.syncV4.R;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
@@ -18,19 +18,15 @@ import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
-import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
-import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
-import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
 
 import org.hamcrest.core.IsNull;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -42,15 +38,9 @@ import java.util.Vector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -60,6 +50,9 @@ import static org.mockito.Mockito.when;
  * Created by Yuriy Chernyshov on 2014-02-11.
  */
 public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTestCase {
+
+    private static final String TAG = "PolicyTableSnapshot_Test";
+
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final int PUTFILE_FUNCTIONID = 32;
     private static final int ONSYSTEMREQUEST_FUNCTIONID = 32781;
@@ -102,26 +95,28 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
     }
 
     public void testOnSystemRequestWithPTS() throws Exception {
-        // fake data for PutFile
-        final int extraDataSize = 10;
-        final int dataSize = (maxDataSize * 2) + extraDataSize;
-        final byte[] data = TestCommon.getRandomBytes(dataSize);
-
-        final String filename = "PolicyTableSnapshot.json";
-        final List<String> urls = Arrays.asList("http://polict.table.snapshot.json");
+        final List<String> urls = Arrays.asList("http://policy.table.snapshot.json");
         final FileType fileType = FileType.JSON;
+        final int bytesLength = 256;
 
         IOnSystemRequestHandler handlerMock = mock(IOnSystemRequestHandler.class);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                final ISystemRequestProxy proxy =
+                /*final ISystemRequestProxy proxy =
                         (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putSystemFile(filename, data, fileType);
+                proxy.putSystemFile(filename, data, fileType);*/
+                assertNotNull(invocationOnMock.getArguments());
+                assertEquals(1, invocationOnMock.getArguments().length);
+
+                byte[] data = (byte[]) invocationOnMock.getArguments()[0];
+                assertNotNull(data);
+                assertEquals(bytesLength, data.length);
+                Log.d(TAG, "Policy Table Snapshot download request TEST:" + data.length);
                 return null;
             }
         }).when(handlerMock)
-          .onFilesDownloadRequest(notNull(ISystemRequestProxy.class), eq(urls), eq(fileType));
+          .onPolicyTableSnapshotRequest(new byte[bytesLength]);
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP
@@ -130,9 +125,9 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         onSystemRequest.setUrl(new Vector<String>(urls));
         onSystemRequest.setFileType(fileType);
 
-        ProtocolMessage incomingOnSysRqPM0 = createNotificationProtocolMessage(onSystemRequest,
+        ProtocolMessage incomingOnSysRequest = createNotificationProtocolMessage(onSystemRequest,
                         ONSYSTEMREQUEST_FUNCTIONID);
-        emulateIncomingMessage(proxy, incomingOnSysRqPM0);
+        emulateIncomingMessage(proxy, incomingOnSysRequest);
 
         // wait for processing
         Thread.sleep(WAIT_TIMEOUT);
