@@ -95,7 +95,7 @@ class ConnectionHandlerObserver {
      */
     virtual bool OnServiceResumedCallback(
         const connection_handler::DeviceHandle& device_handle,
-        const int32_t& old_session_key, const int32_t new_session_key,
+        const int32_t& old_session_key, const int32_t& new_session_key,
         const protocol_handler::ServiceType& type) = 0;
 
     /**

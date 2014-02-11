@@ -39,7 +39,6 @@
 
 #include <map>
 #include <vector>
-#include <list>
 
 #include "utils/logger.h"
 #include "connection_handler/device.h"

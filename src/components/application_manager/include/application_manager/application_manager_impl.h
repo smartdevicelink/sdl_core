@@ -167,7 +167,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    Application* application(int32_t app_id);
+    Application* application(int32_t app_id) const;
     inline const std::set<Application*>& applications() const;
     Application* active_application() const;
     std::vector<Application*> applications_by_button(uint32_t button);
@@ -345,7 +345,7 @@ class ApplicationManagerImpl : public ApplicationManager,
                                   const protocol_handler::ServiceType& type);
     bool OnServiceResumedCallback(
                 const connection_handler::DeviceHandle& device_handle,
-                const int32_t& old_session_key, const int32_t new_session_key,
+                const int32_t& old_session_key, const int32_t& new_session_key,
                 const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
                                 const protocol_handler::ServiceType& type);
@@ -409,7 +409,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Checks HMI level and returns true if audio/video streaming is allowed
      */
-    bool IsStreamingAllowed(uint32_t connection_key);
+    bool IsStreamingAllowed(uint32_t connection_key) const;
 
     /*
      * @brief Save binary data to specified directory

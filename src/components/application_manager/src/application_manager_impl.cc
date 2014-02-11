@@ -145,8 +145,9 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
-Application* ApplicationManagerImpl::application(int32_t app_id) {
-  std::map<int32_t, Application*>::iterator it = applications_.find(app_id);
+Application* ApplicationManagerImpl::application(int32_t app_id) const {
+  std::map<int32_t, Application*>::const_iterator it =
+      applications_.find(app_id);
   if (applications_.end() != it) {
     return it->second;
   } else {
@@ -628,7 +629,7 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle& device_handle) {
 }
 
-bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) {
+bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
 
   if (!app) {
@@ -701,7 +702,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 
 bool ApplicationManagerImpl::OnServiceResumedCallback(
     const connection_handler::DeviceHandle& device_handle,
-    const int32_t& old_session_key, const int32_t new_session_key,
+    const int32_t& old_session_key, const int32_t& new_session_key,
     const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO_EXT(logger_,
                    "OnServiceResumedCallback previous session key= "
