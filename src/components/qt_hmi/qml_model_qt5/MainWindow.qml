@@ -345,6 +345,10 @@ Rectangle {
 
         onAppUnregistered: {
             console.debug("enter")
+            console.debug("Resume unregister:", resume)
+            if (resume) {
+                dataContainer.stashApplication(appId);
+            }
             dataContainer.removeApplication(appId);
             if ((dataContainer.currentApplication.appId === appId)) {
                 if (dataContainer.applicationContext) {

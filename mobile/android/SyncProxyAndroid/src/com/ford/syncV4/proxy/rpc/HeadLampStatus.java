@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.LightSwitchStatus;
+import com.ford.syncV4.proxy.rpc.enums.AmbientLightStatus;
 import com.ford.syncV4.util.DebugTool;
 
 public class HeadLampStatus extends RPCStruct {
@@ -13,28 +13,50 @@ public class HeadLampStatus extends RPCStruct {
     public HeadLampStatus(Hashtable hash) {
         super(hash);
     }
-    public void setLightSwitchStatus(LightSwitchStatus lightSwitchStatus) {
-        if (lightSwitchStatus != null) {
-            store.put(Names.lightSwitchStatus, lightSwitchStatus);
+
+    public void setAmbientLightSensorStatus(
+            AmbientLightStatus ambientLightStatus) {
+        if (ambientLightStatus != null) {
+            store.put(Names.ambientLightSensorStatus, ambientLightStatus);
         } else {
-        	store.remove(Names.lightSwitchStatus);
+            store.remove(Names.ambientLightSensorStatus);
         }
     }
-    public LightSwitchStatus getLightSwitchStatus() {
-        Object obj = store.get(Names.lightSwitchStatus);
-        if (obj instanceof LightSwitchStatus) {
-            return (LightSwitchStatus) obj;
+
+    public AmbientLightStatus getAmbientLightSensorStatus() {
+        Object obj = store.get(Names.ambientLightSensorStatus);
+        if (obj instanceof AmbientLightStatus) {
+            return (AmbientLightStatus) obj;
         } else if (obj instanceof String) {
-        	LightSwitchStatus theCode = null;
+            AmbientLightStatus theCode = null;
             try {
-                theCode = LightSwitchStatus.valueForString((String) obj);
+                theCode = AmbientLightStatus.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.lightSwitchStatus, e);
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.ambientLightSensorStatus, e);
             }
             return theCode;
         }
         return null;
     }
+
+    public void setLowBeamsOn(Boolean lowBeamsOn) {
+        if (lowBeamsOn != null) {
+            store.put(Names.lowBeamsOn, lowBeamsOn);
+        } else {
+            store.remove(Names.lowBeamsOn);
+        }
+    }
+
+    public Boolean getLowBeamsOn() {
+        final Object o = store.get(Names.lowBeamsOn);
+        if (o instanceof Boolean) {
+            return (Boolean) o;
+        }
+        return null;
+    }
+
     public void setHighBeamsOn(Boolean highBeamsOn) {
         if (highBeamsOn != null) {
             store.put(Names.highBeamsOn, highBeamsOn);

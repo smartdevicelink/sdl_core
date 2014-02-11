@@ -136,16 +136,18 @@ const Constant* Float::ConstantFor(const std::string& literal) const {
   }
 }
 
-String::String(int64_t max_length)
-    : max_length_(max_length) {
-}
-
-int64_t String::max_length() const {
-  return max_length_;
+String::String(const Range& range)
+    : length_range_(range) {
 }
 
 bool String::operator <(const String& that) const {
-  return max_length_ < that.max_length_;
+  if (length_range_.min() != that.length_range_.min())
+    return length_range_.min() < that.length_range_.min();
+  return length_range_.max() < that.length_range_.max();
+}
+
+const String::Range& String::length_range() const {
+  return length_range_;
 }
 
 TypeCodeGenerator* String::Apply(TypeCodeGenerator* code_generator) const {

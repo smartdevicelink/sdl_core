@@ -143,6 +143,16 @@ inline bool VariantToValue(const QVariant& variant, double& v) {
     return true;
 }
 
+inline bool VariantToValue(const QVariant& variant, QStringList& v) {
+  if (variant.type() != QVariant::List) return false;
+  QList<QVariant> list = variant.toList();
+  for (QList<QVariant>::const_iterator i = list.begin(); i != list.end(); ++i) {
+    if (i->type() != QVariant::String) return false;
+    v.append(i->toString());
+  }
+  return true;
+}
+
 template<typename T>
 bool VariantToValue(const QVariant& variant, QList<T>& v) {
     if (variant.type() != QVariant::List) return false;

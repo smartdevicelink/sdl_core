@@ -32,6 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config_profile/profile.h"
+
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
@@ -104,6 +106,14 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
     error = client_connection_listener_->Init();
 
   initialised_ = (error == OK);
+
+  if (profile::Profile::instance()->use_last_state()) {
+    if (!Restore()) {
+      LOG4CXX_WARN(logger_, "could not restore transport adapter state");
+      error = FAIL;
+    }
+  }
+
   return error;
 }
 
@@ -523,6 +533,13 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   } else {
     return "";
   }
+}
+
+void TransportAdapterImpl::Store() const {
+}
+
+bool TransportAdapterImpl::Restore() {
+  return true;
 }
 
 ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(

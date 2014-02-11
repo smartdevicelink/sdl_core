@@ -121,8 +121,8 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
     LOG4CXX_INFO(
         logger_,
         "sendStartSessionAck() for connection " << connection_id
-            << " for service_type " << service_type << " session_id "
-            << session_id);
+            << " for service_type " << static_cast<int32_t>(service_type) <<
+            " session_id " << static_cast<int32_t>(session_id));
   } else {
     LOG4CXX_ERROR(logger_, "sendStartSessionAck() - write FAIL");
   }
@@ -180,8 +180,8 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
     LOG4CXX_INFO(
         logger_,
         "SendEndSessionAck() for connection " << connection_id
-            << " for service_type " << service_type << " session_id "
-            << session_id);
+            << " for service_type " << static_cast<int32_t>(service_type) <<
+            " session_id " << static_cast<int32_t>(session_id));
   } else {
     LOG4CXX_ERROR(logger_, "SendEndSessionAck() - write FAIL");
   }
@@ -645,7 +645,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   } else {
     LOG4CXX_INFO_EXT(
         logger_,
-        "Refused to create service " << packet.service_type() << " type.");
+        "Refused to create service " <<
+        static_cast<int32_t>(packet.service_type()) << " type.");
+
     SendStartSessionNAck(connection_id, packet.service_type());
   }
   return RESULT_OK;

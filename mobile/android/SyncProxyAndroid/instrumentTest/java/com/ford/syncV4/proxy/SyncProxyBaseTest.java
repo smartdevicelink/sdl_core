@@ -7,10 +7,14 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
@@ -25,7 +29,9 @@ import java.io.PipedOutputStream;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.TimerTask;
+import java.util.Vector;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -142,16 +148,16 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.closeConnection(currentSession.getSessionId(), false);
-                        _syncConnection = null;
+                    if (mSyncConnection != null) {
+                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection = null;
                     }
-                    _syncConnection = mock(SyncConnection.class);
-                    when(_syncConnection.getIsConnected()).thenReturn(true);
+                    mSyncConnection = mock(SyncConnection.class);
+                    when(mSyncConnection.getIsConnected()).thenReturn(true);
                 }
                 synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (_syncConnection != null) {
-                        _syncConnection.startTransport();
+                    if (mSyncConnection != null) {
+                        mSyncConnection.startTransport();
                     }
                 }
                 currentSession.setSessionId(sessionID);
@@ -204,19 +210,19 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testStartAudioDataTransferClassConnectionMethod() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
         proxyALM.startAudioDataTransfer();
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(proxyALM._syncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
+        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
     }
 
     public void testStartAudioDataTransferReturnsStream() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
-        when(proxyALM._syncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
+        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), VERSION, "");
@@ -226,25 +232,25 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testStopAudioDataTransferFiresCallback() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         proxyALM.stopAudioDataTransfer();
-        verify(proxyALM._syncConnection, timeout(1)).stopAudioDataTransfer();
+        verify(proxyALM.mSyncConnection, timeout(1)).stopAudioDataTransfer();
     }
 
     public void testCloseSessionCalledWithRightSessionID() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM._syncConnection = mock(SyncConnection.class);
+        proxyALM.mSyncConnection = mock(SyncConnection.class);
         Session session = Session.createSession(ServiceType.RPC, sessionID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.closeSession(false);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Boolean> keepConnectionCaptor = ArgumentCaptor.forClass(Boolean.class);
-        verify(proxyALM._syncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
+        verify(proxyALM.mSyncConnection, times(1)).closeConnection(sessionIDCaptor.capture(), keepConnectionCaptor.capture());
         assertEquals("session id of closed RPC service should be same as initial session id", sessionID, sessionIDCaptor.getValue().byteValue());
         assertFalse(keepConnectionCaptor.getValue());
     }
 
-    public void testAppUnregisteredWithIgnitionOff()throws Exception{
+    public void testAppUnregisteredWithIgnitionOff() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -265,7 +271,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 reason);
     }
 
-    public void testAppUnregisteredWithMasterReset()throws Exception{
+    public void testAppUnregisteredWithMasterReset() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -286,7 +292,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 reason);
     }
 
-    public void testAppUnregisteredWithFactoryDefaults()throws Exception{
+    public void testAppUnregisteredWithFactoryDefaults() throws Exception {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
@@ -357,7 +363,215 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.setSyncConnection(mock(SyncConnection.class));
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
-        assertEquals("only one rpc service should be in service list",1, proxy.currentSession.getServiceList().size());
+        assertEquals("only one rpc service should be in service list", 1, proxy.currentSession.getServiceList().size());
     }
 
+    public void testUnregisterAppResponseTriggersStopServicesAndSession() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        assertNotNull(proxy);
+        proxy._wiproVersion = 2;
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, (byte) 2, "");
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+
+        params.put(Names.resultCode, Result.SUCCESS);
+        params.put(Names.success, true);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.UnregisterAppInterface, params,
+                ProtocolMessage.RPCTYPE_RESPONSE, 1));
+        verify(proxy.getSyncConnection(), times(1)).closeMobileNaviService(sessionID);
+        verify(proxy.getSyncConnection(), times(1)).closeAudioService(sessionID);
+        verify(proxy.getSyncConnection(), times(1)).closeConnection(sessionID, true);
+        assertNotNull(proxy.getSyncConnection());
+        assertEquals("Service pool should be empty", 0, proxy.getServicePool().size());
+        assertEquals("Session id should be 0", 0, proxy.currentSession.getSessionId());
+    }
+
+    public void testSyncMsgVersionRequestSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        proxy.setSyncMsgVersionRequest(syncMsgVersion);
+        SyncMsgVersion real = proxy.getSyncMsgVersionRequest();
+        assertEquals("msg version should be equal", real, syncMsgVersion);
+    }
+
+    public void testApplicationNameSetTest() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String name = "name";
+        proxy.setApplicationName(name);
+        String real = proxy.getApplicationName();
+        assertEquals("names should be the same", real, name);
+    }
+
+    public void testTtsNameSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<TTSChunk> ttsChunkVector = new Vector<TTSChunk>();
+        TTSChunk ttsChunk = new TTSChunk();
+        ttsChunk.setText("Text");
+        ttsChunkVector.add(ttsChunk);
+        proxy.setTTSName(ttsChunkVector);
+        Vector<TTSChunk> real = proxy.getTTSName();
+        assertEquals(real, ttsChunkVector);
+    }
+
+    public void testNgnMediaScreenAppNameSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String mediaScreenName = "name";
+        proxy.setNgnMediaScreenAppName(mediaScreenName);
+        String real = proxy.getNgnMediaScreenAppName();
+        assertEquals(real, mediaScreenName);
+    }
+
+    public void testVrSynonymsSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<String> vrSynonums = new Vector<String>();
+        vrSynonums.add("name");
+        proxy.setVrSynonyms(vrSynonums);
+        Vector<String> real = proxy.getVrSynonyms();
+        assertEquals(real, vrSynonums);
+    }
+
+    public void testIsMediaAppSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Boolean isMediaApp = false;
+        proxy.setIsMediApp(isMediaApp);
+        Boolean real = proxy.getIsMediaApp();
+        assertEquals(real, isMediaApp);
+    }
+
+    public void testSyncLanguageDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Language language = Language.AR_SA;
+        proxy.setSyncLanguageDesired(language);
+        Language real = proxy.getSyncLanguageDesired();
+        assertEquals(real, language);
+    }
+
+    public void testHmiDisplayLanguageDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Language language = Language.AR_SA;
+        proxy.setHmiDisplayLanguageDesired(language);
+        Language real = proxy.getHmiDisplayLanguageDesired();
+        assertEquals(real, language);
+    }
+
+    public void testAppHMITypeSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
+        appHMITypeVector.add(AppHMIType.DEFAULT);
+        proxy.setAppHMIType(appHMITypeVector);
+        Vector<AppHMIType> real = proxy.getAppHMIType();
+        assertEquals(real, appHMITypeVector);
+    }
+
+    public void testAppIDSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String appID = "appID";
+        proxy.setAppID(appID);
+        String real = proxy.getAppID();
+        assertEquals(real, appID);
+    }
+
+    public void testAutoActivateIdDesiredSet() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        String autoActivateIdDesired = "_autoActivateIdDesired";
+        proxy.setAutoActivateIdReturned(autoActivateIdDesired);
+        String real = proxy.getAutoActivateIdReturned();
+        assertEquals(real, autoActivateIdDesired);
+    }
+
+    public void testSyncConnectionSessionIdIsSetToNullAfterStopSession() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
+        proxy.closeSession(true);
+        byte realSessionId = proxy.getSyncConnection().getSessionId();
+        assertEquals(0, realSessionId);
+    }
+
+    public void testUpdateRegisterAppInterfaceParametersChangesRegisterParameters() throws Exception {
+        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+        syncMsgVersion.setMajorVersion(2);
+        syncMsgVersion.setMinorVersion(2);
+        Vector<TTSChunk> ttsChunkVector = new Vector<TTSChunk>();
+        TTSChunk ttsChunk = new TTSChunk();
+        ttsChunk.setText("Text");
+        ttsChunkVector.add(ttsChunk);
+        Vector<String> vrSynonyms = new Vector<String>();
+        vrSynonyms.add("name");
+        Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
+        appHMITypeVector.add(AppHMIType.DEFAULT);
+
+        RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
+                syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
+                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1);
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.updateRegisterAppInterfaceParameters(msg);
+
+        assertEquals(syncMsgVersion, proxy.getSyncMsgVersionRequest());
+        assertEquals("appName", proxy.getApplicationName());
+        assertEquals(ttsChunkVector, proxy.getTTSName());
+        // screen app name length is limited
+        assertEquals("ngnMe", proxy.getNgnMediaScreenAppName());
+        assertEquals(vrSynonyms, proxy.getVrSynonyms());
+        assertEquals((Boolean) true, proxy.getIsMediaApp());
+        assertEquals(Language.AR_SA, proxy.getSyncLanguageDesired());
+        assertEquals( Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
+        assertEquals( appHMITypeVector, proxy.getAppHMIType());
+        assertEquals( "appID", proxy.getAppID());
+    }
+
+    public void testRPCMessageHandlerIsSetAfterCreation() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        IRPCMessageHandler messageHandler = proxy.getRPCMessageHandler();
+        assertNotNull("message handler should be not null", messageHandler);
+    }
+
+    public void testRPCMessageHandlerCalledOnIncomingMessage() throws Exception {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM proxy =
+                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy.setRPCMessageHandler(mock(IRPCMessageHandler.class));
+        // send OnAppInterfaceUnregistered
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        final AppInterfaceUnregisteredReason reason =
+                AppInterfaceUnregisteredReason.IGNITION_OFF;
+        params.put(Names.reason, reason);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+                Names.OnAppInterfaceUnregistered, params,
+                ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+        verify(proxy.getRPCMessageHandler(), times(1)).handleRPCMessage(any(Hashtable.class));
+    }
 }

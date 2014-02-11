@@ -141,12 +141,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 // If transport is still connected, sent EndProtocolSessionMessage
-                if (sendFinishMessages && (_transport != null) &&
-                        _transport.getIsConnected()) {
+                if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
                     _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                 }
-
-            } // end-if
+            }
         }
 
         waitForRpcEndServiceACK();
@@ -156,12 +154,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol = null;
             }
         }
-
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.stop();
-            _heartbeatMonitor = null;
+        if (!keepConnection) {
+            if (_heartbeatMonitor != null) {
+                _heartbeatMonitor.stop();
+                _heartbeatMonitor = null;
+            }
         }
-
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
             stopH264();
@@ -279,12 +277,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
-
-        // If _transport is null, then it can't be connected
         if (_transport == null) {
             return false;
         }
-
         return _transport.getIsConnected();
     }
 
@@ -324,10 +319,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onTransportConnected() {
+        initialiseSession();
+    }
+
+    private void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
         }
+        startProtocolSession();
+    }
 
+    private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 Log.d(TAG, "StartProtocolSession, id:" + mSessionId);
@@ -397,11 +399,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 END_PROTOCOL_SERVICE_RPC_LOCK.notifyAll();
             }
             _transport.stopReading();
-        }else if ( _transport != null && serviceType.equals(ServiceType.Mobile_Nav) ){
+        } else if (_transport != null && serviceType.equals(ServiceType.Mobile_Nav)) {
             synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
                 END_PROTOCOL_SERVICE_VIDEO_LOCK.notifyAll();
             }
-        }else if ( _transport != null && serviceType.equals(ServiceType.Audio_Service) ){
+        } else if (_transport != null && serviceType.equals(ServiceType.Audio_Service)) {
             synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
                 END_PROTOCOL_SERVICE_AUDIO_LOCK.notifyAll();
             }
@@ -468,6 +470,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _isHeartbeatTimedout = true;
         closeConnection((byte) 0, false, false);
         _connectionListener.onHeartbeatTimedOut();
+    }
+
+    public byte getSessionId() {
+        return mSessionId;
     }
 
     /**

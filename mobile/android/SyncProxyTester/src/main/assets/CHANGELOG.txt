@@ -1,4 +1,20 @@
+[CW7]
+* SyncProxyAndroid SDK: Update FileType enum.
+* SyncProxyAndroid SDK: Add prerecordedSpeech parameter to RegisterAppInterfaceResponse class.
+* Fix 'USB: Application is not recognizable by SDLCore' if the application is closed when the stream is opened.
+* SyncProxyAndroid SDK: Update HeadLampStatus struct. Add headLampStatus parameter to OnVehicleData notification.
+* SyncProxyAndroid SDK: Add displayCapabilities parameter to SetDisplayLayoutResponse class.
++ SyncProxyAndroid SDK: Add ImageFieldName enum, ImageField struct, ScreenParams struct. Update DisplayCapabilities struct.
+
 [CW6]
++ SyncProxyAndroid SDK: changed video for Alice build
++ SyncProxyAndroid SDK: changed registration/unregistration procedure.
++ SyncProxyAndroid SDK: changed sync logic at transports
++ SyncProxyAndroid SDK: Add WarningLightStatus enum (replaces TirePressureTellTale enum). Update TireStatus struct.
+* SyncProxyAndroid SDK: Update PRNDL enum's values from the spec.
+* SyncProxyAndroid SDK: Fix session id at application resumption.
++ SyncProxyAndroid SDK: Allow to send requests with unknown function names.
++ SyncProxyAndroid SDK: Implement integration of OnSystemRequest notification and system PutFile request.
 + SyncProxyAndroid SDK: changed reconnection scheduling logic
 
 [CW5]

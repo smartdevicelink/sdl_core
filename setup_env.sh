@@ -33,6 +33,41 @@
 #Exit immediately if a command exits with a non-zero status.
 set -e
 
+INSTALL_ALL=false
+INSTALL_QT_HMI=false
+INSTALL_QNX_TOOLS=false
+
+while test $# -gt 0; do
+        case "$1" in
+                -a|--all)
+                    INSTALL_ALL=true
+                    ;;
+                -qt)
+                    INSTALL_QT_HMI=true
+                    ;;
+                -qnx)
+                    INSTALL_QNX_TOOLS=true
+                    ;;
+                -h|--help|*)
+                    echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
+                    echo "                 core compilation and running."
+                    echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
+                    echo " "
+                    echo "Usage: setup_env.sh [option] "
+                    echo "Options:"
+                    echo "-h, --help            show brief help"
+                    echo "-a, --all             all mandatory and optional packages will be installed"
+                    echo "-qt                   install additional packages Qt HMI Qt5"
+                    echo "-qnx                  install additional packages for QNX"
+                    echo "-qnx -qt              install additional packages Qt HMI Qt4 and for QNX"
+
+                    exit 0
+                    ;;
+        esac
+    shift
+done
+
+#Check sudo
 if [ $EUID != 0 ]; then
     echo "This script should be run using sudo or as the root user"
     exit 1
@@ -55,9 +90,6 @@ APPLINK_FTP_SERVER="ftp://ford-applink.luxoft.com"
 CMAKE_DEB_SRC=${APPLINK_FTP_SERVER}"/Distrs/CMake/deb"
 CMAKE_DEB_DST="/tmp/cmake"
 TEMP_FOLDER="/tmp/APPLINK"
-INSTALL_ALL=false
-INSTALL_QT_HMI=false
-INSTALL_QNX_TOOLS=false
 AVAHI_CLIENT_LIBRARY="libavahi-client-dev"
 DOXYGEN="doxygen"
 GRAPHVIZ="graphviz"
@@ -76,36 +108,6 @@ GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/p
 
 FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
 FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
-
-while test $# -gt 0; do
-        case "$1" in
-                -a|--all)
-                    INSTALL_ALL=true
-                    ;;
-                -qt)
-                    INSTALL_QT_HMI=true
-                    ;;
-                -qnx)
-                    INSTALL_QNX_TOOLS=true
-                    ;;
-                -h|--help|*)
-                    echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
-                    echo "                 core compilation and running."
-                    echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
-                    echo " "
-                    echo "Usage: setup_env.sh [option] "
-                    echo "Options:"
-                    echo "-h, --help            show brief help"
-                    echo "-a, --all             all mandatory and optional packages will be installed"
-                    echo "-qt                   install additional packages for Qt HMI"
-                    echo "-qnx                  install additional packages for QNX"
-
-                    exit 0
-                    ;;
-        esac
-    shift
-done
-
 
 echo "Detecting machine architecture"
 uname_result=`uname -i`
@@ -262,14 +264,6 @@ if ${INSTALL_CMAKE_2_8_11_2}; then
     gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DATA_DEB}
     gdebi --non-interactive ${CMAKE_DEB_DST}/${CMAKE_DEB}
 fi
-
-echo "Installing Subversion"
-apt-install ${SUBVERSION}
-echo $OK
-
-echo "Installing Git"
-apt-install ${GIT}
-echo $OK
 
 echo "Installing gstreamer..."
 apt-install ${GSTREAMER}
@@ -521,6 +515,14 @@ if $INSTALL_ALL; then
     echo " "
     echo "Installing optional packages..."
     echo " "
+
+    echo "Installing Subversion"
+    apt-install ${SUBVERSION}
+    echo $OK
+
+    echo "Installing Git"
+    apt-install ${GIT}
+    echo $OK
 
     echo "Installing Doxygen"
     apt-install ${DOXYGEN}

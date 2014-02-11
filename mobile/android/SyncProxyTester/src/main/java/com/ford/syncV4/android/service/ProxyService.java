@@ -10,7 +10,9 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -103,6 +105,8 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -118,9 +122,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
-public class ProxyService extends Service implements IProxyListenerALMTesting {
+public class ProxyService extends Service implements IProxyListenerALMTesting,
+        IOnSystemRequestHandler {
 
     static final String TAG = "SyncProxyTester";
 
@@ -347,6 +353,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*preRegister*/ false,
                         versionNumber,
                         config);
+                mSyncProxy.setOnSystemRequestHandler(this);
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -714,7 +721,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onProxyClosed(final String info, Exception e) {
-        createErrorMessageForAdapter("OnProxyClosed: " + info, e);
+        if (e != null) {
+            createErrorMessageForAdapter("OnProxyClosed:" + info + ", msg:" + e.getMessage());
+        } else {
+            createErrorMessageForAdapter("OnProxyClosed:" + info);
+        }
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
@@ -727,16 +738,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (e == null) {
                 return;
             }
-            final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
-            if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
-                    (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
-                    (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
-                reset();
+            if (e instanceof SyncException) {
+                final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
+                if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
+                        (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
+                        (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
+                    reset();
+                }
             }
-
-            if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
+            /*if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
                 mLogAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e, true);
-            }
+            }*/
         }
     }
 
@@ -1452,19 +1464,30 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version, final String correlationID) {
+    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version,
+                                       final String correlationID) {
         String response = "EndService Ack received; Session Type " + serviceType.getName() + "; " +
                 "Session ID " + version + "; Correlation ID " + correlationID;
         createDebugMessageForAdapter(response);
 
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onProtocolServiceEnded(serviceType, version, correlationID);
-                }
-            });
+        if (serviceType == ServiceType.Audio_Service) {
+            mLogAdapter.logMessage("Audio service stopped", true);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            mLogAdapter.logMessage("Navi service stopped", true);
+        } else if (serviceType == ServiceType.Bulk_Data) {
+            mLogAdapter.logMessage("Bulk Data service stopped", true);
+        } else if (serviceType == ServiceType.RPC) {
+            mLogAdapter.logMessage("RPC service stopped", true);
+
+            if (mServiceDestroyEvent != null) {
+                mServiceDestroyEvent.onDisposeComplete();
+            }
+
+            if (mCloseSessionCallback != null) {
+                mCloseSessionCallback.onCloseSessionComplete();
+            }
+        } else {
+            mLogAdapter.logMessage("Unknown service '" + serviceType + "' stopped", true);
         }
     }
 
@@ -1653,16 +1676,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
-        }
-
-        if (mServiceDestroyEvent != null) {
-            mServiceDestroyEvent.onDisposeComplete();
-
-            //stopServiceBySelf();
-        }
-
-        if (mCloseSessionCallback != null) {
-            mCloseSessionCallback.onCloseSessionComplete();
         }
     }
 
@@ -1872,6 +1885,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    public void syncProxySendRegisterRequest(RegisterAppInterface msg)throws SyncException {
+        if (mSyncProxy != null) {
+            // TODO it's seems stupid in order to register send onTransportConnected
+            mSyncProxy.updateRegisterAppInterfaceParameters(msg);
+            mSyncProxy.getSyncConnection().onTransportConnected();
+        }
+    }
+
     public byte syncProxyGetWiProVersion() {
         if (mSyncProxy != null) {
             return mSyncProxy.getWiProVersion();
@@ -1963,4 +1984,45 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
     }
+
+    @Override
+    public void onFilesDownloadRequest(final ISystemRequestProxy proxy,
+                                       List<String> urls, FileType fileType) {
+        createDebugMessageForAdapter("files download request");
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final byte[] data = contentsOfResource(R.raw.audio_short);
+                try {
+                    proxy.putSystemFile("system.update", data,
+                            FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    createErrorMessageForAdapter("Can't upload system file", e);
+                }
+            }
+        }, 500);
+    }
+
+    @Override
+    public void onFileResumeRequest(final ISystemRequestProxy proxy,
+                                    String filename, final Integer offset,
+                                    final Integer length, FileType fileType) {
+        createDebugMessageForAdapter("files resume request");
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                final byte[] data = Arrays.copyOfRange(
+                        contentsOfResource(R.raw.audio_short), offset,
+                        offset + length);
+                try {
+                    proxy.putSystemFile("system.update", data, offset,
+                            FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    createErrorMessageForAdapter("Can't upload system file", e);
+                }
+            }
+        }, 500);
+    }
+
+
 }

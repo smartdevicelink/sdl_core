@@ -57,7 +57,7 @@ class TransportManagerDefault : public TransportManagerImpl {
    */
   virtual ~TransportManagerDefault();
 
-  explicit TransportManagerDefault(const TransportManagerAttr& config);
+  TransportManagerDefault();
 
  public:
   /**

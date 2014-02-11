@@ -108,7 +108,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    *
    * return TRUE if ID is known already, otherwise - FALSE
    */
-  bool IsApplicationRegistered();
+  bool IsApplicationWithSameAppIdRegistered();
 
   /*
    * @brief Check for some request param. names restrictions, e.g. for

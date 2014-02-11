@@ -64,6 +64,9 @@ add_subdirectory(./hmi_message_handler)
 # --- Config
 add_subdirectory(./config_profile)
 
+# --- Resumption
+add_subdirectory(./resumption)
+
 # --- AudioManager
 add_subdirectory(./media_manager)
 

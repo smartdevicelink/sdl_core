@@ -73,8 +73,16 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  if (IsApplicationRegistered()) {
+  Application* application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+
+  if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  if (IsApplicationWithSameAppIdRegistered()) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -134,9 +142,11 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-	
 
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+    ResumeCtrl* resume_ctrl = ApplicationManagerImpl::instance()->GetResumeController();
+
+    bool resumption = resume_ctrl->StartResumption(app);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, resumption);
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
@@ -265,6 +275,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     display_caps[hmi_response::media_clock_formats] =
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::media_clock_formats);
+
+    display_caps[hmi_response::templates_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::templates_available);
+
+    display_caps[hmi_response::screen_params] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::screen_params);
+
+    display_caps[hmi_response::num_custom_presets_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::num_custom_presets_available);
 
     if (hmi_capabilities.display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
@@ -507,7 +529,7 @@ RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
   return std::string(param_name.begin(), param_name_new_end);
 }
 
-bool RegisterAppInterfaceRequest::IsApplicationRegistered() {
+bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 

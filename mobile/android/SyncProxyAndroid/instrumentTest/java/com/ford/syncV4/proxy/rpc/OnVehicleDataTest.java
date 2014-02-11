@@ -20,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class OnVehicleDataTest extends TestCase {
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final String STEERING_WHEEL_ANGLE = "steeringWheelAngle";
+    private static final String HEAD_LAMP_STATUS = "headLampStatus";
 
     public void testMessageShouldBeCreated() {
         OnVehicleData msg = new OnVehicleData();
@@ -31,12 +32,15 @@ public class OnVehicleDataTest extends TestCase {
         OnVehicleData msg = new OnVehicleData();
 
         final float swa = 1.0f;
+        final HeadLampStatus status = new HeadLampStatus();
 
         msg.setSteeringWheelAngle(swa);
+        msg.setHeadLampStatus(status);
 
         JSONObject jsonObject = msg.serializeJSON(PROTOCOL_VERSION);
         assertThat(jsonObject.getDouble(STEERING_WHEEL_ANGLE),
                 is((double) swa));
+        assertThat(jsonObject.has(HEAD_LAMP_STATUS), is(true));
     }
 
     public void testDeserializedMessageWithoutParamsShouldContainNullFields()
@@ -48,6 +52,7 @@ public class OnVehicleDataTest extends TestCase {
 
         assertThat(msg, notNullValue());
         assertThat(msg.getSteeringWheelAngle(), nullValue());
+        assertThat(msg.getHeadLampStatus(), nullValue());
     }
 
     public void testSteeringWheelAngleGetterShouldReturnSetValue()
@@ -93,5 +98,62 @@ public class OnVehicleDataTest extends TestCase {
                         TestCommon.paramsToRequestObject(jsonObject)));
         assertThat(msg, notNullValue());
         assertThat(msg.getSteeringWheelAngle(), nullValue());
+    }
+
+    public void testHeadLampStatusGetterShouldReturnSetValue()
+            throws JSONException {
+        OnVehicleData msg = new OnVehicleData();
+
+        final HeadLampStatus status = new HeadLampStatus();
+        msg.setHeadLampStatus(status);
+
+        assertThat(msg.getHeadLampStatus(), is(status));
+    }
+
+    public void testSettingNullHeadLampStatusShouldRemoveValue()
+            throws JSONException {
+        OnVehicleData msg = new OnVehicleData();
+
+        msg.setHeadLampStatus(new HeadLampStatus());
+        msg.setHeadLampStatus(null);
+
+        assertThat(msg.getHeadLampStatus(), nullValue());
+    }
+
+    public void testDeserializedHeadLampStatusAsStructShouldContainValue()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        final HeadLampStatus status = new HeadLampStatus();
+        jsonObject.put(HEAD_LAMP_STATUS, status);
+
+        OnVehicleData msg = new OnVehicleData(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getHeadLampStatus(), is(status));
+    }
+
+    public void testDeserializedHeadLampStatusAsStringShouldBeNull()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(HEAD_LAMP_STATUS, "4.0f");
+
+        OnVehicleData msg = new OnVehicleData(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getHeadLampStatus(), nullValue());
+    }
+
+    public void testDeserializedHeadLampStatusAsIntShouldBeNull()
+            throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(HEAD_LAMP_STATUS, 32);
+
+        OnVehicleData msg = new OnVehicleData(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getHeadLampStatus(), nullValue());
     }
 }

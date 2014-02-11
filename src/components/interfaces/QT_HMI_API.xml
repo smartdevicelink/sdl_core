@@ -1258,7 +1258,7 @@
   <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
     <description>The image resolution of this field.</description>
   </param>
-</struct>
+</struct> 
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
@@ -1268,6 +1268,9 @@
   <param name="textFields" type="Common.TextFieldName" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
+  </param>
+  <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true">
+    <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
@@ -1794,6 +1797,9 @@
       <param name="application" type="Common.HMIApplication" mandatory="true">
         <description>The information about application registered. See HMIApplication. </description>
       </param>
+      <param name="resume" type="Boolean" mandatory="false">
+        <description>Flag to indicate if application may be resumed in future</description>
+      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
@@ -1804,11 +1810,14 @@
         <description>Flag to indicate if application may be resumed in future</description>
       </param>
     </function>
-    <function name="OnResumeResult" messagetype="notification">
-      <description>Issued by HMI to notify SDL about application resumption check.</description>
+    <function name="GetResumeResult" messagetype="request">
+      <description>Issued by SDL to request HMI resumption check.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the registered application that will be resumed</description>
       </param>
+    </function>
+    <function name="GetResumeResult" messagetype="response">
+      <description>Issued by HMI to notify SDL about application resumption check.</description>
       <param name="result" type="Boolean" mandatory="true">
         <description>Flag to indicate if applications data check was successfull</description>
       </param>
@@ -2142,6 +2151,12 @@
     <param name="graphic" type="Common.Image" mandatory="false">
       <description>Path to optional dynamic image or the static binary image itself.  See Image. If omitted, the displayed graphic should not change.</description>
     </param>
+    <param name="secondaryGraphic" type="Common.Image" mandatory="false">
+      <description>
+        Image struct determining whether static or dynamic secondary image to display in app.
+        If omitted on supported displays, the displayed secondary graphic shall not change.
+      </description>
+    </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>App defined SoftButtons.</description>
       <description>If omitted, the currently displayed SoftButton values should not change.</description>
@@ -2253,7 +2268,7 @@
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
-          See StartTime.
+          See TimeFormat.
       	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
       	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
       	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
@@ -3003,7 +3018,7 @@
   </function>
 
   <function name="OnSpeed" messagetype="notification">
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="true">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="true">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
   </function>

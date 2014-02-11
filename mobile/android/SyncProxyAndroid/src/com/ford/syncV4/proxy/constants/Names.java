@@ -223,7 +223,7 @@ public class Names {
 	public static final String pressure = "pressure";
 	public static final String hours = "hours";
 	public static final String rows = "rows";
-	public static final String pressureTellTale = "pressureTellTale";
+	public static final String pressureTelltale = "pressureTelltale";
 	public static final String leftFront = "leftFront";
 	public static final String rightFront = "rightFront";
 	public static final String leftRear = "leftRear";
@@ -397,8 +397,9 @@ public class Names {
     public static final String averageTripFuelEconomy = "averageTripFuelEconomy";
     public static final String currentCycleFuelEconomy = "currentCycleFuelEconomy";
 
-    public static final String lightSwitchStatus = "lightSwitchStatus";
+    public static final String ambientLightSensorStatus = "ambientLightSensorStatus";
     public static final String highBeamsOn = "highBeamsOn";
+    public static final String lowBeamsOn = "lowBeamsOn";
 
     public static final String electricFuelConsumption = "electricFuelConsumption";
     public static final String stateOfCharge = "stateOfCharge";
@@ -442,4 +443,10 @@ public class Names {
     public static final String OnSystemRequest = "OnSystemRequest";
     public static final String requestType = "requestType";
     public static final String url = "url";
+    public static final String imageTypeSupported = "imageTypeSupported";
+    public static final String imageResolution = "imageResolution";
+    public static final String imageFields = "imageFields";
+    public static final String graphicSupported = "graphicSupported";
+    public static final String numCustomPresetsAvailable = "numCustomPresetsAvailable";
+    public static final String prerecordedSpeech = "prerecordedSpeech";
 }

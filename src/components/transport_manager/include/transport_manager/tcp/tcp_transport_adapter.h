@@ -68,6 +68,18 @@ class TcpTransportAdapter : public TransportAdapterImpl {
    * @return String with device type.
    */
   virtual DeviceType GetDeviceType() const;
+
+  /**
+   * @brief Store adapter state in last state singleton
+   */
+  virtual void Store() const;
+
+  /**
+   * @brief Restore adapter state from last state singleton
+   *
+   * @return True on success false otherwise
+   */
+  virtual bool Restore();
 };
 
 }  // namespace transport_adapter

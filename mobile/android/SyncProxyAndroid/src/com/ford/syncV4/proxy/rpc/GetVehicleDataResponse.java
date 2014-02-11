@@ -548,28 +548,6 @@ public class GetVehicleDataResponse extends RPCResponse {
         }
         return null;
     }
-    public void setAmbientLightStatus(AmbientLightStatus ambientLightStatus) {
-        if (ambientLightStatus != null) {
-            parameters.put(Names.ambientLightStatus, ambientLightStatus);
-        } else {
-        	parameters.remove(Names.ambientLightStatus);
-        }
-    }
-    public AmbientLightStatus getAmbientLightStatus() {
-        Object obj = parameters.get(Names.ambientLightStatus);
-        if (obj instanceof AmbientLightStatus) {
-            return (AmbientLightStatus) obj;
-        } else if (obj instanceof String) {
-        	AmbientLightStatus theCode = null;
-            try {
-                theCode = AmbientLightStatus.valueForString((String) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.ambientLightStatus, e);
-            }
-            return theCode;
-        }
-        return null;
-    }
     public void setECallInfo(ECallInfo eCallInfo) {
         if (eCallInfo != null) {
             parameters.put(Names.eCallInfo, eCallInfo);

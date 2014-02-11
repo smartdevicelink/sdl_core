@@ -124,7 +124,7 @@ TEST(ValidatedTypes, TestFloatInitializingConstructor) {
 }
 
 TEST(ValidatedTypes, TestStringDefaultConstructor) {
-  String<6> str;
+  String<1, 6> str;
   ASSERT_FALSE(str.is_initialized());
   ASSERT_FALSE(str.is_valid());
   std::string val = str;
@@ -141,22 +141,34 @@ TEST(ValidatedTypes, TestStringDefaultConstructor) {
   ASSERT_EQ(val, "Long string");
 }
 
+TEST(ValidatedTypes, TestStringLengthRange) {
+  String<4, 10> str;
+  ASSERT_FALSE(str.is_initialized());
+  ASSERT_FALSE(str.is_valid());
+  str = "Hello";
+  ASSERT_TRUE(str.is_initialized());
+  ASSERT_TRUE(str.is_valid());
+  str = "Sh";
+  ASSERT_TRUE(str.is_initialized());
+  ASSERT_FALSE(str.is_valid());
+}
+
 TEST(ValidatedTypes, TestStringInitializingConstructor) {
-  String<4> invalid_str("A string");
+  String<1, 4> invalid_str("A string");
   ASSERT_TRUE(invalid_str.is_initialized());
   ASSERT_FALSE(invalid_str.is_valid());
 }
 
 TEST(ValidatedTypes, TestStringAssignment) {
-  String<5> short_str("Short");
-  String<10> long_str("A long string");
+  String<1, 5> short_str("Short");
+  String<1, 10> long_str("A long string");
   short_str = long_str;
   ASSERT_TRUE(short_str.is_initialized());
   ASSERT_FALSE(short_str.is_valid());
 }
 
 TEST(ValidatedTypes, TestArray) {
-  Array<String<5>, 2, 10> arr;
+  Array<String<1, 5>, 2, 10> arr;
   ASSERT_FALSE(arr.is_initialized());
   ASSERT_FALSE(arr.is_valid());
   arr.push_back("Text");
@@ -171,13 +183,13 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   std::vector<std::string> strings;
   strings.push_back("One");
   strings.push_back("Two");
-  Array<String<5>, 2, 10> arr(strings);
+  Array<String<1, 5>, 2, 10> arr(strings);
   ASSERT_TRUE(arr.is_initialized());
   ASSERT_TRUE(arr.is_valid());
 }
 
 TEST(ValidatedTypes, TestMap) {
-  Map<String<6>, 2, 10> map;
+  Map<String<1, 6>, 2, 10> map;
   ASSERT_FALSE(map.is_initialized());
   ASSERT_FALSE(map.is_valid());
   map["a"] = "Hello";
@@ -192,7 +204,7 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   std::map< std::string, std::string > init_map;
   init_map["a"] = "Hello";
   init_map["b"] = "World";
-  Map<String<6>, 2, 10 > map(init_map);
+  Map<String<1, 6>, 2, 10 > map(init_map);
   ASSERT_TRUE(map.is_initialized());
   ASSERT_TRUE(map.is_valid());
 }
@@ -250,7 +262,7 @@ TEST(ValidatedTypes, TestOptionalConstructor) {
 }
 
 TEST(ValidatedTypes, TestOptionalInitializingConstructor) {
-  Optional< String<12> > optional_string("Hello world");
+  Optional< String<1, 12> > optional_string("Hello world");
   ASSERT_TRUE(optional_string.is_initialized());
   ASSERT_TRUE(optional_string.is_valid());
   std::string value = *optional_string;

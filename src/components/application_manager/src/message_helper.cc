@@ -157,7 +157,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl) {
+  const Application& application_impl, bool is_resumption) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -169,6 +169,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     hmi_apis::FunctionID::BasicCommunication_OnAppRegistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params][strings::resume] = is_resumption;
 
   message[strings::msg_params][strings::application][strings::app_name] =
     application_impl.name();
@@ -382,7 +383,6 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
   SendAddCommandRequestToHMI(app);
-  SendChangeRegistrationRequestToHMI(app);
 }
 
 void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
@@ -771,7 +771,7 @@ void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
   ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
+void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app, bool is_resuming) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -784,7 +784,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app) {
     hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
-
+  message[strings::msg_params][strings::resume] = is_resuming;
   message[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
@@ -1347,7 +1347,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
 
   switch (object.getType()) {
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Array: {
-      for (int32_t i = 0; i < object.length(); i++) {
+      for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
         printf("\n%s%d: ", tab_buffer.c_str(), i);

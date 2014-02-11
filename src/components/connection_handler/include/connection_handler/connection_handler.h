@@ -70,6 +70,13 @@ class ConnectionHandler {
 
   virtual void StartTransportManager() = 0;
 
+  /**
+   * \brief Sets resume session map. Used on start up by AppMngr to identify
+   * session that must be resumed.
+   * \param map Map of sessions Id and session_key to be resumed
+   **/
+  virtual void set_resume_session_map(const ResumeSessionMap& map) = 0;
+
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 

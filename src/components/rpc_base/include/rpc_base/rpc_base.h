@@ -50,7 +50,7 @@ class Boolean;
 template<typename T, T minval, T maxval> class Integer;
 template<int64_t minnum, int64_t maxnum,
          int64_t minden = 1, int64_t maxden = 1> class Float;
-template<size_t maxlen> class String;
+template<size_t minlen, size_t maxlen> class String;
 template<typename T> class Enum;
 template<typename T, size_t minsize, size_t maxsize> class Array;
 template<typename T, size_t minsize, size_t maxsize> class Map;
@@ -166,7 +166,7 @@ class Float : public PrimitiveType {
   static const Range<double> range_;
 };
 
-template<size_t maxlen>
+template<size_t minlen, size_t maxlen>
 class String : public PrimitiveType {
  public:
   // Methods
@@ -180,6 +180,7 @@ class String : public PrimitiveType {
 
  private:
   std::string value_;
+  static const Range<size_t> length_range_;
 };
 
 template<typename T>

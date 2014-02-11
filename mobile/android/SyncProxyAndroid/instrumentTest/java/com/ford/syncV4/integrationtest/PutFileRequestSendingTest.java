@@ -222,7 +222,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
                                    SyncConnection connection)
             throws NoSuchFieldException, IllegalAccessException {
         final Field syncConnection =
-                SyncProxyBase.class.getDeclaredField("_syncConnection");
+                SyncProxyBase.class.getDeclaredField("mSyncConnection");
         syncConnection.setAccessible(true);
         syncConnection.set(proxy, connection);
     }

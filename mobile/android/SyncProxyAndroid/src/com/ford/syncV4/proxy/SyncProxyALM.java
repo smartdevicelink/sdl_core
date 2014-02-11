@@ -1,7 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import java.util.Vector;
-
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
@@ -22,6 +20,8 @@ import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+
+import java.util.Vector;
 
 public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	
@@ -586,6 +586,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return buttonCapabilities
 	 * @throws SyncException
 	 */
+    @Override
 	public Vector<ButtonCapabilities> getButtonCapabilities() throws SyncException{
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -605,6 +606,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return softButtonCapabilities 
 	 * @throws SyncException
 	 */
+    @Override
 	public Vector<SoftButtonCapabilities> getSoftButtonCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -624,6 +626,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return presetBankCapabilities 
 	 * @throws SyncException
 	 */
+    @Override
 	public PresetBankCapabilities getPresetBankCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -643,6 +646,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return displayCapabilities
 	 * @throws SyncException
 	 */
+    @Override
 	public DisplayCapabilities getDisplayCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -662,6 +666,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return hmiZoneCapabilities
 	 * @throws SyncException
 	 */
+    @Override
 	public Vector<HmiZoneCapabilities> getHmiZoneCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -681,6 +686,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return speechCapabilities
 	 * @throws SyncException
 	 */
+    @Override
 	public Vector<SpeechCapabilities> getSpeechCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -701,6 +707,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return syncLanguage
 	 * @throws SyncException
 	 */
+    @Override
 	public Language getSyncLanguage() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -720,6 +727,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return hmiDisplayLanguage 
 	 * @throws SyncException
 	 */
+    @Override
 	public Language getHmiDisplayLanguage() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -739,6 +747,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return syncMsgVersion
 	 * @throws SyncException
 	 */
+    @Override
 	public SyncMsgVersion getSyncMsgVersion() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -758,6 +767,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return vrCapabilities
 	 * @throws SyncException
 	 */
+    @Override
 	public Vector<VrCapabilities> getVrCapabilities() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
@@ -777,6 +787,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @return vehicleType 
 	 * @throws SyncException
 	 */
+    @Override
 	public VehicleType getVehicleType() throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {

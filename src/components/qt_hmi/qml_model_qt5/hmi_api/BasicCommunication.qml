@@ -95,6 +95,10 @@ Item {
         }
     }
 
+    function getResumeResult (appID) {
+        return dataContainer.getResumeResult(appID)
+    }
+
     function allowDeviceToConnect (device) {
         console.log("Message Received - {method: 'BasicCommunication.AllowDeviceToConnect', params:{ " +
                     "device: {name: '" + device.name + "', " +

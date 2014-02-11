@@ -85,6 +85,28 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
+    /**
+     * \brief Sets pointer to TransportManager.
+     * \param transportManager Pointer to TransportManager object.
+     **/
+    virtual void set_transport_manager(
+      transport_manager::TransportManager* transport_mngr);
+
+    /**
+     * \brief Sets resume session map. Used on start up by AppMngr to identify
+     * session that must be resumed.
+     * \param map Map of sessions Id and session_key to be resumed
+     **/
+    virtual void set_resume_session_map(const ResumeSessionMap& map);
+
+    /**
+     * \brief Connects to all services of device
+     * \param deviceHandle Handle of device to connect to
+     */
+    virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
+
+    virtual void StartTransportManager();
+
     virtual void OnDeviceListUpdated(
       const std::vector<transport_manager::DeviceInfo>&);
 
@@ -120,7 +142,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void OnConnectionClosedFailure(
       transport_manager::ConnectionUID connection_id,
       const transport_manager::DisconnectError& error);
-
+    virtual void OnUnexpectedDisconnect(
+        transport_manager::ConnectionUID connection_id,
+        const transport_manager::CommunicationError& error);
     virtual void OnDeviceConnectionLost(
       const connection_handler::DeviceHandle& device,
       const transport_manager::DisconnectDeviceError& error);
@@ -137,13 +161,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier whithin which session has to be started.
-     * \param sessionId Identifier of the session to be ended
+     * \param sessionId Identifier of the session to be started
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t session_id,
-      protocol_handler::ServiceType service_type);
+      const transport_manager::ConnectionUID& connection_handle,
+      const uint8_t& session_id,
+      const protocol_handler::ServiceType& service_type);
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -155,9 +179,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \return int32_t -1 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t session_id, uint32_t hashCode,
-      protocol_handler::ServiceType service_type);
+      const transport_manager::ConnectionUID& connection_handle,
+      const uint8_t& session_id, const uint32_t& hashCode,
+      const protocol_handler::ServiceType& service_type);
 
     /**
      * \brief Creates unique identifier of session (can be used as hash)
@@ -206,25 +230,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
-    /**
-     * \brief Sets pointer to TransportManager.
-     * \param transportManager Pointer to TransportManager object.
-     **/
-    virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_mngr);
 
     /**
      * \brief Method which should start devices discoveryng
      */
     virtual void StartDevicesDiscovery();
-
-    /**
-     * \brief Connects to all services of device
-     * \param deviceHandle Handle of device to connect to
-     */
-    virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
-
-    virtual void StartTransportManager();
 
     /*
      * Close all associated sessions and close the connection associated with the key
@@ -272,6 +282,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      **/
     void RemoveConnection(const ConnectionHandle connection_handle);
 
+    void OnConnectionEnded(
+        const transport_manager::ConnectionUID& connection_id);
+
     /**
      * \brief Pointer to observer
      */
@@ -291,6 +304,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of connections
      */
     ConnectionList connection_list_;
+
+    /**
+     * \brief List of sessions that must be resumed
+     */
+    ResumeSessionMap    resume_session_map_;
+
     /*
      * \brief Cleans connection list on destruction
      */

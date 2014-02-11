@@ -106,10 +106,36 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
   // Wraps type declaration with "Mandatory" or "Optional" templates
-  void WrapWithMandatory(const Type* type);
-  bool wrap_with_mandatory_;
+  // returns true if type name was wrapped (and thus fully generated).
+  bool MaybeWrapWithAvailabilitySpecifier(const Type* type);
+  bool skip_availaiblity_specifier_;
   bool mandatory_;
   std::stringstream os_;
+};
+
+/*
+ * Not a real code generator but helper class that is used to collect
+ * properties of composite types
+ */
+class TypeProperties: public TypeCodeGenerator {
+public:
+  TypeProperties(const Type* type);
+  // Tells whether type is map, array or typedef alias of map or array
+  bool is_container() const;
+
+private:
+  // TypeCodeGenerator methods
+  virtual void GenerateCodeForBoolean(const Boolean* boolean);
+  virtual void GenerateCodeForInteger(const Integer* integer);
+  virtual void GenerateCodeForFloat(const Float* flt);
+  virtual void GenerateCodeForString(const String* string);
+  virtual void GenerateCodeForEnum(const Enum* enm);
+  virtual void GenerateCodeForArray(const Array* array);
+  virtual void GenerateCodeForMap(const Map* map);
+  virtual void GenerateCodeForStruct(const Struct* strct);
+  virtual void GenerateCodeForTypedef(const Typedef* tdef);
+private:
+  bool container_;
 };
 
 }  // namespace codegen

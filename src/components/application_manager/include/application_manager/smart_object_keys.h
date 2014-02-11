@@ -49,6 +49,7 @@ const char error_msg[] = "message";
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
+const char resume[] = "resume";
 const char app_id[] = "appID";
 const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
@@ -274,6 +275,9 @@ const char display_type[] = "displayType";
 const char text_fields[] = "textFields";
 const char media_clock_formats[] = "mediaClockFormats";
 const char graphic_supported[] = "graphicSupported";
+const char templates_available[] = "templatesAvailable";
+const char screen_params[] = "screenParams";
+const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 }  // namespace hmi_response
 
 namespace hmi_notification {

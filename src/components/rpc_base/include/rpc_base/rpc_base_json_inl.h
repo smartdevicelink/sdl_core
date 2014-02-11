@@ -134,23 +134,24 @@ Json::Value Float<minnum, maxnum, minden, maxden>::ToJsonValue() const {
   return Json::Value(value_);
 }
 
-template<size_t maxlen>
-String<maxlen>::String(const Json::Value& value)
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const Json::Value& value)
     : PrimitiveType(!value.isNull(),
-                    value.isString() && value.asString().length() < maxlen),
+                    (value.isString() &&
+                        length_range_.Includes(value.asString().length()))),
       value_(valid_ ? value.asString() : std::string()) {
 }
 
-template<size_t maxlen>
-String<maxlen>::String(const Json::Value& value, const std::string& def_value)
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const Json::Value& value, const std::string& def_value)
     : PrimitiveType(true, (value.isString()
-                             && value.asString().length() < maxlen)
+                              && length_range_.Includes(value.asString().length()))
                           || value.isNull()),
       value_(value.isString() ? value.asString() : def_value) {
 }
 
-template<size_t maxlen>
-Json::Value String<maxlen>::ToJsonValue() const {
+template<size_t minlen, size_t maxlen>
+Json::Value String<minlen, maxlen>::ToJsonValue() const {
   return Json::Value(value_);
 }
 
