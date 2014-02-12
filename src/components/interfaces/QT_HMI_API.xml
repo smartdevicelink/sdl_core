@@ -1258,7 +1258,7 @@
   <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
     <description>The image resolution of this field.</description>
   </param>
-</struct> 
+</struct>
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
@@ -1279,6 +1279,15 @@
   </param>
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  </param>
+  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true">
+    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
+  </param>
+  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
+    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
+  </param>
+  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
   </param>
 </struct>
 
@@ -2653,8 +2662,8 @@
   </function>
   <function name="StopStream" messagetype="response">
   </function>
-  
-    <function name="StartAudioStream" messagetype="request">
+
+  <function name="StartAudioStream" messagetype="request">
     <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
@@ -3072,7 +3081,7 @@
   </function>
 
   <function name="OnOdometer" messagetype="notification">
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="true">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="true">
       <description>Odometer in km</description>
     </param>
   </function>
@@ -3354,7 +3363,7 @@
       <description>ID of application requested this RPC.</description>
     </param>
   </function>
-  <function name="SubscribeOdometer" messagetype="response">
+  <function name="Subscribe17000000Odometer" messagetype="response">
     <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
       <description>Odometer in km</description>
     </param>
