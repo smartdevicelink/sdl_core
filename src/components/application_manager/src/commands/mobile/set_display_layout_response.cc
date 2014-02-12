@@ -47,12 +47,9 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutResponse::Run");
-  bool result = false;
-  if (static_cast<int>(mobile_apis::Result::SUCCESS) ==
-      (*message_)[strings::msg_params][strings::result_code].asInt()) {
-    result = true;
-  }
-  SendResponse(result);
+
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+
 }
 
 }  // namespace commands

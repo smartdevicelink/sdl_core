@@ -49,8 +49,10 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
-  Application* app = application_manager::ApplicationManagerImpl::instance()
-  ->application((*message_)[strings::params][strings::connection_key].asUInt());
+
+  Application* app = ApplicationManagerImpl::instance()
+  ->application(connection_key());
+
   if (NULL == app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -58,8 +60,30 @@ void SetDisplayLayoutRequest::Run() {
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
-                 &((*message_)[strings::msg_params]));
+                 &((*message_)[strings::msg_params]), true);
 
+}
+
+void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::on_event");
+
+  const smart_objects::SmartObject& message = event.smart_object();
+  switch (event.id()) {
+    case hmi_apis::FunctionID::UI_SetDisplayLayout: {
+      LOG4CXX_INFO(logger_, "Received UI_SetDisplayLayout event");
+
+      mobile_apis::Result::eType result_code =
+            static_cast<mobile_apis::Result::eType>(
+                message[strings::params][hmi_response::code].asInt());
+      bool response_success = mobile_apis::Result::SUCCESS == result_code;
+      SendResponse(response_success, result_code, NULL, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands

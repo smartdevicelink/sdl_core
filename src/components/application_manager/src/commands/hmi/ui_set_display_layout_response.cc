@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -45,9 +46,10 @@ UiSetDisplayLayoutResponse::~UiSetDisplayLayoutResponse() {
 
 void UiSetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "UiSetDisplayLayoutResponse::Run");
-  (*message_)[strings::params][strings::function_id] =
-      static_cast<int32_t>(mobile_apis::FunctionID::eType::SetDisplayLayoutID);
-  SendResponseToMobile(message_);
+
+  event_engine::Event event(hmi_apis::FunctionID::UI_SetDisplayLayout);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
