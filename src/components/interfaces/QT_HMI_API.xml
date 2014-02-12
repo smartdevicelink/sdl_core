@@ -3363,7 +3363,7 @@
       <description>ID of application requested this RPC.</description>
     </param>
   </function>
-  <function name="Subscribe17000000Odometer" messagetype="response">
+  <function name="SubscribeOdometer" messagetype="response">
     <param name="odometer" type="Common.VehicleDataResult" mandatory="true">
       <description>Odometer in km</description>
     </param>
