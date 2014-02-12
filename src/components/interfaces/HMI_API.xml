@@ -2426,16 +2426,16 @@
     </param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
-    <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
+    <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>
     </param>
-    <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="buttonCapabilities" type="Common.ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>See ButtonCapabilities</description >
     </param>
-    <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description >
     </param>
-    <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false">
+    <param name="presetBankCapabilities" type="Common.PresetBankCapabilities" mandatory="false">
       <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
     </param>
   </function>
