@@ -38,7 +38,6 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-#include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace application_manager {

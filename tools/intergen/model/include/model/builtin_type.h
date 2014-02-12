@@ -129,17 +129,20 @@ class Float : public Type, public ConstantsCreator {
  */
 class String : public Type {
  public:
+  // Types
+  typedef BasicRange<int64_t> Range;
+public:
   // Methods
-  String(int64_t max_length);
-  int64_t max_length() const;
+  String(const Range& range);
   bool operator<(const String& that) const;
+  const Range& length_range() const;
   // codegen::Type methods
   virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
   virtual const ConstantsCreator* SupportsConstants() const;
 
- private:
+private:
   // Fields
-  int64_t max_length_;
+  Range length_range_;
 };
 
 }  // namespace codegen

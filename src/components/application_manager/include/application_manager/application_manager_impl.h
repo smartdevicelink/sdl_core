@@ -167,7 +167,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    Application* application(int32_t app_id);
+    Application* application(int32_t app_id) const;
     inline const std::set<Application*>& applications() const;
     Application* active_application() const;
     std::vector<Application*> applications_by_button(uint32_t button);
@@ -339,15 +339,16 @@ class ApplicationManagerImpl : public ApplicationManager,
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
-    void RemoveDevice(const connection_handler::DeviceHandle device_handle);
-    bool OnServiceStartedCallback(connection_handler::DeviceHandle device_handle,
-                                  int32_t session_key,
-                                  protocol_handler::ServiceType type);
+    void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
+    bool OnServiceStartedCallback(const connection_handler::DeviceHandle& device_handle,
+                                  const int32_t& session_key,
+                                  const protocol_handler::ServiceType& type);
     bool OnServiceResumedCallback(
-        connection_handler::DeviceHandle device_handle, int32_t old_session_key,
-        int32_t new_session_key, protocol_handler::ServiceType type);
-    void OnServiceEndedCallback(int32_t session_key,
-                                protocol_handler::ServiceType type);
+                const connection_handler::DeviceHandle& device_handle,
+                const int32_t& old_session_key, const int32_t& new_session_key,
+                const protocol_handler::ServiceType& type);
+    void OnServiceEndedCallback(const int32_t& session_key,
+                                const protocol_handler::ServiceType& type);
 
     /**
      * @ Add notification to collection
@@ -408,7 +409,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Checks HMI level and returns true if audio/video streaming is allowed
      */
-    bool IsStreamingAllowed(uint32_t connection_key);
+    bool IsStreamingAllowed(uint32_t connection_key) const;
 
     /*
      * @brief Save binary data to specified directory

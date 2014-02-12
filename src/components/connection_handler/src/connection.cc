@@ -55,7 +55,6 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle),
-      session_id_counter_(1),
       heartbeat_monitor_(heartbeat_timeout, this) {
   DCHECK(connection_handler_);
 }
@@ -75,14 +74,15 @@ int32_t Connection::AddNewSession() {
   int32_t size = session_map_.size();
   if (max_connections > size) {
 
+    ++size;
     /* whenever new session created RPC and Bulk services are
     established automatically */
-    session_map_[session_id_counter_].push_back(
+    session_map_[size].push_back(
         static_cast<uint8_t>(protocol_handler::kRpc));
-    session_map_[session_id_counter_].push_back(
+    session_map_[size].push_back(
         static_cast<uint8_t>(protocol_handler::kBulk));
 
-    result = ++size;
+    result = size;
   }
 
   return result;
@@ -153,11 +153,8 @@ DeviceHandle Connection::connection_device_handle() {
   return connection_device_handle_;
 }
 
-void Connection::GetSessionList(SessionList& session_list) {
-  for (SessionMapIterator it = session_map_.begin(),
-       end = session_map_.end(); it != end; ++it) {
-    session_list.push_back(it->first);
-  }
+const SessionMap& Connection::session_map() {
+  return session_map_;
 }
 
 void Connection::Close() {

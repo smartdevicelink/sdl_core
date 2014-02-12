@@ -329,7 +329,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
                      (hmi_apis::Common_Result::SUCCESS == vr_result_));
 
       if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
-        result_code = static_cast<mobile_apis::Result::eType>(vr_result_);
+        result_code = static_cast<mobile_apis::Result::eType>(ui_result_);
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
             std::max(ui_result_, vr_result_));

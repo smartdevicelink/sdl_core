@@ -738,11 +738,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
             if (e == null) {
                 return;
             }
-            final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
-            if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
-                    (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
-                    (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
-                reset();
+            if (e instanceof SyncException) {
+                final SyncExceptionCause cause = ((SyncException) e).getSyncExceptionCause();
+                if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
+                        (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
+                        (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
+                    reset();
+                }
             }
             /*if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
                 mLogAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e, true);
@@ -2022,5 +2024,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         }, 500);
     }
 
-
+    @Override
+    public void onUSBNoSuchDeviceException() {
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.onUSBNoSuchDeviceException();
+        }
+    }
 }

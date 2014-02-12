@@ -166,27 +166,37 @@ Float<minnum, maxnum, minden, maxden>::operator double() const {
 /*
  * String class
  */
-template<size_t maxlen>
-String<maxlen>::String()
+template<size_t minlen, size_t maxlen>
+const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
+
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String()
     : PrimitiveType(false, false) {
 }
 
-template<size_t maxlen>
-String<maxlen>::String(const std::string& value)
-    : PrimitiveType(true, value.length() <= maxlen),
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const std::string& value)
+    : PrimitiveType(true, length_range_.Includes(value.length())),
       value_(value) {
 }
 
-template<size_t maxlen>
-String<maxlen>& String<maxlen>::operator=(const std::string& new_val) {
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const char* value)
+    : PrimitiveType(true, true),
+      value_(value) {
+  valid_ = length_range_.Includes(value_.length());
+}
+
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new_val) {
   value_ = new_val;
   initialized_ = true;
-  valid_ = value_.length() <= maxlen;
+  valid_ = length_range_.Includes(new_val.length());
   return *this;
 }
 
-template<size_t maxlen>
-String<maxlen>::operator const std::string&() const {
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::operator const std::string&() const {
   return value_;
 }
 

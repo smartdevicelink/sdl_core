@@ -145,8 +145,9 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
-Application* ApplicationManagerImpl::application(int32_t app_id) {
-  std::map<int32_t, Application*>::iterator it = applications_.find(app_id);
+Application* ApplicationManagerImpl::application(int32_t app_id) const {
+  std::map<int32_t, Application*>::const_iterator it =
+      applications_.find(app_id);
   if (applications_.end() != it) {
     return it->second;
   } else {
@@ -353,8 +354,6 @@ bool ApplicationManagerImpl::ActivateApplication(Application* app) {
           curr_app->hmi_level()) {
         if (curr_app->has_been_activated()) {
           MessageHelper::SendAppDataToHMI(curr_app);
-        } else {
-          MessageHelper::SendChangeRegistrationRequestToHMI(curr_app);
         }
       }
       if (!curr_app->MakeFullscreen()) {
@@ -627,10 +626,10 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 }
 
 void ApplicationManagerImpl::RemoveDevice(
-  const connection_handler::DeviceHandle device_handle) {
+  const connection_handler::DeviceHandle& device_handle) {
 }
 
-bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) {
+bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
 
   if (!app) {
@@ -649,9 +648,11 @@ bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) {
 }
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(
-  connection_handler::DeviceHandle device_handle, int32_t session_key,
-  protocol_handler::ServiceType type) {
-  LOG4CXX_INFO(logger_, "Started session with type " << type);
+    const connection_handler::DeviceHandle& device_handle,
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type) {
+  LOG4CXX_INFO(logger_,
+      "OnServiceStartedCallback " << type << " in session " << session_key);
 
   Application* app = application(session_key);
 
@@ -700,8 +701,9 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
 }
 
 bool ApplicationManagerImpl::OnServiceResumedCallback(
-    connection_handler::DeviceHandle device_handle, int32_t old_session_key,
-    int32_t new_session_key, protocol_handler::ServiceType type) {
+    const connection_handler::DeviceHandle& device_handle,
+    const int32_t& old_session_key, const int32_t& new_session_key,
+    const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO_EXT(logger_,
                    "OnServiceResumedCallback previous session key= "
                    << old_session_key << " new session key= "
@@ -710,8 +712,8 @@ bool ApplicationManagerImpl::OnServiceResumedCallback(
   return true;
 }
 
-void ApplicationManagerImpl::OnServiceEndedCallback(int32_t session_key,
-    protocol_handler::ServiceType type) {
+void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
+  const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO_EXT(
     logger_,
     "OnServiceEndedCallback " << type  << " in session " << session_key);

@@ -52,6 +52,8 @@
 
 #define NOTREACHED() DCHECK(false)
 
+#define IGNORE_RETURN (void)
+
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available
 #if __cplusplus >= 201103L

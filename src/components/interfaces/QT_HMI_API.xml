@@ -915,6 +915,15 @@
   <element name="AUDIO_MP3" />
 </enum>
 
+<enum name="RequestType">
+    <description>Enumeration listing possible asynchronous requests.</description>
+    <element name="HTTP" />   
+    <element name="FILE_RESUME" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
+    <element name="AUTH_ACK" />       
+  </enum>
+
 <enum name="ECallConfirmationStatus">
   <description>Reflects the status of the eCall Notification.</description>
   <element name="NORMAL" internal_name="ECCS_NORMAL">
@@ -1249,7 +1258,7 @@
   <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
     <description>The image resolution of this field.</description>
   </param>
-</struct>
+</struct> 
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
@@ -1259,6 +1268,9 @@
   <param name="textFields" type="Common.TextFieldName" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
+  </param>
+  <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true">
+    <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
@@ -1857,6 +1869,29 @@
         <description>Must be true if allowed</description>
       </param>
     </function>
+
+    <function name="OnSystemRequest" messagetype="notification" >
+	<description>
+        An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
+	Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
+	</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+        <description>The type of system request.</description>
+      </param>
+      <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>Optional array of URL(s) for HTTP requests.</description>
+      </param>
+      <param name="fileType" type="Common.FileType" mandatory="false">
+        <description>Optional file type (meant for HTTP file requests).</description>
+      </param>
+      <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+        <description>Optional offset in bytes for resuming partial data chunks</description>
+      </param>
+      <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+        <description>Optional length in bytes for resuming partial data chunks</description>
+      </param>    
+    </function>
+
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2116,6 +2151,12 @@
     <param name="graphic" type="Common.Image" mandatory="false">
       <description>Path to optional dynamic image or the static binary image itself.  See Image. If omitted, the displayed graphic should not change.</description>
     </param>
+    <param name="secondaryGraphic" type="Common.Image" mandatory="false">
+      <description>
+        Image struct determining whether static or dynamic secondary image to display in app.
+        If omitted on supported displays, the displayed secondary graphic shall not change.
+      </description>
+    </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>App defined SoftButtons.</description>
       <description>If omitted, the currently displayed SoftButton values should not change.</description>
@@ -2227,7 +2268,7 @@
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
-          See StartTime.
+          See TimeFormat.
       	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
       	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
       	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
@@ -2977,7 +3018,7 @@
   </function>
 
   <function name="OnSpeed" messagetype="notification">
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="true">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="true">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
   </function>

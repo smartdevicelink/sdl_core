@@ -56,14 +56,14 @@ QtObject {
     }
 
     function getStashedApplication(appId) {
-        console.log("enter");
+        console.log("enter getStashedApplication function");
         for(var i = 0; i < stashedApplicationsList.count; i++) {
             if(stashedApplicationsList.get(i).appId === appId) {
                 console.log("Application found", stashedApplicationsList.get(i));
                 return stashedApplicationsList.get(i);
             }
         }
-        console.log("exit");
+        console.log("exit getStashedApplication: application was not found");
     }
 
     onApplicationListChanged: {
@@ -310,7 +310,7 @@ QtObject {
             var stashedApp = getStashedApplication(appId),
                 app = getApplication(appID);
             if (stashedApp.options.count == app.options.count) {
-                for (var optionIndex = 0; optionIndex < stashedApp.options.count; optionIndex++) {
+                for (var optionIndex = 0; optionIndex < stashedApp.options.count; ++optionIndex) {
                     if (app.options.get(optionIndex).type === Internal.MenuItemType.MI_SUBMENU) {
                         //comparison subMenu compare
 

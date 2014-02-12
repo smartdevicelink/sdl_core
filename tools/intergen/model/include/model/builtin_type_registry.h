@@ -78,7 +78,7 @@ class BuiltinTypeRegistry {
   const Boolean* GetBoolean();
   const Integer* GetInteger(const Integer::Range& range);
   const Float* GetFloat(const Float::Range& range);
-  const String* GetString(int64_t max_length);
+  const String* GetString(const String::Range& length_range);
  private:
   Boolean boolean_;
   std::set<Integer> integers_;

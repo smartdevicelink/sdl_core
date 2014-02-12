@@ -165,10 +165,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 public class SyncProxyTester extends FragmentActivity implements OnClickListener,
         IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener {
@@ -314,7 +312,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Time out in milliseconds for exit from application. If application is not correctly
      * destroyed within specified timeout - then we force destroy procedure
      */
-    private static final int EXIT_TIMEOUT = 10000;
+    private static final int EXIT_TIMEOUT = 3000;
     /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
@@ -583,6 +581,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
         mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
                 mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
+
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
 
         if (mBoundProxyService != null) {
             mBoundProxyService.destroyService(new IProxyServiceEvent() {
@@ -1891,13 +1896,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     try {
                                         GetVehicleData msg = new GetVehicleData();
 
-                                        final String[] methodNames = {"Gps", "Speed", "Rpm", "FuelLevel",
-                                                "FuelLevel_State", "InstantFuelConsumption", "ExternalTemperature",
-                                                "Prndl", "TirePressure", "Odometer", "BeltStatus", "BodyInformation",
-                                                "DeviceStatus", "DriverBraking", "WiperStatus", "HeadLampStatus",
-                                                "EngineTorque", "AccPedalPosition", "SteeringWheelAngle",
-                                                "ECallInfo", "AirbagStatus", "EmergencyEvent", "ClusterModeStatus",
-                                                "MyKey"};
+                                        final String[] methodNames =
+                                                { "Gps", "Speed", "Rpm",
+                                                        "FuelLevel",
+                                                        "FuelLevel_State",
+                                                        "InstantFuelConsumption",
+                                                        "ExternalTemperature",
+                                                        "Vin", "Prndl",
+                                                        "TirePressure",
+                                                        "Odometer",
+                                                        "BeltStatus",
+                                                        "BodyInformation",
+                                                        "DeviceStatus",
+                                                        "DriverBraking",
+                                                        "WiperStatus",
+                                                        "HeadLampStatus",
+                                                        "BatteryVoltage",
+                                                        "EngineTorque",
+                                                        "AccPedalPosition",
+                                                        "SteeringWheelAngle",
+                                                        "ECallInfo",
+                                                        "AirbagStatus",
+                                                        "EmergencyEvent",
+                                                        "ClusterModeStatus",
+                                                        "MyKey" };
                                         final String setterName = "set" + methodNames[which];
                                         setVehicleDataParam(msg, GetVehicleData.class, setterName);
 
@@ -3111,21 +3133,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 put(VehicleDataType.VEHICLEDATA_RPM, "Rpm");
                                                 put(VehicleDataType.VEHICLEDATA_FUELLEVEL, "FuelLevel");
                                                 put(VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE, "FuelLevel_State");
-                                                put(VehicleDataType.VEHICLEDATA_INSTANTFUELCONSUMPTION,
-                                                        "InstantFuelConsumption");
+                                                put(VehicleDataType.VEHICLEDATA_FUELCONSUMPTION, "InstantFuelConsumption");
                                                 put(VehicleDataType.VEHICLEDATA_EXTERNTEMP, "ExternalTemperature");
-                                                put(VehicleDataType.VEHICLEDATA_PRNDLSTATUS, "Prndl");
+//                                                put(VehicleDataType.VEHICLEDATA_VIN, "VIN");
+                                                put(VehicleDataType.VEHICLEDATA_PRNDL, "Prndl");
                                                 put(VehicleDataType.VEHICLEDATA_TIREPRESSURE, "TirePressure");
                                                 put(VehicleDataType.VEHICLEDATA_ODOMETER, "Odometer");
                                                 put(VehicleDataType.VEHICLEDATA_BELTSTATUS, "BeltStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BODYINFORMATION, "BodyInformation");
+                                                put(VehicleDataType.VEHICLEDATA_BODYINFO, "BodyInformation");
                                                 put(VehicleDataType.VEHICLEDATA_DEVICESTATUS, "DeviceStatus");
-                                                put(VehicleDataType.VEHICLEDATA_DRIVERBRAKING, "DriverBraking");
+                                                put(VehicleDataType.VEHICLEDATA_BRAKING, "DriverBraking");
                                                 put(VehicleDataType.VEHICLEDATA_WIPERSTATUS, "WiperStatus");
                                                 put(VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS, "HeadLampStatus");
+                                                put(VehicleDataType.VEHICLEDATA_BATTVOLTAGE, "BatteryVoltage");
                                                 put(VehicleDataType.VEHICLEDATA_ENGINETORQUE, "EngineTorque");
-                                                put(VehicleDataType.VEHICLEDATA_ACCPEDALPOSITION, "AccPedalPosition");
-                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEELANGLE, "SteeringWheelAngle");
+                                                put(VehicleDataType.VEHICLEDATA_ACCPEDAL, "AccPedalPosition");
+                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEEL, "SteeringWheelAngle");
                                                 put(VehicleDataType.VEHICLEDATA_ECALLINFO, "ECallInfo");
                                                 put(VehicleDataType.VEHICLEDATA_AIRBAGSTATUS, "AirbagStatus");
                                                 put(VehicleDataType.VEHICLEDATA_EMERGENCYEVENT, "EmergencyEvent");
@@ -3182,15 +3205,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         private String[] vehicleDataTypeNames() {
-                            final String[] vehicleDataTypeNames = new String[]{
-                                    "GPS", "Speed", "RPM", "Fuel Level", "Fuel Level State",
-                                    "Instant Fuel Consumption", "External Temp", "PRNDL Status",
-                                    "Tire Pressure", "Odometer", "Belt Status", "Body Information",
-                                    "Device Status", "Driver Braking", "Wiper Status", "Head Lamp Status",
-                                    "Engine Torque", "Acc Pedal Position", "Steering Wheel Angle",
-                                    "ECall Info", "Airbag Status", "Emergency Event", "Cluster Mode Status", "MyKey"
-                            };
-                            return vehicleDataTypeNames;
+                            return new String[]{ "GPS", "Speed", "RPM",
+                                    "Fuel Level", "Fuel Level State",
+                                    "Fuel Consumption", "External Temp",
+                                    "VIN", "PRNDL", "Tire Pressure",
+                                    "Odometer", "Belt Status",
+                                    "Body Info", "Device Status",
+                                    "Braking", "Wiper Status",
+                                    "Head Lamp Status", "Batt Voltage",
+                                    "Engine Torque", "Acc Pedal",
+                                    "Steering Wheel", "ECall Info",
+                                    "Airbag Status", "Emergency Event",
+                                    "Cluster Mode Status", "MyKey" };
                         }
 
                         private void sendSetGlobalProperties() {
@@ -4105,7 +4131,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void startMobileNaviService() {
         if (isProxyReadyForWork()) {
             if (mBoundProxyService != null) {
-                mLogAdapter.logMessage("Should start mobile nav Service", true);
+                mLogAdapter.logMessage("Should start Mobile Navi Service", true);
 
                 /*mStreamCommandsExecutorService.submit(new Runnable() {
                     @Override
@@ -4123,7 +4149,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onMobileNaviStarted() {
         if (mBoundProxyService == null) {
-            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " MobileNaviStarted can not " +
+            Log.w(LOG_TAG, SyncProxyTester.class.getSimpleName() + " Mobile Navi service can not " +
                     "start with NULL Proxy Service");
             return;
         }
@@ -4175,7 +4201,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void run() {
                 if (isProxyReadyForWork()) {
-                    mLogAdapter.logMessage("Should stop mobile nav currentSession", true);
+                    mLogAdapter.logMessage("Should stop Mobile Navi service", true);
                     if (mBoundProxyService != null) {
                         mBoundProxyService.syncProxyStopMobileNaviService();
                     }
@@ -4210,7 +4236,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void startAudioService() {
         if (isProxyReadyForWork()) {
-            mLogAdapter.logMessage("Should start audio service", true);
+            mLogAdapter.logMessage("Should start Mobile Audio service", true);
 
             mStreamCommandsExecutorService.submit(new Runnable() {
                 @Override
@@ -4226,7 +4252,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void run() {
                 if (isProxyReadyForWork()) {
-                    mLogAdapter.logMessage("Should stop audio service", true);
+                    mLogAdapter.logMessage("Should stop Mobile Audio service", true);
                     mBoundProxyService.syncProxyStopAudioService();
                     closeAudioOutputStream();
                 }
@@ -4316,8 +4342,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             return;
         }
 
-        stopAudioService();
-        stopMobileNavService();
+        if (rpcSession.hasService(ServiceType.Audio_Service)) {
+            stopAudioService();
+        }
+        if (rpcSession.hasService(ServiceType.Mobile_Nav)) {
+            stopMobileNavService();
+        }
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
@@ -4379,5 +4409,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onSessionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
+    }
+
+    public void onUSBNoSuchDeviceException() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
+                builder.setTitle("USB problem");
+                builder.setMessage("Last session over USB was interrupted incorrectly.\nTry UNPLUG and PLUG USB cable again")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                builder.create().show();
+            }
+        });
     }
 }

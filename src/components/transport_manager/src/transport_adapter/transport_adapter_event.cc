@@ -51,7 +51,8 @@ TransportAdapterEvent::TransportAdapterEvent(
 
 
 TransportAdapterEvent::~TransportAdapterEvent() {
-
+  transport_adapter_ = NULL;
+  event_error_ = NULL;
 }
 
 void TransportAdapterEvent::set_event_type(int type) { event_type_ = type; }

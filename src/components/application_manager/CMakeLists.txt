@@ -135,8 +135,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/update_turn_list_response.cc
 ./src/commands/mobile/sync_pdata_request.cc
 ./src/commands/mobile/sync_pdata_response.cc
-./src/commands/mobile/system_request_request.cc
-./src/commands/mobile/system_request_response.cc
+./src/commands/mobile/system_request.cc
+./src/commands/mobile/system_response.cc
 ./src/commands/mobile/on_sync_pdata_notification.cc
 ./src/commands/mobile/on_keyboard_input_notification.cc
 ./src/commands/mobile/on_touch_event_notification.cc
@@ -293,6 +293,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_start_stream_response.cc
 ./src/commands/hmi/audio_stop_stream_request.cc
 ./src/commands/hmi/audio_stop_stream_response.cc
+./src/commands/hmi/on_system_request_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_WEBHMI

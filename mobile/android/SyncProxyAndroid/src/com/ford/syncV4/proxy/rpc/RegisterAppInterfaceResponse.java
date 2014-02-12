@@ -7,6 +7,7 @@ import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.HmiZoneCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.PrerecordedSpeech;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.util.DebugTool;
@@ -213,6 +214,47 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
             parameters.put(Names.speechCapabilities, speechCapabilities);
         }
     }
+
+    public Vector<PrerecordedSpeech> getPrerecordedSpeech() {
+        final Object o = parameters.get(Names.prerecordedSpeech);
+        if (o instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>) o;
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof PrerecordedSpeech) {
+                    return (Vector<PrerecordedSpeech>) list;
+                } else if (obj instanceof String) {
+                    Vector<PrerecordedSpeech> newList =
+                            new Vector<PrerecordedSpeech>();
+                    for (Object hashObj : list) {
+                        String strFormat = (String) hashObj;
+                        PrerecordedSpeech toAdd = null;
+                        try {
+                            toAdd = PrerecordedSpeech.valueForString(strFormat);
+                        } catch (Exception e) {
+                            DebugTool.logError("Failed to parse " +
+                                    getClass().getSimpleName() + "." +
+                                    Names.prerecordedSpeech, e);
+                        }
+                        if (toAdd != null) {
+                            newList.add(toAdd);
+                        }
+                    }
+                    return newList;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setPrerecordedSpeech(Vector<PrerecordedSpeech> vrCapabilities) {
+        if (vrCapabilities != null) {
+            parameters.put(Names.prerecordedSpeech, vrCapabilities);
+        } else {
+            parameters.remove(Names.prerecordedSpeech);
+        }
+    }
+
     public Vector<VrCapabilities> getVrCapabilities() {
         if (parameters.get(Names.vrCapabilities) instanceof Vector<?>) {
 	    	Vector<?> list = (Vector<?>)parameters.get(Names.vrCapabilities);
