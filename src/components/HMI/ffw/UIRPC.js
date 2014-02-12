@@ -383,12 +383,12 @@ FFW.UI = FFW.RPCObserver.create({
                                     "upDownAvailable": true
                                 }
                             ],
-                            "softButtonCapabilities": {
+                            "softButtonCapabilities": [{
                                 "shortPressAvailable": true,
                                 "longPressAvailable": true,
                                 "upDownAvailable": true,
                                 "imageSupported": true
-                            },
+                            }],
                             "presetBankCapabilities": {
                                 "onScreenPresetsAvailable": true
                             },
