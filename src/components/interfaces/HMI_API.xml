@@ -924,6 +924,9 @@
   <element name="GRAPHIC_PNG" />
   <element name="AUDIO_WAVE" />
   <element name="AUDIO_MP3" />
+  <element name="AUDIO_AAC" />
+  <element name="BINARY" />
+  <element name="JSON" />
 </enum>
 
 <enum name="RequestType">
@@ -2226,7 +2229,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2750,6 +2753,27 @@
         Array of all reported DTCs on module. Each DTC is represented with 4 bytes:
         3 bytes for data
         1 byte for status
+      </description>
+    </param>
+  </function>
+<function name="DiagnosticMessage" messagetype="request">
+    <description>Non periodic vehicle diagnostic request</description>
+    <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Name of target ECU.</description>
+    </param>
+    <param name="messageLength" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Length of message (in bytes).</description>
+    </param>
+    <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message.
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="response">
+    <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message result.
       </description>
     </param>
   </function>

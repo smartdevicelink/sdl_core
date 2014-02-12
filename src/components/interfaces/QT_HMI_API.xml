@@ -303,6 +303,15 @@
   <element name="TEXT" internal_name="VR_TEXT" />
 </enum>
 
+<enum name="PrerecordedSpeech">
+  <description>Contains a list of prerecorded speech items present on the platform.</description>
+  <element name="HELP_JINGLE" />
+  <element name="INITIAL_JINGLE" />
+  <element name="LISTEN_JINGLE" />
+  <element name="POSITIVE_JINGLE" />
+  <element name="NEGATIVE_JINGLE" />    
+</enum>
+
 <enum name="TBTState">
   <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
   <element name="ROUTE_UPDATE_REQUEST" />
@@ -463,6 +472,9 @@
   <element name="cmdIcon">
     <description>The image field for AddCommand</description>
   </element>
+  <element name="appIcon">
+    <description>The image field for the app icon (set by setAppIcon)</description>
+  </element>
   <element name="graphic">
     <description>The image field for Show</description>
   </element>
@@ -472,7 +484,6 @@
   <element name="showConstantTBTNextTurnIcon">
     <description>The secondary image field for ShowConstantTBT</description>
   </element>
-  <element name="nextTurnIcon"/>
 </enum>
 
 <enum name="TextAlignment">
@@ -913,6 +924,9 @@
   <element name="GRAPHIC_PNG" />
   <element name="AUDIO_WAVE" />
   <element name="AUDIO_MP3" />
+  <element name="AUDIO_AAC" />
+  <element name="BINARY" />
+  <element name="JSON" />
 </enum>
 
 <enum name="RequestType">
@@ -1999,7 +2013,11 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See SpeechCapabilities</description>
+    </param>
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See PrerecordedSpeech</description>
     </param>
   </function>
   <function name="Started" messagetype="notification">
@@ -2211,7 +2229,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2531,9 +2549,6 @@
     </param>
     <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
