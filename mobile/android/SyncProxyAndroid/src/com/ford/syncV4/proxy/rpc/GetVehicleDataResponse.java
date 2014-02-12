@@ -1,21 +1,14 @@
 package com.ford.syncV4.proxy.rpc;
 
-import java.util.Hashtable;
-
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.AmbientLightStatus;
 import com.ford.syncV4.proxy.rpc.enums.ComponentVolumeStatus;
-import com.ford.syncV4.proxy.rpc.enums.DisplayType;
-import com.ford.syncV4.proxy.rpc.enums.GearShiftAdviceStatus;
-import com.ford.syncV4.proxy.rpc.enums.HMILevel;
-import com.ford.syncV4.proxy.rpc.enums.MaintenanceModeStatus;
 import com.ford.syncV4.proxy.rpc.enums.PRNDL;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataActiveStatus;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataEventStatus;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.proxy.rpc.enums.WiperStatus;
 import com.ford.syncV4.util.DebugTool;
+
+import java.util.Hashtable;
 
 public class GetVehicleDataResponse extends RPCResponse {
 
@@ -284,36 +277,6 @@ public class GetVehicleDataResponse extends RPCResponse {
         }
         return null;
     }
-    public void setFuelEconomy(FuelEconomyInformation fuelEconomy) {
-        if (fuelEconomy != null) {
-            parameters.put(Names.fuelEconomy, fuelEconomy);
-        } else {
-        	parameters.remove(Names.fuelEconomy);
-        }
-    }
-    public FuelEconomyInformation getFuelEconomy() {
-    	Object obj = parameters.get(Names.fuelEconomy);
-        if (obj instanceof FuelEconomyInformation) {
-            return (FuelEconomyInformation) obj;
-        } else if (obj instanceof Hashtable) {
-        	try {
-        		return new FuelEconomyInformation((Hashtable) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelEconomy, e);
-            }
-        }
-        return null;
-    }
-    public void setEngineOilLife(Integer engineOilLife) {
-        if (engineOilLife != null) {
-            parameters.put(Names.engineOilLife, engineOilLife);
-        } else {
-        	parameters.remove(Names.engineOilLife);
-        }
-    }
-    public Integer getEngineOilLife() {
-    	return (Integer) parameters.get(Names.engineOilLife);
-    }
     public void setHeadLampStatus(HeadLampStatus headLampStatus) {
         if (headLampStatus != null) {
             parameters.put(Names.headLampStatus, headLampStatus);
@@ -344,16 +307,6 @@ public class GetVehicleDataResponse extends RPCResponse {
     public Float getBatteryVoltage() {
     	return (Float) parameters.get(Names.batteryVoltage);
     }
-    public void setBrakeTorque(Float brakeTorque) {
-        if (brakeTorque != null) {
-            parameters.put(Names.brakeTorque, brakeTorque);
-        } else {
-        	parameters.remove(Names.brakeTorque);
-        }
-    }
-    public Float getBrakeTorque() {
-    	return (Float) parameters.get(Names.brakeTorque);
-    }
     public void setEngineTorque(Float engineTorque) {
         if (engineTorque != null) {
             parameters.put(Names.engineTorque, engineTorque);
@@ -363,98 +316,6 @@ public class GetVehicleDataResponse extends RPCResponse {
     }
     public Float getEngineTorque() {
     	return (Float) parameters.get(Names.engineTorque);
-    }
-    public void setTurboBoost(Float turboBoost) {
-        if (turboBoost != null) {
-            parameters.put(Names.turboBoost, turboBoost);
-        } else {
-        	parameters.remove(Names.turboBoost);
-        }
-    }
-    public Float getTurboBoost() {
-    	return (Float) parameters.get(Names.turboBoost);
-    }
-    public void setCoolantTemp(Float coolantTemp) {
-        if (coolantTemp != null) {
-            parameters.put(Names.coolantTemp, coolantTemp);
-        } else {
-        	parameters.remove(Names.coolantTemp);
-        }
-    }
-    public Float getCoolantTemp() {
-    	return (Float) parameters.get(Names.coolantTemp);
-    }
-    public void setAirFuelRatio(Float airFuelRatio) {
-        if (airFuelRatio != null) {
-            parameters.put(Names.airFuelRatio, airFuelRatio);
-        } else {
-        	parameters.remove(Names.airFuelRatio);
-        }
-    }
-    public Float getAirFuelRatio() {
-    	return (Float) parameters.get(Names.airFuelRatio);
-    }
-    public void setCoolingHeadTemp(Float coolingHeadTemp) {
-        if (coolingHeadTemp != null) {
-            parameters.put(Names.coolingHeadTemp, coolingHeadTemp);
-        } else {
-        	parameters.remove(Names.coolingHeadTemp);
-        }
-    }
-    public Float getCoolingHeadTemp() {
-    	return (Float) parameters.get(Names.coolingHeadTemp);
-    }
-    public void setOilTemp(Float oilTemp) {
-        if (oilTemp != null) {
-            parameters.put(Names.oilTemp, oilTemp);
-        } else {
-        	parameters.remove(Names.oilTemp);
-        }
-    }
-    public Float getOilTemp() {
-    	return (Float) parameters.get(Names.oilTemp);
-    }
-    public void setIntakeAirTemp(Float intakeAirTemp) {
-        if (intakeAirTemp != null) {
-            parameters.put(Names.intakeAirTemp, intakeAirTemp);
-        } else {
-        	parameters.remove(Names.intakeAirTemp);
-        }
-    }
-    public Float getIntakeAirTemp() {
-    	return (Float) parameters.get(Names.intakeAirTemp);
-    }
-    public void setGearShiftAdvice(GearShiftAdviceStatus gearShiftAdvice) {
-        if (gearShiftAdvice != null) {
-            parameters.put(Names.gearShiftAdvice, gearShiftAdvice);
-        } else {
-        	parameters.remove(Names.gearShiftAdvice);
-        }
-    }
-    public GearShiftAdviceStatus getGearShiftAdvice() {
-        Object obj = parameters.get(Names.gearShiftAdvice);
-        if (obj instanceof GearShiftAdviceStatus) {
-            return (GearShiftAdviceStatus) obj;
-        } else if (obj instanceof String) {
-        	GearShiftAdviceStatus theCode = null;
-            try {
-                theCode = GearShiftAdviceStatus.valueForString((String) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.gearShiftAdvice, e);
-            }
-            return theCode;
-        }
-        return null;
-    }
-    public void setAcceleration(Float acceleration) {
-        if (acceleration != null) {
-            parameters.put(Names.acceleration, acceleration);
-        } else {
-        	parameters.remove(Names.acceleration);
-        }
-    }
-    public Float getAcceleration() {
-    	return (Float) parameters.get(Names.acceleration);
     }
     public void setAccPedalPosition(Float accPedalPosition) {
         if (accPedalPosition != null) {
@@ -482,69 +343,6 @@ public class GetVehicleDataResponse extends RPCResponse {
         }
         if (o instanceof Double) {
             return ((Double) o).floatValue();
-        }
-        return null;
-    }
-
-    public void setClutchPedalPosition(Float clutchPedalPosition) {
-        if (clutchPedalPosition != null) {
-            parameters.put(Names.clutchPedalPosition, clutchPedalPosition);
-        } else {
-        	parameters.remove(Names.clutchPedalPosition);
-        }
-    }
-    public Float getClutchPedalPosition() {
-    	return (Float) parameters.get(Names.clutchPedalPosition);
-    }
-    public void setReverseGearStatus(VehicleDataActiveStatus reverseGearStatus) {
-        if (reverseGearStatus != null) {
-            parameters.put(Names.reverseGearStatus, reverseGearStatus);
-        } else {
-        	parameters.remove(Names.reverseGearStatus);
-        }
-    }
-    public VehicleDataActiveStatus getReverseGearStatus() {
-        Object obj = parameters.get(Names.reverseGearStatus);
-        if (obj instanceof VehicleDataActiveStatus) {
-            return (VehicleDataActiveStatus) obj;
-        } else if (obj instanceof String) {
-        	VehicleDataActiveStatus theCode = null;
-            try {
-                theCode = VehicleDataActiveStatus.valueForString((String) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.reverseGearStatus, e);
-            }
-            return theCode;
-        }
-        return null;
-    }
-    public void setAccTorque(Float accTorque) {
-        if (accTorque != null) {
-            parameters.put(Names.accTorque, accTorque);
-        } else {
-        	parameters.remove(Names.accTorque);
-        }
-    }
-    public Float getAccTorque() {
-    	return (Float) parameters.get(Names.accTorque);
-    }
-    public void setEvInfo(EVInfo evInfo) {
-        if (evInfo != null) {
-            parameters.put(Names.evInfo, evInfo);
-        } else {
-        	parameters.remove(Names.evInfo);
-        }
-    }
-    public EVInfo getEvInfo() {
-    	Object obj = parameters.get(Names.evInfo);
-        if (obj instanceof EVInfo) {
-            return (EVInfo) obj;
-        } else if (obj instanceof Hashtable) {
-        	try {
-        		return new EVInfo((Hashtable) obj);
-            } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.evInfo, e);
-            }
         }
         return null;
     }

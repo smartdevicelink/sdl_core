@@ -1,4 +1,5 @@
 [CW7]
+* SyncProxyAndroid SDK: Update VehicleDataType enum. Add new parameters to OnVehicleData notification. Sync *VehicleData* messages' parameters with the specification.
 - SyncProxyAndroid SDK: removed heartbeat feature
 * SyncProxyAndroid SDK: Update FileType enum.
 * SyncProxyAndroid SDK: Add prerecordedSpeech parameter to RegisterAppInterfaceResponse class.
