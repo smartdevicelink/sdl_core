@@ -2024,5 +2024,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         }, 500);
     }
 
-
+    @Override
+    public void onUSBNoSuchDeviceException() {
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.onUSBNoSuchDeviceException();
+        }
+    }
 }

@@ -4389,4 +4389,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onSessionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
     }
+
+    public void onUSBNoSuchDeviceException() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
+                builder.setTitle("USB problem");
+                builder.setMessage("Last session over USB was interrupted incorrectly.\nTry UNPLUG and PLUG USB cable again")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                builder.create().show();
+            }
+        });
+    }
 }
