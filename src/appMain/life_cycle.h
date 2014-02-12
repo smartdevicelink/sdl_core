@@ -49,6 +49,7 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "policies/policy_manager_impl.h"
+#include "utils/singleton.h"
 
 #ifdef WEB_HMI
 #  include "CMessageBroker.hpp"
@@ -58,9 +59,8 @@
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
 namespace main_namespace {
-class LifeCycle {
+class LifeCycle : public utils::Singleton<LifeCycle> {
   public:
-    static LifeCycle* instance();
     bool StartComponents();
 
     /**
@@ -98,6 +98,10 @@ class LifeCycle {
 #endif  // QT_HMI
 
     static log4cxx::LoggerPtr logger_;
+
+    DISALLOW_COPY_AND_ASSIGN(LifeCycle);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LifeCycle);
 };
 }  //  namespace main_namespace
 

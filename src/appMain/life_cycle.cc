@@ -73,11 +73,6 @@ LifeCycle::LifeCycle()
 #endif  // WEB_HMI
 }
 
-LifeCycle* LifeCycle::instance() {
-  static LifeCycle instance;
-  return &instance;
-}
-
 bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
   transport_manager_ =

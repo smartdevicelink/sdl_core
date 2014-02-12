@@ -65,12 +65,12 @@ Thread::Id Thread::CurrentId() {
 
 //static
 std::string Thread::NameFromId(Id thread_id) {
-  return ThreadManager::instance().GetName(thread_id.id_);
+  return ThreadManager::instance()->GetName(thread_id.id_);
 }
 
 //static
 void Thread::SetNameForId(Id thread_id, const std::string& name) {
-  ThreadManager::instance().RegisterName(thread_id.id_, name);
+  ThreadManager::instance()->RegisterName(thread_id.id_, name);
 }
 
 
@@ -86,7 +86,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 }
 
 Thread::~Thread() {
-  ThreadManager::instance().Unregister(thread_handle_);
+  ThreadManager::instance()->Unregister(thread_handle_);
   if (delegate_) {
     delete delegate_;
   }
@@ -122,7 +122,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
                             delegate_);
   pthread_setname_np(thread_handle_, name_.c_str());
   LOG4CXX_INFO(logger_,"Created thread: " << name_);
-  ThreadManager::instance().RegisterName(thread_handle_, name_);
+  ThreadManager::instance()->RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
 
