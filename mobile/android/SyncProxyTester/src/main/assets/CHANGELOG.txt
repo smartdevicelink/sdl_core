@@ -1,4 +1,5 @@
 [CW7]
++ Add endTime parameter to SetMediaClockTimer UI.
 + SyncProxyAndroid SDK: Add endTime parameter to SetMediaClockTimer request.
 * SyncProxyAndroid SDK: Update VehicleDataType enum. Add new parameters to OnVehicleData notification. Sync *VehicleData* messages' parameters with the specification.
 - SyncProxyAndroid SDK: removed heartbeat feature
