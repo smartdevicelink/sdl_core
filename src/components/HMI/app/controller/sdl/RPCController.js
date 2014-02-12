@@ -1018,6 +1018,21 @@ SDL.RPCController = Em.Object
                 resultStruct: {},
 
                 /**
+                 * Validate method for request SetDisplayLayout
+                 * 
+                 * @param {Object}
+                 *            params
+                 */
+                SetDisplayLayout: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request IsReady
                  *
                  * @param {Object}

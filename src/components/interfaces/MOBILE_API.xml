@@ -549,7 +549,7 @@
     <element name="MFD3" />
     <element name="MFD4" />
     <element name="MFD5" />
-    <element name="GEN3_8-INCH" />
+    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
   </enum>
 
   <enum name="TextFieldName">
@@ -1599,11 +1599,32 @@
     </param>
   </struct>
 
+  <enum name="FileType">
+    <description>Enumeration listing possible file types.</description>
+    <element name="GRAPHIC_BMP" />
+    <element name="GRAPHIC_JPEG" />
+    <element name="GRAPHIC_PNG" />
+    <element name="AUDIO_WAVE" />
+    <element name="AUDIO_MP3" />
+    <element name="AUDIO_AAC" />
+    <element name="BINARY" />
+    <element name="JSON" />
+  </enum>
+
+  <struct name="ImageResolution">
+    <param name="resolutionWidth" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution width.</description>
+    </param>
+    <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
+      <description>The image resolution height.</description>
+    </param>
+  </struct>  
+
   <struct name="ImageField">
      <param name="name" type="ImageFieldName">
        <description>The name that identifies the field. See ImageFieldName.</description>
      </param>
-     <param name="imageTypeSupported" type="FileType" maxlength = "100" array="true">
+     <param name="imageTypeSupported" type="FileType" array="true">
        <description>The image types that are supported in this field. See FileType.</description>
      </param>
      <param name="imageResolution" type="ImageResolution">
@@ -1941,7 +1962,7 @@
     </param>   
   </struct>
 
-  <enum name="RequestType">
+ <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
     <element name="HTTP" />   
     <element name="FILE_RESUME" />

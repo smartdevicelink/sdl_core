@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 
+
 namespace application_manager {
 
 namespace commands {
@@ -50,7 +51,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()
+  const Application* app = ApplicationManagerImpl::instance()
   ->application(connection_key());
 
   if (NULL == app) {

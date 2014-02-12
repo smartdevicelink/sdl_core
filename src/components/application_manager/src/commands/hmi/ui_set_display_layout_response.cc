@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
+#include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

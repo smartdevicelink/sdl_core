@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/set_display_layout_response.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
