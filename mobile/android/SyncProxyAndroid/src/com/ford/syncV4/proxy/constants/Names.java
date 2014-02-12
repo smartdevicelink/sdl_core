@@ -449,4 +449,5 @@ public class Names {
     public static final String graphicSupported = "graphicSupported";
     public static final String numCustomPresetsAvailable = "numCustomPresetsAvailable";
     public static final String prerecordedSpeech = "prerecordedSpeech";
+    public static final String endTime = "endTime";
 }

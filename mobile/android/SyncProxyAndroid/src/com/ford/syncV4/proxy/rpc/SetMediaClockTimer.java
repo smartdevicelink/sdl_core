@@ -29,6 +29,25 @@ public class SetMediaClockTimer extends RPCRequest {
             parameters.put(Names.startTime, startTime );
         }
     }
+
+    public StartTime getEndTime() {
+        Object obj = parameters.get(Names.endTime);
+        if (obj instanceof StartTime) {
+            return (StartTime) obj;
+        } else if (obj instanceof Hashtable) {
+            return new StartTime((Hashtable) obj);
+        }
+        return null;
+    }
+
+    public void setEndTime(StartTime endTime) {
+        if (endTime != null) {
+            parameters.put(Names.endTime, endTime);
+        } else {
+            parameters.remove(Names.endTime);
+        }
+    }
+
     public UpdateMode getUpdateMode() {
         Object obj = parameters.get(Names.updateMode);
         if (obj instanceof UpdateMode) {
