@@ -31,24 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/system_request_response.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_RESPONSE_H_
+
+#include "application_manager/commands/command_response_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-SystemRequestResponse::SystemRequestResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+/**
+ * @brief SystemResponse command class
+ **/
+class SystemResponse : public CommandResponseImpl {
+ public:
+  /**
+   * @brief SystemResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SystemResponse(const MessageSharedPtr& message);
 
-SystemRequestResponse::~SystemRequestResponse() {
-}
+  /**
+   * @brief SystemResponse class destructor
+   **/
+  virtual ~SystemResponse();
 
-void SystemRequestResponse::Run() {
-  LOG4CXX_INFO(logger_, "SystemRequestResponse::Run");
-  SendResponse((*message_)[strings::msg_params][strings::success].asBool());
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SystemResponse);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_RESPONSE_H_

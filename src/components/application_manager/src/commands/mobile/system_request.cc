@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,42 +31,42 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_REQUEST_H_
-
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/mobile/system_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief SystemRequestRequest command class
- **/
-class SystemRequestRequest : public CommandRequestImpl {
- public:
-  /**
-   * @brief SystemRequestRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit SystemRequestRequest(const MessageSharedPtr& message);
+SystemRequest::SystemRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
+}
 
-  /**
-   * @brief SystemRequestRequest class destructor
-   **/
-  virtual ~SystemRequestRequest();
+SystemRequest::~SystemRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void SystemRequest::Run() {
+  LOG4CXX_INFO(logger_, "SystemRequest::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(SystemRequestRequest);
-};
+  Application* application = ApplicationManagerImpl::instance()->application(
+      connection_key());
+
+  if (NULL == application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+    LOG4CXX_ERROR(logger_, "Binary data is missed!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  SendResponse(true, mobile_apis::Result::SUCCESS);
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_REQUEST_H_
+}  // namespace application_manager
