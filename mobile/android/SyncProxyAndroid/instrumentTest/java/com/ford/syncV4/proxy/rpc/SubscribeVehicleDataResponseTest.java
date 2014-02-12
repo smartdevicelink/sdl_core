@@ -75,7 +75,7 @@ public class SubscribeVehicleDataResponseTest extends TestCase {
         JSONObject jsonObject = new JSONObject();
         final VehicleDataResult swa = new VehicleDataResult();
         swa.setResultCode(VehicleDataResultCode.DATA_NOT_AVAILABLE);
-        swa.setDataType(VehicleDataType.VEHICLEDATA_STEERINGWHEELANGLE);
+        swa.setDataType(VehicleDataType.VEHICLEDATA_STEERINGWHEEL);
         jsonObject.put(STEERING_WHEEL_ANGLE, swa);
 
         SubscribeVehicleDataResponse msg = new SubscribeVehicleDataResponse(
