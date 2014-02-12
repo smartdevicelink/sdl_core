@@ -56,14 +56,17 @@ using typesafe_format::strmfmt;
 namespace codegen {
 class ModelFilter;
 
-Interface::Interface(BuiltinTypeRegistry* builtin_type_registry,
+Interface::Interface(const API* api,
+                     BuiltinTypeRegistry* builtin_type_registry,
                      const ModelFilter* model_filter)
-    : builtin_type_registry_(builtin_type_registry),
+    : api_(api),
+      builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
-      type_registry_(builtin_type_registry_, model_filter),
+      type_registry_(this, builtin_type_registry_, model_filter),
       requests_deleter_(&requests_),
       responses_deleter_(&responses_),
       notifications_deleter_(&notifications_) {
+  assert(api_);
   assert(builtin_type_registry_);
   assert(model_filter_);
 }
@@ -71,7 +74,7 @@ Interface::Interface(BuiltinTypeRegistry* builtin_type_registry,
 Interface::~Interface() {
 }
 
-bool codegen::Interface::init(const pugi::xml_node& xml) {
+bool Interface::init(const pugi::xml_node& xml) {
   name_ = xml.attribute("name").value();
   if (name_.empty()) {
     std::cerr << "Interface must have 'name' attribute specified" << '\n';
@@ -80,6 +83,14 @@ bool codegen::Interface::init(const pugi::xml_node& xml) {
   if (!type_registry_.init(xml) || !AddFunctions(xml))
     return false;
   return true;
+}
+
+const Type* Interface::GetNamedType(const std::string& name) const {
+  return type_registry_.GetType(name);
+}
+
+const API& Interface::api() const {
+  return *api_;
 }
 
 const std::string& Interface::name() const {
@@ -207,7 +218,7 @@ bool Interface::AddFunctionMessageParameters(
       return false;
     }
     const Type* type = NULL;
-    if (!type_registry_.GetType(i, &type)) {
+    if (!type_registry_.GetCompositeType(i, &type)) {
       std::cerr << "While parsing function parameter " << name << '\n';
       return false;
     }

@@ -35,8 +35,10 @@
 #include <iostream>
 #include <utility>
 
+#include "model/api.h"
 #include "model/builtin_type_registry.h"
 #include "model/constant.h"
+#include "model/interface.h"
 #include "model/model_filter.h"
 #include "model/scope.h"
 #include "pugixml.hpp"
@@ -52,9 +54,11 @@ const char* kFunctionIdEnumName = "FunctionID";
 
 namespace codegen {
 
-TypeRegistry::TypeRegistry(BuiltinTypeRegistry* builtin_type_registry,
+TypeRegistry::TypeRegistry(const Interface* interface,
+                           BuiltinTypeRegistry* builtin_type_registry,
                            const ModelFilter* model_filter)
-    : builtin_type_registry_(builtin_type_registry),
+    : interface_(interface),
+      builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
       enums_deleter_(&enums_),
       structs_deleter_(&structs_),
@@ -69,7 +73,7 @@ bool TypeRegistry::init(const pugi::xml_node& xml) {
   return true;
 }
 
-bool TypeRegistry::GetType(const pugi::xml_node& params, const Type** type) {
+bool TypeRegistry::GetCompositeType(const pugi::xml_node& params, const Type** type) {
   pugi::xml_attribute array = params.attribute("array");
   pugi::xml_attribute map = params.attribute("map");
   if (array && map) {
@@ -84,6 +88,21 @@ bool TypeRegistry::GetType(const pugi::xml_node& params, const Type** type) {
   } else {
     return GetNonArray(params, type);
   }
+}
+
+const Type* TypeRegistry::GetType(const std::string& name) const {
+  const Type* type = NULL;
+  if (IsRegisteredEnum(name)
+      && GetEnum(name, &type)) {
+    return type;
+  } else if (IsRegisteredStruct(name)
+             && GetStruct(name, &type)) {
+    return type;
+  } else if (IsRegisteredTypedef(name)
+             && GetTypedef(name, &type)) {
+    return type;
+  }
+  return NULL;
 }
 
 const TypeRegistry::EnumList& TypeRegistry::enums() const {
@@ -158,7 +177,7 @@ bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
     std::cerr << "Duplicate enum: " << name << std::endl;
     return false;
   }
-  enums_.push_back(new Enum(name, scope, internal_scope, description));
+  enums_.push_back(new Enum(interface_, name, scope, internal_scope, description));
   enum_by_name_[name] = enums_.back();
   if (!AddEnumConstants(enums_.back(), xml_enum)) {
     return false;
@@ -177,7 +196,7 @@ bool TypeRegistry::AddStruct(const pugi::xml_node& xml_struct) {
     std::cerr << "Duplicate structure: " << name << std::endl;
     return false;
   }
-  structs_.push_back(new Struct(name, scope, description));
+  structs_.push_back(new Struct(interface_, name, scope, description));
   struct_by_name_[name] = structs_.back();
   if (!AddStructureFields(structs_.back(), xml_struct)) {
     return false;
@@ -192,7 +211,7 @@ bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
     return false;
   }
   const Type* type = NULL;
-  if (!GetType(xml_typedef, &type)) {
+  if (!GetCompositeType(xml_typedef, &type)) {
     std::cerr<< "While parsing typedef " << name << '\n';
     return false;
   }
@@ -201,7 +220,7 @@ bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
     std::cerr << "Duplicate typedef: " << name << std::endl;
     return false;
   }
-  typedefs_.push_back(new Typedef(name, type, description));
+  typedefs_.push_back(new Typedef(interface_, name, type, description));
   typedef_by_name_[name] = typedefs_.back();
 
   return true;
@@ -242,12 +261,10 @@ bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
         ->BuiltInTypeByName(type_name_str);
     if (BuiltinTypeRegistry::kNotABuiltInType != builtin_type) {
       return builtin_type_registry_->GetType(builtin_type, params, type);
-    } else if (IsRegisteredEnum(type_name_str)) {
-      return GetEnum(type_name_str, type);
-    } else if (IsRegisteredStruct(type_name_str)) {
-      return GetStruct(type_name_str, type);
-    } else if (IsRegisteredTypedef(type_name_str)){
-      return GetTypedef(type_name_str, type);
+    } else if (IsExternalType(type_name_str)) {
+      return GetExternalType(type_name_str, type);
+    } else if (*type = GetType(type_name_str)) {
+      return true;
     } else {
       std::cerr << "Unregistered type: " << type_name_str << std::endl;
       return false;
@@ -258,8 +275,8 @@ bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
   }
 }
 
-bool TypeRegistry::GetEnum(const std::string& name, const Type** type) {
-  EnumByName::iterator i = enum_by_name_.find(name);
+bool TypeRegistry::GetEnum(const std::string& name, const Type** type) const {
+  EnumByName::const_iterator i = enum_by_name_.find(name);
   if (i != enum_by_name_.end()) {
     *type = i->second;
     return true;
@@ -269,8 +286,8 @@ bool TypeRegistry::GetEnum(const std::string& name, const Type** type) {
   }
 }
 
-bool TypeRegistry::GetStruct(const std::string& name, const Type** type) {
-  StructByName::iterator i = struct_by_name_.find(name);
+bool TypeRegistry::GetStruct(const std::string& name, const Type** type) const {
+  StructByName::const_iterator i = struct_by_name_.find(name);
   if (i != struct_by_name_.end()) {
     *type = i->second;
     return true;
@@ -280,7 +297,7 @@ bool TypeRegistry::GetStruct(const std::string& name, const Type** type) {
   }
 }
 
-bool TypeRegistry::GetTypedef(const std::string& name, const Type** type) {
+bool TypeRegistry::GetTypedef(const std::string& name, const Type** type) const {
   TypedefByName::const_iterator i = typedef_by_name_.find(name);
   if (i != typedef_by_name_.end()) {
     *type = i->second;
@@ -291,12 +308,43 @@ bool TypeRegistry::GetTypedef(const std::string& name, const Type** type) {
   }
 }
 
-bool TypeRegistry::IsRegisteredEnum(const std::string& enum_name) {
+bool TypeRegistry::GetExternalType(const std::string& full_type_name,
+                                   const Type** type) const {
+  size_t dotpos = full_type_name.find('.');
+  if (dotpos == full_type_name.npos) {
+    std::cerr << full_type_name << " is not valid fully qualified type name" << '\n';
+    return false;
+  }
+  std::string interface_name = full_type_name.substr(0, dotpos);
+  std::string type_name = full_type_name.substr(dotpos + 1);
+  const API& api = interface_->api();
+  const Interface* that_interface =
+      interface_name == interface_->name() ?
+        interface_ : api.InterfaceByName(interface_name);
+  if (!that_interface) {
+    std::cerr << "Unknown interface " << interface_name << '\n';
+    return false;
+  }
+  const Type* found_type = that_interface->GetNamedType(type_name);
+  if (!found_type) {
+    strmfmt(std::cerr, "Unknown type {0} in interface {1}",
+            type_name, interface_name) << '\n';
+    return false;
+  }
+  *type = found_type;
+  return true;
+}
+
+bool TypeRegistry::IsRegisteredEnum(const std::string& enum_name) const {
   return enum_by_name_.find(enum_name) != enum_by_name_.end();
 }
 
-bool TypeRegistry::IsRegisteredStruct(const std::string& struct_name) {
+bool TypeRegistry::IsRegisteredStruct(const std::string& struct_name) const {
   return struct_by_name_.find(struct_name) != struct_by_name_.end();
+}
+
+bool TypeRegistry::IsExternalType(const std::string& full_type_name) const {
+  return full_type_name.find('.') != full_type_name.npos;
 }
 
 bool TypeRegistry::AddEnumConstants(Enum* enm, const pugi::xml_node& xml_enum) {
@@ -340,7 +388,7 @@ bool TypeRegistry::AddStructureFields(Struct* strct,
     }
     std::string type_name = i.attribute("type").value();
     const Type* type = NULL;
-    if (!GetType(i, &type)) {
+    if (!GetCompositeType(i, &type)) {
       std::cerr << "While parsing struct " << strct->name()
                 << std::endl;
       return false;
@@ -367,7 +415,7 @@ bool TypeRegistry::AddStructureFields(Struct* strct,
   return true;
 }
 
-bool TypeRegistry::IsRegisteredTypedef(const std::string& typedef_name) {
+bool TypeRegistry::IsRegisteredTypedef(const std::string& typedef_name) const {
   return typedef_by_name_.find(typedef_name) != typedef_by_name_.end();
 }
 

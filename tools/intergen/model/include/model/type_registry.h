@@ -66,7 +66,8 @@ class TypeRegistry {
   typedef std::map<std::string, const Typedef*> TypedefByName;
  public:
   // Methods
-  TypeRegistry(BuiltinTypeRegistry* builtin_type_registry,
+  TypeRegistry(const Interface* interface,
+               BuiltinTypeRegistry* builtin_type_registry,
                const ModelFilter* model_filter);
   ~TypeRegistry();
   // Follows given xml_node collectin all the struct and enum definitons
@@ -75,7 +76,11 @@ class TypeRegistry {
   // Finds (or creates) Type object corresponding to type name and parameters
   // found in |params|.
   // Returns false if unknown type or invalid params were found
-  bool GetType(const pugi::xml_node& params, const Type** type);
+  bool GetCompositeType(const pugi::xml_node& params, const Type** type);
+  // Finds type delcare in this interface with given name.
+  // Type can be enum, struct or typedef
+  // Returns NULL no type with such name registered
+  const Type* GetType(const std::string& name) const;
   // Get reserved enum that contains function ID's
   // returns NULL if FunctionID is not registered
   const Enum* GetFunctionIDEnum() const;
@@ -104,14 +109,18 @@ class TypeRegistry {
   bool GetContainer(const pugi::xml_node& params, const Type** type,
                     bool get_array);
   bool GetNonArray(const pugi::xml_node& params, const Type** type);
-  bool GetEnum(const std::string& name, const Type** type);
-  bool GetStruct(const std::string& name, const Type** type);
-  bool GetTypedef(const std::string& name, const Type** type);
-  bool IsRegisteredEnum(const std::string& enum_name);
-  bool IsRegisteredStruct(const std::string& struct_name);
-  bool IsRegisteredTypedef(const std::string& typedef_name);
+  bool GetEnum(const std::string& name, const Type** type) const;
+  bool GetStruct(const std::string& name, const Type** type) const;
+  bool GetTypedef(const std::string& name, const Type** type) const;
+  bool GetExternalType(const std::string& full_type_name,
+                       const Type** type) const;
+  bool IsRegisteredEnum(const std::string& enum_name) const;
+  bool IsRegisteredStruct(const std::string& struct_name) const;
+  bool IsRegisteredTypedef(const std::string& typedef_name) const;
+  bool IsExternalType(const std::string& full_type_name) const;
  private:
   // fields
+  const Interface* interface_;
   BuiltinTypeRegistry* builtin_type_registry_;
   const ModelFilter* model_filter_;
   std::set<Array> arrays_;

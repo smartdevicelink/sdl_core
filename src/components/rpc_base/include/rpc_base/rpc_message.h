@@ -35,6 +35,10 @@
 
 #include "rpc_base.h"
 
+namespace Json {
+class Value;
+}
+
 namespace rpc {
 
 enum MessageType {
@@ -45,9 +49,12 @@ enum MessageType {
 
 class Message : public CompositeType {
  public:
+  int32_t id;
   virtual int32_t message_type() = 0;
   virtual int32_t function_id() = 0;
+  virtual const char* function_string_id() { return ""; }
   virtual ~Message() {}
+  Json::Value ToJsonRPCv2Value();
 };
 
 class Request : public Message {

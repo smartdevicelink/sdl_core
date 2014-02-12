@@ -61,9 +61,11 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
     const Interface* intf = *i;
     std::string interface_name =
         WordList::FromUnknown(intf->name()).ToLowerCase();
-    // Skip unneeded interfaces
-    if (required_interfaces.count(interface_name) == 0) {
-      continue;
+    if (!required_interfaces.empty()) {
+      // If interface list provided, skip unneeded interfaces
+      if (required_interfaces.count(interface_name) == 0) {
+        continue;
+      }
     }
 
     if (GenerateInterface(intf, interface_name)) {

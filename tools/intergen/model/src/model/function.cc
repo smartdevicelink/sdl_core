@@ -62,7 +62,7 @@ FunctionMessage::FunctionMessage(const Interface* interface,
                                  const Enum::Constant* id,
                                  MessageType message_type,
                                  const Description& description, Scope scope)
-    : Struct(name, scope, description),
+    : Struct(interface, name, scope, description),
       interface_(interface),
       id_(id),
       message_type_(message_type) {

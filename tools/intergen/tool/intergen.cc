@@ -101,11 +101,6 @@ int main(int argc, char* argv[]) {
     cerr << "Interface definition file must be specified" << '\n';
     return EXIT_FAILURE;
   }
-  if (options.requested_interfaces.empty()) {
-    cerr << "At least one interface must be specified" << '\n';
-    return EXIT_FAILURE;
-  }
-
   pugi::xml_document doc;
   pugi::xml_parse_result result = doc.load_file(options.interface_xml);
   if (result) {

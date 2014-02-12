@@ -33,6 +33,7 @@
 #include "model/api.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "model/constant.h"
 #include "pugixml.hpp"
@@ -46,10 +47,12 @@ API::API(const ModelFilter* model_filter)
 }
 
 bool API::init(const pugi::xml_document& xmldoc) {
-  for (pugi::xml_node i = xmldoc.child("interface"); i;
-      i = xmldoc.next_sibling("interface")) {
-    interfaces_.push_back(new Interface(&builtin_type_registry_, model_filter_));
-    if (!interfaces_.back()->init(i)) {
+  if (!AddInterfaces(xmldoc)) {
+    return false;
+  }
+  for (pugi::xml_node i = xmldoc.child("interfaces"); i;
+      i = i.next_sibling("interfaces")) {
+    if (!AddInterfaces(i)) {
       return false;
     }
   }
@@ -61,6 +64,39 @@ API::~API() {
 
 const std::vector<Interface*>& API::interfaces() const {
   return interfaces_;
+}
+
+const Interface* API::InterfaceByName(const std::string& name) const {
+  InterfacesIndex::const_iterator i = interfaces_index_.find(name);
+  if (i != interfaces_index_.end()) {
+    size_t interface_id = i->second;
+    assert(interface_id < interfaces_.size());
+    return interfaces_[interface_id];
+  }
+  return NULL;
+}
+
+bool API::AddInterfaces(const pugi::xml_node& xmldoc) {
+  for (pugi::xml_node i = xmldoc.child("interface"); i;
+      i = i.next_sibling("interface")) {
+    Interface* interface = new Interface(this,
+                                         &builtin_type_registry_,
+                                         model_filter_);
+    interfaces_.push_back(interface);
+    if (!interface->init(i)) {
+      return false;
+    }
+    bool inserted = interfaces_index_.insert(
+          std::make_pair(
+            interface->name(),
+            interfaces_.size() - 1)
+        ).second;
+    if (!inserted) {
+      std::cerr << "Duplicate interface: " << interface->name() << '\n';
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace codegen

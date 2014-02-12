@@ -44,8 +44,10 @@ class xml_node;
 }  // namespace pugi
 
 namespace codegen {
+class API;
 class BuiltinTypeRegistry;
 class Enum;
+class Interface;
 class ModelFilter;
 
 /*
@@ -64,9 +66,11 @@ class Interface {
   typedef TypeRegistry::TypedefList TypedefList;
  public:
   // Methods
-  Interface(BuiltinTypeRegistry* builtin_type_registry,
+  Interface(const API* api,
+            BuiltinTypeRegistry* builtin_type_registry,
             const ModelFilter* model_filter);
   ~Interface();
+  const API& api() const;
   const std::string& name() const;
   const FunctionsList& functions() const;
   const NotificationList& notifications() const;
@@ -79,6 +83,8 @@ class Interface {
 
   // Follows parsed |xml| document validating and constructin type tree
   bool init(const pugi::xml_node& xml);
+
+  const Type* GetNamedType(const std::string& name) const;
 
  private:
   // Methods
@@ -96,6 +102,7 @@ class Interface {
  private:
   // Fields
   std::string name_;
+  const API* api_;
   BuiltinTypeRegistry* builtin_type_registry_;
   const ModelFilter* model_filter_;
   TypeRegistry type_registry_;

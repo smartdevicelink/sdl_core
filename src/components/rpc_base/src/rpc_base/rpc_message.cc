@@ -30,56 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef API_H_
-#define API_H_
-#include <vector>
-#include <map>
+#include "rpc_base/rpc_message.h"
 
-#include "model/builtin_type_registry.h"
-#include "model/interface.h"
-#include "utils/macro.h"
-#include "utils/stl_utils.h"
+#include "json/value.h"
 
-namespace pugi {
-class xml_document;
-}  // namespace pugi
+namespace rpc {
 
-namespace codegen {
-class ModelFilter;
+Json::Value Message::ToJsonRPCv2Value() {
+  Json::Value value(Json::objectValue);
+  value["jsonrpc"] = "2.0";
+  value["method"] = function_string_id();
+  return value;
+}
 
-/*
- * Represents single parsed XML file that defines an API
- */
-class API {
- public:
-  API(const ModelFilter* model_filter);
-  // Follows parsed |xmldoc| collecting and validating API definitions
-  // Returns false and prints to cerr on error
-  bool init(const pugi::xml_document& xmldoc);
-  ~API();
-  // List of all interfaces collected from xml document
-  const std::vector<Interface*>& interfaces() const;
-
-  // Get interface by name
-  // returns NULL if there is no interface with given name
-  const Interface* InterfaceByName(const std::string& name) const;
-
- private:
-  // Types
-  typedef std::map<std::string, size_t> InterfacesIndex;
- private:
-  // Methods
-  bool AddInterfaces(const pugi::xml_node& xmldoc);
- private:
-  // Fields
-  const ModelFilter* model_filter_;
-  BuiltinTypeRegistry builtin_type_registry_;
-  std::vector<Interface*> interfaces_;
-  utils::StdContainerDeleter<std::vector<Interface*> > interfaces_deleter_;
-  InterfacesIndex interfaces_index_;
-  DISALLOW_COPY_AND_ASSIGN(API);
-};
-
-}  // namespace codegen
-
-#endif /* API_H_ */
+}  // namespace rpc
