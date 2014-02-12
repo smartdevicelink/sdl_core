@@ -67,6 +67,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
     private static final String SYNC_FILENAME = "syncFileName";
     private static final String SYSTEM_FILE = "systemFile";
     private static final String FILE_TYPE = "fileType";
+    // TODO may cause test failure depending on device
     private static final int WAIT_TIMEOUT = 20;
     private IJsonRPCMarshaller marshaller;
     private IProxyListenerALMTesting proxyListenerMock;

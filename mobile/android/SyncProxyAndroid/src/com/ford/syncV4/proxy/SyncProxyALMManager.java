@@ -2649,5 +2649,10 @@ public class SyncProxyALMManager {
         public void onAudioServiceStart() {
 
         }
+
+        @Override
+        public void onUSBNoSuchDeviceException() {
+
+        }
     }
 }

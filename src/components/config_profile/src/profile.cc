@@ -41,7 +41,8 @@
 
 namespace {
 const char* kMainSection = "MAIN";
-const uint32_t kDefaultHeartBeatTimeout = 5;
+// Heartbeat is disabled by default
+const uint32_t kDefaultHeartBeatTimeout = 0;
 }
 
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(

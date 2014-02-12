@@ -35,6 +35,10 @@
 
 #include <string>
 #include "media_manager/media_adapter_impl.h"
+#include "utils/shared_ptr.h"
+#include "utils/message_queue.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
 class PipeStreamerAdapter : public MediaAdapterImpl {
@@ -51,7 +55,42 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
     std::string named_pipe_path_;
 
   private:
-    int32_t pipe_fd_;
+    class Streamer : public threads::ThreadDelegate {
+      public:
+        /*
+         * Default constructor
+         *
+         * @param server  Server pointer
+         */
+        explicit Streamer(PipeStreamerAdapter* server);
+
+        /*
+         * Destructor
+         */
+        ~Streamer();
+
+        /*
+         * Function called by thread on start
+         */
+        void threadMain();
+
+        /*
+         * Function called by thread on exit
+         */
+        bool exitThreadMain();
+
+      private:
+        PipeStreamerAdapter*        server_;
+        volatile bool               stop_flag_;
+
+        DISALLOW_COPY_AND_ASSIGN(Streamer);
+    };
+
+    bool                                          is_ready_;
+    int32_t                                       pipe_fd_;
+    threads::Thread*                              thread_;
+    MessageQueue<protocol_handler::RawMessagePtr> messages_;
+
     DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);
 };
 
