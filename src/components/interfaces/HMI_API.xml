@@ -2417,6 +2417,28 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
+  <function name="SetDisplayLayout" messagetype="request">
+    <param name="displayLayout" type="String" maxlength="500" mandatory="true">
+      <description>
+      	Predefined or dynamically created screen layout.
+      	Currently only predefined screen layouts are defined.
+      </description>
+    </param>
+  </function>
+  <function name="SetDisplayLayout" messagetype="response">
+    <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
+      <description>See DisplayCapabilities</description>
+    </param>
+    <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>See ButtonCapabilities</description >
+    </param>
+    <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description >
+    </param>
+    <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false">
+      <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
+    </param>
+  </function>
   <function name="ShowCustomForm" messagetype="request">
     <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
     <param name="customFormID" type="String" maxlength="500" mandatory="true">

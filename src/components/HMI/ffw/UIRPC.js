@@ -259,6 +259,148 @@ FFW.UI = FFW.RPCObserver.create({
 
                     break;
                 }
+                case "UI.SetDisplayLayout":
+                {
+
+                    Em.Logger.log("FFW." + request.method + "Response");
+                    // send repsonse
+                    var JSONMessage = {
+                        "jsonrpc": "2.0",
+                        "id": request.id,
+                        "result": {
+                            "displayCapabilities": {
+                                "displayType": "GEN2_8_DMA",
+                                "textFields": [
+                                    "mainField1",
+                                    "mainField2",
+                                    "mainField3",
+                                    "mainField4",
+                                    "statusBar",
+                                    "mediaClock",
+                                    "mediaTrack",
+                                    "alertText1",
+                                    "alertText2",
+                                    "alertText3",
+                                    "scrollableMessageBody",
+                                    "initialInteractionText",
+                                    "navigationText1",
+                                    "navigationText2",
+                                    "ETA",
+                                    "totalDistance",
+                                    "navigationText",
+                                    "audioPassThruDisplayText1",
+                                    "audioPassThruDisplayText2",
+                                    "sliderHeader",
+                                    "sliderFooter",
+                                    "notificationText",
+                                    "menuName",
+                                    "secondaryText",
+                                    "tertiaryText",
+                                    "timeToDestination",
+                                    "turnText"
+                                ],
+                                "mediaClockFormats": [
+                                    "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
+                                ],
+                                "graphicSupported": true,
+                                "imageCapabilities": ["DYNAMIC"]
+                            },
+                            "buttonCapabilities": [
+                                {
+                                    "name": "PRESET_0",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_1",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_2",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_3",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_4",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_5",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_6",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_7",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_8",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "PRESET_9",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "OK",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "SEEKLEFT",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "SEEKRIGHT",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "TUNEUP",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }, {
+                                    "name": "TUNEDOWN",
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true
+                                }
+                            ],
+                            "softButtonCapabilities": {
+                                "shortPressAvailable": true,
+                                "longPressAvailable": true,
+                                "upDownAvailable": true,
+                                "imageSupported": true
+                            },
+                            "presetBankCapabilities": {
+                                "onScreenPresetsAvailable": true
+                            },
+                            "code": SDL.SDLModel.resultCode["SUCCESS"],
+                            "method": "UI.SetDisplayLayout"
+                        }
+                    };
+
+                    this.client.send(JSONMessage);
+
+                    break;
+                }
                 case "UI.SetAppIcon":
                 {
 
