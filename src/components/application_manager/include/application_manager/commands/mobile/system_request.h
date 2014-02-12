@@ -1,6 +1,6 @@
 /*
 
-Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,23 +31,42 @@ Copyright (c) 2013, Ford Motor Company
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/system_request_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_
+
+#include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SystemRequestRequest::SystemRequestRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+/**
+ * @brief SystemRequest command class
+ **/
+class SystemRequest : public CommandRequestImpl {
+ public:
+  /**
+   * @brief SystemRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SystemRequest(const MessageSharedPtr& message);
 
-SystemRequestRequest::~SystemRequestRequest() {
-}
+  /**
+   * @brief SystemRequest class destructor
+   **/
+  virtual ~SystemRequest();
 
-void SystemRequestRequest::Run() {
-  LOG4CXX_INFO(logger_, "SystemRequestRequest::Run");
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SystemRequest);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_H_

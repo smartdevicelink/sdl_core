@@ -153,7 +153,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(application_impl.system_context());
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -206,7 +206,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
       *app_type;
   }
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
 smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
@@ -262,7 +262,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
 
   message[strings::msg_params][strings::reason] = reason;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
@@ -278,10 +278,10 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
     return NULL;
   }
 
-  (*response)[strings::params][strings::function_id] = function_id;
-  (*response)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*response)[strings::params][strings::function_id] = static_cast<int>(function_id);
+  (*response)[strings::params][strings::message_type] = static_cast<int>(MessageType::kResponse);
   (*response)[strings::msg_params][strings::success] = false;
-  (*response)[strings::msg_params][strings::result_code] = result;
+  (*response)[strings::msg_params][strings::result_code] = static_cast<int>(result);
   (*response)[strings::params][strings::correlation_id] = correlation_id;
   (*response)[strings::params][strings::connection_key] = connection_key;
   (*response)[strings::params][strings::protocol_type] =
@@ -650,41 +650,35 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
       ToCommonLanguage(app->language());
   const HMICapabilities& hmi_capabilities =
   ApplicationManagerImpl::instance()->hmi_capabilities();
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_vr_language()
-      != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
           app->app_id());
 
-    if (!vr_command) {
-      return;
+    if (vr_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_tts_language() != app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* tts_command = CreateChangeRegistration(
           hmi_apis::FunctionID::TTS_ChangeRegistration, app->language(),
           app->app_id());
 
-    if (!tts_command) {
-      return;
+    if (tts_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(tts_command);
   }
 
-  if (mobile_apis::Language::INVALID_ENUM != app->language() &&
-      hmi_capabilities.active_ui_language()!= app_common_language) {
+  if (mobile_apis::Language::INVALID_ENUM != app->ui_language()) {
     smart_objects::SmartObject* ui_command = CreateChangeRegistration(
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
 
-    if (!ui_command) {
-      return;
+if (ui_command) {
+      ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
     }
-    ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
+
   }
 }
 
@@ -1090,7 +1084,7 @@ void MessageHelper::SendAudioStartStream(
 
   (*start_stream)[strings::msg_params] = msg_params;
 
-  ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
+  IGNORE_RETURN ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {

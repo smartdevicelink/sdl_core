@@ -495,7 +495,12 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
     }
   }
 
-  msg_params[strings::timeout] = default_timeout_/2;
+  if (mobile_apis::InteractionMode::BOTH == mode ||
+      mobile_apis::InteractionMode::MANUAL_ONLY == mode) {
+    msg_params[strings::timeout] = default_timeout_/2;
+  } else {
+    msg_params[strings::timeout] = default_timeout_;
+  }
   msg_params[strings::app_id] = app->app_id();
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[strings::choice_set] = smart_objects::SmartObject(

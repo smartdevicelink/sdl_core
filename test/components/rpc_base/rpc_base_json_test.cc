@@ -140,7 +140,7 @@ TEST(ValidatedTypesJson, FloatFromInvalidJsonTest) {
 
 TEST(ValidatedTypesJson, StringFromJsonTest) {
   Value str_val("Hello");
-  String<42> str(str_val);
+  String<1, 42> str(str_val);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_TRUE(str.is_valid());
   Value readback = str.ToJsonValue();
@@ -150,14 +150,14 @@ TEST(ValidatedTypesJson, StringFromJsonTest) {
 
 TEST(ValidatedTypesJson, StringFromInvalidJsonTest) {
   Value int_val(42);
-  String<500> str(int_val);
+  String<1, 500> str(int_val);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_FALSE(str.is_valid());
 }
 
 TEST(ValidatedTypesJson, StringFromToLongJsonString) {
   Value str_val("Too long string");
-  String<5> str(str_val);
+  String<1, 5> str(str_val);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_FALSE(str.is_valid());
 }
@@ -183,7 +183,7 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
   Value array_value;
   array_value.append(Value("haha"));
   array_value.append(Value("hoho"));
-  Array<String<32>, 2, 5> arr(array_value);
+  Array<String<1, 32>, 2, 5> arr(array_value);
   ASSERT_TRUE(arr.is_initialized());
   ASSERT_TRUE(arr.is_valid());
   Value readback = arr.ToJsonValue();

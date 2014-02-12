@@ -287,8 +287,8 @@ void MediaManagerImpl::OnMobileMessageSent(
 void MediaManagerImpl::FramesProcessed(int32_t application_key,
                                        int32_t frame_number) {
   if (protocol_handler_) {
-    protocol_handler_->SendFramesNumber(application_key,
-                                        frame_number);
+    /*protocol_handler_->SendFramesNumber(application_key,
+                                        frame_number);*/
   }
 }
 

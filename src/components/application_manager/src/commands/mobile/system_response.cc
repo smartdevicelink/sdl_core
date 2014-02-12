@@ -31,43 +31,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_RESPONSE_H_
-
-#include "application_manager/commands/command_response_impl.h"
-
+#include "application_manager/commands/mobile/system_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief SystemRequestResponse command class
- **/
-class SystemRequestResponse : public CommandResponseImpl {
- public:
-  /**
-   * @brief SystemRequestResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit SystemRequestResponse(const MessageSharedPtr& message);
+SystemResponse::SystemResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
+}
 
-  /**
-   * @brief SystemRequestResponse class destructor
-   **/
-  virtual ~SystemRequestResponse();
+SystemResponse::~SystemResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void SystemResponse::Run() {
+  LOG4CXX_INFO(logger_, "SystemResponse::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(SystemRequestResponse);
-};
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_SYSTEM_REQUEST_RESPONSE_H_
+}  // namespace application_manager
