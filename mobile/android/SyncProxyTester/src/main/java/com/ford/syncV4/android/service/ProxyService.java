@@ -10,15 +10,12 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -29,6 +26,7 @@ import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.receivers.SyncReceiver;
+import com.ford.syncV4.android.service.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -107,8 +105,6 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
-import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -122,11 +118,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Vector;
 
-public class ProxyService extends Service implements IProxyListenerALMTesting,
-        IOnSystemRequestHandler {
+public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     static final String TAG = "SyncProxyTester";
 
@@ -353,7 +347,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
                         /*preRegister*/ false,
                         versionNumber,
                         config);
-                mSyncProxy.setOnSystemRequestHandler(this);
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -363,6 +356,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
                 }
             }
         }
+
+        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapter);
+
+        mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
+
         createInfoMessageForAdapter("ProxyService.startProxy() complete");
         Log.i(TAG, ProxyService.class.getSimpleName() + " Start Proxy complete:" + mSyncProxy);
 
@@ -1951,64 +1949,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
                 Log.i(TAG, messageObject.toString());
             }
         }
-    }
-
-    @Override
-    public void onPolicyTableSnapshotRequest(byte[] data) {
-        createDebugMessageForAdapter("Policy Table Snapshot download request");
-
-        final byte[] fileData = AppUtils.contentsOfResource(R.raw.policy_table_shanpshot);
-
-        String mTMPFilePath = Environment.getExternalStorageDirectory() +
-                "/policyTableSnapshot.json";
-
-        boolean result = AppUtils.saveDataToFile(fileData, mTMPFilePath);
-        if (result) {
-            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' successfully saved");
-        } else {
-            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' could not be save");
-        }
-
-
-    }
-
-    @Override
-    public void onFilesDownloadRequest(final ISystemRequestProxy proxy,
-                                       List<String> urls, FileType fileType) {
-        createDebugMessageForAdapter("files download request");
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                final byte[] data = AppUtils.contentsOfResource(R.raw.audio_short);
-                try {
-                    proxy.putSystemFile("system.update", data,
-                            FileType.AUDIO_WAVE);
-                } catch (SyncException e) {
-                    createErrorMessageForAdapter("Can't upload system file", e);
-                }
-            }
-        }, 500);
-    }
-
-    @Override
-    public void onFileResumeRequest(final ISystemRequestProxy proxy,
-                                    String filename, final Integer offset,
-                                    final Integer length, FileType fileType) {
-        createDebugMessageForAdapter("files resume request");
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                final byte[] data = Arrays.copyOfRange(
-                        AppUtils.contentsOfResource(R.raw.audio_short), offset,
-                        offset + length);
-                try {
-                    proxy.putSystemFile("system.update", data, offset,
-                            FileType.AUDIO_WAVE);
-                } catch (SyncException e) {
-                    createErrorMessageForAdapter("Can't upload system file", e);
-                }
-            }
-        }, 500);
     }
 
     @Override
