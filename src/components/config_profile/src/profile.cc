@@ -33,7 +33,6 @@
 #include "config_profile/profile.h"
 
 #include <string.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "config_profile/ini_file.h"

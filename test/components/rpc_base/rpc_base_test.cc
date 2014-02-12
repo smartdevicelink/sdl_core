@@ -31,7 +31,9 @@
  */
 
 #include "gtest/gtest.h"
+#include "json/writer.h"
 #include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_json_inl.h"
 
 
 namespace test {
@@ -188,6 +190,15 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   ASSERT_TRUE(arr.is_valid());
 }
 
+TEST(ValidatedTypes, TestEmptyArray) {
+  Array<Integer<int8_t, 0, 10>, 0, 5> ai;
+  ASSERT_TRUE(ai.is_valid());
+  ASSERT_FALSE(ai.is_initialized());
+  Json::FastWriter fw;
+  std::string serialized = fw.write(ai.ToJsonValue());
+  ASSERT_EQ(serialized, "[]\n");
+}
+
 TEST(ValidatedTypes, TestMap) {
   Map<String<1, 6>, 2, 10> map;
   ASSERT_FALSE(map.is_initialized());
@@ -207,6 +218,15 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   Map<String<1, 6>, 2, 10 > map(init_map);
   ASSERT_TRUE(map.is_initialized());
   ASSERT_TRUE(map.is_valid());
+}
+
+TEST(ValidatedTypes, TestEmptyMap) {
+  Map<Integer<int8_t, 0, 10>, 0, 5> im;
+  ASSERT_TRUE(im.is_valid());
+  ASSERT_FALSE(im.is_initialized());
+  Json::FastWriter fw;
+  std::string serialized = fw.write(im.ToJsonValue());
+  ASSERT_EQ(serialized, "{}\n");
 }
 
 TEST(ValidatedTypes, TestEnumConstructor) {

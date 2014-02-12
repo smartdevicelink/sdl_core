@@ -172,6 +172,7 @@ class String : public PrimitiveType {
   // Methods
   String();
   explicit String(const std::string& value);
+  explicit String(const char* value);
   explicit String(const Json::Value& value);
   String(const Json::Value& value, const std::string& def_value);
   String& operator=(const std::string& new_val);

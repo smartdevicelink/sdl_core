@@ -33,6 +33,8 @@ TEST_F(GeneratedInterfaceTests, FunctionWithoutParams) {
   notification::OnAudioPassThru oapt;
   ASSERT_FALSE(oapt.is_initialized());
   ASSERT_TRUE(oapt.is_valid());
+  std::string serialized = writer.write(oapt.ToJsonValue());
+  ASSERT_EQ("{}\n", serialized);
 }
 
 TEST_F(GeneratedInterfaceTests, DefValueTest) {

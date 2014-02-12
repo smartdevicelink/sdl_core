@@ -164,7 +164,7 @@ bool PoliciesManager::Init() {
         hmi_levels.push_back(kHmiLevels[levels[j].asString()]);
       }
 
-      items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels));
+      IGNORE_RETURN items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels));
     }
   } catch (...) {
     return false;

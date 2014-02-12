@@ -42,10 +42,7 @@
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
-#include <string>
-#include <sstream>
 #include "config_profile/profile.h"
-#include <errno.h>
 
 uint64_t file_system::GetAvailableDiskSpace() {
   char currentAppPath[FILENAME_MAX];
@@ -359,7 +356,7 @@ bool file_system::ReadBinaryFile(const std::string& name,
   const std::string& s = ss.str();
 
   result.resize(s.length());
-  std::copy(s.begin(), s.end(), result.begin());
+  IGNORE_RETURN std::copy(s.begin(), s.end(), result.begin());
   return true;
 }
 
