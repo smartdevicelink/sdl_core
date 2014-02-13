@@ -309,7 +309,7 @@
   <element name="INITIAL_JINGLE" />
   <element name="LISTEN_JINGLE" />
   <element name="POSITIVE_JINGLE" />
-  <element name="NEGATIVE_JINGLE" />    
+  <element name="NEGATIVE_JINGLE" />
 </enum>
 
 <enum name="TBTState">
