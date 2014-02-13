@@ -223,6 +223,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_APP_VERSION = 15;
     private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
     private final int MNU_WAKELOCK = 17;
+    private final int MNU_SET_UP_POLICY_FILES = 18;
     private ModuleTest _testerMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
@@ -332,6 +333,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
     private final static String APP_SETUP_DIALOG_TAG = "AppSetupDialogTag";
+    private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
 
     private SyncReceiver mSyncReceiver;
@@ -779,6 +781,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
             menu.add(0, XML_TEST, 0, "XML Test");
             menu.add(0, POLICIES_TEST, 0, "Policies Test");
+            menu.add(0, MNU_SET_UP_POLICY_FILES, 0, "Set Up Policy files");
             MenuItem menuitem = menu.add(0, MNU_WAKELOCK, 0, "Lock screen while testing");
             menuitem.setCheckable(true);
             menuitem.setChecked(!getDisableLockFlag());
@@ -846,6 +849,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (_ESN != null) PoliciesTesterActivity.setESN(_ESN);
                 }
                 //PoliciesTest.runPoliciesTest();
+                break;
+            case MNU_SET_UP_POLICY_FILES:
+                DialogFragment mPolicyFilesSetUpDialog = PolicyFilesSetUpDialog.newInstance();
+                mPolicyFilesSetUpDialog.show(getFragmentManager(), POLICY_FILES_SETUP_DIALOG_TAG);
                 break;
             case MNU_EXIT:
                 stopProxyServiceOnExit();

@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="10dip"
     android:layout_marginRight="10dip"
-    android:minWidth="300px"
+    android:minWidth="300dp"
     android:orientation="vertical"
     android:paddingLeft="20dip"
     android:paddingRight="20dip" >
@@ -14,7 +13,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="Local File Name"
+        android:text="Local Policy Update File Name"
         android:textStyle="bold" />
 
     <LinearLayout
@@ -23,43 +22,22 @@
         android:layout_weight="1" >
 
         <EditText
-            android:id="@+id/putfile_localFileName"
+            android:id="@+id/policy_update_local_file_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:ems="10"
             android:freezesText="true"
             android:visibility="visible" >
-
             <requestFocus />
         </EditText>
 
         <Button
-            android:id="@+id/putfile_selectFileButton"
+            android:id="@+id/policy_update_select_file_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="…" />
-
     </LinearLayout>
-    
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="File Name">
-    </TextView>
-    <EditText android:text="syncFileName" android:id="@+id/syncFileName"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="File Type">
-    </TextView>
-    <Spinner android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/spnFileType">
-    </Spinner>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkPersistentFile"
-        android:text="Persistent File?" android:checked="false">
-    </CheckBox>
+
 </LinearLayout>
