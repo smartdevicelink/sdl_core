@@ -75,6 +75,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/generic_response.cc
 ./src/commands/mobile/get_dtcs_request.cc
 ./src/commands/mobile/get_dtcs_response.cc
+./src/commands/mobile/diagnostic_message_request.cc
+./src/commands/mobile/diagnostic_message_response.cc
 ./src/commands/mobile/get_vehicle_data_request.cc
 ./src/commands/mobile/get_vehicle_data_response.cc
 ./src/commands/mobile/list_files_request.cc
@@ -249,6 +251,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_read_did_response.cc
 ./src/commands/hmi/vi_get_dtcs_request.cc
 ./src/commands/hmi/vi_get_dtcs_response.cc
+./src/commands/hmi/vi_diagnostic_message_request.cc
+./src/commands/hmi/vi_diagnostic_message_response.cc
 ./src/commands/hmi/vi_get_vehicle_type_request.cc
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc

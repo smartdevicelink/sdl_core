@@ -125,6 +125,8 @@
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
 #include "application_manager/commands/mobile/on_system_request_notification.h"
+#include "application_manager/commands/mobile/diagnostic_message_request.h"
+#include "application_manager/commands/mobile/diagnostic_message_response.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -457,6 +459,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::GetDTCsResponse(message));
       } else {
         command.reset(new commands::GetDTCsRequest(message));
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::DiagnosticMessageID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::DiagnosticMessageResponse(message));
+      } else {
+        command.reset(new commands::DiagnosticMessageRequest(message));
       }
       break;
     }

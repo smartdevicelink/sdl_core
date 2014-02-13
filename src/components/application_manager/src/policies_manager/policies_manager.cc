@@ -71,6 +71,8 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "GetVehicleData", FunctionID::GetVehicleDataID },
   { "ReadDID", FunctionID::ReadDIDID },
   { "GetDTCs", FunctionID::GetDTCsID },
+  { "DiagnosticMessage", FunctionID::DiagnosticMessageID },
+  { "SystemRequest", FunctionID::SystemRequestID },
   { "ScrollableMessage", FunctionID::ScrollableMessageID },
   { "Slider", FunctionID::SliderID },
   { "ShowConstantTBT", FunctionID::ShowConstantTBTID },
