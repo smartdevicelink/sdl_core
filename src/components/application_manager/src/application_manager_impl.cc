@@ -1468,9 +1468,6 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 
-ResumeCtrl* ApplicationManagerImpl::GetResumeController() {
-  return &resume_controler;
-}
 
 void ApplicationManagerImpl::Mute() {
   mobile_apis::AudioStreamingState::eType state =

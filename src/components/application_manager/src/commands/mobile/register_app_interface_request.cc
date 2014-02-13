@@ -143,10 +143,7 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
 
-    ResumeCtrl* resume_ctrl = ApplicationManagerImpl::instance()->GetResumeController();
-
-    bool resumption = resume_ctrl->StartResumption(app);
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, resumption);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, false);
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }

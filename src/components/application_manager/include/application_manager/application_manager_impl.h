@@ -428,7 +428,6 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const std::string& save_path,
                                 const uint32_t offset = 0);
 
-    ResumeCtrl* GetResumeController();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
