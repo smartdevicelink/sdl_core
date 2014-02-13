@@ -36,6 +36,7 @@
 #include <cctype>
 #include <memory>
 
+#include "model/interface.h"
 #include "utils/string_utils.h"
 
 using std::string;
@@ -200,6 +201,14 @@ string WordList::Abbreviate() const {
     res += (*i)[0];
   }
   return res;
+}
+
+std::string LowercaseIntefaceName(const Interface& interface) {
+  return WordList::FromUnknown(interface.name()).ToLowerCase();
+}
+
+std::string InterfaceNamespaceName(const Interface& interface) {
+  return LowercaseIntefaceName(interface);
 }
 
 }  // namespace codegen

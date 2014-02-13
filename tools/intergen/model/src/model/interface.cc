@@ -57,12 +57,17 @@ namespace codegen {
 class ModelFilter;
 
 Interface::Interface(const API* api,
+                     bool auto_generate_function_ids,
                      BuiltinTypeRegistry* builtin_type_registry,
                      const ModelFilter* model_filter)
     : api_(api),
       builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
-      type_registry_(this, builtin_type_registry_, model_filter),
+      auto_generate_function_ids_(auto_generate_function_ids),
+      type_registry_(this,
+                     builtin_type_registry_,
+                     model_filter,
+                     auto_generate_function_ids_),
       requests_deleter_(&requests_),
       responses_deleter_(&responses_),
       notifications_deleter_(&notifications_) {
@@ -125,7 +130,25 @@ const Enum* Interface::function_id_enum() const {
   return type_registry_.GetFunctionIDEnum();
 }
 
-bool codegen::Interface::AddFunctions(const pugi::xml_node& xml_interface) {
+const Enum::Constant* Interface::GetFunctionIdEnumConstant(
+    const std::string& function_id) {
+  Enum* func_id_enum = type_registry_.GetFunctionIDEnum();
+  if (!func_id_enum) {
+    strmfmt(std::cerr, "Interface {0} has no FunctionID enum specified",
+            name_) << '\n';
+    return NULL;
+  }
+
+  const Constant* func_id = func_id_enum->ConstantFor(function_id);
+  if (!func_id && auto_generate_function_ids_) {
+    bool added = func_id_enum->AddConstant(function_id, Scope(), "", Description(), "");
+    assert(added);
+    func_id = func_id_enum->ConstantFor(function_id);
+  }
+  return static_cast<const Enum::Constant*>(func_id);
+}
+
+bool Interface::AddFunctions(const pugi::xml_node& xml_interface) {
   for (pugi::xml_node i = xml_interface.child("function"); i; i =
       i.next_sibling("function")) {
     std::string message_type_str = i.attribute("messagetype").value();
@@ -165,21 +188,29 @@ bool Interface::AddFunctionMessage(MessagesMap* list,
     return true;
   }
   std::string name = xml_message.attribute("name").value();
-  std::string func_id_str = xml_message.attribute("functionID").value();
   if (name.empty()) {
     std::cerr << "Message with empty function name found\n";
     return false;
   }
-  if (func_id_str.empty()) {
-    std::cerr << "Message with empty functionID found\n";
-    return false;
+
+  std::string func_id_str;
+  if (auto_generate_function_ids_) {
+    if (!xml_message.attribute("functionID").empty()) {
+      strmfmt(std::cerr,
+              "Auto generation of function IDs is requested "
+              "but function {0} has funcitionID specified",
+              name) << '\n';
+      return false;
+    }
+    func_id_str = name + "ID";
+  } else {
+    func_id_str = xml_message.attribute("functionID").value();
+    if (func_id_str.empty()) {
+      std::cerr << "Message with empty functionID found\n";
+      return false;
+    }
   }
-  const Enum* func_id_enum = type_registry_.GetFunctionIDEnum();
-  if (!func_id_enum) {
-    return false;
-  }
-  const Enum::Constant* func_id = static_cast<const Enum::Constant*>(func_id_enum
-      ->ConstantFor(func_id_str));
+  const Enum::Constant* func_id = GetFunctionIdEnumConstant(func_id_str);
   if (!func_id) {
     std::cerr << "Function " << name << " has invalid functionID: "
               << func_id_str << std::endl;

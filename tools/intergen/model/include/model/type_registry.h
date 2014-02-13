@@ -59,7 +59,7 @@ class TypeRegistry {
  public:
   // Types
   typedef std::list<Enum*> EnumList;
-  typedef std::map<std::string, const Enum*> EnumByName;
+  typedef std::map<std::string, Enum*> EnumByName;
   typedef std::list<Struct*> StructList;
   typedef std::map<std::string, const Struct*> StructByName;
   typedef std::list<Typedef*> TypedefList;
@@ -68,7 +68,8 @@ class TypeRegistry {
   // Methods
   TypeRegistry(const Interface* interface,
                BuiltinTypeRegistry* builtin_type_registry,
-               const ModelFilter* model_filter);
+               const ModelFilter* model_filter,
+               bool create_function_id_enum);
   ~TypeRegistry();
   // Follows given xml_node collectin all the struct and enum definitons
   // Returns false and prints to cerr if invalid type definition was found
@@ -83,7 +84,7 @@ class TypeRegistry {
   const Type* GetType(const std::string& name) const;
   // Get reserved enum that contains function ID's
   // returns NULL if FunctionID is not registered
-  const Enum* GetFunctionIDEnum() const;
+  Enum* GetFunctionIDEnum() const;
   // Returns list of all enums keeping order of definitions in xml
   const EnumList& enums() const;
   // Returns list of all structs keeping order of definitions in xml

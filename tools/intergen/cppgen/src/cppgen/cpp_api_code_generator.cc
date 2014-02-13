@@ -59,8 +59,7 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
   for (std::vector<Interface*>::const_iterator i = interfaces.begin(), end =
       interfaces.end(); i != end; ++i) {
     const Interface* intf = *i;
-    std::string interface_name =
-        WordList::FromUnknown(intf->name()).ToLowerCase();
+    std::string interface_name = LowercaseIntefaceName(*intf);
     if (!required_interfaces.empty()) {
       // If interface list provided, skip unneeded interfaces
       if (required_interfaces.count(interface_name) == 0) {
@@ -68,7 +67,7 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
       }
     }
 
-    if (GenerateInterface(intf, interface_name)) {
+    if (GenerateInterface(intf)) {
       // Mark this interface as sucessfully generated
       problematic_interafces.erase(interface_name);
     }
@@ -76,9 +75,8 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
   return problematic_interafces;
 }
 
-bool CppApiCodeGenerator::GenerateInterface(const Interface* interface,
-                                            const std::string& name) {
-  ModuleManager mgr(name);
+bool CppApiCodeGenerator::GenerateInterface(const Interface* interface) {
+  ModuleManager mgr(LowercaseIntefaceName(*interface));
   CppInterfaceCodeGenerator interface_generator(interface, &mgr);
   interface_generator.GenerateCode();
   return mgr.Write();

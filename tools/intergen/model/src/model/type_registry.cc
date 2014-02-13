@@ -56,7 +56,8 @@ namespace codegen {
 
 TypeRegistry::TypeRegistry(const Interface* interface,
                            BuiltinTypeRegistry* builtin_type_registry,
-                           const ModelFilter* model_filter)
+                           const ModelFilter* model_filter,
+                           bool create_function_id_enum)
     : interface_(interface),
       builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
@@ -65,6 +66,15 @@ TypeRegistry::TypeRegistry(const Interface* interface,
       typedefs_deleter_(&typedefs_) {
   assert(builtin_type_registry_);
   assert(model_filter_);
+  if (create_function_id_enum) {
+    enums_.push_back(
+          new Enum(interface_,
+                   kFunctionIdEnumName,
+                   Scope(),
+                   InternalScope(),
+                   Description()));
+    enum_by_name_[kFunctionIdEnumName] = enums_.back();
+  }
 }
 
 bool TypeRegistry::init(const pugi::xml_node& xml) {
@@ -117,7 +127,7 @@ const TypeRegistry::TypedefList& TypeRegistry::typedefs() const {
   return typedefs_;
 }
 
-const Enum* TypeRegistry::GetFunctionIDEnum() const {
+Enum* TypeRegistry::GetFunctionIDEnum() const {
   EnumByName::const_iterator res = enum_by_name_.find(kFunctionIdEnumName);
   if (res != enum_by_name_.end()) {
     return res->second;

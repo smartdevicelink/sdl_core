@@ -230,6 +230,7 @@ Struct::Struct(const Interface* interface,
       name_(name),
       scope_(scope),
       description_(description) {
+  assert(interface_);
 }
 
 Struct::~Struct() {
@@ -276,6 +277,10 @@ const Type* Struct::Field::type() const {
   return type_;
 }
 
+const Interface& Struct::interface() const {
+  return *interface_;
+}
+
 const std::string& Struct::name() const {
   return name_;
 }
@@ -312,10 +317,16 @@ Typedef::Typedef(const Interface* interface,
       name_(name),
       type_(type),
       description_(description) {
+  assert(interface_);
 }
 
 const Description& Typedef::description() const {
   return description_;
+}
+
+
+const Interface& Typedef::interface() const {
+  return *interface_;
 }
 
 const std::string& Typedef::name() const {

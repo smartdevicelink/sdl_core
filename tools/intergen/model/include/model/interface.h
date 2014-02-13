@@ -34,6 +34,7 @@
 #define INTERFACE_H_
 
 #include <vector>
+#include <memory>
 
 #include "model/function.h"
 #include "model/type_registry.h"
@@ -67,6 +68,7 @@ class Interface {
  public:
   // Methods
   Interface(const API* api,
+            bool auto_generate_function_ids,
             BuiltinTypeRegistry* builtin_type_registry,
             const ModelFilter* model_filter);
   ~Interface();
@@ -89,6 +91,8 @@ class Interface {
  private:
   // Methods
 
+  const Enum::Constant* GetFunctionIdEnumConstant(
+      const std::string& function_id);
   // Find and add all the functions from the given |xml_interafce|
   bool AddFunctions(const pugi::xml_node& xml_interface);
   // Validate and add single function message
@@ -105,6 +109,7 @@ class Interface {
   const API* api_;
   BuiltinTypeRegistry* builtin_type_registry_;
   const ModelFilter* model_filter_;
+  bool auto_generate_function_ids_;
   TypeRegistry type_registry_;
   MessagesMap requests_;
   utils::StdMapDeleter<MessagesMap> requests_deleter_;
@@ -115,6 +120,8 @@ class Interface {
   FunctionsList functions_list_;
   ResponseList generic_responses_list_;
   NotificationList notifications_list_;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(Interface);
 };
 
 }  // namespace codegen

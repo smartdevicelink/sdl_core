@@ -50,18 +50,27 @@ using std::cerr;
  */
 struct Options {
   char* interface_xml;
+  bool  auto_generate_function_ids;
   std::set<std::string> requested_interfaces;
   std::set<std::string> excluded_scopes;
   Options()
-      : interface_xml(NULL) {
+      : interface_xml(NULL),
+        auto_generate_function_ids(false) {
   }
 };
 
 void Usage() {
-  cout << "Interface generator" << '\n'
-       << "Usage: intergen -f <interface definition xml>"
-       << " -i <interface_name> [-i <another_interface_name>]"
-       << " -s <excluded_scope_name> [-s <another_excluded_scope_name>]" <<'\n';
+  cout << "Interface generator\n"
+       << "Usage: intergen -f <xml_file> <options>\n"
+       << "Options are:\n"
+       << "  -f <xml_file>       Specifies interface definition input xml file\n"
+       << "  -i <interface_name> Specifies interface name from given xml file.\n"
+       << "                      Must be given as a lower_case_identifier.\n"
+       << "                      Option can occur multiple times to select\n"
+       << "                      multiple interfaces.\n"
+       << "  -s <scope_name>     Excludes entities marked with given scope from\n"
+       << "                      generated code. Can occur multiple times.\n"
+       << "  -a                  Automatically generates function ID enum.\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -70,7 +79,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
   Options options;
-  const char* opts = "f:i:s:";
+  const char* opts = "af:i:s:";
   for (int opt = getopt(argc, argv, opts); opt != -1;
       opt = getopt(argc, argv, opts)) {
     switch (opt) {
@@ -90,6 +99,10 @@ int main(int argc, char* argv[]) {
         options.excluded_scopes.insert(optarg);
         break;
       }
+      case 'a': {
+        options.auto_generate_function_ids = true;
+        break;
+      }
       default: {
         cerr << "Invalid option: '" << opt << "'" << '\n';
         return EXIT_FAILURE;
@@ -105,7 +118,7 @@ int main(int argc, char* argv[]) {
   pugi::xml_parse_result result = doc.load_file(options.interface_xml);
   if (result) {
     codegen::ModelFilter model_filter(options.excluded_scopes);
-    codegen::API api(&model_filter);
+    codegen::API api(&model_filter, options.auto_generate_function_ids);
     if (api.init(doc)) {
       codegen::CppApiCodeGenerator cpp_code_generator(&api);
       std::set<std::string> bad = cpp_code_generator.Generate(

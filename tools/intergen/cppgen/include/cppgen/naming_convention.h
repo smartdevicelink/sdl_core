@@ -37,6 +37,7 @@
 #include <vector>
 
 namespace codegen {
+class Interface;
 
 /*
  * Helper class that constructs word list from a sentence or
@@ -71,6 +72,11 @@ class WordList {
   void Normalize();
   std::vector<std::string> words_;
 };
+
+// Translate interface name to lower case
+std::string LowercaseIntefaceName(const Interface& interface);
+
+std::string InterfaceNamespaceName(const Interface& interface);
 
 }  // namespace codegen
 

@@ -52,7 +52,7 @@ class ModelFilter;
  */
 class API {
  public:
-  API(const ModelFilter* model_filter);
+  API(const ModelFilter* model_filter, bool auto_generate_func_ids);
   // Follows parsed |xmldoc| collecting and validating API definitions
   // Returns false and prints to cerr on error
   bool init(const pugi::xml_document& xmldoc);
@@ -73,6 +73,7 @@ class API {
  private:
   // Fields
   const ModelFilter* model_filter_;
+  bool auto_generate_func_ids_;
   BuiltinTypeRegistry builtin_type_registry_;
   std::vector<Interface*> interfaces_;
   utils::StdContainerDeleter<std::vector<Interface*> > interfaces_deleter_;

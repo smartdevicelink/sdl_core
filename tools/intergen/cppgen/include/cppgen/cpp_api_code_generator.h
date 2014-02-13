@@ -56,7 +56,7 @@ class CppApiCodeGenerator {
                                  required_interfaces);
  private:
   // Produces code for single interface
-  bool GenerateInterface(const Interface* interface, const std::string& name);
+  bool GenerateInterface(const Interface* interface);
  private:
   const API* api_;
 };

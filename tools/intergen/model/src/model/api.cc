@@ -40,8 +40,9 @@
 
 namespace codegen {
 
-API::API(const ModelFilter* model_filter)
+API::API(const ModelFilter* model_filter, bool auto_generate_func_ids)
     : model_filter_(model_filter),
+      auto_generate_func_ids_(auto_generate_func_ids),
       interfaces_deleter_(&interfaces_) {
   assert(model_filter_);
 }
@@ -80,6 +81,7 @@ bool API::AddInterfaces(const pugi::xml_node& xmldoc) {
   for (pugi::xml_node i = xmldoc.child("interface"); i;
       i = i.next_sibling("interface")) {
     Interface* interface = new Interface(this,
+                                         auto_generate_func_ids_,
                                          &builtin_type_registry_,
                                          model_filter_);
     interfaces_.push_back(interface);

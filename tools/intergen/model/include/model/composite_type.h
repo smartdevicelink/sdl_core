@@ -154,6 +154,7 @@ class Struct : public Type {
          const std::string& name, Scope scope,
          const Description& description);
   ~Struct();
+  const Interface& interface() const;
   const std::string& name() const;
   const Description& description() const;
   const FieldsList& fields() const;
@@ -216,6 +217,7 @@ class Typedef : public Type {
   virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
   virtual const ConstantsCreator* SupportsConstants() const;
   const Description& description() const;
+  const Interface& interface() const;
   const std::string& name() const;
   const Type* type() const;
 
