@@ -5,8 +5,11 @@ import android.util.Log;
 
 import com.ford.syncV4.android.MainApp;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,5 +91,31 @@ public class AppUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Read a File and return bytes array
+     * @param file
+     * @return
+     */
+    public static byte[] readDataFromFile(File file) {
+        int size = (int) file.length();
+        byte[] bytes = new byte[size];
+        BufferedInputStream bufferedInputStream = null;
+        try {
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            bufferedInputStream.read(bytes, 0, bytes.length);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return bytes;
     }
 }

@@ -18,29 +18,37 @@ import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
+import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
 
 import org.hamcrest.core.IsNull;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Vector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -95,34 +103,36 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
     }
 
     public void testOnSystemRequestWithPTS() throws Exception {
-        final List<String> urls = Arrays.asList("http://policy.table.snapshot.json");
         final FileType fileType = FileType.JSON;
-        final int bytesLength = 256;
+        final int extraDataSize = 10;
+        final int dataSize = (maxDataSize * 2) + extraDataSize;
+        final byte[] dataSnapshot = TestCommon.getRandomBytes(dataSize);
+
+        final String filename = "PolicyTableUpdate";
 
         IOnSystemRequestHandler handlerMock = mock(IOnSystemRequestHandler.class);
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-                /*final ISystemRequestProxy proxy =
-                        (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putSystemFile(filename, data, fileType);*/
                 assertNotNull(invocationOnMock.getArguments());
-                assertEquals(1, invocationOnMock.getArguments().length);
-
-                byte[] data = (byte[]) invocationOnMock.getArguments()[0];
+                assertEquals(2, invocationOnMock.getArguments().length);
+                byte[] data = (byte[]) invocationOnMock.getArguments()[1];
                 assertNotNull(data);
-                assertEquals(bytesLength, data.length);
-                Log.d(TAG, "Policy Table Snapshot download request TEST:" + data.length);
+                assertEquals(dataSize, data.length);
+
+                final ISystemRequestProxy proxy =
+                        (ISystemRequestProxy) invocationOnMock.getArguments()[0];
+                proxy.putPolicyTableUpdateFile(filename, data);
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(new byte[bytesLength]);
+          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot));
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP
         OnSystemRequest onSystemRequest = new OnSystemRequest();
         onSystemRequest.setRequestType(RequestType.HTTP);
-        onSystemRequest.setUrl(new Vector<String>(urls));
+        onSystemRequest.setBulkData(dataSnapshot);
         onSystemRequest.setFileType(fileType);
 
         ProtocolMessage incomingOnSysRequest = createNotificationProtocolMessage(onSystemRequest,
@@ -132,39 +142,38 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         // wait for processing
         Thread.sleep(WAIT_TIMEOUT);
 
-        // expect the first part of PutFile to be sent
-        /*ArgumentCaptor<ProtocolMessage> pmCaptor0 = ArgumentCaptor.forClass(ProtocolMessage.class);
-        verify(connectionMock, times(1)).sendMessage(pmCaptor0.capture());
+        // expect PutFile to be sent
+        ArgumentCaptor<ProtocolMessage> argumentCaptor = ArgumentCaptor.forClass(ProtocolMessage.class);
+        verify(connectionMock, times(1)).sendMessage(argumentCaptor.capture());
 
         // set another connection mock to be able to verify the second time below
-        final SyncConnection connectionMock2 = createNewSyncConnectionMock();
-        setSyncConnection(proxy, connectionMock2);
+        //final SyncConnection connectionMock2 = createNewSyncConnectionMock();
+        //setSyncConnection(proxy, connectionMock2);
 
-        final ProtocolMessage pm0 = pmCaptor0.getValue();
-        assertThat(pm0.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm0.getData(), 0, maxDataSize, filename, fileType);
-        final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
-        assertThat(pm0.getBulkData(), is(data0));
-        final int putFileRequestCorrID = pm0.getCorrID();
+        final ProtocolMessage protocolMessage = argumentCaptor.getValue();
+        assertThat(protocolMessage.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        checkPutFileJSON(protocolMessage.getData(), fileType);
+        final byte[] data = Arrays.copyOfRange(dataSnapshot, 0, maxDataSize);
+        assertThat(protocolMessage.getBulkData(), is(data));
+        final int putFileRequestCorrID = protocolMessage.getCorrID();
 
         // the listener should not be called for OnSystemRequest
         verifyZeroInteractions(proxyListenerMock);
 
-        // emulate incoming PutFile response for first part
-        PutFileResponse putFileResponse1 = new PutFileResponse();
-        putFileResponse1.setResultCode(Result.SUCCESS);
-        putFileResponse1.setCorrelationID(putFileRequestCorrID);
+        // emulate incoming PutFile response
+        PutFileResponse putFileResponse = new PutFileResponse();
+        putFileResponse.setResultCode(Result.SUCCESS);
+        putFileResponse.setCorrelationID(putFileRequestCorrID);
 
-        ProtocolMessage incomingPutFileResponsePM1 =
-                createResponseProtocolMessage(putFileResponse1,
+        ProtocolMessage incomingPutFileResponse = createResponseProtocolMessage(putFileResponse,
                         putFileRequestCorrID, PUTFILE_FUNCTIONID);
-        emulateIncomingMessage(proxy, incomingPutFileResponsePM1);
+        emulateIncomingMessage(proxy, incomingPutFileResponse);
 
         // wait for processing
         Thread.sleep(WAIT_TIMEOUT);
 
         // expect the second part of PutFile to be sent
-        ArgumentCaptor<ProtocolMessage> pmCaptor1 = ArgumentCaptor.forClass(ProtocolMessage.class);
+        /*ArgumentCaptor<ProtocolMessage> pmCaptor1 = ArgumentCaptor.forClass(ProtocolMessage.class);
         verify(connectionMock2, times(1)).sendMessage(pmCaptor1.capture());
 
         // set another connection mock to be able to verify the third time below
@@ -173,8 +182,8 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         final ProtocolMessage pm1 = pmCaptor1.getValue();
         assertThat(pm1.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm1.getData(), maxDataSize, maxDataSize, filename, fileType);
-        final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, maxDataSize * 2);
+        checkPutFileJSON(pm1.getData(), maxDataSize, maxDataSize, filename, fileType);
+        final byte[] data1 = Arrays.copyOfRange(dataSnapshot, maxDataSize, maxDataSize * 2);
         assertThat(pm1.getBulkData(), is(data1));
         assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
 
@@ -186,8 +195,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         putFileResponse2.setResultCode(Result.SUCCESS);
         putFileResponse2.setCorrelationID(putFileRequestCorrID);
 
-        ProtocolMessage incomingPutFileResponsePM2 =
-                createResponseProtocolMessage(putFileResponse2,
+        ProtocolMessage incomingPutFileResponsePM2 = createResponseProtocolMessage(putFileResponse2,
                         putFileRequestCorrID, PUTFILE_FUNCTIONID);
         emulateIncomingMessage(proxy, incomingPutFileResponsePM2);
 
@@ -201,9 +209,9 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         final ProtocolMessage pm2 = pmCaptor2.getValue();
         assertThat(pm2.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm2.getData(), maxDataSize * 2, extraDataSize,
+        checkPutFileJSON(pm2.getData(), maxDataSize * 2, extraDataSize,
                 filename, fileType);
-        final byte[] data2 = Arrays.copyOfRange(data, maxDataSize * 2,
+        final byte[] data2 = Arrays.copyOfRange(dataSnapshot, maxDataSize * 2,
                 (maxDataSize * 2) + extraDataSize);
         assertThat(pm2.getBulkData(), is(data2));
         assertThat(pm2.getCorrID(), is(putFileRequestCorrID));
@@ -223,14 +231,11 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         // wait for processing
         Thread.sleep(WAIT_TIMEOUT);
+        */
 
         // the listener should not be called for PutFile or OnSystemRequest
-        verify(proxyListenerMock, never()).onPutFileResponse(
-                any(PutFileResponse.class));
-        verify(proxyListenerMock, never()).onOnSystemRequest(
-                any(OnSystemRequest.class));
-
-        // phew, done*/
+        verify(proxyListenerMock, never()).onPutFileResponse(any(PutFileResponse.class));
+        verify(proxyListenerMock, never()).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
     // TODO check the rest is not sent after reconnect
@@ -258,13 +263,14 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         return incomingPM0;
     }
 
-    private ProtocolMessage createNotificationProtocolMessage(
-            RPCNotification notification, int functionID) {
+    private ProtocolMessage createNotificationProtocolMessage(RPCNotification notification,
+                                                              int functionID) {
         ProtocolMessage incomingPM0 = new ProtocolMessage();
         incomingPM0.setVersion(PROTOCOL_VERSION);
         byte[] msgBytes = marshaller.marshall(notification, PROTOCOL_VERSION);
-        incomingPM0.setData(msgBytes);
         incomingPM0.setJsonSize(msgBytes.length);
+        incomingPM0.setData(msgBytes);
+        incomingPM0.setBulkData(notification.getBulkData());
         incomingPM0.setMessageType(MessageType.RPC);
         incomingPM0.setSessionType(ServiceType.RPC);
         incomingPM0.setFunctionID(functionID);
@@ -281,31 +287,17 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         broker.onProtocolMessageReceived(protocolMessage);
     }
 
-    private void setSyncConnection(SyncProxyALM proxy,
-                                   SyncConnection connection)
+    private void setSyncConnection(SyncProxyALM proxy, SyncConnection connection)
             throws NoSuchFieldException, IllegalAccessException {
-        final Field syncConnection =
-                SyncProxyBase.class.getDeclaredField("mSyncConnection");
+        final Field syncConnection = SyncProxyBase.class.getDeclaredField("mSyncConnection");
         syncConnection.setAccessible(true);
         syncConnection.set(proxy, connection);
     }
 
-    private void checkSystemPutFileJSON(byte[] data, int offset, int length,
-                                        String filename, FileType fileType)
+    private void checkPutFileJSON(byte[] data, FileType fileType)
             throws JSONException {
         assertThat("JSON data must not be null", data, IsNull.notNullValue());
-
-        JSONObject jsonObject =
-                new JSONObject(new String(data, Charset.defaultCharset()));
-        assertThat("offset doesn't match", jsonObject.getInt(OFFSET),
-                is(offset));
-        assertThat("length doesn't match", jsonObject.getInt(LENGTH),
-                is(length));
-        assertThat("filename must be set", jsonObject.getString(SYNC_FILENAME),
-                is(filename));
-        assertThat("systemFile must be true",
-                jsonObject.getBoolean(SYSTEM_FILE), is(true));
-        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
-                is(fileType.toString()));
+        JSONObject jsonObject = new JSONObject(new String(data, Charset.defaultCharset()));
+        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE), is(fileType.toString()));
     }
 }

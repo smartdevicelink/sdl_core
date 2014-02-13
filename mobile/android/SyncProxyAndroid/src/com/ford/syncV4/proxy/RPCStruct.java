@@ -72,7 +72,8 @@ public class RPCStruct {
 
     /**
      * Workaround method to get RPC message type from a table.
-     * @param keys Set of the possible values: request, response, notification
+     *
+     * @param keys Set of the keys in the Table
      * @return founded value or null
      */
     protected String getMessageTypeName(Set<String> keys) {
@@ -86,5 +87,23 @@ public class RPCStruct {
             }
         }
         return null;
+    }
+
+    /**
+     * Method to check whether provided key contains in the Table
+     *
+     * @param keys Set of the keys in the Table
+     * @return true if found, else - otherwise
+     */
+    protected boolean hasKey(Set<String> keys, String keyName) {
+        for (String key : keys) {
+            if (key == null) {
+                continue;
+            }
+            if (key.equals(keyName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

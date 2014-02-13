@@ -43,6 +43,9 @@ public class RPCMessage extends RPCStruct {
         messageType = getMessageTypeName(hash.keySet());
         function = (Hashtable) hash.get(messageType);
         parameters = (Hashtable) function.get(Names.parameters);
+        if (hasKey(hash.keySet(), Names.bulkData)) {
+            setBulkData((byte[]) hash.get(Names.bulkData));
+        }
     }
 
     protected String messageType;

@@ -313,7 +313,9 @@ public class RPCRequestFactory {
 		putFile.setCorrelationID(correlationID);
 		putFile.setSyncFileName(syncFileName);
 		putFile.setFileType(fileType);
-		putFile.setPersistentFile(persistentFile);
+		if (persistentFile != null) {
+            putFile.setPersistentFile(persistentFile);
+        }
 		putFile.setBulkData(fileData);
 		return putFile;
 	}

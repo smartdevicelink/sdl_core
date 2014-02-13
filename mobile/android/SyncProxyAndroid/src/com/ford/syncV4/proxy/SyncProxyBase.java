@@ -616,7 +616,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     new IDispatchingStrategy<ProtocolMessage>() {
                         @Override
                         public void dispatch(ProtocolMessage message) {
-                            dispatchOutgoingMessage((ProtocolMessage) message);
+                            dispatchOutgoingMessage(message);
                         }
 
                         @Override
@@ -647,7 +647,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
                         @Override
                         public void dispatch(InternalProxyMessage message) {
-                            dispatchInternalMessage((InternalProxyMessage) message);
+                            dispatchInternalMessage(message);
                         }
 
                         @Override
@@ -1534,17 +1534,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         final OnSystemRequest msg = new OnSystemRequest(hash);
 
         if (RequestType.HTTP == msg.getRequestType()) {
-            final Vector<String> urls = msg.getUrl();
-            if (urls != null) {
+            if (msg.getFileType() == FileType.JSON) {
                 Runnable request = new Runnable() {
                     @Override
                     public void run() {
-                        if (msg.getFileType() == FileType.JSON) {
-                            onSystemRequestHandler.onPolicyTableSnapshotRequest(new byte[256]);
-                        } else {
-                            onSystemRequestHandler.onFilesDownloadRequest(
-                                    SyncProxyBase.this, urls, msg.getFileType());
-                        }
+                        onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
+                                msg.getBulkData());
                     }
                 };
                 if (_callbackToUIThread) {
@@ -1553,7 +1548,23 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     request.run();
                 }
             } else {
-                Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+                final Vector<String> urls = msg.getUrl();
+                if (urls != null) {
+                    Runnable request = new Runnable() {
+                        @Override
+                        public void run() {
+                            onSystemRequestHandler.onFilesDownloadRequest(
+                                    SyncProxyBase.this, urls, msg.getFileType());
+                        }
+                    };
+                    if (_callbackToUIThread) {
+                        _mainUIHandler.post(request);
+                    } else {
+                        request.run();
+                    }
+                } else {
+                    Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+                }
             }
         } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
             final Vector<String> urls = msg.getUrl();
@@ -2908,15 +2919,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
-            try {
-                if (msg.getData().length > 0) queueIncomingMessage(msg);
-            } catch (Exception e) {
-
-            }
-            try {
-                if (msg.getBulkData().length > 0) queueIncomingMessage(msg);
-            } catch (Exception e) {
-
+            // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
+            // Policy Snapshot is coming WITH BulkData and WITH JSON Data
+            if (msg.getData().length > 0 || msg.getBulkData().length > 0) {
+                queueIncomingMessage(msg);
             }
         }
 
@@ -3028,18 +3034,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     @Override
     public void putSystemFile(String filename, byte[] data, Integer offset,
                               FileType fileType) throws SyncException {
-        PutFile putFile = new PutFile();
-        putFile.setSyncFileName(filename);
-        putFile.setFileType(fileType);
-        putFile.setBulkData(data);
-        putFile.setSystemFile(true);
         final int correlationID = nextCorrelationId();
-        putFile.setCorrelationID(correlationID);
 
+        PutFile putFile = RPCRequestFactory.buildPutFile(filename, fileType, null, data,
+                correlationID);
+        putFile.setSystemFile(true);
         if (offset != null) {
             putFile.setOffset(offset);
             putFile.setLength(data.length);
         }
+
+        sendRPCRequest(putFile);
+        internalRequestCorrelationIDs.add(correlationID);
+    }
+
+    @Override
+    public void putPolicyTableUpdateFile(String filename, byte[] data) throws SyncException {
+        final int correlationID = nextCorrelationId();
+
+        PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
+                correlationID);
 
         sendRPCRequest(putFile);
         internalRequestCorrelationIDs.add(correlationID);

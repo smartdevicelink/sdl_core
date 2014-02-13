@@ -35,4 +35,14 @@ public interface ISystemRequestProxy {
      */
     public void putSystemFile(String filename, byte[] data, Integer offset,
                               FileType fileType) throws SyncException;
+
+    /**
+     * Uploads a updated and processed Policy Table file to the SDL.
+     *
+     * @param filename the requested file's name
+     * @param data     file's contents
+     * @throws SyncException if there is an error during preparations to send the request
+     */
+    public void putPolicyTableUpdateFile(String filename, byte[] data)
+            throws SyncException;
 }

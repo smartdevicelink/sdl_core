@@ -14,6 +14,7 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,22 +92,56 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onPolicyTableSnapshotRequest(byte[] data) {
+    public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data) {
         // TODO : Logging to be refactored
         if (mLogAdapter != null) {
             mLogAdapter.logMessage("Policy Table Snapshot download request", Log.DEBUG, true);
         }
 
-        final byte[] fileData = AppUtils.contentsOfResource(R.raw.policy_table_shanpshot);
+        //final byte[] fileData = AppUtils.contentsOfResource(R.raw.policy_table_shanpshot);
 
         String mTMPFilePath = Environment.getExternalStorageDirectory() +
                 "/policyTableSnapshot.json";
 
-        boolean result = AppUtils.saveDataToFile(fileData, mTMPFilePath);
+        boolean result = AppUtils.saveDataToFile(data, mTMPFilePath);
         if (result) {
             SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' successfully saved");
         } else {
             SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' could not be save");
         }
+
+        // Simulate Policy Table Snapshot file processing
+        // Then, call appropriate method at provided callback which implement
+        // ISystemRequestProxy interface
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
+                        "/policyTableUpdate.json";
+
+                File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
+                if (!mPolicyUpdateFile.exists()) {
+                    SafeToast.showToastAnyThread("Policy Snapshot could not be found");
+                    return;
+                }
+
+                SafeToast.showToastAnyThread("Policy Snapshot is found");
+
+                //final byte[] data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+                final byte[] data = AppUtils.readDataFromFile(mPolicyUpdateFile);
+
+                try {
+                    String mPolicyTableUpdateFileName = "PolicyTableUpdate";
+                    proxy.putPolicyTableUpdateFile(mPolicyTableUpdateFileName, data);
+                } catch (SyncException e) {
+                    // TODO : Logging to be refactored
+                    if (mLogAdapter != null) {
+                        mLogAdapter.logMessage("Can't upload policy table update mPolicyUpdateFile:" +
+                                e.getMessage(), Log.ERROR, true);
+                    }
+                }
+            }
+        }, 500);
     }
 }

@@ -39,7 +39,11 @@ public interface IOnSystemRequestHandler {
                                     FileType fileType);
 
     /**
-     * @param data Raw bytes data of the Policy Table Snapshot file
+     * Requests to get Policy Table Snapshot file as raw data and process it. When done, result
+     * should be upload with
+     *
+     * @param proxy The proxy used to upload the given file
+     * @param data  Raw bytes data of the Policy Table Snapshot file
      */
-    public void onPolicyTableSnapshotRequest(byte[] data);
+    public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data);
 }
