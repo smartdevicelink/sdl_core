@@ -1,6 +1,4 @@
 /**
- * @file MultiTouchArea.qml
- * @brief Area for multitouch.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,42 +34,68 @@ import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
 
 MultiPointTouchArea {
-    readonly property int created: Date.now()
-
-    signal pressed(var touchPoints)
-    signal released(var touchPoints)
-    signal canceled(var touchPoints)
-    signal updated(var touchPoints)
-
-    function fillEvent(touchPoints) {
-        var event = []
-        for (var i = 0; i < touchPoints.length; ++i) {
-            event.push({
-                           id: touchPoints[i].pointId,
-                           ts: [Date.now() - created],
-                           c: [{ x: touchPoints.x, y: touchPoints.y }] // TODO(KKolodiy): need cast to int
-                       })
-        }
-        return event
-    }
+    property date created
 
     minimumTouchPoints: 1
     maximumTouchPoints: 10
 
+    MouseArea {
+        anchors.fill: parent
+
+        function mouseTouchEvent() {
+            var now = new Date()
+            var touchEvents = [
+                {
+                    id: 0,
+                    ts: [now.valueOf() - created.valueOf()],
+                    c: [{x: mouseX, y: mouseY}]
+                }
+            ]
+            return touchEvents
+        }
+
+        onPressed: {
+            sdlUI.onTouchEvent(Common.TouchType.BEGIN, mouseTouchEvent())
+        }
+        onReleased: {
+            sdlUI.onTouchEvent(Common.TouchType.END, mouseTouchEvent())
+        }
+        onCanceled: {
+            sdlUI.onTouchEvent(Common.TouchType.END, mouseTouchEvent())
+        }
+        onPositionChanged: {
+            sdlUI.onTouchEvent(Common.TouchType.MOVE, mouseTouchEvent())
+        }
+    }
+
+    function touchEvents() {
+        var now = new Date()
+        var touchEvents = []
+        for (var i = 0; i < touchPoints.length; ++i) {
+            touchEvents.push(
+                {
+                    id: i, // we should use index because pointId is not guatanteed to be in correct range
+                    ts: [now.valueOf() - created.valueOf()],
+                    c: [{x: touchPoints[i].x, y: touchPoints[i].y}]
+                }
+            )
+        }
+        return touchEvents
+    }
+
     onPressed: {
-        sdlUI.onTouchEvent(Common.BEGIN, fillEvent(touchPoints))
-        parent.pressed(touchPoints)
+        sdlUI.onTouchEvent(Common.TouchType.BEGIN, touchEvents())
     }
     onReleased: {
-        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
-        parent.released(touchPoints)
+        sdlUI.onTouchEvent(Common.TouchType.END, touchEvents())
     }
     onCanceled: {
-        sdlUI.onTouchEvent(Common.END, fillEvent(touchPoints))
-        parent.canceled(touchPoints)
+        sdlUI.onTouchEvent(Common.TouchType.END, touchEvents())
     }
     onUpdated: {
-        sdlUI.onTouchEvent(Common.MOVE, fillEvent(touchPoints))
-        parent.updated(touchPoints)
+        sdlUI.onTouchEvent(Common.TouchType.MOVE, touchEvents())
+    }
+    Component.onCompleted: {
+        created = new Date()
     }
 }

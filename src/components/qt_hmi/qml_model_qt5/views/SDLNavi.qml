@@ -41,7 +41,7 @@ import "../hmi_api/Common.js" as Common
 GeneralView {
     applicationContext: true
 
-    Item {
+    MultiTouchArea {
         anchors.fill: parent
         id: wholeWindow
 
@@ -218,7 +218,6 @@ GeneralView {
             onReleased: {
                 contentLoader.go("./views/SDLPlayerOptionsListView.qml", dataContainer.currentApplication.appId)
             }
-
         }
     }
 }
