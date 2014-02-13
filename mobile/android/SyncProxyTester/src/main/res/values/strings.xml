@@ -71,6 +71,8 @@
     <string name="show_mediaClockDefault">12:34</string>
     <string name="show_graphic">Graphic</string>
     <string name="show_graphicDefault">action.png</string>
+    <string name="show_secondaryGraphic">Secondary Graphic</string>
+    <string name="show_secondaryGraphicDefault">action.png</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
     <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
     <string name="selectprotocol_media">Media</string>
