@@ -1492,7 +1492,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                 final EditText txtECUNameDID = (EditText) layout.findViewById(R.id.txtECUNameDID);
                                 final EditText txtDIDLocation = (EditText) layout.findViewById(R.id.txtDIDLocation);
-                                final CheckBox chkEncryptedDID = (CheckBox) layout.findViewById(R.id.chkEncryptedDID);
 
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1504,7 +1503,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             ReadDID msg = new ReadDID();
                                             msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                             msg.setDidLocation(didlocations);
-                                            msg.setEncrypted(chkEncryptedDID.isChecked());
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
                                             if (mBoundProxyService != null) {

@@ -1,5 +1,6 @@
 [CW7]
-+ SyncProxyAndroid SDK: Add DIDResult struct.
+- Remove encrypted parameter from ReadDID UI.
+* SyncProxyAndroid SDK: Add DIDResult struct. Update ReadDID and ReadDIDResponse.
 + Add endTime parameter to SetMediaClockTimer UI.
 + SyncProxyAndroid SDK: Add endTime parameter to SetMediaClockTimer request.
 * SyncProxyAndroid SDK: Update VehicleDataType enum. Add new parameters to OnVehicleData notification. Sync *VehicleData* messages' parameters with the specification.
