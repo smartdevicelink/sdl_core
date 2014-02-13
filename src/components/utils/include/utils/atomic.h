@@ -28,42 +28,40 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifdef __QNXNTO__
+#include <atomic.h>
+#endif
 
-#include <string>
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+#if defined(__QNXNTO__)
+#define atomic_post_inc(ptr) atomic_add_value((ptr), 1)
+#elif defined(__GNUG__)
+#define atomic_post_inc(ptr) __sync_fetch_and_add((ptr), 1)
+#else
+#warning "atomic_post_inc() implementation is not atomic"
+#define atomic_post_inc(ptr) (*(ptr))++
+#endif
 
-namespace resumption {
+#if defined(__QNXNTO__)
+#define atomic_post_dec(ptr) atomic_sub_value((ptr), 1)
+#elif defined(__GNUG__)
+#define atomic_post_dec(ptr) __sync_fetch_and_sub((ptr), 1)
+#else
+#warning "atomic_post_dec() implementation is not atomic"
+#define atomic_post_dec(ptr) (*(ptr))--
+#endif
 
-class LastState : public utils::Singleton<LastState> {
- public:
-/**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
+#if defined(__QNXNTO__)
+#define atomic_or(ptr, value) atomic_set((ptr), (value))
+#elif defined(__GNUG__)
+#define atomic_or(ptr, value) __sync_fetch_and_or((ptr), (value))
+#else
+#warning "atomic_or() implementation is not atomic"
+#define atomic_or(ptr, value) *(ptr) |= (value)
+#endif
 
- private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
-};
-
-}  // namespace resumption
-
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_

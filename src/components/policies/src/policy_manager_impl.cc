@@ -37,7 +37,6 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 
-
 namespace policies {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -61,13 +60,6 @@ PolicyManagerImpl::~PolicyManagerImpl() {
     delete policy_table_;
     policy_table_ = NULL;
   }
-}
-
-//---------------------------------------------------------------
-
-PolicyManagerImpl* PolicyManagerImpl::instance() {
-  static PolicyManagerImpl instance;
-  return &instance;
 }
 
 //---------------------------------------------------------------

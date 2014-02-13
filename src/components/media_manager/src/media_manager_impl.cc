@@ -53,11 +53,6 @@ namespace media_manager {
 log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaManagerImpl"));
 
-MediaManagerImpl* MediaManagerImpl::instance() {
-  static MediaManagerImpl instance;
-  return &instance;
-}
-
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
   , a2dp_player_(NULL)

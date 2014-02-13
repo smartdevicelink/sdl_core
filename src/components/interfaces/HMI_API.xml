@@ -309,7 +309,7 @@
   <element name="INITIAL_JINGLE" />
   <element name="LISTEN_JINGLE" />
   <element name="POSITIVE_JINGLE" />
-  <element name="NEGATIVE_JINGLE" />    
+  <element name="NEGATIVE_JINGLE" />
 </enum>
 
 <enum name="TBTState">
@@ -2756,7 +2756,7 @@
       </description>
     </param>
   </function>
-<function name="DiagnosticMessage" messagetype="request">
+  <function name="DiagnosticMessage" messagetype="request">
     <description>Non periodic vehicle diagnostic request</description>
     <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Name of target ECU.</description>

@@ -43,6 +43,7 @@ Item {
     property alias model: listView.model
     property alias currentIndex: listView.currentIndex
     property alias currentText: textMain.text
+    property string textRole
 
     function choose(name) {
         var count = listView.count

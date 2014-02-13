@@ -346,6 +346,22 @@ class HMICapabilities {
    */
   inline const smart_objects::SmartObject* vehicle_type() const;
 
+  /*
+   * @brief Retrieves information about the prerecorded speech
+   *
+   * @return Currently supported prerecorded speech
+   */
+  inline const smart_objects::SmartObject* prerecorded_speech() const;
+
+  /*
+   * @brief Sets supported prerecorded speech
+   *
+   * @param prerecorded_speech supported prerecorded speech
+   */
+  void set_prerecorded_speech(
+       const smart_objects::SmartObject& prerecorded_speech);
+
+
  protected:
 
   /*
@@ -386,6 +402,7 @@ class HMICapabilities {
   smart_objects::SmartObject*      vr_capabilities_;
   smart_objects::SmartObject*      speech_capabilities_;
   smart_objects::SmartObject*      audio_pass_thru_capabilities_;
+  smart_objects::SmartObject*      prerecorded_speech_;
 
   ApplicationManagerImpl*          app_mngr_;
 
@@ -486,6 +503,11 @@ bool HMICapabilities::attenuated_supported() const {
 
 const smart_objects::SmartObject* HMICapabilities::vehicle_type() const {
   return vehicle_type_;
+}
+
+const smart_objects::SmartObject*
+HMICapabilities::prerecorded_speech() const {
+  return prerecorded_speech_;
 }
 
 }  //  namespace application_manager

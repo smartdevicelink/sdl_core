@@ -48,8 +48,4 @@
         android:visibility="visible" >
 
     </EditText>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkEncryptedDID"
-        android:text="Encrypted?" android:checked="false">
-    </CheckBox>
 </LinearLayout>

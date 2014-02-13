@@ -28,47 +28,62 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
+
+#include "lock.h"
+#include "memory_barrier.h"
+#include "atomic.h"
+
+namespace utils {
+
+template<typename T>
+class Singleton {
+/**
+ * @brief Singleton template
+ * Singleton classes must derive from this template specialized with class itself:
+ *
+ * class MySingleton : public Singleton<MySingleton> {...};
+ *
+ * All such classes must declare instance() method as friend
+ * by adding FRIEND_BASE_SINGLETON_CLASS_INSTANCE macro from macro.h to class definition:
+ *
+ * FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MySingleton);
+ *
+ * This template does not provide any delete method,
+ * pointer to instance must be deleted explicitly
  */
+ public:
+/**
+ * @brief Returns the singleton of class
+ */
+  static T* instance();
+};
 
-#if  defined(__QNX__) || defined(__QNXNTO__)
-#include <sys/cpuinline.h>
-#endif
-
-#include "utils/lock.h"
-
-#include "resumption/last_state.h"
-
-namespace resumption {
-
-LastState::LastState() {
-}
-
-LastState* LastState::instance() {
-  static LastState* instance = 0;
+template<typename T>
+T* Singleton<T>::instance() {
+  static T* instance = 0;
   static sync_primitives::Lock lock;
 
-  LastState* temp = instance;
-#if  defined(__QNX__) || defined(__QNXNTO__)
-  __cpu_membarrier();
-#else
-  __sync_synchronize();
-#endif
-  if (!temp) {
+  T* local_instance = 0;
+  atomic_or(&local_instance, instance);
+  memory_barrier();
+  if (!local_instance) {
     lock.Ackquire();
-    temp = instance;
-    if (!temp) {
-      temp = new LastState();
-#if  defined(__QNX__) || defined(__QNXNTO__)
-      __cpu_membarrier();
-#else
-      __sync_synchronize();
-#endif
-      instance = temp;
+    local_instance = instance;
+    if (!local_instance) {
+      local_instance = new T();
+      memory_barrier();
+      atomic_or(&instance, local_instance); // we know that instance = 0 before this instruction
     }
     lock.Release();
   }
 
-  return temp;
+  return local_instance;
 }
 
-}
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_

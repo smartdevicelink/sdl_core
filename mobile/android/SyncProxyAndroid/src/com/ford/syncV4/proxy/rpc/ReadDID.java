@@ -43,14 +43,4 @@ public class ReadDID extends RPCRequest {
         }
         return null;
     }
-    public void setEncrypted(Boolean encrypted) {
-    	if (encrypted != null) {
-    		parameters.put(Names.encrypted, encrypted);
-    	} else {
-    		parameters.remove(Names.encrypted);
-    	}
-    }
-    public Boolean getEncrypted() {
-    	return (Boolean) parameters.get(Names.encrypted);
-    }
 }

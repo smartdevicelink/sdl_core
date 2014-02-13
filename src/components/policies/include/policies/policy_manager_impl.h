@@ -38,21 +38,16 @@
 #include "policies/policy_manager.h"
 #include "policies/policy_table.h"
 #include "utils/logger.h"
+#include "utils/singleton.h"
 
 namespace policies {
 
 /**
  * @brief Interface implementation class of Policy Manager.
  */
-class PolicyManagerImpl : public PolicyManager {
+class PolicyManagerImpl : public PolicyManager,
+  public utils::Singleton<PolicyManagerImpl> {
   public:
-    /**
-     * @brief PolicyManagerImpl is a singleton.
-     *
-     * @return Pointer to the single instance of PolicyManagerImpl.
-     */
-    static PolicyManagerImpl* instance();
-
     /**
      * @brief Destructor
      *
@@ -120,6 +115,10 @@ class PolicyManagerImpl : public PolicyManager {
      * @brief Result of call of public method Init()
      */
     InitResult init_result_;
+
+    DISALLOW_COPY_AND_ASSIGN(PolicyManagerImpl);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(PolicyManagerImpl);
 };
 
 }  // namespace policies

@@ -30,40 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_
 
-#include <string>
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+namespace application_manager {
 
-namespace resumption {
+namespace commands {
 
-class LastState : public utils::Singleton<LastState> {
+/**
+ * @brief VIDiagnosticMessageResponse command class
+ **/
+class VIDiagnosticMessageResponse : public ResponseFromHMI {
  public:
-/**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
+  /**
+   * @brief VIDiagnosticMessageResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VIDiagnosticMessageResponse(const MessageSharedPtr& message);
+
+  /**
+   * @brief VIDiagnosticMessageResponse class destructor
+   **/
+  virtual ~VIDiagnosticMessageResponse();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
  private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
+  DISALLOW_COPY_AND_ASSIGN(VIDiagnosticMessageResponse);
 };
 
-}  // namespace resumption
+}  // namespace commands
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VI_DIAGNOSTIC_MESSAGE_RESPONSE_H_

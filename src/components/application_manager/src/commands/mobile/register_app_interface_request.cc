@@ -143,10 +143,7 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
 
-    ResumeCtrl* resume_ctrl = ApplicationManagerImpl::instance()->GetResumeController();
-
-    bool resumption = resume_ctrl->StartResumption(app);
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, resumption);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, false);
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
@@ -329,6 +326,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if (hmi_capabilities.vehicle_type()) {
     response_params[hmi_response::vehicle_type] =
         *hmi_capabilities.vehicle_type();
+  }
+  if (hmi_capabilities.prerecorded_speech()) {
+    response_params[strings::prerecorded_speech] =
+        *(hmi_capabilities.prerecorded_speech());
   }
 
   SendResponse(true, result, "", params);

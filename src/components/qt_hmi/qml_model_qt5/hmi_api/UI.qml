@@ -64,10 +64,13 @@ Item {
     function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
         var softButtonsLog = "",
             alertStringsLog = "";
-        for (var i = 0; i < alertStrings.length; i++) {
-            alertStringsLog += "{fieldName: '" + alertStrings[i].fieldName + "', " +
-                    "fieldText: '" + alertStrings[i].fieldText + "'},";
+        if (alertStrings) {
+            for (var i = 0; i < alertStrings.length; i++) {
+                alertStringsLog += "{fieldName: '" + alertStrings[i].fieldName + "', " +
+                        "fieldText: '" + alertStrings[i].fieldText + "'},";
+            }
         }
+        if (softButtons) {
             for (var i = 0; i < softButtons.length; i++) {
                 softButtonsLog += "{type: '" + softButtons[i].type + "', " +
                         "text: " + softButtons[i].text + "', ";
@@ -77,6 +80,7 @@ Item {
                         "systemAction: " + softButtons[i].systemAction +
                         "},";
             }
+        }
         console.log("Message Received - {method: 'UI.Alert', params:{ " +
                     "alertStrings: [" + alertStringsLog + "]," +
                     "duration: " + duration + "', " +
@@ -202,11 +206,21 @@ Item {
     }
 
     function addCommand (cmdID, menuParams, cmdIcon, appID) {
+        var cmdIconLogs = "",
+            menuParamsLogs = "";
+
+        if (cmdIcon) {
+            cmdIconLogs = "{value: '" + cmdIcon.value + "', imageType: " + cmdIcon.imageType + "}";
+        }
+        if (menuParams) {
+            menuParamsLogs = "{parentID: " + menuParams.parentID + ", position: " + menuParams.position + "}";
+        }
         console.log("Message Received - {method: 'UI.AddCommand', params:{ " +
                     "appID: " + appID + ", " +
                     "cmdID: " + cmdID + ", " +
-                    "cmdIcon: {value: '" + cmdIcon.value + "', imageType: " + cmdIcon.imageType + "}, " +
-                    "menuParams: {parentID: " + menuParams.parentID + ", position: " + menuParams.position + "}" + "}}")
+                    "cmdIcon: " + cmdIconLogs + ", " +
+                    "menuParams: " + menuParamsLogs +
+                    "}}")
         dataContainer.addCommand(cmdID, menuParams, cmdIcon, appID)
     }
 
@@ -219,11 +233,16 @@ Item {
     }
 
     function addSubMenu (menuID, menuParams, appID) {
+        var menuParamsLogs = "";
+
+        if (menuParams) {
+            menuParamsLogs = "{parentID: " + menuParams.parentID + ", position: " + menuParams.position + "}";
+        }
         console.log("Message Received - {method: 'UI.AddSubMenu', params:{ " +
                     "appID: " + appID + ", " +
                     "menuID: " + menuID + ", " +
-                    "menuParams: {menuName: '" + menuParams.menuName + "', position: " + menuParams.position + "}"
-                    + "}}")
+                    "menuParams: " + menuParamsLogs +
+                    "}}")
         dataContainer.addSubMenu(menuID, menuParams, appID)
     }
 
@@ -238,24 +257,38 @@ Item {
     function performInteraction (initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
         console.debug("enter")
         var choiseLog = "",
-            vrHelpLog = "";
-        for (var i = 0; i < choiceSet.length; i++) {
-            choiseLog += "{choiceID: " + choiceSet[i].choiceID + ", " +
-                    "menuName: '" + choiceSet[i].menuName + "', " +
-                    "image: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}, " +
-                    "secondaryText: '" + choiceSet[i].secondaryText + "', " +
-                    "tertiaryText: '" + choiceSet[i].tertiaryText + "', " +
-                    "secondaryImage: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}},";
+            vrHelpLog = "",
+            initialTextLog = "";
+        if (choiceSet) {
+            for (var i = 0; i < choiceSet.length; i++) {
+                choiseLog += "{choiceID: " + choiceSet[i].choiceID + ", " +
+                        "menuName: '" + choiceSet[i].menuName + "', " +
+                        "image: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}, " +
+                        "secondaryText: '" + choiceSet[i].secondaryText + "', " +
+                        "tertiaryText: '" + choiceSet[i].tertiaryText + "', " +
+                        "secondaryImage: {value: '" + choiceSet[i].image.value + "', imageType: " + choiceSet[i].image.imageType + "}},";
+            }
         }
-        for (var i = 0; i < vrHelp.length; i++) {
-            vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
-                    "image: {value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}, " +
-                    "position: " + vrHelp[i].position +
-                    "},";
+        if (vrHelp) {
+            for (var i = 0; i < vrHelp.length; i++) {
+                var vrHelpImageLog = "";
+                if (vrHelp[i].image) {
+                    vrHelpImageLog = "{value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}";
+                }
+
+                vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
+                        "image: " + vrHelpImageLog + ", " +
+                        "position: " + vrHelp[i].position +
+                        "},";
+            }
         }
+        if (initialText) {
+            initialTextLog = "{fieldName: " + initialText.fieldName + ", fieldText: '" + initialText.fieldText + "'}";
+        }
+
         console.log("Message Received - {method: 'UI.PerformInteraction', params:{ " +
                     "appID:" + appID + ", " +
-                    "initialText: {fieldName: " + initialText.fieldName + ", fieldText: '" + initialText.fieldText + "'}, " +
+                    "initialText: " + initialTextLog + ", " +
                     "choiceSet: [" + choiseLog + "], " +
                     "vrHelpTitle: '" + vrHelpTitle + "', " +
                     "vrHelp: [" + vrHelpLog + "], " +
@@ -384,22 +417,37 @@ Item {
 
     function setGlobalProperties (vrHelpTitle, vrHelp, menuTitle, menuIcon, keyboardProperties, appID) {
         console.debug("enter")
-        var vrHelpLog = "";
-        for (var i = 0; i < vrHelp.length; i++) {
-            vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
-                    "image: {value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}, " +
-                    "position: " + vrHelp[i].position +
-                    "},";
+        var vrHelpLog = "",
+            menuIconLog = "",
+            keyboardPropertiesLog = "";
+        if (vrHelp) {
+            for (var i = 0; i < vrHelp.length; i++) {
+                var vrHelpImageLog = "";
+                if (vrHelp[i].image) {
+                    vrHelpImageLog = "{value: '" + vrHelp[i].image.value + "', imageType: " + vrHelp[i].image.imageType + "}";
+                }
+                vrHelpLog += "{text: '" + vrHelp[i].text + "', " +
+                        "image: " + vrHelpImageLog + ", " +
+                        "position: " + vrHelp[i].position +
+                        "},";
+            }
         }
+        if (menuIcon) {
+            menuIconLog = "{value: '" + menuIcon.value + "', imageType: " + menuIcon.imageType + "}";
+        }
+        if (keyboardProperties) {
+            keyboardPropertiesLog = "{language: '" + keyboardProperties.language + "', keyboardLayout: '" + keyboardProperties.language +
+                                "', sendDynamicEntry: '" + keyboardProperties.sendDynamicEntry + "', keypressMode: '" + keyboardProperties.keypressMode +
+                                "', limitedCharacterList: '" + keyboardProperties.limitedCharacterList + "', autoCompleteText: '" + keyboardProperties.autoCompleteText + "'}";
+        }
+
         console.log("Message Received - {method: 'UI.SetGlobalProperties', params:{ " +
                     "appID:" + appID + ", " +
                     "vrHelpTitle: '" + vrHelpTitle + "', " +
                     "vrHelp: [" + vrHelpLog + "], " +
                     "menuTitle: '" + menuTitle + "', " +
-                    "menuIcon: {value: '" + menuIcon.value + "', imageType: " + menuIcon.imageType + "}, " +
-                    "keyboardProperties: {language: '" + keyboardProperties.language + "', keyboardLayout: '" + keyboardProperties.language +
-                    "', sendDynamicEntry: '" + keyboardProperties.sendDynamicEntry + "', keypressMode: '" + keyboardProperties.keypressMode +
-                    "', limitedCharacterList: '" + keyboardProperties.limitedCharacterList + "', autoCompleteText: '" + keyboardProperties.autoCompleteText + "'" +
+                    "menuIcon: " + menuIconLog + ", " +
+                    "keyboardProperties: " + keyboardPropertiesLog +
                     "}}")
         var app = dataContainer.getApplication(appID)
         var dataToUpdate = {}
@@ -468,8 +516,13 @@ Item {
     }
 
     function setAppIcon (syncFileName, appID) {
+        var syncFileNameLog = "";
+        if (syncFileName) {
+            syncFileNameLog = "{value: '" + syncFileName.value + "', imageType: " + syncFileName.imageType + "}";
+        }
+
         console.log("Message Received - {method: 'UI.SetAppIcon', params:{ " +
-                    "syncFileName: {value: '" + syncFileName.value + "', imageType: " + syncFileName.imageType + "}, " +
+                    "syncFileName: " + syncFileNameLog + ", " +
                     "appID: " + appID +
                     "}}")
         dataContainer.setApplicationProperties(appID, { icon: syncFileName.value })
@@ -509,7 +562,9 @@ Item {
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
 
-        var softButtonsLog = "";
+        var softButtonsLog = "",
+            messageTextLog = "";
+        if (softButtons) {
             for (var i = 0; i < softButtons.length; i++) {
                 softButtonsLog += "{type: '" + softButtons[i].type + "', " +
                         "text: " + softButtons[i].text + "', ";
@@ -519,8 +574,13 @@ Item {
                         "systemAction: " + softButtons[i].systemAction +
                         "},";
             }
+        }
+        if (messageText) {
+            messageTextLog = "{fieldName: " + messageText.fieldName + ", fieldText: '" + messageText.fieldText + "'}";
+        }
+
         console.log("Message Received - {method: 'UI.ScrollableMessage', params:{ " +
-                    "messageText: {fieldName: " + messageText.fieldName + ", fieldText: '" + messageText.fieldText + "'}, " +
+                    "messageText: " + messageTextLog + ", " +
                     "timeout: " + timeout + "', " +
                     "softButtons: [" + softButtonsLog + "]," +
                     "appID: " + appID + "', " +
@@ -569,10 +629,12 @@ Item {
 
     function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
         var displayTextsLog = "";
+        if (audioPassThruDisplayTexts) {
             for (var i = 0; i < audioPassThruDisplayTexts.length; i++) {
                 displayTextsLog += "{fieldName: '" + audioPassThruDisplayTexts[i].fieldName + "', " +
                         "fieldText: " + audioPassThruDisplayTexts[i].fieldText + "'},";
             }
+        }
         console.log("Message Received - {method: 'UI.PerformAudioPassThru', params:{ " +
                     "audioPassThruDisplayTexts: [" + displayTextsLog + "], " +
                     "maxDuration: " + timeout +

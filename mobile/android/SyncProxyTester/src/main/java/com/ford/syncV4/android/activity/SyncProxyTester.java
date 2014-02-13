@@ -1499,7 +1499,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                 final EditText txtECUNameDID = (EditText) layout.findViewById(R.id.txtECUNameDID);
                                 final EditText txtDIDLocation = (EditText) layout.findViewById(R.id.txtDIDLocation);
-                                final CheckBox chkEncryptedDID = (CheckBox) layout.findViewById(R.id.chkEncryptedDID);
 
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1511,7 +1510,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             ReadDID msg = new ReadDID();
                                             msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                             msg.setDidLocation(didlocations);
-                                            msg.setEncrypted(chkEncryptedDID.isChecked());
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
                                             if (mBoundProxyService != null) {
@@ -2518,6 +2516,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox graphicCheck = (CheckBox) layout.findViewById(R.id.show_graphicCheck);
                             final Spinner graphicType = (Spinner) layout.findViewById(R.id.show_graphicType);
                             final EditText graphic = (EditText) layout.findViewById(R.id.show_graphic);
+                            final CheckBox secondaryGraphicCheck = (CheckBox) layout.findViewById(R.id.show_secondaryGraphicCheck);
+                            final Spinner secondaryGraphicType = (Spinner) layout.findViewById(R.id.show_secondaryGraphicType);
+                            final EditText secondaryGraphic = (EditText) layout.findViewById(R.id.show_secondaryGraphic);
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.show_chkIncludeSBs);
                             final Button softButtons = (Button) layout.findViewById(R.id.show_btnSoftButtons);
                             final CheckBox customPresetsCheck = (CheckBox) layout.findViewById(R.id.show_customPresetsCheck);
@@ -2541,6 +2542,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                             graphicType.setAdapter(imageTypeAdapter);
                             graphicType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
+                            secondaryGraphicType.setAdapter(imageTypeAdapter);
+                            secondaryGraphicType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
 
                             SoftButton sb1 = new SoftButton();
                             sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
@@ -2615,6 +2618,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             image.setImageType((ImageType) graphicType.getSelectedItem());
                                             image.setValue(graphic.getText().toString());
                                             msg.setGraphic(image);
+                                        }
+                                        if (secondaryGraphicCheck.isChecked()) {
+                                            Image image = new Image();
+                                            image.setImageType((ImageType) secondaryGraphicType.getSelectedItem());
+                                            image.setValue(secondaryGraphic.getText().toString());
+                                            msg.setSecondaryGraphic(image);
                                         }
                                         if (chkIncludeSoftButtons.isChecked() &&
                                                 (currentSoftButtons != null) &&
@@ -3710,7 +3719,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                 try {
                     if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxySendRegisterRequest(msg);
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
                     }
                 } catch (SyncException e) {
                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);

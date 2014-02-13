@@ -30,40 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#include "application_manager/commands/hmi/vi_diagnostic_message_request.h"
 
-#include <string>
+namespace application_manager {
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+namespace commands {
 
-namespace resumption {
+VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-class LastState : public utils::Singleton<LastState> {
- public:
-/**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
+VIDiagnosticMessageRequest::~VIDiagnosticMessageRequest() {
+}
 
- private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
+void VIDiagnosticMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "VIDiagnosticMessageRequest::Run");
 
-  DISALLOW_COPY_AND_ASSIGN(LastState);
+  SendRequest();
+}
 
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
-};
+}  // namespace commands
 
-}  // namespace resumption
+}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_

@@ -65,11 +65,6 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ConnectionHandler"));
 
-ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
-  static ConnectionHandlerImpl instance;
-  return &instance;
-}
-
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
@@ -310,7 +305,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       success = connection_handler_observer_->OnServiceStartedCallback(
           (it->second)->connection_device_handle(), session_key, service_type);
     }
-
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
       new_session_id = -1;

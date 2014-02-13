@@ -29,41 +29,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "application_manager/commands/hmi/vi_diagnostic_message_response.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+namespace application_manager {
 
-#include <string>
+namespace commands {
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
+}
 
-namespace resumption {
+VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {
+}
 
-class LastState : public utils::Singleton<LastState> {
- public:
-/**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
+void VIDiagnosticMessageResponse::Run() {
+  LOG4CXX_INFO(logger_, "VIDiagnosticMessageResponse::Run");
 
- private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
+  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);
+  event.set_smart_object(*message_);
+  event.raise();
+}
 
-  DISALLOW_COPY_AND_ASSIGN(LastState);
+}  // namespace commands
 
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
-};
-
-}  // namespace resumption
-
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+}  // namespace application_manager

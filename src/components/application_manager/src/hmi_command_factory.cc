@@ -174,6 +174,8 @@
 
 #include "application_manager/commands/hmi/vi_get_dtcs_request.h"
 #include "application_manager/commands/hmi/vi_get_dtcs_response.h"
+#include "application_manager/commands/hmi/vi_diagnostic_message_request.h"
+#include "application_manager/commands/hmi/vi_diagnostic_message_response.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_request.h"
@@ -920,6 +922,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::VIGetDTCsResponse(message));
       } else {
         command.reset(new commands::VIGetDTCsRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage: {
+      if (is_response) {
+        command.reset(new commands::VIDiagnosticMessageResponse(message));
+      } else {
+        command.reset(new commands::VIDiagnosticMessageRequest(message));
       }
       break;
     }

@@ -82,11 +82,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL),
-    resume_controler(this)
+    media_manager_(NULL)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  resume_controler.LoadApplications();
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -125,11 +123,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
   media_manager_ = NULL;
-}
-
-ApplicationManagerImpl* ApplicationManagerImpl::instance() {
-  static ApplicationManagerImpl instance;
-  return &instance;
 }
 
 bool ApplicationManagerImpl::Stop() {
@@ -628,6 +621,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle& device_handle) {
 }
+
 
 bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
@@ -1382,9 +1376,6 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
-  // Saving unregistered app.info to the file system before
-  resume_controler.SaveAllApplications();
-  resume_controler.SavetoFS();
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1477,9 +1468,6 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 
-ResumeCtrl* ApplicationManagerImpl::GetResumeController() {
-  return &resume_controler;
-}
 
 void ApplicationManagerImpl::Mute() {
   mobile_apis::AudioStreamingState::eType state =

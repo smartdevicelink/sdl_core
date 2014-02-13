@@ -28,42 +28,27 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
-#ifndef SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
-#define SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_
 
-#include <string>
+#ifdef __QNXNTO__
+#include <sys/cpuinline.h>
+#endif
 
-#include "utils/macro.h"
-#include "utils/dict.h"
-#include "utils/singleton.h"
+namespace utils {
 
-namespace resumption {
+inline void memory_barrier() {
+#if defined(__QNXNTO__)
+  __cpu_membarrier();
+#elif defined(__GNUG__)
+  __sync_synchronize();
+#else
+#warning "memory_barrier() implementation does nothing"
+#endif
+}
 
-class LastState : public utils::Singleton<LastState> {
- public:
-/**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
- * @brief public dictionary
- */
-  Dictionary dictionary;
+}  // namespace utils
 
- private:
-/**
- * @brief Private default constructor
- */
-  LastState() {
-  }
-
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
-};
-
-}  // namespace resumption
-
-#endif  // SRC_COMPONENTS_RESUMPTION_INCLUDE_RESUMPTION_LAST_STATE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MEMORY_BARRIER_H_

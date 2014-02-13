@@ -45,8 +45,10 @@ Item {
 
     function addCommand(cmdID, vrCommands, appID) {
         var vrCommandsLog = "";
-        for (var i = 0; i < vrCommands.length; i++) {
-            vrCommandsLog += "'" + vrCommands[i] + "', ";
+        if (vrCommands) {
+            for (var i = 0; i < vrCommands.length; i++) {
+                vrCommandsLog += "'" + vrCommands[i] + "', ";
+            }
         }
         console.log("Message Received - {method: 'VR.AddCommand', params:{ " +
                     "vrCommands: [" + vrCommandsLog + "], " +
