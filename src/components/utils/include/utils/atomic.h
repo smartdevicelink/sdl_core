@@ -30,60 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
+#ifdef __QNXNTO__
+#include <atomic.h>
+#endif
 
-#include "lock.h"
-#include "memory_barrier.h"
-#include "atomic.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
 
-namespace utils {
+#if defined(__QNXNTO__)
+#define atomic_post_inc(ptr) atomic_add_value((ptr), 1)
+#elif defined(__GNUG__)
+#define atomic_post_inc(ptr) __sync_fetch_and_add((ptr), 1)
+#else
+#warning "atomic_post_inc() implementation is not atomic"
+#define atomic_post_inc(ptr) (*(ptr))++
+#endif
 
-template<typename T>
-class Singleton {
-/**
- * @brief Singleton template
- * Singleton classes must derive from this template specialized with class itself:
- *
- * class MySingleton : public Singleton<MySingleton> {...};
- *
- * All such classes must declare instance() method as friend
- * by adding FRIEND_BASE_SINGLETON_CLASS_INSTANCE macro from macro.h to class definition:
- *
- * FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MySingleton);
- *
- * This template does not provide any delete method,
- * pointer to instance must be deleted explicitly
- */
- public:
-/**
- * @brief Returns the singleton of class
- */
-  static T* instance();
-};
+#if defined(__QNXNTO__)
+#define atomic_post_dec(ptr) atomic_sub_value((ptr), 1)
+#elif defined(__GNUG__)
+#define atomic_post_dec(ptr) __sync_fetch_and_sub((ptr), 1)
+#else
+#warning "atomic_post_dec() implementation is not atomic"
+#define atomic_post_dec(ptr) (*(ptr))--
+#endif
 
-template<typename T>
-T* Singleton<T>::instance() {
-  static T* instance = 0;
-  static sync_primitives::Lock lock;
+#if defined(__QNXNTO__)
+#define atomic_or(ptr, value) atomic_set((ptr), (value))
+#elif defined(__GNUG__)
+#define atomic_or(ptr, value) __sync_fetch_and_or((ptr), (value))
+#else
+#warning "atomic_or() implementation is not atomic"
+#define atomic_or(ptr, value) *(ptr) |= (value)
+#endif
 
-  T* local_instance = 0;
-  atomic_or(&local_instance, instance);
-  memory_barrier();
-  if (!local_instance) {
-    lock.Ackquire();
-    local_instance = instance;
-    if (!local_instance) {
-      local_instance = new T();
-      memory_barrier();
-      atomic_or(&instance, local_instance); // we know that instance = 0 before this instruction
-    }
-    lock.Release();
-  }
-
-  return local_instance;
-}
-
-}  // namespace utils
-
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_

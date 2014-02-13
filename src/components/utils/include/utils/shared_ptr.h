@@ -37,11 +37,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#if  defined(__QNX__) || defined(__QNXNTO__)
-#include <atomic.h>
-#endif
-
-#include "utils/macro.h"
+#include "macro.h"
+#include "atomic.h"
 
 namespace utils {
 /**
@@ -260,11 +257,7 @@ utils::SharedPtr<ObjectType>::operator=(
   mReferenceCounter = Other.mReferenceCounter;
 
   if (0 != mReferenceCounter) {
-#if  defined(__QNX__) || defined(__QNXNTO__)
-    atomic_add(mReferenceCounter, 1);
-#else
-    __sync_add_and_fetch(mReferenceCounter, 1);
-#endif
+    atomic_post_inc(mReferenceCounter);
   }
 
   return *this;
@@ -278,11 +271,7 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_c
   casted_pointer.mReferenceCounter = pointer.mReferenceCounter;
 
   if (0 != casted_pointer.mReferenceCounter) {
-#if  defined(__QNX__) || defined(__QNXNTO__)
-    atomic_add(casted_pointer.mReferenceCounter, 1);
-#else
-    __sync_add_and_fetch(casted_pointer.mReferenceCounter, 1);
-#endif
+    atomic_post_inc(casted_pointer.mReferenceCounter);
   }
 
   return casted_pointer;
@@ -325,11 +314,7 @@ utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
 template<typename ObjectType>
 inline void SharedPtr<ObjectType>::dropReference(void) {
   if (0 != mReferenceCounter) {
-#if defined(__QNX__) || defined(__QNXNTO__)
-    if (1 == atomic_sub_value(mReferenceCounter, 1)) {
-#else
-    if (0 == __sync_sub_and_fetch(mReferenceCounter, 1)) {
-#endif
+    if (1 == atomic_post_dec(mReferenceCounter)) {
 
       delete mObject;
       mObject = 0;
