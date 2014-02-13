@@ -74,7 +74,9 @@ MultiPointTouchArea {
         for (var i = 0; i < touchPoints.length; ++i) {
             touchEvents.push(
                 {
-                    id: i, // we should use index because pointId is not guatanteed to be in correct range
+// pointId is guaranteed to be unique but is not guaranteed to fit in range
+// perhaps we will have to edit protocol xml
+                    id: touchPoints[i].pointId,
                     ts: [now.valueOf() - created.valueOf()],
                     c: [{x: touchPoints[i].x, y: touchPoints[i].y}]
                 }
