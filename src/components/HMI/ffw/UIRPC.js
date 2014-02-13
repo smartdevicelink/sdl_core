@@ -365,6 +365,162 @@ FFW.UI = FFW.RPCObserver.create({
                                     "timeToDestination",
                                     "turnText"
                                 ],
+                                "imageFields": [
+                                    {
+                                        "name": "softButtonImage",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "choiceImage",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "choiceSecondaryImage",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "vrHelpItem",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "turnIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "menuIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "cmdIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "graphic",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "showConstantTBTIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "showConstantTBTNextTurnIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    },
+                                    {
+                                        "name": "nextTurnIcon",
+                                        "imageTypeSupported":
+                                            [
+                                                "GRAPHIC_BMP",
+                                                "GRAPHIC_JPEG",
+                                                "GRAPHIC_PNG"
+                                            ],
+                                        "imageResolution":
+                                        {
+                                            "resolutionWidth": 64,
+                                            "resolutionHeight": 64
+                                        }
+                                    }
+                                ],
                                 "mediaClockFormats": [
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],

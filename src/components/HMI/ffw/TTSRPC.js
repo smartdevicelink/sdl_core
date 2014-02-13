@@ -182,7 +182,17 @@ FFW.TTS = FFW.RPCObserver.create( {
                 "jsonrpc": "2.0",
                 "id": request.id,
                 "result": {
-                    "capabilities": "TEXT",
+                    "speechCapabilities": [
+                        "TEXT",
+                        "PRE_RECORDED"
+                    ],
+                    "prerecordedSpeechCapabilities": [
+                        "HELP_JINGLE",
+                        "INITIAL_JINGLE",
+                        "LISTEN_JINGLE",
+                        "POSITIVE_JINGLE",
+                        "NEGATIVE_JINGLE"
+                    ],
                     "code": SDL.SDLModel.resultCode["SUCCESS"], // type (enum)
                     // from SDL
                     // protocol

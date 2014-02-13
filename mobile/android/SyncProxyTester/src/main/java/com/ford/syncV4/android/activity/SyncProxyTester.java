@@ -1228,62 +1228,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which).equals(Names.ResetGlobalProperties)) {
                                 sendResetGlobalProperties();
                             } else if (adapter.getItem(which).equals(Names.SetMediaClockTimer)) {
-                                //something
-                                AlertDialog.Builder builder;
-                                AlertDialog dlg;
-
-                                Context mContext = adapter.getContext();
-                                LayoutInflater inflater = (LayoutInflater) mContext
-                                        .getSystemService(LAYOUT_INFLATER_SERVICE);
-                                View layout = inflater.inflate(R.layout.setmediaclock, null);
-                                final EditText txtHours = (EditText) layout.findViewById(R.id.txtHours);
-                                final EditText txtMinutes = (EditText) layout.findViewById(R.id.txtMinutes);
-                                final EditText txtSeconds = (EditText) layout.findViewById(R.id.txtSeconds);
-                                final Spinner spnUpdateMode = (Spinner) layout.findViewById(R.id.spnUpdateMode);
-
-                                ArrayAdapter<UpdateMode> spinnerAdapter = new ArrayAdapter<UpdateMode>(adapter.getContext(),
-                                        android.R.layout.simple_spinner_item, UpdateMode.values());
-                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                spnUpdateMode.setAdapter(spinnerAdapter);
-
-                                builder = new AlertDialog.Builder(mContext);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        SetMediaClockTimer msg = new SetMediaClockTimer();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        UpdateMode updateMode = (UpdateMode) spnUpdateMode.getSelectedItem();
-                                        msg.setUpdateMode(updateMode);
-                                        try {
-                                            Integer hours = Integer.parseInt(txtHours.getText().toString());
-                                            Integer minutes = Integer.parseInt(txtMinutes.getText().toString());
-                                            Integer seconds = Integer.parseInt(txtSeconds.getText().toString());
-                                            StartTime startTime = new StartTime();
-                                            startTime.setHours(hours);
-                                            startTime.setMinutes(minutes);
-                                            startTime.setSeconds(seconds);
-                                            msg.setStartTime(startTime);
-                                        } catch (NumberFormatException e) {
-                                            // skip setting start time if parsing failed
-                                        }
-
-                                        try {
-                                            mLogAdapter.logMessage(msg, true);
-                                            if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                                            }
-                                        } catch (SyncException e) {
-                                            mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                    }
-                                });
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.setView(layout);
-                                dlg = builder.create();
-                                dlg.show();
+                                sendSetMediaClockTimer();
                             } else if (adapter.getItem(which).equals(Names.CreateInteractionChoiceSet)) {
                                 sendCreateInteractionChoiceSet();
                             } else if (adapter.getItem(which).equals(Names.DeleteInteractionChoiceSet)) {
@@ -3529,6 +3474,98 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         } else if (v == findViewById(R.id.btnPlayPause)) {
             mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
         }
+    }
+
+    private void sendSetMediaClockTimer() {
+        AlertDialog.Builder builder;
+
+        Context mContext = this;
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.setmediaclock, null);
+        final EditText txtStartHours = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeHours);
+        final EditText txtStartMinutes = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeMinutes);
+        final EditText txtStartSeconds = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeSeconds);
+        final EditText txtEndHours = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeHours);
+        final EditText txtEndMinutes = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeMinutes);
+        final EditText txtEndSeconds = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeSeconds);
+        final Spinner spnUpdateMode = (Spinner) layout.findViewById(
+                R.id.setmediaclocktimer_spnUpdateMode);
+
+        ArrayAdapter<UpdateMode> spinnerAdapter =
+                new ArrayAdapter<UpdateMode>(mContext,
+                        android.R.layout.simple_spinner_item,
+                        UpdateMode.values());
+        spinnerAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spnUpdateMode.setAdapter(spinnerAdapter);
+
+        builder = new AlertDialog.Builder(mContext);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                SetMediaClockTimer msg = new SetMediaClockTimer();
+                msg.setCorrelationID(autoIncCorrId++);
+                UpdateMode updateMode =
+                        (UpdateMode) spnUpdateMode.getSelectedItem();
+                msg.setUpdateMode(updateMode);
+
+                try {
+                    Integer hours = Integer.parseInt(
+                            txtStartHours.getText().toString());
+                    Integer minutes = Integer.parseInt(
+                            txtStartMinutes.getText().toString());
+                    Integer seconds = Integer.parseInt(
+                            txtStartSeconds.getText().toString());
+                    StartTime startTime = new StartTime();
+                    startTime.setHours(hours);
+                    startTime.setMinutes(minutes);
+                    startTime.setSeconds(seconds);
+                    msg.setStartTime(startTime);
+                } catch (NumberFormatException e) {
+                    // skip setting start time if parsing failed
+                }
+
+                try {
+                    Integer hours =
+                            Integer.parseInt(txtEndHours.getText().toString());
+                    Integer minutes = Integer.parseInt(
+                            txtEndMinutes.getText().toString());
+                    Integer seconds = Integer.parseInt(
+                            txtEndSeconds.getText().toString());
+                    StartTime endTime = new StartTime();
+                    endTime.setHours(hours);
+                    endTime.setMinutes(minutes);
+                    endTime.setSeconds(seconds);
+                    msg.setEndTime(endTime);
+                } catch (NumberFormatException e) {
+                    // skip setting start time if parsing failed
+                }
+
+                try {
+                    mLogAdapter.logMessage(msg, true);
+                    if (mBoundProxyService != null) {
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                    }
+                } catch (SyncException e) {
+                    mLogAdapter.logMessage("Error sending message: " + e,
+                            Log.ERROR, e);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.setView(layout);
+        builder.show();
     }
 
     /**

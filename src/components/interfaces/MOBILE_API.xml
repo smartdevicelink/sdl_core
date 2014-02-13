@@ -388,6 +388,15 @@
     <element name="TEXT" internal_name="VR_TEXT"/>
   </enum>
 
+  <enum name="PrerecordedSpeech">
+    <description>Contains a list of prerecorded speech items present on the platform.</description>
+    <element name="HELP_JINGLE" />
+    <element name="INITIAL_JINGLE" />
+    <element name="LISTEN_JINGLE" />
+    <element name="POSITIVE_JINGLE" />
+    <element name="NEGATIVE_JINGLE" />    
+  </enum>
+
   <enum name="SamplingRate">
     <description>Describes different sampling options for PerformAudioPassThru.</description>
     <element name="8KHZ" internal_name="SamplingRate_8KHZ"/>
@@ -2196,6 +2205,17 @@
       <description>Specifies the vehicle's type. See VehicleType.</description>
     </param>
 
+    <param name="prerecordedSpeech" type="PrerecordedSpeech" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>See PrerecordedSpeech</description>
+    </param>
+
+    <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false" scope="internal">   
+      <description>
+      	Specifies the white-list of supported diagnostic modes (0x00-0xFF) capable for DiagnosticMessage requests.
+      	If a mode outside this list is requested, it will be rejected.
+      </description>
+    </param>
+
   </function>
 
   <function name="UnregisterAppInterface" functionID="UnregisterAppInterfaceID" messagetype="request">
@@ -2424,7 +2444,7 @@
   <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="request">
     <description>Adds a sub menu to the in-application menu.</description>
 
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
       <description>unique ID of the sub menu to add.</description>
     </param>
 
@@ -2554,7 +2574,7 @@
       <description>See InteractionMode.</description>
     </param>
 
-    <param name="interactionChoiceSetIDList" type="Integer" minsize="1" maxsize="100" minvalue="0" maxvalue="2000000000" array="true">
+    <param name="interactionChoiceSetIDList" type="Integer" minsize="0" maxsize="100" minvalue="0" maxvalue="2000000000" array="true">
       <description>List of interaction choice set IDs to use with an interaction.</description>
     </param>
 
@@ -2626,6 +2646,13 @@
       <description>
       	ID of the choice that was selected in response to PerformInteraction.
       	Only is valid if resultCode is SUCCESS.
+      </description>
+    </param>
+
+    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+      <description>
+      	Manually entered text selection, e.g. through keyboard
+      	Can be returned in lieu of choiceID, depending on trigger source
       </description>
     </param>
 
@@ -3479,7 +3506,7 @@
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="VehicleDataResult" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
