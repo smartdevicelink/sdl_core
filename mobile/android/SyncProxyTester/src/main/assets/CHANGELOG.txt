@@ -1,4 +1,5 @@
 [CW7]
++ SyncProxyAndroid SDK: Add secondaryGraphic parameter to Show request.
 - Remove encrypted parameter from ReadDID UI.
 * SyncProxyAndroid SDK: Add DIDResult struct. Update ReadDID and ReadDIDResponse.
 + Add endTime parameter to SetMediaClockTimer UI.

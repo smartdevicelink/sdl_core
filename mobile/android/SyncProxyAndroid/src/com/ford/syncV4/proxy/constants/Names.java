@@ -450,4 +450,5 @@ public class Names {
     public static final String prerecordedSpeech = "prerecordedSpeech";
     public static final String endTime = "endTime";
     public static final String didResult = "didResult";
+    public static final String secondaryGraphic = "secondaryGraphic";
 }
