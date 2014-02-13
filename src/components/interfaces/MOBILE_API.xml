@@ -3506,7 +3506,7 @@
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="VehicleDataResult" mandatory="false" scope="partner">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
