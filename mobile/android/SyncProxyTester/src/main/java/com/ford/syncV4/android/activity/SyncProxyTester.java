@@ -3703,7 +3703,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                 try {
                     if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxySendRegisterRequest(msg);
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
                     }
                 } catch (SyncException e) {
                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
