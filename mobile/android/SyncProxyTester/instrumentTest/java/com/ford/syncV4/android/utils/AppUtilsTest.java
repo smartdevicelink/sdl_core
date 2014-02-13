@@ -2,8 +2,6 @@ package com.ford.syncV4.android.utils;
 
 import android.os.Environment;
 
-import com.ford.syncV4.android.activity.SafeToast;
-
 import junit.framework.TestCase;
 
 import java.io.File;
@@ -17,6 +15,9 @@ import java.io.File;
 public class AppUtilsTest extends TestCase {
 
     public void testReadFromFile() {
+
+        // In order to perform this test a file "policyTableUpdate.json" must be located at SD Card
+
         String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
                 "/policyTableUpdate.json";
         File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
