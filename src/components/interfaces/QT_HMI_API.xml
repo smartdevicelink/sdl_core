@@ -2756,6 +2756,27 @@
       </description>
     </param>
   </function>
+  <function name="DiagnosticMessage" messagetype="request">
+    <description>Non periodic vehicle diagnostic request</description>
+    <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Name of target ECU.</description>
+    </param>
+    <param name="messageLength" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Length of message (in bytes).</description>
+    </param>
+    <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+        Array of bytes comprising CAN message.
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="response">
+    <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+        Array of bytes comprising CAN message result.
+      </description>
+    </param>
+  </function>
 
 <!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
