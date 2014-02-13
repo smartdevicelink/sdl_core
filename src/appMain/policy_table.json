@@ -7,6 +7,20 @@
                      "LIMITED"
                   ]
                },
+               "DiagnosticMessage":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },
+               "SystemRequest":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },
                "ReadDID":{
                   "hmi_levels":[
                      "BACKGROUND",
@@ -14,7 +28,7 @@
                      "LIMITED"
                   ]
               },
-			   "AlertManeuver":{
+			        "AlertManeuver":{
                   "hmi_levels":[
                      "BACKGROUND",
                      "FULL",
