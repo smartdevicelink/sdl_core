@@ -103,11 +103,11 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
   LOG4CXX_INFO(
     logger_,
     "Starting thread with stack size "
-    << profile::Profile::instance()->thread_min_stach_size());
+    << profile::Profile::instance()->thread_min_stack_size());
   if (!thread->start()) {
     /*startWithOptions(
      threads::ThreadOptions(
-     profile::Profile::instance()->thread_min_stach_size()))*/
+     profile::Profile::instance()->thread_min_stack_size()))*/
     LOG4CXX_ERROR(logger_, "Failed to start thread");
     return false;
   }

@@ -1,5 +1,12 @@
 [CW7]
-* SyncProxyAndroid SDL: Add prerecordedSpeech parameter to RegisterAppInterfaceResponse class.
+- Remove encrypted parameter from ReadDID UI.
+* SyncProxyAndroid SDK: Add DIDResult struct. Update ReadDID and ReadDIDResponse.
++ Add endTime parameter to SetMediaClockTimer UI.
++ SyncProxyAndroid SDK: Add endTime parameter to SetMediaClockTimer request.
+* SyncProxyAndroid SDK: Update VehicleDataType enum. Add new parameters to OnVehicleData notification. Sync *VehicleData* messages' parameters with the specification.
+- SyncProxyAndroid SDK: removed heartbeat feature
+* SyncProxyAndroid SDK: Update FileType enum.
+* SyncProxyAndroid SDK: Add prerecordedSpeech parameter to RegisterAppInterfaceResponse class.
 * Fix 'USB: Application is not recognizable by SDLCore' if the application is closed when the stream is opened.
 * SyncProxyAndroid SDK: Update HeadLampStatus struct. Add headLampStatus parameter to OnVehicleData notification.
 * SyncProxyAndroid SDK: Add displayCapabilities parameter to SetDisplayLayoutResponse class.

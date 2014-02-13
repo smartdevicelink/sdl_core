@@ -93,6 +93,7 @@ import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
 
 import org.apache.http.HttpResponse;
@@ -2668,9 +2669,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return task;
     }
 
-    private void setCurrentReconnectTimerTask(
-            TimerTask currentReconnectTimerTask) {
+    private void setCurrentReconnectTimerTask(TimerTask currentReconnectTimerTask) {
         synchronized (RECONNECT_TIMER_TASK_LOCK) {
+            if (currentReconnectTimerTask == null) {
+                _currentReconnectTimerTask.cancel();
+            }
             _currentReconnectTimerTask = currentReconnectTimerTask;
         }
     }
@@ -2858,6 +2861,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onTransportError(String info, Exception e) {
             DebugTool.logError("Transport failure: " + info, e);
+
+            if (_transportConfig != null &&
+                    _transportConfig.getTransportType() ==  TransportType.USB) {
+                if (CommonUtils.isUSBNoSuchDeviceError(e.toString())) {
+
+                    if (_callbackToUIThread) {
+                        // Run in UI thread
+                        _mainUIHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                _proxyListener.onUSBNoSuchDeviceException();
+                            }
+                        });
+                    } else {
+                        _proxyListener.onUSBNoSuchDeviceException();
+                    }
+
+                    try {
+                        dispose();
+                    } catch (SyncException e1) {
+                        e1.printStackTrace();
+                    }
+
+                    return;
+                }
+            }
 
             if (_advancedLifecycleManagementEnabled) {
                 // Cycle the proxy

@@ -34,6 +34,7 @@ import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -1458,7 +1459,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     }
 
     @Override
-    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason){
+    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason) {
         Log.i(TAG, "onAppUnregisteredReason:" + reason);
         createDebugMessageForAdapter("onAppUnregisteredReason:" + reason);
     }
@@ -1748,9 +1749,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     /**
      * Create and send PutFile command
      *
-     * @param fileType Type of the File
+     * @param fileType     Type of the File
      * @param syncFileName Name of the File
-     * @param bulkData Data of the File
+     * @param bulkData     Data of the File
      */
     public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData) {
         commandPutFile(fileType, syncFileName, bulkData, -1, null, null);
@@ -1759,9 +1760,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     /**
      * Create and send PutFile command
      *
-     * @param fileType Type of the File
-     * @param syncFileName Name of the File
-     * @param bulkData Data of the File
+     * @param fileType      Type of the File
+     * @param syncFileName  Name of the File
+     * @param bulkData      Data of the File
      * @param correlationId Unique identifier of the command
      */
     public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
@@ -1772,10 +1773,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     /**
      * Create and send PutFile command
      *
-     * @param fileType Type of the File
-     * @param syncFileName Name of the File
-     * @param bulkData Data of the File
-     * @param correlationId Unique identifier of the command
+     * @param fileType        Type of the File
+     * @param syncFileName    Name of the File
+     * @param bulkData        Data of the File
+     * @param correlationId   Unique identifier of the command
      * @param doSetPersistent
      */
     public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
@@ -1786,12 +1787,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
     /**
      * Create and send PutFile command
      *
-     * @param fileType Type of the File
-     * @param syncFileName Name of the File
-     * @param bulkData Data of the File
-     * @param correlationId Unique identifier of the command
+     * @param fileType        Type of the File
+     * @param syncFileName    Name of the File
+     * @param bulkData        Data of the File
+     * @param correlationId   Unique identifier of the command
      * @param doSetPersistent
-     * @param putFile PurFile to be send
+     * @param putFile         PurFile to be send
      */
     public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
                                int correlationId, Boolean doSetPersistent, PutFile putFile) {
@@ -1881,11 +1882,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
 
     public void syncProxySendRPCRequest(RPCRequest request) throws SyncException {
         if (mSyncProxy != null) {
-            mSyncProxy.sendRPCRequest(request);
+            if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
+                syncProxySendRegisterRequest((RegisterAppInterface) request);
+            } else {
+                mSyncProxy.sendRPCRequest(request);
+            }
         }
     }
 
-    public void syncProxySendRegisterRequest(RegisterAppInterface msg)throws SyncException {
+    private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
         if (mSyncProxy != null) {
             // TODO it's seems stupid in order to register send onTransportConnected
             mSyncProxy.updateRegisterAppInterfaceParameters(msg);
@@ -1936,7 +1941,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
 
     /**
      * Logger section. Send log message to adapter and log it to the ADB
-     *
      */
 
     private void createErrorMessageForAdapter(Object messageObject) {
@@ -2024,5 +2028,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting,
         }, 500);
     }
 
-
+    @Override
+    public void onUSBNoSuchDeviceException() {
+        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
+        if (mainActivity != null) {
+            mainActivity.onUSBNoSuchDeviceException();
+        }
+    }
 }

@@ -1,12 +1,9 @@
 package com.ford.syncV4.proxy.rpc;
 
-import java.util.Hashtable;
-import java.util.Vector;
-
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
-import com.ford.syncV4.util.DebugTool;
+
+import java.util.Hashtable;
 
 public class SubscribeVehicleData extends RPCRequest {
 
@@ -166,26 +163,6 @@ public class SubscribeVehicleData extends RPCRequest {
     public Boolean getWiperStatus() {
         return (Boolean) parameters.get(Names.wiperStatus);
     }
-    public void setFuelEconomy(Boolean fuelEconomy) {
-        if (fuelEconomy != null) {
-            parameters.put(Names.fuelEconomy, fuelEconomy);
-        } else {
-        	parameters.remove(Names.fuelEconomy);
-        }
-    }
-    public Boolean getFuelEconomy() {
-        return (Boolean) parameters.get(Names.fuelEconomy);
-    }
-    public void setEngineOilLife(Boolean engineOilLife) {
-        if (engineOilLife != null) {
-            parameters.put(Names.engineOilLife, engineOilLife);
-        } else {
-        	parameters.remove(Names.engineOilLife);
-        }
-    }
-    public Boolean getEngineOilLife() {
-        return (Boolean) parameters.get(Names.engineOilLife);
-    }
     public void setHeadLampStatus(Boolean headLampStatus) {
         if (headLampStatus != null) {
             parameters.put(Names.headLampStatus, headLampStatus);
@@ -206,16 +183,6 @@ public class SubscribeVehicleData extends RPCRequest {
     public Boolean getBatteryVoltage() {
         return (Boolean) parameters.get(Names.batteryVoltage);
     }
-    public void setBrakeTorque(Boolean brakeTorque) {
-        if (brakeTorque != null) {
-            parameters.put(Names.brakeTorque, brakeTorque);
-        } else {
-        	parameters.remove(Names.brakeTorque);
-        }
-    }
-    public Boolean getBrakeTorque() {
-        return (Boolean) parameters.get(Names.brakeTorque);
-    }
     public void setEngineTorque(Boolean engineTorque) {
         if (engineTorque != null) {
             parameters.put(Names.engineTorque, engineTorque);
@@ -225,86 +192,6 @@ public class SubscribeVehicleData extends RPCRequest {
     }
     public Boolean getEngineTorque() {
         return (Boolean) parameters.get(Names.engineTorque);
-    }
-    public void setTurboBoost(Boolean turboBoost) {
-        if (turboBoost != null) {
-            parameters.put(Names.turboBoost, turboBoost);
-        } else {
-        	parameters.remove(Names.turboBoost);
-        }
-    }
-    public Boolean getTurboBoost() {
-        return (Boolean) parameters.get(Names.turboBoost);
-    }
-    public void setCoolantTemp(Boolean coolantTemp) {
-        if (coolantTemp != null) {
-            parameters.put(Names.coolantTemp, coolantTemp);
-        } else {
-        	parameters.remove(Names.coolantTemp);
-        }
-    }
-    public Boolean getCoolantTemp() {
-        return (Boolean) parameters.get(Names.coolantTemp);
-    }
-    public void setAirFuelRatio(Boolean airFuelRatio) {
-        if (airFuelRatio != null) {
-            parameters.put(Names.airFuelRatio, airFuelRatio);
-        } else {
-        	parameters.remove(Names.airFuelRatio);
-        }
-    }
-    public Boolean getAirFuelRatio() {
-        return (Boolean) parameters.get(Names.airFuelRatio);
-    }
-    public void setCoolingHeadTemp(Boolean coolingHeadTemp) {
-        if (coolingHeadTemp != null) {
-            parameters.put(Names.coolingHeadTemp, coolingHeadTemp);
-        } else {
-        	parameters.remove(Names.coolingHeadTemp);
-        }
-    }
-    public Boolean getCoolingHeadTemp() {
-        return (Boolean) parameters.get(Names.coolingHeadTemp);
-    }
-    public void setOilTemp(Boolean oilTemp) {
-        if (oilTemp != null) {
-            parameters.put(Names.oilTemp, oilTemp);
-        } else {
-        	parameters.remove(Names.oilTemp);
-        }
-    }
-    public Boolean getOilTemp() {
-        return (Boolean) parameters.get(Names.oilTemp);
-    }
-    public void setIntakeAirTemp(Boolean intakeAirTemp) {
-        if (intakeAirTemp != null) {
-            parameters.put(Names.intakeAirTemp, intakeAirTemp);
-        } else {
-        	parameters.remove(Names.intakeAirTemp);
-        }
-    }
-    public Boolean getIntakeAirTemp() {
-        return (Boolean) parameters.get(Names.intakeAirTemp);
-    }
-    public void setGearShiftAdvice(Boolean gearShiftAdvice) {
-        if (gearShiftAdvice != null) {
-            parameters.put(Names.gearShiftAdvice, gearShiftAdvice);
-        } else {
-        	parameters.remove(Names.gearShiftAdvice);
-        }
-    }
-    public Boolean getGearShiftAdvice() {
-        return (Boolean) parameters.get(Names.gearShiftAdvice);
-    }
-    public void setAcceleration(Boolean acceleration) {
-        if (acceleration != null) {
-            parameters.put(Names.acceleration, acceleration);
-        } else {
-        	parameters.remove(Names.acceleration);
-        }
-    }
-    public Boolean getAcceleration() {
-        return (Boolean) parameters.get(Names.acceleration);
     }
     public void setAccPedalPosition(Boolean accPedalPosition) {
         if (accPedalPosition != null) {
@@ -333,56 +220,6 @@ public class SubscribeVehicleData extends RPCRequest {
         return null;
     }
 
-    public void setClutchPedalPosition(Boolean clutchPedalPosition) {
-        if (clutchPedalPosition != null) {
-            parameters.put(Names.clutchPedalPosition, clutchPedalPosition);
-        } else {
-        	parameters.remove(Names.clutchPedalPosition);
-        }
-    }
-    public Boolean getClutchPedalPosition() {
-        return (Boolean) parameters.get(Names.clutchPedalPosition);
-    }
-    public void setReverseGearStatus(Boolean reverseGearStatus) {
-        if (reverseGearStatus != null) {
-            parameters.put(Names.reverseGearStatus, reverseGearStatus);
-        } else {
-        	parameters.remove(Names.reverseGearStatus);
-        }
-    }
-    public Boolean getReverseGearStatus() {
-        return (Boolean) parameters.get(Names.reverseGearStatus);
-    }
-    public void setAccTorque(Boolean accTorque) {
-        if (accTorque != null) {
-            parameters.put(Names.accTorque, accTorque);
-        } else {
-        	parameters.remove(Names.accTorque);
-        }
-    }
-    public Boolean getAccTorque() {
-        return (Boolean) parameters.get(Names.accTorque);
-    }
-    public void setEvInfo(Boolean evInfo) {
-        if (evInfo != null) {
-            parameters.put(Names.evInfo, evInfo);
-        } else {
-        	parameters.remove(Names.evInfo);
-        }
-    }
-    public Boolean getEvInfo() {
-        return (Boolean) parameters.get(Names.evInfo);
-    }
-    public void setAmbientLightStatus(Boolean ambientLightStatus) {
-        if (ambientLightStatus != null) {
-            parameters.put(Names.ambientLightStatus, ambientLightStatus);
-        } else {
-        	parameters.remove(Names.ambientLightStatus);
-        }
-    }
-    public Boolean getAmbientLightStatus() {
-        return (Boolean) parameters.get(Names.ambientLightStatus);
-    }
     public void setECallInfo(Boolean eCallInfo) {
         if (eCallInfo != null) {
             parameters.put(Names.eCallInfo, eCallInfo);

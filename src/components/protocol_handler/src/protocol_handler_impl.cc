@@ -33,13 +33,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "protocol_handler/protocol_handler_impl.h"
+
 #include <memory.h>
 
 #include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/session_observer.h"
-#include "protocol_handler/protocol_handler_impl.h"
-#include "utils/macro.h"
 #include "config_profile/profile.h"
+
 namespace protocol_handler {
 
 log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
@@ -62,7 +62,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_(
           "MessagesFromMobileAppHandler", this,
           threads::ThreadOptions(
-                                 profile::Profile::instance()->thread_min_stach_size()
+                                 profile::Profile::instance()->thread_min_stack_size()
           )),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,

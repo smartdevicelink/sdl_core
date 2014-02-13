@@ -204,14 +204,21 @@ public class AppSetUpDialog extends DialogFragment {
                         if (!success) {
                             Log.w(LOG_TAG, "Can't save selected protocol properties");
                         }
-                        if (isHearBeat.isChecked()) {
-                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
-                        } else {
-                            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
-                        }
+
+                        setupHeartbeat(isHearBeat);
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();
+    }
+
+    private void setupHeartbeat(CheckBox isHearBeat) {
+        //TODO APPLINK-5674 disabled heartbeat
+        isHearBeat.setChecked(false);
+        if (isHearBeat.isChecked()) {
+            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
+        } else {
+            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
+        }
     }
 
     private void showNSDUnsupportedView(View view) {

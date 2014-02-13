@@ -35,7 +35,6 @@
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_manager.h"
-#include "utils/macro.h"
 
 using namespace std;
 using namespace threads::impl;
@@ -106,27 +105,27 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   bool success = false;
   pthread_attr_t attributes;
-  pthread_attr_init(&attributes);
+  SKIP_RETURN_VALUE(pthread_attr_init(&attributes));
 
   if (!thread_options_.is_joinable()) {
-    pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+    SKIP_RETURN_VALUE(pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED));
   }
 
   // 0 - default value
   if (thread_options_.stack_size() > 0
       && thread_options_.stack_size() >= Thread::kMinStackSize) {
-    pthread_attr_setstacksize(&attributes, thread_options_.stack_size());
+    SKIP_RETURN_VALUE(pthread_attr_setstacksize(&attributes, thread_options_.stack_size()));
   }
 
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
-  pthread_setname_np(thread_handle_, name_.c_str());
+  SKIP_RETURN_VALUE(pthread_setname_np(thread_handle_, name_.c_str()));
   LOG4CXX_INFO(logger_,"Created thread: " << name_);
   ThreadManager::instance()->RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
 
-  pthread_attr_destroy(&attributes);
+  SKIP_RETURN_VALUE(pthread_attr_destroy(&attributes));
   return success;
 }
 
@@ -150,7 +149,7 @@ void Thread::stop() {
 }
 
 void Thread::join() {
-  pthread_join(thread_handle_, NULL);
+  SKIP_RETURN_VALUE(pthread_join(thread_handle_, NULL));
   isThreadRunning_ = false;
 }
 

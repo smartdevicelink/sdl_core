@@ -33,7 +33,6 @@
 #include "config_profile/profile.h"
 
 #include <string.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "config_profile/ini_file.h"
@@ -42,7 +41,8 @@
 
 namespace {
 const char* kMainSection = "MAIN";
-const uint32_t kDefaultHeartBeatTimeout = 5;
+// Heartbeat is disabled by default
+const uint32_t kDefaultHeartBeatTimeout = 0;
 }
 
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
@@ -153,7 +153,7 @@ const uint16_t& Profile::audio_streaming_port() const {
   return audio_streaming_port_;
 }
 
-const uint64_t& Profile::thread_min_stach_size() const {
+const uint64_t& Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
 }
 

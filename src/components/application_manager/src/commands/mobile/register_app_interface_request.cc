@@ -330,6 +330,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     response_params[hmi_response::vehicle_type] =
         *hmi_capabilities.vehicle_type();
   }
+  if (hmi_capabilities.prerecorded_speech()) {
+    response_params[strings::prerecorded_speech] =
+        *(hmi_capabilities.prerecorded_speech());
+  }
 
   SendResponse(true, result, "", params);
 }

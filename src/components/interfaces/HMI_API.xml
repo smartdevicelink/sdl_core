@@ -303,6 +303,15 @@
   <element name="TEXT" internal_name="VR_TEXT" />
 </enum>
 
+<enum name="PrerecordedSpeech">
+  <description>Contains a list of prerecorded speech items present on the platform.</description>
+  <element name="HELP_JINGLE" />
+  <element name="INITIAL_JINGLE" />
+  <element name="LISTEN_JINGLE" />
+  <element name="POSITIVE_JINGLE" />
+  <element name="NEGATIVE_JINGLE" />
+</enum>
+
 <enum name="TBTState">
   <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
   <element name="ROUTE_UPDATE_REQUEST" />
@@ -463,6 +472,9 @@
   <element name="cmdIcon">
     <description>The image field for AddCommand</description>
   </element>
+  <element name="appIcon">
+    <description>The image field for the app icon (set by setAppIcon)</description>
+  </element>
   <element name="graphic">
     <description>The image field for Show</description>
   </element>
@@ -472,7 +484,6 @@
   <element name="showConstantTBTNextTurnIcon">
     <description>The secondary image field for ShowConstantTBT</description>
   </element>
-  <element name="nextTurnIcon"/>
 </enum>
 
 <enum name="TextAlignment">
@@ -601,6 +612,10 @@
   <element name="FIFTH">
   </element>
   <element name="SIXTH">
+  </element>
+  <element name="SEVENTH">
+  </element>
+  <element name="EIGHTH">
   </element>
 </enum>
 
@@ -909,6 +924,9 @@
   <element name="GRAPHIC_PNG" />
   <element name="AUDIO_WAVE" />
   <element name="AUDIO_MP3" />
+  <element name="AUDIO_AAC" />
+  <element name="BINARY" />
+  <element name="JSON" />
 </enum>
 
 <enum name="RequestType">
@@ -1265,6 +1283,9 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
+  <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true">
+    <description>A set of all fields that support images. See ImageField</description>
+  </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
@@ -1272,6 +1293,15 @@
   </param>
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  </param>
+  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true">
+    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
+  </param>
+  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
+    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
+  </param>
+  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
   </param>
 </struct>
 
@@ -1815,15 +1845,6 @@
         <description>Flag to indicate if applications data check was successfull</description>
       </param>
     </function>
-    <function name="OnResumeResult" messagetype="notification">
-      <description>Issued by HMI to notify SDL about application resumption check.</description>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of the registered application that will be resumed</description>
-      </param>
-      <param name="result" type="Boolean" mandatory="true">
-        <description>Flag to indicate if applications data check was successfull</description>
-      </param>
-    </function>
     <function name="OnExitApplication" messagetype="notification">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
       <param name="appID" type="Integer" mandatory="true">
@@ -1892,7 +1913,7 @@
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>    
-    </function>	
+    </function>
 
 </interface>
 
@@ -1992,7 +2013,11 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See SpeechCapabilities</description>
+    </param>
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See PrerecordedSpeech</description>
     </param>
   </function>
   <function name="Started" messagetype="notification">
@@ -2153,6 +2178,12 @@
     <param name="graphic" type="Common.Image" mandatory="false">
       <description>Path to optional dynamic image or the static binary image itself.  See Image. If omitted, the displayed graphic should not change.</description>
     </param>
+    <param name="secondaryGraphic" type="Common.Image" mandatory="false">
+      <description>
+        Image struct determining whether static or dynamic secondary image to display in app.
+        If omitted on supported displays, the displayed secondary graphic shall not change.
+      </description>
+    </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>App defined SoftButtons.</description>
       <description>If omitted, the currently displayed SoftButton values should not change.</description>
@@ -2198,7 +2229,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2264,7 +2295,7 @@
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
-          See StartTime.
+          See TimeFormat.
       	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
       	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
       	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
@@ -2516,7 +2547,7 @@
             audioPassThruDisplayText1: First line of text displayed during audio capture.
             audioPassThruDisplayText2: Second line of text displayed during audio capture.</description>
     </param>
-    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="false">
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
     </param>
   </function>
@@ -2722,6 +2753,27 @@
         Array of all reported DTCs on module. Each DTC is represented with 4 bytes:
         3 bytes for data
         1 byte for status
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="request">
+    <description>Non periodic vehicle diagnostic request</description>
+    <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Name of target ECU.</description>
+    </param>
+    <param name="messageLength" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Length of message (in bytes).</description>
+    </param>
+    <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message.
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="response">
+    <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message result.
       </description>
     </param>
   </function>
@@ -3195,7 +3247,7 @@
     <param name="gps" type="Common.GPSData" mandatory="false">
       <description>See GPSData</description>
     </param>
-    <param name="speed" type="Float" minvalue="-100" maxvalue="500" mandatory="false">
+    <param name="speed" type="Float" minvalue="0" maxvalue="700" mandatory="false">
       <description>The vehicle speed in kilometers per hour</description>
     </param>
     <param name="rpm" type="Integer" minvalue="0" maxvalue="20000" mandatory="false">
@@ -3222,7 +3274,7 @@
     <param name="tirePressure" type="Common.TireStatus" mandatory="false">
       <description>See TireStatus</description>
     </param>
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="false">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="false">
       <description>Odometer in km</description>
     </param>
     <param name="beltStatus" type="Common.BeltStatus" mandatory="false">

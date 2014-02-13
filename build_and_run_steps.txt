@@ -37,6 +37,8 @@
     3.2.2. SSH configuration on Linux host:
       3.2.2.1. Install Open-SSH server (For Xubuntu run "sudo apt-get install ssh", for Ubuntu run "sudo apt-get install openssh-server"). 
       3.2.2.1. Restart computer if necessary.
+    3.2.3 Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
+      Note: log4cxx crossbuild archive "log4cxx.qnx.cross.build.files.zip" is located in git folder git@adc.luxoft.com:applink/src/thirdPartyLibs/ 
 
   3.3. To run specially prepared QNX in virtual machine:
     3.3.1. Download and install VMware Player from https://my.vmware.com/web/vmware/downloads
@@ -96,12 +98,13 @@
 ==========================================================================================================
 5. Build SDL from source on Linux Host.
     Note: in above cases the <Project_Root_Src> is the path to 'Project_Root_Src' git folder (e.g. "/home/user_name/Work/Project_Root_src").
+    Note: for release build add "-DCMAKE_BUILD_TYPE=Release" to cmake arguments. For QNX+QtHMI build flag "-DCMAKE_BUILD_TYPE=Release" is plainly required.
   5.1. For QNX with Web HMI run command
     "mkdir <Project_QNX_Build_WebHMI>  && cd <Project_QNX_Build_WebHMI>
     "cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake".
   5.2. For QNX with QML HMI run command
     "mkdir <Project_QNX_Build_Qt>  && cd <Project_QNX_Build_Qt>
-    “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON”.
+    “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON -DCMAKE_BUILD_TYPE=Release”.
   5.3. For Linux with Web HMI run command
     "mkdir <Project_Linux_Build_WebHMI>  && cd <Project_Linux_Build_WebHMI>
     "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON".
@@ -139,4 +142,6 @@
   9.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   9.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+    Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/usr/etc/dbus-1/session.conf"
+          If not perform steps 4.2 and restart QNX server
   9.5. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.

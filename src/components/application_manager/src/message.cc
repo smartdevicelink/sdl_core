@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/message.h"
-#include "utils/macro.h"
 
 namespace {
 bool BinaryDataPredicate(uint8_t i, uint8_t j) {

@@ -303,6 +303,15 @@
   <element name="TEXT" internal_name="VR_TEXT" />
 </enum>
 
+<enum name="PrerecordedSpeech">
+  <description>Contains a list of prerecorded speech items present on the platform.</description>
+  <element name="HELP_JINGLE" />
+  <element name="INITIAL_JINGLE" />
+  <element name="LISTEN_JINGLE" />
+  <element name="POSITIVE_JINGLE" />
+  <element name="NEGATIVE_JINGLE" />
+</enum>
+
 <enum name="TBTState">
   <description>Enumeration that describes possible states of turn-by-turn client or SmartDeviceLink app.</description>
   <element name="ROUTE_UPDATE_REQUEST" />
@@ -463,6 +472,9 @@
   <element name="cmdIcon">
     <description>The image field for AddCommand</description>
   </element>
+  <element name="appIcon">
+    <description>The image field for the app icon (set by setAppIcon)</description>
+  </element>
   <element name="graphic">
     <description>The image field for Show</description>
   </element>
@@ -472,7 +484,6 @@
   <element name="showConstantTBTNextTurnIcon">
     <description>The secondary image field for ShowConstantTBT</description>
   </element>
-  <element name="nextTurnIcon"/>
 </enum>
 
 <enum name="TextAlignment">
@@ -913,6 +924,9 @@
   <element name="GRAPHIC_PNG" />
   <element name="AUDIO_WAVE" />
   <element name="AUDIO_MP3" />
+  <element name="AUDIO_AAC" />
+  <element name="BINARY" />
+  <element name="JSON" />
 </enum>
 
 <enum name="RequestType">
@@ -1258,7 +1272,7 @@
   <param name="imageResolution" type="Common.ImageResolution" mandatory="false">
     <description>The image resolution of this field.</description>
   </param>
-</struct> 
+</struct>
 
 <struct name="DisplayCapabilities">
   <description>Contains information about the display capabilities.</description>
@@ -1279,6 +1293,15 @@
   </param>
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
+  </param>
+  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true">
+    <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
+  </param>
+  <param name="screenParams" type="Common.ScreenParams" mandatory="false">
+    <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
+  </param>
+  <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
+    <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
   </param>
 </struct>
 
@@ -1990,7 +2013,11 @@
     <description>Method is invoked at system start-up. SDL requests the information about all supported hardware and their capabilities</description>
   </function>
   <function name="GetCapabilities" messagetype="response">
-    <param name="capabilities" type="Common.SpeechCapabilities" mandatory="true">
+    <param name="speechCapabilities" type="Common.SpeechCapabilities" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See SpeechCapabilities</description>
+    </param>
+    <param name="prerecordedSpeechCapabilities" type="Common.PrerecordedSpeech" minsize="1" maxsize="5" array="true" mandatory="true">
+      <description>See PrerecordedSpeech</description>
     </param>
   </function>
   <function name="Started" messagetype="notification">
@@ -2202,7 +2229,7 @@
   </function>
   <function name="AddSubMenu" messagetype="request">
     <description>Request from SDL to add a sub menu to the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true">
       <description>ID of the sub menu to be added. Unique for the application.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="true">
@@ -2523,9 +2550,6 @@
     <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application related to this RPC.</description>
-    </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
   </function>
@@ -2653,8 +2677,8 @@
   </function>
   <function name="StopStream" messagetype="response">
   </function>
-  
-    <function name="StartAudioStream" messagetype="request">
+
+  <function name="StartAudioStream" messagetype="request">
     <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
@@ -2729,6 +2753,27 @@
         Array of all reported DTCs on module. Each DTC is represented with 4 bytes:
         3 bytes for data
         1 byte for status
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="request">
+    <description>Non periodic vehicle diagnostic request</description>
+    <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Name of target ECU.</description>
+    </param>
+    <param name="messageLength" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Length of message (in bytes).</description>
+    </param>
+    <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+        Array of bytes comprising CAN message.
+      </description>
+    </param>
+  </function>
+  <function name="DiagnosticMessage" messagetype="response">
+    <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+        Array of bytes comprising CAN message result.
       </description>
     </param>
   </function>
@@ -3072,7 +3117,7 @@
   </function>
 
   <function name="OnOdometer" messagetype="notification">
-    <param name="odometer" type="Integer" minvalue="0" maxvalue="2000000" mandatory="true">
+    <param name="odometer" type="Integer" minvalue="0" maxvalue="17000000" mandatory="true">
       <description>Odometer in km</description>
     </param>
   </function>

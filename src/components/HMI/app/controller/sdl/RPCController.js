@@ -915,7 +915,7 @@ SDL.RPCController = Em.Object
 
                 /**
                  * Validate method for request IsReady
-                 * 
+                 *
                  * @param {Object}
                  *            params
                  */
@@ -2216,6 +2216,21 @@ SDL.RPCController = Em.Object
                  *            params
                  */
                 IsReady: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request DiagnosticMessage
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                DiagnosticMessage: function(params) {
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

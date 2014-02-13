@@ -193,7 +193,7 @@ Item {
                 "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                 "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
                 "magic": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
-                "total": 0
+                "startTimeForProgress": -1
             }
         }
 
@@ -502,6 +502,7 @@ Item {
             console.debug("exit")
             return sliderPopup.async;
         } else {
+            console.debug("exit")
             return { sliderPosition: position }
         }
     }

@@ -222,7 +222,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	/**
 	 * onButtonEvent being called indicates that a button event has occurred. 
 	 * 
-	 * @param response - Contains information about the notification sent from SYNC.
+	 * @param notification - Contains information about the notification sent from SYNC.
 	 */
 	public void onOnButtonEvent(OnButtonEvent notification);
 
@@ -230,7 +230,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * onButtonPress being called indicates that SYNC has a button has 
 	 * been pressed by the user. 
 	 * 
-	 * @param response - Contains information about the notification sent from SYNC.
+	 * @param notification - Contains information about the notification sent from SYNC.
 	 */
 	public void onOnButtonPress(OnButtonPress notification);
 	
@@ -324,4 +324,10 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onSessionStarted(byte sessionID, String correlationID);
 
     public void onAudioServiceStart();
+
+    /**
+     * Provide a callback to listener in case of USB problem
+     * https://code.google.com/p/android/issues/detail?id=20545
+     */
+    public void onUSBNoSuchDeviceException();
 }

@@ -134,23 +134,24 @@ Json::Value Float<minnum, maxnum, minden, maxden>::ToJsonValue() const {
   return Json::Value(value_);
 }
 
-template<size_t maxlen>
-String<maxlen>::String(const Json::Value& value)
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const Json::Value& value)
     : PrimitiveType(!value.isNull(),
-                    value.isString() && value.asString().length() < maxlen),
+                    (value.isString() &&
+                        length_range_.Includes(value.asString().length()))),
       value_(valid_ ? value.asString() : std::string()) {
 }
 
-template<size_t maxlen>
-String<maxlen>::String(const Json::Value& value, const std::string& def_value)
+template<size_t minlen, size_t maxlen>
+String<minlen, maxlen>::String(const Json::Value& value, const std::string& def_value)
     : PrimitiveType(true, (value.isString()
-                             && value.asString().length() < maxlen)
+                              && length_range_.Includes(value.asString().length()))
                           || value.isNull()),
       value_(value.isString() ? value.asString() : def_value) {
 }
 
-template<size_t maxlen>
-Json::Value String<maxlen>::ToJsonValue() const {
+template<size_t minlen, size_t maxlen>
+Json::Value String<minlen, maxlen>::ToJsonValue() const {
   return Json::Value(value_);
 }
 
@@ -195,7 +196,7 @@ Array<T, minsize, maxsize>::Array(const Json::Value& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
-  Json::Value array;
+  Json::Value array(Json::arrayValue);
   array.resize(this->size());
   for (size_t i = 0; i != this->size(); ++i) {
     array[Json::ArrayIndex(i)] = (this->operator [](i)).ToJsonValue();
@@ -220,7 +221,7 @@ Map<T, minsize, maxsize>::Map(const Json::Value& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Map<T, minsize, maxsize>::ToJsonValue() const {
-  Json::Value map;
+  Json::Value map(Json::objectValue);
   for (typename MapType::const_iterator i = this->begin(); i != this->end(); ++i) {
     map[i->first] = i->second.ToJsonValue();
   }

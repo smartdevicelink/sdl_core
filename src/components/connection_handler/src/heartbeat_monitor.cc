@@ -53,19 +53,32 @@ HeartBeatMonitor::~HeartBeatMonitor() {
 
 void HeartBeatMonitor::BeginMonitoring() {
   AssertRunningOnCreationThread();
-  LOG4CXX_INFO(g_logger, "Heart beat monitor: started");
-  timer_.start(heartbeat_timeout_seconds_);
+  if (heartbeat_timeout_seconds_ != 0) {
+    LOG4CXX_INFO(g_logger, "Heart beat monitor: monitoring connection "
+                 << connection_->connection_handle() << ", timeout "
+                 << heartbeat_timeout_seconds_ << " seconds");
+    timer_.start(heartbeat_timeout_seconds_);
+  } else {
+    LOG4CXX_INFO(g_logger, "Heart beat monitor: disabled");
+  }
 }
 
 void HeartBeatMonitor::TimeOut() {
-  LOG4CXX_INFO(g_logger, "Heart beat monitor: connection timed out, closing");
+  LOG4CXX_INFO(g_logger, "Heart beat monitor: connection "
+               << connection_->connection_handle() << " timed out, closing");
   connection_->Close();
 }
 
 void HeartBeatMonitor::KeepAlive() {
   AssertRunningOnCreationThread();
-  timer_.stop();
-  timer_.start(heartbeat_timeout_seconds_);
+  if (heartbeat_timeout_seconds_ != 0) {
+    LOG4CXX_INFO(
+        g_logger,
+        "Resetting heart beat timer for connection "
+          << connection_->connection_handle());
+    timer_.stop();
+    timer_.start(heartbeat_timeout_seconds_);
+  }
 }
 
 

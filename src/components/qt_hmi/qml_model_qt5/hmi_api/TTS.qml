@@ -93,7 +93,17 @@ Item {
     function getCapabilities() {
         console.log("Message Received - {method: 'TTS.GetCapabilities'}")
         return {
-            capabilities: Common.SpeechCapabilities.SC_TEXT
+            speechCapabilities: [
+                Common.SpeechCapabilities.SC_TEXT,
+                Common.SpeechCapabilities.PRE_RECORDED
+            ],
+            prerecordedSpeechCapabilities: [
+                Common.PrerecordedSpeech.HELP_JINGLE,
+                Common.PrerecordedSpeech.INITIAL_JINGLE,
+                Common.PrerecordedSpeech.LISTEN_JINGLE,
+                Common.PrerecordedSpeech.POSITIVE_JINGLE,
+                Common.PrerecordedSpeech.NEGATIVE_JINGLE
+            ]
         }
     }
 

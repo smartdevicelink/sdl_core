@@ -42,10 +42,10 @@ HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),
       messages_to_hmi_("hmi_message_handler::ToHMIThreadImpl", this,
                  threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stach_size())),
+                     profile::Profile::instance()->thread_min_stack_size())),
       messages_from_hmi_("hmi_message_handler::FromHMIThreadImpl", this,
                  threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stach_size())) {
+                     profile::Profile::instance()->thread_min_stack_size())) {
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {

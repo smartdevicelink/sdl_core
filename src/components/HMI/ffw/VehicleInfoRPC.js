@@ -156,6 +156,29 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                 break;
             }
 
+            case "VehicleInfo.DiagnosticMessage": {
+
+
+                Em.Logger.log("FFW." + request.method + "Response");
+
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {
+                        "messageDataResult": 200,
+                        "code": SDL.SDLModel.resultCode["SUCCESS"],
+                        "method": "VehicleInfo.IsReady"
+                    }
+                };
+
+                this.client.send(JSONMessage);
+
+                break;
+
+                break;
+            }
+
             case "VehicleInfo.SubscribeVehicleData": {
 
                 SDL.SDLVehicleInfoModel.SubscribeVehicleData(request);

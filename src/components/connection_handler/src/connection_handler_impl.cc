@@ -564,9 +564,6 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
 
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
-    LOG4CXX_INFO(
-        logger_,
-        "Resetting heart beat timer for connection " << connection_handle);
     it->second->KeepAlive();
   }
 }

@@ -957,17 +957,16 @@ std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform(
 std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
-  if(m_type == SmartType_Map)
-    {
-        std::transform(
+  if(m_type == SmartType_Map) {
+        SKIP_RETURN_VALUE(std::transform(
             m_data.map_value->begin(),
             m_data.map_value->end(),
             std::inserter(keys, keys.end()),
             //operator[](const SmartMap::value_type &pair){return pair.first;}
             &NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform
-        );
-    }
-    return keys;
+        ));
+  }
+  return keys;
 }
 
 bool SmartObject::keyExists(const std::string & Key) const {

@@ -1228,62 +1228,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which).equals(Names.ResetGlobalProperties)) {
                                 sendResetGlobalProperties();
                             } else if (adapter.getItem(which).equals(Names.SetMediaClockTimer)) {
-                                //something
-                                AlertDialog.Builder builder;
-                                AlertDialog dlg;
-
-                                Context mContext = adapter.getContext();
-                                LayoutInflater inflater = (LayoutInflater) mContext
-                                        .getSystemService(LAYOUT_INFLATER_SERVICE);
-                                View layout = inflater.inflate(R.layout.setmediaclock, null);
-                                final EditText txtHours = (EditText) layout.findViewById(R.id.txtHours);
-                                final EditText txtMinutes = (EditText) layout.findViewById(R.id.txtMinutes);
-                                final EditText txtSeconds = (EditText) layout.findViewById(R.id.txtSeconds);
-                                final Spinner spnUpdateMode = (Spinner) layout.findViewById(R.id.spnUpdateMode);
-
-                                ArrayAdapter<UpdateMode> spinnerAdapter = new ArrayAdapter<UpdateMode>(adapter.getContext(),
-                                        android.R.layout.simple_spinner_item, UpdateMode.values());
-                                spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                spnUpdateMode.setAdapter(spinnerAdapter);
-
-                                builder = new AlertDialog.Builder(mContext);
-                                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        SetMediaClockTimer msg = new SetMediaClockTimer();
-                                        msg.setCorrelationID(autoIncCorrId++);
-                                        UpdateMode updateMode = (UpdateMode) spnUpdateMode.getSelectedItem();
-                                        msg.setUpdateMode(updateMode);
-                                        try {
-                                            Integer hours = Integer.parseInt(txtHours.getText().toString());
-                                            Integer minutes = Integer.parseInt(txtMinutes.getText().toString());
-                                            Integer seconds = Integer.parseInt(txtSeconds.getText().toString());
-                                            StartTime startTime = new StartTime();
-                                            startTime.setHours(hours);
-                                            startTime.setMinutes(minutes);
-                                            startTime.setSeconds(seconds);
-                                            msg.setStartTime(startTime);
-                                        } catch (NumberFormatException e) {
-                                            // skip setting start time if parsing failed
-                                        }
-
-                                        try {
-                                            mLogAdapter.logMessage(msg, true);
-                                            if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                                            }
-                                        } catch (SyncException e) {
-                                            mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                                        }
-                                    }
-                                });
-                                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                    }
-                                });
-                                builder.setView(layout);
-                                dlg = builder.create();
-                                dlg.show();
+                                sendSetMediaClockTimer();
                             } else if (adapter.getItem(which).equals(Names.CreateInteractionChoiceSet)) {
                                 sendCreateInteractionChoiceSet();
                             } else if (adapter.getItem(which).equals(Names.DeleteInteractionChoiceSet)) {
@@ -1547,7 +1492,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                 final EditText txtECUNameDID = (EditText) layout.findViewById(R.id.txtECUNameDID);
                                 final EditText txtDIDLocation = (EditText) layout.findViewById(R.id.txtDIDLocation);
-                                final CheckBox chkEncryptedDID = (CheckBox) layout.findViewById(R.id.chkEncryptedDID);
 
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -1559,7 +1503,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             ReadDID msg = new ReadDID();
                                             msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                             msg.setDidLocation(didlocations);
-                                            msg.setEncrypted(chkEncryptedDID.isChecked());
                                             msg.setCorrelationID(autoIncCorrId++);
                                             mLogAdapter.logMessage(msg, true);
                                             if (mBoundProxyService != null) {
@@ -1896,13 +1839,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     try {
                                         GetVehicleData msg = new GetVehicleData();
 
-                                        final String[] methodNames = {"Gps", "Speed", "Rpm", "FuelLevel",
-                                                "FuelLevel_State", "InstantFuelConsumption", "ExternalTemperature",
-                                                "Prndl", "TirePressure", "Odometer", "BeltStatus", "BodyInformation",
-                                                "DeviceStatus", "DriverBraking", "WiperStatus", "HeadLampStatus",
-                                                "EngineTorque", "AccPedalPosition", "SteeringWheelAngle",
-                                                "ECallInfo", "AirbagStatus", "EmergencyEvent", "ClusterModeStatus",
-                                                "MyKey"};
+                                        final String[] methodNames =
+                                                { "Gps", "Speed", "Rpm",
+                                                        "FuelLevel",
+                                                        "FuelLevel_State",
+                                                        "InstantFuelConsumption",
+                                                        "ExternalTemperature",
+                                                        "Vin", "Prndl",
+                                                        "TirePressure",
+                                                        "Odometer",
+                                                        "BeltStatus",
+                                                        "BodyInformation",
+                                                        "DeviceStatus",
+                                                        "DriverBraking",
+                                                        "WiperStatus",
+                                                        "HeadLampStatus",
+                                                        "BatteryVoltage",
+                                                        "EngineTorque",
+                                                        "AccPedalPosition",
+                                                        "SteeringWheelAngle",
+                                                        "ECallInfo",
+                                                        "AirbagStatus",
+                                                        "EmergencyEvent",
+                                                        "ClusterModeStatus",
+                                                        "MyKey" };
                                         final String setterName = "set" + methodNames[which];
                                         setVehicleDataParam(msg, GetVehicleData.class, setterName);
 
@@ -3116,21 +3076,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 put(VehicleDataType.VEHICLEDATA_RPM, "Rpm");
                                                 put(VehicleDataType.VEHICLEDATA_FUELLEVEL, "FuelLevel");
                                                 put(VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE, "FuelLevel_State");
-                                                put(VehicleDataType.VEHICLEDATA_INSTANTFUELCONSUMPTION,
-                                                        "InstantFuelConsumption");
+                                                put(VehicleDataType.VEHICLEDATA_FUELCONSUMPTION, "InstantFuelConsumption");
                                                 put(VehicleDataType.VEHICLEDATA_EXTERNTEMP, "ExternalTemperature");
-                                                put(VehicleDataType.VEHICLEDATA_PRNDLSTATUS, "Prndl");
+//                                                put(VehicleDataType.VEHICLEDATA_VIN, "VIN");
+                                                put(VehicleDataType.VEHICLEDATA_PRNDL, "Prndl");
                                                 put(VehicleDataType.VEHICLEDATA_TIREPRESSURE, "TirePressure");
                                                 put(VehicleDataType.VEHICLEDATA_ODOMETER, "Odometer");
                                                 put(VehicleDataType.VEHICLEDATA_BELTSTATUS, "BeltStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BODYINFORMATION, "BodyInformation");
+                                                put(VehicleDataType.VEHICLEDATA_BODYINFO, "BodyInformation");
                                                 put(VehicleDataType.VEHICLEDATA_DEVICESTATUS, "DeviceStatus");
-                                                put(VehicleDataType.VEHICLEDATA_DRIVERBRAKING, "DriverBraking");
+                                                put(VehicleDataType.VEHICLEDATA_BRAKING, "DriverBraking");
                                                 put(VehicleDataType.VEHICLEDATA_WIPERSTATUS, "WiperStatus");
                                                 put(VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS, "HeadLampStatus");
+                                                put(VehicleDataType.VEHICLEDATA_BATTVOLTAGE, "BatteryVoltage");
                                                 put(VehicleDataType.VEHICLEDATA_ENGINETORQUE, "EngineTorque");
-                                                put(VehicleDataType.VEHICLEDATA_ACCPEDALPOSITION, "AccPedalPosition");
-                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEELANGLE, "SteeringWheelAngle");
+                                                put(VehicleDataType.VEHICLEDATA_ACCPEDAL, "AccPedalPosition");
+                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEEL, "SteeringWheelAngle");
                                                 put(VehicleDataType.VEHICLEDATA_ECALLINFO, "ECallInfo");
                                                 put(VehicleDataType.VEHICLEDATA_AIRBAGSTATUS, "AirbagStatus");
                                                 put(VehicleDataType.VEHICLEDATA_EMERGENCYEVENT, "EmergencyEvent");
@@ -3187,15 +3148,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         private String[] vehicleDataTypeNames() {
-                            final String[] vehicleDataTypeNames = new String[]{
-                                    "GPS", "Speed", "RPM", "Fuel Level", "Fuel Level State",
-                                    "Instant Fuel Consumption", "External Temp", "PRNDL Status",
-                                    "Tire Pressure", "Odometer", "Belt Status", "Body Information",
-                                    "Device Status", "Driver Braking", "Wiper Status", "Head Lamp Status",
-                                    "Engine Torque", "Acc Pedal Position", "Steering Wheel Angle",
-                                    "ECall Info", "Airbag Status", "Emergency Event", "Cluster Mode Status", "MyKey"
-                            };
-                            return vehicleDataTypeNames;
+                            return new String[]{ "GPS", "Speed", "RPM",
+                                    "Fuel Level", "Fuel Level State",
+                                    "Fuel Consumption", "External Temp",
+                                    "VIN", "PRNDL", "Tire Pressure",
+                                    "Odometer", "Belt Status",
+                                    "Body Info", "Device Status",
+                                    "Braking", "Wiper Status",
+                                    "Head Lamp Status", "Batt Voltage",
+                                    "Engine Torque", "Acc Pedal",
+                                    "Steering Wheel", "ECall Info",
+                                    "Airbag Status", "Emergency Event",
+                                    "Cluster Mode Status", "MyKey" };
                         }
 
                         private void sendSetGlobalProperties() {
@@ -3510,6 +3474,98 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
     }
 
+    private void sendSetMediaClockTimer() {
+        AlertDialog.Builder builder;
+
+        Context mContext = this;
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.setmediaclock, null);
+        final EditText txtStartHours = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeHours);
+        final EditText txtStartMinutes = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeMinutes);
+        final EditText txtStartSeconds = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_startTimeSeconds);
+        final EditText txtEndHours = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeHours);
+        final EditText txtEndMinutes = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeMinutes);
+        final EditText txtEndSeconds = (EditText) layout.findViewById(
+                R.id.setmediaclocktimer_endTimeSeconds);
+        final Spinner spnUpdateMode = (Spinner) layout.findViewById(
+                R.id.setmediaclocktimer_spnUpdateMode);
+
+        ArrayAdapter<UpdateMode> spinnerAdapter =
+                new ArrayAdapter<UpdateMode>(mContext,
+                        android.R.layout.simple_spinner_item,
+                        UpdateMode.values());
+        spinnerAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spnUpdateMode.setAdapter(spinnerAdapter);
+
+        builder = new AlertDialog.Builder(mContext);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                SetMediaClockTimer msg = new SetMediaClockTimer();
+                msg.setCorrelationID(autoIncCorrId++);
+                UpdateMode updateMode =
+                        (UpdateMode) spnUpdateMode.getSelectedItem();
+                msg.setUpdateMode(updateMode);
+
+                try {
+                    Integer hours = Integer.parseInt(
+                            txtStartHours.getText().toString());
+                    Integer minutes = Integer.parseInt(
+                            txtStartMinutes.getText().toString());
+                    Integer seconds = Integer.parseInt(
+                            txtStartSeconds.getText().toString());
+                    StartTime startTime = new StartTime();
+                    startTime.setHours(hours);
+                    startTime.setMinutes(minutes);
+                    startTime.setSeconds(seconds);
+                    msg.setStartTime(startTime);
+                } catch (NumberFormatException e) {
+                    // skip setting start time if parsing failed
+                }
+
+                try {
+                    Integer hours =
+                            Integer.parseInt(txtEndHours.getText().toString());
+                    Integer minutes = Integer.parseInt(
+                            txtEndMinutes.getText().toString());
+                    Integer seconds = Integer.parseInt(
+                            txtEndSeconds.getText().toString());
+                    StartTime endTime = new StartTime();
+                    endTime.setHours(hours);
+                    endTime.setMinutes(minutes);
+                    endTime.setSeconds(seconds);
+                    msg.setEndTime(endTime);
+                } catch (NumberFormatException e) {
+                    // skip setting start time if parsing failed
+                }
+
+                try {
+                    mLogAdapter.logMessage(msg, true);
+                    if (mBoundProxyService != null) {
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                    }
+                } catch (SyncException e) {
+                    mLogAdapter.logMessage("Error sending message: " + e,
+                            Log.ERROR, e);
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.setView(layout);
+        builder.show();
+    }
+
     /**
      * Sends RegisterAppInterface message.
      */
@@ -3645,7 +3701,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                 try {
                     if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxySendRegisterRequest(msg);
+                        mBoundProxyService.syncProxySendRPCRequest(msg);
                     }
                 } catch (SyncException e) {
                     mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
@@ -4388,5 +4444,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onSessionStarted(byte sessionID, String correlationID) {
         rpcSession.setSessionId(sessionID);
+    }
+
+    public void onUSBNoSuchDeviceException() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
+                builder.setTitle("USB problem");
+                builder.setMessage("Last session over USB was interrupted incorrectly.\nTry UNPLUG and PLUG USB cable again")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+
+                            }
+                        });
+                builder.create().show();
+            }
+        });
     }
 }

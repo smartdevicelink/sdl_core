@@ -135,7 +135,7 @@ class Profile : public utils::Singleton<Profile> {
     /**
      * @brief Returns desirable thread stack size
      */
-    const uint64_t& thread_min_stach_size() const;
+    const uint64_t& thread_min_stack_size() const;
 
     /**
       * @brief Returns true if audio mixing is supported
