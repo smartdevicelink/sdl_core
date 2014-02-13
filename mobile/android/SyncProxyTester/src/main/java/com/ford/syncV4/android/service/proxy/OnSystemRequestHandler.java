@@ -95,6 +95,12 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     @Override
     public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data) {
         // TODO : Logging to be refactored
+        if (data == null) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("Policy Snapshot data is null", Log.ERROR, true);
+            }
+            return;
+        }
         if (mLogAdapter != null) {
             mLogAdapter.logMessage("Policy Table Snapshot download request", Log.DEBUG, true);
         }
@@ -142,10 +148,10 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                     return;
                 }
 
-                SafeToast.showToastAnyThread("Policy Snapshot is found");
+                SafeToast.showToastAnyThread("Policy Update is found");
                 // TODO : Logging to be refactored
                 if (mLogAdapter != null) {
-                    mLogAdapter.logMessage("Policy Snapshot is found", Log.DEBUG, true);
+                    mLogAdapter.logMessage("Policy Update is found", Log.DEBUG, true);
                 }
 
                 try {
