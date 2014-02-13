@@ -62,7 +62,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_(
           "MessagesFromMobileAppHandler", this,
           threads::ThreadOptions(
-                                 profile::Profile::instance()->thread_min_stach_size()
+                                 profile::Profile::instance()->thread_min_stack_size()
           )),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,
