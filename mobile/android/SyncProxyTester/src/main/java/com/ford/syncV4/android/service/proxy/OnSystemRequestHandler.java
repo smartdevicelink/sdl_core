@@ -8,6 +8,7 @@ import android.util.Log;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.adapters.LogAdapter;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
@@ -117,8 +118,19 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
-                        "/policyTableUpdate.json";
+                String mPolicyTableUpdatePath = AppPreferencesManager.getPolicyTableUpdateFilePath();
+                //Environment.getExternalStorageDirectory() +
+                //        "/policyTableUpdate.json";
+
+                byte[] data = null;
+                if (mPolicyTableUpdatePath.equals("")) {
+                    data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+                } else {
+                    File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
+                    if (!mPolicyUpdateFile.exists()) {
+                        data = AppUtils.readDataFromFile(mPolicyUpdateFile);
+                    }
+                }
 
                 File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
                 if (!mPolicyUpdateFile.exists()) {
@@ -127,9 +139,6 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 }
 
                 SafeToast.showToastAnyThread("Policy Snapshot is found");
-
-                //final byte[] data = AppUtils.contentsOfResource(R.raw.policy_table_update);
-                final byte[] data = AppUtils.readDataFromFile(mPolicyUpdateFile);
 
                 try {
                     String mPolicyTableUpdateFileName = "PolicyTableUpdate";

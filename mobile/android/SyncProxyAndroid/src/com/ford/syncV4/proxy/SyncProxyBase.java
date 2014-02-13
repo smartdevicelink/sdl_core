@@ -1533,6 +1533,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void handleOnSystemRequest(Hashtable hash) {
         final OnSystemRequest msg = new OnSystemRequest(hash);
 
+        // This is to inform Tester about incoming OnSystemRequest
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onOnSystemRequest(msg);
+                }
+            });
+        } else {
+            _proxyListener.onOnSystemRequest(msg);
+        }
+
         if (RequestType.HTTP == msg.getRequestType()) {
             if (msg.getFileType() == FileType.JSON) {
                 Runnable request = new Runnable() {
@@ -1590,18 +1603,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 Log.w(TAG,
                         "OnSystemRequest FILE_RESUME: a required parameter is missing");
-            }
-        } else {
-            if (_callbackToUIThread) {
-                // Run in UI thread
-                _mainUIHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        _proxyListener.onOnSystemRequest(msg);
-                    }
-                });
-            } else {
-                _proxyListener.onOnSystemRequest(msg);
             }
         }
     }
