@@ -141,7 +141,7 @@
   9.2. Log as root and make sure you are not running Photon
   9.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   9.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
-    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.s
+    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
     Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/usr/etc/dbus-1/session.conf"
           If not perform steps 4.2 and restart QNX server
   9.5. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
