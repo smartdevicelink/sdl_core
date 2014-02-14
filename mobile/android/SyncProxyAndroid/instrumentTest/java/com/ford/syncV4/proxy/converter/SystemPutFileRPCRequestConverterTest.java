@@ -5,6 +5,7 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.MessageType;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -73,7 +74,7 @@ public class SystemPutFileRPCRequestConverterTest
         final byte sessionID = (byte) 0;
         final byte[] data = TestCommon.getRandomBytes(32);
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
@@ -100,7 +101,7 @@ public class SystemPutFileRPCRequestConverterTest
         final int correlationID = 1;
         final byte sessionID = (byte) 0;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setCorrelationID(correlationID);
 
@@ -135,7 +136,7 @@ public class SystemPutFileRPCRequestConverterTest
         final String fileName = "file2";
         final FileType fileType = FileType.AUDIO_MP3;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
@@ -186,7 +187,7 @@ public class SystemPutFileRPCRequestConverterTest
         final String fileName = "file2";
         final FileType fileType = FileType.AUDIO_MP3;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
@@ -235,7 +236,7 @@ public class SystemPutFileRPCRequestConverterTest
         final String fileName = "file2";
         final FileType fileType = FileType.AUDIO_MP3;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
@@ -270,7 +271,7 @@ public class SystemPutFileRPCRequestConverterTest
         final int offset = 4000;
         final String fileName = "file";
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName(fileName);
         msg.setBulkData(data);
         msg.setOffset(offset);
@@ -309,7 +310,7 @@ public class SystemPutFileRPCRequestConverterTest
         final FileType fileType = FileType.AUDIO_MP3;
         final int offset = 4000;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);

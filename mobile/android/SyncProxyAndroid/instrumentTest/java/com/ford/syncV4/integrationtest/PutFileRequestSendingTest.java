@@ -9,6 +9,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
@@ -85,7 +86,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         final byte[] data = TestCommon.getRandomBytes(dataSize);
         final int correlationID = 0;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
         proxy.sendRPCRequest(msg);
@@ -138,7 +139,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
         final byte[] data = TestCommon.getRandomBytes(dataSize);
         final int correlationID = 0;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
         proxy.sendRPCRequest(msg);

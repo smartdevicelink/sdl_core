@@ -306,7 +306,30 @@ public class RPCRequestFactory {
 				interactionMode, timeout, correlationID);
 		return msg;
 	}
-	
+
+    /**
+     * PutFile section
+     */
+
+    /**
+     * Build empty <b>PutFile</b> object
+     * @return empty <b>PutFile</b> object
+     */
+    public static PutFile buildPutFile() {
+        PutFile putFile = new PutFile();
+        return putFile;
+    }
+
+    /**
+     * Build <b>PutFile</b> object with provided parameters
+     *
+     * @param syncFileName   File name
+     * @param fileType       File type {@link com.ford.syncV4.proxy.rpc.enums.FileType}
+     * @param persistentFile Boolean value indicated whether this file is persistent or not
+     * @param fileData       Raw file data
+     * @param correlationID  Correlation Id of the object
+     * @return <b>PutFile</b> object
+     */
 	public static PutFile buildPutFile(String syncFileName, FileType fileType,
 			Boolean persistentFile, byte[] fileData, Integer correlationID) {
 		PutFile putFile = new PutFile();

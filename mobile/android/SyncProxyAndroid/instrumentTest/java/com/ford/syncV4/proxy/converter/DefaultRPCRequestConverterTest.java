@@ -7,6 +7,7 @@ import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -87,7 +88,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         final byte sessionID = (byte) 0;
         final byte[] data = TestCommon.getRandomBytes(32);
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
@@ -114,7 +115,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         final int correlationID = 1;
         final byte sessionID = (byte) 0;
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setCorrelationID(correlationID);
 
@@ -143,7 +144,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         final int dataSize = maxDataSize + extraDataSize;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
 
@@ -173,7 +174,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         final int dataSize = maxDataSize * 2;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
 
@@ -204,7 +205,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         final int dataSize = (maxDataSize * dataCopies) + extraDataSize;
         final byte[] data = TestCommon.getRandomBytes(dataSize);
 
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
         msg.setCorrelationID(correlationID);
 

@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy.converter;
 
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.Show;
 
@@ -38,20 +39,20 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
     }
 
     public void testGetConverterShouldReturnDefaultConverterForDefaultPutFile() {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         assertThat(factory.getConverterForRequest(msg),
                 instanceOf(DefaultRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldReturnDefaultConverterForNotSystemPutFile() {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSystemFile(false);
         assertThat(factory.getConverterForRequest(msg),
                 instanceOf(DefaultRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldReturnSystemPutFileConverterForSystemPutFile() {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSystemFile(true);
         assertThat(factory.getConverterForRequest(msg),
                 instanceOf(SystemPutFileRPCRequestConverter.class));
@@ -66,10 +67,10 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
     }
 
     public void testGetConverterShouldCacheSystemPutFileConverter() {
-        final PutFile msg1 = new PutFile();
+        final PutFile msg1 = RPCRequestFactory.buildPutFile();
         msg1.setSystemFile(true);
 
-        final PutFile msg2 = new PutFile();
+        final PutFile msg2 = RPCRequestFactory.buildPutFile();
         msg2.setSystemFile(true);
 
         final IRPCRequestConverter converter =

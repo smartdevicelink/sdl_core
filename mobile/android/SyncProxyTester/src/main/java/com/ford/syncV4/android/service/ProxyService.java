@@ -33,6 +33,7 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
@@ -1767,7 +1768,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mCorrelationId = getNextCorrelationID();
         }
 
-        PutFile newPutFile = new PutFile();
+        PutFile newPutFile = RPCRequestFactory.buildPutFile();
 
         if (putFile == null) {
             newPutFile.setFileType(fileType);
