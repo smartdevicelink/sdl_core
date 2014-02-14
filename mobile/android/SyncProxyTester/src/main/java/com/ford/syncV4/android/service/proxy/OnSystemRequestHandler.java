@@ -133,13 +133,12 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                     data = AppUtils.contentsOfResource(R.raw.policy_table_update);
                 } else {
                     File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
-                    if (!mPolicyUpdateFile.exists()) {
+                    if (mPolicyUpdateFile.exists()) {
                         data = AppUtils.contentsOfResource(mPolicyUpdateFile);
                     }
                 }
 
-                File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
-                if (!mPolicyUpdateFile.exists()) {
+                if (data == null) {
                     SafeToast.showToastAnyThread("Policy Snapshot could not be found");
                     // TODO : Logging to be refactored
                     if (mLogAdapter != null) {

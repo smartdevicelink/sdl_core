@@ -83,6 +83,9 @@ public class ProtocolMessage {
 	}
 
 	public void setBulkData(byte[] bulkData) {
+        if (bulkData == null) {
+            return;
+        }
 		if (this._bulkData != null)
 			this._bulkData = null;
 		this._bulkData = new byte[bulkData.length];
