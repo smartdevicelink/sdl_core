@@ -507,7 +507,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         }
                                     },
                                     {
-                                        "name": "nextTurnIcon",
+                                        "name": "showConstantTBTNextTurnIcon",
                                         "imageTypeSupported":
                                             [
                                                 "GRAPHIC_BMP",
@@ -525,7 +525,21 @@ FFW.UI = FFW.RPCObserver.create({
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],
                                 "graphicSupported": true,
-                                "imageCapabilities": ["DYNAMIC"]
+                                "imageCapabilities": ["DYNAMIC"],
+                                "templatesAvailable": ["TEMPLATE"],
+                                "screenParams": {
+                                    "resolution": {
+                                        "resolutionWidth": 800,
+                                        "resolutionHeight": 480
+                                    },
+                                    "touchEventAvailable": {
+                                        "pressAvailable": true,
+                                        "multiTouchAvailable": true,
+                                        "doublePressAvailable": false
+                                    }
+                                },
+                                "numCustomPresetsAvailable": 6
+
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",
