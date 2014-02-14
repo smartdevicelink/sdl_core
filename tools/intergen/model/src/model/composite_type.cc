@@ -121,6 +121,10 @@ const ConstantsCreator* Map::SupportsConstants() const {
 /*
  * Enum type
  */
+
+// static
+const char* Enum::kFunctionIdEnumName = "FunctionID";
+
 Enum::Enum(const Interface* interface,
            const std::string& name,
            Scope scope,

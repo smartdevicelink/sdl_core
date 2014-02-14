@@ -68,8 +68,11 @@ class DeclarationGenerator {
                                    bool skip_coma);
   void GenerateCodeForStructField(const Struct& strct,
                                   const Struct::Field& field,
+                                  CppFile* header_file,
                                   Namespace* name_space);
-  void GenerateCodeForStructFields(const Struct& strct, Namespace* name_space);
+  void GenerateCodeForStructFields(const Struct& strct,
+                                   CppFile* header_file,
+                                   Namespace* name_space);
  private:
   // Fields
   ModuleManager* module_manager_;

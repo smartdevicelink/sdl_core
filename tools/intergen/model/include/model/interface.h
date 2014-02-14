@@ -37,6 +37,7 @@
 #include <memory>
 
 #include "model/function.h"
+#include "model/composite_type.h"
 #include "model/type_registry.h"
 #include "utils/stl_utils.h"
 
@@ -47,7 +48,6 @@ class xml_node;
 namespace codegen {
 class API;
 class BuiltinTypeRegistry;
-class Enum;
 class Interface;
 class ModelFilter;
 
@@ -86,11 +86,13 @@ class Interface {
   // Follows parsed |xml| document validating and constructin type tree
   bool init(const pugi::xml_node& xml);
 
+  // Finds a type with |name| defined in this interface
   const Type* GetNamedType(const std::string& name) const;
 
  private:
   // Methods
-
+  // Finds (or creates, depending on generation prefs) function id
+  // enum constant given |function_id|
   const Enum::Constant* GetFunctionIdEnumConstant(
       const std::string& function_id);
   // Find and add all the functions from the given |xml_interafce|
@@ -110,6 +112,7 @@ class Interface {
   BuiltinTypeRegistry* builtin_type_registry_;
   const ModelFilter* model_filter_;
   bool auto_generate_function_ids_;
+  Enum function_ids_enum_;
   TypeRegistry type_registry_;
   MessagesMap requests_;
   utils::StdMapDeleter<MessagesMap> requests_deleter_;

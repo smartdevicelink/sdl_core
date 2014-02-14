@@ -76,6 +76,8 @@ class WordList {
 // Translate interface name to lower case
 std::string LowercaseIntefaceName(const Interface& interface);
 
+// Produces namespace name for |interface|.
+// Currently it just lower_case_interface_name
 std::string InterfaceNamespaceName(const Interface& interface);
 
 }  // namespace codegen

@@ -48,9 +48,11 @@ API::API(const ModelFilter* model_filter, bool auto_generate_func_ids)
 }
 
 bool API::init(const pugi::xml_document& xmldoc) {
+  // Search for interfaces defined directly in given root document
   if (!AddInterfaces(xmldoc)) {
     return false;
   }
+  // Then search for interfaces defined in <interfaces> elements
   for (pugi::xml_node i = xmldoc.child("interfaces"); i;
       i = i.next_sibling("interfaces")) {
     if (!AddInterfaces(i)) {

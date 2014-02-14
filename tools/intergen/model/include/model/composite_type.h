@@ -96,6 +96,10 @@ class Enum : public Type, public ConstantsCreator {
   class Constant;
   typedef std::list<Enum::Constant> ConstantsList;
   typedef std::map<std::string, Constant*> ConstantsByName;
+public:
+  // Constants
+  // Name of enum that enlists IDs of all interface functions
+  static const char* kFunctionIdEnumName;
  public:
   // Methods
   Enum(const Interface* interface,

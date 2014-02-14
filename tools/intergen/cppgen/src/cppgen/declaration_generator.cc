@@ -125,7 +125,7 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
                         Comment(strct->description()));
   {
     Section pub("public", &o);
-    GenerateCodeForStructFields(*strct, &header_file.types_ns());
+    GenerateCodeForStructFields(*strct, &header_file, &header_file.types_ns());
   }
   {
     Section pub("public", &o);
@@ -177,11 +177,13 @@ void DeclarationGenerator::GenerateCodeForEnumConstant(
 void DeclarationGenerator::GenerateCodeForStructField(
     const Struct& strct,
     const Struct::Field& field,
+    CppFile* header_file,
     Namespace* name_space) {
   ostream& o = name_space->os();
   RpcTypeNameGenerator::Availability availability =
       field.default_value() || field.is_mandatory() ?
           RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
+  header_file->IncludeType(*field.type());
   o << RpcTypeNameGenerator(&strct.interface(),
                             field.type(),
                             availability).result();
@@ -213,6 +215,7 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     strmfmt(o, "typedef {0}::{1} ResponseType;",
             header_file->responses_ns().name(), request.name()) << endl;
     GenerateCodeForStructFields(request,
+                                header_file,
                                 &header_file->requests_ns());
   }
   {
@@ -247,6 +250,7 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
   {
     Section pub("public", &o);
     GenerateCodeForStructFields(response,
+                                &header_file,
                                 &header_file.responses_ns());
   }
   {
@@ -282,6 +286,7 @@ void DeclarationGenerator::GenerateCodeForNotification(
   {
     Section pub("public", &o);
     GenerateCodeForStructFields(notification,
+                                &header_file,
                                 &header_file.notifications_ns());
   }
   {
@@ -307,12 +312,14 @@ void DeclarationGenerator::GenerateCodeForNotification(
 }
 
 void DeclarationGenerator::GenerateCodeForStructFields(
-    const Struct& strct, Namespace* name_space) {
+    const Struct& strct,
+    CppFile* header_file,
+    Namespace* name_space) {
   const FunctionMessage::ParametersList& params = strct.fields();
   for (FunctionMessage::ParametersList::const_iterator i = params.begin(), end =
       params.end(); i != end; ++i) {
     const FunctionMessage::Parameter& param = *i;
-    GenerateCodeForStructField(strct, param, name_space);
+    GenerateCodeForStructField(strct, param, header_file, name_space);
   }
 }
 

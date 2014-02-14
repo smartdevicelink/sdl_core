@@ -53,7 +53,7 @@ class Type;
 class TypeNameGenerator: public TypeCodeGenerator {
  public:
   // Generates primitive type name for |type|.
-  // |interface| specifies the interface which code is currently
+  // |interface| specifies the interface where code is currently
   // being generated. Depending on that relative or fully qualified
   // type names are generated.
   // Generates type name can be accessed with result() method.
@@ -93,7 +93,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   };
  public:
   // Generates name of type that is able to validate given primitive value
-  // |interface| specifies the interface which code is currently
+  // |interface| specifies the interface where code is currently
   // being generated. Depending on that relative or fully qualified
   // type names are generated.
   // Depending on |availability| option optionally wraps declaration into

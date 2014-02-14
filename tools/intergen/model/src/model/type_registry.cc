@@ -48,38 +48,32 @@
 
 using typesafe_format::strmfmt;
 
-namespace {
-const char* kFunctionIdEnumName = "FunctionID";
-}
-
 namespace codegen {
 
 TypeRegistry::TypeRegistry(const Interface* interface,
                            BuiltinTypeRegistry* builtin_type_registry,
+                           Enum* function_ids_enum,
                            const ModelFilter* model_filter,
                            bool create_function_id_enum)
     : interface_(interface),
       builtin_type_registry_(builtin_type_registry),
+      function_ids_enum_(function_ids_enum),
       model_filter_(model_filter),
       enums_deleter_(&enums_),
       structs_deleter_(&structs_),
       typedefs_deleter_(&typedefs_) {
   assert(builtin_type_registry_);
+  assert(function_ids_enum_);
   assert(model_filter_);
-  if (create_function_id_enum) {
-    enums_.push_back(
-          new Enum(interface_,
-                   kFunctionIdEnumName,
-                   Scope(),
-                   InternalScope(),
-                   Description()));
-    enum_by_name_[kFunctionIdEnumName] = enums_.back();
-  }
+}
+
+TypeRegistry::~TypeRegistry() {
 }
 
 bool TypeRegistry::init(const pugi::xml_node& xml) {
-  if (!AddEnums(xml) || !AddStructsAndTypedefs(xml))
+  if (!AddEnums(xml) || !AddStructsAndTypedefs(xml)) {
     return false;
+  }
   return true;
 }
 
@@ -125,19 +119,6 @@ const TypeRegistry::StructList& TypeRegistry::structs() const {
 
 const TypeRegistry::TypedefList& TypeRegistry::typedefs() const {
   return typedefs_;
-}
-
-Enum* TypeRegistry::GetFunctionIDEnum() const {
-  EnumByName::const_iterator res = enum_by_name_.find(kFunctionIdEnumName);
-  if (res != enum_by_name_.end()) {
-    return res->second;
-  } else {
-    std::cerr << "FunctionID enum is not defined" << std::endl;
-    return NULL;
-  }
-}
-
-TypeRegistry::~TypeRegistry() {
 }
 
 // static
@@ -187,9 +168,15 @@ bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
     std::cerr << "Duplicate enum: " << name << std::endl;
     return false;
   }
-  enums_.push_back(new Enum(interface_, name, scope, internal_scope, description));
-  enum_by_name_[name] = enums_.back();
-  if (!AddEnumConstants(enums_.back(), xml_enum)) {
+  Enum* this_enum = NULL;
+  if (name == Enum::kFunctionIdEnumName) {
+    this_enum = function_ids_enum_;
+  } else {
+    enums_.push_back(new Enum(interface_, name, scope, internal_scope, description));
+    this_enum = enums_.back();
+    enum_by_name_[name] = this_enum;
+  }
+  if (!AddEnumConstants(this_enum, xml_enum)) {
     return false;
   }
   return true;

@@ -67,6 +67,13 @@ void CppInterfaceCodeGenerator::GenerateEnums() {
     declaration_generator_.GenerateCodeForEnum(e);
     definition_generator_.GenerateCodeForEnum(e);
   }
+
+  const Enum* func_id_enum = interface_->function_id_enum();
+  // Not all interfaces declare functions, avoid empty enum generation
+  if (!func_id_enum->constants().empty()) {
+    declaration_generator_.GenerateCodeForEnum(func_id_enum);
+    definition_generator_.GenerateCodeForEnum(func_id_enum);
+  }
 }
 
 void CppInterfaceCodeGenerator::GenerateStructs() {

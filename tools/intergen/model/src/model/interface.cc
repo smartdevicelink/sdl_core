@@ -64,8 +64,14 @@ Interface::Interface(const API* api,
       builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
       auto_generate_function_ids_(auto_generate_function_ids),
+      function_ids_enum_(this,
+                         Enum::kFunctionIdEnumName,
+                         Scope(),
+                         InternalScope(),
+                         Description()),
       type_registry_(this,
                      builtin_type_registry_,
+                     &function_ids_enum_,
                      model_filter,
                      auto_generate_function_ids_),
       requests_deleter_(&requests_),
@@ -127,17 +133,12 @@ const Interface::TypedefList& Interface::typedefs() const {
 }
 
 const Enum* Interface::function_id_enum() const {
-  return type_registry_.GetFunctionIDEnum();
+  return &function_ids_enum_;
 }
 
 const Enum::Constant* Interface::GetFunctionIdEnumConstant(
     const std::string& function_id) {
-  Enum* func_id_enum = type_registry_.GetFunctionIDEnum();
-  if (!func_id_enum) {
-    strmfmt(std::cerr, "Interface {0} has no FunctionID enum specified",
-            name_) << '\n';
-    return NULL;
-  }
+  Enum* func_id_enum = &function_ids_enum_;
 
   const Constant* func_id = func_id_enum->ConstantFor(function_id);
   if (!func_id && auto_generate_function_ids_) {

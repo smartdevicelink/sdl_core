@@ -9,9 +9,17 @@ set(GENERATED_LIB_HEADER_DEPENDENCIES
 # in CMAKE_CURRENT_BINARY_DIR
 # |xml_file_name| contains path to xml spec files
 # |generated_interface_names| should contain list of generated interfaces
+# if |AUTO_FUNC_IDS| is added to argument list, intergen is called with "-a"
+#   flag telling intergen to generate function ids automatically
 # from xml_file (intergen creates separate directory for every interface).
 # Their names are written lowercase_underscored_style.
 macro (GenerateInterfaceLibrary xml_file_name generated_interface_names)
+  set(options AUTO_FUNC_IDS)
+  cmake_parse_arguments(GenerateInterfaceLibrary "${options}" "" "" ${ARGN})
+  if (GenerateInterfaceLibrary_AUTO_FUNC_IDS)
+    set(intergen_flags "-a")
+  endif()
+
   foreach(interface_name ${generated_interface_names})
     set(HEADERS
         ${interface_name}/enums.h
@@ -25,7 +33,7 @@ macro (GenerateInterfaceLibrary xml_file_name generated_interface_names)
         ${interface_name}/validation.cc
     )
     add_custom_command( OUTPUT ${HEADERS} ${SOURCES}
-                        COMMAND ${INTERGEN_CMD} -f ${CMAKE_CURRENT_SOURCE_DIR}/${xml_file_name} -i ${interface_name}
+                        COMMAND ${INTERGEN_CMD} -f ${CMAKE_CURRENT_SOURCE_DIR}/${xml_file_name} -i ${interface_name} ${intergen_flags}
                         DEPENDS ${INTERGEN_CMD} ${xml_file_name}
                         COMMENT "Generating interface ${interface_name} from ${xml_file_name}"
                         VERBATIM
@@ -35,6 +43,10 @@ macro (GenerateInterfaceLibrary xml_file_name generated_interface_names)
       ${GENERATED_LIB_HEADER_DEPENDENCIES}
     )
     add_library(${interface_name} ${SOURCES})
-    target_link_libraries(${interface_name} ${GENERATED_LIB_DEPENDENCIES})
+
+    # |previous_interface| ensures that interface libraries built in same oreder
+    # they defined in |generated_interface_names|
+    target_link_libraries(${interface_name} ${GENERATED_LIB_DEPENDENCIES} ${previous_interface})
+    set(previous_interface ${interface_name})
   endforeach(interface_name)
 endmacro(GenerateInterfaceLibrary xml_file_name generated_interface_names)
