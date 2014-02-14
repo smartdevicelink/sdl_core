@@ -1,4 +1,5 @@
 [CW7]
++ Policy Table: read Snapshot file, response with Update file
 + Add secondaryGraphic parameter to Show UI.
 + SyncProxyAndroid SDK: Add secondaryGraphic parameter to Show request.
 - Remove encrypted parameter from ReadDID UI.
