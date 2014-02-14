@@ -1,5 +1,5 @@
 [CW7]
-+ SyncProxyAndroid SDK: add AudioPassThruCapabilities struct.
++ SyncProxyAndroid SDK: add AudioPassThruCapabilities struct. Add parameters to RegisterAppInterfaceResponse class.
 + SyncProxyAndroid SDK: add new parameters to SetDisplayLayoutResponse class.
 + Policy Table: read Snapshot file, response with Update file
 + Add secondaryGraphic parameter to Show UI.

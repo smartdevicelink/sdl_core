@@ -451,4 +451,6 @@ public class Names {
     public static final String endTime = "endTime";
     public static final String didResult = "didResult";
     public static final String secondaryGraphic = "secondaryGraphic";
+    public static final String audioPassThruCapabilities = "audioPassThruCapabilities";
+    public static final String supportedDiagModes = "supportedDiagModes";
 }
