@@ -1283,7 +1283,7 @@
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
-  <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true">
+  <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>A set of all fields that support images. See ImageField</description>
   </param>
   <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
@@ -1294,7 +1294,7 @@
   <param name="graphicSupported" type="Boolean" mandatory="true">
     <description>The display's persistent screen supports referencing a static or dynamic image.</description>
   </param>
-  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true">
+  <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" mandatory="true">
     <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
   </param>
   <param name="screenParams" type="Common.ScreenParams" mandatory="false">
@@ -2054,6 +2054,17 @@
     </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
+    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+      <description>
+      	Manually entered text selection, e.g. through keyboard
+      	Can be returned in lieu of choiceID, depending on trigger source
+      </description>
+    </param>    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+      <description>
+      	Manually entered text selection, e.g. through keyboard
+      	Can be returned in lieu of choiceID, depending on trigger source
+      </description>
+    </param>
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
