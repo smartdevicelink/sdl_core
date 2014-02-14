@@ -56,7 +56,7 @@
 #endif
 
 #if defined(__QNXNTO__)
-#define atomic_or(ptr, value) atomic_set((ptr), (value))
+#define atomic_or(ptr, value) atomic_set((unsigned*)(ptr), (unsigned)(value))
 #elif defined(__GNUG__)
 #define atomic_or(ptr, value) __sync_fetch_and_or((ptr), (value))
 #else
