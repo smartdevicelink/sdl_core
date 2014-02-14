@@ -2054,12 +2054,6 @@
     </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
-    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
-      <description>
-      	Manually entered text selection, e.g. through keyboard
-      	Can be returned in lieu of choiceID, depending on trigger source
-      </description>
-    </param>
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
