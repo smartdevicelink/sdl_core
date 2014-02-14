@@ -71,4 +71,10 @@
 #define OVERRIDE
 #endif
 
+/*
+* @brief Calculate size of na array
+* @param arr  array, which size need to calculate
+*/
+#define ARRAYSIZE(arr) sizeof (arr) / sizeof(*arr)
+
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_
