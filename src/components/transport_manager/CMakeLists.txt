@@ -78,5 +78,3 @@ target_link_libraries ("TransportManager" log4cxx)
 if (BUILD_BT_SUPPORT)
   target_link_libraries("TransportManager" bluetooth)
 endif()
-
-target_link_libraries("TransportManager" Resumption)

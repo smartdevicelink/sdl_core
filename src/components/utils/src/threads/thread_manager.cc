@@ -74,17 +74,6 @@ std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
   }
 }
 
-//static
-ThreadManager* ThreadManager::instance_ = 0;
-
-// static
-ThreadManager& ThreadManager::instance() {
-  if (!instance_) {
-    instance_ = new ThreadManager;
-  }
-  return *instance_;
-}
-
 ThreadManager::ThreadManager() {
   names_.insert(kUnknownName);
 }

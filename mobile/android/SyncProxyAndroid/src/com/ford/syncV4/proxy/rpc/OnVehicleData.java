@@ -4,7 +4,10 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.enums.ComponentVolumeStatus;
 import com.ford.syncV4.proxy.rpc.enums.PRNDL;
+import com.ford.syncV4.proxy.rpc.enums.VehicleDataEventStatus;
+import com.ford.syncV4.proxy.rpc.enums.WiperStatus;
 import com.ford.syncV4.util.DebugTool;
 
 public class OnVehicleData extends RPCNotification {
@@ -66,25 +69,37 @@ public class OnVehicleData extends RPCNotification {
     public Float getFuelLevel() {
     	return (Float) store.get(Names.fuelLevel);
     }
-    public void setAvgFuelEconomy(Float avgFuelEconomy) {
-    	if (avgFuelEconomy != null) {
-    		store.put(Names.avgFuelEconomy, avgFuelEconomy);
-    	} else {
-    		store.remove(Names.avgFuelEconomy);
-    	}
+    public void setFuelLevel_State(ComponentVolumeStatus fuelLevel_State) {
+        if (fuelLevel_State != null) {
+            parameters.put(Names.fuelLevel_State, fuelLevel_State);
+        } else {
+            parameters.remove(Names.fuelLevel_State);
+        }
     }
-    public Float getAvgFuelEconomy() {
-    	return (Float) store.get(Names.avgFuelEconomy);
+    public ComponentVolumeStatus getFuelLevel_State() {
+        Object obj = parameters.get(Names.fuelLevel_State);
+        if (obj instanceof ComponentVolumeStatus) {
+            return (ComponentVolumeStatus) obj;
+        } else if (obj instanceof String) {
+            ComponentVolumeStatus theCode = null;
+            try {
+                theCode = ComponentVolumeStatus.valueForString((String) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelLevel_State, e);
+            }
+            return theCode;
+        }
+        return null;
     }
-    public void setBatteryVoltage(Float batteryVoltage) {
-    	if (batteryVoltage != null) {
-    		store.put(Names.batteryVoltage, batteryVoltage);
-    	} else {
-    		store.remove(Names.batteryVoltage);
-    	}
+    public void setInstantFuelConsumption(Float instantFuelConsumption) {
+        if (instantFuelConsumption != null) {
+            parameters.put(Names.instantFuelConsumption, instantFuelConsumption);
+        } else {
+            parameters.remove(Names.instantFuelConsumption);
+        }
     }
-    public Float getBatteryVoltage() {
-    	return (Float) store.get(Names.batteryVoltage);
+    public Float getInstantFuelConsumption() {
+        return (Float) parameters.get(Names.instantFuelConsumption);
     }
     public void setExternalTemperature(Float externalTemperature) {
     	if (externalTemperature != null) {
@@ -148,35 +163,119 @@ public class OnVehicleData extends RPCNotification {
         }
         return null;
     }
-    public void setBatteryPackVoltage(Float batteryPackVoltage) {
-    	if (batteryPackVoltage != null) {
-    		store.put(Names.batteryPackVoltage, batteryPackVoltage);
-    	} else {
-    		store.remove(Names.batteryPackVoltage);
-    	}
+    public void setOdometer(Integer odometer) {
+        if (odometer != null) {
+            store.put(Names.odometer, odometer);
+        } else {
+            store.remove(Names.odometer);
+        }
     }
-    public Float getBatteryPackVoltage() {
-    	return (Float) store.get(Names.batteryPackVoltage);
+    public Integer getOdometer() {
+        return (Integer) store.get(Names.odometer);
     }
-    public void setBatteryPackCurrent(Float batteryPackCurrent) {
-    	if (batteryPackCurrent != null) {
-    		store.put(Names.batteryPackCurrent, batteryPackCurrent);
-    	} else {
-    		store.remove(Names.batteryPackCurrent);
-    	}
+    public void setBeltStatus(BeltStatus beltStatus) {
+        if (beltStatus != null) {
+            parameters.put(Names.beltStatus, beltStatus);
+        } else {
+            parameters.remove(Names.beltStatus);
+        }
     }
-    public Float getBatteryPackCurrent() {
-    	return (Float) store.get(Names.batteryPackCurrent);
+    public BeltStatus getBeltStatus() {
+        Object obj = parameters.get(Names.beltStatus);
+        if (obj instanceof BeltStatus) {
+            return (BeltStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new BeltStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.beltStatus, e);
+            }
+        }
+        return null;
     }
-    public void setBatteryPackTemperature(Integer batteryPackTemperature) {
-    	if (batteryPackTemperature != null) {
-    		store.put(Names.batteryPackTemperature, batteryPackTemperature);
-    	} else {
-    		store.remove(Names.batteryPackTemperature);
-    	}
+    public void setBodyInformation(BodyInformation bodyInformation) {
+        if (bodyInformation != null) {
+            parameters.put(Names.bodyInformation, bodyInformation);
+        } else {
+            parameters.remove(Names.bodyInformation);
+        }
     }
-    public Integer getBatteryPackTemperature() {
-    	return (Integer) store.get(Names.batteryPackTemperature);
+    public BodyInformation getBodyInformation() {
+        Object obj = parameters.get(Names.bodyInformation);
+        if (obj instanceof BodyInformation) {
+            return (BodyInformation) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new BodyInformation((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.bodyInformation, e);
+            }
+        }
+        return null;
+    }
+    public void setDeviceStatus(DeviceStatus deviceStatus) {
+        if (deviceStatus != null) {
+            parameters.put(Names.deviceStatus, deviceStatus);
+        } else {
+            parameters.remove(Names.deviceStatus);
+        }
+    }
+    public DeviceStatus getDeviceStatus() {
+        Object obj = parameters.get(Names.deviceStatus);
+        if (obj instanceof DeviceStatus) {
+            return (DeviceStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new DeviceStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.deviceStatus, e);
+            }
+        }
+        return null;
+    }
+    public void setDriverBraking(VehicleDataEventStatus driverBraking) {
+        if (driverBraking != null) {
+            parameters.put(Names.driverBraking, driverBraking);
+        } else {
+            parameters.remove(Names.driverBraking);
+        }
+    }
+    public VehicleDataEventStatus getDriverBraking() {
+        Object obj = parameters.get(Names.driverBraking);
+        if (obj instanceof VehicleDataEventStatus) {
+            return (VehicleDataEventStatus) obj;
+        } else if (obj instanceof String) {
+            VehicleDataEventStatus theCode = null;
+            try {
+                theCode = VehicleDataEventStatus.valueForString((String) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverBraking, e);
+            }
+            return theCode;
+        }
+        return null;
+    }
+    public void setWiperStatus(WiperStatus wiperStatus) {
+        if (wiperStatus != null) {
+            parameters.put(Names.wiperStatus, wiperStatus);
+        } else {
+            parameters.remove(Names.wiperStatus);
+        }
+    }
+    public WiperStatus getWiperStatus() {
+        Object obj = parameters.get(Names.wiperStatus);
+        if (obj instanceof WiperStatus) {
+            return (WiperStatus) obj;
+        } else if (obj instanceof String) {
+            WiperStatus theCode = null;
+            try {
+                theCode = WiperStatus.valueForString((String) obj);
+            } catch (Exception e) {
+                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.wiperStatus, e);
+            }
+            return theCode;
+        }
+        return null;
     }
 
     public void setHeadLampStatus(HeadLampStatus headLampStatus) {
@@ -213,35 +312,15 @@ public class OnVehicleData extends RPCNotification {
     public Integer getEngineTorque() {
     	return (Integer) store.get(Names.engineTorque);
     }
-    public void setOdometer(Integer odometer) {
-    	if (odometer != null) {
-    		store.put(Names.odometer, odometer);
-    	} else {
-    		store.remove(Names.odometer);
-    	}
+    public void setAccPedalPosition(Float accPedalPosition) {
+        if (accPedalPosition != null) {
+            parameters.put(Names.accPedalPosition, accPedalPosition);
+        } else {
+            parameters.remove(Names.accPedalPosition);
+        }
     }
-    public Integer getOdometer() {
-    	return (Integer) store.get(Names.odometer);
-    }
-    public void setTripOdometer(Integer tripOdometer) {
-    	if (tripOdometer != null) {
-    		store.put(Names.tripOdometer, tripOdometer);
-    	} else {
-    		store.remove(Names.tripOdometer);
-    	}
-    }
-    public Integer getTripOdometer() {
-    	return (Integer) store.get(Names.tripOdometer);
-    }
-    public void setSatRadioESN(String satRadioESN) {
-    	if (satRadioESN != null) {
-    		store.put(Names.satRadioESN, satRadioESN);
-    	} else {
-    		store.remove(Names.satRadioESN);
-    	}
-    }
-    public String getSatRadioESN() {
-    	return (String) store.get(Names.satRadioESN);
+    public Float getAccPedalPosition() {
+        return (Float) parameters.get(Names.accPedalPosition);
     }
 
     public void setSteeringWheelAngle(Float steeringWheelAngle) {
@@ -263,4 +342,123 @@ public class OnVehicleData extends RPCNotification {
         return null;
     }
 
+    public void setECallInfo(ECallInfo eCallInfo) {
+        if (eCallInfo != null) {
+            parameters.put(Names.eCallInfo, eCallInfo);
+        } else {
+            parameters.remove(Names.eCallInfo);
+        }
+    }
+
+    public ECallInfo getECallInfo() {
+        Object obj = parameters.get(Names.eCallInfo);
+        if (obj instanceof ECallInfo) {
+            return (ECallInfo) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new ECallInfo((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.eCallInfo, e);
+            }
+        }
+        return null;
+    }
+
+    public void setAirbagStatus(AirbagStatus airbagStatus) {
+        if (airbagStatus != null) {
+            parameters.put(Names.airbagStatus, airbagStatus);
+        } else {
+            parameters.remove(Names.airbagStatus);
+        }
+    }
+
+    public AirbagStatus getAirbagStatus() {
+        Object obj = parameters.get(Names.airbagStatus);
+        if (obj instanceof AirbagStatus) {
+            return (AirbagStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new AirbagStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.airbagStatus, e);
+            }
+        }
+        return null;
+    }
+
+    public void setEmergencyEvent(EmergencyEvent emergencyEvent) {
+        if (emergencyEvent != null) {
+            parameters.put(Names.emergencyEvent, emergencyEvent);
+        } else {
+            parameters.remove(Names.emergencyEvent);
+        }
+    }
+
+    public EmergencyEvent getEmergencyEvent() {
+        Object obj = parameters.get(Names.emergencyEvent);
+        if (obj instanceof EmergencyEvent) {
+            return (EmergencyEvent) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new EmergencyEvent((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.emergencyEvent, e);
+            }
+        }
+        return null;
+    }
+
+    public void setClusterModeStatus(ClusterModeStatus clusterModeStatus) {
+        if (clusterModeStatus != null) {
+            parameters.put(Names.clusterModeStatus, clusterModeStatus);
+        } else {
+            parameters.remove(Names.clusterModeStatus);
+        }
+    }
+
+    public ClusterModeStatus getClusterModeStatus() {
+        Object obj = parameters.get(Names.clusterModeStatus);
+        if (obj instanceof ClusterModeStatus) {
+            return (ClusterModeStatus) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new ClusterModeStatus((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.clusterModeStatus, e);
+            }
+        }
+        return null;
+    }
+
+    public void setMyKey(MyKey myKey) {
+        if (myKey != null) {
+            parameters.put(Names.myKey, myKey);
+        } else {
+            parameters.remove(Names.myKey);
+        }
+    }
+
+    public MyKey getMyKey() {
+        Object obj = parameters.get(Names.myKey);
+        if (obj instanceof MyKey) {
+            return (MyKey) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new MyKey((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.myKey, e);
+            }
+        }
+        return null;
+    }
 }

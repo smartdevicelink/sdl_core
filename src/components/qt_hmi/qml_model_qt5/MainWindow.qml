@@ -121,14 +121,8 @@ Rectangle {
 
                 NamedPipeNotifier {
                     id: notifier
-                    // we need absolute path here
-                    // because relative paths differ for Video and NamedPipeNotifier
-                    // we use url.toString() to obtain absolute path
-                    // and we use substring() to remove "file://" prefix
-                    property url pipe: "/tmp/video_stream_pipe"
-                    name: pipe.toString().substring(7)
                     onReadyRead: {
-                        player.source = pipe.toString().substring(7)
+                        player.source = name
                         player.play()
                     }
                 }
@@ -139,6 +133,10 @@ Rectangle {
                 onStopped: {
                     notifier.start()
 
+                }
+                function startStream(url) {
+                    notifier.name = url
+                    notifier.start()
                 }
             }
 

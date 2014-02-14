@@ -65,11 +65,6 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ConnectionHandler"));
 
-ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
-  static ConnectionHandlerImpl instance;
-  return &instance;
-}
-
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
@@ -310,7 +305,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       success = connection_handler_observer_->OnServiceStartedCallback(
           (it->second)->connection_device_handle(), session_key, service_type);
     }
-
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
       new_session_id = -1;
@@ -569,9 +563,6 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
 
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
-    LOG4CXX_INFO(
-        logger_,
-        "Resetting heart beat timer for connection " << connection_handle);
     it->second->KeepAlive();
   }
 }

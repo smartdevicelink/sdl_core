@@ -128,6 +128,31 @@ public class Show extends RPCRequest {
         }
         return null;
     }
+
+    public void setSecondaryGraphic(Image secondaryGraphic) {
+        if (secondaryGraphic != null) {
+            parameters.put(Names.secondaryGraphic, secondaryGraphic);
+        } else {
+            parameters.remove(Names.secondaryGraphic);
+        }
+    }
+
+    public Image getSecondaryGraphic() {
+        Object obj = parameters.get(Names.secondaryGraphic);
+        if (obj instanceof Image) {
+            return (Image) obj;
+        } else if (obj instanceof Hashtable) {
+            try {
+                return new Image((Hashtable) obj);
+            } catch (Exception e) {
+                DebugTool.logError(
+                        "Failed to parse " + getClass().getSimpleName() + "." +
+                                Names.secondaryGraphic, e);
+            }
+        }
+        return null;
+    }
+
     public Vector<SoftButton> getSoftButtons() {
         if (parameters.get(Names.softButtons) instanceof Vector<?>) {
 	    	Vector<?> list = (Vector<?>)parameters.get(Names.softButtons);

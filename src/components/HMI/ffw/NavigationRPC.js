@@ -191,6 +191,26 @@ FFW.Navigation = FFW.RPCObserver.create( {
 
                     break;
                 }
+                case "Navigation.StartAudioStream": {
+
+                    SDL.SDLModel.startAudioStream(request.params);
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
+                case "Navigation.StopAudioStream": {
+
+                    SDL.SDLModel.stoptAudioStream(request.params.appID);
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
                 case "Navigation.StartStream": {
 
                     SDL.SDLModel.startStream(request.params);

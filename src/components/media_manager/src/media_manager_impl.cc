@@ -53,11 +53,6 @@ namespace media_manager {
 log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaManagerImpl"));
 
-MediaManagerImpl* MediaManagerImpl::instance() {
-  static MediaManagerImpl instance;
-  return &instance;
-}
-
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
   , a2dp_player_(NULL)
@@ -151,11 +146,19 @@ void MediaManagerImpl::StartMicrophoneRecording(
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
                << output_file);
 #if defined(DEFAULT_MEDIA)
-  from_mic_listener_ = new FromMicRecorderListener(output_file);
+  application_manager::Application* app;
+  app= application_manager::ApplicationManagerImpl::instance()->
+      application(application_key);
+  std::string relative_file_path =
+      file_system::CreateDirectory(app->name());
+  relative_file_path += "/";
+  relative_file_path += output_file;
+
+  from_mic_listener_ = new FromMicRecorderListener(relative_file_path);
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-    ->set_output_file(output_file);
+    ->set_output_file(relative_file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
     ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
@@ -199,8 +202,8 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
                  profile::Profile::instance()->named_video_pipe_path().c_str());
       }
     #else
-      snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
-          profile::Profile::instance()->video_stream_file()).c_str());
+      DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
+          profile::Profile::instance()->video_stream_file()).c_str()));
     #endif
 
       application_manager::MessageHelper::SendNaviStartStream(url,
@@ -238,9 +241,9 @@ void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
                  profile::Profile::instance()->named_audio_pipe_path().c_str());
       }
   #else
-      snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+      DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                file_system::FullPath(profile::Profile::instance()->
-                                     audio_stream_file()).c_str());
+                                     audio_stream_file()).c_str()));
   #endif
 
       application_manager::MessageHelper::SendAudioStartStream(url,
@@ -287,8 +290,8 @@ void MediaManagerImpl::OnMobileMessageSent(
 void MediaManagerImpl::FramesProcessed(int32_t application_key,
                                        int32_t frame_number) {
   if (protocol_handler_) {
-    protocol_handler_->SendFramesNumber(application_key,
-                                        frame_number);
+    /*protocol_handler_->SendFramesNumber(application_key,
+                                        frame_number);*/
   }
 }
 

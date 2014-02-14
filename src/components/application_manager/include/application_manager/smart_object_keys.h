@@ -212,6 +212,7 @@ const char dtc_list[] = "dtcList";
 const char interaction_mode[] = "interactionMode";
 const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
+const char prerecorded_speech[] = "prerecordedSpeech";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -263,6 +264,8 @@ const char soft_button_capabilities[] = "softButtonCapabilities";
 const char image_supported[] = "imageSupported";
 const char button_capabilities[] = "buttonCapabilities";
 const char capabilities[] = "capabilities";
+const char speech_capabilities[] = "speechCapabilities";
+const char prerecorded_speech_capabilities[] = "prerecordedSpeechCapabilities";
 const char preset_bank_capabilities[] = "presetBankCapabilities";
 const char allowed[] = "allowed";
 const char vehicle_type[] = "vehicleType";

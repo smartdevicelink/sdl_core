@@ -53,6 +53,7 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/stl_utils.h"
+#include "utils/singleton.h"
 
 /**
  * \namespace connection_handler
@@ -65,14 +66,10 @@ namespace connection_handler {
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
   public transport_manager::TransportManagerListenerEmpty,
-  public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
+  public protocol_handler::SessionObserver,
+  public DevicesDiscoveryStarter,
+  public utils::Singleton<ConnectionHandlerImpl> {
   public:
-    /**
-     * \brief Singletone instantiator.
-     * \return pointer to ConnectionHandlerImpl instance.
-     */
-    static ConnectionHandlerImpl* instance();
-
     /**
      * \brief Destructor
      */
@@ -320,6 +317,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

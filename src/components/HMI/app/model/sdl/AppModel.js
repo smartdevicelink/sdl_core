@@ -67,6 +67,11 @@ SDL.SDLAppModel = Em.Object.extend({
         navigationStream: null,
 
         /**
+         * Navigation streaming url
+         */
+        navigationAudioStream: null,
+
+        /**
          * Chosen device name
          *
          * @type {String}

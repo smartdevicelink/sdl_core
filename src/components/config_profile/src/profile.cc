@@ -41,7 +41,8 @@
 
 namespace {
 const char* kMainSection = "MAIN";
-const uint32_t kDefaultHeartBeatTimeout = 5;
+// Heartbeat is disabled by default
+const uint32_t kDefaultHeartBeatTimeout = 0;
 }
 
 log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
@@ -82,11 +83,6 @@ Profile::Profile()
 }
 
 Profile::~Profile() {
-}
-
-Profile* Profile::instance() {
-  static Profile instance;
-  return &instance;
 }
 
 void Profile::config_file_name(const std::string& fileName) {
@@ -157,7 +153,7 @@ const uint16_t& Profile::audio_streaming_port() const {
   return audio_streaming_port_;
 }
 
-const uint64_t& Profile::thread_min_stach_size() const {
+const uint64_t& Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
 }
 

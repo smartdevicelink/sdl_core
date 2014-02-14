@@ -71,6 +71,8 @@ std::map<std::string, FunctionID::eType> kFunctionIDs {
   { "GetVehicleData", FunctionID::GetVehicleDataID },
   { "ReadDID", FunctionID::ReadDIDID },
   { "GetDTCs", FunctionID::GetDTCsID },
+  { "DiagnosticMessage", FunctionID::DiagnosticMessageID },
+  { "SystemRequest", FunctionID::SystemRequestID },
   { "ScrollableMessage", FunctionID::ScrollableMessageID },
   { "Slider", FunctionID::SliderID },
   { "ShowConstantTBT", FunctionID::ShowConstantTBTID },
@@ -164,7 +166,7 @@ bool PoliciesManager::Init() {
         hmi_levels.push_back(kHmiLevels[levels[j].asString()]);
       }
 
-      IGNORE_RETURN items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels));
+      SKIP_RETURN_VALUE(items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels)));
     }
   } catch (...) {
     return false;

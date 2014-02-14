@@ -158,10 +158,14 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
   if (pending_requests_.IsFinal(event_id)) {
 
-    bool result = ((hmi_apis::Common_Result::SUCCESS == tts_speak_result_code_) &&
-                   (hmi_apis::Common_Result::SUCCESS == navi_alert_maneuver_result_code_)) ||
-                   ((hmi_apis::Common_Result::INVALID_ENUM == tts_speak_result_code_) &&
-                   (hmi_apis::Common_Result::SUCCESS == navi_alert_maneuver_result_code_));
+    bool result = ((hmi_apis::Common_Result::SUCCESS ==
+        static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_)) &&
+                   (hmi_apis::Common_Result::SUCCESS ==
+        static_cast<hmi_apis::Common_Result::eType>(navi_alert_maneuver_result_code_))) ||
+                   ((hmi_apis::Common_Result::INVALID_ENUM ==
+        static_cast<hmi_apis::Common_Result::eType>(tts_speak_result_code_)) &&
+                   (hmi_apis::Common_Result::SUCCESS ==
+        static_cast<hmi_apis::Common_Result::eType>(navi_alert_maneuver_result_code_)));
 
     mobile_apis::Result::eType result_code =
         static_cast<mobile_apis::Result::eType>(std::max(tts_speak_result_code_,
@@ -173,7 +177,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       if (mobile_apis::Result::INVALID_ENUM != result_) {
           result_code = result_;
       } else if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-          static_cast<mobile_apis::Result::eType>(result_code)) {
+          static_cast<hmi_apis::Common_Result::eType>(result_code)) {
         result_code = mobile_apis::Result::WARNINGS;
         return_info =
             std::string("Unsupported phoneme type sent in a prompt").c_str();

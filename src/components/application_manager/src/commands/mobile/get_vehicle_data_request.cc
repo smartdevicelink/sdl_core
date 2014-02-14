@@ -102,7 +102,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code ||
-          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE == result_code
+          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE ==
+              static_cast<hmi_apis::Common_Result::eType>(result_code)
                     && message[strings::msg_params].length() > 1)) {
         result = true;
       }

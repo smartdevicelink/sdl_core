@@ -958,13 +958,13 @@ std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
   if(m_type == SmartType_Map) {
-        IGNORE_RETURN std::transform(
+        SKIP_RETURN_VALUE(std::transform(
             m_data.map_value->begin(),
             m_data.map_value->end(),
             std::inserter(keys, keys.end()),
             //operator[](const SmartMap::value_type &pair){return pair.first;}
             &NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform
-        );
+        ));
   }
   return keys;
 }

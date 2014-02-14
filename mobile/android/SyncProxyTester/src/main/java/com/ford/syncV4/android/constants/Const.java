@@ -55,6 +55,11 @@ public class Const {
 		public static final String PREFS_DEFAULT_TRANSPORT_IP = "10.10.0.1";
 	}
 
+    // Policy properties
+    public static final class Policy {
+        public static final String PREF_KEY_POLICY_UPDATE_FILE_PATH = "PolicyUpdateFilePath";
+    }
+
 	// Keys to pass objects via IntentHelper
 	public static final String INTENTHELPER_KEY_OBJECT = "IntentObject";
 	public static final String INTENTHELPER_KEY_OBJECTSLIST = "IntentObjectsList";
@@ -70,4 +75,5 @@ public class Const {
     public static final int JELLYBEAN_API_LEVEL = 16;
 
     public static final int REQUEST_FILE_OPEN = 50;
+    public static final int REQUEST_POLICY_UPDATE_FILE_OPEN = 51;
 }
