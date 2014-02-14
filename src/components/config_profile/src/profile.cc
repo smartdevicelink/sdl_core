@@ -460,7 +460,7 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "MAIN", "SpaceAvailable", value))
+                           "MAIN", "AppDirectoryQuota", value))
       && ('\0' != *value)) {
     app_dir_quota_ = atoi(value);
     if (app_dir_quota_ <= 0) {
