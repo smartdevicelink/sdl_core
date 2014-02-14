@@ -89,6 +89,12 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
         bool is_ready() const;
 
         /*
+         * Starts server
+         *
+         */
+        void start();
+
+        /*
          * Stops server
          *
          */
@@ -103,7 +109,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
 
       private:
         SocketStreamerAdapter* const server_;
-        int32_t socket_fd_;
+        int32_t new_socket_fd_;
         bool is_first_loop_;
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
@@ -111,10 +117,9 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
         DISALLOW_COPY_AND_ASSIGN(Streamer);
     };
 
-    int32_t socket_;
-    bool is_ready_;
-    Streamer* delegate_;
-    threads::Thread* thread_;
+    int32_t                                       socket_fd_;
+    bool                                          is_ready_;
+    threads::Thread                               thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
