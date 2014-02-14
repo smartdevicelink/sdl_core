@@ -110,7 +110,8 @@ void PerformInteractionRequest::Run() {
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
+  if ((mobile_apis::Result::SUCCESS != verification_result)&&
+      (mobile_apis::Result::UNSUPPORTED_RESOURCE != verification_result)) {
     LOG4CXX_ERROR_EXT(
         logger_,
         "MessageHelper::VerifyImageFiles return " << verification_result);
