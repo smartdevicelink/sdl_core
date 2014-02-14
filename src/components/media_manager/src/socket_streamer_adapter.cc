@@ -189,8 +189,6 @@ bool SocketStreamerAdapter::Streamer::exitThreadMain() {
 }
 
 void SocketStreamerAdapter::Streamer::start() {
-  LOG4CXX_INFO(logger, "Streamer::start");
-
   server_->socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (0 >= server_->socket_fd_) {
@@ -226,8 +224,6 @@ void SocketStreamerAdapter::Streamer::start() {
 }
 
 void SocketStreamerAdapter::Streamer::stop() {
-  LOG4CXX_INFO(logger, "Streamer::stop");
-
   is_client_connected_ = false;
   if (!new_socket_fd_) {
     return;
@@ -247,8 +243,6 @@ void SocketStreamerAdapter::Streamer::stop() {
 }
 
 bool SocketStreamerAdapter::Streamer::is_ready() const {
-  LOG4CXX_INFO(logger, "Streamer::is_ready");
-
   bool result = true;
   fd_set fds;
   FD_ZERO(&fds);
