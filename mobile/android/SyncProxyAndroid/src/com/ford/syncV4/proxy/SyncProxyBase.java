@@ -1532,20 +1532,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void handleOnSystemRequest(Hashtable hash) {
         final OnSystemRequest msg = new OnSystemRequest(hash);
-
-        // This is to inform Tester about incoming OnSystemRequest
-        if (_callbackToUIThread) {
-            // Run in UI thread
-            _mainUIHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    _proxyListener.onOnSystemRequest(msg);
-                }
-            });
-        } else {
-            _proxyListener.onOnSystemRequest(msg);
-        }
-
         if (RequestType.HTTP == msg.getRequestType()) {
             if (msg.getFileType() == FileType.JSON) {
                 Runnable request = new Runnable() {
@@ -1603,6 +1589,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 Log.w(TAG,
                         "OnSystemRequest FILE_RESUME: a required parameter is missing");
+            }
+        } else {
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _proxyListener.onOnSystemRequest(msg);
+                    }
+                });
+            } else {
+                _proxyListener.onOnSystemRequest(msg);
             }
         }
     }
@@ -1686,7 +1684,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
-        if (!_appInterfaceRegisterd && request.getFunctionName() != Names.RegisterAppInterface) {
+        if (!_appInterfaceRegisterd && !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
                 SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
                 throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
@@ -1694,8 +1692,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         if (_advancedLifecycleManagementEnabled) {
-            if (request.getFunctionName() == Names.RegisterAppInterface
-                    || request.getFunctionName() == Names.UnregisterAppInterface) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface)
+                    || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
                     SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
                     throw new SyncException("The RPCRequest, " + request.getFunctionName() +

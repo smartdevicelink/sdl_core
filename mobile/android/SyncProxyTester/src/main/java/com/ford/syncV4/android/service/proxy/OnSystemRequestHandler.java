@@ -134,7 +134,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 } else {
                     File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
                     if (!mPolicyUpdateFile.exists()) {
-                        data = AppUtils.readDataFromFile(mPolicyUpdateFile);
+                        data = AppUtils.contentsOfResource(mPolicyUpdateFile);
                     }
                 }
 

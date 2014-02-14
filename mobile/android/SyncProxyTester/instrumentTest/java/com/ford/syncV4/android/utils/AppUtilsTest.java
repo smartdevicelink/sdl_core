@@ -24,7 +24,7 @@ public class AppUtilsTest extends TestCase {
                 "/policyTableUpdate.json";
         File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
         assertTrue(mPolicyUpdateFile.exists());
-        byte[] data = AppUtils.readDataFromFile(mPolicyUpdateFile);
+        byte[] data = AppUtils.contentsOfResource(mPolicyUpdateFile);
         assertNotNull(data);
     }
 
@@ -47,7 +47,7 @@ public class AppUtilsTest extends TestCase {
                 "\"XML\"]}, \"GlossSee\": \"markup\" }}}}}";
         byte[] mData = mString.getBytes(Charset.forName("UTF-8"));
         AppUtils.saveDataToFile(mData, mPath);
-        byte[] mReadData = AppUtils.readDataFromFile(new File(mPath));
+        byte[] mReadData = AppUtils.contentsOfResource(new File(mPath));
         String mReadString = new String(mReadData);
 
         assertEquals(mData.length, mReadData.length);

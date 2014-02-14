@@ -35,29 +35,21 @@ public class AppUtils {
      * @return The resource file's contents
      */
     public static byte[] contentsOfResource(int resource) {
-        InputStream is = null;
+        return contentsOfResource(MainApp.getInstance().getResources().openRawResource(resource));
+    }
+
+    /**
+     * Read a File and return bytes array
+     * @param file
+     * @return
+     */
+    public static byte[] contentsOfResource(File file) {
         try {
-            is = MainApp.getInstance().getResources().openRawResource(resource);
-            ByteArrayOutputStream os = new ByteArrayOutputStream(is.available());
-            final int bufferSize = 4096;
-            final byte[] buffer = new byte[bufferSize];
-            int available;
-            while ((available = is.read(buffer)) >= 0) {
-                os.write(buffer, 0, available);
-            }
-            return os.toByteArray();
-        } catch (IOException e) {
-            Log.w(TAG, "Can't read icon file", e);
-            return null;
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.e(TAG, e.toString());
-                }
-            }
+            return contentsOfResource(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Contents Of Resource exception", e);
         }
+        return new byte[0];
     }
 
     /**
@@ -93,29 +85,28 @@ public class AppUtils {
         return result;
     }
 
-    /**
-     * Read a File and return bytes array
-     * @param file
-     * @return
-     */
-    public static byte[] readDataFromFile(File file) {
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-        BufferedInputStream bufferedInputStream = null;
+    private static byte[] contentsOfResource(InputStream inputStream) {
         try {
-            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
-            bufferedInputStream.read(bytes, 0, bytes.length);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            ByteArrayOutputStream byteArrayOutputStream =
+                    new ByteArrayOutputStream(inputStream.available());
+            final int bufferSize = 4096;
+            final byte[] buffer = new byte[bufferSize];
+            int available;
+            while ((available = inputStream.read(buffer)) >= 0) {
+                byteArrayOutputStream.write(buffer, 0, available);
+            }
+            return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.w(TAG, "Can't read file", e);
+            return null;
         } finally {
-            try {
-                bufferedInputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, e.toString());
+                }
             }
         }
-        return bytes;
     }
 }
