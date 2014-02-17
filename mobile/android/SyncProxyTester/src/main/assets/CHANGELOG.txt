@@ -1,3 +1,6 @@
+[CW8]
+* Improve application exit: close non RPC services first, then close RPC, then - exit.
+
 [CW7]
 + SyncProxyAndroid SDK: add AudioPassThruCapabilities struct. Add parameters to RegisterAppInterfaceResponse class.
 + SyncProxyAndroid SDK: add new parameters to SetDisplayLayoutResponse class.
