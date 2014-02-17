@@ -1,4 +1,5 @@
 [CW8]
++ Add DiagnosticMessage request UI.
 + SyncProxyAndroid SDK: Add DiagnosticMessage request and response classes.
 * Improve application exit: close non RPC services first, then close RPC, then - exit.
 

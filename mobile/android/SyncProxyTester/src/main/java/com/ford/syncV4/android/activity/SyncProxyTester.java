@@ -81,6 +81,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DiagnosticMessage;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
@@ -1140,6 +1141,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             addToFunctionsAdapter(adapter, Names.AlertManeuver);
             addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
+            addToFunctionsAdapter(adapter, Names.DiagnosticMessage);
             addToFunctionsAdapter(adapter, Names.RegisterAppInterface);
             addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
             addToFunctionsAdapter(adapter, GenericRequest.NAME);
@@ -1599,6 +1601,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             } else if (adapter.getItem(which).equals(
                                     Names.RegisterAppInterface)) {
                                 sendRegisterAppInterface();
+                            } else if (adapter.getItem(which)
+                                              .equals(Names.DiagnosticMessage)) {
+                                sendDiagnosticMessage();
                             } else if (adapter.getItem(which).equals(GenericRequest.NAME)) {
                                 sendGenericRequest();
                             }
@@ -3646,6 +3651,78 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void getProxyService() {
         mBoundProxyService = null;
         mBoundProxyService = MainApp.getInstance().getBoundProxyService();
+    }
+
+    private void sendDiagnosticMessage() {
+        final Context mContext = this;
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+                LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.diagnosticmessage, null);
+        final EditText txtTargetID = (EditText) layout.findViewById(
+                R.id.diagnosticmessage_txtTargetID);
+        final EditText txtMessageLength = (EditText) layout.findViewById(
+                R.id.diagnosticmessage_txtMessageLength);
+        final EditText txtMessageData = (EditText) layout.findViewById(
+                R.id.diagnosticmessage_txtMessageData);
+        final CheckBox useTargetID = (CheckBox) layout.findViewById(
+                R.id.diagnosticmessage_useTargetID);
+        final CheckBox useMessageLength = (CheckBox) layout.findViewById(
+                R.id.diagnosticmessage_useMessageLength);
+        final CheckBox useMessageData = (CheckBox) layout.findViewById(
+                R.id.diagnosticmessage_useMessageData);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                try {
+                    DiagnosticMessage msg = new DiagnosticMessage();
+                    msg.setCorrelationID(autoIncCorrId++);
+
+                    if (useTargetID.isChecked()) {
+                        msg.setTargetID(Integer.valueOf(
+                                txtTargetID.getText().toString()));
+                    }
+
+                    if (useMessageLength.isChecked()) {
+                        msg.setMessageLength(Integer.valueOf(
+                                txtMessageLength.getText().toString()));
+                    }
+
+                    if (useMessageData.isChecked()) {
+                        final String[] msgData = txtMessageData.getText()
+                                                               .toString()
+                                                               .split(JOIN_STRING);
+                        final Vector<Integer> data = new Vector<Integer>();
+                        for (String s : msgData) {
+                            data.add(Integer.valueOf(s));
+                        }
+                        msg.setMessageData(data);
+                    }
+
+                    mLogAdapter.logMessage(msg, true);
+
+                    try {
+                        if (mBoundProxyService != null) {
+                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                        }
+                    } catch (SyncException e) {
+                        mLogAdapter.logMessage("Error sending message: " + e,
+                                Log.ERROR, e);
+                    }
+                } catch (NumberFormatException e) {
+                    Toast.makeText(mContext, "Couldn't parse number",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        builder.setView(layout);
+        builder.show();
     }
 
     /**
