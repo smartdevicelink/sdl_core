@@ -327,7 +327,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Counter of the Services
      */
-    private AtomicInteger mServicesCounter;
+    private AtomicInteger mServicesCounter = new AtomicInteger();
     /**
      * Handler object to monitor stop proxy procedure for the Bluetooth connection.
      */
@@ -672,9 +672,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
-            if (mServicesCounter == null) {
-                mServicesCounter = new AtomicInteger();
-            }
             mServicesCounter.set(0);
             rpcSession.setSessionId(sessionId);
         }
