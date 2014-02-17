@@ -1870,7 +1870,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
-            Log.i(TAG, "Mobile Navi Service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Navi Service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -1881,7 +1882,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
-            Log.i(TAG, "Mobile Audio service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Audio service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeAudioService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -2744,6 +2746,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public boolean hasServiceInServicesPool(ServiceType serviceType) {
         return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
+    }
+
+    /**
+     * Return number of Services in current Session
+     *
+     * @return number of Services in current Session
+     */
+    public int getServicesNumber() {
+        return currentSession.getServicesNumber();
     }
 
     public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {

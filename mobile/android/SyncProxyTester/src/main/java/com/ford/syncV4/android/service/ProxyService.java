@@ -150,7 +150,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private HMILevel prevHMILevel = HMILevel.HMI_NONE;
 
     private boolean mWaitingForResponse = false;
-    private IProxyServiceEvent mServiceDestroyEvent;
+    private IProxyServiceEvent mProxyServiceEvent;
     private ICloseSession mCloseSessionCallback;
 
     private int mAwaitingInitIconResponseCorrelationID;
@@ -173,7 +173,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mediaButtonReceiver = new SyncReceiver();
         registerReceiver(mediaButtonReceiver, mediaIntentFilter);
 
-        startProxyIfNetworkConnected();
+        //startProxyIfNetworkConnected();
 
         mPutFileTransferManager = new PutFileTransferManager();
     }
@@ -233,7 +233,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return result;
     }
 
-    private void startProxyIfNetworkConnected() {
+    public void startProxyIfNetworkConnected() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, MODE_PRIVATE);
         int transportType = prefs.getInt(
                 Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
@@ -393,11 +393,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createInfoMessageForAdapter("ProxyService.onDestroy()");
 
         // In case service is destroying by System
-        if (mServiceDestroyEvent == null) {
+        if (mProxyServiceEvent == null) {
             // TODO : Reconsider this case, for instance if we just close Session
             //disposeSyncProxy();
         }
-        mServiceDestroyEvent = null;
+        setProxyServiceEvent(null);
         if (mEmbeddedAudioPlayer != null) {
             mEmbeddedAudioPlayer.release();
         }
@@ -409,8 +409,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mCloseSessionCallback = closeSessionCallback;
     }
 
-    public void destroyService(IProxyServiceEvent serviceDestroyEvent) {
-        mServiceDestroyEvent = serviceDestroyEvent;
+    public void setProxyServiceEvent(IProxyServiceEvent proxyServiceEvent) {
+        mProxyServiceEvent = proxyServiceEvent;
+    }
+
+    public void destroyService() {
         disposeSyncProxy();
     }
 
@@ -422,12 +425,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mSyncProxy.dispose();
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
-                if (mServiceDestroyEvent != null) {
-                    mServiceDestroyEvent.onDisposeError();
+                if (mProxyServiceEvent != null) {
+                    mProxyServiceEvent.onDisposeError();
                 }
             }
             mSyncProxy = null;
         }
+    }
+
+    public int getServicesNumber() {
+        return mSyncProxy.getServicesNumber();
+    }
+
+    public boolean hasServiceInServicesPool(ServiceType serviceType) {
+        return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(serviceType);
     }
 
     private void initialize() {
@@ -725,7 +736,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
         // In case we run exit() - this is a quick marker of exiting.
-        if (mServiceDestroyEvent != null) {
+        if (mProxyServiceEvent != null) {
             return;
         }
         try {
@@ -1336,44 +1347,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onMobileNaviStart() {
-        createDebugMessageForAdapter("Mobile Navi Service Started");
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onMobileNaviStarted();
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1);
         }
     }
 
     @Override
     public void onAudioServiceStart() {
-        createDebugMessageForAdapter("Audio Service Started");
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onAudioServiceStarted();
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1);
         }
     }
 
     @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
-        final int fNumber = frameReceivedNumber;
-        Log.d(TAG, "Mobile Ack Received = " + frameReceivedNumber);
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onMobileNavAckReceived(fNumber);
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onAckReceived(frameReceivedNumber, ServiceType.Mobile_Nav);
         }
     }
 
@@ -1438,38 +1427,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 "Session ID " + version + "; Correlation ID " + correlationID;
         createDebugMessageForAdapter(response);
 
-        if (serviceType == ServiceType.Audio_Service) {
-            mLogAdapter.logMessage("Audio service stopped", true);
-        } else if (serviceType == ServiceType.Mobile_Nav) {
-            mLogAdapter.logMessage("Navi service stopped", true);
-        } else if (serviceType == ServiceType.Bulk_Data) {
-            mLogAdapter.logMessage("Bulk Data service stopped", true);
-        } else if (serviceType == ServiceType.RPC) {
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceEnd(serviceType);
+        }
+        if (serviceType == ServiceType.RPC) {
             mLogAdapter.logMessage("RPC service stopped", true);
 
-            if (mServiceDestroyEvent != null) {
-                mServiceDestroyEvent.onDisposeComplete();
+            if (mProxyServiceEvent != null) {
+                mProxyServiceEvent.onDisposeComplete();
             }
 
             if (mCloseSessionCallback != null) {
                 mCloseSessionCallback.onCloseSessionComplete();
             }
-        } else {
-            mLogAdapter.logMessage("Unknown service '" + serviceType + "' stopped", true);
         }
     }
 
     @Override
     public void onSessionStarted(final byte sessionID, final String correlationID) {
-        createDebugMessageForAdapter("Session Started; currentSession id " + sessionID);
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onSessionStarted(sessionID, correlationID);
-                }
-            });
+        Log.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID);
         }
     }
 

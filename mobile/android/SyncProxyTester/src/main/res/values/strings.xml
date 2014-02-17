@@ -261,4 +261,6 @@
     <string name="nsd_unsupported_api_level_text">NSD is supported from Android 4.1 Jellybean</string>
     <string name="policy_files_setup_dialog_title">Set up Policy files</string>
 
+    <string name="rpc_service_not_started">RPS Service is not started</string>
+
 </resources>
