@@ -77,6 +77,7 @@ public class FunctionID {
             put(Names.ListFiles, 34);
             put(Names.SetAppIcon, 35);
             put(Names.SetDisplayLayout, 36);
+            put(Names.DiagnosticMessage, 37);
             put(Names.SystemRequest, 38);
 
             /*
