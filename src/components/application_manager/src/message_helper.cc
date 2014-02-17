@@ -83,7 +83,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
       // Image name must not be empty
       std::string file_name = buttonImage[strings::value].asString();
-      SKIP_RETURN_VALUE(file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end()));
+      file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end());
       if (file_name.empty()) {
         return false;
       }
@@ -93,7 +93,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 }
 
 }
-std::pair<const char*, VehicleDataType> kMapInitializer[] = {
+std::pair<const char*, VehicleDataType> kVehicleDataInitializer[] = {
 std::make_pair(strings::gps,  VehicleDataType::GPS),
 std::make_pair(strings::speed, VehicleDataType::SPEED),
 std::make_pair(strings::rpm, VehicleDataType::RPM),
@@ -125,8 +125,9 @@ std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
 std::make_pair(strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL),
 };
 
-const VehicleData MessageHelper::vehicle_data_(kMapInitializer,
-                                               kMapInitializer + ARRAYSIZE(kMapInitializer));
+const VehicleData MessageHelper::vehicle_data_(kVehicleDataInitializer,
+                                               kVehicleDataInitializer +
+                                               ARRAYSIZE(kVehicleDataInitializer));
 
 
 
@@ -159,7 +160,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(application_impl.system_context());
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -213,7 +214,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
       *app_type;
   }
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
 smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
@@ -271,7 +272,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   message[strings::msg_params][strings::reason] =
     static_cast<int32_t>(reason);
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
@@ -389,7 +390,7 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
       so_to_send[strings::msg_params] = *msg_params;
     }
     // TODO(PV): appropriate handling of result
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(set_app_icon));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(set_app_icon));
   }
 
   SendGlobalPropertiesToHMI(app);
@@ -434,7 +435,7 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
 
     (*ui_global_properties)[strings::msg_params] = ui_msg_params;
 
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties));
   }
 
   // TTS global properties
@@ -542,7 +543,7 @@ void MessageHelper::SendShowRequestToHMI(const Application* app) {
     (*ui_show)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     (*ui_show)[strings::msg_params] = (*app->show_command());
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_show));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_show));
   }
 }
 
@@ -570,7 +571,7 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(const Application* app) {
     (*navi_show_tbt)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     (*navi_show_tbt)[strings::msg_params] = (*app->tbt_show_command());
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_tbt));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_tbt));
   }
 }
 
@@ -616,7 +617,7 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
       }
       (*ui_command)[strings::msg_params] = msg_params;
 
-      SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_command));
+      DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_command));
     }
 
     // VR Interface
@@ -1096,7 +1097,7 @@ void MessageHelper::SendAudioStartStream(
 
   (*start_stream)[strings::msg_params] = msg_params;
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(start_stream));
+  DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(start_stream));
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {
