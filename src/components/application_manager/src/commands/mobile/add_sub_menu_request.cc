@@ -33,8 +33,6 @@
 
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -70,6 +68,12 @@ void AddSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_name].asString())) {
     LOG4CXX_ERROR(logger_, "DUPLICATE_NAME");
     SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
+
+  if (!CheckSubMenuName()) {
+    LOG4CXX_ERROR(logger_, "SubMenuName is not valid");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -123,6 +127,17 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
+}
+
+bool AddSubMenuRequest::CheckSubMenuName() {
+  const std::string& str =
+      (*message_)[strings::msg_params][strings::menu_name].asString();
+  if ((std::string::npos != str.find_first_of("\t\n")) ||
+      (std::string::npos == str.find_first_not_of(' '))) {
+    LOG4CXX_INFO(logger_, "Invalid subMenu name.");
+    return false;
+  }
+  return true;
 }
 
 }  // namespace commands
