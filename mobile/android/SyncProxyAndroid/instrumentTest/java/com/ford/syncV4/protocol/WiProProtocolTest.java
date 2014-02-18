@@ -86,6 +86,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
 
                 }
+
+                @Override
+                public void onStartServiceNackReceived(ServiceType serviceType) {
+
+                }
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
@@ -438,6 +443,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
 
             }
+
+            @Override
+            public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -552,6 +562,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+
+            }
+
+            @Override
+            public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
         });
