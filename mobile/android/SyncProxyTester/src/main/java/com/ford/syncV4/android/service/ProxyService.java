@@ -1406,7 +1406,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
-        Log.i(TAG, "onAppUnregisteredAfterLanguageChange " + msg.toString());
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
                         msg.getLanguage(), msg.getHmiDisplayLanguage());
@@ -1416,7 +1415,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason) {
-        Log.i(TAG, "onAppUnregisteredReason:" + reason);
         createDebugMessageForAdapter("onAppUnregisteredReason:" + reason);
     }
 

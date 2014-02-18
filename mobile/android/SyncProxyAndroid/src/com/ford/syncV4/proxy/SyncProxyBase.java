@@ -1266,6 +1266,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
+
+            if (message.getSessionID() != currentSession.getSessionId()) {
+                DebugTool.logWarning("Message is not from current session");
+                Log.w(TAG, "Message is not from current session");
+                return;
+            }
+
             // Dispatching logic
             if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
@@ -1329,7 +1336,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void setWiProVersion(byte version) {
         Log.i(TAG, "Setting WiPro version from " + (int) this._wiproVersion + " to " + (int) version);
-        Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
+        //Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
         this._wiproVersion = version;
     }
 

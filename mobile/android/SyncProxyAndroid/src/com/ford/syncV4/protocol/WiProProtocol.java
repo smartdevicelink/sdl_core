@@ -1,5 +1,7 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
@@ -16,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
+
+    private static final String TAG = "WiProProtocol";
 
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
@@ -175,6 +179,8 @@ public class WiProProtocol extends AbstractProtocol {
 
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
+
+        Log.d(TAG, "Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength));
 
         //Check for a version difference
         if (_version == 1) {
