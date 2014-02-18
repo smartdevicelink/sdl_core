@@ -212,8 +212,6 @@ public class AppSetUpDialog extends DialogFragment {
     }
 
     private void setupHeartbeat(CheckBox isHearBeat) {
-        //TODO APPLINK-5674 disabled heartbeat
-        isHearBeat.setChecked(false);
         if (isHearBeat.isChecked()) {
             SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
         } else {
