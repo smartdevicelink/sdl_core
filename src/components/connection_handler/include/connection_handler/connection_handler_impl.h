@@ -52,7 +52,9 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/lock.h"
 #include "utils/stl_utils.h"
+#include "utils/singleton.h"
 
 /**
  * \namespace connection_handler
@@ -65,14 +67,10 @@ namespace connection_handler {
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
   public transport_manager::TransportManagerListenerEmpty,
-  public protocol_handler::SessionObserver, public DevicesDiscoveryStarter {
+  public protocol_handler::SessionObserver,
+  public DevicesDiscoveryStarter,
+  public utils::Singleton<ConnectionHandlerImpl> {
   public:
-    /**
-     * \brief Singletone instantiator.
-     * \return pointer to ConnectionHandlerImpl instance.
-     */
-    static ConnectionHandlerImpl* instance();
-
     /**
      * \brief Destructor
      */
@@ -306,6 +304,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     ConnectionList connection_list_;
 
     /**
+     *  \brief Lock for applications list
+     */
+    sync_primitives::Lock connection_list_lock_;
+
+    /**
      * \brief List of sessions that must be resumed
      */
     ResumeSessionMap    resume_session_map_;
@@ -320,6 +323,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

@@ -33,4 +33,26 @@ public class AppPreferencesManager {
         return sharedPreferences.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.KEY_UNKNOWN);
     }
+
+    /**
+     * Set a path to the Policy Table Update file
+     *
+     * @param filePath path to the local file
+     */
+    public static void setPolicyTableUpdateFilePath(String filePath) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(Const.Policy.PREF_KEY_POLICY_UPDATE_FILE_PATH, filePath);
+        editor.commit();
+    }
+
+    /**
+     * Get a path to the Policy Table Update local file
+     *
+     * @return path to the file
+     */
+    public static String getPolicyTableUpdateFilePath() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getString(Const.Policy.PREF_KEY_POLICY_UPDATE_FILE_PATH, "");
+    }
 }

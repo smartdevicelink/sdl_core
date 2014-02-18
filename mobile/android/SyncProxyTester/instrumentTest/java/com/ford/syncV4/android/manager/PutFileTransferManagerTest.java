@@ -2,6 +2,7 @@ package com.ford.syncV4.android.manager;
 
 import android.util.SparseArray;
 
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 
@@ -29,7 +30,7 @@ public class PutFileTransferManagerTest extends TestCase {
     }
 
     public void testAddPutFileToAwaitArray() {
-        PutFile newPutFile = new PutFile();
+        PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
         newPutFile.setCorrelationID(mCorrelationId);
@@ -40,7 +41,7 @@ public class PutFileTransferManagerTest extends TestCase {
     }
 
     public void testRemovePutFileFromAwaitArray() {
-        PutFile newPutFile = new PutFile();
+        PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
         newPutFile.setCorrelationID(mCorrelationId);
@@ -55,7 +56,7 @@ public class PutFileTransferManagerTest extends TestCase {
     }
 
     public void testHasNextTrue() {
-        PutFile newPutFile = new PutFile();
+        PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
         newPutFile.setCorrelationID(mCorrelationId);
@@ -73,7 +74,7 @@ public class PutFileTransferManagerTest extends TestCase {
         int arraySize = 10;
         PutFile newPutFile;
         for (int i = 0; i < arraySize; i++) {
-            newPutFile = new PutFile();
+            newPutFile = RPCRequestFactory.buildPutFile();
             newPutFile.setFileType(FileType.AUDIO_MP3);
             newPutFile.setSyncFileName(mFileName);
             newPutFile.setCorrelationID(i);
@@ -92,7 +93,7 @@ public class PutFileTransferManagerTest extends TestCase {
         int arraySize = 10;
         PutFile newPutFile;
         for (int i = 0; i < arraySize; i++) {
-            newPutFile = new PutFile();
+            newPutFile = RPCRequestFactory.buildPutFile();
             newPutFile.setFileType(FileType.AUDIO_MP3);
             newPutFile.setSyncFileName(mFileName);
             newPutFile.setCorrelationID(i);

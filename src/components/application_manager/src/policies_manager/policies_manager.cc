@@ -44,66 +44,75 @@ namespace {
 const char kRpcsKey[] = "rpcs";
 const char kHmiLevelsKey[] = "hmi_levels";
 
-std::map<std::string, FunctionID::eType> kFunctionIDs {
-  { "RegisterAppInterface", FunctionID::RegisterAppInterfaceID },
-  { "UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID },
-  { "SetGlobalProperties", FunctionID::SetGlobalPropertiesID },
-  { "ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID },
-  { "AddCommand", FunctionID::AddCommandID },
-  { "DeleteCommand", FunctionID::DeleteCommandID },
-  { "AddSubMenu", FunctionID::AddSubMenuID },
-  { "DeleteSubMenu", FunctionID::DeleteSubMenuID },
-  { "CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID },
-  { "PerformInteraction", FunctionID::PerformInteractionID },
-  { "DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID },
-  { "Alert", FunctionID::AlertID },
-  { "Show", FunctionID::ShowID },
-  { "Speak", FunctionID::SpeakID },
-  { "SetMediaClockTimer", FunctionID::SetMediaClockTimerID },
-  { "EncodedSyncPData", FunctionID::EncodedSyncPDataID },
-  { "SyncPData", FunctionID::SyncPDataID },
-  { "PerformAudioPassThru", FunctionID::PerformAudioPassThruID },
-  { "EndAudioPassThru", FunctionID::EndAudioPassThruID },
-  { "SubscribeButton", FunctionID::SubscribeButtonID },
-  { "UnsubscribeButton", FunctionID::UnsubscribeButtonID },
-  { "SubscribeVehicleData", FunctionID::SubscribeVehicleDataID },
-  { "UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID },
-  { "GetVehicleData", FunctionID::GetVehicleDataID },
-  { "ReadDID", FunctionID::ReadDIDID },
-  { "GetDTCs", FunctionID::GetDTCsID },
-  { "ScrollableMessage", FunctionID::ScrollableMessageID },
-  { "Slider", FunctionID::SliderID },
-  { "ShowConstantTBT", FunctionID::ShowConstantTBTID },
-  { "AlertManeuver", FunctionID::AlertManeuverID },
-  { "UpdateTurnList", FunctionID::UpdateTurnListID },
-  { "ChangeRegistration", FunctionID::ChangeRegistrationID },
-  { "GenericResponse", FunctionID::GenericResponseID },
-  { "PutFile", FunctionID::PutFileID },
-  { "DeleteFile", FunctionID::DeleteFileID },
-  { "ListFiles",  FunctionID::ListFilesID },
-  { "SetAppIcon", FunctionID::SetAppIconID },
-  { "SetDisplayLayout", FunctionID::SetDisplayLayoutID },
-  { "OnHMIStatus", FunctionID::OnHMIStatusID },
-  { "OnAppInterfaceUnregistered", FunctionID::OnAppInterfaceUnregisteredID },
-  { "OnButtonEvent", FunctionID::OnButtonEventID },
-  { "OnButtonPress", FunctionID::OnButtonPressID },
-  { "OnVehicleData", FunctionID::OnVehicleDataID },
-  { "OnCommand", FunctionID::OnCommandID },
-  { "OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID },
-  { "OnTBTClientState", FunctionID::OnTBTClientStateID },
-  { "OnPermissionsChange", FunctionID::OnPermissionsChangeID },
-  { "OnAudioPassThru", FunctionID::OnAudioPassThruID },
-  { "OnLanguageChange", FunctionID::OnLanguageChangeID },
-  { "OnDriverDistraction", FunctionID::OnDriverDistractionID },
-  { "OnSyncPData", FunctionID::EncodedSyncPDataID }
+std::pair<const char*, FunctionID::eType> kFunctionIDsInitializer[] = {
+  std::make_pair("RegisterAppInterface", FunctionID::RegisterAppInterfaceID),
+  std::make_pair("UnregisterAppInterface", FunctionID::UnregisterAppInterfaceID),
+  std::make_pair("SetGlobalProperties", FunctionID::SetGlobalPropertiesID),
+  std::make_pair("ResetGlobalProperties", FunctionID::ResetGlobalPropertiesID),
+  std::make_pair("AddCommand", FunctionID::AddCommandID),
+  std::make_pair("DeleteCommand", FunctionID::DeleteCommandID),
+  std::make_pair("AddSubMenu", FunctionID::AddSubMenuID),
+  std::make_pair("DeleteSubMenu", FunctionID::DeleteSubMenuID),
+  std::make_pair("CreateInteractionChoiceSet", FunctionID::CreateInteractionChoiceSetID),
+  std::make_pair("PerformInteraction", FunctionID::PerformInteractionID),
+  std::make_pair("DeleteInteractionChoiceSet", FunctionID::DeleteInteractionChoiceSetID),
+  std::make_pair("Alert", FunctionID::AlertID),
+  std::make_pair("Show", FunctionID::ShowID),
+  std::make_pair("Speak", FunctionID::SpeakID),
+  std::make_pair("SetMediaClockTimer", FunctionID::SetMediaClockTimerID),
+  std::make_pair("EncodedSyncPData", FunctionID::EncodedSyncPDataID),
+  std::make_pair("SyncPData", FunctionID::SyncPDataID),
+  std::make_pair("PerformAudioPassThru", FunctionID::PerformAudioPassThruID),
+  std::make_pair("EndAudioPassThru", FunctionID::EndAudioPassThruID),
+  std::make_pair("SubscribeButton", FunctionID::SubscribeButtonID),
+  std::make_pair("UnsubscribeButton", FunctionID::UnsubscribeButtonID),
+  std::make_pair("SubscribeVehicleData", FunctionID::SubscribeVehicleDataID),
+  std::make_pair("UnsubscribeVehicleData", FunctionID::UnsubscribeVehicleDataID),
+  std::make_pair("GetVehicleData", FunctionID::GetVehicleDataID),
+  std::make_pair("ReadDID", FunctionID::ReadDIDID),
+  std::make_pair("GetDTCs", FunctionID::GetDTCsID),
+  std::make_pair("DiagnosticMessage", FunctionID::DiagnosticMessageID),
+  std::make_pair("SystemRequest", FunctionID::SystemRequestID),
+  std::make_pair("ScrollableMessage", FunctionID::ScrollableMessageID),
+  std::make_pair("Slider", FunctionID::SliderID),
+  std::make_pair("ShowConstantTBT", FunctionID::ShowConstantTBTID),
+  std::make_pair("AlertManeuver", FunctionID::AlertManeuverID),
+  std::make_pair("UpdateTurnList", FunctionID::UpdateTurnListID),
+  std::make_pair("ChangeRegistration", FunctionID::ChangeRegistrationID),
+  std::make_pair("GenericResponse", FunctionID::GenericResponseID),
+  std::make_pair("PutFile", FunctionID::PutFileID),
+  std::make_pair("DeleteFile", FunctionID::DeleteFileID),
+  std::make_pair("ListFiles",  FunctionID::ListFilesID),
+  std::make_pair("SetAppIcon", FunctionID::SetAppIconID),
+  std::make_pair("SetDisplayLayout", FunctionID::SetDisplayLayoutID),
+  std::make_pair("OnHMIStatus", FunctionID::OnHMIStatusID),
+  std::make_pair("OnAppInterfaceUnregistered", FunctionID::OnAppInterfaceUnregisteredID),
+  std::make_pair("OnButtonEvent", FunctionID::OnButtonEventID),
+  std::make_pair("OnButtonPress", FunctionID::OnButtonPressID),
+  std::make_pair("OnVehicleData", FunctionID::OnVehicleDataID),
+  std::make_pair("OnCommand", FunctionID::OnCommandID),
+  std::make_pair("OnEncodedSyncPData", FunctionID::OnEncodedSyncPDataID),
+  std::make_pair("OnTBTClientState", FunctionID::OnTBTClientStateID),
+  std::make_pair("OnPermissionsChange", FunctionID::OnPermissionsChangeID),
+  std::make_pair("OnAudioPassThru", FunctionID::OnAudioPassThruID),
+  std::make_pair("OnLanguageChange", FunctionID::OnLanguageChangeID),
+  std::make_pair("OnDriverDistraction", FunctionID::OnDriverDistractionID),
+  std::make_pair("OnSyncPData", FunctionID::EncodedSyncPDataID)
+};
+std::map<std::string, FunctionID::eType> kFunctionIDs(kFunctionIDsInitializer,
+                                                      kFunctionIDsInitializer +
+                                                      ARRAYSIZE(kFunctionIDsInitializer));
+
+std::pair<const char*, mobile_apis::HMILevel::eType> kHmiLevelsInitializer[] = {
+  std::make_pair("FULL", mobile_apis::HMILevel::HMI_FULL),
+  std::make_pair("LIMITED", mobile_apis::HMILevel::HMI_LIMITED),
+  std::make_pair("BACKGROUND", mobile_apis::HMILevel::HMI_BACKGROUND),
+  std::make_pair("NONE", mobile_apis::HMILevel::HMI_NONE)
 };
 
-std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels {
-  { "FULL", mobile_apis::HMILevel::HMI_FULL },
-  { "LIMITED", mobile_apis::HMILevel::HMI_LIMITED },
-  { "BACKGROUND", mobile_apis::HMILevel::HMI_BACKGROUND },
-  { "NONE", mobile_apis::HMILevel::HMI_NONE }
-};
+std::map<std::string, mobile_apis::HMILevel::eType> kHmiLevels(kHmiLevelsInitializer,
+                                                               kHmiLevelsInitializer +
+                                                               ARRAYSIZE(kHmiLevelsInitializer));
 }  // namespace
 
 namespace application_manager {
@@ -164,7 +173,7 @@ bool PoliciesManager::Init() {
         hmi_levels.push_back(kHmiLevels[levels[j].asString()]);
       }
 
-      SKIP_RETURN_VALUE(items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels)));
+      items_.insert(PoliciesItem(kFunctionIDs[item.asString()], hmi_levels));
     }
   } catch (...) {
     return false;

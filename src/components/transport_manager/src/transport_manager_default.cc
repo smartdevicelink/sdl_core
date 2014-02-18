@@ -68,18 +68,4 @@ TransportManagerDefault::~TransportManagerDefault() {}
 TransportManagerDefault::TransportManagerDefault()
     : TransportManagerImpl() {}
 
-TransportManagerDefault* TransportManagerDefault::Instance() {
-  static pthread_mutex_t tm_default_instance_mutex = PTHREAD_MUTEX_INITIALIZER;
-  static TransportManagerDefault* tm_default_instance = NULL;
-
-  if (tm_default_instance == NULL) {
-    pthread_mutex_lock(&tm_default_instance_mutex);
-    if (tm_default_instance == NULL) {
-      tm_default_instance = new TransportManagerDefault();
-    }
-    pthread_mutex_unlock(&tm_default_instance_mutex);
-  }
-  return tm_default_instance;
-}
-
 }  //  namespace transport_manager

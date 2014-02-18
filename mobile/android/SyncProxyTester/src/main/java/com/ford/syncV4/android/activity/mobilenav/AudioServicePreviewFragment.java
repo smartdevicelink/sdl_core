@@ -8,7 +8,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import java.io.OutputStream;
 
@@ -42,7 +44,11 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onMobileNaviCheckBoxAction(view);
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    onMobileNaviCheckBoxAction(view);
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
             }
         });
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());

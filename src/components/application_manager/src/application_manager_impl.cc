@@ -82,11 +82,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL),
-    resume_controler(this)
+    media_manager_(NULL)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  resume_controler.LoadApplications();
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -125,11 +123,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
   media_manager_ = NULL;
-}
-
-ApplicationManagerImpl* ApplicationManagerImpl::instance() {
-  static ApplicationManagerImpl instance;
-  return &instance;
 }
 
 bool ApplicationManagerImpl::Stop() {
@@ -628,6 +621,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle& device_handle) {
 }
+
 
 bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
@@ -1382,9 +1376,6 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
-  // Saving unregistered app.info to the file system before
-  resume_controler.SaveAllApplications();
-  resume_controler.SavetoFS();
   std::set<Application*>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1406,7 +1397,23 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
   }
-
+  if (audio_pass_thru_active_) {
+    // May be better to put this code in MessageHelper?
+    end_audio_pass_thru();
+    StopAudioPassThru(app_id);
+    NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
+        new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+    const uint32_t hmi_correlation_id = GetNextHMICorrelationID();
+    NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+    request[strings::params][strings::message_type] = MessageType::kRequest;
+    request[strings::params][strings::function_id] = hmi_apis::FunctionID::UI_EndAudioPassThru;
+    request[strings::params][strings::correlation_id] = hmi_correlation_id;
+    request[strings::params][strings::protocol_version] =
+        commands::CommandImpl::protocol_version_;
+    request[strings::params][strings::protocol_type] =
+        commands::CommandImpl::hmi_protocol_type_;
+    ApplicationManagerImpl::instance()->ManageHMICommand(result);
+  }
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
   Application* app_to_remove = it->second;
@@ -1477,9 +1484,6 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
 
-ResumeCtrl* ApplicationManagerImpl::GetResumeController() {
-  return &resume_controler;
-}
 
 void ApplicationManagerImpl::Mute() {
   mobile_apis::AudioStreamingState::eType state =

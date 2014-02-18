@@ -50,9 +50,11 @@ Item {
         // appID unused
         console.debug('enter:', ttsChunks, appID);
         var ttsChunksLog = "";
-        for (var i = 0; i < ttsChunks.length; i++) {
-            ttsChunksLog += "{type: " + ttsChunks[i].type + ", " +
-                    "text: '" + ttsChunks[i].text + "'}, ";
+        if (ttsChunks) {
+            for (var i = 0; i < ttsChunks.length; i++) {
+                ttsChunksLog += "{type: " + ttsChunks[i].type + ", " +
+                        "text: '" + ttsChunks[i].text + "'}, ";
+            }
         }
         console.log("Message Received - {method: 'TTS.Speak', params:{ " +
                     "ttsChunks: [" + ttsChunksLog + "], " +
@@ -93,7 +95,17 @@ Item {
     function getCapabilities() {
         console.log("Message Received - {method: 'TTS.GetCapabilities'}")
         return {
-            capabilities: Common.SpeechCapabilities.SC_TEXT
+            speechCapabilities: [
+                Common.SpeechCapabilities.SC_TEXT,
+                Common.SpeechCapabilities.PRE_RECORDED
+            ],
+            prerecordedSpeechCapabilities: [
+                Common.PrerecordedSpeech.HELP_JINGLE,
+                Common.PrerecordedSpeech.INITIAL_JINGLE,
+                Common.PrerecordedSpeech.LISTEN_JINGLE,
+                Common.PrerecordedSpeech.POSITIVE_JINGLE,
+                Common.PrerecordedSpeech.NEGATIVE_JINGLE
+            ]
         }
     }
 
@@ -102,17 +114,24 @@ Item {
         var helpttsChunksLog = "",
             initialttsChunkLog = "",
             timeoutttsChunkLog = "";
-        for (var i = 0; i < helpPrompt.length; i++) {
-            helpttsChunksLog += "{type: " + helpPrompt[i].type + ", " +
-                    "text: '" + helpPrompt[i].text + "'}, ";
+
+        if (helpPrompt) {
+            for (var i = 0; i < helpPrompt.length; i++) {
+                helpttsChunksLog += "{type: " + helpPrompt[i].type + ", " +
+                        "text: '" + helpPrompt[i].text + "'}, ";
+            }
         }
-        for (var i = 0; i < initialPrompt.length; i++) {
-            initialttsChunkLog += "{type: " + initialPrompt[i].type + ", " +
-                    "text: '" + initialPrompt[i].text + "'}, ";
+        if (initialPrompt) {
+            for (var i = 0; i < initialPrompt.length; i++) {
+                initialttsChunkLog += "{type: " + initialPrompt[i].type + ", " +
+                        "text: '" + initialPrompt[i].text + "'}, ";
+            }
         }
-        for (var i = 0; i < timeoutPrompt.length; i++) {
-            timeoutttsChunkLog += "{type: " + timeoutPrompt[i].type + ", " +
-                    "text: '" + timeoutPrompt[i].text + "'}, ";
+        if (timeoutPrompt) {
+            for (var i = 0; i < timeoutPrompt.length; i++) {
+                timeoutttsChunkLog += "{type: " + timeoutPrompt[i].type + ", " +
+                        "text: '" + timeoutPrompt[i].text + "'}, ";
+            }
         }
         console.log("Message Received - {method: 'TTS.PerformInteraction', params:{ " +
                     "helpPrompt: [" + helpttsChunksLog + "], " +
@@ -140,13 +159,17 @@ Item {
     function setGlobalProperties(helpPrompt, timeoutPrompt, appID) {
         var helpPromptLog = "",
             timeoutPromptLog = "";
-        for (var i = 0; i < helpPrompt.length; i++) {
-            helpPromptLog += "{type: " + helpPrompt[i].type + ", " +
-                    "text: '" + helpPrompt[i].text + "'}, ";
+        if (helpPrompt) {
+            for (var i = 0; i < helpPrompt.length; i++) {
+                helpPromptLog += "{type: " + helpPrompt[i].type + ", " +
+                        "text: '" + helpPrompt[i].text + "'}, ";
+            }
         }
-        for (var i = 0; i < timeoutPrompt.length; i++) {
-            timeoutPromptLog += "{type: " + timeoutPrompt[i].type + ", " +
-                    "text: '" + timeoutPrompt[i].text + "'}, ";
+        if (timeoutPrompt) {
+            for (var i = 0; i < timeoutPrompt.length; i++) {
+                timeoutPromptLog += "{type: " + timeoutPrompt[i].type + ", " +
+                        "text: '" + timeoutPrompt[i].text + "'}, ";
+            }
         }
         console.log("Message Received - {method: 'TTS.SetGlobalProperties', params:{ " +
                     "appID:" + appID + ", " +

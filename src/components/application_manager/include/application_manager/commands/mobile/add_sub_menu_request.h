@@ -71,6 +71,14 @@ class AddSubMenuRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
+
+  /*
+   * @brief Check if submenu name is valid
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckSubMenuName();
+
   DISALLOW_COPY_AND_ASSIGN(AddSubMenuRequest);
 };
 

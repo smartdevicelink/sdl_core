@@ -113,7 +113,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+  ProtocolPacket packet(protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
                         service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
                         0, hash_code);
 
@@ -131,13 +131,14 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
+                                               uint8_t session_id,
+                                               uint8_t protocol_version,
                                                uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  uint8_t versionFlag = PROTOCOL_VERSION_1;
-
-  ProtocolPacket packet(versionFlag, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-                        service_type, FRAME_DATA_START_SERVICE_NACK, 0x0, 0, 0);
+  ProtocolPacket packet(protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+                        service_type, FRAME_DATA_START_SERVICE_NACK,
+                        session_id, 0, 0);
 
   if (RESULT_OK == SendFrame(connection_id, packet)) {
     LOG4CXX_INFO(logger_, "sendStartSessionNAck() - write OK");
@@ -150,11 +151,13 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
 
 void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
                                              uint32_t session_id,
+                                             uint8_t protocol_version,
                                              uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-                        service_type, FRAME_DATA_END_SERVICE_NACK, session_id, 0, 0);
+  ProtocolPacket packet(protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+                        service_type, FRAME_DATA_END_SERVICE_NACK,
+                        session_id, 0, 0);
 
   if (RESULT_OK == SendFrame(connection_id, packet)) {
     LOG4CXX_INFO(logger_, "SendEndSessionNAck() - write OK");
@@ -172,7 +175,7 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
                                             uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  ProtocolPacket packet(PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+  ProtocolPacket packet(protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
                         service_type, FRAME_DATA_END_SERVICE_ACK, session_id, 0,
                         hash_code);
 
@@ -620,7 +623,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     LOG4CXX_INFO_EXT(
         logger_,
         "Refused to end session " << packet.service_type() << " type.");
-    SendEndSessionNAck(connection_id, current_session_id,
+    SendEndSessionNAck(connection_id, current_session_id, packet.version(),
                        packet.service_type());
   }
   return RESULT_OK;
@@ -648,7 +651,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         "Refused to create service " <<
         static_cast<int32_t>(packet.service_type()) << " type.");
 
-    SendStartSessionNAck(connection_id, packet.service_type());
+    SendStartSessionNAck(connection_id, packet.session_id(), packet.version(),
+                         packet.service_type());
   }
   return RESULT_OK;
 }

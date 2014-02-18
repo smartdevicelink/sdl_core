@@ -74,7 +74,7 @@ void initStartData()
 //	tma.disconnectTimeout = 1000;
 	transport_manager_ =
 	//				new transport_manager::TransportManagerImpl(tma);
-			transport_manager::TransportManagerDefault::Instance();
+      transport_manager::TransportManagerDefault::instance();
 	DCHECK(transport_manager_);
 
 	protocol_handler_ =

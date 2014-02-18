@@ -37,10 +37,11 @@
 
 #include "utils/macro.h"
 #include "utils/dict.h"
+#include "utils/singleton.h"
 
 namespace resumption {
 
-class LastState {
+class LastState : public utils::Singleton<LastState> {
  public:
 /**
  * @brief Typedef for string-driven dictionary
@@ -50,18 +51,17 @@ class LastState {
  * @brief public dictionary
  */
   Dictionary dictionary;
-/**
- * @brief Returns the singleton of class
- */
-  static LastState* instance();
 
  private:
 /**
  * @brief Private default constructor
  */
-  LastState();
+  LastState() {
+  }
 
   DISALLOW_COPY_AND_ASSIGN(LastState);
+
+  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
 };
 
 }  // namespace resumption

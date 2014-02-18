@@ -110,7 +110,6 @@ public class Names {
 	public static final String samplingRate = "samplingRate";
 	public static final String audioType = "audioType";
 	public static final String satRadioESN = "satRadioESN";
-	public static final String encrypted = "encrypted";
 	public static final String dtcList = "dtcList";
 	public static final String tryAgainTime = "tryAgainTime";
 
@@ -450,4 +449,13 @@ public class Names {
     public static final String numCustomPresetsAvailable = "numCustomPresetsAvailable";
     public static final String prerecordedSpeech = "prerecordedSpeech";
     public static final String endTime = "endTime";
+    public static final String didResult = "didResult";
+    public static final String secondaryGraphic = "secondaryGraphic";
+    public static final String audioPassThruCapabilities = "audioPassThruCapabilities";
+    public static final String supportedDiagModes = "supportedDiagModes";
+    public static final String DiagnosticMessage = "DiagnosticMessage";
+    public static final String targetID = "targetID";
+    public static final String messageLength = "messageLength";
+    public static final String messageData = "messageData";
+    public static final String messageDataResult = "messageDataResult";
 }

@@ -616,7 +616,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     new IDispatchingStrategy<ProtocolMessage>() {
                         @Override
                         public void dispatch(ProtocolMessage message) {
-                            dispatchOutgoingMessage((ProtocolMessage) message);
+                            dispatchOutgoingMessage(message);
                         }
 
                         @Override
@@ -647,7 +647,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
                         @Override
                         public void dispatch(InternalProxyMessage message) {
-                            dispatchInternalMessage((InternalProxyMessage) message);
+                            dispatchInternalMessage(message);
                         }
 
                         @Override
@@ -1532,25 +1532,38 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void handleOnSystemRequest(Hashtable hash) {
         final OnSystemRequest msg = new OnSystemRequest(hash);
-
         if (RequestType.HTTP == msg.getRequestType()) {
-            final Vector<String> urls = msg.getUrl();
-            if (urls != null) {
+            if (msg.getFileType() == FileType.JSON) {
                 Runnable request = new Runnable() {
                     @Override
                     public void run() {
-                        onSystemRequestHandler.onFilesDownloadRequest(
-                                SyncProxyBase.this, urls, msg.getFileType());
+                        onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
+                                msg.getBulkData());
                     }
                 };
-
                 if (_callbackToUIThread) {
                     _mainUIHandler.post(request);
                 } else {
                     request.run();
                 }
             } else {
-                Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+                final Vector<String> urls = msg.getUrl();
+                if (urls != null) {
+                    Runnable request = new Runnable() {
+                        @Override
+                        public void run() {
+                            onSystemRequestHandler.onFilesDownloadRequest(
+                                    SyncProxyBase.this, urls, msg.getFileType());
+                        }
+                    };
+                    if (_callbackToUIThread) {
+                        _mainUIHandler.post(request);
+                    } else {
+                        request.run();
+                    }
+                } else {
+                    Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+                }
             }
         } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
             final Vector<String> urls = msg.getUrl();
@@ -1671,7 +1684,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
-        if (!_appInterfaceRegisterd && request.getFunctionName() != Names.RegisterAppInterface) {
+        if (!_appInterfaceRegisterd && !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
                 SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
                 throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
@@ -1679,8 +1692,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         if (_advancedLifecycleManagementEnabled) {
-            if (request.getFunctionName() == Names.RegisterAppInterface
-                    || request.getFunctionName() == Names.UnregisterAppInterface) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface)
+                    || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
                     SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
                     throw new SyncException("The RPCRequest, " + request.getFunctionName() +
@@ -1857,7 +1870,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
-            Log.i(TAG, "Mobile Navi Service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Navi Service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -1868,7 +1882,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
-            Log.i(TAG, "Mobile Audio service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Audio service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeAudioService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -2733,6 +2748,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
+    /**
+     * Return number of Services in current Session
+     *
+     * @return number of Services in current Session
+     */
+    public int getServicesNumber() {
+        return currentSession.getServicesNumber();
+    }
+
     public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
         _syncMsgVersionRequest = syncMsgVersionRequest;
     }
@@ -2905,15 +2929,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
-            try {
-                if (msg.getData().length > 0) queueIncomingMessage(msg);
-            } catch (Exception e) {
-
-            }
-            try {
-                if (msg.getBulkData().length > 0) queueIncomingMessage(msg);
-            } catch (Exception e) {
-
+            // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
+            // Policy Snapshot is coming WITH BulkData and WITH JSON Data
+            if (msg.getData().length > 0 || msg.getBulkData().length > 0) {
+                queueIncomingMessage(msg);
             }
         }
 
@@ -3025,18 +3044,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     @Override
     public void putSystemFile(String filename, byte[] data, Integer offset,
                               FileType fileType) throws SyncException {
-        PutFile putFile = new PutFile();
-        putFile.setSyncFileName(filename);
-        putFile.setFileType(fileType);
-        putFile.setBulkData(data);
-        putFile.setSystemFile(true);
         final int correlationID = nextCorrelationId();
-        putFile.setCorrelationID(correlationID);
 
+        PutFile putFile = RPCRequestFactory.buildPutFile(filename, fileType, null, data,
+                correlationID);
+        putFile.setSystemFile(true);
         if (offset != null) {
             putFile.setOffset(offset);
             putFile.setLength(data.length);
         }
+
+        sendRPCRequest(putFile);
+        internalRequestCorrelationIDs.add(correlationID);
+    }
+
+    @Override
+    public void putPolicyTableUpdateFile(String filename, byte[] data) throws SyncException {
+        final int correlationID = nextCorrelationId();
+
+        PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
+                correlationID);
 
         sendRPCRequest(putFile);
         internalRequestCorrelationIDs.add(correlationID);

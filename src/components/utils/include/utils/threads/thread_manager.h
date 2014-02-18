@@ -41,6 +41,7 @@
 #include <set>
 
 #include "utils/macro.h"
+#include "utils/singleton.h"
 
 namespace threads {
 namespace impl {
@@ -74,11 +75,8 @@ class UnnamedThreadRegistry {
  * associated with it.
  * OS provides it's own facilities to name threads but
  */
-class ThreadManager {
+class ThreadManager : public utils::Singleton<ThreadManager> {
  public:
-  // Singleton access method
-  static ThreadManager& instance();
-
   // Name a thread. Should be called only once for every thread.
   // Threads can't be renamed
   void RegisterName(PlatformThreadHandle id, const std::string& name);
@@ -107,15 +105,10 @@ class ThreadManager {
   // Has to memorize every generated name this is why it is mutable
   mutable UnnamedThreadRegistry unnamed_thread_namer_;
 
-  // Singleton instance
-  // We need ThreadManager to be singleton because it provides (debugging)
-  // functionality that is to be used by every module in the system.
-  // And it must outlive all other singletones (so all other singletones
-  // are able to use it for debugging while being destroyed)
-  // This it is leaked (intentionally!).
-  static ThreadManager* instance_;
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
+
+  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ThreadManager);
 };
 
 } // namespace impl

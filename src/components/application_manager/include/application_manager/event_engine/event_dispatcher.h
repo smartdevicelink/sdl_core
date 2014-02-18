@@ -35,7 +35,10 @@
 
 #include <list>
 #include <map>
+
 #include "utils/lock.h"
+#include "utils/singleton.h"
+
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -43,14 +46,8 @@ namespace event_engine {
 
 class EventObserver;
 
-class EventDispatcher
-{
+class EventDispatcher : public utils::Singleton<EventDispatcher> {
  public:
-
-  /*
-   * @brief Provides an access to single instance of class
-   */
-  static EventDispatcher* instance();
 
   /*
    * @brief Delivers the event to all subscribers
@@ -101,6 +98,8 @@ class EventDispatcher
   virtual ~EventDispatcher();
 
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
+
+  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(EventDispatcher);
 
   // Data types section
   typedef std::list<EventObserver*>                   ObserverList;

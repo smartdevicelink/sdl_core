@@ -200,7 +200,8 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     vr_capabilities_(NULL),
     speech_capabilities_(NULL),
     audio_pass_thru_capabilities_(NULL),
-    app_mngr_(app_mngr){
+    app_mngr_(app_mngr),
+    prerecorded_speech_(NULL) {
 
   if (false == profile::Profile::instance()->launch_hmi()) {
     if (load_capabilities_from_file()) {
@@ -232,6 +233,7 @@ HMICapabilities::~HMICapabilities() {
   delete vr_capabilities_;
   delete speech_capabilities_;
   delete audio_pass_thru_capabilities_;
+  delete prerecorded_speech_;
   app_mngr_ = NULL;
 }
 
@@ -482,6 +484,15 @@ void HMICapabilities::set_vehicle_type(
     delete vehicle_type_;
   }
   vehicle_type_ = new smart_objects::SmartObject(vehicle_type);
+}
+
+void HMICapabilities::set_prerecorded_speech(
+       const smart_objects::SmartObject& prerecorded_speech) {
+  if (prerecorded_speech_) {
+    delete prerecorded_speech_;
+    prerecorded_speech_ = NULL;
+  }
+  prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
 bool HMICapabilities::load_capabilities_from_file() {

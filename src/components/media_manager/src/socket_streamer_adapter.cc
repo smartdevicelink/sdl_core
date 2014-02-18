@@ -50,22 +50,18 @@ log4cxx::LoggerPtr logger =
 }
 
 SocketStreamerAdapter::SocketStreamerAdapter()
-  : socket_(0),
+  : socket_fd_(0),
     is_ready_(false),
     messages_(),
-    delegate_(NULL),
-    thread_(NULL) {
-  delegate_ = new Streamer(this);
-  if (delegate_) {
-    thread_ = new threads::Thread("SocketStreamerAdapter", delegate_);
-  }
+    thread_("SocketStreamerAdapter", new Streamer(this)) {
+    thread_.startWithOptions(
+        threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {
-  delete thread_;
-  thread_ = NULL;
-  if (socket_ != -1) {
-    ::close(socket_);
+  thread_.stop();
+  if (socket_fd_ != -1) {
+    ::close(socket_fd_);
   }
 }
 
@@ -77,45 +73,7 @@ void SocketStreamerAdapter::StartActivity(int32_t application_key) {
     return;
   }
 
-  socket_ = socket(AF_INET, SOCK_STREAM, 0);
-
-  if (0 >= socket_) {
-    LOG4CXX_ERROR_EXT(logger, "Server open error");
-    return;
-  }
-
-  int32_t optval = 1;
-  if (-1 == setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR,
-                       &optval, sizeof optval)) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to set sockopt");
-    return;
-  }
-
-  struct sockaddr_in serv_addr_;
-  memset(&serv_addr_, 0, sizeof(serv_addr_));
-  serv_addr_.sin_addr.s_addr = inet_addr(ip_.c_str());
-  serv_addr_.sin_family = AF_INET;
-  serv_addr_.sin_port = htons(port_);
-
-  if (-1 == bind(socket_,
-                 reinterpret_cast<struct sockaddr*>(&serv_addr_),
-                 sizeof(serv_addr_))) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to bind");
-    return;
-  }
-
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::listen for connections");
-  if (-1 == listen(socket_, 5)) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to listen");
-    return;
-  }
-
   is_ready_ = true;
-  if (delegate_ && thread_) {
-    thread_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
-  }
-
   current_application_ = application_key;
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
@@ -129,24 +87,18 @@ void SocketStreamerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_INFO(logger, "SocketStreamerAdapter::stop");
 
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger, "Video isn't streaming for " << application_key);
+    LOG4CXX_WARN(logger, "Streaming is not active for " << application_key);
     return;
   }
+
+  is_ready_ = false;
+  current_application_ = 0;
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
     (*it)->OnActivityEnded(application_key);
   }
-
-  if (delegate_ && thread_) {
-    thread_->stop();
-  }
-
-  if (socket_ != -1) {
-    ::close(socket_);
-  }
-  current_application_ = 0;
 }
 
 bool SocketStreamerAdapter::is_app_performing_activity(
@@ -168,24 +120,12 @@ void SocketStreamerAdapter::SendData(
   if (is_ready_) {
     messages_.push(message);
   }
-
-  static int32_t messsages_for_session = 0;
-  ++messsages_for_session;
-
-  LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-               << messsages_for_session << "th message for "
-               << application_key);
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnDataReceived(application_key, messsages_for_session);
-  }
 }
 
 SocketStreamerAdapter::Streamer::Streamer(
   SocketStreamerAdapter* const server)
   : server_(server),
-    socket_fd_(0),
+    new_socket_fd_(0),
     is_first_loop_(true),
     is_client_connected_(false),
     stop_flag_(false) {
@@ -198,10 +138,12 @@ SocketStreamerAdapter::Streamer::~Streamer() {
 void SocketStreamerAdapter::Streamer::threadMain() {
   LOG4CXX_INFO(logger, "Streamer::threadMain");
 
-  while (!stop_flag_) {
-    socket_fd_ = accept(server_->socket_, NULL, NULL);
+  start();
 
-    if (0 > socket_fd_) {
+  while (!stop_flag_) {
+    new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
+
+    if (0 > new_socket_fd_) {
       LOG4CXX_ERROR(logger, "Socket is closed");
       sleep(1);
       continue;
@@ -209,16 +151,29 @@ void SocketStreamerAdapter::Streamer::threadMain() {
 
     is_client_connected_ = true;
     while (is_client_connected_) {
-      server_->messages_.wait();
-      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
-      printf("recieved message for socket server");
-      if (!msg) {
-        LOG4CXX_ERROR(logger, "Null pointer message");
-        continue;
-      }
+      while (!server_->messages_.empty()) {
+        protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+        if (!msg) {
+          LOG4CXX_ERROR(logger, "Null pointer message");
+          continue;
+        }
 
-      is_client_connected_ = send(msg);
-      printf("is_client_connected %d", is_client_connected_);
+        is_client_connected_ = send(msg);
+        static int32_t messsages_for_session = 0;
+        ++messsages_for_session;
+
+        LOG4CXX_INFO(logger, "Handling map streaming message. This is "
+                     << messsages_for_session << " the message for "
+                     << server_->current_application_);
+        std::set<MediaListenerPtr>::iterator it =
+            server_->media_listeners_.begin();
+        for (; server_->media_listeners_.end() != it; ++it) {
+          (*it)->OnDataReceived(server_->current_application_,
+                                messsages_for_session);
+        }
+      }
+      server_->messages_.wait();
+      is_client_connected_ = is_ready();
     }
 
     stop();
@@ -229,43 +184,75 @@ bool SocketStreamerAdapter::Streamer::exitThreadMain() {
   LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
   stop_flag_ = true;
   stop();
-  return true;
+  server_->messages_.Shutdown();
+  return false;
 }
 
-void SocketStreamerAdapter::Streamer::stop() {
-  LOG4CXX_INFO(logger, "Streamer::stop");
+void SocketStreamerAdapter::Streamer::start() {
+  server_->socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
-  is_client_connected_ = false;
-  if (!socket_fd_) {
+  if (0 >= server_->socket_fd_) {
+    LOG4CXX_ERROR_EXT(logger, "Server open error");
     return;
   }
 
-  if (-1 == shutdown(socket_fd_, SHUT_RDWR)) {
+  int32_t optval = 1;
+  if (-1 == setsockopt(server_->socket_fd_, SOL_SOCKET, SO_REUSEADDR,
+                       &optval, sizeof optval)) {
+    LOG4CXX_ERROR_EXT(logger, "Unable to set sockopt");
+    return;
+  }
+
+  struct sockaddr_in serv_addr_;
+  memset(&serv_addr_, 0, sizeof(serv_addr_));
+  serv_addr_.sin_addr.s_addr = inet_addr(server_->ip_.c_str());
+  serv_addr_.sin_family = AF_INET;
+  serv_addr_.sin_port = htons(server_->port_);
+
+  if (-1 == bind(server_->socket_fd_,
+                 reinterpret_cast<struct sockaddr*>(&serv_addr_),
+                 sizeof(serv_addr_))) {
+    LOG4CXX_ERROR_EXT(logger, "Unable to bind");
+    return;
+  }
+
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::listen for connections");
+  if (-1 == listen(server_->socket_fd_, 5)) {
+    LOG4CXX_ERROR_EXT(logger, "Unable to listen");
+    return;
+  }
+}
+
+void SocketStreamerAdapter::Streamer::stop() {
+  is_client_connected_ = false;
+  if (!new_socket_fd_) {
+    return;
+  }
+
+  if (-1 == shutdown(new_socket_fd_, SHUT_RDWR)) {
     LOG4CXX_ERROR(logger, "Unable to shutdown socket");
     return;
   }
 
-  if (-1 == ::close(socket_fd_)) {
+  if (-1 == ::close(new_socket_fd_)) {
     LOG4CXX_ERROR(logger, "Unable to close socket");
     return;
   }
 
-  socket_fd_ = -1;
+  new_socket_fd_ = -1;
 }
 
 bool SocketStreamerAdapter::Streamer::is_ready() const {
-  LOG4CXX_INFO(logger, "Streamer::is_ready");
-
   bool result = true;
   fd_set fds;
   FD_ZERO(&fds);
-  FD_SET(socket_fd_, &fds);
+  FD_SET(new_socket_fd_, &fds);
   struct timeval tv;
   tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 
   int32_t retval = 0;
-  retval = select(socket_fd_ + 1, 0, &fds, 0, &tv);
+  retval = select(new_socket_fd_ + 1, 0, &fds, 0, &tv);
 
   if (-1 == retval) {
     LOG4CXX_ERROR_EXT(logger, "An error occurred");
@@ -294,13 +281,13 @@ bool SocketStreamerAdapter::Streamer::send(
                   "Content-Type: video/mp4\r\n\r\n"
                  };
 
-    if (-1 == ::send(socket_fd_, hdr, strlen(hdr), MSG_NOSIGNAL)) {
+    if (-1 == ::send(new_socket_fd_, hdr, strlen(hdr), MSG_NOSIGNAL)) {
       LOG4CXX_ERROR_EXT(logger, " Unable to send");
       return false;
     }
   }
 
-  if (-1 == ::send(socket_fd_, (*msg).data(),
+  if (-1 == ::send(new_socket_fd_, (*msg).data(),
                    (*msg).data_size(), MSG_NOSIGNAL)) {
     LOG4CXX_ERROR_EXT(logger, " Unable to send");
     return false;

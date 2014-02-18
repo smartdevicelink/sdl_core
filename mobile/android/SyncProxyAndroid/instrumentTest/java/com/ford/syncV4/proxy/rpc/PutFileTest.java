@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 
 import junit.framework.TestCase;
 
@@ -24,13 +25,13 @@ public class PutFileTest extends TestCase {
     private static final String LENGTH = "length";
 
     public void testMessageShouldBeCreated() {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
         assertThat(msg, notNullValue());
     }
 
     public void testSerializedMessageShouldContainAllSetFields()
             throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         final boolean systemFile = true;
         final Integer offset = 531;
@@ -60,7 +61,7 @@ public class PutFileTest extends TestCase {
 
     public void testSystemFileGetterShouldReturnSetValue()
             throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         final boolean systemFile = true;
         msg.setSystemFile(systemFile);
@@ -70,7 +71,7 @@ public class PutFileTest extends TestCase {
 
     public void testSettingNullSystemFileShouldRemoveValue()
             throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         msg.setSystemFile(true);
         msg.setSystemFile(null);
@@ -102,7 +103,7 @@ public class PutFileTest extends TestCase {
     }
 
     public void testOffsetGetterShouldReturnSetValue() throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         final Integer offset = 333;
         msg.setOffset(offset);
@@ -111,7 +112,7 @@ public class PutFileTest extends TestCase {
     }
 
     public void testSettingNullOffsetShouldRemoveValue() throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         msg.setOffset(333);
         msg.setOffset(null);
@@ -143,7 +144,7 @@ public class PutFileTest extends TestCase {
     }
 
     public void testLengthGetterShouldReturnSetValue() throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         final Integer length = 333;
         msg.setLength(length);
@@ -152,7 +153,7 @@ public class PutFileTest extends TestCase {
     }
 
     public void testSettingNullLengthShouldRemoveValue() throws JSONException {
-        PutFile msg = new PutFile();
+        PutFile msg = RPCRequestFactory.buildPutFile();
 
         msg.setLength(333);
         msg.setLength(null);

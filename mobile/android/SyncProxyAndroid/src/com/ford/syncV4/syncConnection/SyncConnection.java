@@ -3,6 +3,7 @@ package com.ford.syncV4.syncConnection;
 import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
@@ -33,6 +34,13 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
+/**
+ * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
+ * and Session management methods.
+ *
+ * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
+ * connection
+ */
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
     private static final String TAG = "SyncConnection";
@@ -54,6 +62,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     static final Object END_PROTOCOL_SERVICE_VIDEO_LOCK = new Object();
     static final Object END_PROTOCOL_SERVICE_RPC_LOCK = new Object();
 
+    private boolean mIsInit = false;
 
     /**
      * Constructor.
@@ -62,12 +71,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public SyncConnection(ISyncConnectionListener listener) {
         _connectionListener = listener;
+        mIsInit = false;
     }
 
+    /**
+     * Initialize transport with provided configuration
+     *
+     * @param transportConfig configuration of the transport to be used, refer to
+     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     */
     public void init(BaseTransportConfig transportConfig) {
         init(transportConfig, null);
     }
 
+    /**
+     * Initialize transport with provided configuration and transport instance
+     *
+     * @param transportConfig configuration of the transport to be used, refer to
+     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
@@ -111,6 +134,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             }
             _protocol = new WiProProtocol(this);
         }
+
+        mIsInit = true;
     }
 
     public AbstractProtocol getWiProProtocol() {
@@ -272,7 +297,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    /**
+     * Start a connection of the provided or specified transport
+     * @throws SyncException
+     */
     public void startTransport() throws SyncException {
+        if (!mIsInit) {
+            throw new SyncException("You must call 'init( ... )' method before start transport",
+                    SyncExceptionCause.SYNC_CONNECTION_INIT_EXCEPTION);
+        }
         _transport.openConnection();
     }
 

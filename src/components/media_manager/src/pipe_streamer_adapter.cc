@@ -46,12 +46,12 @@ log4cxx::LoggerPtr logger =
 
 PipeStreamerAdapter::PipeStreamerAdapter()
   : is_ready_(false),
-    pipe_fd_(0),
     messages_(),
-    thread_(NULL) {
+    thread_("PipeStreamerAdapter", new Streamer(this)) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::PipeStreamerAdapter");
-  thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
-  named_pipe_path_ = profile::Profile::instance()->named_video_pipe_path();
+
+  thread_.startWithOptions(
+    threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 PipeStreamerAdapter::~PipeStreamerAdapter() {
@@ -61,8 +61,7 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
     StopActivity(current_application_);
   }
 
-  delete thread_;
-  thread_ = NULL;
+  thread_.stop();
 }
 
 void PipeStreamerAdapter::SendData(
@@ -78,17 +77,6 @@ void PipeStreamerAdapter::SendData(
   if (is_ready_) {
     messages_.push(message);
   }
-
-  static int32_t messsages_for_session = 0;
-  ++messsages_for_session;
-
-  LOG4CXX_INFO(logger, "Handling map streaming message. This is " <<
-               messsages_for_session << " the message for " << application_key);
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnDataReceived(application_key, messsages_for_session);
-  }
 }
 
 void PipeStreamerAdapter::StartActivity(int32_t application_key) {
@@ -99,28 +87,8 @@ void PipeStreamerAdapter::StartActivity(int32_t application_key) {
     return;
   }
 
-  if ((mkfifo(named_pipe_path_.c_str(),
-              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
-      && (errno != EEXIST)) {
-    LOG4CXX_ERROR(logger, "Cannot create pipe " << named_pipe_path_);
-    return;
-  }
-
-  LOG4CXX_TRACE(logger, "Pipe was successfully created");
-
-  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
-  if (-1 == pipe_fd_) {
-    LOG4CXX_ERROR(logger, "Cannot open pipe for writing " << named_pipe_path_);
-    return;
-  }
-
   current_application_ = application_key;
   is_ready_ = true;
-
-  if (thread_) {
-    thread_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
-  }
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
@@ -139,20 +107,14 @@ void PipeStreamerAdapter::StopActivity(int32_t application_key) {
     return;
   }
 
+  is_ready_ = false;
+  current_application_ = 0;
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
     (*it)->OnActivityEnded(application_key);
   }
-
-  is_ready_ = false;
-
-  if (thread_) {
-    thread_->stop();
-  }
-
-  close(pipe_fd_);
-  unlink(named_pipe_path_.c_str());
 }
 
 bool PipeStreamerAdapter::is_app_performing_activity(
@@ -163,6 +125,7 @@ bool PipeStreamerAdapter::is_app_performing_activity(
 PipeStreamerAdapter::Streamer::Streamer(
   PipeStreamerAdapter* server)
   : server_(server),
+    pipe_fd_(0),
     stop_flag_(false) {
 }
 
@@ -173,37 +136,79 @@ PipeStreamerAdapter::Streamer::~Streamer() {
 void PipeStreamerAdapter::Streamer::threadMain() {
   LOG4CXX_INFO(logger, "Streamer::threadMain");
 
+  open();
+
   while (!stop_flag_) {
-    server_->messages_.wait();
-    protocol_handler::RawMessagePtr msg = server_->messages_.pop();
-    if (!msg) {
-      LOG4CXX_ERROR(logger, "Null pointer message");
-      continue;
-    }
+    while (!server_->messages_.empty()) {
+      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      if (!msg) {
+        LOG4CXX_ERROR(logger, "Null pointer message");
+        continue;
+      }
 
-    ssize_t ret = write(server_->pipe_fd_, msg.get()->data(),
-                        msg.get()->data_size());
-    if (ret == -1) {
-      LOG4CXX_ERROR(logger, "Failed writing data to pipe "
-                    << server_->named_pipe_path_);
+      ssize_t ret = write(pipe_fd_, msg.get()->data(),
+                          msg.get()->data_size());
+      if (ret == -1) {
+        LOG4CXX_ERROR(logger, "Failed writing data to pipe "
+                      << server_->named_pipe_path_);
 
+        std::set<MediaListenerPtr>::iterator it =
+            server_->media_listeners_.begin();
+        for (;server_->media_listeners_.end() != it; ++it) {
+          (*it)->OnErrorReceived(server_->current_application_, -1);
+        }
+      } else if (ret != msg.get()->data_size()) {
+        LOG4CXX_WARN(logger, "Couldn't write all the data to pipe "
+                     << server_->named_pipe_path_);
+      }
+
+      static int32_t messsages_for_session = 0;
+      ++messsages_for_session;
+
+      LOG4CXX_INFO(logger, "Handling map streaming message. This is "
+                   << messsages_for_session << " the message for "
+                   << server_->current_application_);
       std::set<MediaListenerPtr>::iterator it =
           server_->media_listeners_.begin();
-      for (;server_->media_listeners_.end() != it; ++it) {
-        (*it)->OnErrorReceived(server_->current_application_, -1);
+      for (; server_->media_listeners_.end() != it; ++it) {
+        (*it)->OnDataReceived(server_->current_application_,
+                              messsages_for_session);
       }
-    } else if (ret != msg.get()->data_size()) {
-      LOG4CXX_WARN(logger, "Couldn't write all the data to pipe "
-                   << server_->named_pipe_path_);
     }
+    server_->messages_.wait();
   }
+  close();
 }
 
 bool PipeStreamerAdapter::Streamer::exitThreadMain() {
   LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
   stop_flag_ = true;
   server_->messages_.Shutdown();
-  return true;
+  return false;
+}
+
+void PipeStreamerAdapter::Streamer::open() {
+  if ((mkfifo(server_->named_pipe_path_.c_str(),
+              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
+      && (errno != EEXIST)) {
+    LOG4CXX_ERROR(logger, "Cannot create pipe " << server_->named_pipe_path_);
+    return;
+  }
+
+  pipe_fd_ = ::open(server_->named_pipe_path_.c_str(), O_RDWR, 0);
+  if (-1 == pipe_fd_) {
+    LOG4CXX_ERROR(logger, "Cannot open pipe for writing "
+                  << server_->named_pipe_path_);
+    return;
+  }
+
+  LOG4CXX_TRACE(logger, "Pipe " << server_->named_pipe_path_
+                << " was successfully created");
+}
+
+void PipeStreamerAdapter::Streamer::close() {
+  ::close(pipe_fd_);
+  unlink(server_->named_pipe_path_.c_str());
 }
 
 }  // namespace media_manager

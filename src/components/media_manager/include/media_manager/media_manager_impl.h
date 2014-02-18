@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_
 
 #include <string>
+#include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/service_type.h"
@@ -44,9 +45,9 @@
 namespace media_manager {
 
 class MediaManagerImpl : public MediaManager,
-  public protocol_handler::ProtocolObserver {
+  public protocol_handler::ProtocolObserver,
+  public utils::Singleton<MediaManagerImpl> {
   public:
-    static MediaManagerImpl* instance();
     virtual ~MediaManagerImpl();
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
@@ -83,6 +84,8 @@ class MediaManagerImpl : public MediaManager,
   private:
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MediaManagerImpl);
 };
 
 }  //  namespace media_manager

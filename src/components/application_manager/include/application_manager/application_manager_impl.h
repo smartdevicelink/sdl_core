@@ -71,7 +71,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
-
+#include "utils/singleton.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -152,11 +152,11 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::FromMobileQueue::Handler,
   public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler,
-  public impl::ToHmiQueue::Handler {
+  public impl::ToHmiQueue::Handler,
+  public utils::Singleton<ApplicationManagerImpl> {
   friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
-    static ApplicationManagerImpl* instance();
 
     /**
      * @brief Stop work.
@@ -428,7 +428,6 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const std::string& save_path,
                                 const uint32_t offset = 0);
 
-    ResumeCtrl* GetResumeController();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -499,7 +498,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * about persistent application data on disk, and save session ID for resuming
      * application in case INGITION_OFF or MASTER_RESSET
      */
-    ResumeCtrl resume_controler; // TODO: use UniquePtr
+
     /**
      * @brief Map of connection keys and associated applications
      */
@@ -564,6 +563,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     sync_primitives::Lock applications_list_lock_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ApplicationManagerImpl);
 };
 
 const std::set<Application*>& ApplicationManagerImpl::applications() const {

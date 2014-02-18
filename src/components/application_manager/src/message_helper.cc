@@ -34,6 +34,7 @@
 #include <string>
 #include <algorithm>
 
+#include "utils/macro.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/commands/command_impl.h"
@@ -82,7 +83,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 
       // Image name must not be empty
       std::string file_name = buttonImage[strings::value].asString();
-      SKIP_RETURN_VALUE(file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end()));
+      file_name.erase(remove(file_name.begin(), file_name.end(), ' '), file_name.end());
       if (file_name.empty()) {
         return false;
       }
@@ -92,39 +93,41 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 }
 
 }
+std::pair<const char*, VehicleDataType> kVehicleDataInitializer[] = {
+std::make_pair(strings::gps,  VehicleDataType::GPS),
+std::make_pair(strings::speed, VehicleDataType::SPEED),
+std::make_pair(strings::rpm, VehicleDataType::RPM),
+std::make_pair(strings::fuel_level, VehicleDataType::FUELLEVEL),
+std::make_pair(strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE),
+std::make_pair(strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION),
+std::make_pair(strings::external_temp, VehicleDataType::EXTERNTEMP),
+std::make_pair(strings::vin, VehicleDataType::VIN ),
+std::make_pair(strings::prndl, VehicleDataType::PRNDL),
+std::make_pair(strings::tire_pressure, VehicleDataType::TIREPRESSURE),
+std::make_pair(strings::odometer, VehicleDataType::ODOMETER),
+std::make_pair(strings::belt_status, VehicleDataType::BELTSTATUS),
+std::make_pair(strings::body_information, VehicleDataType::BODYINFO),
+std::make_pair(strings::device_status, VehicleDataType::DEVICESTATUS),
+std::make_pair(strings::driver_braking, VehicleDataType::BRAKING),
+std::make_pair(strings::wiper_status, VehicleDataType::WIPERSTATUS),
+std::make_pair(strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS),
+std::make_pair(strings::e_call_info, VehicleDataType::ECALLINFO),
+std::make_pair(strings::airbag_status, VehicleDataType::AIRBAGSTATUS),
+std::make_pair(strings::emergency_event, VehicleDataType::EMERGENCYEVENT),
+std::make_pair(strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS),
+std::make_pair(strings::my_key, VehicleDataType::MYKEY),
+/*
+ NOT DEFINED in mobile API
+ std::make_pair(strings::gps,                      VehicleDataType::BATTVOLTAGE),
+ */
+std::make_pair(strings::engine_torque, VehicleDataType::ENGINETORQUE ),
+std::make_pair(strings::acc_pedal_pos, VehicleDataType::ACCPEDAL),
+std::make_pair(strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL),
+};
 
-const VehicleData MessageHelper::vehicle_data_ =
-    create_map<const char*,VehicleDataType>
-  (strings::gps,  VehicleDataType::GPS)
-  (strings::speed, VehicleDataType::SPEED)
-  (strings::rpm, VehicleDataType::RPM)
-  (strings::fuel_level, VehicleDataType::FUELLEVEL)
-  (strings::fuel_level_state, VehicleDataType::FUELLEVEL_STATE)
-  (strings::instant_fuel_consumption, VehicleDataType::FUELCONSUMPTION)
-  (strings::external_temp, VehicleDataType::EXTERNTEMP)
-  (strings::vin, VehicleDataType::VIN )
-  (strings::prndl, VehicleDataType::PRNDL)
-  (strings::tire_pressure, VehicleDataType::TIREPRESSURE)
-  (strings::odometer, VehicleDataType::ODOMETER)
-  (strings::belt_status, VehicleDataType::BELTSTATUS)
-  (strings::body_information, VehicleDataType::BODYINFO)
-  (strings::device_status, VehicleDataType::DEVICESTATUS)
-  (strings::driver_braking, VehicleDataType::BRAKING)
-  (strings::wiper_status, VehicleDataType::WIPERSTATUS)
-  (strings::head_lamp_status, VehicleDataType::HEADLAMPSTATUS)
-  (strings::e_call_info, VehicleDataType::ECALLINFO)
-  (strings::airbag_status, VehicleDataType::AIRBAGSTATUS)
-  (strings::emergency_event, VehicleDataType::EMERGENCYEVENT)
-  (strings::cluster_mode_status, VehicleDataType::CLUSTERMODESTATUS)
-  (strings::my_key, VehicleDataType::MYKEY)
-  /*
-   NOT DEFINED in mobile API
-   (strings::gps,                      VehicleDataType::BATTVOLTAGE)
-   */
-  (strings::engine_torque, VehicleDataType::ENGINETORQUE )
-  (strings::acc_pedal_pos, VehicleDataType::ACCPEDAL)
-  (strings::steering_wheel_angle, VehicleDataType::STEERINGWHEEL)
-;
+const VehicleData MessageHelper::vehicle_data_(kVehicleDataInitializer,
+                                               kVehicleDataInitializer +
+                                               ARRAYSIZE(kVehicleDataInitializer));
 
 
 
@@ -157,7 +160,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
       static_cast<int32_t>(application_impl.system_context());
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -211,7 +214,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
       *app_type;
   }
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
 smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
@@ -269,7 +272,7 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   message[strings::msg_params][strings::reason] =
     static_cast<int32_t>(reason);
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
 }
 
 const VehicleData& MessageHelper::vehicle_data() {
@@ -387,7 +390,7 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
       so_to_send[strings::msg_params] = *msg_params;
     }
     // TODO(PV): appropriate handling of result
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(set_app_icon));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(set_app_icon));
   }
 
   SendGlobalPropertiesToHMI(app);
@@ -432,7 +435,7 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
 
     (*ui_global_properties)[strings::msg_params] = ui_msg_params;
 
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_global_properties));
   }
 
   // TTS global properties
@@ -540,7 +543,7 @@ void MessageHelper::SendShowRequestToHMI(const Application* app) {
     (*ui_show)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     (*ui_show)[strings::msg_params] = (*app->show_command());
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_show));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_show));
   }
 }
 
@@ -568,7 +571,7 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(const Application* app) {
     (*navi_show_tbt)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     (*navi_show_tbt)[strings::msg_params] = (*app->tbt_show_command());
-    SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_tbt));
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_tbt));
   }
 }
 
@@ -614,7 +617,7 @@ void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
       }
       (*ui_command)[strings::msg_params] = msg_params;
 
-      SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(ui_command));
+      DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_command));
     }
 
     // VR Interface
@@ -1094,7 +1097,7 @@ void MessageHelper::SendAudioStartStream(
 
   (*start_stream)[strings::msg_params] = msg_params;
 
-  SKIP_RETURN_VALUE(ApplicationManagerImpl::instance()->ManageHMICommand(start_stream));
+  DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(start_stream));
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {

@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -120,7 +121,7 @@ public class TestRPC {
 	    } else if (functionName.equalsIgnoreCase(Names.ChangeRegistration)) {
 			rpc = new ChangeRegistration();
 	    } else if (functionName.equalsIgnoreCase(Names.PutFile)) {
-			rpc = new PutFile();
+			rpc = RPCRequestFactory.buildPutFile();
 	    } else if (functionName.equalsIgnoreCase(Names.DeleteFile)) {
 			rpc = new DeleteFile();
 	    } else if (functionName.equalsIgnoreCase(Names.ListFiles)) {

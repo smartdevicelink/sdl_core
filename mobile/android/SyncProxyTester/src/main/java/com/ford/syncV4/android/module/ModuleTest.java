@@ -38,6 +38,7 @@ import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -542,7 +543,7 @@ public class ModuleTest {
 							    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
 									rpc = new ChangeRegistration();
 							    } else if (name.equalsIgnoreCase(Names.PutFile)) {
-									rpc = new PutFile();
+									rpc = RPCRequestFactory.buildPutFile();
 							    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
 									rpc = new DeleteFile();
 							    } else if (name.equalsIgnoreCase(Names.ListFiles)) {

@@ -1,4 +1,17 @@
+[CW8]
++ SyncProxyAndroid SDK: Add PredefinedLayout enum.
++ Add DiagnosticMessage request UI.
++ SyncProxyAndroid SDK: Add DiagnosticMessage request and response classes.
+* Improve application exit: close non RPC services first, then close RPC, then - exit.
+
 [CW7]
++ SyncProxyAndroid SDK: add AudioPassThruCapabilities struct. Add parameters to RegisterAppInterfaceResponse class.
++ SyncProxyAndroid SDK: add new parameters to SetDisplayLayoutResponse class.
++ Policy Table: read Snapshot file, response with Update file
++ Add secondaryGraphic parameter to Show UI.
++ SyncProxyAndroid SDK: Add secondaryGraphic parameter to Show request.
+- Remove encrypted parameter from ReadDID UI.
+* SyncProxyAndroid SDK: Add DIDResult struct. Update ReadDID and ReadDIDResponse.
 + Add endTime parameter to SetMediaClockTimer UI.
 + SyncProxyAndroid SDK: Add endTime parameter to SetMediaClockTimer request.
 * SyncProxyAndroid SDK: Update VehicleDataType enum. Add new parameters to OnVehicleData notification. Sync *VehicleData* messages' parameters with the specification.

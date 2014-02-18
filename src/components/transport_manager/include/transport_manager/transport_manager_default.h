@@ -36,6 +36,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
+#include "utils/singleton.h"
+
 #include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager {
@@ -43,7 +45,8 @@ namespace transport_manager {
 /**
  * @brief Default realization of transport_manager_impl class.
  */
-class TransportManagerDefault : public TransportManagerImpl {
+class TransportManagerDefault : public TransportManagerImpl,
+  public utils::Singleton<TransportManagerDefault> {
 
   /**
    * @brief Initialize transport manager.
@@ -59,13 +62,9 @@ class TransportManagerDefault : public TransportManagerImpl {
 
   TransportManagerDefault();
 
- public:
-  /**
-   * @brief Create instance of itself.
-   *
-   * @return Pointer to the object of TransportManagerDefault class.
-   */
-  static TransportManagerDefault* Instance();
+  DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
+
+  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(TransportManagerDefault);
 };
 }
 

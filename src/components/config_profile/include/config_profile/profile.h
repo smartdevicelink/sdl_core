@@ -37,20 +37,16 @@
 #include <vector>
 #include <stdint.h>
 #include "utils/macro.h"
+#include "utils/singleton.h"
 
 namespace profile {
 
 /**
  * The Profile class
  */
-class Profile {
+class Profile : public utils::Singleton<Profile> {
   public:
     // Methods section
-
-    /**
-     * @brief Returns the singleton of class
-     */
-    static Profile* instance();
 
     /**
      * Destructor
@@ -382,6 +378,8 @@ class Profile {
     bool                            use_last_state_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
+
+    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(Profile);
 };
 
 }  //  namespace profile

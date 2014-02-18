@@ -70,25 +70,35 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
         ~Streamer();
 
         /*
-         * Function called by thread on start
+         * @brief Function called by thread on start
          */
         void threadMain();
 
         /*
-         * Function called by thread on exit
+         * @brief Function called by thread on exit
          */
         bool exitThreadMain();
 
+        /*
+         * @brief Opens pipe
+         */
+        void open();
+
+        /*
+         * @brief Closes pipe
+         */
+        void close();
+
       private:
         PipeStreamerAdapter*        server_;
+        int32_t                     pipe_fd_;
         volatile bool               stop_flag_;
 
         DISALLOW_COPY_AND_ASSIGN(Streamer);
     };
 
     bool                                          is_ready_;
-    int32_t                                       pipe_fd_;
-    threads::Thread*                              thread_;
+    threads::Thread                               thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);

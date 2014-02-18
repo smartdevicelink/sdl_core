@@ -470,7 +470,8 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to open Phone view and dial phone number
+     * Method to start playing video from streaming video source
+     * provided by SDLCore
      *
      * @param {Object}
      */
@@ -481,9 +482,9 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to set navigation streaming url to current app model
+     * Method to stop playing video streaming
      *
-     * @param {Object}
+     * @param {Number}
      */
     stopStream: function(appID) {
 
@@ -504,6 +505,29 @@ SDL.SDLModel = Em.Object.create({
 
         SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
         SDL.MediaNavigationView.set('videoView', videoChild);
+    },
+
+    /**
+     * Method to start playing audio from streaming audio source
+     * provided by SDLCore
+     *
+     * @param {Object}
+     */
+    startAudioStream: function(params) {
+
+        SDL.SDLController.getApplicationModel(params.appID).set('navigationAudioStream', params.url);
+        SDL.StreamAudio.play(params.url);
+    },
+
+    /**
+     * Method to set navigation streaming url to current app model
+     *
+     * @param {Number}
+     */
+    stoptAudioStream: function(appID) {
+
+        SDL.SDLController.getApplicationModel(appID).set('navigationAudioStream', null);
+        SDL.StreamAudio.stop();
     },
 
     /**

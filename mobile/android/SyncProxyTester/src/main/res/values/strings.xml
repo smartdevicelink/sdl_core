@@ -71,6 +71,8 @@
     <string name="show_mediaClockDefault">12:34</string>
     <string name="show_graphic">Graphic</string>
     <string name="show_graphicDefault">action.png</string>
+    <string name="show_secondaryGraphic">Secondary Graphic</string>
+    <string name="show_secondaryGraphicDefault">action.png</string>
     <string name="show_customPresets">Custom Presets (comma-separated)</string>
     <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
     <string name="selectprotocol_media">Media</string>
@@ -253,9 +255,19 @@
     <string name="setmediaclocktimer_endTimeSecondsDefault">33</string>
     <string name="setmediaclocktimer_updateMode">Update Mode</string>
 
+    <string name="diagnosticmessage_targetID">Target ID</string>
+    <string name="diagnosticmessage_targetIDDefault">42</string>
+    <string name="diagnosticmessage_messageLength">Message Length</string>
+    <string name="diagnosticmessage_messageLengthDefault">8</string>
+    <string name="diagnosticmessage_messageData">Message Data (comma-separated)</string>
+    <string name="diagnosticmessage_messageDataDefault">128,64,32,16,8,4,2,1</string>
+
     <string name="exit_dialog_title">Exit Application</string>
     <string name="app_setup_dialog_title">Please set up application properties</string>
     <string name="nsd_use_label">Network Service Discovery:</string>
     <string name="nsd_unsupported_api_level_text">NSD is supported from Android 4.1 Jellybean</string>
+    <string name="policy_files_setup_dialog_title">Set up Policy files</string>
+
+    <string name="rpc_service_not_started">RPS Service is not started</string>
 
 </resources>

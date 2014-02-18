@@ -65,11 +65,6 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("ConnectionHandler"));
 
-ConnectionHandlerImpl* ConnectionHandlerImpl::instance() {
-  static ConnectionHandlerImpl instance;
-  return &instance;
-}
-
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
@@ -192,6 +187,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
     return;
   }
   LOG4CXX_INFO(logger_, "Add Connection:" << connection_id << " to the list.");
+  sync_primitives::AutoLock lock(connection_list_lock_);
   connection_list_.insert(
       ConnectionList::value_type(
           connection_id,
@@ -257,6 +253,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   bool is_session_resumption = false;
   ResumeSessionMapIt resume_session_it;
 
+  sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
@@ -310,7 +307,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       success = connection_handler_observer_->OnServiceStartedCallback(
           (it->second)->connection_device_handle(), session_key, service_type);
     }
-
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
       new_session_id = -1;
@@ -330,6 +326,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
   int32_t result = -1;
+  sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
@@ -567,6 +564,7 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
 
+  sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
     it->second->KeepAlive();
@@ -578,6 +576,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   LOG4CXX_INFO(logger_, "Delete Connection: " <<
                static_cast<int32_t>(connection_id) << " from the list.");
 
+  sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");

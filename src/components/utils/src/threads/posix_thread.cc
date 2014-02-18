@@ -64,12 +64,12 @@ Thread::Id Thread::CurrentId() {
 
 //static
 std::string Thread::NameFromId(Id thread_id) {
-  return ThreadManager::instance().GetName(thread_id.id_);
+  return ThreadManager::instance()->GetName(thread_id.id_);
 }
 
 //static
 void Thread::SetNameForId(Id thread_id, const std::string& name) {
-  ThreadManager::instance().RegisterName(thread_id.id_, name);
+  ThreadManager::instance()->RegisterName(thread_id.id_, name);
 }
 
 
@@ -85,7 +85,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 }
 
 Thread::~Thread() {
-  ThreadManager::instance().Unregister(thread_handle_);
+  ThreadManager::instance()->Unregister(thread_handle_);
   if (delegate_) {
     delete delegate_;
   }
@@ -105,27 +105,46 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   bool success = false;
   pthread_attr_t attributes;
-  SKIP_RETURN_VALUE(pthread_attr_init(&attributes));
-
+  int pthread_result = pthread_attr_init(&attributes);
+  if (pthread_result != 0) {
+    LOG4CXX_INFO(logger_,"Couldn't init pthread attributes."
+                 " Error code = " << pthread_result);
+  }
   if (!thread_options_.is_joinable()) {
-    SKIP_RETURN_VALUE(pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED));
+    pthread_result = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+    if (pthread_result != 0) {
+      LOG4CXX_INFO(logger_,"Couldn't set detach state attribute. Error code = " << pthread_result);
+    }
   }
 
   // 0 - default value
   if (thread_options_.stack_size() > 0
       && thread_options_.stack_size() >= Thread::kMinStackSize) {
-    SKIP_RETURN_VALUE(pthread_attr_setstacksize(&attributes, thread_options_.stack_size()));
+    pthread_result = pthread_attr_setstacksize(&attributes, thread_options_.stack_size());
+    if (pthread_result != 0) {
+      LOG4CXX_INFO(logger_,"Couldn't set stacksize = " << thread_options_.stack_size() <<
+                   "Error code = " << pthread_result);
+    }
   }
-
+  pthread_result = pthread_setname_np(thread_handle_, name_.c_str());
+#ifdef __QNXNTO__
+  if (pthread_result != EOK) {
+    LOG4CXX_INFO(logger_,"Couldn't set pthread name"
+                 " Error code = " << pthread_result);
+  }
+#endif
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
-  SKIP_RETURN_VALUE(pthread_setname_np(thread_handle_, name_.c_str()));
   LOG4CXX_INFO(logger_,"Created thread: " << name_);
-  ThreadManager::instance().RegisterName(thread_handle_, name_);
+  ThreadManager::instance()->RegisterName(thread_handle_, name_);
 
   isThreadRunning_ = success;
 
-  SKIP_RETURN_VALUE(pthread_attr_destroy(&attributes));
+  pthread_result = pthread_attr_destroy(&attributes);
+  if (pthread_result != 0) {
+    LOG4CXX_INFO(logger_,"Couldn't destroy pthread attributes."
+                 " Error code = " << pthread_result);
+  }
   return success;
 }
 
@@ -149,7 +168,11 @@ void Thread::stop() {
 }
 
 void Thread::join() {
-  SKIP_RETURN_VALUE(pthread_join(thread_handle_, NULL));
+  int pthread_result = pthread_join(thread_handle_, NULL);
+  if (pthread_result != 0) {
+    LOG4CXX_INFO(logger_,"Couldn't join thread "
+                 " Error code = " << pthread_result);
+  }
   isThreadRunning_ = false;
 }
 

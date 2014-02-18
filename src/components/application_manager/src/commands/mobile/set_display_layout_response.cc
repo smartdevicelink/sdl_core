@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/set_display_layout_response.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -47,14 +49,9 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutResponse::Run");
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-  SendResponse(true);
+
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+
 }
 
 }  // namespace commands

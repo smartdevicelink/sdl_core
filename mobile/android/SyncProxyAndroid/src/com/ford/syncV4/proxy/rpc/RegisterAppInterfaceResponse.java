@@ -247,9 +247,10 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
         return null;
     }
 
-    public void setPrerecordedSpeech(Vector<PrerecordedSpeech> vrCapabilities) {
-        if (vrCapabilities != null) {
-            parameters.put(Names.prerecordedSpeech, vrCapabilities);
+    public void setPrerecordedSpeech(
+            Vector<PrerecordedSpeech> prerecordedSpeech) {
+        if (prerecordedSpeech != null) {
+            parameters.put(Names.prerecordedSpeech, prerecordedSpeech);
         } else {
             parameters.remove(Names.prerecordedSpeech);
         }
@@ -287,6 +288,49 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
             parameters.put(Names.vrCapabilities, vrCapabilities);
         }
     }
+
+    public Vector<AudioPassThruCapabilities> getAudioPassThruCapabilities() {
+        final Object o = parameters.get(Names.audioPassThruCapabilities);
+        if (o instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>) o;
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof AudioPassThruCapabilities) {
+                    return (Vector<AudioPassThruCapabilities>) list;
+                } else if (obj instanceof String) {
+                    Vector<AudioPassThruCapabilities> newList =
+                            new Vector<AudioPassThruCapabilities>();
+                    for (Object hashObj : list) {
+                        AudioPassThruCapabilities toAdd = null;
+                        try {
+                            toAdd = new AudioPassThruCapabilities(
+                                    (Hashtable) hashObj);
+                        } catch (Exception e) {
+                            DebugTool.logError("Failed to parse " +
+                                    getClass().getSimpleName() + "." +
+                                    Names.audioPassThruCapabilities, e);
+                        }
+                        if (toAdd != null) {
+                            newList.add(toAdd);
+                        }
+                    }
+                    return newList;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setAudioPassThruCapabilities(
+            Vector<AudioPassThruCapabilities> audioPassThruCapabilities) {
+        if (audioPassThruCapabilities != null) {
+            parameters.put(Names.audioPassThruCapabilities,
+                    audioPassThruCapabilities);
+        } else {
+            parameters.remove(Names.audioPassThruCapabilities);
+        }
+    }
+
     public VehicleType getVehicleType() {
         Object obj = parameters.get(Names.vehicleType);
         if (obj instanceof VehicleType) {
@@ -299,6 +343,28 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
     public void setVehicleType(VehicleType vehicleType) {
         if (vehicleType != null) {
             parameters.put(Names.vehicleType, vehicleType);
+        }
+    }
+
+    public Vector<Integer> getSupportedDiagModes() {
+        final Object o = parameters.get(Names.supportedDiagModes);
+        if (o instanceof Vector<?>) {
+            Vector<?> list = (Vector<?>) o;
+            if (list != null && list.size() > 0) {
+                Object obj = list.get(0);
+                if (obj instanceof Integer) {
+                    return (Vector<Integer>) list;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void setSupportedDiagModes(Vector<Integer> supportedDiagModes) {
+        if (supportedDiagModes != null) {
+            parameters.put(Names.supportedDiagModes, supportedDiagModes);
+        } else {
+            parameters.remove(Names.supportedDiagModes);
         }
     }
 }

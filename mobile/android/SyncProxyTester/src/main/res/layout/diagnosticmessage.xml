@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/diagnosticmessage_Root"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="10dip"
+              android:layout_marginRight="10dip"
+              android:minWidth="300dip"
+              android:orientation="vertical"
+              android:paddingLeft="20dip"
+              android:paddingRight="20dip">
+
+    <CheckBox
+            android:id="@+id/diagnosticmessage_useTargetID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/diagnosticmessage_targetID"/>
+
+    <EditText
+            android:id="@+id/diagnosticmessage_txtTargetID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:text="@string/diagnosticmessage_targetIDDefault"
+            android:visibility="visible"
+            android:maxLength="5"/>
+
+    <CheckBox
+            android:id="@+id/diagnosticmessage_useMessageLength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/diagnosticmessage_messageLength"/>
+
+    <EditText
+            android:id="@+id/diagnosticmessage_txtMessageLength"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:freezesText="true"
+            android:inputType="number"
+            android:text="@string/diagnosticmessage_messageLengthDefault"
+            android:visibility="visible"
+            android:maxLength="5"/>
+
+    <CheckBox
+            android:id="@+id/diagnosticmessage_useMessageData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/diagnosticmessage_messageData"/>
+
+    <EditText
+            android:id="@+id/diagnosticmessage_txtMessageData"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:freezesText="true"
+            android:inputType="text"
+            android:text="@string/diagnosticmessage_messageDataDefault"
+            android:visibility="visible"
+            android:maxLength="1530"/>
+
+</LinearLayout>
