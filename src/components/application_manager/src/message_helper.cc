@@ -39,6 +39,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/commands/command_impl.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "application_manager/application.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 

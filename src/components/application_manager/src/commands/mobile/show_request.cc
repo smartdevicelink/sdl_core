@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 

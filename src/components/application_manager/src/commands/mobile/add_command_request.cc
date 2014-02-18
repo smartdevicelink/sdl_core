@@ -34,6 +34,7 @@
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 
