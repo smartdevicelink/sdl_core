@@ -1,5 +1,5 @@
 /**
- * \file appMain.cpp
+ * \file appMain.cc
  * \brief SmartDeviceLink main application sources
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -45,7 +45,6 @@
 
 // ----------------------------------------------------------------------------
 
-#include "./appMain.h"
 #include "./life_cycle.h"
 
 #include "utils/signals.h"
