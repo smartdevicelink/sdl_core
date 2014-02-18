@@ -254,18 +254,18 @@ void LifeCycle::StopComponents() {
   delete app_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
-  policy_manager_->~PolicyManager();
+  delete policy_manager_;
 
   transport_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
-  media_manager_->~MediaManagerImpl();
+  delete media_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   protocol_handler_->set_session_observer(NULL);
-  connection_handler_->~ConnectionHandlerImpl();
+  delete connection_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
@@ -294,7 +294,7 @@ void LifeCycle::StopComponents() {
   mb_adapter_->Close();
   delete mb_adapter_;
 #endif  // WEB_HMI
-  hmi_handler_->~HMIMessageHandlerImpl();
+  delete hmi_handler_;
 
 #ifdef WEB_HMI
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
@@ -305,7 +305,7 @@ void LifeCycle::StopComponents() {
   message_broker_server_->Close();
   message_broker_->stopMessageBroker();
   delete mb_server_thread_;
-  message_broker_->~CMessageBroker();
+  delete message_broker_;
 
   networking::cleanup();
 #endif  // WEB_HMI
