@@ -1402,7 +1402,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     // May be better to put this code in MessageHelper?
     end_audio_pass_thru();
     StopAudioPassThru(app_id);
-    MessageHelper::SendAudioStopAudioPathThru();
+    MessageHelper::SendStopAudioPathThru();
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);

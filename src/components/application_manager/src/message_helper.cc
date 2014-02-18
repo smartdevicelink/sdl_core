@@ -1134,7 +1134,7 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
-bool MessageHelper::SendAudioStopAudioPathThru() {
+bool MessageHelper::SendStopAudioPathThru() {
   LOG4CXX_INFO(g_logger,"MessageHelper::SendAudioStopAudioPathThru");
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
