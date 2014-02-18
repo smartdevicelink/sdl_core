@@ -225,6 +225,9 @@ int32_t main(int32_t argc, char** argv) {
   // Third-Party components initialization.
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
+    main_namespace::LifeCycle::instance()->StopComponents();
+// without this line log4cxx threads continue using some instances destroyed by exit()
+    log4cxx::Logger::getRootLogger()->closeNestedAppenders();
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
@@ -235,6 +238,9 @@ int32_t main(int32_t argc, char** argv) {
       LOG4CXX_INFO(logger, "Start HMI on localhost");
 
       if (!InitHmi()) {
+        main_namespace::LifeCycle::instance()->StopComponents();
+// without this line log4cxx threads continue using some instances destroyed by exit()
+        log4cxx::Logger::getRootLogger()->closeNestedAppenders();
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");
@@ -243,10 +249,7 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
 
   utils::SubscribeToTerminateSignal(
-    &main_namespace::LifeCycle::StopComponents);
+    &main_namespace::LifeCycle::StopComponentsOnSignal);
 
-  while (true) {
-    sleep(100500);
-  }
+  pause();
 }
-
