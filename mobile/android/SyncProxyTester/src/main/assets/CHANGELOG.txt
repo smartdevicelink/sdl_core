@@ -1,4 +1,5 @@
 [CW8]
++ SyncProxyAndroid SDK: heartbeat is back
 + Process Start non RPC Service Nack
 + SyncProxyAndroid SDK: Add PredefinedLayout enum.
 + Add DiagnosticMessage request UI.
