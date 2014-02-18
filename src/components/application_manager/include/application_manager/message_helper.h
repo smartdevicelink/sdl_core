@@ -247,6 +247,14 @@ class MessageHelper {
      */
     static void SendAudioStopStream(int32_t connection_key);
 
+    /*
+     * @brief Sends notification to HMI to stop audioPathThrou
+     *
+     * @param connection_key  Application connection key
+     *
+     * @return TRUE on SUCCES otherwise return FALSE
+     */
+    static bool SendAudioStopAudioPathThru();
 
     static smart_objects::SmartObject* CreateNegativeResponse(
       uint32_t connection_key, int32_t function_id, uint32_t correlation_id,

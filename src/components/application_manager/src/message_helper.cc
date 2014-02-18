@@ -1134,6 +1134,24 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
+bool MessageHelper::SendAudioStopAudioPathThru() {
+  LOG4CXX_INFO(g_logger,"MessageHelper::SendAudioStopAudioPathThru");
+
+  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
+      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  const uint32_t hmi_correlation_id = ApplicationManagerImpl::instance()->
+                                      GetNextHMICorrelationID();
+  NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
+  request[strings::params][strings::message_type] = MessageType::kRequest;
+  request[strings::params][strings::function_id] = hmi_apis::FunctionID::UI_EndAudioPassThru;
+  request[strings::params][strings::correlation_id] = hmi_correlation_id;
+  request[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  request[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  return ApplicationManagerImpl::instance()->ManageHMICommand(result);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, const Application* app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
