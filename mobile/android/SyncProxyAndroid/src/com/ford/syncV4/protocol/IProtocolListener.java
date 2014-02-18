@@ -31,4 +31,6 @@ public interface IProtocolListener {
     void onProtocolAppUnregistered();
 
     void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
-} // end-interfCe
+
+    void onStartServiceNackReceived(ServiceType serviceType);
+}

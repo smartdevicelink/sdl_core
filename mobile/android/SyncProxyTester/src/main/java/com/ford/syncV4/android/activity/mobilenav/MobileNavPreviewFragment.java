@@ -37,13 +37,13 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         changeMobileNaviCheckBoxState();
     }
 
-    public void setMobileNaviStateOff() {
-        mSessionCheckBoxState.setStateOff();
+    @Override
+    public void setStateOff() {
+        super.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
         box.setChecked(false);
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(false);
-        mDataStreamingButton.setEnabled(false);
     }
 
     public void setMobileNaviStateOn(OutputStream stream) {

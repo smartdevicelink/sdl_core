@@ -1,4 +1,5 @@
 [CW8]
++ Process Start non RPC Service Nack
 + SyncProxyAndroid SDK: Add PredefinedLayout enum.
 + Add DiagnosticMessage request UI.
 + SyncProxyAndroid SDK: Add DiagnosticMessage request and response classes.

@@ -392,7 +392,7 @@ public class WiProProtocol extends AbstractProtocol {
                 }
                 inspectStartServiceACKHeader(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceNACK.getValue()) {
-                handleProtocolError("Got StartServiceNACK for protocol sessionID=" + header.getSessionID(), null);
+                handleStartServiceNackFrame(header.getServiceType());
             } else if (header.getFrameData() == FrameDataControlFrameType.EndService.getValue()) {
                 handleEndSessionFrame(header);
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
@@ -470,5 +470,8 @@ public class WiProProtocol extends AbstractProtocol {
             handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
         }
     }
-} // end-class
 
+    private void handleStartServiceNackFrame(ServiceType serviceType) {
+        _protocolListener.onStartServiceNackReceived(serviceType);
+    }
+}

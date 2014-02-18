@@ -2654,5 +2654,10 @@ public class SyncProxyALMManager {
         public void onUSBNoSuchDeviceException() {
 
         }
+
+        @Override
+        public void onStartServiceNackReceived(ServiceType serviceType) {
+
+        }
     }
 }

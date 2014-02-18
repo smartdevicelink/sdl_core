@@ -1835,6 +1835,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void handleStartServiceNack(final ServiceType serviceType) {
+        Log.i(TAG, "Service Nack received for " + serviceType);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onStartServiceNackReceived(serviceType);
+                }
+            });
+        } else {
+            _proxyListener.onStartServiceNackReceived(serviceType);
+        }
+    }
+
     protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav);
@@ -2967,6 +2982,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onMobileNavAckReceived(int frameReceivedNumber) {
             handleMobileNavAck(frameReceivedNumber);
+        }
+
+        @Override
+        public void onStartServiceNackReceived(ServiceType serviceType) {
+            handleStartServiceNack(serviceType);
         }
 
         @Override

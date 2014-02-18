@@ -1367,6 +1367,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onStartServiceNackReceived(ServiceType serviceType) {
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onStartServiceNackReceived(serviceType);
+        }
+    }
+
+    @Override
     public void onOnTouchEvent(OnTouchEvent notification) {
         final OnTouchEvent event = notification;
         createDebugMessageForAdapter(notification);

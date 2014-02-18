@@ -76,6 +76,12 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         return proxyService != null && proxyService.hasServiceInServicesPool(serviceType);
     }
 
+    protected void setStateOff() {
+        mFileStreamingLogic.resetStreaming();
+        mSessionCheckBoxState.setStateOff();
+        mDataStreamingButton.setEnabled(false);
+    }
+
     /**
      * Add all necessary listeners
      */

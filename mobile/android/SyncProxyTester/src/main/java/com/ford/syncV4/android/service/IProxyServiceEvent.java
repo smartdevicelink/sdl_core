@@ -46,4 +46,11 @@ public interface IProxyServiceEvent {
      * @param serviceType   a type of the service
      */
     public void onAckReceived(int frameReceived, ServiceType serviceType);
+
+    /**
+     * Dispatch when Service Nack received
+     *
+     * @param serviceType a type of the service
+     */
+    public void onStartServiceNackReceived(ServiceType serviceType);
 }

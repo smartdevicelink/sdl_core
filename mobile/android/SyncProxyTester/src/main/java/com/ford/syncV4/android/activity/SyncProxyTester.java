@@ -684,6 +684,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mLogAdapter.logMessage("Service '" + serviceType + "' Ack received, n:" + frameReceived);
     }
 
+    @Override
+    public void onStartServiceNackReceived(final ServiceType serviceType) {
+        mLogAdapter.logMessage("Start Service '" + serviceType + "' Nack received", true);
+
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                if (serviceType == ServiceType.Mobile_Nav) {
+                    MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
+                            getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+                    fragment.setStateOff();
+                } else if (serviceType == ServiceType.Audio_Service) {
+                    AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
+                            getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+                    fragment.setStateOff();
+                }
+            }
+        });
+    }
+
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
         messageSelectCount = new Hashtable<String, Integer>();
@@ -4337,10 +4357,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onMobileNaviError(String errorMsg, boolean addToUI) {
         mLogAdapter.logMessage(errorMsg, addToUI);
         MobileNavPreviewFragment fr = (MobileNavPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-        fr.setMobileNaviStateOff();
+        fr.setStateOff();
         closeMobileNaviOutputStream();
         AudioServicePreviewFragment audioFragement = (AudioServicePreviewFragment) getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-        audioFragement.setAudioServiceStateOff();
+        audioFragement.setStateOff();
         closeAudioOutputStream();
     }
 
