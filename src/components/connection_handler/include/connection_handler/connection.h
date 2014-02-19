@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "utils/logger.h"
+#include "utils/lock.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 
@@ -171,7 +172,7 @@ class Connection {
    * \brief Returns map of sessions which have been opened in
    *  current connection.
    */
-  const SessionMap& session_map();
+  const SessionMap session_map() const;
 
   /*
    * \brief Close this connection and all associated sessions
@@ -200,6 +201,8 @@ class Connection {
    * \brief session/services map
    */
   SessionMap  session_map_;
+
+  mutable sync_primitives::Lock session_map_lock_;
 
   /*
    * \brief monitor that closes connection if there is no traffic over it

@@ -579,7 +579,8 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   }
 
   if (0 != connection_handler_observer_) {
-    const SessionMap session_map = (itr->second)->session_map();
+    const Connection* connection = itr->second;
+    const SessionMap session_map = connection->session_map();
     for (SessionMapConstIterator session_it = session_map.begin(),
          end = session_map.end(); session_it != end; ++session_it) {
 
