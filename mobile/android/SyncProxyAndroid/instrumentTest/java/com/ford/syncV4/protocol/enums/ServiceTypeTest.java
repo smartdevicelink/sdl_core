@@ -42,5 +42,19 @@ public class ServiceTypeTest extends AndroidTestCase {
         assertTrue(sessionTypes.contains(ServiceType.Audio_Service));
     }
 
+    public void testServiceTypeHeartbeatNameIsHeartbeat_Service() throws Exception {
+        String name = ServiceType.Heartbeat.getName();
+        assertEquals(name, "Heartbeat_Service");
+    }
+
+    public void testServiceTypeHeartbeatValueIs0() throws Exception {
+        byte value = ServiceType.Heartbeat.getValue();
+        assertEquals(value, (byte) 0);
+    }
+
+    public void testHeartbeatIsInServiceTypeList() throws Exception {
+        Vector sessionTypes = ServiceType.getList();
+        assertTrue(sessionTypes.contains(ServiceType.Heartbeat));
+    }
 
 }
