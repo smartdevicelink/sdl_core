@@ -60,10 +60,10 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

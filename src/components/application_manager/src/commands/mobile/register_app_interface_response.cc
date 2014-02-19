@@ -59,7 +59,7 @@ void RegisterAppInterfaceResponse::Run() {
   SendResponse(success, mobile_apis::Result::INVALID_ENUM, last_message);
 
   if (success) {
-    Application* application =
+    ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(
             (*message_)[strings::params][strings::connection_key].asInt());
 

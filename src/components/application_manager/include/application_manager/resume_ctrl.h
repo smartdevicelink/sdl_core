@@ -64,7 +64,7 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @param application is applicatint whitch need to be saved
      * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will saveto to file system
      */
-    void SaveApplication(Application* application);
+    void SaveApplication(ApplicationConstSharedPtr application);
 
     /**
      * @brief Load unregistered applications info from the file system
@@ -82,21 +82,21 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @param application is applicatint whitch HMI Level is need to restore
      * @return true if succes, otherwise return false
      */
-    bool RestoreApplicationHMILevel(Application* application);
+    bool RestoreApplicationHMILevel(ApplicationSharedPtr application);
 
     /**
      * @brief Check if Resume contriller have saved instance of application
      * @param application is applicatint whitch need to be checked
      * @return true if exist, false otherway
      */
-    bool ApplicationIsSaved(const Application* application);
+    bool ApplicationIsSaved(ApplicationConstSharedPtr application);
 
     /**
      * @brief Remove application from list of saved applications
      * @param application is applicatint whitch need to be removed
      * @return return true, if succes, otherwise return false
      */
-    bool RemoveApplicationFromSaved(const Application* application);
+    bool RemoveApplicationFromSaved(ApplicationConstSharedPtr application);
 
     /**
      * @brief Save application info to FileSystem
@@ -108,7 +108,7 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @param application that is need to be resaterted
      * @return true if it was saved, otherwise return false
      */
-    bool StartResumption(Application* application);
+    bool StartResumption(ApplicationSharedPtr application);
 
     /**
      * @brief Timer callback function
@@ -123,7 +123,7 @@ class ResumeCtrl: public event_engine::EventObserver {
      * timestamp and application from correlationID
      */
     struct ResumingApp {
-      Application* app;
+      ApplicationSharedPtr app;
       uint32_t correlation_id;
       time_t start_resuming_time;
       bool is_waiting_for_timer;
@@ -163,7 +163,7 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @param application is applicatint whose adress need to get
      * return string, that contains parameters for connection
      */
-    std::string GetMacAddress(const Application* application);
+    std::string GetMacAddress(ApplicationConstSharedPtr application);
 
     /**
      * @brief Get Send resumption requesto to mobile

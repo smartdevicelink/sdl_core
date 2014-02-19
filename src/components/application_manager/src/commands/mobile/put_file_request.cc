@@ -51,7 +51,7 @@ PutFileRequest::~PutFileRequest() {
 void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       connection_key());
 
   if (!application) {

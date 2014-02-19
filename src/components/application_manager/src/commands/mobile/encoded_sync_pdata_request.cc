@@ -58,10 +58,10 @@ EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
 void EncodedSyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "EncodedSyncPDataRequest::Run");
 
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       connection_key());
 
-  if (NULL == application) {
+  if (!application.valid()) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

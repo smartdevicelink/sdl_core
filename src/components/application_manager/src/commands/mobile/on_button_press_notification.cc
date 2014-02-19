@@ -57,12 +57,12 @@ void OnButtonPressNotification::Run() {
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
-  const std::vector<Application*>& subscribedApps =
+  const std::vector<ApplicationSharedPtr>& subscribedApps =
       ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
-  std::vector<Application*>::const_iterator it = subscribedApps.begin();
+  std::vector<ApplicationSharedPtr>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {
-    Application* subscribed_app = *it;
+    ApplicationSharedPtr subscribed_app = *it;
     if (!subscribed_app) {
       LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
       continue;
@@ -80,7 +80,7 @@ void OnButtonPressNotification::Run() {
   }
 }
 
-void OnButtonPressNotification::SendButtonPress(const Application* app) {
+void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* on_btn_press = new smart_objects::SmartObject();
 
   if (!on_btn_press) {

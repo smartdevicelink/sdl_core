@@ -56,7 +56,7 @@ void ActivateAppResponse::Run() {
       LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
       return;
     }
-    Application* application = ApplicationManagerImpl::instance()->application(app_id);
+    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(app_id);
     if (application) {
       ApplicationManagerImpl::instance()->ActivateApplication(application);
     } else {

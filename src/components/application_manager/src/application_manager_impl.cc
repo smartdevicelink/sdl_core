@@ -138,32 +138,32 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
-Application* ApplicationManagerImpl::application(int32_t app_id) const {
-  std::map<int32_t, Application*>::const_iterator it =
+ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
+  std::map<int32_t, ApplicationSharedPtr>::const_iterator it =
       applications_.find(app_id);
   if (applications_.end() != it) {
     return it->second;
   } else {
-    return NULL;
+    return ApplicationSharedPtr();
   }
 }
 
-Application* ApplicationManagerImpl::active_application() const {
+ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   // TODO(DK) : check driver distraction
-  for (std::set<Application*>::iterator it = application_list_.begin();
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
     if ((*it)->IsFullscreen()) {
       return *it;
     }
   }
-  return NULL;
+  return ApplicationSharedPtr();
 }
 
-std::vector<Application*> ApplicationManagerImpl::applications_by_button(
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_button(
   uint32_t button) {
-  std::vector<Application*> result;
-  for (std::set<Application*>::iterator it = application_list_.begin();
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it; ++it) {
     if ((*it)->IsSubscribedToButton(
           static_cast<mobile_apis::ButtonName::eType>(button))) {
@@ -173,10 +173,10 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_button(
   return result;
 }
 
-std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_ivi(
   uint32_t vehicle_info) {
-  std::vector<Application*> result;
-  for (std::set<Application*>::iterator it = application_list_.begin();
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
     if ((*it)->IsSubscribedToIVI(vehicle_info)) {
@@ -186,9 +186,9 @@ std::vector<Application*> ApplicationManagerImpl::applications_by_ivi(
   return result;
 }
 
-std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
-  std::vector<Application*> result;
-  for (std::set<Application*>::iterator it = application_list_.begin();
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi() {
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
     if ((*it)->allowed_support_navigation()) {
@@ -198,7 +198,7 @@ std::vector<Application*> ApplicationManagerImpl::applications_with_navi() {
   return result;
 }
 
-Application* ApplicationManagerImpl::RegisterApplication(
+ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
   smart_objects::SmartObject& message = *request_for_registration;
@@ -214,7 +214,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
         message[strings::params][strings::correlation_id].asUInt(),
         mobile_apis::Result::DISALLOWED));
     ManageMobileCommand(response);
-    return NULL;
+    return ApplicationSharedPtr();
   }
 
   // app_id is SDL "internal" ID
@@ -238,11 +238,11 @@ Application* ApplicationManagerImpl::RegisterApplication(
           message[strings::params][strings::correlation_id].asUInt(),
           mobile_apis::Result::GENERIC_ERROR));
       ManageMobileCommand(response);
-      return NULL;
+      return ApplicationSharedPtr();
     }
   }
 
-  Application* application = new ApplicationImpl(app_id);
+  ApplicationSharedPtr application(new ApplicationImpl(app_id));
   if (!application) {
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -250,7 +250,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
         message[strings::params][strings::correlation_id].asUInt(),
         mobile_apis::Result::OUT_OF_MEMORY));
     ManageMobileCommand(response);
-    return NULL;
+    return ApplicationSharedPtr();
   }
 
   const std::string& name =
@@ -308,7 +308,7 @@ Application* ApplicationManagerImpl::RegisterApplication(
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  applications_.insert(std::pair<int32_t, Application*>(app_id, application));
+  applications_.insert(std::pair<int32_t, ApplicationSharedPtr>(app_id, application));
   application_list_.insert(application);
 
   // TODO(PV): add asking user to allow application
@@ -317,15 +317,15 @@ Application* ApplicationManagerImpl::RegisterApplication(
   return application;
 }
 
-bool ApplicationManagerImpl::RemoveAppDataFromHMI(Application* app) {
+bool ApplicationManagerImpl::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
   return true;
 }
 
-bool ApplicationManagerImpl::LoadAppDataToHMI(Application* app) {
+bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
   return true;
 }
 
-bool ApplicationManagerImpl::ActivateApplication(Application* app) {
+bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
@@ -334,10 +334,10 @@ bool ApplicationManagerImpl::ActivateApplication(Application* app) {
 
   bool is_new_app_media = app->is_media_application();
 
-  for (std::set<Application*>::iterator it = application_list_.begin();
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    Application* curr_app = *it;
+    ApplicationSharedPtr curr_app = *it;
     if (curr_app->app_id() == curr_app->app_id()) {
       if (curr_app->IsFullscreen()) {
         LOG4CXX_WARN(logger_, "Application is already active.");
@@ -368,7 +368,7 @@ bool ApplicationManagerImpl::ActivateApplication(Application* app) {
   return true;
 }
 
-void ApplicationManagerImpl::DeactivateApplication(Application* app) {
+void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
   MessageHelper::SendDeleteCommandRequestToHMI(app);
   MessageHelper::ResetGlobalproperties(app);
 }
@@ -624,7 +624,7 @@ void ApplicationManagerImpl::RemoveDevice(
 
 
 bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
-  Application* app = application(connection_key);
+  ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
     LOG4CXX_INFO(logger_, "An application is not registered.");
@@ -648,7 +648,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   LOG4CXX_INFO(logger_,
       "OnServiceStartedCallback " << type << " in session " << session_key);
 
-  Application* app = application(session_key);
+  ApplicationSharedPtr app = application(session_key);
 
   switch (type) {
     case protocol_handler::kRpc: {
@@ -839,13 +839,13 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   uint32_t protocol_type =
     (*message)[strings::params][strings::protocol_type].asUInt();
 
-  Application* app = NULL;
+  ApplicationSharedPtr app;
 
   if (((mobile_apis::FunctionID::RegisterAppInterfaceID != function_id) &&
        (protocol_type == commands::CommandImpl::mobile_protocol_type_)) &&
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     app = ApplicationManagerImpl::instance()->application(connection_key);
-    if (NULL == app) {
+    if (!app.valid()) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
         MessageHelper::CreateNegativeResponse(
@@ -888,7 +888,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       // get application hmi level
       mobile_api::HMILevel::eType app_hmi_level =
         mobile_api::HMILevel::INVALID_ENUM;
-      if (NULL != app) {
+      if (app.valid()) {
         app_hmi_level = app->hmi_level();
       }
 
@@ -1027,7 +1027,7 @@ void ApplicationManagerImpl::CreatePoliciesManager(PoliciesManager* managaer) {
 }
 
 bool ApplicationManagerImpl::CheckPolicies(smart_objects::SmartObject* message,
-    Application* app) {
+    ApplicationSharedPtr app) {
   return true;
 }
 
@@ -1376,7 +1376,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
-  std::set<Application*>::iterator it = application_list_.begin();
+  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
@@ -1392,7 +1392,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  std::map<int32_t, Application*>::iterator it = applications_.find(app_id);
+  std::map<int32_t, ApplicationSharedPtr>::iterator it = applications_.find(app_id);
   if (applications_.end() == it) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
@@ -1416,11 +1416,10 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
-  Application* app_to_remove = it->second;
+  ApplicationSharedPtr app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
-  delete app_to_remove;
 
   return;
 }
@@ -1491,8 +1490,8 @@ void ApplicationManagerImpl::Mute() {
       ? mobile_apis::AudioStreamingState::ATTENUATED
       : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
-  std::set<Application*>::const_iterator it = application_list_.begin();
-  std::set<Application*>::const_iterator itEnd = application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(state);
@@ -1503,8 +1502,8 @@ void ApplicationManagerImpl::Mute() {
 }
 
 void ApplicationManagerImpl::Unmute() {
-  std::set<Application*>::const_iterator it = application_list_.begin();
-  std::set<Application*>::const_iterator itEnd = application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       (*it)->set_audio_streaming_state(

@@ -35,6 +35,7 @@
 
 #include <string>
 #include <map>
+#include "utils/shared_ptr.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 
@@ -401,6 +402,9 @@ class Application : public virtual InitialApplicationData,
     virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 };
+
+typedef utils::SharedPtr<Application> ApplicationSharedPtr;
+typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
 
 }  // namespace application_manager
 

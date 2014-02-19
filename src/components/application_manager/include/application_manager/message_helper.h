@@ -38,6 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
+#include "application_manager/application.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -46,7 +47,6 @@ class SmartObject;
 }
 
 namespace application_manager {
-class Application;
 namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -176,7 +176,7 @@ class MessageHelper {
      * @brief Removes Vr Synonyms of application name from HMI
      * when unregistering application.
      */
-    static void SendRemoveVrCommandsOnUnregisterApp(Application* app);
+    static void SendRemoveVrCommandsOnUnregisterApp(ApplicationConstSharedPtr app);
 
     /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
@@ -218,24 +218,24 @@ class MessageHelper {
     static smart_objects::SmartObject* CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
-    static void SendAppDataToHMI(const Application* app);
-    static void SendGlobalPropertiesToHMI(const Application* app);
+    static void SendAppDataToHMI(ApplicationConstSharedPtr app);
+    static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
 
-    static smart_objects::SmartObject* CreateAppVrHelp(const Application* app);
+    static smart_objects::SmartObject* CreateAppVrHelp(ApplicationConstSharedPtr app);
 
-    static void SendShowRequestToHMI(const Application* app);
-    static void SendShowConstantTBTRequestToHMI(const Application* app);
-    static void SendAddCommandRequestToHMI(const Application* app);
-    static void SendChangeRegistrationRequestToHMI(const Application* app);
+    static void SendShowRequestToHMI(ApplicationConstSharedPtr app);
+    static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app);
+    static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
+    static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddVRCommandToHMI(
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
-    static void SendAddSubMenuRequestToHMI(const Application* app);
-    static void RemoveAppDataFromHMI(Application* const app);
-    static void SendOnAppUnregNotificationToHMI(Application* const app, bool is_resuming = false);
-    static void SendDeleteCommandRequestToHMI(Application* const app);
-    static void SendDeleteSubMenuRequestToHMI(Application* const app);
-    static void ResetGlobalproperties(Application* const app);
+    static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
+    static void RemoveAppDataFromHMI(ApplicationSharedPtr app);
+    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app, bool is_resuming = false);
+    static void SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app);
+    static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
+    static void ResetGlobalproperties(ApplicationSharedPtr app);
 
     static void SendActivateAppToHMI(uint32_t const app_id);
 
@@ -290,7 +290,7 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImage(smart_objects::SmartObject& image,
-                            const Application* app);
+                            ApplicationConstSharedPtr app);
 
     /*
      * @brief Finds "Image" structure in request and verify image file presence
@@ -304,13 +304,13 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImageFiles(
-      smart_objects::SmartObject& message, const Application* app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
                                   smart_objects::SmartObject& message_params,
-                                  const Application* app);
+                                  ApplicationConstSharedPtr app);
 
     static bool PrintSmartObject(const smart_objects::SmartObject& object);
 

@@ -52,10 +52,10 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[str::params][str::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

@@ -90,10 +90,10 @@ namespace {
 void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

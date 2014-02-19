@@ -35,11 +35,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_INTERACTION_CHOICE_SET_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 
@@ -72,7 +71,7 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param app mobile application
    */
-  bool ChoiceSetInUse(const Application* app);
+  bool ChoiceSetInUse(ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };

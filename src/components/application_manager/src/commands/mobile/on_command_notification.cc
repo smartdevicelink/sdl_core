@@ -49,7 +49,7 @@ OnCommandNotification::~OnCommandNotification() {
 void OnCommandNotification::Run() {
   LOG4CXX_INFO(logger_, "OnCommandNotification::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {

@@ -51,7 +51,7 @@ DeleteFileRequest::~DeleteFileRequest() {
 void DeleteFileRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
 
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {

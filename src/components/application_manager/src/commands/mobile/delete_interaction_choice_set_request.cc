@@ -52,10 +52,10 @@ DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
 void DeleteInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -90,7 +90,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
    msg_params, true);*/
 }
 
-bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(const Application* app) {
+bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr app) {
   if (app->is_perform_interaction_active()) {
     // retrieve stored choice sets for perform interaction
     const PerformChoiceSetMap& choice_set_map = app

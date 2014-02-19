@@ -53,9 +53,9 @@ void SetMediaClockRequest::Run() {
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (NULL == app) {
+  if (!app.valid()) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;

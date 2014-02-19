@@ -92,10 +92,10 @@ void PerformInteractionRequest::Run() {
 
   // timer_.start(2);
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -250,7 +250,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 
 void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key].asUInt());
   if (app) {
 
@@ -270,8 +270,8 @@ void PerformInteractionRequest::ProcessVRNotification(
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRNotification");
   const uint32_t app_id = message[strings::msg_params][strings::app_id]
                                 .asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
-  if (NULL == app) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
@@ -339,8 +339,8 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
   const uint32_t app_id = (*message_)[strings::params]
                                           [strings::connection_key].asUInt();
   if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
-    Application* app = ApplicationManagerImpl::instance()->application(app_id);
-    if (NULL == app) {
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+    if (!app.valid()) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
@@ -359,7 +359,7 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
 }
 
 void PerformInteractionRequest::SendVrDeleteCommand(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
   const PerformChoiceSetMap& choice_set_map = app
       ->performinteraction_choice_set_map();
@@ -382,9 +382,9 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key].asUInt());
-    if (NULL == app) {
+    if (!app.valid()) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
@@ -430,7 +430,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -467,7 +467,7 @@ void PerformInteractionRequest::SendVRAddCommandRequest(
 }
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject& choice_set_id_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -550,13 +550,13 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
 
 void PerformInteractionRequest::CreateUIPerformInteraction(
     const smart_objects::SmartObject& msg_params,
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
                      &msg_params, true);
 }
 
 void PerformInteractionRequest::SendTTSPerformInteractionRequest(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -635,7 +635,7 @@ void PerformInteractionRequest::DeleteParameterFromTTSChunk
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -685,7 +685,7 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
 }
 
 bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
@@ -741,7 +741,7 @@ bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
 }
 
 bool PerformInteractionRequest::CheckVrHelpItemPositions(
-    application_manager::Application* const app) {
+    application_manager::ApplicationSharedPtr const app) {
 
   if (!(*message_)[strings::msg_params].keyExists(strings::vr_help)) {
     LOG4CXX_INFO(logger_, ""

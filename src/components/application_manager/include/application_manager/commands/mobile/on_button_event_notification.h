@@ -35,11 +35,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_BUTTON_EVENT_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 
@@ -74,7 +73,7 @@ class OnButtonEventNotification : public CommandNotificationImpl {
    *
    * @param app Application to receive notification
    */
-  void SendButtonEvent(const Application* app);
+  void SendButtonEvent(ApplicationConstSharedPtr app);
 
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };

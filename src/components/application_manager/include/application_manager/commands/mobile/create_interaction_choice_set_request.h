@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_CREATE_INTERACTION_CHOICE_SET_REQUEST_H_
 
+#include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
@@ -74,7 +75,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @return Mobile result code
    */
-  mobile_apis::Result::eType CheckChoiceSet(const Application* app);
+  mobile_apis::Result::eType CheckChoiceSet(ApplicationConstSharedPtr app);
 
   /*
   * @brief Predicate for using with CheckChoiceSet method to compare choice ID param

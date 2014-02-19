@@ -34,12 +34,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ADD_COMMAND_REQUEST_H_
 
+#include "application_manager/application.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 
@@ -82,7 +81,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandName(const Application* app);
+  bool CheckCommandName(ApplicationConstSharedPtr app);
 
   /*
    * @brief Check if command VR synonyms doesn't exist in application commands
@@ -92,7 +91,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandVRSynonym(const Application* app);
+  bool CheckCommandVRSynonym(ApplicationConstSharedPtr app);
 
   /*
    * @brief Check if command parent ID exists in submenu map
@@ -101,7 +100,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckCommandParentId(const Application* app);
+  bool CheckCommandParentId(ApplicationConstSharedPtr app);
 
   bool CheckVRCommandsNames();
 

@@ -53,12 +53,12 @@ OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {
 void OnKeyBoardInputNotification::Run() {
   LOG4CXX_INFO(logger_, "OnKeyBoardInputNotification::Run");
 
-  const std::vector<Application*>& applications =
+  const std::vector<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications_with_navi();
 
-  std::vector<Application*>::const_iterator it = applications.begin();
+  std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
-    Application* app = *it;
+    ApplicationSharedPtr app = *it;
     if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();

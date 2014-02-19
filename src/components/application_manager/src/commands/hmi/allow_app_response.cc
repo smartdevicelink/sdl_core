@@ -50,10 +50,10 @@ void AllowAppResponse::Run() {
   uint32_t connection_key =
     (*message_)[strings::params][strings::connection_key].asInt();
 
-  Application* app = ApplicationManagerImpl::instance()->
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
                      application(connection_key);
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }

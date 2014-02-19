@@ -57,7 +57,7 @@ void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
   int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -136,7 +136,7 @@ void GetVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
 
   int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

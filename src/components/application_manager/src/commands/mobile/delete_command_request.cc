@@ -57,7 +57,7 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteCommandRequest::Run");
 
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
@@ -133,10 +133,10 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   if (!IsPendingResponseExist()) {
-    Application* application =
+    ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
-    if (NULL == application) {
+    if (!application.valid()) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }

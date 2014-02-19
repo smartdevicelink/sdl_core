@@ -240,7 +240,7 @@ void MessageHelper::SendHelpVrCommand() {
   SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
 }
 
-void MessageHelper::SendRemoveVrCommandsOnUnregisterApp(Application* app) {
+void MessageHelper::SendRemoveVrCommandsOnUnregisterApp(ApplicationConstSharedPtr app) {
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
 
   if (app->vr_synonyms()) {
@@ -362,7 +362,7 @@ smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
   return set_icon;
 }
 
-void MessageHelper::SendAppDataToHMI(const Application* app) {
+void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app) {
   uint32_t id = app->app_id();
 
   utils::SharedPtr<smart_objects::SmartObject> set_app_icon(
@@ -397,7 +397,7 @@ void MessageHelper::SendAppDataToHMI(const Application* app) {
   SendAddCommandRequestToHMI(app);
 }
 
-void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
+void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -473,7 +473,7 @@ void MessageHelper::SendGlobalPropertiesToHMI(const Application* app) {
   }
 }
 
-smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* app) {
+smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* result = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!result) {
@@ -489,11 +489,11 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
   if (app->vr_help()) {
     vr_help[strings::vr_help] = (*app->vr_help());
   } else {
-    const std::set<Application*>& apps = ApplicationManagerImpl::instance()
+    const std::set<ApplicationSharedPtr>& apps = ApplicationManagerImpl::instance()
                                          ->applications();
 
     int32_t index = 0;
-    std::set<Application*>::const_iterator it_app = apps.begin();
+    std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
     for (; apps.end() != it_app; ++it_app) {
       if ((*it_app)->vr_synonyms()) {
         smart_objects::SmartObject item(smart_objects::SmartType_Map);
@@ -518,7 +518,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(const Application* ap
   return result;
 }
 
-void MessageHelper::SendShowRequestToHMI(const Application* app) {
+void MessageHelper::SendShowRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -546,7 +546,7 @@ void MessageHelper::SendShowRequestToHMI(const Application* app) {
   }
 }
 
-void MessageHelper::SendShowConstantTBTRequestToHMI(const Application* app) {
+void MessageHelper::SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -574,7 +574,7 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(const Application* app) {
   }
 }
 
-void MessageHelper::SendAddCommandRequestToHMI(const Application* app) {
+void MessageHelper::SendAddCommandRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -657,7 +657,7 @@ smart_objects::SmartObject* MessageHelper::CreateChangeRegistration(
   return command;
 }
 
-void MessageHelper::SendChangeRegistrationRequestToHMI(const Application* app) {
+void MessageHelper::SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app) {
   hmi_apis::Common_Language::eType app_common_language =
       ToCommonLanguage(app->language());
   const HMICapabilities& hmi_capabilities =
@@ -729,7 +729,7 @@ void MessageHelper::SendAddVRCommandToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(vr_command);
 }
 
-void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
+void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -770,14 +770,14 @@ void MessageHelper::SendAddSubMenuRequestToHMI(const Application* app) {
   }
 }
 
-void MessageHelper::RemoveAppDataFromHMI(Application* const app) {
+void MessageHelper::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
   SendDeleteCommandRequestToHMI(app);
   SendDeleteSubMenuRequestToHMI(app);
   SendRemoveVrCommandsOnUnregisterApp(app);
   ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app, bool is_resuming) {
+void MessageHelper::SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app, bool is_resuming) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -796,7 +796,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(Application* const app, bool
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
-void MessageHelper::SendDeleteCommandRequestToHMI(Application* const app) {
+void MessageHelper::SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -845,7 +845,7 @@ void MessageHelper::SendRemoveCommandToHMI(int32_t function_id, int32_t command_
   ApplicationManagerImpl::instance()->ManageHMICommand(delete_cmd);
 }
 
-void MessageHelper::SendDeleteSubMenuRequestToHMI(Application* const app) {
+void MessageHelper::SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app) {
   if (!app) {
     return;
   }
@@ -924,7 +924,7 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   return response;
 }
 
-void MessageHelper::ResetGlobalproperties(Application* const app) {
+void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
   // reset help_promt
   const std::vector<std::string>& help_promt = profile::Profile::instance()
       ->help_promt();
@@ -1011,14 +1011,6 @@ void MessageHelper::SendNaviStartStream(
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
       connection_key,
       &app_id);
-
-  /*Application* app =
-      ApplicationManagerImpl::instance()->application(connection_key);
-
-
-  if (NULL == app) {
-    return;
-  }*/
 
   msg_params[strings::app_id] = app_id;
   msg_params[strings::url] = url;
@@ -1134,7 +1126,7 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
-  smart_objects::SmartObject& message, const Application* app) {
+  smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
     for (int32_t i = 0; i < message.length(); ++i) {
       mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
@@ -1170,7 +1162,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
-    smart_objects::SmartObject& image, const Application* app) {
+    smart_objects::SmartObject& image, ApplicationConstSharedPtr app) {
   const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
@@ -1217,7 +1209,7 @@ bool MessageHelper::VerifySoftButtonText
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
-    smart_objects::SmartObject& message_params, const Application* app) {
+    smart_objects::SmartObject& message_params, ApplicationConstSharedPtr app) {
   if (!message_params.keyExists(strings::soft_buttons)) {
     return mobile_apis::Result::SUCCESS;
   }

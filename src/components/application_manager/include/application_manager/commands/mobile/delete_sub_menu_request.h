@@ -35,11 +35,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DELETE_SUB_MENU_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 
@@ -73,7 +72,7 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  void DeleteSubMenuVRCommands(Application* const app);
+  void DeleteSubMenuVRCommands(ApplicationConstSharedPtr app);
 
   /*
    * @brief Deletes UI commands from SDL for corresponding submenu ID
@@ -82,7 +81,7 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  void DeleteSubMenuUICommands(Application* const app);
+  void DeleteSubMenuUICommands(ApplicationSharedPtr const app);
 
   /**
    * @brief Interface method that is called whenever new event received

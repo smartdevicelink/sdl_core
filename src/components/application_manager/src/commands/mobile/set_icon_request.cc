@@ -52,10 +52,10 @@ SetIconRequest::~SetIconRequest() {
 void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -112,7 +112,7 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
       if (result) {
-        Application* app = ApplicationManagerImpl::instance()->application(
+        ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
             connection_key());
 
         const std::string path = (*message_)[strings::msg_params]

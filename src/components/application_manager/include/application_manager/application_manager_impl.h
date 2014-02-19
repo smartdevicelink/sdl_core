@@ -167,18 +167,18 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    Application* application(int32_t app_id) const;
-    inline const std::set<Application*>& applications() const;
-    Application* active_application() const;
-    std::vector<Application*> applications_by_button(uint32_t button);
-    std::vector<Application*> applications_by_ivi(uint32_t vehicle_info);
-    std::vector<Application*> applications_with_navi();
+    ApplicationSharedPtr application(int32_t app_id) const;
+    inline const std::set<ApplicationSharedPtr>& applications() const;
+    ApplicationSharedPtr active_application() const;
+    std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
+    std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
+    std::vector<ApplicationSharedPtr> applications_with_navi();
 
     /////////////////////////////////////////////////////
 
     HMICapabilities& hmi_capabilities();
 
-    Application* RegisterApplication(
+    ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
     /*
      * @brief Closes application by id
@@ -203,10 +203,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void UnregisterAllApplications();
 
-    bool RemoveAppDataFromHMI(Application* app);
-    bool LoadAppDataToHMI(Application* app);
-    bool ActivateApplication(Application* app);
-    void DeactivateApplication(Application* app);
+    bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
+    bool LoadAppDataToHMI(ApplicationSharedPtr app);
+    bool ActivateApplication(ApplicationSharedPtr app);
+    void DeactivateApplication(ApplicationSharedPtr app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
 
@@ -446,7 +446,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * \return bool Indicates whether message is allowed for application
      */
     bool CheckPolicies(smart_objects::SmartObject* message,
-                       Application* app);
+                       ApplicationSharedPtr app);
 
     /**
      * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
@@ -502,12 +502,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Map of connection keys and associated applications
      */
-    std::map<int32_t, Application*> applications_;
+    std::map<int32_t, ApplicationSharedPtr> applications_;
 
     /**
      * @brief List of applications
      */
-    std::set<Application*> application_list_;
+    std::set<ApplicationSharedPtr> application_list_;
 
     /**
      * @brief Set of HMI notifications with timeout.
@@ -567,7 +567,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ApplicationManagerImpl);
 };
 
-const std::set<Application*>& ApplicationManagerImpl::applications() const {
+const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {
   return application_list_;
 }
 
