@@ -44,6 +44,21 @@ using typesafe_format::strmfmt;
 namespace codegen {
 
 // static
+const char* FunctionMessage::MessageTypeToString(
+    FunctionMessage::MessageType message_type) {
+  switch (message_type) {
+    case FunctionMessage::kRequest:
+      return "request";
+    case FunctionMessage::kResponse:
+      return "response";
+    case FunctionMessage::kNotification:
+      return "notification";
+    default:
+      return "";
+  }
+}
+
+// static
 FunctionMessage::MessageType FunctionMessage::MessageTypeFromLiteral(
     const std::string& literal) {
   if (literal == "request") {
@@ -86,12 +101,15 @@ bool FunctionMessage::AddParameter(const std::string& param_name, const Type* ty
                                    Platform platformn) {
   return AddField(type, param_name, is_mandatory, scope, default_value, description, platformn);
 }
+const Interface* FunctionMessage::interface() const {
+    return interface_;
+}
 
 Function::Function(const Request* request, const Response* response)
     : request_(request),
       response_(response) {
-  assert(request_);
-  assert(response_);
+    assert(request_);
+    assert(response_);
 }
 
 

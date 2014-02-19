@@ -202,5 +202,19 @@ Namespace& CppFile::notifications_ns() {
   return module_namespace().nested("notification");
 }
 
+Namespace& CppFile::NamespaceByMessageType(FunctionMessage::MessageType type) {
+  switch(type) {
+    case FunctionMessage::kRequest:
+      return requests_ns();
+    case FunctionMessage::kResponse:
+      return responses_ns();
+    case FunctionMessage::kNotification:
+      return notifications_ns();
+    default:
+      assert(!"Invalid message type");
+      return global_namespace();
+  }
+}
+
 }  // namespace codegen
 

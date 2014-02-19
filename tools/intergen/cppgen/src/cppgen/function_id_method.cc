@@ -34,6 +34,7 @@
 
 #include <cassert>
 #include <ostream>
+#include "model/interface.h"
 #include "model/function.h"
 #include "utils/safeformat.h"
 #include "cppgen/literal_generator.h"
@@ -44,7 +45,9 @@ using typesafe_format::strmfmt;
 namespace codegen {
 
 FunctionIdMethod::FunctionIdMethod(const FunctionMessage* func)
-    : CppFunction(func->name(), "function_id", "int32_t", kVirtual),
+    : CppFunction(func->name(),
+                  "function_id",
+                  "int32_t", kConst),
       func_(func) {
   assert(func);
 }
@@ -54,7 +57,26 @@ FunctionIdMethod::~FunctionIdMethod() {
 
 void FunctionIdMethod::DefineBody(std::ostream* os) const {
   const Enum::Constant* id = func_->id();
-  strmfmt(*os, "return {0}; ", LiteralGenerator(*id).result()) << endl;
+  strmfmt(*os, "return {0};", LiteralGenerator(*id).result()) << endl;
+}
+
+FunctionStringIdMethod::FunctionStringIdMethod(const FunctionMessage* func)
+    : CppFunction(func->name(),
+                  "function_string_id",
+                  "const char*",
+                  kConst),
+      func_(func) {
+  assert(func);
+}
+
+FunctionStringIdMethod::~FunctionStringIdMethod() {
+}
+
+void FunctionStringIdMethod::DefineBody(std::ostream* os) const {
+  const Enum::Constant* id = func_->id();
+  strmfmt(*os, "return \"{0}.{1}\";" ,
+          func_->interface()->name(),
+          id->name()) << endl;
 }
 
 }  // namespace codegen

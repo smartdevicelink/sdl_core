@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,47 +29,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CPP_INTERFACE_CODE_GENERATOR_H_
-#define CPP_INTERFACE_CODE_GENERATOR_H_
+#include "cppgen/message_interface.h"
 
-#include "cppgen/declaration_generator.h"
-#include "cppgen/definition_generator.h"
+#include "cppgen/naming_convention.h"
 
 namespace codegen {
-class Interface;
-class ModuleManager;
-class GeneratorPreferences;
 
-/*
- * Generates code for all the entities of single interface
- */
-class CppInterfaceCodeGenerator {
- public:
-  // Creates code generator for |interface|, using
-  // |module_manager| to find where to output the code
-  CppInterfaceCodeGenerator(const Interface* interface,
-                            ModuleManager* module_manager);
-  ~CppInterfaceCodeGenerator();
-  // Generate all the interface code
-  void GenerateCode();
- private:
-  // Generate code for different interface entities
-  void GenerateEnums();
-  void GenerateStructs();
-  void GenerateTypedefs();
-  void GenerateFunctions();
-  void GenerateResponses();
-  void GenerateNotifications();
-  void GenerateHandlerInterfaces();
-  void GenerateMessageBaseClasses();
-private:
-  // Fields
-  const Interface* interface_;
-  ModuleManager* module_manager_;
-  DeclarationGenerator declaration_generator_;
-  DefinitionGenerator definition_generator_;
-};
+MessageInterface::MessageInterface(FunctionMessage::MessageType message_type)
+  : CppClass(Capitalize(FunctionMessage::MessageTypeToString(message_type))),
+    handle_with_method_(this, kPublic,
+                        "HandleWith", "void",
+                        Method::kVirtual|Method::kAbstract) {
+  Add(Superclass("rpc::" + name() + "Base", kPublic));
+  handle_with_method_.Add(Method::Parameter(
+                            "handler", "Handler*"));
+  methods_.push_back(&handle_with_method_);
+}
 
-}  // namespace codegen
+const CppClass::MethodsList& MessageInterface::methods() {
+  return methods_;
+}
 
-#endif /* CPP_INTERFACE_CODE_GENERATOR_H_ */
+} // namespace codegen

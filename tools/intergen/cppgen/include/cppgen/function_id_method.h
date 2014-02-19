@@ -46,8 +46,23 @@ class FunctionIdMethod : public CppFunction {
  public:
   FunctionIdMethod(const FunctionMessage* func);
   ~FunctionIdMethod();
+ private:
+  // Methods
   virtual void DefineBody(std::ostream* os) const;
  private:
+  // Fields
+  const FunctionMessage* func_;
+};
+
+class FunctionStringIdMethod : public CppFunction {
+ public:
+  FunctionStringIdMethod(const FunctionMessage* func);
+  ~FunctionStringIdMethod();
+ private:
+  // Methods
+  virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
   const FunctionMessage* func_;
 };
 

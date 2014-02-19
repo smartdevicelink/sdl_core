@@ -36,11 +36,4 @@
 
 namespace rpc {
 
-Json::Value Message::ToJsonRPCv2Value() {
-  Json::Value value(Json::objectValue);
-  value["jsonrpc"] = "2.0";
-  value["method"] = function_string_id();
-  return value;
-}
-
 }  // namespace rpc

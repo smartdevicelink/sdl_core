@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,47 +29,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CPP_INTERFACE_CODE_GENERATOR_H_
-#define CPP_INTERFACE_CODE_GENERATOR_H_
+#ifndef HANDLER_INTERFACE_H
+#define HANDLER_INTERFACE_H
 
-#include "cppgen/declaration_generator.h"
-#include "cppgen/definition_generator.h"
+#include "cppgen/cpp_class.h"
+
+#include "model/function.h"
+#include "utils/stl_utils.h"
 
 namespace codegen {
-class Interface;
-class ModuleManager;
-class GeneratorPreferences;
+class CppFile;
+class Namespace;
 
-/*
- * Generates code for all the entities of single interface
- */
-class CppInterfaceCodeGenerator {
- public:
-  // Creates code generator for |interface|, using
-  // |module_manager| to find where to output the code
-  CppInterfaceCodeGenerator(const Interface* interface,
-                            ModuleManager* module_manager);
-  ~CppInterfaceCodeGenerator();
-  // Generate all the interface code
-  void GenerateCode();
- private:
-  // Generate code for different interface entities
-  void GenerateEnums();
-  void GenerateStructs();
-  void GenerateTypedefs();
-  void GenerateFunctions();
-  void GenerateResponses();
-  void GenerateNotifications();
-  void GenerateHandlerInterfaces();
-  void GenerateMessageBaseClasses();
+class HandlerInterface: public CppClass {
+public:
+  // Methods
+  HandlerInterface(FunctionMessage::MessageType type,
+                   const Interface* interface,
+                   CppFile* header_file);
+protected:
+  // Methods
+  // CppClass interface
+  virtual const MethodsList& methods();
+
+private:
+  // Types
+  typedef std::vector<const FunctionMessage*> FunctionMessages;
+private:
+  // Methods
+  void CollectMethods();
+  void AddFunctionMessageHandlers(const FunctionMessages& function_messages);
 private:
   // Fields
+  FunctionMessage::MessageType type_;
   const Interface* interface_;
-  ModuleManager* module_manager_;
-  DeclarationGenerator declaration_generator_;
-  DefinitionGenerator definition_generator_;
+  CppFile* header_file_;
+  MethodsList methods_;
+  utils::StdContainerDeleter<MethodsList> methods_deleter_;
 };
 
 }  // namespace codegen
 
-#endif /* CPP_INTERFACE_CODE_GENERATOR_H_ */
+#endif // HANDLER_INTERFACE_H

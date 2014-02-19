@@ -56,6 +56,7 @@ class ModuleManager {
    * Methods that are used to find header file for entity that is being
    * generated
    */
+  CppFile& HeaderForInterface();
   CppFile& HeaderForEnum(const Enum& enm);
   CppFile& HeaderForStruct(const Struct& strct);
   CppFile& HeaderForTypedef(const Typedef& tdef);
@@ -67,6 +68,7 @@ class ModuleManager {
    * Methods that are used to find implementation file for entity that
    * is being generated
    */
+  CppFile& SourceForInterface();
   CppFile& SourceForEnum(const Enum& enm);
   CppFile& SourceForStruct(const Struct& strct);
   CppFile& SourceForFunction(const Function& function);
@@ -86,6 +88,8 @@ private:
   CppFile structs_source_;
   CppFile functions_header_;
   CppFile functions_source_;
+  CppFile interface_header_;
+  CppFile interface_source_;
   CppFile additional_validation_source_;
 };
 

@@ -32,6 +32,8 @@
 
 #include "cppgen/cpp_interface_code_generator.h"
 
+#include "cppgen/handler_interface.h"
+#include "cppgen/message_interface.h"
 #include "cppgen/module_manager.h"
 #include "model/interface.h"
 #include "model/type_registry.h"
@@ -54,9 +56,15 @@ void CppInterfaceCodeGenerator::GenerateCode() {
   GenerateEnums();
   GenerateTypedefs();
   GenerateStructs();
-  GenerateFunctions();
-  GenerateResponses();
-  GenerateNotifications();
+  bool type_only_interface =
+      interface_->function_id_enum()->constants().empty();
+  if (!type_only_interface) {
+    GenerateFunctions();
+    GenerateResponses();
+    GenerateNotifications();
+    GenerateHandlerInterfaces();
+    GenerateMessageBaseClasses();
+  }
 }
 
 void CppInterfaceCodeGenerator::GenerateEnums() {
@@ -124,6 +132,26 @@ void CppInterfaceCodeGenerator::GenerateNotifications() {
     declaration_generator_.GenerateCodeForNotification(notification);
     definition_generator_.GenerateCodeForNotification(notification);
   }
+}
+
+void CppInterfaceCodeGenerator::GenerateHandlerInterfaces() {
+  CppFile& handlers_file = module_manager_->HeaderForInterface();
+  HandlerInterface(FunctionMessage::kNotification, interface_, &handlers_file)
+      .Declare(&handlers_file.notifications_ns().os());
+  HandlerInterface(FunctionMessage::kRequest, interface_, &handlers_file)
+      .Declare(&handlers_file.requests_ns().os());
+  HandlerInterface(FunctionMessage::kResponse, interface_, &handlers_file)
+      .Declare(&handlers_file.responses_ns().os());
+}
+
+void CppInterfaceCodeGenerator::GenerateMessageBaseClasses() {
+  CppFile& handlers_file = module_manager_->HeaderForInterface();
+  MessageInterface(FunctionMessage::kNotification)
+      .Declare(&handlers_file.notifications_ns().os());
+  MessageInterface(FunctionMessage::kRequest)
+      .Declare(&handlers_file.requests_ns().os());
+  MessageInterface(FunctionMessage::kResponse)
+      .Declare(&handlers_file.responses_ns().os());
 }
 
 }  // namespace codegen

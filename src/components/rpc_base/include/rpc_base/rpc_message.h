@@ -48,31 +48,30 @@ enum MessageType {
 };
 
 class Message : public CompositeType {
- public:
-  int32_t id;
-  virtual int32_t message_type() = 0;
-  virtual int32_t function_id() = 0;
-  virtual const char* function_string_id() { return ""; }
+public:
+  virtual MessageType message_type() const = 0;
+  virtual int32_t function_id() const = 0;
+  virtual const char* function_string_id() const = 0;
+  virtual Json::Value ToJsonValue() const = 0;
   virtual ~Message() {}
-  Json::Value ToJsonRPCv2Value();
 };
 
-class Request : public Message {
+class RequestBase : public Message {
  public:
-  virtual int32_t message_type() { return kRequest; }
-  virtual ~Request() {}
+  MessageType message_type() const { return kRequest; }
+  virtual ~RequestBase() {}
 };
 
-class Response : public Message {
+class ResponseBase : public Message {
  public:
-  virtual int32_t message_type() { return kResponse; }
-  virtual ~Response() {}
+  MessageType message_type() const { return kResponse; }
+  virtual ~ResponseBase() {}
 };
 
-class Notification : public Message {
+class NotificationBase : public Message {
  public:
-  virtual int32_t message_type() { return kNotification; }
-  virtual ~Notification() {}
+  MessageType message_type() const { return kNotification; }
+  virtual ~NotificationBase() {}
 };
 
 }  // namespace rpc

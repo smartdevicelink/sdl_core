@@ -60,6 +60,7 @@ class Interface {
   // Types
   typedef std::map<std::string, FunctionMessage*> MessagesMap;
   typedef std::vector<Function> FunctionsList;
+  typedef std::vector<const Request*> RequestList;
   typedef std::vector<const Response*> ResponseList;
   typedef std::vector<const Notification*> NotificationList;
   typedef TypeRegistry::EnumList EnumList;
@@ -75,6 +76,8 @@ class Interface {
   const API& api() const;
   const std::string& name() const;
   const FunctionsList& functions() const;
+  RequestList all_requests() const;
+  ResponseList all_responses() const;
   const NotificationList& notifications() const;
   const ResponseList& generic_responses() const;
   const EnumList& enums() const;

@@ -25,12 +25,14 @@ macro (GenerateInterfaceLibrary xml_file_name generated_interface_names)
         ${interface_name}/enums.h
         ${interface_name}/types.h
         ${interface_name}/functions.h
+        ${interface_name}/interface.h
     )
     set(SOURCES
         ${interface_name}/enums.cc
         ${interface_name}/types.cc
         ${interface_name}/functions.cc
         ${interface_name}/validation.cc
+        ${interface_name}/interface.cc
     )
     add_custom_command( OUTPUT ${HEADERS} ${SOURCES}
                         COMMAND ${INTERGEN_CMD} -f ${CMAKE_CURRENT_SOURCE_DIR}/${xml_file_name} -i ${interface_name} ${intergen_flags}

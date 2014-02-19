@@ -40,6 +40,7 @@
 #include <string>
 
 #include "cppgen/namespace.h"
+#include "model/function.h"
 #include "utils/common_types.h"
 
 namespace codegen {
@@ -75,6 +76,7 @@ class CppFile {
   Namespace& requests_ns();
   Namespace& responses_ns();
   Namespace& notifications_ns();
+  Namespace& NamespaceByMessageType(FunctionMessage::MessageType type);
 
   // Generates code file named module_name/file_name and saves all namespaces
   // into it.

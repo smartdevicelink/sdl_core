@@ -77,7 +77,8 @@ void StructTypeToJsonMethod::DefineBody(std::ostream* os) const {
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     const Struct::Field& field = *i;
-    strmfmt(*os, "WriteJsonField(\"{0}\", {0}, &result__);", field.name())
+    strmfmt(*os, "CompositeType::WriteJsonField(\"{0}\", {0}, &result__);",
+            field.name())
         << '\n';
   }
   *os << "return result__;" << '\n';

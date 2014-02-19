@@ -207,8 +207,18 @@ std::string LowercaseIntefaceName(const Interface& interface) {
   return WordList::FromUnknown(interface.name()).ToLowerCase();
 }
 
+std::string UpperCamelCaseInterfaceName(const Interface& interface) {
+  return WordList::FromUnknown(interface.name()).ToUpperCamelCase();
+}
+
 std::string InterfaceNamespaceName(const Interface& interface) {
   return LowercaseIntefaceName(interface);
+}
+
+std::string Capitalize(const std::string& str) {
+  string res = str;
+  res[0] = std::toupper(res[0]);
+  return res;
 }
 
 }  // namespace codegen

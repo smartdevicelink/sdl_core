@@ -73,8 +73,12 @@ class WordList {
   std::vector<std::string> words_;
 };
 
+std::string Capitalize(const std::string& str);
+
 // Translate interface name to lower case
 std::string LowercaseIntefaceName(const Interface& interface);
+
+std::string UpperCamelCaseInterfaceName(const Interface& interface);
 
 // Produces namespace name for |interface|.
 // Currently it just lower_case_interface_name

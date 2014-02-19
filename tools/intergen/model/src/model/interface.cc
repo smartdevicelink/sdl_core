@@ -56,6 +56,20 @@ using typesafe_format::strmfmt;
 namespace codegen {
 class ModelFilter;
 
+namespace {
+
+// standard algorithm helper to access request() member of a function
+const FunctionMessage* FunctionRequest(const Function& function) {
+  return &function.request();
+}
+
+// standard algorithm helper to access response() member of a function
+const FunctionMessage* FunctionResponse(const Function& function) {
+  return &function.response();
+}
+
+}  // namespace
+
 Interface::Interface(const API* api,
                      bool auto_generate_function_ids,
                      BuiltinTypeRegistry* builtin_type_registry,
@@ -110,6 +124,26 @@ const std::string& Interface::name() const {
 
 const Interface::FunctionsList& Interface::functions() const {
   return functions_list_;
+}
+
+Interface::RequestList Interface::all_requests() const {
+  RequestList requests(functions_list_.size());
+  std::transform(functions_list_.begin(), functions_list_.end(),
+                 requests.begin(), std::ptr_fun(&FunctionRequest));
+  return requests;
+}
+
+Interface::ResponseList Interface::all_responses() const {
+  ResponseList responses(
+        functions_list_.size() + generic_responses_list_.size());
+  ResponseList::iterator response_iter =
+    std::transform(functions_list_.begin(), functions_list_.end(),
+                   responses.begin(), std::ptr_fun(&FunctionResponse));
+  response_iter =
+  std::copy(generic_responses_list_.begin(), generic_responses_list_.end(),
+            response_iter);
+  assert(response_iter == responses.end());
+  return responses;
 }
 
 const Interface::NotificationList& Interface::notifications() const {
@@ -203,7 +237,7 @@ bool Interface::AddFunctionMessage(MessagesMap* list,
               name) << '\n';
       return false;
     }
-    func_id_str = name + "ID";
+    func_id_str = name;
   } else {
     func_id_str = xml_message.attribute("functionID").value();
     if (func_id_str.empty()) {
