@@ -1120,17 +1120,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                             getProxyListener().onAppUnregisteredAfterLanguageChange(syncProxyBase.getLastLanguageChange());
                         }
                     } else if (msg.getReason() != null) {
-                        if (getCallbackToUIThread()) {
-                            // Run in UI thread
-                            getMainUIHandler().post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    getProxyListener().onAppUnregisteredReason(msg.getReason());
-                                }
-                            });
-                        } else {
-                            getProxyListener().onAppUnregisteredReason(msg.getReason());
-                        }
+                        syncProxyBase.onAppUnregisteredReason(msg.getReason());
                     } else {
                         // This requires the proxy to be cycled
                         if (syncProxyBase.getCurrentTransportType() == TransportType.BLUETOOTH) {

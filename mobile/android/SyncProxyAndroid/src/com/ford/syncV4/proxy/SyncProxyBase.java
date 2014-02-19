@@ -62,6 +62,7 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
@@ -1027,7 +1028,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
+
+                currentSession.setSessionId((byte) 0);
                 mSyncConnection.setSessionId(currentSession.getSessionId());
+
+                //mSyncConnection.setSessionId(currentSession.getSessionId());
+
                 mSyncConnection.init(_transportConfig);
             }
 
@@ -1625,6 +1631,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             });
         } else {
             ((IProxyListener) _proxyListener).onOnAppInterfaceUnregistered(msg);
+        }
+    }
+
+    protected void onAppUnregisteredReason(final AppInterfaceUnregisteredReason reason) {
+        if (reason == AppInterfaceUnregisteredReason.IGNITION_OFF ||
+                reason == AppInterfaceUnregisteredReason.MASTER_RESET) {
+            cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(reason));
+        }
+
+        if (getCallbackToUIThread()) {
+            // Run in UI thread
+            getMainUIHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    getProxyListener().onAppUnregisteredReason(reason);
+                }
+            });
+        } else {
+            getProxyListener().onAppUnregisteredReason(reason);
         }
     }
 
