@@ -16,12 +16,14 @@ BRANCH_OWNERS=$(echo "$BRANCH_COMMITS"|cut -f3|sort|uniq)
 for OWNER in $BRANCH_OWNERS; do
   # Oldness and names of branches which belong to $OWNER and that are more than 2 weeks old
   OLD_BRANCHES=$(echo "$BRANCH_COMMITS"|grep $OWNER|grep -v 'days ago'|cut -f 2,4)
-
-cat <<EOF
+  if [ -n "$OLD_BRANCHES" ];
+  then
+    cat <<EOF
 Dear $OWNER, here are your branches you didn't update for more than two weeks,
 please merge them to develop and/or remove:
 $OLD_BRANCHES
 
 EOF
-
+  fi
 done
+
