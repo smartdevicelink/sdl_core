@@ -34,6 +34,7 @@
 
 #include "cppgen/handler_interface.h"
 #include "cppgen/message_interface.h"
+#include "cppgen/message_factory_function.h"
 #include "cppgen/module_manager.h"
 #include "model/interface.h"
 #include "model/type_registry.h"
@@ -64,6 +65,7 @@ void CppInterfaceCodeGenerator::GenerateCode() {
     GenerateNotifications();
     GenerateHandlerInterfaces();
     GenerateMessageBaseClasses();
+    GenerateMessageFactories();
   }
 }
 
@@ -152,6 +154,26 @@ void CppInterfaceCodeGenerator::GenerateMessageBaseClasses() {
       .Declare(&handlers_file.requests_ns().os());
   MessageInterface(FunctionMessage::kResponse)
       .Declare(&handlers_file.responses_ns().os());
+}
+
+void CppInterfaceCodeGenerator::GenerateMessageFactories() {
+  CppFile& factories_header = module_manager_->HeaderForInterface();
+  CppFile& factories_source = module_manager_->SourceForInterface();
+
+  MessageFactoryFunction request_factory(interface_,
+                                         FunctionMessage::kRequest);
+  request_factory.Declare(&factories_header.requests_ns().os(), true);
+  request_factory.Define(&factories_source.requests_ns().os(), true);
+  MessageFactoryFunction response_factory(interface_,
+                                          FunctionMessage::kResponse);
+  response_factory.Declare(&factories_header.responses_ns().os(), true);
+  response_factory.Define(&factories_source.responses_ns().os(), true);
+  MessageFactoryFunction notification_factory(
+        interface_,
+        FunctionMessage::kNotification);
+  notification_factory.Declare(&factories_header.notifications_ns().os(),
+                               true);
+  notification_factory.Define(&factories_source.notifications_ns().os(), true);
 }
 
 }  // namespace codegen

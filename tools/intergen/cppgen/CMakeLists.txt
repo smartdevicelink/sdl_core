@@ -20,6 +20,7 @@ set (SOURCES
   src/cppgen/handler_interface.cc
   src/cppgen/is_valid_enum_function.cc
   src/cppgen/literal_generator.cc
+  src/cppgen/message_factory_function.cc
   src/cppgen/message_handle_with_method.cc
   src/cppgen/message_interface.cc
   src/cppgen/module_manager.cc
@@ -48,6 +49,7 @@ set (HEADERS
   include/cppgen/handler_interface.h
   include/cppgen/is_valid_enum_function.h
   include/cppgen/literal_generator.h
+  include/cppgen/message_factory_function.h
   include/cppgen/message_handle_with_method.h
   include/cppgen/message_interface.h
   include/cppgen/module_manager.h
