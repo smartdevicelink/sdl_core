@@ -86,7 +86,7 @@ include_directories (
 )
 
 set (SOURCES
-  appMain.cpp
+  main.cc
   life_cycle.cc
 )
 

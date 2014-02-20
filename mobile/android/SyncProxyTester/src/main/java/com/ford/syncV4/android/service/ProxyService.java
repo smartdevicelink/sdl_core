@@ -37,7 +37,6 @@ import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
-import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -55,7 +54,6 @@ import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
-import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -465,12 +463,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             createErrorMessageForAdapter("Error subscribing to buttons", e);
         }
 
-        try {
-            addCommand(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
-            addCommand(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
-        } catch (SyncException e) {
-            createErrorMessageForAdapter("Error adding AddCommands", e);
-        }
+        commandAddCommand(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
+        commandAddCommand(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
     }
 
     private void setInitAppIcon() {
@@ -488,21 +482,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mLogAdapter.logMessage(msg, true);
         }
         mSyncProxy.sendRPCRequest(msg);
-    }
-
-    private void addCommand(Integer cmdId, Vector<String> vrCommands,
-                            String menuName) throws SyncException {
-        AddCommand addCommand = new AddCommand();
-        addCommand.setCorrelationID(getNextCorrelationID());
-        addCommand.setCmdID(cmdId);
-        addCommand.setVrCommands(vrCommands);
-        MenuParams menuParams = new MenuParams();
-        menuParams.setMenuName(menuName);
-        addCommand.setMenuParams(menuParams);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(addCommand, true);
-        }
-        mSyncProxy.sendRPCRequest(addCommand);
     }
 
     private void subscribeToButton(ButtonName buttonName) throws SyncException {
@@ -1776,6 +1755,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         } catch (SyncException e) {
             mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
             mAwaitingInitIconResponseCorrelationID = 0;
+        }
+    }
+
+    public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
+                                  String menuName) {
+        try {
+            mSyncProxy.addCommand(commandId, menuName, vrCommands, getNextCorrelationID());
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand sent", true);
+            }
+        } catch (SyncException e) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand send error: " + e, Log.ERROR, e);
+            }
         }
     }
 
