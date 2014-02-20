@@ -115,21 +115,34 @@ public class RPCRequestFactory {
 		return addCommand;
 	}
 
+    /**
+     * AddSubMenu section
+     */
+
+    /**
+     * Build <b>AddSubMenu</b> empty object
+     *
+     * @return created empty <b>AddSubMenu</b> object
+     */
+    public static AddSubMenu buildAddSubMenu() {
+        return new AddSubMenu();
+    }
+
 	public static AddSubMenu buildAddSubMenu(Integer menuID, String menuName,
 			Integer correlationID) {
-		AddSubMenu msg = buildAddSubMenu(menuID, menuName, null, correlationID);
-		return msg;
+		AddSubMenu addSubMenu = buildAddSubMenu(menuID, menuName, null, correlationID);
+		return addSubMenu;
 	}
 
 	public static AddSubMenu buildAddSubMenu(Integer menuID, String menuName,
 			Integer position, Integer correlationID) {
-		AddSubMenu msg = new AddSubMenu();
-		msg.setCorrelationID(correlationID);
-		msg.setMenuName(menuName);
-		msg.setMenuID(menuID);
-		msg.setPosition(position);
+		AddSubMenu addSubMenu = new AddSubMenu();
+		addSubMenu.setCorrelationID(correlationID);
+		addSubMenu.setMenuName(menuName);
+		addSubMenu.setMenuID(menuID);
+		addSubMenu.setPosition(position);
 
-		return msg;
+		return addSubMenu;
 	}
 	
 	public static Alert buildAlert(String ttsText, Boolean playTone,

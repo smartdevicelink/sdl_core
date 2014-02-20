@@ -2145,7 +2145,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         }
                                     }
 
-                                    AddSubMenu msg = new AddSubMenu();
+                                    AddSubMenu msg = RPCRequestFactory.buildAddSubMenu();
                                     msg.setCorrelationID(autoIncCorrId++);
 
                                     SyncSubMenu sm = new SyncSubMenu();

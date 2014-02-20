@@ -491,7 +491,7 @@ public class ModuleTest {
 								} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
 									rpc = new DeleteCommand();
 								} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
-									rpc = new AddSubMenu();
+									rpc = RPCRequestFactory.buildAddSubMenu();
 								} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
 									rpc = new DeleteSubMenu();
 								} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
