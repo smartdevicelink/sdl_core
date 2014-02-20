@@ -89,7 +89,7 @@ void SubscribeVehicleDataRequest::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

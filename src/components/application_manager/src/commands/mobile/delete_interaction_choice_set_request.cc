@@ -55,7 +55,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

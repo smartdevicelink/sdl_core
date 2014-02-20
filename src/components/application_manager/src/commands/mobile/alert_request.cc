@@ -177,7 +177,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 bool AlertRequest::Validate(uint32_t app_id) {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;

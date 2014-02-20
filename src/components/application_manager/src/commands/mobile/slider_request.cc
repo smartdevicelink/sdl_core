@@ -66,7 +66,7 @@ void SliderRequest::Run() {
       application_manager::ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (!application.valid()) {
+  if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

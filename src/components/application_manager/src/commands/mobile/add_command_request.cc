@@ -63,7 +63,7 @@ void AddCommandRequest::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -172,7 +172,7 @@ void AddCommandRequest::Run() {
 }
 
 bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
-  if (!app.valid()) {
+  if (!app) {
     return false;
   }
 
@@ -197,7 +197,7 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
 }
 
 bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
-  if (!app.valid()) {
+  if (!app) {
     return false;
   }
 
@@ -248,7 +248,7 @@ bool AddCommandRequest::CheckVRCommandsNames() {
 }
 
 bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
-  if (!app.valid()) {
+  if (!app) {
     return false;
   }
 
@@ -302,7 +302,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
-    if (!application.valid()) {
+    if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }

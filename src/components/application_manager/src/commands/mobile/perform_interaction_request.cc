@@ -95,7 +95,7 @@ void PerformInteractionRequest::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -271,7 +271,7 @@ void PerformInteractionRequest::ProcessVRNotification(
   const uint32_t app_id = message[strings::msg_params][strings::app_id]
                                 .asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
@@ -340,7 +340,7 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
                                           [strings::connection_key].asUInt();
   if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
     ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-    if (!app.valid()) {
+    if (!app) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
@@ -384,7 +384,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
         (*message_)[strings::params][strings::connection_key].asUInt());
-    if (!app.valid()) {
+    if (!app) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }

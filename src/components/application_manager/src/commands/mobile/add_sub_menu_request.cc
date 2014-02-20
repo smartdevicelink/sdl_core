@@ -104,7 +104,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());
 
-      if (!application.valid()) {
+      if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
         return;
       }

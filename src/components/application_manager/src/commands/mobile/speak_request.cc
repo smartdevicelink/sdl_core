@@ -52,7 +52,7 @@ void SpeakRequest::Run() {
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
                      ->application(connection_key());
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -85,7 +85,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
                                connection_key());
 
-  if (!application.valid()) {
+  if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }

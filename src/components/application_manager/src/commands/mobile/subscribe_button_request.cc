@@ -54,7 +54,7 @@ void SubscribeButtonRequest::Run() {
   uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

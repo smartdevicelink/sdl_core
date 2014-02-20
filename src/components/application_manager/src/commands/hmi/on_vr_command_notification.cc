@@ -58,7 +58,7 @@ void OnVRCommandNotification::Run() {
   const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
       .asUInt();
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  if (!active_app.valid()) {
+  if (!active_app) {
     if (cmd_id > max_cmd_id + 1) {
       MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
     } else {
@@ -80,7 +80,7 @@ void OnVRCommandNotification::Run() {
   const uint32_t app_id = (*message_)[strings::msg_params][strings::app_id]
       .asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }

@@ -845,7 +845,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
        (protocol_type == commands::CommandImpl::mobile_protocol_type_)) &&
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     app = ApplicationManagerImpl::instance()->application(connection_key);
-    if (!app.valid()) {
+    if (!app) {
       LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObject* response =
         MessageHelper::CreateNegativeResponse(
@@ -888,7 +888,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       // get application hmi level
       mobile_api::HMILevel::eType app_hmi_level =
         mobile_api::HMILevel::INVALID_ENUM;
-      if (app.valid()) {
+      if (app) {
         app_hmi_level = app->hmi_level();
       }
 

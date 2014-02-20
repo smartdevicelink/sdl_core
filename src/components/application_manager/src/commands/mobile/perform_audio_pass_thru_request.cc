@@ -69,7 +69,7 @@ void PerformAudioPassThruRequest::Run() {
       .asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

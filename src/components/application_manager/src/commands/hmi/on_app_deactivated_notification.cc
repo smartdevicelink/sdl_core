@@ -53,7 +53,7 @@ void OnAppDeactivatedNotification::Run() {
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->active_application();
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
     return;
   }

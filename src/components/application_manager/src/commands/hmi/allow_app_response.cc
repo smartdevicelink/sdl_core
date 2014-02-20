@@ -53,7 +53,7 @@ void AllowAppResponse::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
                      application(connection_key);
 
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }

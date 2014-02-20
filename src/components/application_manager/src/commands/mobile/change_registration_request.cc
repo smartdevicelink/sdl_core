@@ -60,7 +60,7 @@ void ChangeRegistrationRequest::Run() {
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
 
   ApplicationSharedPtr app = instance->application(connection_key());
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -181,7 +181,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
-    if (!application.valid()) {
+    if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
