@@ -272,15 +272,11 @@ void LifeCycle::StopComponents(int32_t params) {
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete instance()->protocol_handler_;
 
-  LOG4CXX_INFO(logger_, "Destroying TM");
-  delete instance()->transport_manager_;
-
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef QT_HMI
   instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->dbus_adapter_);
   instance()->dbus_adapter_thread_->Stop();
   instance()->dbus_adapter_thread_->Join();
-  delete instance()->dbus_adapter_;
 #endif  // QT_HMI
 #ifdef WEB_HMI
   instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->mb_adapter_);

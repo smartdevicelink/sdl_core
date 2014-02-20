@@ -66,7 +66,7 @@ class Deleter {
 
 }  // namespace deleters
 
-template<typename T, class Deleter = deleters::DummyDeleter>
+template<typename T, class Deleter = deleters::Deleter<T> >
 class Singleton {
 /**
  * @brief Singleton template
@@ -85,7 +85,8 @@ class Singleton {
  * Deleter template parameter can be specified with any class
  * with public default constructor, destructor and method
  * void grab(T*);
- * However, default Deleter specification does nothing
+ * Default Deleter specification deletes instance -
+ * that is, instance must not be deleted explicitly
  */
  public:
 /**

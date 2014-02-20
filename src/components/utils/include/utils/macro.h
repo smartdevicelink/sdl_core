@@ -46,6 +46,10 @@
 #define FRIEND_BASE_SINGLETON_CLASS_INSTANCE(TypeName) \
   friend TypeName* utils::Singleton<TypeName>::instance()
 
+// A macro to allow utils::deleters::Deleter::~Deleter() call class destructor
+#define FRIEND_DELETER_DESTRUCTOR(TypeName) \
+  friend utils::deleters::Deleter<TypeName>::~Deleter()
+
 #define DCHECK(condition) \
   if (!(condition)) { \
     printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
