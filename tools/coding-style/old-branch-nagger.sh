@@ -23,12 +23,12 @@ for OWNER in $BRANCH_OWNERS; do
   if [ -n "$OLD_BRANCHES" ];
   then
     if [[ $FLAGS == "-m" ]]; then
-        SENDER="mail -s 'Your branches are too old!' $OWNER"
+        SENDER="mail -s Your_branches_may_be_old $OWNER"
     else
-        SENDER=cat
+        SENDER="cat"
     fi
     $SENDER <<EOF
-Dear $OWNER, here are your branches you didn't update for more than two weeks,
+Dear $OWNER, here are your branches you DID NOT update for more than two weeks,
 please merge them to develop and/or remove:
 $OLD_BRANCHES
 
