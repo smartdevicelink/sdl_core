@@ -39,6 +39,11 @@
 #include "cppgen/cpp_function.h"
 
 namespace codegen {
+/*
+ * Class helper abstract class for C++ classes generation
+ * Must be inherited by a concrete class that provides
+ * class information by implementing pure virtual methods
+ */
 class CppClass {
  public:
   // Types
@@ -46,27 +51,40 @@ class CppClass {
   class Superclass;
   typedef std::vector<const Method*> MethodsList;
   typedef std::vector<Superclass> SuperclassList;
+  // Member and inheritance access types specifier
   enum AccessSpec {
     kPublic, kProtected, kPrivate
   };
  public:
   // Methods
+  // Creates class named |name|
   CppClass(const std::string& name);
   ~CppClass();
+  // Add superclass to classess parent's list
   void Add(const Superclass& superclass);
+  // Output class declaration code to |os|
   void Declare(std::ostream* os);
+  // Output class member's definition code to |os|
   void Define(std::ostream* os);
+  // Class name
   std::string name() const;
 protected:
   // Methods
+  // To be defined by a concrete class, to provide
+  // Class member methods list
   virtual const MethodsList& methods() = 0;
 private:
+  // Helper method that gives method list filtered by
+  // |access_spec|
   MethodsList functions(AccessSpec access_spec);
   // Fields
   std::string name_;
   SuperclassList superclasses_;
 };
 
+/*
+ * Helper class produces code for class method
+ */
 class CppClass::Method: public CppFunction {
  public:
   Method(const CppClass* cls, AccessSpec access, const std::string& name,
@@ -77,6 +95,9 @@ private:
   AccessSpec access_specifier_;
 };
 
+/*
+ * Helper class that is used to specify class's parrents
+ */
 class CppClass::Superclass {
 public:
   Superclass(const std::string& name, AccessSpec inheritance_type);

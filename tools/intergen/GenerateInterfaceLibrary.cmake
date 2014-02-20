@@ -46,8 +46,8 @@ macro (GenerateInterfaceLibrary xml_file_name generated_interface_names)
     )
     add_library(${interface_name} ${SOURCES})
 
-    # |previous_interface| ensures that interface libraries built in same oreder
-    # they defined in |generated_interface_names|
+    # |previous_interface| ensures that interface libraries are built in the same order
+    # as they defined in |generated_interface_names|
     target_link_libraries(${interface_name} ${GENERATED_LIB_DEPENDENCIES} ${previous_interface})
     set(previous_interface ${interface_name})
   endforeach(interface_name)

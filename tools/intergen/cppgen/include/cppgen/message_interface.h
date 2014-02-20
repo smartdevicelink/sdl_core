@@ -39,6 +39,11 @@ namespace codegen {
 class Interface;
 class MessageInterface;
 
+/*
+ * Helper class that is used to produce code for
+ * interface() method for interface-specific.
+ * message base class.
+ */
 class InterfaceStringIdMethod: public CppClass::Method {
  public:
   InterfaceStringIdMethod(
@@ -51,6 +56,11 @@ class InterfaceStringIdMethod: public CppClass::Method {
   const Interface* interface_;
 };
 
+/*
+ * Helper class that is used to produce declaration and
+ * definition of interface-specific message base class
+ * for messages of given type
+ */
 class MessageInterface: public CppClass {
  public:
   MessageInterface(const Interface* interface,

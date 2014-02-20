@@ -73,15 +73,25 @@ class Interface {
             BuiltinTypeRegistry* builtin_type_registry,
             const ModelFilter* model_filter);
   ~Interface();
+  // API this interface belongs to
   const API& api() const;
+  // Name of the interface
   const std::string& name() const;
+  // List of all functions (requests and appropriate responses) in the interface
   const FunctionsList& functions() const;
+  // List of all requests in the interface
   RequestList all_requests() const;
+  // List of all the responses (including generic) in the interface
   ResponseList all_responses() const;
+  // List of all the notifications in the interface
   const NotificationList& notifications() const;
+  // List of generic responses that are not connected to particular request
   const ResponseList& generic_responses() const;
+  // List of all the enums defined in the interface (exept FunctionID special purpose enum)
   const EnumList& enums() const;
+  // List of all structs defined in the interface
   const StructList& structs() const;
+  // List of all typedefs defined in the interface
   const TypedefList& typedefs() const;
   // Special-purpose enum that assigns numerical ID's for all API messages
   const Enum* function_id_enum() const;

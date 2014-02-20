@@ -73,6 +73,7 @@ class WordList {
   std::vector<std::string> words_;
 };
 
+// Capitalizes given string
 std::string Capitalize(const std::string& str);
 
 // Translate interface name to lower case

@@ -38,9 +38,17 @@
 namespace codegen {
 class Interface;
 
+/*
+ * This class is used to produce interface-specific,
+ * Message-type specific message factory function that is
+ * to be used to produce message from Json::Value object
+ */
 class MessageFactoryFunction: public CppFunction {
  public:
   // Methods
+  // Creates function code generation object that produces
+  // declaration and definition of a factory for messages of type
+  // |factory_type| that belong to given |interface|
   MessageFactoryFunction(const Interface* interface,
                          FunctionMessage::MessageType factory_type);
  private:

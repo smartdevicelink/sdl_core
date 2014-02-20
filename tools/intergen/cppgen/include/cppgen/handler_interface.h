@@ -41,9 +41,18 @@ namespace codegen {
 class CppFile;
 class Namespace;
 
+/*
+ * Class is used to declare message handler interfaces for specific messages of
+ * given type for given interface
+ */
 class HandlerInterface: public CppClass {
 public:
   // Methods
+  // Creates HandlerInterface object that is used to produce declaration of
+  // Handler interface. This interface defines handler methods for messages of
+  // given |type| defined in given rpc |interface|.
+  // Interface declaration requires message types to be forward-declared, these
+  // declarations are placed into given |header_file|.
   HandlerInterface(FunctionMessage::MessageType type,
                    const Interface* interface,
                    CppFile* header_file);
@@ -57,7 +66,10 @@ private:
   typedef std::vector<const FunctionMessage*> FunctionMessages;
 private:
   // Methods
+  // Collects all the messages that are to be handled and defines
+  // Handler methods for them. Also declares virtual destructor.
   void CollectMethods();
+  // Helper method that actually generates handler functions
   void AddFunctionMessageHandlers(const FunctionMessages& function_messages);
 private:
   // Fields

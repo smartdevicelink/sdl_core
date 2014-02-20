@@ -47,6 +47,7 @@ namespace codegen {
 
 namespace {
 
+// Produces C++ literals for given access specifier
 const char* AccessSpecName(CppClass::AccessSpec access) {
   switch (access) {
     case CppClass::kPublic:
@@ -61,6 +62,10 @@ const char* AccessSpecName(CppClass::AccessSpec access) {
   }
 }
 
+/*
+ * Helper class that automatically declares section inside
+ * C++ class declaration and manages indentation
+ */
 class Section {
   struct SectionDeclarer {
     SectionDeclarer(const char* name, ostream* os) {

@@ -36,6 +36,13 @@
 
 namespace codegen {
 
+/*
+ * Generates declaration and definiton of HandleWith method
+ * that is required in every structure representing a message.
+ * This method takes Message Handler implementation and calls
+ * Appropriate function on it to handle current message.
+ * (see Visitor pattern).
+ */
 class MessageHandleWithMethod: public CppFunction {
 public:
   MessageHandleWithMethod(const std::string& class_name);

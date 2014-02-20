@@ -60,6 +60,7 @@ class FunctionMessage: public Struct {
     kNotification,
     kUnknownMessageType
   };
+  // Procudes string given MessageType to be used in class names
   static const char* MessageTypeToString(MessageType message_type);
 
   // Message parameters are passed as structs so every parameter

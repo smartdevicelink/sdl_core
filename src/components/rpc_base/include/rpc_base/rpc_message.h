@@ -47,31 +47,46 @@ enum MessageType {
   kNotification = 2
 };
 
-class Message : public CompositeType {
+// Base class for all RPC messages
+// Has methods to identify interface this message belongs to
+// And message ID
+class Message {
 public:
+  // Type of message
   virtual MessageType message_type() const = 0;
+  // Numerical function identifier, unique to the interface
+  // Responses share function identifier with corresponding requests
   virtual int32_t function_id() const = 0;
+  // Function string identifier as specified in original xml file
   virtual const char* function_string_id() const = 0;
+  // Interface name as specified in original xml file
   virtual const char* interface_string_id() const = 0;
+  // Serializes message to Json::Value
   virtual Json::Value ToJsonValue() const = 0;
   virtual ~Message() {}
 };
 
+// Base class for all interface-specific requests
 class RequestBase : public Message {
  public:
+  // Message interface
   MessageType message_type() const { return kRequest; }
   virtual ~RequestBase() {}
 };
 
+// Base class for all interface-specific responses
 class ResponseBase : public Message {
  public:
+  // Message interface
   MessageType message_type() const { return kResponse; }
   virtual ~ResponseBase() {}
 };
 
+// Base class for all interface-specific notifications
 class NotificationBase : public Message {
  public:
   MessageType message_type() const { return kNotification; }
+  // Message interface
   virtual ~NotificationBase() {}
 };
 

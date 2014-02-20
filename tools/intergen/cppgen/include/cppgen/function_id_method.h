@@ -48,18 +48,24 @@ class FunctionIdMethod : public CppFunction {
   ~FunctionIdMethod();
  private:
   // Methods
+  // CppFunction interface
   virtual void DefineBody(std::ostream* os) const;
  private:
   // Fields
   const FunctionMessage* func_;
 };
 
+/*
+ * Generates function_string_id() virtual method that is to be declared/defined
+ * in every API message struct.
+ */
 class FunctionStringIdMethod : public CppFunction {
  public:
   FunctionStringIdMethod(const FunctionMessage* func);
   ~FunctionStringIdMethod();
  private:
   // Methods
+  // CppFunction interface
   virtual void DefineBody(std::ostream* os) const;
  private:
   // Fields
