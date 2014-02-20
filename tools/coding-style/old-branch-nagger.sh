@@ -15,13 +15,20 @@ BRANCH_OWNERS=$(echo "$BRANCH_COMMITS"|cut -f3|sort|uniq)
 TIME_THRESHOLD=$((60 * 60 * 24 * 7 * 2))
 DATE_THRESHOLD=$(( $(date +%s) - $TIME_THRESHOLD ))
 
+FLAGS=${1:-""}
+
 for OWNER in $BRANCH_OWNERS; do
   # Oldness and names of branches which belong to $OWNER and that are more than 2 weeks old
   OLD_BRANCHES=$(echo "$BRANCH_COMMITS"|grep $OWNER|awk -F'\t' 'int($1) < '$DATE_THRESHOLD' {print $2 " " $4}')
   if [ -n "$OLD_BRANCHES" ];
   then
-    cat <<EOF
-Dear $OWNER, here are your branches you didn't update for more than two weeks,
+    if [[ $FLAGS == "-m" ]]; then
+        SENDER="mail -s Your_branches_may_be_old $OWNER"
+    else
+        SENDER="cat"
+    fi
+    $SENDER <<EOF
+Dear $OWNER, here are your branches you DID NOT update for more than two weeks,
 please merge them to develop and/or remove:
 $OLD_BRANCHES
 

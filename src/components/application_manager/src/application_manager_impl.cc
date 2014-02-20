@@ -623,7 +623,7 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 
-bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
+bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) const {
   Application* app = application(connection_key);
 
   if (!app) {
@@ -635,6 +635,23 @@ bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
 
   if (mobile_api::HMILevel::HMI_FULL == hmi_level ||
       mobile_api::HMILevel::HMI_LIMITED == hmi_level) {
+    return true;
+  }
+
+  return false;
+}
+
+bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) const {
+  Application* app = application(connection_key);
+
+  if (!app) {
+    LOG4CXX_INFO(logger_, "An application is not registered.");
+    return false;
+  }
+
+  const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
+
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level) {
     return true;
   }
 
