@@ -52,6 +52,7 @@
 #include "connection_handler/connection_handler.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+#include "utils/lock.h"
 #include "utils/stl_utils.h"
 #include "utils/singleton.h"
 
@@ -301,6 +302,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief List of connections
      */
     ConnectionList connection_list_;
+
+    /**
+     *  \brief Lock for applications list
+     */
+    sync_primitives::Lock connection_list_lock_;
 
     /**
      * \brief List of sessions that must be resumed

@@ -332,6 +332,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         *(hmi_capabilities.prerecorded_speech());
   }
 
+  const std::vector<uint32_t>& diag_modes =
+      profile::Profile::instance()->supported_diag_modes();
+  if (!diag_modes.empty()) {
+    std::vector<uint32_t>::const_iterator it = diag_modes.begin();
+    uint32_t index = 0;
+    for (; it != diag_modes.end(); ++it) {
+      response_params[strings::supported_diag_modes][index] = *it;
+      ++index;
+    }
+  }
+
+
   SendResponse(true, result, "", params);
 }
 

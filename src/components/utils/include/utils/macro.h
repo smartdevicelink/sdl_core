@@ -46,6 +46,10 @@
 #define FRIEND_BASE_SINGLETON_CLASS_INSTANCE(TypeName) \
   friend TypeName* utils::Singleton<TypeName>::instance()
 
+// A macro to allow utils::deleters::Deleter::~Deleter() call class destructor
+#define FRIEND_DELETER_DESTRUCTOR(TypeName) \
+  friend utils::deleters::Deleter<TypeName>::~Deleter()
+
 #define DCHECK(condition) \
   if (!(condition)) { \
     printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
@@ -55,13 +59,6 @@
   }
 
 #define NOTREACHED() DCHECK(false)
-
-/*
-* @brief Skips returning by a function call value (due to the LINT complaining)
-* @param FUNC The function to be called
-*/
-#define SKIP_RETURN_VALUE(FUNC) static_cast<void>((FUNC));
-
 
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available

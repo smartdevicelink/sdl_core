@@ -66,10 +66,13 @@ class DeclarationGenerator {
   void GenerateCodeForEnumConstant(const Enum::Constant& enm,
                                    CppFile* header_file,
                                    bool skip_coma);
-  void GenerateCodeForStructField(const Struct::Field& field,
+  void GenerateCodeForStructField(const Struct& strct,
+                                  const Struct::Field& field,
+                                  CppFile* header_file,
                                   Namespace* name_space);
-  void GenerateCodeForStructFields(
-      const FunctionMessage::ParametersList& params, Namespace* name_space);
+  void GenerateCodeForStructFields(const Struct& strct,
+                                   CppFile* header_file,
+                                   Namespace* name_space);
  private:
   // Fields
   ModuleManager* module_manager_;

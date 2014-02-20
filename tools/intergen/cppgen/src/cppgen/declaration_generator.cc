@@ -43,6 +43,7 @@
 #include "cppgen/generator_preferences.h"
 #include "cppgen/is_valid_enum_function.h"
 #include "cppgen/literal_generator.h"
+#include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
 #include "cppgen/struct_type_constructor.h"
 #include "cppgen/struct_type_from_json_method.h"
@@ -83,7 +84,9 @@ class Section {
 void DeclareStructureBegin(ostream& o, const string& name,
                            const string& base_type, const Comment& comment) {
   o << comment << endl;
-  strmfmt(o, "struct {0} : {1} {", name, base_type) << endl;
+  strmfmt(o, "struct {0}{1} {",
+          name,
+          base_type.empty() ? "" : " : " + base_type) << endl;
 }
 
 }
@@ -121,11 +124,11 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   header_file.global_namespace().nested("Json").ForwardDeclare(
       Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
   ostream& o = header_file.types_ns().os();
-  DeclareStructureBegin(o, strct->name(), "CompositeType",
+  DeclareStructureBegin(o, strct->name(), "",
                         Comment(strct->description()));
   {
     Section pub("public", &o);
-    GenerateCodeForStructFields(strct->fields(), &header_file.types_ns());
+    GenerateCodeForStructFields(*strct, &header_file, &header_file.types_ns());
   }
   {
     Section pub("public", &o);
@@ -154,7 +157,8 @@ void DeclarationGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
   TypeForwardDeclarator(&types_ns, tdef->type());
   types_ns.os() << Comment(tdef->description()) << '\n';
   strmfmt(types_ns.os(), "typedef {0} {1};",
-          RpcTypeNameGenerator(tdef->type(),
+          RpcTypeNameGenerator(&tdef->interface(),
+                               tdef->type(),
                                RpcTypeNameGenerator::kUnspecified).result(),
           tdef->name())
       << '\n';
@@ -174,12 +178,18 @@ void DeclarationGenerator::GenerateCodeForEnumConstant(
 }
 
 void DeclarationGenerator::GenerateCodeForStructField(
-    const Struct::Field& field, Namespace* name_space) {
+    const Struct& strct,
+    const Struct::Field& field,
+    CppFile* header_file,
+    Namespace* name_space) {
   ostream& o = name_space->os();
   RpcTypeNameGenerator::Availability availability =
       field.default_value() || field.is_mandatory() ?
           RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
-  o << RpcTypeNameGenerator(field.type(), availability).result();
+  header_file->IncludeType(*field.type());
+  o << RpcTypeNameGenerator(&strct.interface(),
+                            field.type(),
+                            availability).result();
   o << " " << field.name() << ";";
   if (!field.description().empty()) {
     o << " " << Comment(field.description());
@@ -189,9 +199,7 @@ void DeclarationGenerator::GenerateCodeForStructField(
 
 void DeclarationGenerator::GenerateCodeForFunction(const Function& function) {
   CppFile& header_file = module_manager_->HeaderForFunction(function);
-  header_file.responses_ns().ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kStruct,
-                                    function.response().name()));
+
   GenerateCodeForRequest(function.request(), &header_file);
   GenerateCodeForResponse(function.response());
 }
@@ -200,14 +208,16 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
                                                   CppFile* header_file) {
   header_file->global_namespace().nested("Json").ForwardDeclare(
       Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  ostream& o = header_file->requests_ns().os();
+  Namespace& requests_ns = header_file->requests_ns();
+  ostream& o = requests_ns.os();
   DeclareStructureBegin(o, request.name(), "Request",
                         Comment(request.description()));
   {
     Section pub("public", &o);
     strmfmt(o, "typedef {0}::{1} ResponseType;",
             header_file->responses_ns().name(), request.name()) << endl;
-    GenerateCodeForStructFields(request.parameters(),
+    GenerateCodeForStructFields(request,
+                                header_file,
                                 &header_file->requests_ns());
   }
   {
@@ -222,7 +232,9 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
     StructTypeToJsonMethod(&request).Declare(&o , true);
+    MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
+    FunctionStringIdMethod(&request).Define(&o, true);
   }
   {
     Section priv("private", &o);
@@ -236,12 +248,14 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
   CppFile& header_file = module_manager_->HeaderForResponse(response);
   header_file.global_namespace().nested("Json").ForwardDeclare(
       Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  ostream& o = header_file.responses_ns().os();
+  Namespace& responses_ns = header_file.responses_ns();
+  ostream& o = responses_ns.os();
   DeclareStructureBegin(o, response.name(), "Response",
                         Comment(response.description()));
   {
     Section pub("public", &o);
-    GenerateCodeForStructFields(response.parameters(),
+    GenerateCodeForStructFields(response,
+                                &header_file,
                                 &header_file.responses_ns());
   }
   {
@@ -256,7 +270,9 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
     StructTypeToJsonMethod(&response).Declare(&o , true);
+    MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
+    FunctionStringIdMethod(&response).Define(&o, true);
   }
   {
     Section priv("private", &o);
@@ -271,12 +287,14 @@ void DeclarationGenerator::GenerateCodeForNotification(
   CppFile& header_file = module_manager_->HeaderForNotification(notification);
   header_file.global_namespace().nested("Json").ForwardDeclare(
       Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  ostream& o = header_file.notifications_ns().os();
+  Namespace& notifications_ns = header_file.notifications_ns();
+  ostream& o = notifications_ns.os();
   DeclareStructureBegin(o, notification.name(), "Notification",
                         Comment(notification.description()));
   {
     Section pub("public", &o);
-    GenerateCodeForStructFields(notification.parameters(),
+    GenerateCodeForStructFields(notification,
+                                &header_file,
                                 &header_file.notifications_ns());
   }
   {
@@ -291,7 +309,9 @@ void DeclarationGenerator::GenerateCodeForNotification(
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
     StructTypeToJsonMethod(&notification).Declare(&o , true);
+    MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);
+    FunctionStringIdMethod(&notification).Define(&o, true);
   }
   {
     Section priv("private", &o);
@@ -302,11 +322,14 @@ void DeclarationGenerator::GenerateCodeForNotification(
 }
 
 void DeclarationGenerator::GenerateCodeForStructFields(
-    const FunctionMessage::ParametersList& params, Namespace* name_space) {
+    const Struct& strct,
+    CppFile* header_file,
+    Namespace* name_space) {
+  const FunctionMessage::ParametersList& params = strct.fields();
   for (FunctionMessage::ParametersList::const_iterator i = params.begin(), end =
       params.end(); i != end; ++i) {
     const FunctionMessage::Parameter& param = *i;
-    GenerateCodeForStructField(param, name_space);
+    GenerateCodeForStructField(strct, param, header_file, name_space);
   }
 }
 

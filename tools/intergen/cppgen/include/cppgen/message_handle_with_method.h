@@ -1,7 +1,4 @@
-/**
- * \file appMain.hpp
- * \brief SmartDeviceLink main application header
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,15 +29,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_APPMAIN_APPMAIN_H_
-#define SRC_APPMAIN_APPMAIN_H_
+#ifndef CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H
+#define CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H
 
-/**
- * \namespace NsSmartDeviceLink
- * \brief SmartDeviceLink main Application related functions.
+#include "cppgen/cpp_function.h"
+
+namespace codegen {
+
+/*
+ * Generates declaration and definiton of HandleWith method
+ * that is required in every structure representing a message.
+ * This method takes Message Handler implementation and calls
+ * Appropriate function on it to handle current message.
+ * (see Visitor pattern).
  */
-namespace NsSmartDeviceLink {
+class MessageHandleWithMethod: public CppFunction {
+public:
+  MessageHandleWithMethod(const std::string& class_name);
 
-}  // namespace NsSmartDeviceLink
+protected:
+  // CppFunction methods
+  virtual void DefineBody(std::ostream* os) const;
+private:
+  // Fields
+  std::string class_name_;
+};
 
-#endif  // SRC_APPMAIN_APPMAIN_H_
+} // namespace codegen
+
+#endif // CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H

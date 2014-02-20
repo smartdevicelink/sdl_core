@@ -29,29 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
+
+#include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-NaviAlertManeuverResponse::NaviAlertManeuverResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
+UiSetDisplayLayoutRequest::UiSetDisplayLayoutRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
+UiSetDisplayLayoutRequest::~UiSetDisplayLayoutRequest() {
 }
 
-void NaviAlertManeuverResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviAlertManeuverResponse::Run");
-
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
-  event.set_smart_object(*message_);
-  event.raise();
+void UiSetDisplayLayoutRequest::Run() {
+  LOG4CXX_INFO(logger_, "UiSetDisplayLayoutRequest::Run");
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

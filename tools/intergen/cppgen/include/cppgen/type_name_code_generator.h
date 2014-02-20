@@ -38,6 +38,7 @@
 #include <sstream>
 
 namespace codegen {
+class Interface;
 class Type;
 
 /*
@@ -51,9 +52,13 @@ class Type;
  */
 class TypeNameGenerator: public TypeCodeGenerator {
  public:
-  // Generates primitive type name for |type|. Generates type name
-  // can be accessed with result() method.
-  TypeNameGenerator(const Type* type);
+  // Generates primitive type name for |type|.
+  // |interface| specifies the interface where code is currently
+  // being generated. Depending on that relative or fully qualified
+  // type names are generated.
+  // Generates type name can be accessed with result() method.
+  TypeNameGenerator(const Interface* interface,
+                    const Type* type);
   ~TypeNameGenerator();
   // Generated type name
   std::string result() const;
@@ -68,6 +73,7 @@ class TypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
+  const Interface* interface_;
   bool prefer_reference_type_;
   std::stringstream os_;
 };
@@ -87,9 +93,14 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   };
  public:
   // Generates name of type that is able to validate given primitive value
+  // |interface| specifies the interface where code is currently
+  // being generated. Depending on that relative or fully qualified
+  // type names are generated.
   // Depending on |availability| option optionally wraps declaration into
   // Mandatory or Optional template
-  RpcTypeNameGenerator(const Type* type, Availability availability);
+  RpcTypeNameGenerator(const Interface* interface,
+                       const Type* type,
+                       Availability availability);
   ~RpcTypeNameGenerator();
   // Generated type name
   std::string result() const;
@@ -108,6 +119,8 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   // Wraps type declaration with "Mandatory" or "Optional" templates
   // returns true if type name was wrapped (and thus fully generated).
   bool MaybeWrapWithAvailabilitySpecifier(const Type* type);
+private:
+  const Interface* interface_;
   bool skip_availaiblity_specifier_;
   bool mandatory_;
   std::stringstream os_;

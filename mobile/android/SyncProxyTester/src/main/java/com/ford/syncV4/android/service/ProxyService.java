@@ -37,12 +37,13 @@ import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
-import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
+import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
@@ -55,7 +56,6 @@ import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
-import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -150,7 +150,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private HMILevel prevHMILevel = HMILevel.HMI_NONE;
 
     private boolean mWaitingForResponse = false;
-    private IProxyServiceEvent mServiceDestroyEvent;
+    private IProxyServiceEvent mProxyServiceEvent;
     private ICloseSession mCloseSessionCallback;
 
     private int mAwaitingInitIconResponseCorrelationID;
@@ -173,7 +173,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mediaButtonReceiver = new SyncReceiver();
         registerReceiver(mediaButtonReceiver, mediaIntentFilter);
 
-        startProxyIfNetworkConnected();
+        //startProxyIfNetworkConnected();
 
         mPutFileTransferManager = new PutFileTransferManager();
     }
@@ -233,7 +233,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return result;
     }
 
-    private void startProxyIfNetworkConnected() {
+    public void startProxyIfNetworkConnected() {
         SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, MODE_PRIVATE);
         int transportType = prefs.getInt(
                 Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
@@ -393,11 +393,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createInfoMessageForAdapter("ProxyService.onDestroy()");
 
         // In case service is destroying by System
-        if (mServiceDestroyEvent == null) {
+        if (mProxyServiceEvent == null) {
             // TODO : Reconsider this case, for instance if we just close Session
             //disposeSyncProxy();
         }
-        mServiceDestroyEvent = null;
+        setProxyServiceEvent(null);
         if (mEmbeddedAudioPlayer != null) {
             mEmbeddedAudioPlayer.release();
         }
@@ -409,8 +409,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mCloseSessionCallback = closeSessionCallback;
     }
 
-    public void destroyService(IProxyServiceEvent serviceDestroyEvent) {
-        mServiceDestroyEvent = serviceDestroyEvent;
+    public void setProxyServiceEvent(IProxyServiceEvent proxyServiceEvent) {
+        mProxyServiceEvent = proxyServiceEvent;
+    }
+
+    public void destroyService() {
         disposeSyncProxy();
     }
 
@@ -422,12 +425,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mSyncProxy.dispose();
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
-                if (mServiceDestroyEvent != null) {
-                    mServiceDestroyEvent.onDisposeError();
+                if (mProxyServiceEvent != null) {
+                    mProxyServiceEvent.onDisposeError();
                 }
             }
             mSyncProxy = null;
         }
+    }
+
+    public int getServicesNumber() {
+        return mSyncProxy.getServicesNumber();
+    }
+
+    public boolean hasServiceInServicesPool(ServiceType serviceType) {
+        return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(serviceType);
     }
 
     private void initialize() {
@@ -454,12 +465,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             createErrorMessageForAdapter("Error subscribing to buttons", e);
         }
 
-        try {
-            addCommand(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
-            addCommand(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
-        } catch (SyncException e) {
-            createErrorMessageForAdapter("Error adding AddCommands", e);
-        }
+        commandAddCommand(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
+        commandAddCommand(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
     }
 
     private void setInitAppIcon() {
@@ -477,21 +484,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mLogAdapter.logMessage(msg, true);
         }
         mSyncProxy.sendRPCRequest(msg);
-    }
-
-    private void addCommand(Integer cmdId, Vector<String> vrCommands,
-                            String menuName) throws SyncException {
-        AddCommand addCommand = new AddCommand();
-        addCommand.setCorrelationID(getNextCorrelationID());
-        addCommand.setCmdID(cmdId);
-        addCommand.setVrCommands(vrCommands);
-        MenuParams menuParams = new MenuParams();
-        menuParams.setMenuName(menuName);
-        addCommand.setMenuParams(menuParams);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(addCommand, true);
-        }
-        mSyncProxy.sendRPCRequest(addCommand);
     }
 
     private void subscribeToButton(ButtonName buttonName) throws SyncException {
@@ -725,7 +717,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
         // In case we run exit() - this is a quick marker of exiting.
-        if (mServiceDestroyEvent != null) {
+        if (mProxyServiceEvent != null) {
             return;
         }
         try {
@@ -953,27 +945,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(response);
         int mCorrelationId = response.getCorrelationID();
         if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
-            SetAppIcon setAppIcon = new SetAppIcon();
-            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-            setAppIcon.setCorrelationID(getNextCorrelationID());
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage(setAppIcon, true);
-            }
             try {
-                syncProxySendRPCRequest(setAppIcon);
+                mSyncProxy.setAppIcon(ICON_SYNC_FILENAME, getNextCorrelationID());
+                if (mLogAdapter != null) {
+                    mLogAdapter.logMessage("SetAppIcon sent", true);
+                }
             } catch (SyncException e) {
-                Log.e(TAG, "Set InitAppIcon", e);
+                if (mLogAdapter != null) {
+                    mLogAdapter.logMessage("SetAppIcon send error: " + e, Log.ERROR, e);
+                }
             }
             mAwaitingInitIconResponseCorrelationID = 0;
         }
-
         if (isModuleTesting()) {
             ModuleTest.responses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
         }
-
         mPutFileTransferManager.removePutFileFromAwaitArray(mCorrelationId);
     }
 
@@ -1336,44 +1325,29 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onMobileNaviStart() {
-        createDebugMessageForAdapter("Mobile Navi Service Started");
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onMobileNaviStarted();
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1);
         }
     }
 
     @Override
     public void onAudioServiceStart() {
-        createDebugMessageForAdapter("Audio Service Started");
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onAudioServiceStarted();
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1);
         }
     }
 
     @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
-        final int fNumber = frameReceivedNumber;
-        Log.d(TAG, "Mobile Ack Received = " + frameReceivedNumber);
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onMobileNavAckReceived(fNumber);
-                }
-            });
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onAckReceived(frameReceivedNumber, ServiceType.Mobile_Nav);
+        }
+    }
+
+    @Override
+    public void onStartServiceNackReceived(ServiceType serviceType) {
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onStartServiceNackReceived(serviceType);
         }
     }
 
@@ -1417,7 +1391,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
-        Log.i(TAG, "onAppUnregisteredAfterLanguageChange " + msg.toString());
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
                         msg.getLanguage(), msg.getHmiDisplayLanguage());
@@ -1427,7 +1400,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason) {
-        Log.i(TAG, "onAppUnregisteredReason:" + reason);
         createDebugMessageForAdapter("onAppUnregisteredReason:" + reason);
     }
 
@@ -1438,38 +1410,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 "Session ID " + version + "; Correlation ID " + correlationID;
         createDebugMessageForAdapter(response);
 
-        if (serviceType == ServiceType.Audio_Service) {
-            mLogAdapter.logMessage("Audio service stopped", true);
-        } else if (serviceType == ServiceType.Mobile_Nav) {
-            mLogAdapter.logMessage("Navi service stopped", true);
-        } else if (serviceType == ServiceType.Bulk_Data) {
-            mLogAdapter.logMessage("Bulk Data service stopped", true);
-        } else if (serviceType == ServiceType.RPC) {
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceEnd(serviceType);
+        }
+        if (serviceType == ServiceType.RPC) {
             mLogAdapter.logMessage("RPC service stopped", true);
 
-            if (mServiceDestroyEvent != null) {
-                mServiceDestroyEvent.onDisposeComplete();
+            if (mProxyServiceEvent != null) {
+                mProxyServiceEvent.onDisposeComplete();
             }
 
             if (mCloseSessionCallback != null) {
                 mCloseSessionCallback.onCloseSessionComplete();
             }
-        } else {
-            mLogAdapter.logMessage("Unknown service '" + serviceType + "' stopped", true);
         }
     }
 
     @Override
     public void onSessionStarted(final byte sessionID, final String correlationID) {
-        createDebugMessageForAdapter("Session Started; currentSession id " + sessionID);
-        final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
-        if (mainActivity != null) {
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mainActivity.onSessionStarted(sessionID, correlationID);
-                }
-            });
+        Log.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID);
         }
     }
 
@@ -1691,13 +1652,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Create and send ListFiles command
      */
     public void commandListFiles() {
-        ListFiles listFiles = new ListFiles();
-        listFiles.setCorrelationID(getNextCorrelationID());
-
         try {
-            syncProxySendRPCRequest(listFiles);
+            mSyncProxy.listFiles(getNextCorrelationID());
             if (mLogAdapter != null) {
-                mLogAdapter.logMessage(listFiles, true);
+                mLogAdapter.logMessage("ListFiles sent", true);
             }
         } catch (SyncException e) {
             mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
@@ -1786,13 +1744,57 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
         try {
-            syncProxySendRPCRequest(newPutFile);
+            if (mSyncProxy != null) {
+                mSyncProxy.putFile(newPutFile);
+            }
             if (mLogAdapter != null) {
                 mLogAdapter.logMessage(newPutFile, true);
             }
         } catch (SyncException e) {
             mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
             mAwaitingInitIconResponseCorrelationID = 0;
+        }
+    }
+
+    /**
+     * Call a method from SDK to create and send <b>AddCommand</b> request
+     *
+     * @param commandId Id of the command
+     * @param vrCommands Vector of the VR Commands
+     * @param menuName Name of the Menu
+     */
+    public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
+                                  String menuName) {
+        try {
+            mSyncProxy.addCommand(commandId, menuName, vrCommands, getNextCorrelationID());
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand sent", true);
+            }
+        } catch (SyncException e) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand send error: " + e, Log.ERROR, e);
+            }
+        }
+    }
+
+    /**
+     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request
+     *
+     * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param interactionChoiceSetID Id of the interaction Choice set
+     * @param correlationID correlation Id
+     */
+    public void commandCreateInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
+                                                  Integer correlationID) {
+        try {
+            mSyncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("CreateInteractionChoiceSet sent", true);
+            }
+        } catch (SyncException e) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("CreateInteractionChoiceSet send error: " + e, Log.ERROR, e);
+            }
         }
     }
 

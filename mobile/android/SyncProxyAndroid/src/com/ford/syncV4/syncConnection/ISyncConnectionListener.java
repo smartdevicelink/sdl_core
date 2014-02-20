@@ -23,4 +23,6 @@ public interface ISyncConnectionListener {
     public void onMobileNavAckReceived(int frameReceivedNumber);
 
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
+
+    public void onStartServiceNackReceived(ServiceType serviceType);
 }

@@ -40,9 +40,11 @@
 #include <string>
 
 #include "cppgen/namespace.h"
+#include "model/function.h"
 #include "utils/common_types.h"
 
 namespace codegen {
+class Type;
 
 /*
  * Class representing C++ source file (generic) which contains C++ declarations
@@ -66,12 +68,15 @@ class CppFile {
   const std::string& file_name() const;
   // Adds header to file's include list
   void Include(const Header& header);
+  // Automatically adds header where given type is defined
+  void IncludeType(const Type& type);
   // Returns predefined namespaces for entities of different type
   Namespace& global_namespace();
   Namespace& types_ns();
   Namespace& requests_ns();
   Namespace& responses_ns();
   Namespace& notifications_ns();
+  Namespace& NamespaceByMessageType(FunctionMessage::MessageType type);
 
   // Generates code file named module_name/file_name and saves all namespaces
   // into it.

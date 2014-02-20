@@ -118,33 +118,6 @@ typedef enum {
  */
 typedef std::map<const char*, VehicleDataType> VehicleData;
 
-/*
- * @brief class for creatin static map
- * Need to avoid FlexeLint Warnings
- */
-template <typename T, typename U>
-class create_map
-{
-private:
-    std::map<T, U> m_map;
-public:
-    create_map(const T& key, const U& val)
-    {
-        m_map[key] = val;
-    }
-
-    create_map<T, U>& operator()(const T& key, const U& val)
-    {
-        m_map[key] = val;
-        return *this;
-    }
-
-    operator std::map<T, U>()
-    {
-        return m_map;
-    }
-};
-
 /**
  * @brief MessageHelper class
  **/
@@ -274,6 +247,14 @@ class MessageHelper {
      */
     static void SendAudioStopStream(int32_t connection_key);
 
+    /*
+     * @brief Sends notification to HMI to stop audioPathThru
+     *
+     * @param connection_key  Application connection key
+     *
+     * @return TRUE on SUCCES otherwise return FALSE
+     */
+    static bool SendStopAudioPathThru();
 
     static smart_objects::SmartObject* CreateNegativeResponse(
       uint32_t connection_key, int32_t function_id, uint32_t correlation_id,

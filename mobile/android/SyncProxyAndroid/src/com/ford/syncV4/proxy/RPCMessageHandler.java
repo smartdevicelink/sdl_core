@@ -263,20 +263,17 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     }
                 } else if (functionName.equals(Names.AddCommand)) {
                     // AddCommand
-
                     final AddCommandResponse msg = new AddCommandResponse(hash);
                     if (getCallbackToUIThread()) {
                         // Run in UI thread
                         getMainUIHandler().post(new Runnable() {
                             @Override
                             public void run() {
-                                getProxyListener().onAddCommandResponse(
-                                        (AddCommandResponse) msg);
+                                getProxyListener().onAddCommandResponse(msg);
                             }
                         });
                     } else {
-                        getProxyListener().onAddCommandResponse(
-                                (AddCommandResponse) msg);
+                        getProxyListener().onAddCommandResponse(msg);
                     }
                 } else if (functionName.equals(Names.DeleteCommand)) {
                     // DeleteCommandResponse
@@ -1120,17 +1117,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                             getProxyListener().onAppUnregisteredAfterLanguageChange(syncProxyBase.getLastLanguageChange());
                         }
                     } else if (msg.getReason() != null) {
-                        if (getCallbackToUIThread()) {
-                            // Run in UI thread
-                            getMainUIHandler().post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    getProxyListener().onAppUnregisteredReason(msg.getReason());
-                                }
-                            });
-                        } else {
-                            getProxyListener().onAppUnregisteredReason(msg.getReason());
-                        }
+                        syncProxyBase.onAppUnregisteredReason(msg.getReason());
                     } else {
                         // This requires the proxy to be cycled
                         if (syncProxyBase.getCurrentTransportType() == TransportType.BLUETOOTH) {

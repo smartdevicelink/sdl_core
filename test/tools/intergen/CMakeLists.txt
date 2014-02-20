@@ -2,6 +2,18 @@ message("Intergen tests cmake")
 include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
 GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
 
+set (TEST_HMI_INTERFACES
+  common
+  buttons
+  navigation
+  basic_communication
+  tts
+  ui
+  vehicle_info
+  vr
+)
+GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
+
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include

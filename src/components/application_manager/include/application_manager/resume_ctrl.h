@@ -45,12 +45,13 @@
 #include "interfaces/MOBILE_API_schema.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 
 class ApplicationManagerImpl;
+class Application;
 class ResumeCtrl: public event_engine::EventObserver {
   public:
     ResumeCtrl(const ApplicationManagerImpl* app_mngr);

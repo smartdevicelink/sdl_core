@@ -213,6 +213,7 @@ const char interaction_mode[] = "interactionMode";
 const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
 const char prerecorded_speech[] = "prerecordedSpeech";
+const char supported_diag_modes[] = "supportedDiagModes";
 }  // namespace strings
 
 namespace mobile_notification {

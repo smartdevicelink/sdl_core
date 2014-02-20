@@ -95,10 +95,16 @@ void CppFunction::Add(const OptionalParameter& parameter) {
 
 void CppFunction::Declare(ostream* os, bool in_class) const {
   WriteFunctionPrototype(os, in_class, true);
+  if (qualifiers_ & kAbstract) {
+    *os << " = 0";
+  }
   *os << ";" << endl;
 }
 
 void CppFunction::Define(ostream* os, bool in_class) const {
+  // No definitions for abstract functions
+  if (qualifiers_ & kAbstract)
+    return;
   WriteFunctionPrototype(os, in_class, false);
   if (!initializers_.empty()) {
     *os << endl;
@@ -133,6 +139,9 @@ void CppFunction::WriteInitializerList(std::ostream* os) const {
     }
     first = false;
   }
+}
+
+void CppFunction::DefineBody(std::ostream *os) const {
 }
 
 void CppFunction::WriteFunctionPrototype(ostream* os, bool in_class,
@@ -189,17 +198,12 @@ CppStructConstructor::CppStructConstructor(const std::string& type_name)
 CppStructConstructor::~CppStructConstructor() {
 }
 
-void CppStructConstructor::DefineBody(std::ostream* os) const {
-}
-
-CppStructDestructor::CppStructDestructor(const std::string& type_name)
-    : CppFunction(type_name, "~" + type_name, "") {
+CppStructDestructor::CppStructDestructor(const std::string& type_name,
+                                         bool abstract)
+    : CppFunction(type_name, "~" + type_name, "", abstract ? kAbstract : 0) {
 }
 
 CppStructDestructor::~CppStructDestructor() {
-}
-
-void CppStructDestructor::DefineBody(std::ostream* os) const {
 }
 
 }  // namespace codegen

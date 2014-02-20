@@ -36,6 +36,7 @@
 #include <cassert>
 #include <limits>
 
+#include "cppgen/naming_convention.h"
 #include "model/builtin_type.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
@@ -43,6 +44,19 @@
 using typesafe_format::strmfmt;
 
 namespace codegen {
+
+namespace {
+template <class T>
+std::string TypeNamespacePrefix(const Interface* current_interface,
+                                const T* type) {
+  std::string ns;
+  const Interface& type_interface = type->interface();
+  if (&type_interface != current_interface) {
+    ns = InterfaceNamespaceName(type_interface) + "::";
+  }
+  return ns;
+}
+}
 
 namespace {
 const char* StdIntTypeFromRagne(const Integer::Range& range) {
@@ -73,8 +87,10 @@ const char* StdIntTypeFromRagne(const Integer::Range& range) {
 }
 }  // namespace
 
-TypeNameGenerator::TypeNameGenerator(const Type* type)
-    : prefer_reference_type_(true) {
+TypeNameGenerator::TypeNameGenerator(const Interface* interface,
+                                     const Type* type)
+    : interface_(interface),
+      prefer_reference_type_(true) {
   type->Apply(this);
 }
 
@@ -102,7 +118,7 @@ void TypeNameGenerator::GenerateCodeForString(const String* string) {
 }
 
 void TypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
-  os_ << enm->name();
+  os_ << TypeNamespacePrefix(interface_, enm) << enm->name();
 }
 
 void TypeNameGenerator::GenerateCodeForArray(const Array* array) {
@@ -131,17 +147,24 @@ void TypeNameGenerator::GenerateCodeForMap(const Map* map) {
 void TypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
   const char* struct_decl_begin = prefer_reference_type_ ? "const " : "";
   const char* struct_decl_end = prefer_reference_type_ ? "&" : "";
-  os_ << struct_decl_begin << strct->name() << struct_decl_end;
+  os_ << struct_decl_begin
+      << TypeNamespacePrefix(interface_, strct) << strct->name()
+      << struct_decl_end;
 }
 
 void TypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
   const char* typedef_decl_begin = prefer_reference_type_ ? "const " : "";
   const char* typedef_decl_end = prefer_reference_type_ ? "&" : "";
-  os_ << typedef_decl_begin << tdef->name() << typedef_decl_end;
+  os_ << typedef_decl_begin
+      << TypeNamespacePrefix(interface_, tdef) << tdef->name()
+      << typedef_decl_end;
 }
 
-RpcTypeNameGenerator::RpcTypeNameGenerator(const Type* type, Availability availability)
-    : skip_availaiblity_specifier_(availability == kUnspecified),
+RpcTypeNameGenerator::RpcTypeNameGenerator(const Interface* interface,
+                                           const Type* type,
+                                           Availability availability)
+    : interface_(interface),
+      skip_availaiblity_specifier_(availability == kUnspecified),
       mandatory_(availability == kMandatory) {
   if (!skip_availaiblity_specifier_) {
     // Arrays, map and typedefs of arrays and maps doesn't need to be marked as
@@ -196,7 +219,7 @@ void RpcTypeNameGenerator::GenerateCodeForString(const String* string) {
 
 void RpcTypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
   if (!MaybeWrapWithAvailabilitySpecifier(enm)) {
-    strmfmt(os_, "Enum<{0}>", enm->name());
+    strmfmt(os_, "Enum<{0}>", TypeNamespacePrefix(interface_, enm) + enm->name());
   }
 }
 
@@ -214,13 +237,13 @@ void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
 
 void RpcTypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
   if (!MaybeWrapWithAvailabilitySpecifier(strct)) {
-    os_ << strct->name();
+    os_ << TypeNamespacePrefix(interface_, strct) + strct->name();
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
   if (!MaybeWrapWithAvailabilitySpecifier(tdef)) {
-    os_ << tdef->name();
+    os_ << TypeNamespacePrefix(interface_, tdef) + tdef->name();
   }
 }
 

@@ -782,17 +782,6 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * SDL UI Alert Maneuver response handler show popup window
-     *
-     * @param {Object}
-     *            message Object with parameters come from SDLCore
-     */
-    onNavigationAlertManeuver: function (message) {
-
-        SDL.AlertManeuverPopUp.AlertManeuverActive(message);
-    },
-
-    /**
      * SDL UI Alert response handler show popup window
      *
      * @param {Object}

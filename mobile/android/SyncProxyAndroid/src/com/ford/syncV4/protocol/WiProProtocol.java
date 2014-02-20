@@ -1,5 +1,7 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
@@ -16,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
+
+    private static final String TAG = "WiProProtocol";
 
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
@@ -67,11 +71,13 @@ public class WiProProtocol extends AbstractProtocol {
     } // end-method
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
+        byte sessionId = session.getSessionId();
         DebugTool.logInfo("Protocol service should start: " + serviceType);
-        if (session.getSessionId() == 0) {
-            throw new IllegalArgumentException("currentSession id 0 should be used to start currentSession only");
+        if (sessionId == 0) {
+            throw new IllegalArgumentException("currentSession id 0 should be used to start " +
+                    "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, session.getSessionId(), _version);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, _version);
         sendFrameToTransport(header);
     } // end-method
 
@@ -173,6 +179,8 @@ public class WiProProtocol extends AbstractProtocol {
 
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
+
+        Log.d(TAG, "Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength));
 
         //Check for a version difference
         if (_version == 1) {
@@ -384,7 +392,7 @@ public class WiProProtocol extends AbstractProtocol {
                 }
                 inspectStartServiceACKHeader(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceNACK.getValue()) {
-                handleProtocolError("Got StartServiceNACK for protocol sessionID=" + header.getSessionID(), null);
+                handleStartServiceNackFrame(header.getServiceType());
             } else if (header.getFrameData() == FrameDataControlFrameType.EndService.getValue()) {
                 handleEndSessionFrame(header);
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
@@ -462,5 +470,8 @@ public class WiProProtocol extends AbstractProtocol {
             handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
         }
     }
-} // end-class
 
+    private void handleStartServiceNackFrame(ServiceType serviceType) {
+        _protocolListener.onStartServiceNackReceived(serviceType);
+    }
+}

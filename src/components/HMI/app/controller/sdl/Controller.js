@@ -52,6 +52,7 @@ SDL.SDLController = Em.Object
                 || SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
+                || SDL.AudioPassThruPopUp.activate
                 || SDL.VRHelpListView.active) {
 
                 return 'HMI_OBSCURED';
@@ -77,7 +78,8 @@ SDL.SDLController = Em.Object
             'SDL.ExitApp.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
-            'SDL.VRHelpListView.active'),
+            'SDL.VRHelpListView.active',
+            'SDL.AudioPassThruPopUp.activate'),
 
         /**
          * List of SDL application models
@@ -338,14 +340,6 @@ SDL.SDLController = Em.Object
         InteractionChoicesDeactivate: function() {
 
             SDL.InteractionChoicesView.deactivate("ABORTED");
-        },
-
-        /**
-         * Method to close AlertMeneuverPopUp view
-         */
-        closeAlertMeneuverPopUp: function() {
-
-            SDL.AlertManeuverPopUp.set('activate', false);
         },
         /**
          * Method to open Turn List view from TBT

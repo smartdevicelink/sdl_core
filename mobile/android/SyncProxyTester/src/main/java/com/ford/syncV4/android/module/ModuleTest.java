@@ -487,15 +487,15 @@ public class ModuleTest {
 								} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 									rpc = new ResetGlobalProperties();
 								} else if (name.equalsIgnoreCase(Names.AddCommand)) {
-									rpc = new AddCommand();
+									rpc = RPCRequestFactory.buildAddCommand();
 								} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
 									rpc = new DeleteCommand();
 								} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
-									rpc = new AddSubMenu();
+									rpc = RPCRequestFactory.buildAddSubMenu();
 								} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
 									rpc = new DeleteSubMenu();
 								} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
-									rpc = new CreateInteractionChoiceSet();
+									rpc = RPCRequestFactory.buildCreateInteractionChoiceSet();
 								} else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
 									rpc = new PerformInteraction();
 								} else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {

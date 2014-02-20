@@ -36,6 +36,7 @@
 #include "cppgen/enum_from_json_value_function.h"
 #include "cppgen/enum_to_json_value_function.h"
 #include "cppgen/is_valid_enum_function.h"
+#include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
 #include "cppgen/struct_type_constructor.h"
 #include "cppgen/struct_type_from_json_method.h"
@@ -106,6 +107,7 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   StructTypeIsInitializedMethod(&response).Define(&o, false);
   StructTypeFromJsonConstructor(&response).Define(&o , false);
   StructTypeToJsonMethod(&response).Define(&o , false);
+  MessageHandleWithMethod(response.name()).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().responses_ns();
@@ -127,6 +129,7 @@ void DefinitionGenerator::GenerateCodeForNotification(
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
   StructTypeFromJsonConstructor(&notification).Define(&o , false);
   StructTypeToJsonMethod(&notification).Define(&o , false);
+  MessageHandleWithMethod(notification.name()).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().notifications_ns();
@@ -148,6 +151,7 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   StructTypeIsInitializedMethod(&request).Define(&o, false);
   StructTypeFromJsonConstructor(&request).Define(&o , false);
   StructTypeToJsonMethod(&request).Define(&o , false);
+  MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().requests_ns();

@@ -848,12 +848,9 @@ public class SyncProxyALMManager {
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *
-	 *@param commandID
 	 *@param menuText
-	 *@param parentID
 	 *@param position
 	 *@param vrCommands
-	 *@param _correlationID
 	 *@throws SyncException
 	 */
 	public SyncCommand addSyncCommand(String menuText, SyncSubMenu parentSubMenu, Integer position,
@@ -1142,8 +1139,6 @@ public class SyncProxyALMManager {
 	 * Sends a CreateInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param syncChoiceSet
-	 * @param _interactionChoiceSetID
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public SyncChoiceSet createInteractionChoiceSet(Vector<SyncChoice> syncChoiceSet, Object tag, 
@@ -1193,7 +1188,7 @@ public class SyncProxyALMManager {
 			addGenericObjectTagByChoiceSetID(tag, interactionChoiceSetID);
 		}
 		
-		// Base createInteracationChoiceSet
+		// Base createInteractionChoiceSet
 		syncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
 		return syncInteractionChoiceSet;
 	}
@@ -1201,8 +1196,6 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends a DeleteInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param _interactionChoiceSetID
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void deleteSyncChoiceSet(SyncChoiceSet syncChoiceSetToDelete, 
@@ -2652,6 +2645,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onUSBNoSuchDeviceException() {
+
+        }
+
+        @Override
+        public void onStartServiceNackReceived(ServiceType serviceType) {
 
         }
     }

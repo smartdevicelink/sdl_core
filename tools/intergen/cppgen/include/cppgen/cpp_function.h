@@ -56,6 +56,7 @@ class CppFunction {
   static const int kExplicit = 1 << 2;
   static const int kConst    = 1 << 3;
   static const int kVolatile = 1 << 4;
+  static const int kAbstract = 1 << 5;
  public:
   // Methods
   // Creates a C++ function that belongs to |class_name|
@@ -99,7 +100,7 @@ class CppFunction {
   void WriteInitializerList(std::ostream* os) const;
  protected:
   // A method to be defined by derived classes that outputs function code
-  virtual void DefineBody(std::ostream* os) const = 0;
+  virtual void DefineBody(std::ostream* os) const;
   int qualifiers_;
   std::string class_name_;
   std::string name_;
@@ -156,9 +157,6 @@ class CppStructConstructor: public CppFunction {
   // Generates a constructor for type named |type_name|.
   CppStructConstructor(const std::string& type_name);
   ~CppStructConstructor();
- protected:
-  // CppFunction interface
-  virtual void DefineBody(std::ostream* os) const;
 };
 
 /*
@@ -167,11 +165,8 @@ class CppStructConstructor: public CppFunction {
  */
 class CppStructDestructor: public CppFunction {
  public:
-  CppStructDestructor(const std::string& type_name);
+  CppStructDestructor(const std::string& type_name, bool abstract = false);
   ~CppStructDestructor();
- protected:
-  // CppFunction interface
-  virtual void DefineBody(std::ostream* os) const;
 };
 
 }  // namespace codegen

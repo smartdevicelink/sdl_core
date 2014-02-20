@@ -69,7 +69,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
     private static final String SYNC_FILENAME = "syncFileName";
     private static final String SYSTEM_FILE = "systemFile";
     private static final String FILE_TYPE = "fileType";
-    private static final int WAIT_TIMEOUT = 20;
+    private static final int WAIT_TIMEOUT = 200;
     private IJsonRPCMarshaller marshaller;
     private IProxyListenerALMTesting proxyListenerMock;
     private WiProProtocol protocolMock;

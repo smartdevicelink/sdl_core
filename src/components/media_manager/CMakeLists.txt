@@ -16,6 +16,7 @@ set(default_sources
     ./src/audio/pipe_audio_streamer_adapter.cc
     ./src/video/socket_video_streamer_adapter.cc
     ./src/video/pipe_video_streamer_adapter.cc
+    ./src/video/video_stream_to_file_adapter.cc
     ./src/pipe_streamer_adapter.cc
     ./src/socket_streamer_adapter.cc
 )
@@ -31,6 +32,13 @@ set(default_includes
 )
 set(default_sources
   ./src/video/video_stream_to_file_adapter.cc
+  ./src/audio/socket_audio_streamer_adapter.cc
+  ./src/audio/pipe_audio_streamer_adapter.cc
+  ./src/video/socket_video_streamer_adapter.cc
+  ./src/video/pipe_video_streamer_adapter.cc
+  ./src/video/video_stream_to_file_adapter.cc
+  ./src/pipe_streamer_adapter.cc
+  ./src/socket_streamer_adapter.cc
 )
 set(LIBRARIES
 )

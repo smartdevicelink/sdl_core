@@ -39,8 +39,6 @@
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
 #include "application_manager/commands/mobile/alert_request.h"
 #include "application_manager/commands/mobile/alert_response.h"
-#include "application_manager/commands/mobile/alert_maneuver_request.h"
-#include "application_manager/commands/mobile/alert_maneuver_response.h"
 #include "application_manager/commands/mobile/change_registration_request.h"
 #include "application_manager/commands/mobile/change_registration_response.h"
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
@@ -405,15 +403,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command.reset(new commands::ScrollableMessageResponse(message));
       } else {
         command.reset(new commands::ScrollabelMessageRequest(message));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::AlertManeuverID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::AlertManeuverResponse(message));
-      } else {
-        command.reset(new commands::AlertManeuverRequest(message));
       }
       break;
     }

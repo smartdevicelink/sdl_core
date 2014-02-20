@@ -244,68 +244,66 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // QT_HMI
 
-void LifeCycle::StopComponents(int32_t params) {
-  utils::ResetSubscribeToTerminateSignal();
-  instance()->hmi_handler_->set_message_observer(NULL);
-  instance()->connection_handler_->set_connection_handler_observer(NULL);
+void LifeCycle::StopComponents() {
+  hmi_handler_->set_message_observer(NULL);
+  connection_handler_->set_connection_handler_observer(NULL);
+  protocol_handler_->RemoveProtocolObserver(app_manager_);
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  instance()->app_manager_->Stop();
+  app_manager_->Stop();
 
-  LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
-  instance()->policy_manager_->~PolicyManager();
-
-  instance()->transport_manager_->Stop();
-  instance()->protocol_handler_->RemoveProtocolObserver(
-    instance()->app_manager_);
+  transport_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
-  instance()->protocol_handler_->RemoveProtocolObserver(
-      instance()->media_manager_);
-  instance()->media_manager_->SetProtocolHandler(NULL);
-  instance()->media_manager_->~MediaManagerImpl();
+  protocol_handler_->RemoveProtocolObserver(media_manager_);
+  media_manager_->SetProtocolHandler(NULL);
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  instance()->protocol_handler_->set_session_observer(NULL);
-  instance()->connection_handler_->~ConnectionHandlerImpl();
+  protocol_handler_->set_session_observer(NULL);
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  delete instance()->protocol_handler_;
-
-  LOG4CXX_INFO(logger_, "Destroying TM");
-  delete instance()->transport_manager_;
+  delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef QT_HMI
-  instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->dbus_adapter_);
-  instance()->dbus_adapter_thread_->Stop();
-  instance()->dbus_adapter_thread_->Join();
-  delete instance()->dbus_adapter_;
+  if (dbus_adapter_) {
+    if (hmi_handler_) {
+      hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
+    }
+    if (dbus_adapter_thread_) {
+      dbus_adapter_thread_->Stop();
+      dbus_adapter_thread_->Join();
+    }
+    delete dbus_adapter_;
+  }
 #endif  // QT_HMI
 #ifdef WEB_HMI
-  instance()->hmi_handler_->RemoveHMIMessageAdapter(instance()->mb_adapter_);
-  instance()->mb_adapter_->unregisterController();
-  instance()->mb_adapter_thread_->Stop();
-  instance()->mb_adapter_thread_->Join();
-  instance()->mb_adapter_->Close();
-  delete instance()->mb_adapter_;
+  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+  mb_adapter_->unregisterController();
+  mb_adapter_thread_->Stop();
+  mb_adapter_thread_->Join();
+  mb_adapter_->Close();
+  delete mb_adapter_;
 #endif  // WEB_HMI
-  instance()->hmi_handler_->~HMIMessageHandlerImpl();
 
 #ifdef WEB_HMI
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
-  instance()->mb_server_thread_->Stop();
-  instance()->mb_server_thread_->Join();
-  instance()->mb_thread_->Stop();
-  instance()->mb_thread_->Join();
-  instance()->message_broker_server_->Close();
-  instance()->message_broker_->stopMessageBroker();
-  delete instance()->mb_server_thread_;
-  instance()->message_broker_->~CMessageBroker();
+  mb_server_thread_->Stop();
+  mb_server_thread_->Join();
+  mb_thread_->Stop();
+  mb_thread_->Join();
+  message_broker_server_->Close();
+  message_broker_->stopMessageBroker();
+  delete mb_server_thread_;
 
   networking::cleanup();
 #endif  // WEB_HMI
+}
 
+void LifeCycle::StopComponentsOnSignal(int32_t params) {
+  utils::ResetSubscribeToTerminateSignal();
+  instance()->StopComponents();
   utils::ForwardSignal();
 }
+
 }  //  namespace main_namespace

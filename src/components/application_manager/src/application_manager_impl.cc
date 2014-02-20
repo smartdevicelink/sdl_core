@@ -623,7 +623,7 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 
-bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
+bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) const {
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
@@ -635,6 +635,23 @@ bool ApplicationManagerImpl::IsStreamingAllowed(uint32_t connection_key) const {
 
   if (mobile_api::HMILevel::HMI_FULL == hmi_level ||
       mobile_api::HMILevel::HMI_LIMITED == hmi_level) {
+    return true;
+  }
+
+  return false;
+}
+
+bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) const {
+  ApplicationSharedPtr app = application(connection_key);
+
+  if (!app) {
+    LOG4CXX_INFO(logger_, "An application is not registered.");
+    return false;
+  }
+
+  const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
+
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level) {
     return true;
   }
 
@@ -1397,26 +1414,15 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
   }
+  ApplicationSharedPtr app_to_remove = it->second;
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     end_audio_pass_thru();
     StopAudioPassThru(app_id);
-    NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
-        new NsSmartDeviceLink::NsSmartObjects::SmartObject;
-    const uint32_t hmi_correlation_id = GetNextHMICorrelationID();
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
-    request[strings::params][strings::message_type] = MessageType::kRequest;
-    request[strings::params][strings::function_id] = hmi_apis::FunctionID::UI_EndAudioPassThru;
-    request[strings::params][strings::correlation_id] = hmi_correlation_id;
-    request[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-    request[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-    ApplicationManagerImpl::instance()->ManageHMICommand(result);
+    MessageHelper::SendStopAudioPathThru();
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
-  ApplicationSharedPtr app_to_remove = it->second;
   applications_.erase(it);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);

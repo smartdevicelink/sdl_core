@@ -58,8 +58,11 @@ ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
       total_packet_size_(0),
       data_offset_(0),
       packet_id_(packet_id) {
-  SKIP_RETURN_VALUE(serializePacket(version, compress, frameType, serviceType, frameData,
-                  sessionID, dataSize, messageID, data));
+  RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
+                  sessionID, dataSize, messageID, data);
+  if (result != RESULT_OK) {
+    NOTREACHED();
+  }
 }
 
 ProtocolPacket::~ProtocolPacket() {

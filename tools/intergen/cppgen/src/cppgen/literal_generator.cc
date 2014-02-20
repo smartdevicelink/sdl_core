@@ -64,7 +64,7 @@ void LiteralGenerator::GenerateCodeForFloatConstant(
 
 void LiteralGenerator::GenerateCodeForEnumConstant(const Enum::Constant* enm) {
   std::string type_name = enm->type()->name();
-  if ("FunctionID" == type_name) {
+  if (Enum::kFunctionIdEnumName == type_name) {
     result_ = "k" + enm->name();
   } else {
     std::string constant_name = enm->name();

@@ -4,6 +4,7 @@ include_directories(
 )
 
 set (SOURCES
+ src/rpc_base/rpc_message.cc
  src/rpc_base/rpc_base.cc
 )
 

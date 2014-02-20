@@ -4,8 +4,11 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.widget.Button;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.listener.ConnectionListener;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
+import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 /**
  * Created with Android Studio.
@@ -63,6 +66,20 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
     protected void startBaseFileStreaming(int resourceId) {
         mFileStreamingLogic.setFileResID(resourceId);
         mFileStreamingLogic.startFileStreaming();
+    }
+
+    protected boolean hasServiceInServicesPool(ServiceType serviceType) {
+        if (serviceType == null) {
+            return false;
+        }
+        ProxyService proxyService = MainApp.getInstance().getBoundProxyService();
+        return proxyService != null && proxyService.hasServiceInServicesPool(serviceType);
+    }
+
+    protected void setStateOff() {
+        mFileStreamingLogic.resetStreaming();
+        mSessionCheckBoxState.setStateOff();
+        mDataStreamingButton.setEnabled(false);
     }
 
     /**

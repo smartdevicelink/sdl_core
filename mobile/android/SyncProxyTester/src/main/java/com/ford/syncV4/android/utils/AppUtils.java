@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.ford.syncV4.android.MainApp;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,7 +31,7 @@ public class AppUtils {
      * Returns the file contents from the specified resource.
      *
      * @param resource Resource id (in res/ directory)
-     * @return The resource file's contents
+     * @return         The resource file's contents
      */
     public static byte[] contentsOfResource(int resource) {
         return contentsOfResource(MainApp.getInstance().getResources().openRawResource(resource));
@@ -50,6 +49,10 @@ public class AppUtils {
             Log.e(TAG, "Contents Of Resource exception", e);
         }
         return new byte[0];
+    }
+
+    public static byte[] contentsOfResource(String fileName) {
+        return contentsOfResource(new File(fileName));
     }
 
     /**
@@ -85,6 +88,12 @@ public class AppUtils {
         return result;
     }
 
+    /**
+     * Read a content of the Input Stream into bytes array
+     *
+     * @param inputStream a stream of incoming bytes
+     * @return            bytes array
+     */
     private static byte[] contentsOfResource(InputStream inputStream) {
         try {
             ByteArrayOutputStream byteArrayOutputStream =

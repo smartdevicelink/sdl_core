@@ -33,9 +33,8 @@
 
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -94,6 +93,11 @@ void ShowRequest::Run() {
     }
   }
 
+  if (!CheckMenuFieldsNames()) {
+    LOG4CXX_ERROR(logger_, "Bad menu name");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
@@ -214,6 +218,42 @@ void ShowRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
+}
+
+bool ShowRequest::CheckMenuFieldsNames() {
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
+    const std::string& str = (*message_)[strings::msg_params]
+                                         [strings::main_field_4].asString();
+    if (std::string::npos != str.find_first_of("\t\n")) {
+      LOG4CXX_INFO(logger_, "main_field_4 syntax check failed");
+      return false;
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
+    const std::string& str = (*message_)[strings::msg_params]
+                                         [strings::main_field_3].asString();
+    if (std::string::npos != str.find_first_of("\t\n")) {
+      LOG4CXX_INFO(logger_, "main_field_3 syntax check failed");
+      return false;
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
+    const std::string& str = (*message_)[strings::msg_params]
+                                         [strings::main_field_2].asString();
+    if (std::string::npos != str.find_first_of("\t\n")) {
+      LOG4CXX_INFO(logger_, "main_field_2 syntax check failed");
+      return false;
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
+    const std::string& str = (*message_)[strings::msg_params]
+                                         [strings::main_field_1].asString();
+    if (std::string::npos != str.find_first_of("\t\n")) {
+      LOG4CXX_INFO(logger_, "main_field_1 syntax check failed");
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

@@ -1,12 +1,20 @@
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #include <iostream>
+#include <test_rpc_interface/interface.h>
 #include <test_rpc_interface/functions.h>
 #include "json/reader.h"
 #include "json/writer.h"
 
 namespace test {
 using namespace rpc::test_rpc_interface;
+
+class TestRequestHandlerMock: public request::Handler {
+public:
+  MOCK_METHOD1(HandleAddSubMenu, void(const request::AddSubMenu& params));
+  MOCK_METHOD1(HandleDiagnosticMessage, void(const request::DiagnosticMessage& params));
+  ~TestRequestHandlerMock() {}
+};
 
 class GeneratedInterfaceTests: public ::testing::Test {
  public:
@@ -94,6 +102,25 @@ TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest64) {
   request::DiagnosticMessage dm(JsonValue(input_json));
   ASSERT_TRUE(dm.is_initialized());
   ASSERT_FALSE(dm.is_valid());
+}
+
+TEST_F(GeneratedInterfaceTests, TestHandlerCalled) {
+  testing::StrictMock<TestRequestHandlerMock> mock;
+  request::AddSubMenu add_submenu;
+  EXPECT_CALL(mock, HandleAddSubMenu(testing::Ref(add_submenu)))
+      .Times(1);
+  add_submenu.HandleWith(&mock);
+}
+
+TEST_F(GeneratedInterfaceTests, TestFactory) {
+  testing::StrictMock<TestRequestHandlerMock> mock;
+  Json::Value json_value;
+  request::Request* req = request::NewFromJson(json_value, kAddSubMenuID);
+  request::AddSubMenu& add_sub_menu_ref =
+      static_cast<request::AddSubMenu&>(*req);
+  EXPECT_CALL(mock, HandleAddSubMenu(testing::Ref(add_sub_menu_ref)))
+      .Times(1);
+  req->HandleWith(&mock);
 }
 
 }  // namespace test

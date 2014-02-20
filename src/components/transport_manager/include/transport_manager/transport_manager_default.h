@@ -65,6 +65,7 @@ class TransportManagerDefault : public TransportManagerImpl,
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
 
   FRIEND_BASE_SINGLETON_CLASS_INSTANCE(TransportManagerDefault);
+  FRIEND_DELETER_DESTRUCTOR(TransportManagerDefault);
 };
 }
 

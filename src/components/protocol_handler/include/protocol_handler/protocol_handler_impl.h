@@ -188,10 +188,14 @@ class ProtocolHandlerImpl
      * \brief Sends fail of starting session to mobile application.
      * \param connection_handle Identifier of connection whithin which session
      * ment to be started
+     * \param session_id ID of session to be sent to mobile applicatin.
+     * \param protocol_version Version of protocol used for communication
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendStartSessionNAck(
       ConnectionID connection_id,
+      uint8_t session_id,
+      uint8_t protocol_version,
       uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
@@ -218,11 +222,13 @@ class ProtocolHandlerImpl
      * \param connection_handle Identifier of connection whithin which
      * session exists
      * \param session_id ID of session ment to be ended
+     * \param protocol_version Version of protocol used for communication
      * \param service_type Type of session: RPC or BULK Data. RPC by default.
      */
     void SendEndSessionNAck(
       ConnectionID connection_id ,
       uint32_t session_id,
+      uint8_t protocol_version,
       uint8_t service_type = SERVICE_TYPE_RPC);
 
   private:

@@ -13,7 +13,9 @@ ExternalProject_Add(intergen
                     INSTALL_DIR ${intergen_INSTALL_DIR}
                     CMAKE_ARGS ${intergen_CMAKE_ARGS})
 
-# This will force intergen build every time core is built
+# This will force intergen make call every time core is built
+# When intergen source didn't change no files are updated
+# It is required to automatically rebuild interfaces if intergen was changed
 ExternalProject_Add_Step(intergen forcebuild
                          COMMAND ${CMAKE_COMMAND} -E echo "Force intergen build"
                          DEPENDEES update DEPENDERS build

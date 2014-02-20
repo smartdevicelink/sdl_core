@@ -407,9 +407,14 @@ class ApplicationManagerImpl : public ApplicationManager,
     void Unmute();
 
     /*
-     * @brief Checks HMI level and returns true if audio/video streaming is allowed
+     * @brief Checks HMI level and returns true if audio streaming is allowed
      */
-    bool IsStreamingAllowed(uint32_t connection_key) const;
+    bool IsAudioStreamingAllowed(uint32_t connection_key) const;
+
+    /*
+     * @brief Checks HMI level and returns true if video streaming is allowed
+     */
+    bool IsVideoStreamingAllowed(uint32_t connection_key) const;
 
     /*
      * @brief Save binary data to specified directory

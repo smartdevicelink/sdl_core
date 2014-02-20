@@ -36,6 +36,7 @@
 #include <cctype>
 #include <memory>
 
+#include "model/interface.h"
 #include "utils/string_utils.h"
 
 using std::string;
@@ -199,6 +200,24 @@ string WordList::Abbreviate() const {
   for (vector<string>::const_iterator i = words_.begin(); i != words_.end(); ++i) {
     res += (*i)[0];
   }
+  return res;
+}
+
+std::string LowercaseIntefaceName(const Interface& interface) {
+  return WordList::FromUnknown(interface.name()).ToLowerCase();
+}
+
+std::string UpperCamelCaseInterfaceName(const Interface& interface) {
+  return WordList::FromUnknown(interface.name()).ToUpperCamelCase();
+}
+
+std::string InterfaceNamespaceName(const Interface& interface) {
+  return LowercaseIntefaceName(interface);
+}
+
+std::string Capitalize(const std::string& str) {
+  string res = str;
+  res[0] = std::toupper(res[0]);
   return res;
 }
 

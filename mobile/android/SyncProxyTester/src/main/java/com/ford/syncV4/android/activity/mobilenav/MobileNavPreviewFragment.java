@@ -10,8 +10,10 @@ import android.widget.Button;
 import android.widget.CheckBox;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 import java.io.OutputStream;
 
@@ -35,13 +37,13 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         changeMobileNaviCheckBoxState();
     }
 
-    public void setMobileNaviStateOff() {
-        mSessionCheckBoxState.setStateOff();
+    @Override
+    public void setStateOff() {
+        super.setStateOff();
         CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
         box.setChecked(false);
         Button button = (Button) getView().findViewById(R.id.videobutton);
         button.setEnabled(false);
-        mDataStreamingButton.setEnabled(false);
     }
 
     public void setMobileNaviStateOn(OutputStream stream) {
@@ -69,7 +71,11 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onMobileNaviCheckBoxAction(view);
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    onMobileNaviCheckBoxAction(view);
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
             }
         });
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
