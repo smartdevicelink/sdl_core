@@ -67,6 +67,7 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
@@ -2236,7 +2237,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         }
                                     }
 
-                                    AddCommand msg = new AddCommand();
+                                    AddCommand msg = RPCRequestFactory.buildAddCommand();
                                     msg.setCorrelationID(autoIncCorrId++);
                                     msg.setCmdID(cmdID);
 

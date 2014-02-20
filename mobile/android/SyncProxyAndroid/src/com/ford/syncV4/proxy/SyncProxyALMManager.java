@@ -848,12 +848,9 @@ public class SyncProxyALMManager {
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *
-	 *@param commandID
 	 *@param menuText
-	 *@param parentID
 	 *@param position
 	 *@param vrCommands
-	 *@param _correlationID
 	 *@throws SyncException
 	 */
 	public SyncCommand addSyncCommand(String menuText, SyncSubMenu parentSubMenu, Integer position,

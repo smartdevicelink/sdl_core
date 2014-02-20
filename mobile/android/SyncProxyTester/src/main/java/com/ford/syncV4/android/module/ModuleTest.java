@@ -487,7 +487,7 @@ public class ModuleTest {
 								} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 									rpc = new ResetGlobalProperties();
 								} else if (name.equalsIgnoreCase(Names.AddCommand)) {
-									rpc = new AddCommand();
+									rpc = RPCRequestFactory.buildAddCommand();
 								} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
 									rpc = new DeleteCommand();
 								} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {

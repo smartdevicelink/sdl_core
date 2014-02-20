@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -64,41 +65,54 @@ public class RPCRequestFactory {
 		msg.setSyncPData(data);
 		return msg;
 	}
-	
+
+    /**
+     * AddCommand section
+     */
+
+    /**
+     * Build <b>AddCommand</b> empty object
+     *
+     * @return created empty <b>AddCommand</b> object
+     */
+    public static AddCommand buildAddCommand() {
+        return new AddCommand();
+    }
+
 	public static AddCommand buildAddCommand(Integer commandID,
 			String menuText, Integer parentID, Integer position,
 			Vector<String> vrCommands, Integer correlationID) {
-		AddCommand msg = new AddCommand();
-		msg.setCorrelationID(correlationID);
-		msg.setCmdID(commandID);
-		msg.setVrCommands(vrCommands);
+		AddCommand addCommand = new AddCommand();
+		addCommand.setCorrelationID(correlationID);
+		addCommand.setCmdID(commandID);
+		addCommand.setVrCommands(vrCommands);
 		
 		if(menuText != null || parentID != null || position != null) {
 			MenuParams menuParams = new MenuParams();
 			menuParams.setMenuName(menuText);
 			menuParams.setPosition(position);
 			menuParams.setParentID(parentID);
-			msg.setMenuParams(menuParams);
+			addCommand.setMenuParams(menuParams);
 		}
 		
-		return msg;
+		return addCommand;
 	}
 	
 	public static AddCommand buildAddCommand(Integer commandID,
 			String menuText, Vector<String> vrCommands, Integer correlationID) {
-		AddCommand msg = buildAddCommand(commandID, menuText, null, null,
+		AddCommand addCommand = buildAddCommand(commandID, menuText, null, null,
 				vrCommands, correlationID);
-		return msg;
+		return addCommand;
 	}
 	
 	public static AddCommand buildAddCommand(Integer commandID,
 			Vector<String> vrCommands, Integer correlationID) {
-		AddCommand msg = new AddCommand();
-		msg.setCorrelationID(correlationID);
-		msg.setCmdID(commandID);
-		msg.setVrCommands(vrCommands);
+		AddCommand addCommand = new AddCommand();
+		addCommand.setCorrelationID(correlationID);
+		addCommand.setCmdID(commandID);
+		addCommand.setVrCommands(vrCommands);
 
-		return msg;
+		return addCommand;
 	}
 
 	public static AddSubMenu buildAddSubMenu(Integer menuID, String menuName,
