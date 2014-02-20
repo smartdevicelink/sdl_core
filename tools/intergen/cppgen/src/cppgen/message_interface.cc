@@ -32,18 +32,37 @@
 #include "cppgen/message_interface.h"
 
 #include "cppgen/naming_convention.h"
+#include "model/interface.h"
+#include "utils/safeformat.h"
+
+using typesafe_format::strmfmt;
 
 namespace codegen {
 
-MessageInterface::MessageInterface(FunctionMessage::MessageType message_type)
+InterfaceStringIdMethod::InterfaceStringIdMethod(
+    const MessageInterface* message_interface,
+    const Interface* interface)
+    : CppClass::Method(message_interface, CppClass::kPublic,
+         "interface_string_id", "const char*", kConst),
+      interface_(interface) {
+}
+
+void InterfaceStringIdMethod::DefineBody(std::ostream* os) const {
+  strmfmt(*os, "return \"{0}\";\n", interface_->name());
+}
+
+MessageInterface::MessageInterface(const Interface* interface,
+                                   FunctionMessage::MessageType message_type)
   : CppClass(Capitalize(FunctionMessage::MessageTypeToString(message_type))),
     handle_with_method_(this, kPublic,
                         "HandleWith", "void",
-                        Method::kVirtual|Method::kAbstract) {
+                        Method::kVirtual|Method::kAbstract),
+    interface_string_id_method_(this, interface){
   Add(Superclass("rpc::" + name() + "Base", kPublic));
   handle_with_method_.Add(Method::Parameter(
                             "handler", "Handler*"));
   methods_.push_back(&handle_with_method_);
+  methods_.push_back(&interface_string_id_method_);
 }
 
 const CppClass::MethodsList& MessageInterface::methods() {

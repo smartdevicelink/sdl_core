@@ -52,6 +52,7 @@ public:
   virtual MessageType message_type() const = 0;
   virtual int32_t function_id() const = 0;
   virtual const char* function_string_id() const = 0;
+  virtual const char* interface_string_id() const = 0;
   virtual Json::Value ToJsonValue() const = 0;
   virtual ~Message() {}
 };

@@ -156,13 +156,19 @@ void CppInterfaceCodeGenerator::GenerateHandlerInterfaces() {
 }
 
 void CppInterfaceCodeGenerator::GenerateMessageBaseClasses() {
-  CppFile& handlers_file = module_manager_->HeaderForInterface();
-  MessageInterface(FunctionMessage::kNotification)
-      .Declare(&handlers_file.notifications_ns().os());
-  MessageInterface(FunctionMessage::kRequest)
-      .Declare(&handlers_file.requests_ns().os());
-  MessageInterface(FunctionMessage::kResponse)
-      .Declare(&handlers_file.responses_ns().os());
+  CppFile& message_base_header = module_manager_->HeaderForInterface();
+  CppFile& message_base_source = module_manager_->SourceForInterface();
+  MessageInterface notif_message(interface_, FunctionMessage::kNotification);
+  notif_message.Declare(&message_base_header.notifications_ns().os());
+  notif_message.Define(&message_base_source.notifications_ns().os());
+
+  MessageInterface request_message(interface_, FunctionMessage::kRequest);
+  request_message.Declare(&message_base_header.requests_ns().os());
+  request_message.Define(&message_base_source.requests_ns().os());
+
+  MessageInterface response_message(interface_, FunctionMessage::kResponse);
+  response_message.Declare(&message_base_header.responses_ns().os());
+  response_message.Define(&message_base_source.responses_ns().os());
 }
 
 void CppInterfaceCodeGenerator::GenerateMessageFactories() {

@@ -74,8 +74,7 @@ FunctionStringIdMethod::~FunctionStringIdMethod() {
 
 void FunctionStringIdMethod::DefineBody(std::ostream* os) const {
   const Enum::Constant* id = func_->id();
-  strmfmt(*os, "return \"{0}.{1}\";" ,
-          func_->interface()->name(),
+  strmfmt(*os, "return \"{0}\";" ,
           id->name()) << endl;
 }
 

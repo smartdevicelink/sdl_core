@@ -36,17 +36,33 @@
 #include "model/function.h"
 
 namespace codegen {
+class Interface;
+class MessageInterface;
+
+class InterfaceStringIdMethod: public CppClass::Method {
+ public:
+  InterfaceStringIdMethod(
+      const MessageInterface* message_interface,
+      const Interface* interface);
+ protected:
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
+  const Interface* interface_;
+};
 
 class MessageInterface: public CppClass {
-public:
-  MessageInterface(FunctionMessage::MessageType message_type);
-private:
+ public:
+  MessageInterface(const Interface* interface,
+                   FunctionMessage::MessageType message_type);
+ private:
   // Methods
   // CppClass interface
   virtual const MethodsList& methods();
-private:
+ private:
   // Fields
   Method handle_with_method_;
+  InterfaceStringIdMethod interface_string_id_method_;
   std::vector<const Method*> methods_;
 };
 
