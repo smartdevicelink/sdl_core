@@ -37,6 +37,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #if defined(DEFAULT_MEDIA)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
@@ -286,19 +287,21 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
-
-  if (!(application_manager::ApplicationManagerImpl::instance()->
-      IsStreamingAllowed(message->connection_key()))) {
-    return;
-  }
-
   if (message->service_type()
       == protocol_handler::kMovileNav) {
+    if (!(application_manager::ApplicationManagerImpl::instance()->
+         IsVideoStreamingAllowed(message->connection_key()))) {
+       return;
+     }
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
     }
   } else if (message->service_type()
           == protocol_handler::kAudio) {
+    if (!(application_manager::ApplicationManagerImpl::instance()->
+         IsAudioStreamingAllowed(message->connection_key()))) {
+       return;
+     }
     if (audio_streamer_) {
       audio_streamer_->SendData(message->connection_key(), message);
     }
