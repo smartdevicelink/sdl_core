@@ -295,7 +295,6 @@ void LifeCycle::StopComponents() {
   message_broker_server_->Close();
   message_broker_->stopMessageBroker();
   delete mb_server_thread_;
-  delete message_broker_;
 
   networking::cleanup();
 #endif  // WEB_HMI
