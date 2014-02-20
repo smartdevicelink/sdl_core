@@ -38,6 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
+#include "application_manager/application.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -46,7 +47,6 @@ class SmartObject;
 }
 
 namespace application_manager {
-class Application;
 namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

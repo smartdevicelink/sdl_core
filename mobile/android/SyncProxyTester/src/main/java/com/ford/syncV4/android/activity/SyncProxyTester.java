@@ -4515,7 +4515,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
 
         if (mBoundProxyService == null) {
-            exitApp();
             return;
         }
 
