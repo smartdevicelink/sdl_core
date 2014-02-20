@@ -80,6 +80,8 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
         } else {
             FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
         }
+
+        SDL.SDLController.onSystemContextChange();
     },
 
     activate: function(text, timeout) {
@@ -90,6 +92,8 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
         this.set( 'active', true );
 
         this.set('timeout', timeout);
+
+        SDL.SDLController.onSystemContextChange();
 
         this.timer = setTimeout(function () {
             if (SDL.SliderView.active) {
