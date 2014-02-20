@@ -41,10 +41,9 @@ namespace utils {
 
 namespace deleters {
 
-template<typename T>
 class DummyDeleter {
  public:
-  void grab(T* pointer) {
+  void grab(void* pointer) {
   }
 };
 
@@ -67,7 +66,7 @@ class Deleter {
 
 }  // namespace deleters
 
-template<typename T, class Deleter = deleters::DummyDeleter<T> >
+template<typename T, class Deleter = deleters::DummyDeleter>
 class Singleton {
 /**
  * @brief Singleton template
