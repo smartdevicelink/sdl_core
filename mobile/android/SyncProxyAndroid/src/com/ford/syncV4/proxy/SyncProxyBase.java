@@ -1999,37 +1999,35 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
-     * @param menuText
-     * @param parentID
-     * @param position
-     * @param vrCommands
-     * @param correlationID
+     * @param commandID command Id
+     * @param menuText menu text
+     * @param parentID parent Id
+     * @param position position
+     * @param vrCommands VR Commands vector
+     * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           String menuText, Integer parentID, Integer position,
+    public void addCommand(Integer commandID, String menuText, Integer parentID, Integer position,
                            Vector<String> vrCommands, Integer correlationID)
             throws SyncException {
 
-        AddCommand msg = RPCRequestFactory.buildAddCommand(commandID, menuText, parentID, position,
+        AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandID, menuText, parentID, position,
                 vrCommands, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(addCommand);
     }
 
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
+     * @param commandID command Id
      * @param menuText
      * @param position
      * @param vrCommands
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           String menuText, Integer position,
+    public void addCommand(Integer commandID, String menuText, Integer position,
                            Vector<String> vrCommands, Integer correlationID)
             throws SyncException {
 
@@ -2039,14 +2037,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
+     * @param commandID command Id
      * @param menuText
      * @param position
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           String menuText, Integer position,
+    public void addCommand(Integer commandID, String menuText, Integer position,
                            Integer correlationID)
             throws SyncException {
 
@@ -2056,13 +2053,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
+     * @param commandID command Id
      * @param menuText
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           String menuText, Integer correlationID)
+    public void addCommand(Integer commandID, String menuText, Integer correlationID)
             throws SyncException {
 
         addCommand(commandID, menuText, null, null, null, correlationID);
@@ -2071,29 +2067,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
-     * @param menuText
-     * @param vrCommands
-     * @param correlationID
+     * @param commandID command Id
+     * @param menuText menu text
+     * @param vrCommands VR Commands vector
+     * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           String menuText, Vector<String> vrCommands, Integer correlationID)
+    public void addCommand(Integer commandID, String menuText, Vector<String> vrCommands,
+                           Integer correlationID)
             throws SyncException {
-
         addCommand(commandID, menuText, null, null, vrCommands, correlationID);
     }
 
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID
+     * @param commandID command Id
      * @param vrCommands
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID,
-                           Vector<String> vrCommands, Integer correlationID)
+    public void addCommand(Integer commandID, Vector<String> vrCommands, Integer correlationID)
             throws SyncException {
 
         addCommand(commandID, null, null, null, vrCommands, correlationID);
@@ -2108,8 +2102,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addSubMenu(Integer menuID, String menuName,
-                           Integer position, Integer correlationID)
+    public void addSubMenu(Integer menuID, String menuName, Integer position, Integer correlationID)
             throws SyncException {
 
         AddSubMenu msg = RPCRequestFactory.buildAddSubMenu(menuID, menuName,
@@ -2126,8 +2119,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addSubMenu(Integer menuID, String menuName,
-                           Integer correlationID) throws SyncException {
+    public void addSubMenu(Integer menuID, String menuName, Integer correlationID)
+            throws SyncException {
 
         addSubMenu(menuID, menuName, null, correlationID);
     }

@@ -37,7 +37,6 @@ import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
-import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -55,7 +54,6 @@ import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
-import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -1762,20 +1760,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
                                   String menuName) {
-        AddCommand addCommand = RPCRequestFactory.buildAddCommand();
-        addCommand.setCorrelationID(getNextCorrelationID());
-        addCommand.setCmdID(commandId);
-        addCommand.setVrCommands(vrCommands);
-        MenuParams menuParams = new MenuParams();
-        menuParams.setMenuName(menuName);
-        addCommand.setMenuParams(menuParams);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(addCommand, true);
-        }
         try {
-            mSyncProxy.sendRPCRequest(addCommand);
+            mSyncProxy.addCommand(commandId, menuName, vrCommands, getNextCorrelationID());
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand sent", true);
+            }
         } catch (SyncException e) {
-            mLogAdapter.logMessage("AddCommand send error: " + e, Log.ERROR, e);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("AddCommand send error: " + e, Log.ERROR, e);
+            }
         }
     }
 
