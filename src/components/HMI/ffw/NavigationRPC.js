@@ -181,16 +181,6 @@ FFW.Navigation = FFW.RPCObserver.create( {
 
                     break;
                 }
-                case "Navigation.AlertManeuver": {
-
-                    SDL.SDLModel.onNavigationAlertManeuver(request.params);
-
-                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
-
-                    break;
-                }
                 case "Navigation.StartAudioStream": {
 
                     SDL.SDLModel.startAudioStream(request.params);

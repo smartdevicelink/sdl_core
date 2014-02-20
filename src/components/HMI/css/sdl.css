@@ -620,7 +620,7 @@
 }
 
 /* Alert, AudioPassThruPopUp popup*/
-#AlertManeuverPopUp.AlertManeuverPopUp,#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
+#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
 	{
 	opacity: 0;
 	left: 200px;
@@ -635,7 +635,7 @@
 	display: none;
 }
 
-#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
+#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
 	{
 	width: 380px;
 	left: 10px;
@@ -707,13 +707,13 @@
 	text-overflow: ellipsis;
 }
 
-#AlertManeuverPopUp.AlertManeuverActive,#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
+#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
 	{
 	opacity: 1;
 	display: block;
 }
 
-#baseNavigation .softButton,#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+#baseNavigation .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
 	{
 	border: 1px solid #393939;
 	border-radius: 3px;
@@ -741,19 +741,13 @@
     position: absolute;
 }
 
-#AlertManeuverPopUp .closeButton {
-	width: 170px;
-	top: 180px;
-	left: 110px;
-}
-
 #AlertPopUp .alertSoftButtons {
 	margin-left: 8px;
 	top: 120px;
 	width: 386px;
 }
 
-#AlertManeuverPopUp .one,#softButton0.one {
+#softButton0.one {
 	margin-top: 42px;
 	width: 362px;
 }

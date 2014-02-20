@@ -2670,14 +2670,6 @@
   </function>
   <function name="ShowConstantTBT" messagetype="response">
   </function>
-  <function name="AlertManeuver" messagetype="request">
-    <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
-    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
-      <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
-    </param>
-  </function>
-  <function name="AlertManeuver" messagetype="response">
-  </function>
   <function name="UpdateTurnList" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>
     <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="true">

@@ -339,14 +339,6 @@ SDL.SDLController = Em.Object
 
             SDL.InteractionChoicesView.deactivate("ABORTED");
         },
-
-        /**
-         * Method to close AlertMeneuverPopUp view
-         */
-        closeAlertMeneuverPopUp: function() {
-
-            SDL.AlertManeuverPopUp.set('activate', false);
-        },
         /**
          * Method to open Turn List view from TBT
          * 

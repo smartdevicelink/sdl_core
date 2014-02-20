@@ -975,35 +975,6 @@ SDL.RPCController = Em.Object
                     };
 
                     return this.resultStruct;
-                },
-
-                /**
-                 * Validate method for request Navigation.AlertManeuver
-                 * 
-                 * @param {Object}
-                 *            params
-                 */
-                AlertManeuver: function(params) {
-
-                    if (params) {
-                        if ("softButtons" in params) {
-                            if (SDL.RPCController
-                                .checkImagesArray(params.softButtons)) {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-
-                                return this.resultStruct;
-                            }
-                        }
-                    }
-
-                    this.resultStruct = {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-                    };
-
-                    return this.resultStruct;
                 }
 
             }),
