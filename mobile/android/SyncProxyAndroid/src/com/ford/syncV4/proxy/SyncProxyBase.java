@@ -2286,19 +2286,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends a CreateInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param choiceSet
-     * @param interactionChoiceSetID
-     * @param correlationID
+     * @param choiceSet Set of {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param interactionChoiceSetID Id of the interaction Choice set
+     * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void createInteractionChoiceSet(
-            Vector<Choice> choiceSet, Integer interactionChoiceSetID,
-            Integer correlationID) throws SyncException {
+    public void createInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
+                                           Integer correlationID) throws SyncException {
 
-        CreateInteractionChoiceSet msg = RPCRequestFactory.buildCreateInteractionChoiceSet(
-                choiceSet, interactionChoiceSetID, correlationID);
+        CreateInteractionChoiceSet createInteractionChoiceSet =
+                RPCRequestFactory.buildCreateInteractionChoiceSet(choiceSet,
+                        interactionChoiceSetID, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(createInteractionChoiceSet);
     }
 
     /**

@@ -42,6 +42,8 @@ import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
+import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
@@ -1754,6 +1756,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    /**
+     * Call a method from SDK to create and send <b>AddCommand</b> request
+     *
+     * @param commandId Id of the command
+     * @param vrCommands Vector of the VR Commands
+     * @param menuName Name of the Menu
+     */
     public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
                                   String menuName) {
         try {
@@ -1764,6 +1773,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         } catch (SyncException e) {
             if (mLogAdapter != null) {
                 mLogAdapter.logMessage("AddCommand send error: " + e, Log.ERROR, e);
+            }
+        }
+    }
+
+    /**
+     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request
+     *
+     * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param interactionChoiceSetID Id of the interaction Choice set
+     * @param correlationID correlation Id
+     */
+    public void commandCreateInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
+                                                  Integer correlationID) {
+        try {
+            mSyncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("CreateInteractionChoiceSet sent", true);
+            }
+        } catch (SyncException e) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("CreateInteractionChoiceSet send error: " + e, Log.ERROR, e);
             }
         }
     }

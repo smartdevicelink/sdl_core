@@ -191,15 +191,36 @@ public class RPCRequestFactory {
 
 		return msg;
 	}
-	
+
+    /**
+     * CreateInteractionChoiceSet section
+     */
+
+    /**
+     * Build empty <b>CreateInteractionChoiceSet</b> request object
+     *
+     * @return an empty <b>CreateInteractionChoiceSet</b> request object
+     */
+    public static CreateInteractionChoiceSet buildCreateInteractionChoiceSet() {
+        return new CreateInteractionChoiceSet();
+    }
+
+    /**
+     * Build <b>CreateInteractionChoiceSet</b> request
+     *
+     * @param choiceSet Vector of {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param interactionChoiceSetID Id of the interaction choice set
+     * @param correlationID Correlation Id of the request
+     * @return instance of the <b>CreateInteractionChoiceSet</b> request
+     */
 	public static CreateInteractionChoiceSet buildCreateInteractionChoiceSet(
 			Vector<Choice> choiceSet, Integer interactionChoiceSetID,
 			Integer correlationID) {
-		CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
-		msg.setChoiceSet(choiceSet);
-		msg.setInteractionChoiceSetID(interactionChoiceSetID);
-		msg.setCorrelationID(correlationID);
-		return msg;
+		CreateInteractionChoiceSet createInteractionChoiceSet = new CreateInteractionChoiceSet();
+		createInteractionChoiceSet.setChoiceSet(choiceSet);
+		createInteractionChoiceSet.setInteractionChoiceSetID(interactionChoiceSetID);
+		createInteractionChoiceSet.setCorrelationID(correlationID);
+		return createInteractionChoiceSet;
 	}
 	
 	public static DeleteCommand buildDeleteCommand(Integer commandID,

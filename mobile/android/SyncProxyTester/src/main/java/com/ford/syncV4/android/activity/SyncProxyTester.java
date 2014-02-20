@@ -4235,23 +4235,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return Environment.MEDIA_MOUNTED.equals(state);
     }
 
-    void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
-        CreateInteractionChoiceSet msg = new CreateInteractionChoiceSet();
-        msg.setCorrelationID(autoIncCorrId++);
+    private void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
         int choiceSetID = autoIncChoiceSetId++;
-        msg.setInteractionChoiceSetID(choiceSetID);
-        msg.setChoiceSet(choices);
-        try {
-            mLogAdapter.logMessage(msg, true);
-            if (mBoundProxyService != null) {
-                mBoundProxyService.syncProxySendRPCRequest(msg);
-            }
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandCreateInteractionChoiceSet(choices, choiceSetID,
+                    autoIncCorrId++);
+
             if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
-                Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " + _latestCreateChoiceSetId);
+                Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " +
+                        _latestCreateChoiceSetId);
             }
             _latestCreateChoiceSetId = choiceSetID;
-        } catch (SyncException e) {
-            mLogAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
         }
     }
 

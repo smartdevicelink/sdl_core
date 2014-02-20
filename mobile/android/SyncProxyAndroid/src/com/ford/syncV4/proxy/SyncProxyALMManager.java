@@ -1139,8 +1139,6 @@ public class SyncProxyALMManager {
 	 * Sends a CreateInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param syncChoiceSet
-	 * @param _interactionChoiceSetID
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public SyncChoiceSet createInteractionChoiceSet(Vector<SyncChoice> syncChoiceSet, Object tag, 
@@ -1190,7 +1188,7 @@ public class SyncProxyALMManager {
 			addGenericObjectTagByChoiceSetID(tag, interactionChoiceSetID);
 		}
 		
-		// Base createInteracationChoiceSet
+		// Base createInteractionChoiceSet
 		syncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
 		return syncInteractionChoiceSet;
 	}
@@ -1198,8 +1196,6 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends a DeleteInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param _interactionChoiceSetID
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void deleteSyncChoiceSet(SyncChoiceSet syncChoiceSetToDelete, 

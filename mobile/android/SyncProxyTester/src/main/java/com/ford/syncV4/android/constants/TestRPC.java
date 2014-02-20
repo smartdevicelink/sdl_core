@@ -75,7 +75,7 @@ public class TestRPC {
 		} else if (functionName.equalsIgnoreCase(Names.DeleteSubMenu)) {
 			rpc = new DeleteSubMenu();
 		} else if (functionName.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
-			rpc = new CreateInteractionChoiceSet();
+			rpc = RPCRequestFactory.buildCreateInteractionChoiceSet();
 		} else if (functionName.equalsIgnoreCase(Names.PerformInteraction)) {
 			rpc = new PerformInteraction();
 		} else if (functionName.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
