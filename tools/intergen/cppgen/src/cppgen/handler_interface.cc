@@ -79,7 +79,7 @@ void HandlerInterface::CollectMethods() {
   std::auto_ptr<CppClass::Method> destructor(
         new CppClass::Method(this, CppClass::kPublic,
                              "~"+name(), "",
-                             CppFunction::kVirtual|CppFunction::kAbstract));
+                             CppFunction::kVirtual));
   methods_.push_back(destructor.get());
   destructor.release();
 }
@@ -91,8 +91,8 @@ void HandlerInterface::AddFunctionMessageHandlers(
     const FunctionMessage* func_msg = *i;
     Namespace& message_ns = header_file_->NamespaceByMessageType(type_);
     message_ns.ForwardDeclare(Namespace::ForwardDeclaration(
-                                Namespace::ForwardDeclaration::kStruct,
-                                func_msg->name()));
+                              Namespace::ForwardDeclaration::kStruct,
+                              func_msg->name()));
     std::auto_ptr<CppClass::Method> method(
         new CppClass::Method(
           this, CppClass::kPublic, "Handle" + func_msg->name(),

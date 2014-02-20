@@ -86,6 +86,15 @@ void DeclareMethods(const CppClass::MethodsList& method_list,
   }
 }
 
+void DefineMethods(const CppClass::MethodsList& method_list,
+                    ostream* os) {
+  for (CppClass::MethodsList::const_iterator i = method_list.begin(),
+       end = method_list.end(); i != end; ++i) {
+    const CppClass::Method* method = *i;
+    method->Define(os, false);
+  }
+}
+
 }  // namespace
 
 CppClass::CppClass(const string& name)
@@ -126,6 +135,13 @@ void CppClass::Declare(ostream* os) {
   }
   *os << "};\n";
 }
+
+void CppClass::Define(std::ostream* os) {
+  DefineMethods(functions(kPublic), os);
+  DefineMethods(functions(kProtected), os);
+  DefineMethods(functions(kPrivate), os);
+}
+
 std::string CppClass::name() const {
   return name_;
 }

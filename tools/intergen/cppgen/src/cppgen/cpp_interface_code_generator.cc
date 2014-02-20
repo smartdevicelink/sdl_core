@@ -137,13 +137,22 @@ void CppInterfaceCodeGenerator::GenerateNotifications() {
 }
 
 void CppInterfaceCodeGenerator::GenerateHandlerInterfaces() {
-  CppFile& handlers_file = module_manager_->HeaderForInterface();
-  HandlerInterface(FunctionMessage::kNotification, interface_, &handlers_file)
-      .Declare(&handlers_file.notifications_ns().os());
-  HandlerInterface(FunctionMessage::kRequest, interface_, &handlers_file)
-      .Declare(&handlers_file.requests_ns().os());
-  HandlerInterface(FunctionMessage::kResponse, interface_, &handlers_file)
-      .Declare(&handlers_file.responses_ns().os());
+  CppFile& handler_header = module_manager_->HeaderForInterface();
+  CppFile& handler_source = module_manager_->SourceForInterface();
+  HandlerInterface notif_handler(
+        FunctionMessage::kNotification, interface_, &handler_header);
+  notif_handler.Declare(&handler_header.notifications_ns().os());
+  notif_handler.Define(&handler_source.notifications_ns().os());
+
+  HandlerInterface req_handler(
+        FunctionMessage::kRequest, interface_, &handler_header);
+  req_handler.Declare(&handler_header.requests_ns().os());
+  req_handler.Define(&handler_source.requests_ns().os());
+
+  HandlerInterface resp_handler(
+        FunctionMessage::kResponse, interface_, &handler_header);
+  resp_handler.Declare(&handler_header.responses_ns().os());
+  resp_handler.Define(&handler_source.responses_ns().os());
 }
 
 void CppInterfaceCodeGenerator::GenerateMessageBaseClasses() {

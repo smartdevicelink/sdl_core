@@ -55,6 +55,7 @@ class CppClass {
   ~CppClass();
   void Add(const Superclass& superclass);
   void Declare(std::ostream* os);
+  void Define(std::ostream* os);
   std::string name() const;
 protected:
   // Methods

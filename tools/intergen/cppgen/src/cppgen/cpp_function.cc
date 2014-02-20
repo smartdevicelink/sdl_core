@@ -102,6 +102,9 @@ void CppFunction::Declare(ostream* os, bool in_class) const {
 }
 
 void CppFunction::Define(ostream* os, bool in_class) const {
+  // No definitions for abstract functions
+  if (qualifiers_ & kAbstract)
+    return;
   WriteFunctionPrototype(os, in_class, false);
   if (!initializers_.empty()) {
     *os << endl;
