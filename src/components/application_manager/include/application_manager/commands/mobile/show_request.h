@@ -71,6 +71,13 @@ class ShowRequest : public CommandRequestImpl {
 
  private:
 
+  /*
+   * @brief Check if main fileds{1,2,3,4} have valid syntax
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckMenuFieldsNames();
+
   // members
   mobile_apis::Result::eType  result_;
 

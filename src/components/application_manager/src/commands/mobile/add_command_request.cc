@@ -34,10 +34,8 @@
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#include "application_manager/application.h"
 #include "application_manager/message_helper.h"
-#include "interfaces/MOBILE_API.h"
-#include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -134,6 +132,11 @@ void AddCommandRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    if (!CheckMenuName()) {
+      LOG4CXX_ERROR_EXT(logger_, "MenuName is invalid");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params[strings::cmd_id] =
@@ -238,12 +241,23 @@ bool AddCommandRequest::CheckVRCommandsNames() {
     const std::string& str =
         (*message_)[strings::msg_params][strings::vr_commands][i].asString();
 
-    if (std::string::npos == str.find_first_not_of(' ')) {
+    if ((std::string::npos != str.find_first_of("\t\n")) ||
+        (std::string::npos == str.find_first_not_of(' '))) {
       LOG4CXX_INFO(logger_, "Invalid command name.");
       return false;
     }
   }
+  return true;
+}
 
+bool AddCommandRequest::CheckMenuName() {
+    const std::string& str = (*message_)[strings::msg_params][strings::menu_params]
+                             [strings::menu_name].asString();
+    if ((std::string::npos != str.find_first_of("\t\n")) ||
+        (std::string::npos == str.find_first_not_of(' '))) {
+      LOG4CXX_INFO(logger_, "Invalid menu name.");
+      return false;
+    }
   return true;
 }
 

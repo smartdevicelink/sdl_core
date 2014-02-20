@@ -62,6 +62,7 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.VehicleType;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
@@ -1027,7 +1028,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
+
+                currentSession.setSessionId((byte) 0);
                 mSyncConnection.setSessionId(currentSession.getSessionId());
+
+                //mSyncConnection.setSessionId(currentSession.getSessionId());
+
                 mSyncConnection.init(_transportConfig);
             }
 
@@ -1266,6 +1272,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
+
+            if (message.getSessionID() != currentSession.getSessionId()) {
+                DebugTool.logWarning("Message is not from current session");
+                Log.w(TAG, "Message is not from current session");
+                return;
+            }
+
             // Dispatching logic
             if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
@@ -1329,7 +1342,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void setWiProVersion(byte version) {
         Log.i(TAG, "Setting WiPro version from " + (int) this._wiproVersion + " to " + (int) version);
-        Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
+        //Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
         this._wiproVersion = version;
     }
 
@@ -1621,6 +1634,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void onAppUnregisteredReason(final AppInterfaceUnregisteredReason reason) {
+        if (reason == AppInterfaceUnregisteredReason.IGNITION_OFF ||
+                reason == AppInterfaceUnregisteredReason.MASTER_RESET) {
+            cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(reason));
+        }
+
+        if (getCallbackToUIThread()) {
+            // Run in UI thread
+            getMainUIHandler().post(new Runnable() {
+                @Override
+                public void run() {
+                    getProxyListener().onAppUnregisteredReason(reason);
+                }
+            });
+        } else {
+            getProxyListener().onAppUnregisteredReason(reason);
+        }
+    }
+
     protected void onUnregisterAppInterfaceResponse(Hashtable hash) {
         stopAllServices();
         closeSyncConnection(true);
@@ -1828,6 +1860,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void handleStartServiceNack(final ServiceType serviceType) {
+        Log.i(TAG, "Service Nack received for " + serviceType);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onStartServiceNackReceived(serviceType);
+                }
+            });
+        } else {
+            _proxyListener.onStartServiceNackReceived(serviceType);
+        }
+    }
+
     protected void startMobileNaviService(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav);
@@ -1870,7 +1917,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
-            Log.i(TAG, "Mobile Navi Service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Navi Service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -1881,7 +1929,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
-            Log.i(TAG, "Mobile Audio service is going to stop " + currentSession.getSessionId());
+            Log.i(TAG, "Mobile Audio service is going to stop, " +
+                    "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeAudioService(currentSession.getSessionId());
             } catch (NullPointerException e) {
@@ -2746,6 +2795,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
     }
 
+    /**
+     * Return number of Services in current Session
+     *
+     * @return number of Services in current Session
+     */
+    public int getServicesNumber() {
+        return currentSession.getServicesNumber();
+    }
+
     public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
         _syncMsgVersionRequest = syncMsgVersionRequest;
     }
@@ -2949,6 +3007,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onMobileNavAckReceived(int frameReceivedNumber) {
             handleMobileNavAck(frameReceivedNumber);
+        }
+
+        @Override
+        public void onStartServiceNackReceived(ServiceType serviceType) {
+            handleStartServiceNack(serviceType);
         }
 
         @Override

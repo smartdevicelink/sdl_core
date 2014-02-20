@@ -19,6 +19,7 @@ import android.widget.Spinner;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
@@ -108,7 +109,7 @@ public class PutFileDialog extends DialogFragment {
                 String filename = mSelectedFileNameView.getText().toString();
                 long fileSize = new File(filename).length();
                 if (fileSize <= PUTFILE_MAXFILESIZE) {
-                    byte[] data = SyncProxyTester.contentsOfFile(filename);
+                    byte[] data = AppUtils.contentsOfResource(filename);
                     if (data != null) {
                         String syncFileName = txtSyncFileName.getText().toString();
 

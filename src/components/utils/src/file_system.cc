@@ -356,7 +356,7 @@ bool file_system::ReadBinaryFile(const std::string& name,
   const std::string& s = ss.str();
 
   result.resize(s.length());
-  SKIP_RETURN_VALUE(std::copy(s.begin(), s.end(), result.begin()));
+  std::copy(s.begin(), s.end(), result.begin());
   return true;
 }
 

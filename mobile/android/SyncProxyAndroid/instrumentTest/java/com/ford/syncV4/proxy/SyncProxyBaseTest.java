@@ -379,9 +379,11 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         params.put(Names.resultCode, Result.SUCCESS);
         params.put(Names.success, true);
-        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
+        ProtocolMessage protocolMessage = TestCommon.createProtocolMessage(
                 Names.UnregisterAppInterface, params,
-                ProtocolMessage.RPCTYPE_RESPONSE, 1));
+                ProtocolMessage.RPCTYPE_RESPONSE, 1);
+        protocolMessage.setSessionID(sessionID);
+        proxy.dispatchIncomingMessage(protocolMessage);
         verify(proxy.getSyncConnection(), times(1)).closeMobileNaviService(sessionID);
         verify(proxy.getSyncConnection(), times(1)).closeAudioService(sessionID);
         verify(proxy.getSyncConnection(), times(1)).closeConnection(sessionID, true);

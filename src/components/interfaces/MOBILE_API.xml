@@ -549,6 +549,7 @@
     <element name="MFD3" />
     <element name="MFD4" />
     <element name="MFD5" />
+    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
   </enum>
 
   <enum name="TextFieldName">
@@ -569,7 +570,7 @@
     </element>
 
     <element name="statusBar">
-      <description>The status bar on Nav; applies to "Show"</description>
+      <description>The status bar on NGN; applies to "Show"</description>
     </element>
 
     <element name="mediaClock">
@@ -577,7 +578,7 @@
     </element>
 
     <element name="mediaTrack">
-      <description>The track field of NGN type ACMs. This field is only available for media applications; applies to "Show"</description>
+      <description>The track field of NGN and GEN1.1 MFD displays. This field is only available for media applications; applies to "Show"</description>
     </element>
 
     <element name="alertText1">
@@ -597,7 +598,7 @@
     </element>
 
     <element name="initialInteractionText">
-      <description> First line suggestion for a user response (in the case of VR enabled interaction</description>
+      <description> First line suggestion for a user response (in the case of VR enabled interaction)</description>
     </element>
 
     <element name="navigationText1">
@@ -703,7 +704,7 @@
       <description>The secondary image field for ShowConstantTBT</description>
     </element>
   </enum>
-  
+
   <enum name="CharacterSet">
     <description>The list of potential character sets</description>
     <element name="TYPE2SET">
@@ -1605,19 +1606,19 @@
     <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
       <description>The image resolution height.</description>
     </param>
-  </struct>
+  </struct>  
 
   <struct name="ImageField">
-    <param name="name" type="ImageFieldName">
-      <description>The name that identifies the field. See ImageFieldName.</description>
-    </param>
-    <param name="imageTypeSupported" type="FileType" array="true">
-      <description>The image types that are supported in this field. See FileType.</description>
-    </param>
-    <param name="imageResolution" type="ImageResolution">
-      <description>The image resolution of this field.</description>
-    </param>
-  </struct>
+     <param name="name" type="ImageFieldName">
+       <description>The name that identifies the field. See ImageFieldName.</description>
+     </param>
+     <param name="imageTypeSupported" type="FileType" array="true">
+       <description>The image types that are supported in this field. See FileType.</description>
+     </param>
+     <param name="imageResolution" type="ImageResolution">
+       <description>The image resolution of this field.</description>
+     </param>
+   </struct>
   
   <struct name="TouchCoord">
     <param name="x" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
@@ -1668,24 +1669,24 @@
 		</param>
   </struct>
 
-  <struct name="TouchEventCapabilities">
-	<param name="pressAvailable" type="Boolean" mandatory="true">
-	</param>
-	<param name="multiTouchAvailable" type="Boolean" mandatory="true">
-	</param>
-	<param name="doublePressAvailable" type="Boolean" mandatory="true">
-	</param>
-  </struct>
-  
-  <struct name="ScreenParams" scope="partner">
+   <struct name="TouchEventCapabilities">
+     <param name="pressAvailable" type="Boolean" mandatory="true">
+     </param>
+     <param name="multiTouchAvailable" type="Boolean" mandatory="true">
+     </param>
+     <param name="doublePressAvailable" type="Boolean" mandatory="true">
+     </param>
+   </struct>
+
+   <struct name="ScreenParams" scope="partner">
     <param name="resolution" type="ImageResolution" mandatory="true">
-      <description>The resolution of the prescribed screen area.</description>
+       <description>The resolution of the prescribed screen area.</description>
     </param>    
     <param name="touchEventAvailable" type="TouchEventCapabilities" mandatory="false">
-      <description>Types of screen touch events available in screen area.</description>    
-	</param>    
-  </struct>
-  
+       <description>Types of screen touch events available in screen area.</description>    
+    </param>    
+   </struct>
+
   <enum name="PermissionStatus">
     <description>Enumeration that describes possible permission states of a policy table entry.</description>
     <element name="ALLOWED" internal_name="PS_ALLOWED"/>
@@ -1728,6 +1729,9 @@
     <param name="textFields" type="TextField" minsize="1" maxsize="100" array="true">
       <description>A set of all fields that support text data. See TextField</description>
     </param>
+    <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true">
+       <description>A set of all fields that support images. See ImageField</description>
+     </param>
     <param name="mediaClockFormats" type="MediaClockFormat" minsize="1" maxsize="100" array="true">
       <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
     </param>
@@ -1737,9 +1741,9 @@
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" scope="partner">
       <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
     </param>
-	<param name="screenParams" type="ScreenParams" mandatory="false">
+    <param name="screenParams" type="ScreenParams" mandatory="false">
       <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
-  	</param>
+    </param>
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
       <description>The number of on-screen custom presets available (if any); otherwise omitted.</description>
     </param>
@@ -1925,7 +1929,7 @@
     </param>   
   </struct>
 
-  <enum name="RequestType">
+ <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
     <element name="HTTP" />   
     <element name="FILE_RESUME" />
@@ -4319,9 +4323,7 @@
       <description>
       	Predefined or dynamically created screen layout.
       	Currently only predefined screen layouts are defined.
-      	Predefined layouts include:
-      		"ONSCREEN_PRESETS" - Custom screen containing app-defined onscreen presets.  Currently defined for GEN2.
-      	</description>
+      </description>
     </param>
 
   </function>
@@ -4343,7 +4345,23 @@
       <element name="REJECTED"/>
       <element name="UNSUPPORTED_REQUEST"/>
     </param>
+ 
+    <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
+      <description>See DisplayCapabilities</description>
+    </param>
 
+    <param name="buttonCapabilities" type="ButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>See ButtonCapabilities</description >
+    </param>
+
+    <param name="softButtonCapabilities" type="SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>If returned, the platform supports on-screen SoftButtons; see SoftButtonCapabilities.</description >
+    </param>
+
+    <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false">
+      <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
+    </param>
+   
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
     </param>

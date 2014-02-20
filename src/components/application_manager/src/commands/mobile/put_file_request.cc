@@ -172,6 +172,11 @@ void PutFileRequest::Run() {
       break;
     }
     default:
+      if (mobile_apis::Result::OUT_OF_MEMORY == save_result) {
+        if (file_system::FileExists(relative_file_path)) {
+          DCHECK(file_system::DeleteFile(relative_file_path));
+        }
+      }
       LOG4CXX_INFO(logger_, "Save in unsuccesfull result = " << save_result);
       SendResponse(false, save_result);
       break;

@@ -78,7 +78,8 @@ Profile::Profile()
       app_info_storage_("app_info.dat"),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
       transport_manager_disconnect_timeout_(0),
-      use_last_state_(false) {
+      use_last_state_(false),
+      supported_diag_modes_() {
   UpdateValues();
 }
 
@@ -239,6 +240,10 @@ uint32_t Profile::transport_manager_disconnect_timeout() const {
 
 bool Profile::use_last_state() const {
   return use_last_state_;
+}
+
+const std::vector<uint32_t>& Profile::supported_diag_modes() const {
+  return supported_diag_modes_;
 }
 
 void Profile::UpdateValues() {
@@ -460,7 +465,7 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "MAIN", "SpaceAvailable", value))
+                           "MAIN", "AppDirectoryQuota", value))
       && ('\0' != *value)) {
     app_dir_quota_ = atoi(value);
     if (app_dir_quota_ <= 0) {
@@ -580,6 +585,19 @@ void Profile::UpdateValues() {
     LOG4CXX_INFO(
         logger_,
         "Set Application information storage to " << app_info_storage_);
+  }
+
+  supported_diag_modes_.clear();
+  *value = '\0';
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "MAIN",
+                        "SupportedDiagModes", value)) && ('\0' != *value)) {
+    char* str = NULL;
+    str = strtok(value, ",");
+    while (str != NULL) {
+      supported_diag_modes_.push_back(strtol(str, NULL, 16));
+      str = strtok(NULL, ",");
+    }
   }
 
   (void) ReadIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout,

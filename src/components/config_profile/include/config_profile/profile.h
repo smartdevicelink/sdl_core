@@ -254,6 +254,11 @@ class Profile : public utils::Singleton<Profile> {
      */
     bool use_last_state() const;
 
+    /**
+     * @brief Returns supported diagnostic modes
+     */
+    const std::vector<uint32_t>& supported_diag_modes() const;
+
     // Members section
 
   protected:
@@ -376,6 +381,7 @@ class Profile : public utils::Singleton<Profile> {
     int32_t                         heart_beat_timeout_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
+    std::vector<uint32_t>           supported_diag_modes_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

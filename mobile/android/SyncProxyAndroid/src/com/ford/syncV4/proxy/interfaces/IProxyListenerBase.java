@@ -325,6 +325,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onAudioServiceStart();
 
+    public void onStartServiceNackReceived(ServiceType serviceType);
+
     /**
      * Provide a callback to listener in case of USB problem
      * https://code.google.com/p/android/issues/detail?id=20545

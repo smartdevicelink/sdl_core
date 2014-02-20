@@ -423,12 +423,17 @@ int TransportManagerImpl::SearchDevices(void) {
 
   LOG4CXX_INFO(logger_, "Search device called");
 
+  bool success_occured = false;
+
   for (std::vector<TransportAdapter*>::iterator it =
            transport_adapters_.begin();
        it != transport_adapters_.end(); ++it) {
     LOG4CXX_INFO(logger_, "Iterating over transport adapters");
     TransportAdapter::Error scanResult = (*it)->SearchDevices();
-    if (scanResult != transport_adapter::TransportAdapter::OK) {
+    if (transport_adapter::TransportAdapter::OK == scanResult) {
+      success_occured = true;
+    }
+    else {
       LOG4CXX_ERROR(logger_, "Transport Adapter search failed "
                                  << *it << "[" << (*it)->GetDeviceType()
                                  << "]");
@@ -446,12 +451,14 @@ int TransportManagerImpl::SearchDevices(void) {
           break;
         }
       }
-      // TODO(KKolodiy): I think return error from TA is bad
-      return scanResult;
     }
   }
+
   LOG4CXX_INFO(logger_, "SearchDevices() function is complete");
-  return E_SUCCESS;
+
+  return (success_occured || transport_adapters_.empty())
+    ? E_SUCCESS
+    : E_ADAPTERS_FAIL;
 }
 
 int TransportManagerImpl::Init(void) {

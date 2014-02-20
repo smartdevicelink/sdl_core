@@ -222,6 +222,8 @@
 #include "application_manager/commands/hmi/get_resume_result_request.h"
 #include "application_manager/commands/hmi/get_resume_result_response.h"
 #include "application_manager/commands/hmi/on_system_request_notification.h"
+#include "application_manager/commands/hmi/ui_set_display_layout_request.h"
+#include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 
 namespace application_manager {
 
@@ -1865,6 +1867,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemRequest: {
       command.reset(new commands::OnSystemRequestNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_SetDisplayLayout: {
+      if (is_response) {
+        command.reset(new commands::UiSetDisplayLayoutResponse(message));
+      } else {
+        command.reset(new commands::UiSetDisplayLayoutRequest(message));
+      }
       break;
     }
   }

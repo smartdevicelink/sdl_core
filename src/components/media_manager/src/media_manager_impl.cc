@@ -40,13 +40,13 @@
 #if defined(DEFAULT_MEDIA)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
+#endif
 #include "media_manager/video/socket_video_streamer_adapter.h"
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#else
 #include "media_manager/video/video_stream_to_file_adapter.h"
-#endif
+
 
 namespace media_manager {
 
@@ -93,26 +93,31 @@ void MediaManagerImpl::SetProtocolHandler(
 
 void MediaManagerImpl::Init() {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
+
 #if defined(DEFAULT_MEDIA)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
   a2dp_player_ = new A2DPSourcePlayerAdapter();
   from_mic_recorder_ = new FromMicRecorderAdapter();
+#endif
+
   if ("socket" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new SocketVideoStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     video_streamer_ = new PipeVideoStreamerAdapter();
+  } else if ("file" == profile::Profile::instance()->video_server_type()) {
+    video_streamer_ = new VideoStreamToFileAdapter(
+        profile::Profile::instance()->video_stream_file());
   }
+
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
     audio_streamer_ = new SocketAudioStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
     audio_streamer_ = new PipeAudioStreamerAdapter();
+  } else if ("file" == profile::Profile::instance()->audio_server_type()) {
+    audio_streamer_ = new VideoStreamToFileAdapter(
+        profile::Profile::instance()->audio_stream_file());
   }
-#else
-  video_streamer_ = new VideoStreamToFileAdapter(
-    profile::Profile::instance()->video_stream_file());
-  audio_streamer_ = new VideoStreamToFileAdapter(
-      profile::Profile::instance()->audio_stream_file());
-#endif
+
   video_streamer_listener_ = new StreamerListener();
   audio_streamer_listener_ = new StreamerListener();
 
@@ -192,7 +197,7 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
 
       char url[100] = {'\0'};
 
-    #if defined(DEFAULT_MEDIA)
+
       if ("socket" == profile::Profile::instance()->video_server_type()) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
                  profile::Profile::instance()->server_address().c_str(),
@@ -200,12 +205,10 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
       } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_video_pipe_path().c_str());
+      } else {
+        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
+            profile::Profile::instance()->video_stream_file()).c_str()));
       }
-    #else
-      DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
-          profile::Profile::instance()->video_stream_file()).c_str()));
-    #endif
-
       application_manager::MessageHelper::SendNaviStartStream(url,
                                                               application_key);
     }
@@ -231,20 +234,18 @@ void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
 
       char url[100] = {'\0'};
 
-  #if defined(DEFAULT_MEDIA)
       if ("socket" == profile::Profile::instance()->audio_server_type()) {
-      snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
+        snprintf(url, sizeof(url) / sizeof(url[0]), "http://%s:%d",
                profile::Profile::instance()->server_address().c_str(),
                profile::Profile::instance()->audio_streaming_port());
       } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_audio_pipe_path().c_str());
-      }
-  #else
-      DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+      } else {
+        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                file_system::FullPath(profile::Profile::instance()->
                                      audio_stream_file()).c_str()));
-  #endif
+      }
 
       application_manager::MessageHelper::SendAudioStartStream(url,
                                                                application_key);

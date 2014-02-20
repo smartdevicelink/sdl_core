@@ -56,13 +56,6 @@
 
 #define NOTREACHED() DCHECK(false)
 
-/*
-* @brief Skips returning by a function call value (due to the LINT complaining)
-* @param FUNC The function to be called
-*/
-#define SKIP_RETURN_VALUE(FUNC) static_cast<void>((FUNC));
-
-
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available
 #if __cplusplus >= 201103L
@@ -70,5 +63,11 @@
 #else
 #define OVERRIDE
 #endif
+
+/*
+* @brief Calculate size of na array
+* @param arr  array, which size need to calculate
+*/
+#define ARRAYSIZE(arr) sizeof (arr) / sizeof(*arr)
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_MACRO_H_

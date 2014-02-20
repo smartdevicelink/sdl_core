@@ -451,4 +451,11 @@ public class Names {
     public static final String endTime = "endTime";
     public static final String didResult = "didResult";
     public static final String secondaryGraphic = "secondaryGraphic";
+    public static final String audioPassThruCapabilities = "audioPassThruCapabilities";
+    public static final String supportedDiagModes = "supportedDiagModes";
+    public static final String DiagnosticMessage = "DiagnosticMessage";
+    public static final String targetID = "targetID";
+    public static final String messageLength = "messageLength";
+    public static final String messageData = "messageData";
+    public static final String messageDataResult = "messageDataResult";
 }

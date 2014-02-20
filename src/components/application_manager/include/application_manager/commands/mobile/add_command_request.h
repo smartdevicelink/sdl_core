@@ -103,7 +103,19 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool CheckCommandParentId(const Application* app);
 
+  /*
+   * @brief Check if commands has valid syntax
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
   bool CheckVRCommandsNames();
+
+    /*
+   * @brief Check if menuNames has valid syntax
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckMenuName();
 
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
