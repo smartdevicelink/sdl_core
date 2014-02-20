@@ -943,27 +943,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(response);
         int mCorrelationId = response.getCorrelationID();
         if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
-            SetAppIcon setAppIcon = new SetAppIcon();
-            setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-            setAppIcon.setCorrelationID(getNextCorrelationID());
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage(setAppIcon, true);
-            }
             try {
-                syncProxySendRPCRequest(setAppIcon);
+                mSyncProxy.setAppIcon(ICON_SYNC_FILENAME, getNextCorrelationID());
+                if (mLogAdapter != null) {
+                    mLogAdapter.logMessage("SetAppIcon sent", true);
+                }
             } catch (SyncException e) {
-                Log.e(TAG, "Set InitAppIcon", e);
+                if (mLogAdapter != null) {
+                    mLogAdapter.logMessage("SetAppIcon send error: " + e, Log.ERROR, e);
+                }
             }
             mAwaitingInitIconResponseCorrelationID = 0;
         }
-
         if (isModuleTesting()) {
             ModuleTest.responses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
         }
-
         mPutFileTransferManager.removePutFileFromAwaitArray(mCorrelationId);
     }
 
@@ -1653,13 +1650,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Create and send ListFiles command
      */
     public void commandListFiles() {
-        ListFiles listFiles = new ListFiles();
-        listFiles.setCorrelationID(getNextCorrelationID());
-
         try {
-            syncProxySendRPCRequest(listFiles);
+            mSyncProxy.listFiles(getNextCorrelationID());
             if (mLogAdapter != null) {
-                mLogAdapter.logMessage(listFiles, true);
+                mLogAdapter.logMessage("ListFiles sent", true);
             }
         } catch (SyncException e) {
             mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
@@ -1748,7 +1742,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
         try {
-            syncProxySendRPCRequest(newPutFile);
+            if (mSyncProxy != null) {
+                mSyncProxy.putFile(newPutFile);
+            }
             if (mLogAdapter != null) {
                 mLogAdapter.logMessage(newPutFile, true);
             }

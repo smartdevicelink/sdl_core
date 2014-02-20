@@ -39,6 +39,7 @@ import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
@@ -48,6 +49,7 @@ import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
@@ -2123,6 +2125,45 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             throws SyncException {
 
         addSubMenu(menuID, menuName, null, correlationID);
+    }
+
+    /**
+     * Send a ListFiles RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+     *
+     * @param correlationID correlation Id
+     * @throws SyncException
+     */
+    public void listFiles(Integer correlationID) throws SyncException {
+        ListFiles listFiles = new ListFiles();
+        listFiles.setCorrelationID(correlationID);
+        sendRPCRequest(listFiles);
+    }
+
+    /**
+     * Send a SetAppIcon RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+     *
+     * @param fileName a name of the file
+     * @param correlationID correlation Id
+     * @throws SyncException
+     */
+    public void setAppIcon(String fileName, Integer correlationID) throws SyncException {
+        SetAppIcon setAppIcon = new SetAppIcon();
+        setAppIcon.setSyncFileName(fileName);
+        setAppIcon.setCorrelationID(correlationID);
+        sendRPCRequest(setAppIcon);
+    }
+
+    /**
+     * Send PutFile RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+     *
+     * @param putFile PutFile object to be send
+     */
+    public void putFile(PutFile putFile) throws SyncException {
+        if (putFile != null) {
+            sendRPCRequest(putFile);
+        } else {
+            // TODO : Process null object here
+        }
     }
 
     /**
