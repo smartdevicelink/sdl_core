@@ -126,17 +126,19 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
                    "Error code = " << pthread_result);
     }
   }
-  pthread_result = pthread_setname_np(thread_handle_, name_.c_str());
-#ifdef __QNXNTO__
-  if (pthread_result != EOK) {
-    LOG4CXX_INFO(logger_,"Couldn't set pthread name"
-                 " Error code = " << pthread_result);
-  }
-#endif
   success = !pthread_create(&thread_handle_, &attributes, threadFunc,
                             delegate_);
-  LOG4CXX_INFO(logger_,"Created thread: " << name_);
-  ThreadManager::instance()->RegisterName(thread_handle_, name_);
+  if (success) {
+    pthread_result = pthread_setname_np(thread_handle_, name_.c_str());
+#   ifdef __QNXNTO__
+    if (pthread_result != EOK) {
+      LOG4CXX_INFO(logger_,"Couldn't set pthread name"
+                   " Error code = " << pthread_result);
+    }
+#   endif
+    LOG4CXX_INFO(logger_,"Created thread: " << name_);
+    ThreadManager::instance()->RegisterName(thread_handle_, name_);
+  }
 
   isThreadRunning_ = success;
 

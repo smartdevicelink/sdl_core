@@ -288,7 +288,7 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
   if (message->service_type()
-      == protocol_handler::kMovileNav) {
+      == protocol_handler::kMobileNav) {
     if (!(application_manager::ApplicationManagerImpl::instance()->
          IsVideoStreamingAllowed(message->connection_key()))) {
        return;

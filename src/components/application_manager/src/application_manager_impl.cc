@@ -672,7 +672,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
       LOG4CXX_INFO(logger_, "RPC service is about to be started.");
       break;
     }
-    case protocol_handler::kMovileNav: {
+    case protocol_handler::kMobileNav: {
       LOG4CXX_INFO(logger_, "Video service is about to be started.");
       if (media_manager_) {
         if (!app) {
@@ -734,7 +734,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
       UnregisterApplication(session_key, true);
       break;
     }
-    case protocol_handler::kMovileNav: {
+    case protocol_handler::kMobileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       if (media_manager_) {
         media_manager_->StopVideoStreaming(session_key);
