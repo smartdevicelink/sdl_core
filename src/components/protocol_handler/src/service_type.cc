@@ -16,7 +16,7 @@ bool IsValid(ServiceType service_type) {
   switch (service_type) {
     case kRpc:
     case kAudio:
-    case kMovileNav:
+    case kMobileNav:
     case kBulk:
       return true;
     default:

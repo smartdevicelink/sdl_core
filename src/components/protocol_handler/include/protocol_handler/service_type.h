@@ -14,7 +14,7 @@ namespace protocol_handler {
 enum ServiceType {
 	kRpc =       SERVICE_TYPE_RPC,
 	kAudio =     SERVICE_TYPE_AUDIO,
-	kMovileNav = SERVICE_TYPE_NAVI,
+	kMobileNav = SERVICE_TYPE_NAVI,
 	kBulk =      SERVICE_TYPE_BULK,
   kInvalidServiceType
 };
