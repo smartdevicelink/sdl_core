@@ -57,11 +57,6 @@ using ::protocol_handler::RawMessage;
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::TransportManager;
-<<<<<<< HEAD
-//sing ::transport_manager::TransportManagerAttr;
-=======
-//using ::transport_manager::TransportManagerAttr;
->>>>>>> Fix Build. Commit 2fb8d4d
 using ::transport_manager::TransportManagerImpl;
 using ::transport_manager::DeviceUID;
 using ::transport_manager::DeviceInfo;
