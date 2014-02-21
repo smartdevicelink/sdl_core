@@ -58,7 +58,7 @@ class ThreadedSocketConnection : public Connection {
   /**
    * @brief Send data frame.
    *
-   * @param Message Smart pointer to the raw message.
+   * @param message Smart pointer to the raw message.
    *
    * @return Error Information about possible reason of sending data failure.
    */

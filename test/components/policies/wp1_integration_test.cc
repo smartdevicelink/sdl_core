@@ -184,8 +184,10 @@ TEST_F(TestWP1Integration, test_straight_forward_ok) {
   AssertRPC(func_ids::ReadDIDID, msg_type::request,
             HMILevel::HMI_FULL, true);
 
+  /* AlertManeuverID is removed (0a64974db985f9bdd7ef9d24b1fc5b9e74551a5a)
   AssertRPC(func_ids::AlertManeuverID, msg_type::response,
             HMILevel::HMI_LIMITED, true);
+  */
 
   AssertRPC(func_ids::ChangeRegistrationID, msg_type::request,
             HMILevel::HMI_FULL, true);
@@ -252,4 +254,5 @@ int main(int argc, char **argv) {
     ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }
+
 
