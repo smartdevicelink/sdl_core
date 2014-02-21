@@ -87,7 +87,7 @@ public class RPCRequestFactory {
 		addCommand.setCmdID(commandID);
 		addCommand.setVrCommands(vrCommands);
 		
-		if(menuText != null || parentID != null || position != null) {
+		if (menuText != null || parentID != null || position != null) {
 			MenuParams menuParams = new MenuParams();
 			menuParams.setMenuName(menuText);
 			menuParams.setPosition(position);

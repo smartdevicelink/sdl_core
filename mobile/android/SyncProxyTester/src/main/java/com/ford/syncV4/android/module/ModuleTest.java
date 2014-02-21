@@ -975,11 +975,7 @@ public class ModuleTest {
                                                 invalidMarshaller :
                                                 defaultMarshaller);
                         mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
-                        try {
-                            mProxyService.syncProxySendRPCRequest(rpc);
-                        } catch (SyncException e) {
-                            mLogAdapter.logMessage("Error sending RPC", Log.ERROR, e, true);
-                        }
+                        mProxyService.syncProxySendRPCRequest(rpc);
 
                         // restore the default marshaller
                         mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
