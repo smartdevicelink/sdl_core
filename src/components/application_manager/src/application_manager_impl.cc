@@ -337,7 +337,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
-    Application* curr_app = *it;
+    ApplicationSharedPtr curr_app = *it;
     if (app->app_id() == curr_app->app_id()) {
       if (curr_app->IsFullscreen()) {
         LOG4CXX_WARN(logger_, "Application is already active.");
