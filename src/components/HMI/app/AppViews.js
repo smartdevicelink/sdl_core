@@ -39,6 +39,7 @@ SDL.AppViews = Em.ContainerView.extend( {
     childViews: [
         SDL.HomeView,
         SDL.MediaView,
+        SDL.NavigationAppView,
         SDL.InfoView,
         SDL.PhoneView,
         SDL.ClimateView,

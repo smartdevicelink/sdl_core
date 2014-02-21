@@ -219,7 +219,7 @@ SDL.SDLController = Em.Object
         },
 
         /**
-         * Activate navigation method to set navigation data to controlls on main screen
+         * Activate navigationApp method to set navigationApp data to controlls on main screen
          */
         navigationAppUpdate: function() {
             SDL.BaseNavigationView.update(SDL.SDLAppController.model.appID);

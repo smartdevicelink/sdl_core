@@ -27,7 +27,7 @@
  * @name SDL.BaseNavigationView
  * @desc Navigation component base screen
  * @category View
- * @filesource app/view/navigation/baseNavigationView.js
+ * @filesource app/view/navigationApp/baseNavigationView.js
  * @version 1.0
  */
 SDL.BaseNavigationView = Em.ContainerView.create({
@@ -35,7 +35,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
     elementId: 'baseNavigation',
 
     classNameBindings: [
-        'SDL.States.media.sdlmedia.mediaNavigation.baseNavigation.active:active_state:inactive_state'
+        'SDL.States.navigationApp.baseNavigation.active:active_state:inactive_state'
     ],
 
     afterRender: function() {

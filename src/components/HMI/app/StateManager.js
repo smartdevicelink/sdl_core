@@ -183,18 +183,6 @@ var StateManager = Em.StateManager.extend({
                 SDL.SDLController.activateTBT();
             },
 
-            mediaNavigation: Em.State.create({
-
-                baseNavigation: Em.State.create({
-
-                }),
-
-                exit: function () {
-
-                    this._super();
-                }
-            }),
-
             exit: function () {
 
                 this._super();
@@ -203,6 +191,20 @@ var StateManager = Em.StateManager.extend({
             }
 
         })
+    }),
+
+    navigationApp: Em.State.create({
+
+        baseNavigation: Em.State.create({
+
+        }),
+
+        exit: function () {
+
+            this._super();
+
+            SDL.SDLAppController.deactivateApp();
+        }
     }),
 
     /** Navigation state */

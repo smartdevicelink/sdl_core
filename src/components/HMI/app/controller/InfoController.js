@@ -46,5 +46,34 @@ SDL.InfoController = Em.Object.create( {
 
         SDL.States.goToStates(SDL.States.currentState.get('path') + '.'
             + event.goToState);
+    },
+
+    /**
+     * Switching on Application
+     */
+    turnOnSDL: function () {
+
+        //SDL.CDModel.set('active', false);
+        /**
+         * Set SDL Data active, flag for status bar
+         */
+        if (SDL.SDLAppController.model) {
+            SDL.SDLAppController.model.set('active', true);
+        }
+        /**
+         * Go to SDL state
+         */
+        if (SDL.SDLAppController.model.appType) {
+            for (var i = 0; i < SDL.SDLAppController.model.appType.length; i++) {
+                if (SDL.SDLAppController.model.appType[i] == "NAVIGATION") {
+                    SDL.States.goToStates('navigationApp.baseNavigation');
+                    return;
+                }
+            }
+        }
+
+        SDL.States.goToStates('info.nonMedia');
+        //SDL.States.goToStates('media.sdlmedia');
+
     }
 });
