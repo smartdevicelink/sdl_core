@@ -55,6 +55,7 @@ class Deleter {
   ~Deleter() {
     if (pointer_) {
       delete pointer_;
+      pointer_ = NULL;
     }
   }
   void grab(T* pointer) {
@@ -66,7 +67,7 @@ class Deleter {
 
 }  // namespace deleters
 
-template<typename T, class Deleter = deleters::Deleter<T> >
+template<typename T, class Deleter = deleters::DummyDeleter >
 class Singleton {
 /**
  * @brief Singleton template
