@@ -34,6 +34,7 @@
 #include "json/writer.h"
 #include "rpc_base/rpc_base.h"
 #include "rpc_base/rpc_base_json_inl.h"
+#include "rpc_base/rpc_base_dbus_inl.h"
 
 
 namespace test {
@@ -297,6 +298,96 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
   ASSERT_TRUE(val2.is_valid());
   ASSERT_TRUE(val.is_initialized());
   ASSERT_FALSE(val.is_valid());
+}
+
+TEST(ValidatedTypes, TestBooleanDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size = Boolean::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "b");
+}
+
+TEST(ValidatedTypes, TestIntDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size = Integer<int32_t, 1, 5>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestFloatDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size = Float<1, 2>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "d");
+}
+
+TEST(ValidatedTypes, TestStringDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size = String<1, 2>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "s");
+}
+
+TEST(ValidatedTypes, TestEnumDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size = Enum<TestEnum>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestIntArrayDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Array<Integer<int32_t, 1, 2>, 1, 3>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 2);
+  ASSERT_STREQ(sign, "ai");
+}
+
+TEST(ValidatedTypes, TestIntArrayArrayDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 3);
+  ASSERT_STREQ(sign, "aai");
+}
+
+TEST(ValidatedTypes, TestMapDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Map<Integer<int32_t, 1, 2>, 3, 4>::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 5);
+  ASSERT_STREQ(sign, "a{si}");
+}
+
+TEST(ValidatedTypes, TestShortBufferDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Map<Integer<int32_t, 1, 2>, 3, 4>::DbusSignature(sign, 2);
+  ASSERT_EQ(sign_size, 0);
+}
+
+TEST(ValidatedTypes, TestMandatoryEnumDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Mandatory<Enum<TestEnum> >::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 1);
+  ASSERT_STREQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestOptionalEnumDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Optional<Enum<TestEnum> >::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 4);
+  ASSERT_STREQ(sign, "(bi)");
+}
+
+TEST(ValidatedTypes, TestOptionalFloatArrayDbusSignature) {
+  char sign[42] = {};
+  size_t sign_size =
+      Optional< Array<Float<1,2>, 3, 4> >::DbusSignature(sign, 42);
+  ASSERT_EQ(sign_size, 5);
+  ASSERT_STREQ(sign, "(bad)");
 }
 
 }  // namespace codegen

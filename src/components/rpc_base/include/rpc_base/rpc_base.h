@@ -42,6 +42,10 @@ namespace Json {
 class Value;
 }  // namespace Json
 
+namespace dbus {
+class MessageIterator;
+}  // namespace dbus
+
 namespace rpc {
 template<typename T> class Range;
 class PrimitiveType;
@@ -119,10 +123,16 @@ class Boolean : public PrimitiveType {
   Boolean();
   explicit Boolean(bool value);
   explicit Boolean(const Json::Value& value);
+  explicit Boolean(dbus::MessageIterator* iter);
   Boolean(const Json::Value& value, bool def_value);
+  Boolean(dbus::MessageIterator* iter, bool def_value);
+
   Boolean& operator=(bool new_val);
   operator bool() const;
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
  private:
   // Fields
@@ -139,10 +149,15 @@ class Integer : public PrimitiveType {
   Integer();
   explicit Integer(IntType value);
   explicit Integer(const Json::Value& value);
+  explicit Integer(dbus::MessageIterator* iter);
   Integer(const Json::Value& value, IntType def_value);
+  explicit Integer(dbus::MessageIterator* iter, IntType def_value);
   Integer& operator=(IntType new_val);
   operator IntType() const;
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
  private:
   IntType value_;
@@ -156,10 +171,15 @@ class Float : public PrimitiveType {
   Float();
   explicit Float(double value);
   explicit Float(const Json::Value& value);
+  explicit Float(dbus::MessageIterator* iter);
   Float(const Json::Value& value, double def_value);
+  Float(dbus::MessageIterator* iter, double def_value);
   Float& operator=(double new_val);
   operator double() const;
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
  private:
   double value_;
@@ -174,10 +194,15 @@ class String : public PrimitiveType {
   explicit String(const std::string& value);
   explicit String(const char* value);
   explicit String(const Json::Value& value);
+  explicit String(dbus::MessageIterator* iter);
   String(const Json::Value& value, const std::string& def_value);
+  String(dbus::MessageIterator* iter, const std::string& def_value);
   String& operator=(const std::string& new_val);
   operator const std::string&() const;
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
  private:
   std::string value_;
@@ -194,10 +219,15 @@ class Enum : public PrimitiveType {
   Enum();
   explicit Enum(EnumType value);
   explicit Enum(const Json::Value& value);
+  explicit Enum(dbus::MessageIterator* iter);
   Enum(const Json::Value& value, EnumType def_value);
+  Enum(dbus::MessageIterator* iter, EnumType def_value);
   Enum& operator=(EnumType new_val);
   operator EnumType() const;
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
  private:
   // Fields
@@ -213,6 +243,7 @@ class Array : public std::vector<T> {
   // Methods
   Array();
   explicit Array(const Json::Value& value);
+  explicit Array(dbus::MessageIterator* iter);
   template<typename U>
   explicit Array(const U& value);
   template<typename U>
@@ -221,6 +252,9 @@ class Array : public std::vector<T> {
   template<typename U>
   void push_back(const U& value);
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
   bool is_valid() const;
   bool is_initialized() const;
@@ -235,6 +269,7 @@ class Map : public std::map<std::string, T> {
   // Methods
   Map();
   explicit Map(const Json::Value& value);
+  explicit Map(dbus::MessageIterator* iter);
   template<typename U>
   explicit Map(const U& value);
   template<typename U>
@@ -243,6 +278,9 @@ class Map : public std::map<std::string, T> {
   template<typename U>
   void insert(const std::pair<std::string, U>& value);
   Json::Value ToJsonValue() const;
+  void WriteToDbusIterator(dbus::MessageIterator* iter);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
   bool is_valid() const;
   bool is_initialized() const;
@@ -259,6 +297,8 @@ class Mandatory : public T {
   Mandatory(const Json::Value& value, const U& def_value);
   template<typename U>
   Mandatory& operator=(const U& new_val);
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
   bool is_valid() const;
 };
@@ -282,6 +322,8 @@ class Optional {
   // Better than operator bool because bool can be implicitly
   // casted to integral types
   operator const void*() const;
+
+  static size_t DbusSignature(char* buff, size_t buff_len);
 
   bool is_valid() const;
   bool is_initialized() const;
