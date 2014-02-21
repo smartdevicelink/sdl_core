@@ -1,3 +1,4 @@
+#include "protocol_handler/service_type.h"
 #include "protocol_handler/message_priority.h"
 
 #include "utils/logger.h"

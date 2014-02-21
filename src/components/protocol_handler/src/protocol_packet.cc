@@ -34,7 +34,6 @@
  */
 #include <stdint.h>
 #include <memory.h>
-#include <iostream>  // TODO(AK): cpplink error - Streams are highly discouraged.
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 
@@ -44,10 +43,12 @@ ProtocolPacket::ProtocolPacket()
     : packet_(0),
       total_packet_size_(0),
       data_offset_(0),
-      packet_id_(0) {
+      packet_id_(0),
+      connection_key_(0)  {
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
+ProtocolPacket::ProtocolPacket(uint8_t connection_key,
+                               uint8_t version, bool compress,
                                uint8_t frameType,
                                uint8_t serviceType,
                                uint8_t frameData, uint8_t sessionID,
@@ -57,7 +58,8 @@ ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
     : packet_(0),
       total_packet_size_(0),
       data_offset_(0),
-      packet_id_(packet_id) {
+      packet_id_(packet_id),
+      connection_key_(connection_key) {
   RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
   if (result != RESULT_OK) {
@@ -65,11 +67,27 @@ ProtocolPacket::ProtocolPacket(uint8_t version, bool compress,
   }
 }
 
+ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+                               uint32_t data_size)
+  : packet_(0),
+    total_packet_size_(0),
+    data_offset_(0),
+    packet_id_(0),
+    connection_key_(connection_key) {
+    RESULT_CODE result = deserializePacket(data_param, data_size);
+    if (result != RESULT_OK) {
+      NOTREACHED();
+    }
+}
+
 ProtocolPacket::~ProtocolPacket() {
-  // TODO(PV): where to clean?
   packet_ = 0;
   total_packet_size_ = 0;
   packet_id_ = 0;
+  if (packet_data_.data) {
+    delete packet_data_.data;
+    packet_data_.data = 0;
+  }
 }
 
 // Serialization
@@ -82,6 +100,7 @@ RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
                                             uint32_t dataSize,
                                             uint32_t messageID,
                                             const uint8_t* data) {
+
   if (packet_) {
     delete[] packet_;
     packet_ = 0;
@@ -146,15 +165,18 @@ uint32_t ProtocolPacket::packet_id() const {
 RESULT_CODE ProtocolPacket::appendData(uint8_t* chunkData,
                                        uint32_t chunkDataSize) {
   if (data_offset_ + chunkDataSize <= packet_data_.totalDataBytes) {
-    memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
-    data_offset_ += chunkDataSize;
-    return RESULT_OK;
+    if (chunkData) {
+      if (packet_data_.data) {
+        memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
+        data_offset_ += chunkDataSize;
+        return RESULT_OK;
+      }
+    }
   }
+
   return RESULT_FAIL;
 }
-// End of Serialization
 
-// Deserialization
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
                                               uint32_t messageSize) {
   uint8_t offset = 0;
@@ -189,32 +211,41 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
     packet_header_.messageId = 0u;
   }
 
+  packet_data_.totalDataBytes = packet_header_.dataSize;
 
   uint32_t dataPayloadSize = 0;
-  if (offset < messageSize) {
+  if ((offset < messageSize) &&
+      packet_header_.frameType != FRAME_TYPE_FIRST) {
     dataPayloadSize = messageSize - offset;
-  }
-
-  if (dataPayloadSize != packet_header_.dataSize) {
-    return RESULT_FAIL;
   }
 
   uint8_t * data = 0;
   if (dataPayloadSize) {
-    data = new uint8_t[messageSize - offset];
+    data = new uint8_t[dataPayloadSize];
     if (data) {
       memcpy(data, message + offset, dataPayloadSize);
+      data_offset_ = dataPayloadSize;
     } else {
       return RESULT_FAIL;
     }
   }
 
-  packet_data_.data = data;
-  packet_data_.totalDataBytes = dataPayloadSize;
+  if (packet_header_.frameType == FRAME_TYPE_FIRST) {
+    data_offset_ = 0;
+    const uint8_t* data = message + offset;
+    uint32_t total_data_bytes = data[0] << 24;
+    total_data_bytes |= data[1] << 16;
+    total_data_bytes |= data[2] << 8;
+    total_data_bytes |= data[3];
+    set_total_data_bytes(total_data_bytes);
+  } else {
+    packet_data_.data = data;
+  }
+
   return RESULT_OK;
 }
 
-uint8_t ProtocolPacket::version() const {
+uint8_t ProtocolPacket::protocol_version() const {
   return packet_header_.version;
 }
 
@@ -264,5 +295,10 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
 uint32_t ProtocolPacket::total_data_bytes() const {
   return packet_data_.totalDataBytes;
 }
+
+uint8_t ProtocolPacket::connection_key() const {
+  return connection_key_;
+}
+
 // End of Deserialization
 }  // namespace protocol_handler

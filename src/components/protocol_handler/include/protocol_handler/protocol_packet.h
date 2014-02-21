@@ -36,6 +36,8 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
+#include "utils/macro.h"
+
 /**
  *\namespace NsProtocolHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
@@ -86,6 +88,12 @@ const uint8_t FRAME_TYPE_FIRST = 0x02;
  *\brief protocol header.
  */
 const uint8_t FRAME_TYPE_CONSECUTIVE = 0x03;
+
+
+/**
+ *\brief Constant: Frame type for HeartBeat
+ */
+const uint8_t SERVICE_TYPE_ZERO = 0x00;
 
 /**
  *\brief Constant: RPC type of session
@@ -288,6 +296,17 @@ class ProtocolPacket {
     ProtocolPacket();
 
     /**
+     * \brief Cconstructor
+     *
+     * \param connectionKey Identifier of connection within wich message
+     * is transferred
+     * \param data Message string
+     * \param dataSize Message size
+     */
+    ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+                   uint32_t data_size);
+
+    /**
      * \brief Constructor
      * \param version Version of protocol
      * \param compress Compression flag
@@ -300,7 +319,8 @@ class ProtocolPacket {
      * \param messageID ID of message or hash code - only for second protocol
      * \param data Message string if provided
      */
-    ProtocolPacket(uint8_t version, bool compress, uint8_t frameType,
+    ProtocolPacket(uint8_t connection_key,
+                   uint8_t version, bool compress, uint8_t frameType,
                    uint8_t serviceType, uint8_t frameData,
                    uint8_t sessionId, uint32_t dataSize,
                    uint32_t messageID, const uint8_t* data = 0,
@@ -376,7 +396,7 @@ class ProtocolPacket {
     /**
      * \brief Getter of protocol version.
      */
-    uint8_t version() const;
+    uint8_t protocol_version() const;
 
     /**
      * \brief Getter of compression flag
@@ -429,6 +449,11 @@ class ProtocolPacket {
     uint32_t total_data_bytes() const;
     /*End of Deserialization*/
 
+    /**
+    * \brief Getter for Connection Identifier
+    */
+    uint8_t connection_key() const;
+
   private:
     /**
      *\brief Serialized message string
@@ -459,6 +484,14 @@ class ProtocolPacket {
      *\brief ID for multiframe messages
      */
     uint32_t packet_id_;
+
+    /**
+    * \brief Connection Identifier
+    * Obtained from Cconnection_handler
+    */
+    uint8_t connection_key_;
+
+    DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
 };
 }  // namespace protocol_handler
 
