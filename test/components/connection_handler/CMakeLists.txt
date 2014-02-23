@@ -17,13 +17,15 @@ set (LIBRARIES
     connectionHandler
     TransportManager
     Utils
-    bluetooth    
+    bluetooth
+    ConfigProfile
 )
 
 set (SOURCES
+  ./src/session_test.cc
   ./src/heart_beat_monitor_test.cc
 )
 
 create_test("test_ConnectionHandler" "${SOURCES}" "${LIBRARIES}")
 
-add_library("test_ConnectionHandlerTest" "${SOURCES}")
+add_library("test_ConnectionHandlerTest" ${SOURCES})

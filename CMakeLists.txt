@@ -190,6 +190,10 @@ else (${HMI2})
     add_definitions(-DWEB_HMI)
 ENDIF (${HMI2})
 
+if(BUILD_TESTS)
+    add_definitions(-DBUILD_TESTS)
+endif()
+
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
 

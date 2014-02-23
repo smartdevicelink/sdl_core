@@ -279,6 +279,7 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_c
 
 template<typename ObjectType> ObjectType*
 utils::SharedPtr<ObjectType>::operator->(void) const {
+  DCHECK(mObject);
   return mObject;
 }
 

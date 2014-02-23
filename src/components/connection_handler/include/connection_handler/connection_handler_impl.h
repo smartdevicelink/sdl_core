@@ -248,7 +248,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
     void KeepConnectionAlive(uint32_t connection_key);
-  private:
+#ifdef BUILD_TESTS
+    protected:
+#else
+    private:
+#endif
     /**
      * \brief Default class constructor
      */
