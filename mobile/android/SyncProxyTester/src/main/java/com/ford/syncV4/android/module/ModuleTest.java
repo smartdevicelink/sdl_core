@@ -35,18 +35,14 @@ import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
 import com.ford.syncV4.android.module.reader.BinaryDataReader;
 import com.ford.syncV4.android.module.reader.BinaryDataReaderFactory;
 import com.ford.syncV4.android.service.ProxyService;
-import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.AddCommand;
-import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
-import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
@@ -58,14 +54,12 @@ import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
-import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
-import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
@@ -483,7 +477,7 @@ public class ModuleTest {
 								} else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
 									rpc = new UnregisterAppInterface();
 								} else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
-									rpc = new SetGlobalProperties();
+									rpc = RPCRequestFactory.buildSetGlobalProperties();
 								} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 									rpc = new ResetGlobalProperties();
 								} else if (name.equalsIgnoreCase(Names.AddCommand)) {
@@ -579,7 +573,7 @@ public class ModuleTest {
                                 } else if (name.equalsIgnoreCase(GenericRequest.NAME)) {
                                     rpc = new GenericRequest();
 								} else {
-									rpc = new SetGlobalProperties();
+									rpc = RPCRequestFactory.buildSetGlobalProperties();
 								}
 
 								try {

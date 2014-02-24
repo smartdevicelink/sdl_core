@@ -85,7 +85,6 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
-import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -97,7 +96,6 @@ import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
-import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
@@ -123,8 +121,6 @@ import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
-import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
-import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -232,7 +228,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Latest choiceSetId, required to add it to the adapter when a successful
      * CreateInteractionChoiceSetResponse comes.
      */
-    private int _latestCreateChoiceSetId = CHOICESETID_UNSET;
+    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
     /**
      * Latest choiceSetId, required to delete it from the adapter when a
      * successful DeleteInteractionChoiceSetResponse comes.
@@ -267,11 +263,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * check it when the user has explicitly set the soft buttons.
      */
     private CheckBox chkIncludeSoftButtons;
-    /**
-     * KeyboardProperties object passed between KeyboardPropertiesActivity and
-     * this activity.
-     */
-    private KeyboardProperties currentKbdProperties;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
      * filename is set after choosing.
@@ -339,6 +330,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
+    private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -2868,173 +2860,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         private void sendSetGlobalProperties() {
-                            AlertDialog.Builder builder;
-
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.setglobalproperties,
-                                    (ViewGroup) findViewById(R.id.setglobalproperties_Root));
-
-                            final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
-                            final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
-                            final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
-                            final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
-                            final CheckBox useVRHelpItemImage = (CheckBox) layout.findViewById(R.id.setglobalproperties_useVRHelpItemImage);
-                            final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
-                            final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
-                            final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
-                            final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
-                            final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
-                            final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
-                            final CheckBox choiceMenuTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuTitle);
-                            final EditText menuTitle = (EditText) layout.findViewById(R.id.setglobalproperties_menuTitle);
-                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuIcon);
-                            final EditText menuIcon = (EditText) layout.findViewById(R.id.setglobalproperties_menuIcon);
-                            final Spinner menuIconType = (Spinner) layout.findViewById(R.id.setglobalproperties_menuIconType);
-                            final CheckBox chkKbdProperties = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceKbdProperties);
-
-                            menuIconType.setAdapter(imageTypeAdapter);
-                            menuIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
-
-                            currentKbdProperties = new KeyboardProperties();
-                            currentKbdProperties.setLanguage(Language.EN_US);
-                            currentKbdProperties.setKeyboardLayout(
-                                    KeyboardLayout.QWERTY);
-                            currentKbdProperties.setKeypressMode(
-                                    KeypressMode.SINGLE_KEYPRESS);
-                            currentKbdProperties.setAutoCompleteText(getString(
-                                    R.string.keyboardproperties_autoCompleteTextDefault));
-                            currentKbdProperties.setLimitedCharacterList(new Vector<String>() {{
-                                add("a");
-                                add("b");
-                                add("c");
-                            }});
-
-                            Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
-                            btnKbdProperties.setOnClickListener(
-                                    new OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            IntentHelper.addObjectForKey(
-                                                    currentKbdProperties,
-                                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-                                            Intent intent = new Intent(mContext,
-                                                    KeyboardPropertiesActivity.class);
-                                            startActivityForResult(intent,
-                                                    Const.REQUEST_EDIT_KBDPROPERTIES);
-                                        }
-                                    });
-
-                            builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    SetGlobalProperties msg = new SetGlobalProperties();
-                                    int numberOfChoices = 0;
-
-                                    if (choiceHelpPrompt.isChecked()) {
-                                        Vector<TTSChunk> help = new Vector<TTSChunk>();
-                                        String helpString = helpPrompt.getText().toString();
-                                        for (String ttsChunk : helpString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            help.add(chunk);
-                                        }
-                                        msg.setHelpPrompt(help);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceTimeoutPrompt.isChecked()) {
-                                        Vector<TTSChunk> timeout = new Vector<TTSChunk>();
-                                        String timeoutString = timeoutPrompt.getText().toString();
-                                        for (String ttsChunk : timeoutString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            timeout.add(chunk);
-                                        }
-                                        msg.setTimeoutPrompt(timeout);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceVRHelpTitle.isChecked()) {
-                                        msg.setVrHelpTitle(vrHelpTitle.getText().toString());
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceVRHelpItem.isChecked()) {
-                                        Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
-
-                                        String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
-                                        String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
-                                        String[] itemImageArray = vrHelpItemImage.getText().toString()
-                                                .split(JOIN_STRING);
-                                        int itemsCount = Math.min(itemTextArray.length,
-                                                Math.min(itemPosArray.length, itemImageArray.length));
-
-                                        for (int i = 0; i < itemsCount; ++i) {
-                                            VrHelpItem item = new VrHelpItem();
-                                            item.setText(itemTextArray[i]);
-
-                                            try {
-                                                item.setPosition(Integer.parseInt(itemPosArray[i]));
-                                            } catch (NumberFormatException e) {
-                                                // set default position
-                                                item.setPosition(1);
-                                            }
-
-                                            if (useVRHelpItemImage.isChecked()) {
-                                                Image image = new Image();
-                                                image.setValue(
-                                                        itemImageArray[i]);
-                                                image.setImageType(
-                                                        ImageType.DYNAMIC);
-                                                item.setImage(image);
-                                            }
-
-                                            vrHelpItems.add(item);
-                                        }
-
-                                        msg.setVrHelp(vrHelpItems);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceMenuTitle.isChecked()) {
-                                        String title = menuTitle.getText().toString();
-                                        msg.setMenuTitle(title);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceMenuIcon.isChecked()) {
-                                        Image image = new Image();
-                                        image.setValue(menuIcon.getText().toString());
-                                        image.setImageType(imageTypeAdapter.getItem(menuIconType.getSelectedItemPosition()));
-                                        msg.setMenuIcon(image);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (chkKbdProperties.isChecked() &&
-                                            (currentKbdProperties != null)) {
-                                        msg.setKeyboardProperties(currentKbdProperties);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (numberOfChoices > 0) {
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                        currentKbdProperties = null;
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    currentKbdProperties = null;
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.create().show();
+                            DialogFragment setGlobalPropertiesDialog = SetGlobalPropertiesDialog.newInstance();
+                            setGlobalPropertiesDialog.show(getFragmentManager(), SET_GLOBAL_PROPERTIES_DIALOG_TAG);
                         }
 
                         private void sendResetGlobalProperties() {
@@ -3505,6 +3332,25 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return imageTypeAdapter;
     }
 
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SetGlobalPropertiesDialog}
+     *
+     * @param setGlobalProperties {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
+     */
+    public void onSetGlobalPropertiesDialogResult(SetGlobalProperties setGlobalProperties) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandSetGlobalPropertiesResumable(setGlobalProperties);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AddSubMenuDialog}
+     *
+     * @param addSubMenu {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
+     * @param syncSubMenu SubMenu structure
+     */
     public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
         if (mBoundProxyService != null) {
             mBoundProxyService.commandAddSubMenuResumable(addSubMenu);
@@ -3601,11 +3447,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * adapter. In any case, remove the key from the map.
      */
     public void onCreateChoiceSetResponse(boolean success) {
-        if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+        if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
             if (success) {
-                mChoiceSetAdapter.add(_latestCreateChoiceSetId);
+                mChoiceSetAdapter.add(mLatestCreateChoiceSetId);
             }
-            _latestCreateChoiceSetId = CHOICESETID_UNSET;
+            mLatestCreateChoiceSetId = CHOICESETID_UNSET;
         } else {
             Log.w(LOG_TAG, "Latest createChoiceSetId is unset");
         }
@@ -3854,14 +3700,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
         int choiceSetID = autoIncChoiceSetId++;
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandCreateInteractionChoiceSet(choices, choiceSetID,
+            mBoundProxyService.commandCreateInteractionChoiceSetResumable(choices, choiceSetID,
                     getCorrelationid());
 
-            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+            if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
                 Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " +
-                        _latestCreateChoiceSetId);
+                        mLatestCreateChoiceSetId);
             }
-            _latestCreateChoiceSetId = choiceSetID;
+            mLatestCreateChoiceSetId = choiceSetID;
         }
     }
 
@@ -3904,18 +3750,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         xmlTestContinue(filePath);
                     }
                 }
-                break;
-
-            case Const.REQUEST_EDIT_KBDPROPERTIES:
-                if (resultCode == RESULT_OK) {
-                    currentKbdProperties =
-                            (KeyboardProperties) IntentHelper.getObjectForKey(
-                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-                    if (currentKbdProperties == null) {
-                        Log.w(LOG_TAG, "Returned kbdProperties is null!");
-                    }
-                }
-                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
                 break;
 
             default:

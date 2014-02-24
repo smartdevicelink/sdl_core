@@ -63,7 +63,7 @@ public class TestRPC {
 		} else if (functionName.equalsIgnoreCase(Names.UnregisterAppInterface)) {
 			rpc = new UnregisterAppInterface();
 		} else if (functionName.equalsIgnoreCase(Names.SetGlobalProperties)) {
-			rpc = new SetGlobalProperties();
+			rpc = RPCRequestFactory.buildSetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 			rpc = new ResetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.AddCommand)) {

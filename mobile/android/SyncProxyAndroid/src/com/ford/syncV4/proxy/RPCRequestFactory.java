@@ -457,32 +457,61 @@ public class RPCRequestFactory {
 		return msg;
 	}
 	
-	public static SetAppIcon buildSetAppIcon(String syncFileName,
-			Integer correlationID) {
+	public static SetAppIcon buildSetAppIcon(String syncFileName, Integer correlationID) {
 		SetAppIcon setAppIcon = new SetAppIcon();
 		setAppIcon.setCorrelationID(correlationID);
 		setAppIcon.setSyncFileName(syncFileName);
 		return setAppIcon;
 	}
-	
-	public static SetGlobalProperties buildSetGlobalProperties(
-			String helpPrompt, String timeoutPrompt, Integer correlationID) {
+
+    /**
+     * <b>SetGlobalProperties</b> section
+     *
+     */
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
+     *
+     * @param helpPrompt
+     * @param timeoutPrompt
+     * @param correlationID Correlation Id of the request
+     * @return {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request object
+     */
+    public static SetGlobalProperties buildSetGlobalProperties(String helpPrompt,
+                                                               String timeoutPrompt,
+                                                               Integer correlationID) {
 		return buildSetGlobalProperties(TTSChunkFactory
 				.createSimpleTTSChunks(helpPrompt), TTSChunkFactory
 				.createSimpleTTSChunks(timeoutPrompt), correlationID);
 	}
-	
-	public static SetGlobalProperties buildSetGlobalProperties(
-			Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
-			Integer correlationID) {
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
+     *
+     * @param helpChunks
+     * @param timeoutChunks
+     * @param correlationID
+     * @return {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request object
+     */
+	public static SetGlobalProperties buildSetGlobalProperties(Vector<TTSChunk> helpChunks,
+                                                               Vector<TTSChunk> timeoutChunks,
+                                                               Integer correlationID) {
 		SetGlobalProperties req = new SetGlobalProperties();
 		req.setCorrelationID(correlationID);
-
 		req.setHelpPrompt(helpChunks);
 		req.setTimeoutPrompt(timeoutChunks);
 
 		return req;
 	}
+
+    /**
+     * Build an empty {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request object
+     */
+    public static SetGlobalProperties buildSetGlobalProperties() {
+        return new SetGlobalProperties();
+    }
 
 	public static SetMediaClockTimer buildSetMediaClockTimer(Integer hours,
 			Integer minutes, Integer seconds, UpdateMode updateMode,
