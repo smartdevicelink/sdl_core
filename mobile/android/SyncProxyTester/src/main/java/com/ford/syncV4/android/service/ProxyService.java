@@ -93,12 +93,14 @@ import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
@@ -454,19 +456,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             createErrorMessageForAdapter("Error sending show", e);
         }
 
-        try {
-            subscribeToButton(ButtonName.OK);
-            subscribeToButton(ButtonName.SEEKLEFT);
-            subscribeToButton(ButtonName.SEEKRIGHT);
-            subscribeToButton(ButtonName.TUNEUP);
-            subscribeToButton(ButtonName.TUNEDOWN);
-            Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[]{
-                    ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
-                    ButtonName.TUNEDOWN}));
-            SyncProxyTester.getInstance().buttonsSubscribed(buttons);
-        } catch (SyncException e) {
-            createErrorMessageForAdapter("Error subscribing to buttons", e);
-        }
+        commandSubscribeButtonPredefined(ButtonName.OK, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.SEEKLEFT, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.SEEKRIGHT, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.TUNEUP, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.TUNEDOWN, getNextCorrelationID());
+
+        Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[]{
+                ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
+                ButtonName.TUNEDOWN}));
+        SyncProxyTester.getInstance().buttonsSubscribed(buttons);
 
         commandAddCommandPredefined(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
         commandAddCommandPredefined(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
@@ -483,16 +482,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         msg.setCorrelationID(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(msg, true);
-        }
-        mSyncProxy.sendRPCRequest(msg);
-    }
-
-    private void subscribeToButton(ButtonName buttonName) throws SyncException {
-        SubscribeButton msg = new SubscribeButton();
-        msg.setCorrelationID(getNextCorrelationID());
-        msg.setButtonName(buttonName);
         if (mLogAdapter != null) {
             mLogAdapter.logMessage(msg, true);
         }
@@ -1757,6 +1746,53 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
             mAwaitingInitIconResponseCorrelationID = 0;
         }
+    }
+
+    /**
+     * Call a method from SDK to send <b>SubscribeButton</b> request
+     *
+     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     */
+    public void commandSubscribeButtonPredefined(ButtonName buttonName, int correlationId) {
+        SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
+        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setButtonName(buttonName);
+
+        syncProxySendRPCRequest(subscribeButton);
+    }
+
+    /**
+     * Call a method from SDK to send <b>SubscribeButton</b> request which will be used in application
+     * resumption.
+     *
+     * @param correlationId Unique identifier of the command
+     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     */
+    public void commandSubscribeButtonResumable(ButtonName buttonName, int correlationId) {
+        SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
+        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setButtonName(buttonName);
+
+        syncProxySendRPCRequestResumable(subscribeButton);
+    }
+
+    /**
+     * Call a method from SDK to send <b>UnsubscribeVehicleData</b> request.
+     *
+     * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
+     */
+    public void commandUnsubscribeVehicleInterface(UnsubscribeVehicleData unsubscribeVehicleData) {
+        syncProxySendRPCRequest(unsubscribeVehicleData);
+    }
+
+    /**
+     * Call a method from SDK to send <b>SubscribeVehicleData</b> request which will be used in
+     * application resumption.
+     *
+     * @param subscribeVehicleData {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData}
+     */
+    public void commandSubscribeVehicleInterfaceResumable(SubscribeVehicleData subscribeVehicleData) {
+        syncProxySendRPCRequestResumable(subscribeVehicleData);
     }
 
     /**

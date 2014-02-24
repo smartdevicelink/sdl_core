@@ -104,7 +104,6 @@ import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.SoftButton;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
@@ -150,7 +149,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -332,6 +330,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
     private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
+    private final static String SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG = "SubscriptionVehicleDataDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -1262,12 +1261,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         ButtonName buttonName = ButtonName.values()[which];
                                         int corrId = getCorrelationid();
                                         if (needToSubscribe) {
-                                            SubscribeButton msg = new SubscribeButton();
-                                            msg.setCorrelationID(corrId);
-                                            msg.setButtonName(buttonName);
-                                            mLogAdapter.logMessage(msg, true);
                                             if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                mBoundProxyService.commandSubscribeButtonResumable(
+                                                        buttonName, corrId);
                                             }
                                         } else {
                                             UnsubscribeButton msg = new UnsubscribeButton();
@@ -1794,22 +1790,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 }
                             });
                             builder.show();
-                        }
-
-                        /**
-                         * Calls the setter with setterName on the msg.
-                         */
-                        private void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
-                            try {
-                                Method setter = msgClass.getMethod(setterName, Boolean.class);
-                                setter.invoke(msg, true);
-                            } catch (NoSuchMethodException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            } catch (IllegalAccessException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            } catch (InvocationTargetException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            }
                         }
 
                         /**
@@ -2743,126 +2723,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         private void sendVehicleDataSubscriptions() {
-                            AlertDialog.Builder builder;
-                            final Context mContext = adapter.getContext();
-
-                            // the local copy of isVehicleDataSubscribed
-                            final boolean[] checkedVehicleDataTypes = isVehicleDataSubscribed.clone();
-
-                            builder = new AlertDialog.Builder(mContext);
-                            builder.setMultiChoiceItems(vehicleDataTypeNames(), checkedVehicleDataTypes, new OnMultiChoiceClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                                    /**
-                                     * NB! This method is intentionally left empty. If the 3rd
-                                     * parameter to setMultiChoiceItems() is null, the user's
-                                     * changes to checked items don't save.
-                                     **/
-                                }
-                            });
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<VehicleDataType> subscribeVehicleData = new Vector<VehicleDataType>();
-                                    Vector<VehicleDataType> unsubscribeVehicleData = new Vector<VehicleDataType>();
-                                    VehicleDataType[] dataTypes = VehicleDataType.values();
-
-                                    // subscribe and unsubscribe to new checked/unchecked items only
-                                    for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
-                                        boolean checked = checkedVehicleDataTypes[i];
-                                        boolean wasChecked = isVehicleDataSubscribed[i];
-                                        if (checked && !wasChecked) {
-                                            subscribeVehicleData.add(dataTypes[i]);
-                                        } else if (!checked && wasChecked) {
-                                            unsubscribeVehicleData.add(dataTypes[i]);
-                                        }
-                                    }
-
-                                    final Map<VehicleDataType, String> methodNamesMap =
-                                            new HashMap<VehicleDataType, String>() {{
-                                                put(VehicleDataType.VEHICLEDATA_GPS, "Gps");
-                                                put(VehicleDataType.VEHICLEDATA_SPEED, "Speed");
-                                                put(VehicleDataType.VEHICLEDATA_RPM, "Rpm");
-                                                put(VehicleDataType.VEHICLEDATA_FUELLEVEL, "FuelLevel");
-                                                put(VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE, "FuelLevel_State");
-                                                put(VehicleDataType.VEHICLEDATA_FUELCONSUMPTION, "InstantFuelConsumption");
-                                                put(VehicleDataType.VEHICLEDATA_EXTERNTEMP, "ExternalTemperature");
-//                                                put(VehicleDataType.VEHICLEDATA_VIN, "VIN");
-                                                put(VehicleDataType.VEHICLEDATA_PRNDL, "Prndl");
-                                                put(VehicleDataType.VEHICLEDATA_TIREPRESSURE, "TirePressure");
-                                                put(VehicleDataType.VEHICLEDATA_ODOMETER, "Odometer");
-                                                put(VehicleDataType.VEHICLEDATA_BELTSTATUS, "BeltStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BODYINFO, "BodyInformation");
-                                                put(VehicleDataType.VEHICLEDATA_DEVICESTATUS, "DeviceStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BRAKING, "DriverBraking");
-                                                put(VehicleDataType.VEHICLEDATA_WIPERSTATUS, "WiperStatus");
-                                                put(VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS, "HeadLampStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BATTVOLTAGE, "BatteryVoltage");
-                                                put(VehicleDataType.VEHICLEDATA_ENGINETORQUE, "EngineTorque");
-                                                put(VehicleDataType.VEHICLEDATA_ACCPEDAL, "AccPedalPosition");
-                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEEL, "SteeringWheelAngle");
-                                                put(VehicleDataType.VEHICLEDATA_ECALLINFO, "ECallInfo");
-                                                put(VehicleDataType.VEHICLEDATA_AIRBAGSTATUS, "AirbagStatus");
-                                                put(VehicleDataType.VEHICLEDATA_EMERGENCYEVENT, "EmergencyEvent");
-                                                put(VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS, "ClusterModeStatus");
-                                                put(VehicleDataType.VEHICLEDATA_MYKEY, "MyKey");
-                                            }};
-
-                                    if (!subscribeVehicleData.isEmpty()) {
-                                        SubscribeVehicleData msg = new SubscribeVehicleData();
-                                        for (VehicleDataType vdt : subscribeVehicleData) {
-                                            setVehicleDataParam(msg, SubscribeVehicleData.class,
-                                                    "set" + methodNamesMap.get(vdt));
-                                        }
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    }
-
-                                    if (!unsubscribeVehicleData.isEmpty()) {
-                                        UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
-                                        for (VehicleDataType vdt : unsubscribeVehicleData) {
-                                            setVehicleDataParam(msg, UnsubscribeVehicleData.class,
-                                                    "set" + methodNamesMap.get(vdt));
-                                        }
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    }
-                                    isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
-
-                                    if (subscribeVehicleData.isEmpty() && unsubscribeVehicleData.isEmpty()) {
-                                        Toast.makeText(mContext, "Nothing new here", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.show();
-                        }
-
-                        private String[] vehicleDataTypeNames() {
-                            return new String[]{ "GPS", "Speed", "RPM",
-                                    "Fuel Level", "Fuel Level State",
-                                    "Fuel Consumption", "External Temp",
-                                    "VIN", "PRNDL", "Tire Pressure",
-                                    "Odometer", "Belt Status",
-                                    "Body Info", "Device Status",
-                                    "Braking", "Wiper Status",
-                                    "Head Lamp Status", "Batt Voltage",
-                                    "Engine Torque", "Acc Pedal",
-                                    "Steering Wheel", "ECall Info",
-                                    "Airbag Status", "Emergency Event",
-                                    "Cluster Mode Status", "MyKey" };
+                            DialogFragment subscriptionsVehicleDataDialog =
+                                    SubscriptionsVehicleDataDialog.newInstance();
+                            subscriptionsVehicleDataDialog.show(getFragmentManager(),
+                                    SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG);
                         }
 
                         private void sendSetGlobalProperties() {
-                            DialogFragment setGlobalPropertiesDialog = SetGlobalPropertiesDialog.newInstance();
-                            setGlobalPropertiesDialog.show(getFragmentManager(), SET_GLOBAL_PROPERTIES_DIALOG_TAG);
+                            DialogFragment setGlobalPropertiesDialog =
+                                    SetGlobalPropertiesDialog.newInstance();
+                            setGlobalPropertiesDialog.show(getFragmentManager(),
+                                    SET_GLOBAL_PROPERTIES_DIALOG_TAG);
                         }
 
                         private void sendResetGlobalProperties() {
@@ -3305,6 +3176,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return chunks;
     }
 
+    /**
+     * Calls the setter with setterName on the msg.
+     */
+    public void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
+        try {
+            Method setter = msgClass.getMethod(setterName, Boolean.class);
+            setter.invoke(msg, true);
+        } catch (NoSuchMethodException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        } catch (IllegalAccessException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        } catch (InvocationTargetException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        }
+    }
+
     public void addSubMenuToList(final SyncSubMenu sm) {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -3331,6 +3218,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     public ArrayAdapter<ImageType> getImageTypeAdapter() {
         return imageTypeAdapter;
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SubscriptionsVehicleDataDialog}
+     *
+     * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
+     */
+    public void onUnsubscribeVehicleDialogResult(UnsubscribeVehicleData unsubscribeVehicleData) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandUnsubscribeVehicleInterface(unsubscribeVehicleData);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SubscriptionsVehicleDataDialog}
+     *
+     * @param subscribeVehicleData {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData}
+     */
+    public void onSubscribeVehicleDialogResult(SubscribeVehicleData subscribeVehicleData) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandSubscribeVehicleInterfaceResumable(subscribeVehicleData);
+        }
     }
 
     /**
@@ -3441,6 +3352,31 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void onPause() {
         super.onPause();
         saveMessageSelectCount();
+    }
+
+    /**
+     * Return a clone of the {@code isVehicleDataSubscribed}
+     * @return a clone of the {@code isVehicleDataSubscribed}
+     */
+    public boolean[] cloneIsVehicleDataSubscribed() {
+        return isVehicleDataSubscribed.clone();
+    }
+
+    /**
+     *
+     * @param position position in the array
+     * @return
+     */
+    public boolean getIsVehicleDataSubscribedAt(int position) {
+        return isVehicleDataSubscribed[position];
+    }
+
+    /**
+     * Set a velue of the {@code isVehicleDataSubscribed} array
+     * @param value
+     */
+    public void setIsVehicleDataSubscribed(boolean[] value) {
+        isVehicleDataSubscribed = value;
     }
 
     /**

@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
@@ -582,9 +583,21 @@ public class RPCRequestFactory {
 
 		return msg;
 	}
-	
+
+    /**
+     * <b>SubscribeButton</b> section
+     *
+     */
+
+    /**
+     * Create {@link com.ford.syncV4.proxy.rpc.SubscribeButton} request
+     *
+     * @param buttonName Name of the button
+     * @param correlationID Correlation Id of the request
+     * @return {@link com.ford.syncV4.proxy.rpc.SubscribeButton} request
+     */
 	public static SubscribeButton buildSubscribeButton(ButtonName buttonName,
-			Integer correlationID) {
+                                                       Integer correlationID) {
 
 		SubscribeButton msg = new SubscribeButton();
 		msg.setCorrelationID(correlationID);
@@ -592,6 +605,29 @@ public class RPCRequestFactory {
 
 		return msg;
 	}
+
+    /**
+     * Create an empty {@link com.ford.syncV4.proxy.rpc.SubscribeButton} request
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.SubscribeButton} request
+     */
+    public static SubscribeButton buildSubscribeButton() {
+        return new SubscribeButton();
+    }
+
+    /**
+     * <b>SubscribeVehicleData</b> section
+     *
+     */
+
+    /**
+     * Create an empty {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData} request
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData} request
+     */
+    public static SubscribeVehicleData buildSubscribeVehicleData() {
+        return new SubscribeVehicleData();
+    }
 	
 	public static UnregisterAppInterface buildUnregisterAppInterface(
 			Integer correlationID) {
