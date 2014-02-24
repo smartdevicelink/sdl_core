@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
     android:versionCode="14"
-    android:versionName="1.3.11 (CW8)" >
+    android:versionName="1.3.11 (CW9)" >
 
     <!-- Version 12 is minimum to support the USB Accessory mode -->
     <uses-sdk android:minSdkVersion="12"/>

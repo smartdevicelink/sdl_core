@@ -1,3 +1,6 @@
+[CW9]
+- Remove AlertManeuver UI.
+
 [CW8]
 * SyncProxyAndroid SDK: App resumption (USB) - SPT doesn't appear at HMI's App List
 + Process Start non RPC Service Nack
