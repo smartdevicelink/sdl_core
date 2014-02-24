@@ -232,8 +232,7 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
   delegate_->setTimeOut(timeout_seconds);
   if (delegate_ && thread_) {
     is_running_ = true;
-    thread_->startWithOptions(
-      threads::ThreadOptions(threads::Thread::kMinStackSize));
+    thread_->startWithOptions(threads::ThreadOptions(16384));
   }
 }
 

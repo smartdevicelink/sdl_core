@@ -54,8 +54,7 @@ SocketStreamerAdapter::SocketStreamerAdapter()
     is_ready_(false),
     messages_(),
     thread_("SocketStreamerAdapter", new Streamer(this)) {
-    thread_.startWithOptions(
-        threads::ThreadOptions(threads::Thread::kMinStackSize));
+    thread_.startWithOptions(threads::ThreadOptions(16384));
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {

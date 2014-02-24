@@ -66,7 +66,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
           )),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,
-          threads::ThreadOptions(threads::Thread::kMinStackSize)) {
+          threads::ThreadOptions(16384)) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
