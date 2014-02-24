@@ -268,11 +268,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         msg.setCorrelationID(6000);
 
         if (mBoundProxyService != null) {
-            try {
-                mBoundProxyService.syncProxySendRPCRequest(msg);
-            } catch (SyncException e) {
-                Log.e(LOG_TAG, "Error sending requestGPStoGetESN: " + e);
-            }
+            mBoundProxyService.syncProxySendRPCRequest(msg);
         }
     }
 
@@ -534,8 +530,6 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             if (mBoundProxyService != null) {
                                 mBoundProxyService.syncProxySendRPCRequest(msg);
                             }
-                        } catch (SyncException e) {
-                            _msgAdapter.logMessage("Error sending syncp to sync: " + e, Log.ERROR, e);
                         } catch (UnsupportedEncodingException e) {
                             Log.e("SyncProxyTester", e.toString());
                         }

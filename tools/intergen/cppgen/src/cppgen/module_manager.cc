@@ -72,20 +72,30 @@ ModuleManager::ModuleManager(const std::string& name)
       structs_source_(module_name_ + "/types.cc", module_name_, false),
       functions_header_(module_name_ + "/functions.h", module_name_, true),
       functions_source_(module_name_ + "/functions.cc", module_name_, false),
+      interface_header_(module_name_ + "/interface.h", module_name_, true),
+      interface_source_(module_name_ + "/interface.cc", module_name_, false),
       additional_validation_source_(module_name_ + "/validation.cc", module_name_, false){
   structs_header_.Include(CppFile::Header("rpc_base/rpc_message.h", true));
   structs_header_.Include(CppFile::Header(enums_header_.file_name(), true));
-  functions_header_.Include(CppFile::Header("rpc_base/rpc_message.h", true));
   functions_header_.Include(CppFile::Header(enums_header_.file_name(), true));
   functions_header_.Include(CppFile::Header(structs_header_.file_name(), true));
+  functions_header_.Include(CppFile::Header(interface_header_.file_name(), true));
+  interface_header_.Include(CppFile::Header("rpc_base/rpc_message.h", true));
+  interface_header_.Include(CppFile::Header(enums_header_.file_name(), true));
   enums_header_.Include(CppFile::Header("string", false));
   enums_source_.Include(CppFile::Header(enums_header_.file_name(), true));
   structs_source_.Include(CppFile::Header(structs_header_.file_name(), true));
   structs_source_.Include(
       CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
-  functions_source_.Include(CppFile::Header(functions_header_.file_name(), true));
+  functions_source_.Include(CppFile::Header(functions_header_.file_name(),
+                                            true));
   functions_source_.Include(
       CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
+
+  interface_source_.Include((CppFile::Header(interface_header_.file_name(),
+                                             true)));
+  interface_source_.Include(CppFile::Header(functions_header_.file_name(),
+                                            true));
 
   additional_validation_source_.Include(
       CppFile::Header(structs_header_.file_name(), true));
@@ -94,6 +104,10 @@ ModuleManager::ModuleManager(const std::string& name)
 }
 
 ModuleManager::~ModuleManager() {
+}
+
+CppFile& ModuleManager::HeaderForInterface() {
+  return interface_header_;
 }
 
 CppFile& ModuleManager::HeaderForEnum(const Enum& enm) {
@@ -119,6 +133,10 @@ CppFile& ModuleManager::HeaderForResponse(const Response& request) {
 CppFile& ModuleManager::HeaderForNotification(
     const Notification& notification) {
   return functions_header_;
+}
+
+CppFile& ModuleManager::SourceForInterface() {
+  return interface_source_;
 }
 
 CppFile& ModuleManager::SourceForEnum(const Enum& enm) {
@@ -150,9 +168,11 @@ bool ModuleManager::Write() {
   if (!CreateDirectory(module_name_)) {
     return false;
   }
-  CppFile* files[] = { &enums_header_, &enums_source_, &structs_header_,
-      &structs_source_, &functions_header_, &functions_source_,
-      &additional_validation_source_ };
+  CppFile* files[] = { &enums_header_, &enums_source_,
+                       &structs_header_, &structs_source_,
+                       &functions_header_, &functions_source_,
+                       &interface_header_, &interface_source_,
+                       &additional_validation_source_ };
   for (size_t i = 0; i != sizeof(files)/sizeof(files[0]); ++i) {
     CppFile* file = files[i];
     std::ofstream stream(file->file_name().c_str());

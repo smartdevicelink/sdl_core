@@ -35,11 +35,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_RESET_GLOBAL_PROPERTIES_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
-
-class Application;
 
 namespace commands {
 // TODO(DK): Include GlobalProperty header
@@ -93,7 +92,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetHelpPromt(application_manager::Application* const app);
+  bool ResetHelpPromt(ApplicationSharedPtr app);
 
   /*
    * @brief  Sets default value of the TIMEOUTPROMT global property
@@ -103,7 +102,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetTimeoutPromt(application_manager::Application* const app);
+  bool ResetTimeoutPromt(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property
@@ -113,7 +112,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitle(application_manager::Application* const app);
+  bool ResetVrHelpTitle(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sets default value of the VRHELPITEMS global property
@@ -123,7 +122,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpItems(application_manager::Application* const app);
+  bool ResetVrHelpItems(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Check if there some not delivered hmi responses exist

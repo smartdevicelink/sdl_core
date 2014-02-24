@@ -1,9 +1,19 @@
-/*! \mainpage Project SmartDeviceLink
-
-This is the entry point to the documentation about project.
-
-This manual is divided in the following sections:
-- \subpage info "General project information"
-- \subpage components "Project components"
-- \subpage tools "Project specific tools"
-*/
+/**
+ * \mainpage Project SmartDeviceLink
+ *
+ * \section introduction Introduction
+ *
+ * This is the entry point to the documentation about project.
+ *
+ * This manual is divided in the following sections:
+ * - \subpage info "General project information"
+ * - \subpage components "Project components"
+ * - \subpage tools "Project specific tools"
+ *
+ * \section installation Installation
+ *
+ * \section developers_info Information for developers
+ *
+ * \section testers_info Information for testers
+ *
+ */

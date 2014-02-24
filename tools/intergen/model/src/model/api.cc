@@ -33,23 +33,29 @@
 #include "model/api.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "model/constant.h"
 #include "pugixml.hpp"
 
 namespace codegen {
 
-API::API(const ModelFilter* model_filter)
+API::API(const ModelFilter* model_filter, bool auto_generate_func_ids)
     : model_filter_(model_filter),
+      auto_generate_func_ids_(auto_generate_func_ids),
       interfaces_deleter_(&interfaces_) {
   assert(model_filter_);
 }
 
 bool API::init(const pugi::xml_document& xmldoc) {
-  for (pugi::xml_node i = xmldoc.child("interface"); i;
-      i = xmldoc.next_sibling("interface")) {
-    interfaces_.push_back(new Interface(&builtin_type_registry_, model_filter_));
-    if (!interfaces_.back()->init(i)) {
+  // Search for interfaces defined directly in given root document
+  if (!AddInterfaces(xmldoc)) {
+    return false;
+  }
+  // Then search for interfaces defined in <interfaces> elements
+  for (pugi::xml_node i = xmldoc.child("interfaces"); i;
+      i = i.next_sibling("interfaces")) {
+    if (!AddInterfaces(i)) {
       return false;
     }
   }
@@ -61,6 +67,40 @@ API::~API() {
 
 const std::vector<Interface*>& API::interfaces() const {
   return interfaces_;
+}
+
+const Interface* API::InterfaceByName(const std::string& name) const {
+  InterfacesIndex::const_iterator i = interfaces_index_.find(name);
+  if (i != interfaces_index_.end()) {
+    size_t interface_id = i->second;
+    assert(interface_id < interfaces_.size());
+    return interfaces_[interface_id];
+  }
+  return NULL;
+}
+
+bool API::AddInterfaces(const pugi::xml_node& xmldoc) {
+  for (pugi::xml_node i = xmldoc.child("interface"); i;
+      i = i.next_sibling("interface")) {
+    Interface* interface = new Interface(this,
+                                         auto_generate_func_ids_,
+                                         &builtin_type_registry_,
+                                         model_filter_);
+    interfaces_.push_back(interface);
+    if (!interface->init(i)) {
+      return false;
+    }
+    bool inserted = interfaces_index_.insert(
+          std::make_pair(
+            interface->name(),
+            interfaces_.size() - 1)
+        ).second;
+    if (!inserted) {
+      std::cerr << "Duplicate interface: " << interface->name() << '\n';
+      return false;
+    }
+  }
+  return true;
 }
 
 }  // namespace codegen

@@ -52,7 +52,7 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_INFO(logger_, "ShowRequest::Run");
 
-  Application* app = application_manager::ApplicationManagerImpl::instance()
+  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application(
       (*message_)[strings::params][strings::connection_key].asInt());
 

@@ -51,10 +51,10 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
 
-  const Application* app = ApplicationManagerImpl::instance()
+  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()
   ->application(connection_key());
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

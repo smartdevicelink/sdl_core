@@ -75,7 +75,8 @@ SDL.NonMediaController = Em.Object.create( {
         // FFW.BasicCommunication.ActivateApp( applicationModel.appID );
 
         // Go to SDL state
-        SDL.States.goToStates('info.nonMedia');
+        SDL.InfoController.turnOnSDL();
+        //SDL.States.goToStates('info.nonMedia');
     },
 
     /**

@@ -50,7 +50,7 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -80,7 +80,7 @@ void DeleteSubMenuRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params, true);
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
+void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app) {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuVRCommands");
 
   const CommandsMap& commands = app->commands_map();
@@ -105,7 +105,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(Application* const app) {
   }
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuUICommands(Application* const app) {
+void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const app) {
   LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuUICommands");
 
   const CommandsMap& commands = app->commands_map();
@@ -149,10 +149,10 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      Application* application =
+      ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());
 
-      if (NULL == application) {
+      if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
         return;
       }

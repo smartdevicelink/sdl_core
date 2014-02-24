@@ -43,6 +43,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
+#include "utils/shared_ptr.h"
 
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_packet.h"
@@ -65,6 +66,11 @@ class MessagesToMobileAppHandler;
 
 using transport_manager::TransportManagerListenerEmpty;
 
+/**
+ * @brief Type definition for variable that hold shared pointer to raw message.
+ */
+typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+
 typedef std::multimap<int32_t, RawMessagePtr> MessagesOverNaviMap;
 typedef std::set<ProtocolObserver*> ProtocolObservers;
 typedef transport_manager::ConnectionUID ConnectionID;
@@ -77,18 +83,20 @@ namespace impl {
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct RawFordMessageFromMobile: public RawMessagePtr {
-  explicit RawFordMessageFromMobile(const RawMessagePtr& message)
-      : RawMessagePtr(message) {}
+struct RawFordMessageFromMobile: public ProtocolFramePtr {
+  explicit RawFordMessageFromMobile(const ProtocolFramePtr& message)
+      : ProtocolFramePtr(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
+      get()->service_type())).OrderingValue(); }
 };
 
-struct RawFordMessageToMobile: public RawMessagePtr {
-  explicit RawFordMessageToMobile(const RawMessagePtr& message, bool final_message)
-      : RawMessagePtr(message), is_final(final_message) {}
+struct RawFordMessageToMobile: public ProtocolFramePtr {
+  explicit RawFordMessageToMobile(const ProtocolFramePtr& message, bool final_message)
+      : ProtocolFramePtr(message), is_final(final_message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
+      get()->service_type())).OrderingValue(); }
   // Signals wether connection to mobile must be closed after processing this message
   bool is_final;
 };
@@ -343,7 +351,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMessage(
       ConnectionID connection_id ,
-      ProtocolPacket* packet);
+      const ProtocolFramePtr& packet);
 
     /**
      * \brief Handles message received in multiple frames. Collects all frames
@@ -355,7 +363,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMultiFrameMessage(
       ConnectionID connection_id ,
-      ProtocolPacket* packet);
+      const ProtocolFramePtr& packet);
 
     /**
      * \brief Handles message received in single frame.
@@ -366,7 +374,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleControlMessage(
       ConnectionID connection_id ,
-      const ProtocolPacket& packet);
+      const ProtocolFramePtr& packet);
 
     RESULT_CODE HandleControlMessageEndSession(
       ConnectionID connection_id ,
@@ -418,7 +426,7 @@ class ProtocolHandlerImpl
     /**
      *\brief Map of frames for messages received in multiple frames.
      */
-    std::map<int32_t, ProtocolPacket*> incomplete_multi_frame_messages_;
+    std::map<int32_t, ProtocolFramePtr> incomplete_multi_frame_messages_;
 
     /**
      * \brief Map of messages (frames) recieved over mobile nave session

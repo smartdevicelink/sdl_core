@@ -1,7 +1,4 @@
-/**
- * \file appMain.hpp
- * \brief SmartDeviceLink main application header
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,15 +29,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_APPMAIN_APPMAIN_H_
-#define SRC_APPMAIN_APPMAIN_H_
+#include <ostream>
 
-/**
- * \namespace NsSmartDeviceLink
- * \brief SmartDeviceLink main Application related functions.
- */
-namespace NsSmartDeviceLink {
+#include "cppgen/message_handle_with_method.h"
+#include "utils/safeformat.h"
 
-}  // namespace NsSmartDeviceLink
+using typesafe_format::strmfmt;
 
-#endif  // SRC_APPMAIN_APPMAIN_H_
+namespace codegen {
+
+MessageHandleWithMethod::MessageHandleWithMethod(const std::string& class_name)
+    : CppFunction(class_name, "HandleWith", "void", kVirtual),
+      class_name_(class_name){
+  Add(Parameter("handler", "Handler*"));
+}
+
+void MessageHandleWithMethod::DefineBody(std::ostream* os) const {
+  strmfmt(*os, "return handler->Handle{0}(*this);",
+          class_name_) << '\n';
+}
+
+} // namespace codegen
+

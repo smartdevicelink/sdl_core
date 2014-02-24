@@ -100,6 +100,7 @@ class EventDispatcher : public utils::Singleton<EventDispatcher> {
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 
   FRIEND_BASE_SINGLETON_CLASS_INSTANCE(EventDispatcher);
+  FRIEND_DELETER_DESTRUCTOR(EventDispatcher);
 
   // Data types section
   typedef std::list<EventObserver*>                   ObserverList;

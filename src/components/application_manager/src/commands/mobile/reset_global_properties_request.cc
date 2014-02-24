@@ -61,9 +61,9 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -186,8 +186,8 @@ void ResetGlobalPropertiesRequest::Run() {
 }
 
 bool ResetGlobalPropertiesRequest::ResetHelpPromt(
-    application_manager::Application* const app) {
-  if (NULL == app) {
+    application_manager::ApplicationSharedPtr app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
@@ -213,8 +213,8 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
 }
 
 bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
-    application_manager::Application* const app) {
-  if (NULL == app) {
+    application_manager::ApplicationSharedPtr const app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
@@ -240,8 +240,8 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
 }
 
 bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
-    application_manager::Application* const app) {
-  if (NULL == app) {
+    application_manager::ApplicationSharedPtr const app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
@@ -252,8 +252,8 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
 }
 
 bool ResetGlobalPropertiesRequest::ResetVrHelpItems(
-    application_manager::Application* const app) {
-  if (NULL == app) {
+    application_manager::ApplicationSharedPtr const app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;

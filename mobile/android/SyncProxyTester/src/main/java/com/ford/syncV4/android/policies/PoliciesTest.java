@@ -165,11 +165,7 @@ public class PoliciesTest {
 			 */
             if (sProxyService != null) {
                 //sendRPCRequestPrivate(encodedSyncPDataRequest);
-                try {
-                    sProxyService.syncProxySendRPCRequest(encodedSyncPDataRequest);
-                } catch (SyncException e) {
-                    sMsgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
-                }
+                sProxyService.syncProxySendRPCRequest(encodedSyncPDataRequest);
             }
             return returnVal;
         } catch (JSONException e) {

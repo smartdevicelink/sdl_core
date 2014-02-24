@@ -49,10 +49,10 @@ SpeakRequest::~SpeakRequest() {
 void SpeakRequest::Run() {
   LOG4CXX_INFO(logger_, "SpeakRequest::Run");
 
-  Application* app = application_manager::ApplicationManagerImpl::instance()
+  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
                      ->application(connection_key());
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -82,10 +82,10 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 void SpeakRequest::ProcessTTSSpeakResponse(
   const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_, "SpeakRequest::ProcessTTSSpeakResponse");
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
                                connection_key());
 
-  if (NULL == application) {
+  if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }

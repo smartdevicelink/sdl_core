@@ -51,7 +51,7 @@ void DeleteFileResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileResponse::Run");
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

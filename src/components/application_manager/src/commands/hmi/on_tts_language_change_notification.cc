@@ -64,12 +64,12 @@ void OnTTSLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  const std::set<Application*> applications =
+  const std::set<ApplicationSharedPtr> applications =
       ApplicationManagerImpl::instance()->applications();
 
-  std::set<Application*>::iterator it = applications.begin();
+  std::set<ApplicationSharedPtr>::iterator it = applications.begin();
   for (;applications.end() != it; ++it) {
-    Application* app = (*it);
+    ApplicationSharedPtr app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 

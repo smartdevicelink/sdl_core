@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_PERFORM_INTERACTION_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/timer_thread.h"
 #include "utils/macro.h"
 
@@ -117,7 +118,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendVrDeleteCommand(application_manager::Application* const app);
+  void SendVrDeleteCommand(ApplicationSharedPtr app);
 
   /*
    * @brief Sends PerformInteraction response to mobile side
@@ -134,7 +135,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendVRAddCommandRequest(application_manager::Application* const app);
+  void SendVRAddCommandRequest(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -143,7 +144,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    */
   void SendUIPerformInteractionRequest(
-      application_manager::Application* const app);
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sends TTS PerformInteraction request to HMI
@@ -152,7 +153,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    */
   void SendTTSPerformInteractionRequest(
-      application_manager::Application* const app);
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Prepare request for sending to HMI
@@ -167,13 +168,13 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    * @param app_id Application ID
    */
-  void SendUIShowVRHelpRequest(Application* const app);
+  void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
 
   /**
    * @brief Creates and Sends Perform interaction to UI.
    */
   void CreateUIPerformInteraction(const smart_objects::SmartObject& msg_params,
-                                  application_manager::Application* const app);
+                                  application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
@@ -183,7 +184,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar menu names in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetMenuNames(application_manager::Application* const app);
+  bool CheckChoiceSetMenuNames(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -193,7 +194,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar VR synonyms in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetVRSynonyms(application_manager::Application* const app);
+  bool CheckChoiceSetVRSynonyms(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -204,7 +205,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return TRUE if vrHelpItems positions are sequential,
    * otherwise FALSE
    */
-  bool CheckVrHelpItemPositions(application_manager::Application* const app);
+  bool CheckVrHelpItemPositions(application_manager::ApplicationSharedPtr const app);
 
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;

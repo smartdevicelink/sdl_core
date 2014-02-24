@@ -27,7 +27,7 @@
  * @name SDL.StatusNavigationView
  * @desc Component for Navigation Status bar
  * @category view
- * @filesource app/view/navigation/StatusNavigationView.js
+ * @filesource app/view/home/statusNavigationView.js
  * @version 1.0
  */
 SDL.StatusNavigationView = Em.ContainerView.extend( {

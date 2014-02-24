@@ -182,8 +182,6 @@
 #include "application_manager/commands/hmi/navi_show_constant_tbt_request.h"
 #include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
-#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
-#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_request.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
@@ -948,14 +946,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviIsReadyResponse(message));
       } else {
         command.reset(new commands::NaviIsReadyRequest(message));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      if (is_response) {
-        command.reset(new commands::NaviAlertManeuverResponse(message));
-      } else {
-        command.reset(new commands::NaviAlertManeuverRequest(message));
       }
       break;
     }

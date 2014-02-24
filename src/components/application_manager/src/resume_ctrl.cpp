@@ -27,16 +27,16 @@ void ResumeCtrl::SaveAllApplications() {
     LOG4CXX_ERROR(logger_, "application_manager_ is NULL");
     return ;
   }
-  std::set<Application*>::iterator it = 
+  std::set<ApplicationSharedPtr>::iterator it = 
 								  app_mngr_->application_list_.begin();
-  std::set<Application*>::iterator it_end =
+  std::set<ApplicationSharedPtr>::iterator it_end =
 								   app_mngr_->application_list_.end();
   for (; it != it_end; ++it) {
     SaveApplication(*it);
   }
 }
 
-void ResumeCtrl::SaveApplication(Application* application) {
+void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   LOG4CXX_INFO(logger_, " ResumeCtrl::SaveApplication");
 
   std::string mac_adddress = GetMacAddress(application);
@@ -133,7 +133,7 @@ void ResumeCtrl::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& smart_object = event.smart_object();
   uint32_t corr_id = smart_object[strings::params][strings::correlation_id].asUInt();
-  Application* application;
+  ApplicationSharedPtr application;
   for (std::list<ResumingApp*>::iterator it = resuming_applications_.begin();
       it != resuming_applications_.end(); ) {
     if ((*it)->correlation_id == corr_id) {
@@ -163,7 +163,7 @@ void ResumeCtrl::on_event(const event_engine::Event& event) {
   }
 }
 
-bool ResumeCtrl::RestoreApplicationHMILevel(Application* application) {
+bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::RestoreApplicationHMILevel");
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
@@ -178,7 +178,7 @@ bool ResumeCtrl::RestoreApplicationHMILevel(Application* application) {
   return false;
 }
 
-bool ResumeCtrl::ApplicationIsSaved(const Application* application) {
+bool ResumeCtrl::ApplicationIsSaved(ApplicationConstSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::ApplicationIsSaved "
 						<< application->mobile_app_id());
 
@@ -191,7 +191,7 @@ bool ResumeCtrl::ApplicationIsSaved(const Application* application) {
   return false;
 }
 
-bool ResumeCtrl::RemoveApplicationFromSaved(const Application *application) {
+bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr application) {
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
             it != saved_applications_.end(); ) {
     if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
@@ -231,7 +231,7 @@ void ResumeCtrl::SavetoFS() {
   file.close();
 }
 
-bool ResumeCtrl::StartResumption(Application* application) {
+bool ResumeCtrl::StartResumption(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption");
 
   bool is_saved = ApplicationIsSaved(application);
@@ -298,7 +298,7 @@ void ResumeCtrl::sendResumptionRequest(ResumingApp* application) {
 }
 
 
-std::string ResumeCtrl::GetMacAddress(const Application* application) {
+std::string ResumeCtrl::GetMacAddress(ApplicationConstSharedPtr application) {
    LOG4CXX_INFO(logger_, "ResumeCtrl::GetMacAddress");
 
    if (0 == app_mngr_->connection_handler_) {

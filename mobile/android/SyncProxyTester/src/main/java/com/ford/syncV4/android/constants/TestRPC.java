@@ -67,15 +67,15 @@ public class TestRPC {
 		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 			rpc = new ResetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.AddCommand)) {
-			rpc = new AddCommand();
+			rpc = RPCRequestFactory.buildAddCommand();
 		} else if (functionName.equalsIgnoreCase(Names.DeleteCommand)) {
 			rpc = new DeleteCommand();
 		} else if (functionName.equalsIgnoreCase(Names.AddSubMenu)) {
-			rpc = new AddSubMenu();
+			rpc = RPCRequestFactory.buildAddSubMenu();
 		} else if (functionName.equalsIgnoreCase(Names.DeleteSubMenu)) {
 			rpc = new DeleteSubMenu();
 		} else if (functionName.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
-			rpc = new CreateInteractionChoiceSet();
+			rpc = RPCRequestFactory.buildCreateInteractionChoiceSet();
 		} else if (functionName.equalsIgnoreCase(Names.PerformInteraction)) {
 			rpc = new PerformInteraction();
 		} else if (functionName.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {

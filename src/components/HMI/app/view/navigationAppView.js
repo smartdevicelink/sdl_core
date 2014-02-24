@@ -24,15 +24,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.MediaNavigationView
+ * @name SDL.NavigationAppView
  * @desc Navigation component
  * @category View
- * @filesource app/view/mediaNavigationView.js
+ * @filesource app/view/navigationAppView.js
  * @version 1.0
  */
-SDL.MediaNavigationView = Em.ContainerView.create( {
+SDL.NavigationAppView = Em.ContainerView.create( {
     /** View Id */
-    elementId: 'MediaNavigationView',
+    elementId: 'NavigationAppView',
 
     classNameBindings: [
         'this.activeState:active_state:inactive_state'
@@ -41,12 +41,12 @@ SDL.MediaNavigationView = Em.ContainerView.create( {
     activeState: function(){
         if (SDL.TurnByTurnView.activeTBT) {
             return false;
-        } else if (SDL.States.media.sdlmedia.mediaNavigation.active) {
+        } else if (SDL.States.navigationApp.active) {
             return true;
         } else {
             return false;
         }
-    }.property('SDL.States.media.sdlmedia.mediaNavigation.active', 'SDL.TurnByTurnView.activeTBT'),
+    }.property('SDL.States.navigationApp.active', 'SDL.TurnByTurnView.activeTBT'),
 
     childViews: [
         'videoView',

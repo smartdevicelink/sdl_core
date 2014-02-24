@@ -73,7 +73,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                              default_timeout());
   }
 
-  Application* application =
+  ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
   if (application) {
@@ -102,7 +102,7 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  Application* app =
+  ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   const smart_objects::SmartObject& msg_params =
@@ -232,7 +232,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
 
-    Application* application = ApplicationManagerImpl::instance()->application(
+    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
         connection_key());
 
     LOG4CXX_WARN_EXT(
@@ -332,6 +332,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         *(hmi_capabilities.prerecorded_speech());
   }
 
+  const std::vector<uint32_t>& diag_modes =
+      profile::Profile::instance()->supported_diag_modes();
+  if (!diag_modes.empty()) {
+    std::vector<uint32_t>::const_iterator it = diag_modes.begin();
+    uint32_t index = 0;
+    for (; it != diag_modes.end(); ++it) {
+      response_params[strings::supported_diag_modes][index] = *it;
+      ++index;
+    }
+  }
+
+
   SendResponse(true, result, "", params);
 }
 
@@ -345,8 +357,8 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
-  const std::set<Application*>& applications = app_manager->applications();
-  std::set<Application*>::const_iterator it = applications.begin();
+  const std::set<ApplicationSharedPtr>& applications = app_manager->applications();
+  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   const std::string app_name = msg_params[strings::app_name].asString();
 
   for (; applications.end() != it; ++it) {
@@ -536,11 +548,11 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
 
-  const std::set<Application*>& applications =
+  const std::set<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications();
 
-  std::set<Application*>::const_iterator it = applications.begin();
-  std::set<Application*>::const_iterator it_end = applications.end();
+  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
+  std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
     if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {

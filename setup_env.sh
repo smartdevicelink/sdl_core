@@ -363,11 +363,11 @@ fi
 QT5_HMI=false
 QT4_HMI=false
 
-if $INSTALL_QT_HMI; then
-    if $INSTALL_ALL; then
-        QT5_HMI=true
-        QT4_HMI=true
-    elif $INSTALL_QNX_TOOLS; then
+if $INSTALL_ALL; then
+   QT5_HMI=true
+   QT4_HMI=true
+elif $INSTALL_QT_HMI; then
+    if $INSTALL_QNX_TOOLS; then
         QT4_HMI=true
     else
         QT5_HMI=true

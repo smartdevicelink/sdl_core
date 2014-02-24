@@ -1820,29 +1820,11 @@
       <param name="application" type="Common.HMIApplication" mandatory="true">
         <description>The information about application registered. See HMIApplication. </description>
       </param>
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>Flag to indicate if application may be resumed in future</description>
-      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the application unregistered</description>
-      </param>
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>Flag to indicate if application may be resumed in future</description>
-      </param>
-    </function>
-    <function name="GetResumeResult" messagetype="request">
-      <description>Issued by SDL to request HMI resumption check.</description>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of the registered application that will be resumed</description>
-      </param>
-    </function>
-    <function name="GetResumeResult" messagetype="response">
-      <description>Issued by HMI to notify SDL about application resumption check.</description>
-      <param name="result" type="Boolean" mandatory="true">
-        <description>Flag to indicate if applications data check was successfull</description>
       </param>
     </function>
     <function name="OnExitApplication" messagetype="notification">

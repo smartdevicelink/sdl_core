@@ -87,10 +87,10 @@ class PrimitiveType {
 };
 
 /*
- * Base class for all composite types (arrays and all user-defined types)
+ * Helper class for all composite types (arrays and all user-defined types)
  */
 class CompositeType {
- protected:
+ public:
   template<class T, size_t minsize, size_t maxsize>
   static void WriteJsonField(const char* field_name,
                              const Array<T, minsize, maxsize>& field,
@@ -205,7 +205,7 @@ class Enum : public PrimitiveType {
 };
 
 template<typename T, size_t minsize, size_t maxsize>
-class Array : public std::vector<T>, public CompositeType {
+class Array : public std::vector<T> {
  public:
   // Types
   typedef std::vector<T> ArrayType;
@@ -227,7 +227,7 @@ class Array : public std::vector<T>, public CompositeType {
 };
 
 template<typename T, size_t minsize, size_t maxsize>
-class Map : public std::map<std::string, T>, public CompositeType {
+class Map : public std::map<std::string, T> {
  public:
   // Types
   typedef std::map<std::string, T> MapType;
@@ -264,7 +264,7 @@ class Mandatory : public T {
 };
 
 template<typename T>
-class Optional : public CompositeType {
+class Optional {
  public:
   // Methods
   Optional();

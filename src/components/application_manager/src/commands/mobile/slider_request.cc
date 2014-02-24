@@ -62,11 +62,11 @@ bool SliderRequest::Init() {
 void SliderRequest::Run() {
   LOG4CXX_INFO(logger_, "SliderRequest::Run");
 
-  Application* application_impl =
+  ApplicationSharedPtr application =
       application_manager::ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == application_impl) {
+  if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -94,7 +94,7 @@ void SliderRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = application_impl->app_id();
+  msg_params[strings::app_id] = application->app_id();
 
   if (!(*message_)[strings::msg_params].keyExists(strings::timeout)) {
     msg_params[strings::timeout] = default_timeout_;

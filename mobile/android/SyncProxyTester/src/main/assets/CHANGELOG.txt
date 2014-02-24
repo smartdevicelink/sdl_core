@@ -1,6 +1,7 @@
 [CW8]
 + SyncProxyAndroid SDK: heartbeat service type 0 added
 + SyncProxyAndroid SDK: heartbeat is back
+* SyncProxyAndroid SDK: App resumption (USB) - SPT doesn't appear at HMI's App List
 + Process Start non RPC Service Nack
 + SyncProxyAndroid SDK: Add PredefinedLayout enum.
 + Add DiagnosticMessage request UI.

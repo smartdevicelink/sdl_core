@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
+#include "rpc_base/rpc_message.h"
 
-namespace application_manager {
+#include "json/value.h"
 
-namespace commands {
+namespace rpc {
 
-NaviAlertManeuverRequest::NaviAlertManeuverRequest(
-  const MessageSharedPtr& message) : RequestToHMI(message) {
-}
-
-NaviAlertManeuverRequest::~NaviAlertManeuverRequest() {
-}
-
-void NaviAlertManeuverRequest::Run() {
-  LOG4CXX_INFO(logger_, "NaviAlertManeuverRequest::Run");
-
-  SendRequest();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
-
+}  // namespace rpc

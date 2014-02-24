@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy.rpc;
 
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 
@@ -44,7 +45,7 @@ public class ChoiceTest extends TestCase {
     private CreateInteractionChoiceSet createCreateInteractionChoiceSet(Choice choice) {
         Vector<Choice> choiceVector = new Vector<Choice>();
         choiceVector.add(choice);
-        CreateInteractionChoiceSet choiceSet = new CreateInteractionChoiceSet();
+        CreateInteractionChoiceSet choiceSet = RPCRequestFactory.buildCreateInteractionChoiceSet();
         choiceSet.setChoiceSet(choiceVector);
         return choiceSet;
     }

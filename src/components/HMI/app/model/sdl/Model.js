@@ -58,7 +58,7 @@ SDL.SDLModel = Em.Object.create({
     timeStamp: null,
 
     /**
-     * Video player object for navigation
+     * Video player object for navigationApp
      *
      * @type {Object}
      */
@@ -224,7 +224,7 @@ SDL.SDLModel = Em.Object.create({
 
 
     /**
-     * Info navigation data for ShowConstantTBT request
+     * Info navigationApp data for ShowConstantTBT request
      *
      * @type: {Object}
      */
@@ -494,17 +494,17 @@ SDL.SDLModel = Em.Object.create({
             }),
             videoChild = null;
 
-        SDL.MediaNavigationView.removeChild(SDL.MediaNavigationView.get('videoView'));
-        SDL.MediaNavigationView.rerender();
+        SDL.NavigationAppView.removeChild(SDL.NavigationAppView.get('videoView'));
+        SDL.NavigationAppView.rerender();
 
         SDL.SDLController.getApplicationModel(appID).set('navigationStream', null);
 
         //this.pauseVideo();
 
-        videoChild = SDL.MediaNavigationView.createChildView(createVideoView);
+        videoChild = SDL.NavigationAppView.createChildView(createVideoView);
 
-        SDL.MediaNavigationView.get('childViews').pushObject(videoChild);
-        SDL.MediaNavigationView.set('videoView', videoChild);
+        SDL.NavigationAppView.get('childViews').pushObject(videoChild);
+        SDL.NavigationAppView.set('videoView', videoChild);
     },
 
     /**
@@ -520,7 +520,7 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to set navigation streaming url to current app model
+     * Method to set navigationApp streaming url to current app model
      *
      * @param {Number}
      */
@@ -531,7 +531,7 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to reset navigation streaming url from current app model
+     * Method to reset navigationApp streaming url from current app model
      */
     playVideo: function(){
         if (SDL.SDLAppController.model.navigationStream !== null) {
@@ -779,17 +779,6 @@ SDL.SDLModel = Em.Object.create({
 
             img.src = message.syncFileName.value;
         }
-    },
-
-    /**
-     * SDL UI Alert Maneuver response handler show popup window
-     *
-     * @param {Object}
-     *            message Object with parameters come from SDLCore
-     */
-    onNavigationAlertManeuver: function (message) {
-
-        SDL.AlertManeuverPopUp.AlertManeuverActive(message);
     },
 
     /**

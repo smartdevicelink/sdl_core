@@ -57,12 +57,12 @@ void OnVehicleDataNotification::Run() {
 
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-      const std::vector<Application*>& applications =
+      const std::vector<ApplicationSharedPtr>& applications =
           ApplicationManagerImpl::instance()->applications_by_ivi((static_cast<uint32_t>(it->second)));
 
-      std::vector<Application*>::const_iterator it = applications.begin();
+      std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
       for (; applications.end() != it; ++it) {
-        Application* app = *it;
+        ApplicationSharedPtr app = *it;
         if (!app) {
           LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
           continue;

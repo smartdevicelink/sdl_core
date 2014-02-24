@@ -58,10 +58,10 @@ AddCommandRequest::~AddCommandRequest() {
 void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -174,8 +174,8 @@ void AddCommandRequest::Run() {
   }
 }
 
-bool AddCommandRequest::CheckCommandName(const Application* app) {
-  if (NULL == app) {
+bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
+  if (!app) {
     return false;
   }
 
@@ -199,8 +199,8 @@ bool AddCommandRequest::CheckCommandName(const Application* app) {
   return true;
 }
 
-bool AddCommandRequest::CheckCommandVRSynonym(const Application* app) {
-  if (NULL == app) {
+bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
+  if (!app) {
     return false;
   }
 
@@ -261,8 +261,8 @@ bool AddCommandRequest::CheckMenuName() {
   return true;
 }
 
-bool AddCommandRequest::CheckCommandParentId(const Application* app) {
-  if (NULL == app) {
+bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
+  if (!app) {
     return false;
   }
 
@@ -313,10 +313,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   if (!IsPendingResponseExist()) {
-    Application* application =
+    ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
 
-    if (NULL == application) {
+    if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }

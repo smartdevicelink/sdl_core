@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,29 +28,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
-#include "application_manager/event_engine/event.h"
-#include "interfaces/HMI_API.h"
 
-namespace application_manager {
+#ifndef CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H
+#define CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H
 
-namespace commands {
+#include "cppgen/cpp_function.h"
 
-NaviAlertManeuverResponse::NaviAlertManeuverResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+namespace codegen {
 
-NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
-}
+/*
+ * Generates declaration and definiton of HandleWith method
+ * that is required in every structure representing a message.
+ * This method takes Message Handler implementation and calls
+ * Appropriate function on it to handle current message.
+ * (see Visitor pattern).
+ */
+class MessageHandleWithMethod: public CppFunction {
+public:
+  MessageHandleWithMethod(const std::string& class_name);
 
-void NaviAlertManeuverResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviAlertManeuverResponse::Run");
+protected:
+  // CppFunction methods
+  virtual void DefineBody(std::ostream* os) const;
+private:
+  // Fields
+  std::string class_name_;
+};
 
-  event_engine::Event event(hmi_apis::FunctionID::Navigation_AlertManeuver);
-  event.set_smart_object(*message_);
-  event.raise();
-}
+} // namespace codegen
 
-}  // namespace commands
-
-}  // namespace application_manager
+#endif // CODEGEN_MESSAGE_HANDLE_WITH_METHOD_H

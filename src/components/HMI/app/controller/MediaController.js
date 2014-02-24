@@ -70,7 +70,7 @@ SDL.MediaController = Em.Object.create({
         if (SDL.SDLAppController.model.appType) {
             for (var i = 0; i < SDL.SDLAppController.model.appType.length; i++) {
                 if (SDL.SDLAppController.model.appType[i] == "NAVIGATION") {
-                    SDL.States.goToStates('media.sdlmedia.mediaNavigation.baseNavigation');
+                    SDL.States.goToStates('navigationApp.baseNavigation');
                     return;
                 }
             }

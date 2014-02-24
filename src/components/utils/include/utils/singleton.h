@@ -39,7 +39,35 @@
 
 namespace utils {
 
+namespace deleters {
+
+class DummyDeleter {
+ public:
+  void grab(void* pointer) {
+  }
+};
+
 template<typename T>
+class Deleter {
+ public:
+  Deleter() : pointer_(0) {
+  }
+  ~Deleter() {
+    if (pointer_) {
+      delete pointer_;
+      pointer_ = NULL;
+    }
+  }
+  void grab(T* pointer) {
+    pointer_ = pointer;
+  }
+ private:
+  T* pointer_;
+};
+
+}  // namespace deleters
+
+template<typename T, class Deleter = deleters::DummyDeleter >
 class Singleton {
 /**
  * @brief Singleton template
@@ -52,8 +80,14 @@ class Singleton {
  *
  * FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MySingleton);
  *
- * This template does not provide any delete method,
- * pointer to instance must be deleted explicitly
+ * Instance of this class (if created) can be deleted by Deleter destructor
+ * which is called after main() (or from exit())
+ * This requires T destructor to be accessible for Deleter (e.g. public)
+ * Deleter template parameter can be specified with any class
+ * with public default constructor, destructor and method
+ * void grab(T*);
+ * Default Deleter specification deletes instance -
+ * that is, instance must not be deleted explicitly
  */
  public:
 /**
@@ -62,9 +96,10 @@ class Singleton {
   static T* instance();
 };
 
-template<typename T>
-T* Singleton<T>::instance() {
+template<typename T, class Deleter>
+T* Singleton<T, Deleter>::instance() {
   static T* instance = 0;
+  static Deleter deleter;
   static sync_primitives::Lock lock;
 
   T* local_instance = 0;
@@ -76,6 +111,7 @@ T* Singleton<T>::instance() {
     if (!local_instance) {
       local_instance = new T();
       memory_barrier();
+      deleter.grab(local_instance);
       atomic_or(&instance, local_instance); // we know that instance = 0 before this instruction
     }
     lock.Release();

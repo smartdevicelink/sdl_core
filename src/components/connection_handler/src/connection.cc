@@ -64,6 +64,8 @@ Connection::~Connection() {
 }
 
 int32_t Connection::AddNewSession() {
+  sync_primitives::AutoLock lock(session_map_lock_);
+
   int32_t result = -1;
 
   if (session_map_.empty()) {
@@ -89,6 +91,7 @@ int32_t Connection::AddNewSession() {
 }
 
 int32_t Connection::RemoveSession(uint8_t session) {
+  sync_primitives::AutoLock lock(session_map_lock_);
   int32_t result = -1;
   SessionMapIterator it = session_map_.find(session);
   if (session_map_.end() == it) {
@@ -102,6 +105,7 @@ int32_t Connection::RemoveSession(uint8_t session) {
 }
 
 bool Connection::AddNewService(uint8_t session, uint8_t service) {
+  sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 
   SessionMapIterator session_it = session_map_.find(session);
@@ -124,6 +128,7 @@ bool Connection::AddNewService(uint8_t session, uint8_t service) {
 }
 
 bool Connection::RemoveService(uint8_t session, uint8_t service) {
+  sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 
   SessionMapIterator session_it = session_map_.find(session);
@@ -153,7 +158,8 @@ DeviceHandle Connection::connection_device_handle() {
   return connection_device_handle_;
 }
 
-const SessionMap& Connection::session_map() {
+const SessionMap Connection::session_map() const {
+  sync_primitives::AutoLock lock(session_map_lock_);
   return session_map_;
 }
 

@@ -59,7 +59,9 @@ StructTypeMandatoryConstructor::StructTypeMandatoryConstructor(
     const Struct::Field& field = *i;
     if (field.default_value() || field.is_mandatory()) {
       Add(Parameter(field.name(),
-                    TypeNameGenerator(field.type()).result()));
+                    TypeNameGenerator(
+                      &strct->interface(),
+                      field.type()).result()));
       Add(Initializer(field.name(), field.name()));
     }
   }

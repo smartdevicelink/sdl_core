@@ -46,6 +46,7 @@
 
 
 namespace codegen {
+class Interface;
 
 class Array : public Type {
  public:
@@ -95,11 +96,19 @@ class Enum : public Type, public ConstantsCreator {
   class Constant;
   typedef std::list<Enum::Constant> ConstantsList;
   typedef std::map<std::string, Constant*> ConstantsByName;
+public:
+  // Constants
+  // Name of enum that enlists IDs of all interface functions
+  static const char* kFunctionIdEnumName;
  public:
   // Methods
-  Enum(const std::string& name, Scope scope, InternalScope internal_scope,
+  Enum(const Interface* interface,
+       const std::string& name,
+       Scope scope,
+       InternalScope internal_scope,
        const Description& description);
   ~Enum();
+  const Interface& interface() const;
   const std::string& name() const;
   const ConstantsList& constants() const;
   const ConstantsByName& constants_by_name() const;
@@ -123,6 +132,7 @@ class Enum : public Type, public ConstantsCreator {
                    const std::string& design_description);
  private:
   // Fields
+  const Interface* interface_;
   std::string name_;
   ConstantsList constants_;
   Scope scope_;
@@ -144,8 +154,11 @@ class Struct : public Type {
   typedef std::vector<Field> FieldsList;
  public:
   // Methods
-  Struct(const std::string& name, Scope scope, const Description& description);
+  Struct(const Interface* interface,
+         const std::string& name, Scope scope,
+         const Description& description);
   ~Struct();
+  const Interface& interface() const;
   const std::string& name() const;
   const Description& description() const;
   const FieldsList& fields() const;
@@ -159,6 +172,7 @@ class Struct : public Type {
 
  private:
   // Fields
+  const Interface* interface_;
   std::string name_;
   Scope scope_;
   Description description_;
@@ -198,17 +212,21 @@ class Struct::Field {
 
 class Typedef : public Type {
  public:
-  Typedef(const std::string& name, const Type* type,
+  Typedef(const Interface* interface,
+          const std::string& name,
+          const Type* type,
           const Description& description);
 
   // codegen::Type methods
   virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
   virtual const ConstantsCreator* SupportsConstants() const;
   const Description& description() const;
+  const Interface& interface() const;
   const std::string& name() const;
   const Type* type() const;
 
  private:
+  const Interface* interface_;
   std::string name_;
   const Type* type_;
   Description description_;

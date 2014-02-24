@@ -4,15 +4,22 @@ import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.marshal.IJsonRPCMarshaller;
+import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
+import com.ford.syncV4.protocol.enums.FunctionID;
+import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
+import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
+import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.streaming.H264Packetizer;
@@ -33,6 +40,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.Hashtable;
 
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
@@ -410,6 +418,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolMessageReceived(ProtocolMessage msg) {
         _connectionListener.onProtocolMessageReceived(msg);
+
+        // Unblock USB reader thread by this method
+        FunctionID functionID = new FunctionID();
+        if (functionID.getFunctionName(msg.getFunctionID()).equals(Names.OnAppInterfaceUnregistered)) {
+            IJsonRPCMarshaller marshaller = new JsonRPCMarshaller();
+            Hashtable<String, Object> hashtable = marshaller.unmarshall(msg.getData());
+            if (hashtable.containsKey(Names.reason)) {
+                String reason = hashtable.get(Names.reason).toString();
+                if (reason == null) {
+                    return;
+                }
+                if (reason.equals(AppInterfaceUnregisteredReason.IGNITION_OFF.toString()) ||
+                        reason.equals(AppInterfaceUnregisteredReason.MASTER_RESET.toString()) ||
+                        reason.equals(AppInterfaceUnregisteredReason.FACTORY_DEFAULTS.toString())) {
+                    if (_transport != null) {
+                        _transport.stopReading();
+                    }
+                }
+            }
+        }
     }
 
     @Override

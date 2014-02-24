@@ -103,7 +103,7 @@
 	border-bottom: 1px solid #656565;
 	border-top: 1px solid #393939;
 }  /*
-	.navigation {width:26px;height:25px;background:url("../images/phone/ico_navigation.png") no-repeat;left:60px;top:10px;}
+	.navigationApp {width:26px;height:25px;background:url("../images/phone/ico_navigation.png") no-repeat;left:60px;top:10px;}
 
 #phone_menu.hide {
 	left: -170px;

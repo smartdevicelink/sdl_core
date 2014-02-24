@@ -36,11 +36,6 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
     /** View ID */
     elementId: 'media_leftmenu',
 
-    classNameBindings:
-        [
-            'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
-        ],
-
     /** View components */
     childViews:
         [

@@ -121,16 +121,29 @@ const ConstantsCreator* Map::SupportsConstants() const {
 /*
  * Enum type
  */
-Enum::Enum(const std::string& name, Scope scope, InternalScope internal_scope,
+
+// static
+const char* Enum::kFunctionIdEnumName = "FunctionID";
+
+Enum::Enum(const Interface* interface,
+           const std::string& name,
+           Scope scope,
+           InternalScope internal_scope,
            const Description& description)
-    : name_(name),
+    : interface_(interface),
+      name_(name),
       scope_(scope),
       internal_scope_(internal_scope),
       description_(description),
       last_constant_value_(-1) {
+  assert(interface);
 }
 
 Enum::~Enum() {
+}
+
+const Interface& Enum::interface() const {
+  return *interface_;
 }
 
 const std::string& Enum::name() const {
@@ -213,11 +226,15 @@ bool Enum::AddConstant(const std::string& name, const int64_t value,
 /*
  * Struct type
  */
-Struct::Struct(const std::string& name, Scope scope,
+Struct::Struct(const Interface* interface,
+               const std::string& name,
+               Scope scope,
                const Description& description)
-    : name_(name),
+    : interface_(interface),
+      name_(name),
       scope_(scope),
       description_(description) {
+  assert(interface_);
 }
 
 Struct::~Struct() {
@@ -264,6 +281,10 @@ const Type* Struct::Field::type() const {
   return type_;
 }
 
+const Interface& Struct::interface() const {
+  return *interface_;
+}
+
 const std::string& Struct::name() const {
   return name_;
 }
@@ -292,15 +313,24 @@ Struct::Field::Field(const Type* type, const std::string& name, bool mandatory,
       platform_(platform){
 }
 
-Typedef::Typedef(const std::string& name, const Type* type,
+Typedef::Typedef(const Interface* interface,
+                 const std::string& name,
+                 const Type* type,
                  const Description& description)
-    : name_(name),
+    : interface_(interface),
+      name_(name),
       type_(type),
       description_(description) {
+  assert(interface_);
 }
 
 const Description& Typedef::description() const {
   return description_;
+}
+
+
+const Interface& Typedef::interface() const {
+  return *interface_;
 }
 
 const std::string& Typedef::name() const {

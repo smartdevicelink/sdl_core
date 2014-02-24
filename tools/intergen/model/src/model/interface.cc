@@ -56,14 +56,42 @@ using typesafe_format::strmfmt;
 namespace codegen {
 class ModelFilter;
 
-Interface::Interface(BuiltinTypeRegistry* builtin_type_registry,
+namespace {
+
+// standard algorithm helper to access request() member of a function
+const FunctionMessage* FunctionRequest(const Function& function) {
+  return &function.request();
+}
+
+// standard algorithm helper to access response() member of a function
+const FunctionMessage* FunctionResponse(const Function& function) {
+  return &function.response();
+}
+
+}  // namespace
+
+Interface::Interface(const API* api,
+                     bool auto_generate_function_ids,
+                     BuiltinTypeRegistry* builtin_type_registry,
                      const ModelFilter* model_filter)
-    : builtin_type_registry_(builtin_type_registry),
+    : api_(api),
+      builtin_type_registry_(builtin_type_registry),
       model_filter_(model_filter),
-      type_registry_(builtin_type_registry_, model_filter),
+      auto_generate_function_ids_(auto_generate_function_ids),
+      function_ids_enum_(this,
+                         Enum::kFunctionIdEnumName,
+                         Scope(),
+                         InternalScope(),
+                         Description()),
+      type_registry_(this,
+                     builtin_type_registry_,
+                     &function_ids_enum_,
+                     model_filter,
+                     auto_generate_function_ids_),
       requests_deleter_(&requests_),
       responses_deleter_(&responses_),
       notifications_deleter_(&notifications_) {
+  assert(api_);
   assert(builtin_type_registry_);
   assert(model_filter_);
 }
@@ -71,7 +99,7 @@ Interface::Interface(BuiltinTypeRegistry* builtin_type_registry,
 Interface::~Interface() {
 }
 
-bool codegen::Interface::init(const pugi::xml_node& xml) {
+bool Interface::init(const pugi::xml_node& xml) {
   name_ = xml.attribute("name").value();
   if (name_.empty()) {
     std::cerr << "Interface must have 'name' attribute specified" << '\n';
@@ -82,12 +110,40 @@ bool codegen::Interface::init(const pugi::xml_node& xml) {
   return true;
 }
 
+const Type* Interface::GetNamedType(const std::string& name) const {
+  return type_registry_.GetType(name);
+}
+
+const API& Interface::api() const {
+  return *api_;
+}
+
 const std::string& Interface::name() const {
   return name_;
 }
 
 const Interface::FunctionsList& Interface::functions() const {
   return functions_list_;
+}
+
+Interface::RequestList Interface::all_requests() const {
+  RequestList requests(functions_list_.size());
+  std::transform(functions_list_.begin(), functions_list_.end(),
+                 requests.begin(), std::ptr_fun(&FunctionRequest));
+  return requests;
+}
+
+Interface::ResponseList Interface::all_responses() const {
+  ResponseList responses(
+        functions_list_.size() + generic_responses_list_.size());
+  ResponseList::iterator response_iter =
+    std::transform(functions_list_.begin(), functions_list_.end(),
+                   responses.begin(), std::ptr_fun(&FunctionResponse));
+  response_iter =
+  std::copy(generic_responses_list_.begin(), generic_responses_list_.end(),
+            response_iter);
+  assert(response_iter == responses.end());
+  return responses;
 }
 
 const Interface::NotificationList& Interface::notifications() const {
@@ -111,10 +167,23 @@ const Interface::TypedefList& Interface::typedefs() const {
 }
 
 const Enum* Interface::function_id_enum() const {
-  return type_registry_.GetFunctionIDEnum();
+  return &function_ids_enum_;
 }
 
-bool codegen::Interface::AddFunctions(const pugi::xml_node& xml_interface) {
+const Enum::Constant* Interface::GetFunctionIdEnumConstant(
+    const std::string& function_id) {
+  Enum* func_id_enum = &function_ids_enum_;
+
+  const Constant* func_id = func_id_enum->ConstantFor(function_id);
+  if (!func_id && auto_generate_function_ids_) {
+    bool added = func_id_enum->AddConstant(function_id, Scope(), "", Description(), "");
+    assert(added);
+    func_id = func_id_enum->ConstantFor(function_id);
+  }
+  return static_cast<const Enum::Constant*>(func_id);
+}
+
+bool Interface::AddFunctions(const pugi::xml_node& xml_interface) {
   for (pugi::xml_node i = xml_interface.child("function"); i; i =
       i.next_sibling("function")) {
     std::string message_type_str = i.attribute("messagetype").value();
@@ -154,21 +223,29 @@ bool Interface::AddFunctionMessage(MessagesMap* list,
     return true;
   }
   std::string name = xml_message.attribute("name").value();
-  std::string func_id_str = xml_message.attribute("functionID").value();
   if (name.empty()) {
     std::cerr << "Message with empty function name found\n";
     return false;
   }
-  if (func_id_str.empty()) {
-    std::cerr << "Message with empty functionID found\n";
-    return false;
+
+  std::string func_id_str;
+  if (auto_generate_function_ids_) {
+    if (!xml_message.attribute("functionID").empty()) {
+      strmfmt(std::cerr,
+              "Auto generation of function IDs is requested "
+              "but function {0} has funcitionID specified",
+              name) << '\n';
+      return false;
+    }
+    func_id_str = name;
+  } else {
+    func_id_str = xml_message.attribute("functionID").value();
+    if (func_id_str.empty()) {
+      std::cerr << "Message with empty functionID found\n";
+      return false;
+    }
   }
-  const Enum* func_id_enum = type_registry_.GetFunctionIDEnum();
-  if (!func_id_enum) {
-    return false;
-  }
-  const Enum::Constant* func_id = static_cast<const Enum::Constant*>(func_id_enum
-      ->ConstantFor(func_id_str));
+  const Enum::Constant* func_id = GetFunctionIdEnumConstant(func_id_str);
   if (!func_id) {
     std::cerr << "Function " << name << " has invalid functionID: "
               << func_id_str << std::endl;
@@ -207,7 +284,7 @@ bool Interface::AddFunctionMessageParameters(
       return false;
     }
     const Type* type = NULL;
-    if (!type_registry_.GetType(i, &type)) {
+    if (!type_registry_.GetCompositeType(i, &type)) {
       std::cerr << "While parsing function parameter " << name << '\n';
       return false;
     }

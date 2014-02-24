@@ -66,9 +66,9 @@ void SetGlobalPropertiesRequest::Run() {
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
 
-  Application* app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

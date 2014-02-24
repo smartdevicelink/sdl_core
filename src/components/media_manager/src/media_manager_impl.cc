@@ -35,7 +35,9 @@
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #if defined(DEFAULT_MEDIA)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
@@ -150,16 +152,15 @@ void MediaManagerImpl::StartMicrophoneRecording(
   int32_t duration) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
                << output_file);
-#if defined(DEFAULT_MEDIA)
-  application_manager::Application* app;
-  app= application_manager::ApplicationManagerImpl::instance()->
+  application_manager::ApplicationSharedPtr app =
+    application_manager::ApplicationManagerImpl::instance()->
       application(application_key);
   std::string relative_file_path =
-      file_system::CreateDirectory(app->name());
+    file_system::CreateDirectory(app->name());
   relative_file_path += "/";
   relative_file_path += output_file;
-
   from_mic_listener_ = new FromMicRecorderListener(relative_file_path);
+#if defined(DEFAULT_MEDIA)
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -169,8 +170,29 @@ void MediaManagerImpl::StartMicrophoneRecording(
     from_mic_recorder_->StartActivity(application_key);
   }
 #else
-  const char* predefined_rec_file = "audio.8bit.wav";
-  from_mic_listener_ = new FromMicRecorderListener(predefined_rec_file);
+  if (file_system::FileExists(relative_file_path)) {
+    LOG4CXX_INFO(logger_, "File " << output_file << " exists, removing");
+    if (file_system::DeleteFile(relative_file_path)) {
+      LOG4CXX_INFO(logger_, "File " << output_file << " removed");
+    }
+    else {
+      LOG4CXX_WARN(logger_, "Could not remove file " << output_file);
+    }
+  }
+  const std::string predefined_rec_file = "audio.8bit.wav";
+  std::vector<uint8_t> buf;
+  if (file_system::ReadBinaryFile(predefined_rec_file, buf)) {
+    if (file_system::Write(relative_file_path, buf)) {
+      LOG4CXX_INFO(logger_,
+        "File " << predefined_rec_file << " copied to " << output_file);
+    }
+    else {
+      LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
+    }
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Could not read file " << predefined_rec_file);
+  }
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }
@@ -265,19 +287,21 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
-
-  if (!(application_manager::ApplicationManagerImpl::instance()->
-      IsStreamingAllowed(message->connection_key()))) {
-    return;
-  }
-
   if (message->service_type()
-      == protocol_handler::kMovileNav) {
+      == protocol_handler::kMobileNav) {
+    if (!(application_manager::ApplicationManagerImpl::instance()->
+         IsVideoStreamingAllowed(message->connection_key()))) {
+       return;
+     }
     if (video_streamer_) {
       video_streamer_->SendData(message->connection_key(), message);
     }
   } else if (message->service_type()
           == protocol_handler::kAudio) {
+    if (!(application_manager::ApplicationManagerImpl::instance()->
+         IsAudioStreamingAllowed(message->connection_key()))) {
+       return;
+     }
     if (audio_streamer_) {
       audio_streamer_->SendData(message->connection_key(), message);
     }

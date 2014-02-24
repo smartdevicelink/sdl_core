@@ -57,10 +57,10 @@ SyncPDataRequest::~SyncPDataRequest() {
 void SyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SyncPDataRequest::Run");
 
-  Application* application = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       connection_key());
 
-  if (NULL == application) {
+  if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;

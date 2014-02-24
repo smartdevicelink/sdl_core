@@ -55,10 +55,10 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
-  if (NULL == app) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
@@ -101,7 +101,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
-    const Application* app) {
+    ApplicationConstSharedPtr app) {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSet");
 
   const smart_objects::SmartArray* new_choice_set_array =

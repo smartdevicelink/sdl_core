@@ -60,6 +60,8 @@ class FunctionMessage: public Struct {
     kNotification,
     kUnknownMessageType
   };
+  // Procudes string given MessageType to be used in class names
+  static const char* MessageTypeToString(MessageType message_type);
 
   // Message parameters are passed as structs so every parameter
   // is a struct field
@@ -85,7 +87,9 @@ class FunctionMessage: public Struct {
                     const Constant* default_value, bool is_mandatory,
                     const Description& description, Scope scope,
                     Platform platform);
- private:
+  const Interface* interface() const;
+
+private:
   const Interface* interface_;
   const Enum::Constant* id_;
   MessageType message_type_;

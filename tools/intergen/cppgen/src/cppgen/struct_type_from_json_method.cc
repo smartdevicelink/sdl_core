@@ -72,15 +72,16 @@ StructTypeToJsonMethod::~StructTypeToJsonMethod() {
 }
 
 void StructTypeToJsonMethod::DefineBody(std::ostream* os) const {
-  *os << "Json::Value result(Json::objectValue);" << '\n';
+  *os << "Json::Value result__(Json::objectValue);" << '\n';
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     const Struct::Field& field = *i;
-    strmfmt(*os, "WriteJsonField(\"{0}\", {0}, &result);", field.name())
+    strmfmt(*os, "CompositeType::WriteJsonField(\"{0}\", {0}, &result__);",
+            field.name())
         << '\n';
   }
-  *os << "return result;" << '\n';
+  *os << "return result__;" << '\n';
 }
 
 }  // namespace codegen

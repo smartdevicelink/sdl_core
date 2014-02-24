@@ -49,7 +49,7 @@ AddSubMenuRequest::~AddSubMenuRequest() {
 void AddSubMenuRequest::Run() {
   LOG4CXX_INFO(logger_, "AddSubMenuRequest::Run");
 
-  Application* app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -106,10 +106,10 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
-      Application* application =
+      ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());
 
-      if (NULL == application) {
+      if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
         return;
       }

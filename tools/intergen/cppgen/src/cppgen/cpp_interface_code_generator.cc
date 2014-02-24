@@ -32,6 +32,9 @@
 
 #include "cppgen/cpp_interface_code_generator.h"
 
+#include "cppgen/handler_interface.h"
+#include "cppgen/message_interface.h"
+#include "cppgen/message_factory_function.h"
 #include "cppgen/module_manager.h"
 #include "model/interface.h"
 #include "model/type_registry.h"
@@ -54,9 +57,16 @@ void CppInterfaceCodeGenerator::GenerateCode() {
   GenerateEnums();
   GenerateTypedefs();
   GenerateStructs();
-  GenerateFunctions();
-  GenerateResponses();
-  GenerateNotifications();
+  bool type_only_interface =
+      interface_->function_id_enum()->constants().empty();
+  if (!type_only_interface) {
+    GenerateFunctions();
+    GenerateResponses();
+    GenerateNotifications();
+    GenerateHandlerInterfaces();
+    GenerateMessageBaseClasses();
+    GenerateMessageFactories();
+  }
 }
 
 void CppInterfaceCodeGenerator::GenerateEnums() {
@@ -66,6 +76,13 @@ void CppInterfaceCodeGenerator::GenerateEnums() {
     const Enum* e = *i;
     declaration_generator_.GenerateCodeForEnum(e);
     definition_generator_.GenerateCodeForEnum(e);
+  }
+
+  const Enum* func_id_enum = interface_->function_id_enum();
+  // Not all interfaces declare functions, avoid empty enum generation
+  if (!func_id_enum->constants().empty()) {
+    declaration_generator_.GenerateCodeForEnum(func_id_enum);
+    definition_generator_.GenerateCodeForEnum(func_id_enum);
   }
 }
 
@@ -117,6 +134,61 @@ void CppInterfaceCodeGenerator::GenerateNotifications() {
     declaration_generator_.GenerateCodeForNotification(notification);
     definition_generator_.GenerateCodeForNotification(notification);
   }
+}
+
+void CppInterfaceCodeGenerator::GenerateHandlerInterfaces() {
+  CppFile& handler_header = module_manager_->HeaderForInterface();
+  CppFile& handler_source = module_manager_->SourceForInterface();
+  HandlerInterface notif_handler(
+        FunctionMessage::kNotification, interface_, &handler_header);
+  notif_handler.Declare(&handler_header.notifications_ns().os());
+  notif_handler.Define(&handler_source.notifications_ns().os());
+
+  HandlerInterface req_handler(
+        FunctionMessage::kRequest, interface_, &handler_header);
+  req_handler.Declare(&handler_header.requests_ns().os());
+  req_handler.Define(&handler_source.requests_ns().os());
+
+  HandlerInterface resp_handler(
+        FunctionMessage::kResponse, interface_, &handler_header);
+  resp_handler.Declare(&handler_header.responses_ns().os());
+  resp_handler.Define(&handler_source.responses_ns().os());
+}
+
+void CppInterfaceCodeGenerator::GenerateMessageBaseClasses() {
+  CppFile& message_base_header = module_manager_->HeaderForInterface();
+  CppFile& message_base_source = module_manager_->SourceForInterface();
+  MessageInterface notif_message(interface_, FunctionMessage::kNotification);
+  notif_message.Declare(&message_base_header.notifications_ns().os());
+  notif_message.Define(&message_base_source.notifications_ns().os());
+
+  MessageInterface request_message(interface_, FunctionMessage::kRequest);
+  request_message.Declare(&message_base_header.requests_ns().os());
+  request_message.Define(&message_base_source.requests_ns().os());
+
+  MessageInterface response_message(interface_, FunctionMessage::kResponse);
+  response_message.Declare(&message_base_header.responses_ns().os());
+  response_message.Define(&message_base_source.responses_ns().os());
+}
+
+void CppInterfaceCodeGenerator::GenerateMessageFactories() {
+  CppFile& factories_header = module_manager_->HeaderForInterface();
+  CppFile& factories_source = module_manager_->SourceForInterface();
+
+  MessageFactoryFunction request_factory(interface_,
+                                         FunctionMessage::kRequest);
+  request_factory.Declare(&factories_header.requests_ns().os(), true);
+  request_factory.Define(&factories_source.requests_ns().os(), true);
+  MessageFactoryFunction response_factory(interface_,
+                                          FunctionMessage::kResponse);
+  response_factory.Declare(&factories_header.responses_ns().os(), true);
+  response_factory.Define(&factories_source.responses_ns().os(), true);
+  MessageFactoryFunction notification_factory(
+        interface_,
+        FunctionMessage::kNotification);
+  notification_factory.Declare(&factories_header.notifications_ns().os(),
+                               true);
+  notification_factory.Define(&factories_source.notifications_ns().os(), true);
 }
 
 }  // namespace codegen

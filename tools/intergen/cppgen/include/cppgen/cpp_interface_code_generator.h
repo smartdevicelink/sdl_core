@@ -61,6 +61,9 @@ class CppInterfaceCodeGenerator {
   void GenerateFunctions();
   void GenerateResponses();
   void GenerateNotifications();
+  void GenerateHandlerInterfaces();
+  void GenerateMessageBaseClasses();
+  void GenerateMessageFactories();
 private:
   // Fields
   const Interface* interface_;

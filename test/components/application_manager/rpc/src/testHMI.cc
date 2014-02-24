@@ -162,7 +162,7 @@ namespace test{
 			///////////////////////////////////			
 			
 			
-			Application* appl = app_manager_->application(65537);
+			ApplicationSharedPtr appl = app_manager_->application(65537);
 			
 			////////////////////////////////////////
 			sleep(5);

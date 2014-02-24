@@ -41,10 +41,6 @@ SDL.SDLMediaControlls = Em.ContainerView.create( {
             'tuneButtons'
         ],
 
-    classNameBindings: [
-        'SDL.States.media.sdlmedia.mediaNavigation.active:inactive_state'
-    ],
-
     /**
      * Verification paramiter
      */

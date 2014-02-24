@@ -14,9 +14,10 @@ log4cxx::LoggerPtr g_logger = log4cxx::LoggerPtr(
 // Check if provided service value is one of the specified
 bool IsValid(ServiceType service_type) {
   switch (service_type) {
+    case kZero:
     case kRpc:
     case kAudio:
-    case kMovileNav:
+    case kMobileNav:
     case kBulk:
       return true;
     default:
