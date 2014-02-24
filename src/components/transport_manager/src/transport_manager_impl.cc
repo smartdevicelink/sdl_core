@@ -663,7 +663,7 @@ unsigned int TransportManagerImpl::GetPacketSize(unsigned int data_size,
   DCHECK(first_bytes);
   unsigned char offset = sizeof(uint32_t);
   if (data_size < 2 * offset) {
-    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse fram size.");
+    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse frame size.");
     return 0;
   }
 

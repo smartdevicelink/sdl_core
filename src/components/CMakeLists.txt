@@ -67,6 +67,9 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
+# --- CryptoManager
+add_subdirectory(./crypto_manager)
+
 # --- Policies
 add_subdirectory(./policies)
 
