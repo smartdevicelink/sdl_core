@@ -39,6 +39,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
@@ -155,6 +156,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private PutFileTransferManager mPutFileTransferManager;
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
+    // This Vector keep all RPC requests since the last successful application start
+    private final Vector<RPCRequest> rpcRequestsResumable = new Vector<RPCRequest>();
 
     public void onCreate() {
         super.onCreate();
@@ -1755,19 +1758,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * Call a method from SDK to create and send <b>AddCommand</b> request
+     * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
+     * resumption.
      *
      * @param commandId Id of the command
      * @param vrCommands Vector of the VR Commands
      * @param menuName Name of the Menu
      */
-    public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
-                                  String menuName) {
+    public void commandAddCommandResumable(Integer commandId, Vector<String> vrCommands,
+                                           String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
                 getNextCorrelationID());
         syncProxySendRPCRequestResumable(addCommand);
     }
 
+    /**
+     * Call a method from SDK to send <b>AddCommand</b> request
+     *
+     * @param commandId Id of the command
+     * @param vrCommands Vector of the VR Commands
+     * @param menuName Name of the Menu
+     */
     public void commandAddCommandPredefined(Integer commandId, Vector<String> vrCommands,
                                   String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
@@ -1775,8 +1786,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         syncProxySendRPCRequest(addCommand);
     }
 
-    public void commandAddCommand(AddCommand addCommand) {
+    /**
+     * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
+     * resumption.
+     *
+     * @param addCommand {@link com.ford.syncV4.proxy.rpc.AddCommand} object
+     */
+    public void commandAddCommandResumable(AddCommand addCommand) {
         syncProxySendRPCRequestResumable(addCommand);
+    }
+
+    /**
+     * Call a method from SDK to send <b>AddSubMenu</b> request which will be used in application
+     * resumption.
+     *
+     * @param addSubMenu {@link com.ford.syncV4.proxy.rpc.AddSubMenu} object
+     */
+    public void commandAddSubMenuResumable(AddSubMenu addSubMenu) {
+        syncProxySendRPCRequestResumable(addSubMenu);
     }
 
     /**
@@ -1852,7 +1879,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * This method is send a RPC Request to the Sync Proxy
+     * This method is send RPC Request to the Sync Proxy
      *
      * @param request object of {@link com.ford.syncV4.proxy.RPCRequest} type
      */
@@ -1880,6 +1907,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
     }
+
+    /**
+     * This method is for the requests on which resumption is depends on. All the requests will be
+     * stored in the collection in order to re-use them when resumption will have place.
+     *
+     * @param request {@link com.ford.syncV4.proxy.RPCRequest} object
+     */
+    public void syncProxySendRPCRequestResumable(RPCRequest request) {
+        if (request == null) {
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("Resumable RPC request is NULL", Log.ERROR);
+            }
+            return;
+        }
+
+        // TODO : Implement here a procedure of the keep in collection request
+        rpcRequestsResumable.add(request);
+
+        syncProxySendRPCRequest(request);
+    }
+
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
         if (mSyncProxy != null) {
@@ -1926,25 +1974,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (mSyncProxy != null) {
             mSyncProxy.setJsonRPCMarshaller(jsonRPCMarshaller);
         }
-    }
-
-    /**
-     * This method is for the requests on which resumption is depends on. All the requests here are
-     * keeping in the collection in order to re-use them when resumption will have place.
-     *
-     * @param request {@link com.ford.syncV4.proxy.RPCRequest} object
-     */
-    public void syncProxySendRPCRequestResumable(RPCRequest request) {
-        if (request == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("Resumable RPC request is NULL", Log.ERROR);
-            }
-            return;
-        }
-
-        // TODO : Implement here a procedure of the keep in collection request
-
-        syncProxySendRPCRequest(request);
     }
 
     // TODO: Reconsider this section, this is a first step to optimize log procedure

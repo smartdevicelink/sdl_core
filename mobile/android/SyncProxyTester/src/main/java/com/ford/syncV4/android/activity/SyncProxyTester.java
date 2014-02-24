@@ -67,7 +67,6 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
-import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
@@ -250,13 +249,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Latest SyncSubMenu, required to add the submenu from the adapter when a
      * successful AddSubMenuResponse comes.
      */
-    private SyncSubMenu _latestAddSubmenu = null;
+    private SyncSubMenu mLatestAddSubmenu = null;
     private Pair<Integer, Integer> mLatestAddCommand = null;
     private Integer _latestDeleteCommandCmdID = null;
     private int mAutoIncCorrId = 101;
     private int autoIncChoiceSetId = 1;
     private int autoIncChoiceSetIdCmdId = 1;
-    private int submenucmdID = 1000;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
     private boolean[] isButtonSubscribed = null;
     private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
@@ -342,6 +340,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -2029,72 +2028,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Opens the dialog for AddSubMenu message and sends it.
                          */
                         private void sendAddSubmenu() {
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.addsubmenu,
-                                    (ViewGroup) findViewById(R.id.submenu_Root));
-
-                            final EditText editMenuName = (EditText) layout.findViewById(R.id.addsubmenu_menuName);
-                            final EditText editMenuID = (EditText) layout.findViewById(R.id.addsubmenu_menuID);
-                            final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addsubmenu_useMenuPos);
-                            final EditText editMenuPos = (EditText) layout.findViewById(R.id.addsubmenu_menuPos);
-
-                            // set suggested value
-                            editMenuID.setText(String.valueOf(submenucmdID++));
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    String subMenuIDString = editMenuID.getText().toString();
-                                    int subMenuID = -1;
-                                    try {
-                                        subMenuID = Integer.parseInt(subMenuIDString);
-                                    } catch (NumberFormatException e) {
-                                        Toast.makeText(mContext, "Couldn't parse number " + subMenuIDString,
-                                                Toast.LENGTH_LONG).show();
-                                        return;
-                                    }
-
-                                    int pos = -1;
-                                    if (chkUseMenuPos.isChecked()) {
-                                        String posString = editMenuPos.getText().toString();
-                                        try {
-                                            pos = Integer.parseInt(posString);
-                                        } catch (NumberFormatException e) {
-                                            Toast.makeText(mContext, "Couldn't parse number " + posString,
-                                                    Toast.LENGTH_LONG).show();
-                                            return;
-                                        }
-                                    }
-
-                                    AddSubMenu msg = RPCRequestFactory.buildAddSubMenu();
-                                    msg.setCorrelationID(getCorrelationid());
-
-                                    SyncSubMenu sm = new SyncSubMenu();
-                                    sm.setName(editMenuName.getText().toString());
-                                    sm.setSubMenuId(subMenuID);
-                                    msg.setMenuID(sm.getSubMenuId());
-                                    msg.setMenuName(sm.getName());
-                                    if (chkUseMenuPos.isChecked()) {
-                                        msg.setPosition(pos);
-                                    }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
-                                    if (_latestAddSubmenu != null) {
-                                        Log.w(LOG_TAG, "Latest addSubmenu should be null, but equals to " + _latestAddSubmenu);
-                                    }
-                                    _latestAddSubmenu = sm;
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
+                            DialogFragment addSubMenuDialogFragment = AddSubMenuDialog.newInstance();
+                            addSubMenuDialogFragment.show(getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
                         }
 
                         /**
@@ -3657,6 +3592,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return imageTypeAdapter;
     }
 
+    public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandAddSubMenuResumable(addSubMenu);
+        }
+        if (mLatestAddSubmenu != null) {
+            Log.w(LOG_TAG, "Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
+        }
+        mLatestAddSubmenu = syncSubMenu;
+    }
+
     /**
      * This is a callback function for the result of the
      * {@link com.ford.syncV4.android.activity.AddCommandDialog}
@@ -3665,7 +3610,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     public void onAddCommandDialogResult(AddCommand addCommand) {
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandAddCommand(addCommand);
+            mBoundProxyService.commandAddCommandResumable(addCommand);
         }
 
         if (mLatestAddCommand != null) {
@@ -3798,11 +3743,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * adapter.
      */
     public void onAddSubMenuResponse(boolean success) {
-        if (_latestAddSubmenu != null) {
+        if (mLatestAddSubmenu != null) {
             if (success) {
-                addSubMenuToList(_latestAddSubmenu);
+                addSubMenuToList(mLatestAddSubmenu);
             }
-            _latestAddSubmenu = null;
+            mLatestAddSubmenu = null;
         } else {
             Log.w(LOG_TAG, "Latest addSubMenu is unset");
         }

@@ -104,8 +104,9 @@ public class AddCommandDialog extends DialogFragment {
                         if (chkUseMenuParams.isChecked()) {
                             MenuParams menuParams = new MenuParams();
                             if (chkUseCommandName.isChecked()) {
-                                String itemText = er.getText().toString();
-                                menuParams.setMenuName(itemText);
+                                String menuNameValue = er.getText().toString();
+                                //Log.d(LOG_TAG, "AddCommand MenuName:" + menuNameValue);
+                                menuParams.setMenuName(menuNameValue);
                             }
                             if (chkUseMenuPos.isChecked()) {
                                 menuParams.setPosition(pos);
