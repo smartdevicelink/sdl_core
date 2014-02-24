@@ -16,10 +16,10 @@ import java.util.Random;
  */
 public class AppUtilsTest extends TestCase {
 
+    /**
+     * This test <b>require</b> that a file "policyTableUpdate.json" be located at SD Card
+     */
     public void testReadFromFile() {
-
-        // In order to perform this test a file "policyTableUpdate.json" must be located at SD Card
-
         String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
                 "/policyTableUpdate.json";
         File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);

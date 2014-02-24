@@ -272,29 +272,6 @@ void ResumeCtrl::onTimer() {
 void ResumeCtrl::sendResumptionRequest(ResumingApp* application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumptionRequest");
 
-  uint32_t correlation_id = ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
-                                          smart_objects::SmartType_Map);
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "OUT OF MEMORY");
-    return;
-  }
-  (*message)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::BasicCommunication_GetResumeResult;
-  (*message)[strings::params][strings::message_type] = MessageType::kRequest;
-  (*message)[strings::params][strings::correlation_id] = correlation_id;
-  (*message)[strings::msg_params][strings::app_id] = application->app->app_id();
-  if (ApplicationManagerImpl::instance()->ManageHMICommand(message)) {
-    application->is_waiting_for_timer = false;
-    application->correlation_id = correlation_id;
-    subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_GetResumeResult,
-					   correlation_id);
-    LOG4CXX_INFO(logger_, "Subscribed to event "
-				<< hmi_apis::FunctionID::BasicCommunication_GetResumeResult
-				<< " corID "<<correlation_id);
-  } else {
-    LOG4CXX_ERROR(logger_, "ManageHMICommand Error")
-  }
 }
 
 

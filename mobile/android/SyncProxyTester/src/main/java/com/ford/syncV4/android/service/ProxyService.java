@@ -45,6 +45,7 @@ import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
@@ -82,6 +83,7 @@ import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.Show;
@@ -1800,6 +1802,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Call a method from SDK to send <b>AddSubMenu</b> request which will be used in application
      * resumption.
      *
+     * @param setGlobalProperties {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties}
+     */
+    public void commandSetGlobalPropertiesResumable(SetGlobalProperties setGlobalProperties) {
+        syncProxySendRPCRequestResumable(setGlobalProperties);
+    }
+
+    /**
+     * Call a method from SDK to send <b>AddSubMenu</b> request which will be used in application
+     * resumption.
+     *
      * @param addSubMenu {@link com.ford.syncV4.proxy.rpc.AddSubMenu} object
      */
     public void commandAddSubMenuResumable(AddSubMenu addSubMenu) {
@@ -1807,24 +1819,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request
+     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request which
+     * will be used in application resumption.
      *
      * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
      * @param interactionChoiceSetID Id of the interaction Choice set
      * @param correlationID correlation Id
      */
-    public void commandCreateInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
-                                                  Integer correlationID) {
-        try {
-            mSyncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("CreateInteractionChoiceSet sent", true);
-            }
-        } catch (SyncException e) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("CreateInteractionChoiceSet send error: " + e, Log.ERROR, e);
-            }
-        }
+    public void commandCreateInteractionChoiceSetResumable(Vector<Choice> choiceSet,
+                                                           Integer interactionChoiceSetID,
+                                                           Integer correlationID) {
+
+        CreateInteractionChoiceSet createInteractionChoiceSet =
+                RPCRequestFactory.buildCreateInteractionChoiceSet(choiceSet,
+                        interactionChoiceSetID, correlationID);
+        syncProxySendRPCRequestResumable(createInteractionChoiceSet);
     }
 
     /**

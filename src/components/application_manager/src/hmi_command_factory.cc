@@ -217,8 +217,6 @@
 #include "application_manager/commands/hmi/audio_start_stream_response.h"
 #include "application_manager/commands/hmi/audio_stop_stream_request.h"
 #include "application_manager/commands/hmi/audio_stop_stream_response.h"
-#include "application_manager/commands/hmi/get_resume_result_request.h"
-#include "application_manager/commands/hmi/get_resume_result_response.h"
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
@@ -261,14 +259,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::UpdateDeviceListResponse(message));
       } else {
         command.reset(new commands::UpdateDeviceListRequest(message));
-      }
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_GetResumeResult: {
-      if (is_response) {
-        command.reset(new commands::GetResumeResultResponse(message));
-      } else {
-        command.reset(new commands::GetResumeResultRequest(message));
       }
       break;
     }
