@@ -119,7 +119,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
 
     int32_t                                       socket_fd_;
     bool                                          is_ready_;
-    threads::Thread                               thread_;
+    threads::Thread*                              thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
