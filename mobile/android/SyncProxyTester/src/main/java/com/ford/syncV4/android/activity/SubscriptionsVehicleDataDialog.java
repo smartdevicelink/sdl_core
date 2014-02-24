@@ -6,8 +6,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.widget.Toast;
 
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
@@ -65,8 +63,6 @@ public class SubscriptionsVehicleDataDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Context mContext = getActivity();
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
 
         // the local copy of isVehicleDataSubscribed
         final boolean[] checkedVehicleDataTypes = ((SyncProxyTester) getActivity())
@@ -129,7 +125,7 @@ public class SubscriptionsVehicleDataDialog extends DialogFragment {
                                 .setIsVehicleDataSubscribed(checkedVehicleDataTypes.clone());
 
                         if (subscribeVehicleData.isEmpty() && unsubscribeVehicleData.isEmpty()) {
-                            Toast.makeText(mContext, "Nothing new here", Toast.LENGTH_LONG).show();
+                            SafeToast.showToastAnyThread("Nothing new here");
                         }
                     }
                 })
