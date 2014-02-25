@@ -71,7 +71,13 @@ function p_sdlproto.dissector(buf, pkt, root)
 
   -- add protocol fields to subtree
   local l_byte0 = buf(0, 1)
-  subtree:add(f_version, l_byte0):append_text(" (Only version 2 is supported)")
+  local l_versionTreeItem = subtree:add(f_version, l_byte0)
+
+  local l_version = l_byte0:bitfield(0, 4)
+  if l_version ~= 2 then
+    l_versionTreeItem:add_expert_info(PI_REQUEST_CODE, PI_WARN, "Only version 2 is supported (maybe the message is incorrect?)")
+  end
+
   subtree:add(f_compressionFlag, l_byte0)
   subtree:add(f_frameType, l_byte0)
 
