@@ -248,6 +248,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
     void KeepConnectionAlive(uint32_t connection_key);
+//FIXME: Fix on Singlton reimplementation (with @deleteInstanse methode)
 #ifdef BUILD_TESTS
     protected:
 #else
