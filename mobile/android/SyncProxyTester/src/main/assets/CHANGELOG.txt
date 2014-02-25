@@ -1,4 +1,5 @@
 [CW9]
+* Fix request / response notification messages
 - Remove AlertManeuver UI.
 
 [CW8]

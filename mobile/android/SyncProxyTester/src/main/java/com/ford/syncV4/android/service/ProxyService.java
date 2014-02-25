@@ -81,6 +81,7 @@ import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
 import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
@@ -471,7 +472,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         commandAddCommandPredefined(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
     }
 
-    private void setInitAppIcon() {
+    private void sendPutFileForAppIcon() {
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
         commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
                 mAwaitingInitIconResponseCorrelationID);
@@ -577,7 +578,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
             if (!isModuleTesting()) {
-                setInitAppIcon();
+                sendPutFileForAppIcon();
             }
         }
 
@@ -937,17 +938,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(response);
         int mCorrelationId = response.getCorrelationID();
         if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
-            try {
-                mSyncProxy.setAppIcon(ICON_SYNC_FILENAME, getNextCorrelationID());
-                if (mLogAdapter != null) {
-                    mLogAdapter.logMessage("SetAppIcon sent", true);
-                }
-            } catch (SyncException e) {
-                if (mLogAdapter != null) {
-                    mLogAdapter.logMessage("SetAppIcon send error: " + e, Log.ERROR, e);
-                }
-            }
-            mAwaitingInitIconResponseCorrelationID = 0;
+            setAppIcon();
         }
         if (isModuleTesting()) {
             ModuleTest.responses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
@@ -1735,17 +1726,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
-        try {
-            if (mSyncProxy != null) {
-                mSyncProxy.putFile(newPutFile);
-            }
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage(newPutFile, true);
-            }
-        } catch (SyncException e) {
-            mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
-            mAwaitingInitIconResponseCorrelationID = 0;
-        }
+        syncProxySendRPCRequest(newPutFile);
+
+        //mAwaitingInitIconResponseCorrelationID = 0;
     }
 
     /**
@@ -1930,9 +1913,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      */
     public void syncProxySendRPCRequest(RPCRequest request) {
         if (request == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request is NULL", Log.ERROR);
-            }
+            createErrorMessageForAdapter("RPC request is NULL");
             return;
         }
         try {
@@ -1941,15 +1922,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             } else {
                 mSyncProxy.sendRPCRequest(request);
             }
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request '" + request.getFunctionName() + "'" +
-                        " sent", true);
-            }
+            createDebugMessageForAdapter(request);
         } catch (SyncException e) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request '" + request.getFunctionName() + "'" +
-                        " send error: " + e, Log.ERROR, e);
-            }
+            createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
+                    " send error");
         }
     }
 
@@ -1961,9 +1937,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      */
     public void syncProxySendRPCRequestResumable(RPCRequest request) {
         if (request == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("Resumable RPC request is NULL", Log.ERROR);
-            }
+            createErrorMessageForAdapter("Resumable RPC request is NULL");
             return;
         }
 
@@ -2019,6 +1993,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (mSyncProxy != null) {
             mSyncProxy.setJsonRPCMarshaller(jsonRPCMarshaller);
         }
+    }
+
+    private void setAppIcon() {
+        SetAppIcon setAppIcon = RPCRequestFactory.buildSetAppIcon();
+        setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+        setAppIcon.setCorrelationID(getNextCorrelationID());
+
+        syncProxySendRPCRequest(setAppIcon);
+
+        mAwaitingInitIconResponseCorrelationID = 0;
     }
 
     // TODO: Reconsider this section, this is a first step to optimize log procedure

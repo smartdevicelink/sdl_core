@@ -457,7 +457,27 @@ public class RPCRequestFactory {
 
 		return msg;
 	}
-	
+
+    /**
+     * <b>SetAppIcon</b> section
+     */
+
+    /**
+     * Build an empty {@link com.ford.syncV4.proxy.rpc.SetAppIcon} request
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.SetAppIcon} request object
+     */
+    public static SetAppIcon buildSetAppIcon() {
+        return new SetAppIcon();
+    }
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.SetAppIcon} request
+     *
+     * @param syncFileName name of the file
+     * @param correlationID correlation id of the request
+     * @return {@link com.ford.syncV4.proxy.rpc.SetAppIcon} request object
+     */
 	public static SetAppIcon buildSetAppIcon(String syncFileName, Integer correlationID) {
 		SetAppIcon setAppIcon = new SetAppIcon();
 		setAppIcon.setCorrelationID(correlationID);
