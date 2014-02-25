@@ -44,16 +44,22 @@ namespace test {
 namespace components {
 namespace connection_handle {
 
+class ConnectionHandlerImplWrapper : public ConnectionHandlerImpl{
+public:
+  ConnectionHandlerImplWrapper() : ConnectionHandlerImpl() {}
+};
+
 class ConnectionTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0;
     connection_.reset(new Connection(connectionHandle, device_handle,
-                                     ConnectionHandlerImpl::instance(), 10000));
+                                     &connectionHandler_, 10000));
   }
 
   utils::SharedPtr<Connection> connection_;
+  ConnectionHandlerImplWrapper connectionHandler_;
 };
 
 TEST_F(ConnectionTest, Session_AddNewSession) {
@@ -68,7 +74,7 @@ TEST_F(ConnectionTest, Session_AddNewSession) {
   EXPECT_NE(it, serviceList.cend());
 }
 
-TEST_F(ConnectionTest, Session_StartSecureService) {
+TEST_F(ConnectionTest, Session_SecureService) {
   const int32_t session_id = connection_->AddNewSession();
   EXPECT_NE(session_id, -1);
   const SessionMap sessionMap = connection_->session_map();
@@ -87,10 +93,19 @@ TEST_F(ConnectionTest, Session_StartSecureService) {
   EXPECT_FALSE(newSessionMap.empty());
   const ServiceList newServiceList = newSessionMap.cbegin()->second;
   EXPECT_FALSE(newServiceList.empty());
-  const ServiceList::const_iterator it2 =
+  const ServiceList::const_iterator it1 =
       std::find(newServiceList.cbegin(), newServiceList.cend(), protocol_handler::kSecure);
-  EXPECT_NE(it2, newServiceList.cend());
+  EXPECT_NE(it1, newServiceList.cend());
 
+  const bool result2 = connection_->RemoveService(session_id, protocol_handler::kSecure);
+  EXPECT_TRUE(result2);
+  const SessionMap newSessionMap2 = connection_->session_map();
+  EXPECT_FALSE(newSessionMap2.empty());
+  const ServiceList newServiceList2 = newSessionMap2.cbegin()->second;
+  EXPECT_FALSE(newServiceList2.empty());
+  const ServiceList::const_iterator it2 =
+      std::find(newServiceList2.cbegin(), newServiceList2.cend(), protocol_handler::kSecure);
+  EXPECT_EQ(it2, newServiceList2.cend());
 }
 
 } // connection_handle
