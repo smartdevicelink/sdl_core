@@ -91,38 +91,52 @@ function p_sdlproto.dissector(buf, pkt, root)
   elseif f_frameTypeValue_ConsecutiveFrame == l_frameType then
     subtree:add(f_frameInfo_ConsecutiveFrame, l_frameInfoBytes)
   else
-    subtree:add(f_frameInfo, l_frameInfoBytes):append_text(" (Reserved, should be 0x00)")
-    -- TODO use expert flags here
+    local l_frameInfoTreeItem = subtree:add(f_frameInfo, l_frameInfoBytes)
+
+    if l_frameInfoBytes:uint() ~= 0x00 then
+      l_frameInfoTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Reserved, should be 0x00")
+    end
   end
 
   subtree:add(f_sessionID, buf(3, 1))
 
   -- Data Size depends on Frame Type
   local l_dataSizeBytes = buf(4, 4)
+  local l_dataSizeValue = l_dataSizeBytes:uint()
+  local l_dataSizeTreeItem = subtree:add(f_dataSize, l_dataSizeBytes)
   if f_frameTypeValue_FirstFrame == l_frameType then
-    subtree:add(f_dataSize, l_dataSizeBytes):append_text(" (Should be 0x00000008)")
-    -- TODO use expert flags here
+    if l_dataSizeValue ~= 0x00000008 then
+      l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_ERROR, "Should be 0x00000008")
+    end
   elseif (f_frameTypeValue_ConsecutiveFrame == l_frameType) or
          (f_frameTypeValue_SingleFrame == l_frameType) then
-    subtree:add(f_dataSize, l_dataSizeBytes):append_text(" -- Total data bytes in this frame (Should be >= 0x00000001)")
-    -- TODO use expert flags here
+    l_dataSizeTreeItem:append_text(" -- Total data bytes in this frame")
+
+    if l_dataSizeValue < 0x00000001 then
+      l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_ERROR, "Should be >= 0x00000001")
+    end
   else
-    subtree:add(f_dataSize, l_dataSizeBytes):append_text(" (Reserved, should be 0x00)")
-    -- TODO use expert flags here
+    if l_dataSizeValue ~= 0x00000000 then
+      l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Reserved, should be 0x00000000")
+    end
   end
 
   -- Message ID depends on Frame Data (value of Frame Info)
   local l_messageIDBytes = buf(8, 4)
+  local l_messageIDValue = l_messageIDBytes:uint()
   local l_frameInfo = l_frameInfoBytes
+  local l_messageIDTreeItem = subtree:add(f_messageID, l_messageIDBytes)
+  local l_messageIDDescription = ""
   if f_frameInfoValue_StartServiceACK == l_frameInfo then
-    subtree:add(f_messageID, l_messageIDBytes):append_text(" -- Hash code for End Session (Should be >= 0x00000001)")
-    -- TODO use expert flags here
+    l_messageIDDescription = " -- Hash code for End Session"
   elseif f_frameInfoValue_ServiceDataACK == l_frameInfo then
-    subtree:add(f_messageID, l_messageIDBytes):append_text(" -- A control message for a given service. Please see the spec for more information. (Should be >= 0x00000001)")
-    -- TODO use expert flags here
+    l_messageIDDescription = " -- A control message for a given service. Please see the spec for more information."
   else
-    subtree:add(f_messageID, l_messageIDBytes):append_text(" -- Identifier of a message sent using SDL layer (Should be >= 0x00000001)")
-    -- TODO use expert flags here
+    l_messageIDDescription = " -- Identifier of a message sent using SDL layer"
+  end
+  l_messageIDTreeItem:append_text(l_messageIDDescription)
+  if l_messageIDValue < 0x00000001 then
+    l_messageIDTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Should be >= 0x00000001")
   end
 
   -- TODO subdissector for RPC messages
