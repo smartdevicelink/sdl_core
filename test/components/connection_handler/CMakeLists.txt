@@ -23,6 +23,7 @@ set (LIBRARIES
 
 set (SOURCES
   ./src/connection_handler_test.cc
+  ./src/connection_test.cc
   ./src/heart_beat_monitor_test.cc
 )
 
