@@ -596,8 +596,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       for (ServiceListConstIterator service_it = session_it->second.begin(),
           end = session_it->second.end(); service_it != end; ++service_it) {
 
-      connection_handler_observer_->OnServiceEndedCallback(
-          session_key, static_cast<protocol_handler::ServiceType>(*service_it));
+      connection_handler_observer_->OnServiceEndedCallback(session_key, *service_it);
       }
     }
   }

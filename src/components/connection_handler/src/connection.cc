@@ -79,10 +79,9 @@ int32_t Connection::AddNewSession() {
     ++size;
     /* whenever new session created RPC and Bulk services are
     established automatically */
-    session_map_[size].push_back(
-        static_cast<uint8_t>(protocol_handler::kRpc));
-    session_map_[size].push_back(
-        static_cast<uint8_t>(protocol_handler::kBulk));
+      //TODO: Dmitriy Trunov + Klimenko
+    session_map_[size].push_back(protocol_handler::kRpc);
+    session_map_[size].push_back(protocol_handler::kBulk);
 
     result = size;
   }
@@ -104,7 +103,7 @@ int32_t Connection::RemoveSession(uint8_t session) {
   return result;
 }
 
-bool Connection::AddNewService(uint8_t session, uint8_t service) {
+bool Connection::AddNewService(uint8_t session, ServiceType service) {
   sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 

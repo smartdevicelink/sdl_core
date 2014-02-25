@@ -44,6 +44,7 @@
 #include "utils/lock.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
+#include "protocol_handler/service_type.h"
 
 /**
  * \namespace connection_handler
@@ -84,17 +85,22 @@ typedef std::map<uint8_t, uint32_t>::iterator ResumeSessionMapIt;
 /**
  * \brief Type for Session Services
  */
-typedef std::vector<uint8_t> ServiceList;
+typedef protocol_handler::ServiceType ServiceType;
+
+/**
+ * \brief Type for Session Services
+ */
+typedef std::vector<ServiceType> ServiceList;
 
 /**
  * \brief Type for Services iterator
  */
-typedef std::vector<uint8_t>::iterator ServiceListIterator;
+typedef ServiceList::iterator ServiceListIterator;
 
 /**
  * \brief Type for Services iterator
  */
-typedef std::vector<uint8_t>::const_iterator ServiceListConstIterator;
+typedef ServiceList::const_iterator ServiceListConstIterator;
 
 /**
  * \brief Type for Services iterator
@@ -104,15 +110,15 @@ typedef std::map<uint8_t, ServiceList> SessionMap;
 /**
  * \brief Type for Services iterator
  */
-typedef std::map<uint8_t, ServiceList>::iterator SessionMapIterator;
+typedef SessionMap::iterator SessionMapIterator;
 
 /**
  * \brief Type for Services const iterator
  */
-typedef std::map<uint8_t, ServiceList>::const_iterator SessionMapConstIterator;
+typedef SessionMap::const_iterator SessionMapConstIterator;
 
 /**
- * \class Connection
+ * \class Connection
  * \brief Connection class
  */
 class Connection {
@@ -159,7 +165,7 @@ class Connection {
    * \brief Adds service to session
    * \return TRUE on success, otherwise FALSE
    */
-  bool AddNewService(uint8_t session, uint8_t service);
+  bool AddNewService(uint8_t session, ServiceType service);
 
   /**
    * \brief Removes service from session
