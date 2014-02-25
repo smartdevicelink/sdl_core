@@ -1422,7 +1422,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     MessageHelper::SendStopAudioPathThru();
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   applications_.erase(it);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);

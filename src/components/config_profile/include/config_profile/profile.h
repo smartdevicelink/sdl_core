@@ -104,7 +104,7 @@ class Profile : public utils::Singleton<Profile> {
     /**
      * @brief Returns help promt vector
      */
-    const std::vector<std::string>& help_promt() const;
+    const std::vector<std::string>& help_prompt() const;
 
     /**
      * @brief Returns help promt vector
@@ -352,7 +352,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        audio_streaming_port_;
     std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
-    std::vector<std::string>        help_promt_;
+    std::vector<std::string>        help_prompt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;
     uint64_t                        min_tread_stack_size_;

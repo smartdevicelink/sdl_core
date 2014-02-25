@@ -138,7 +138,7 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl, bool is_resumption = false);
+      const Application& application_impl);
 
     /**
      * @brief Sendss Vr Command 'Help'
@@ -205,7 +205,7 @@ class MessageHelper {
       uint32_t app_id);
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void RemoveAppDataFromHMI(ApplicationSharedPtr app);
-    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app, bool is_resuming = false);
+    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app);
     static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);

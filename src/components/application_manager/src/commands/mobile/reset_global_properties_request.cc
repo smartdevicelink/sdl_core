@@ -73,7 +73,7 @@ void ResetGlobalPropertiesRequest::Run() {
                       .length();
 
   bool helpt_promt = false;
-  bool timeout_promt = false;
+  bool timeout_prompt = false;
   bool vr_help_title = false;
   bool vr_help_items = false;
   bool menu_name = false;
@@ -87,7 +87,7 @@ void ResetGlobalPropertiesRequest::Run() {
         break;
       }
       case GlobalProperty::TIMEOUTPROMT: {
-        timeout_promt = ResetTimeoutPromt(app);
+        timeout_prompt = ResetTimeoutPromt(app);
         break;
       }
       case GlobalProperty::VRHELPTITLE: {
@@ -165,17 +165,17 @@ void ResetGlobalPropertiesRequest::Run() {
                        &msg_params, true);
   }
 
-  if (timeout_promt || helpt_promt) {
+  if (timeout_prompt || helpt_promt) {
     // create ui request
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
     if (helpt_promt) {
-      msg_params[strings::help_prompt] = (*app->help_promt());
+      msg_params[strings::help_prompt] = (*app->help_prompt());
     }
 
-    if (timeout_promt) {
-      msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    if (timeout_prompt) {
+      msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
 
     msg_params[strings::app_id] = app->app_id();
@@ -193,21 +193,21 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     return false;
   }
 
-  const std::vector<std::string>& help_promt = profile::Profile::instance()
-      ->help_promt();
+  const std::vector<std::string>& help_prompt = profile::Profile::instance()
+      ->help_prompt();
 
-  smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
+  smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < help_promt.size(); ++i) {
+  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_promt[i];
+    helpPrompt[strings::text] = help_prompt[i];
     helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_help_promt[i] = helpPrompt;
+    so_help_prompt[i] = helpPrompt;
   }
 
-  app->set_help_prompt(so_help_promt);
+  app->set_help_prompt(so_help_prompt);
 
   return true;
 }

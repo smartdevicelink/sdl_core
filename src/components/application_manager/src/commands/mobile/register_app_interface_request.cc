@@ -143,7 +143,7 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
 
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app, false);
+    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
