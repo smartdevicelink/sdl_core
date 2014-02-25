@@ -19,6 +19,7 @@ bool IsValid(ServiceType service_type) {
     case kAudio:
     case kMobileNav:
     case kBulk:
+    case kSecure:
       return true;
     default:
       return false;
@@ -28,7 +29,7 @@ bool IsValid(ServiceType service_type) {
 
 ServiceType ServiceTypeFromByte(uint8_t byte) {
   ServiceType type = ServiceType(byte);
-  bool valid_type = IsValid(type);
+  const bool valid_type = IsValid(type);
   if (!valid_type) {
     LOG4CXX_INFO(g_logger, "Invalid service type: "<<int32_t(byte))
   }

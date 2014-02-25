@@ -116,6 +116,11 @@ const uint8_t SERVICE_TYPE_NAVI = 0x0B;
 const uint8_t SERVICE_TYPE_BULK = 0x0F;
 
 /**
+ *\brief Constant: Secre Service type of session
+ */
+const uint8_t SERVICE_TYPE_SECURE = 0x10;
+
+/**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
  */
 const uint8_t FRAME_DATA_HEART_BEAT = 0x00;
