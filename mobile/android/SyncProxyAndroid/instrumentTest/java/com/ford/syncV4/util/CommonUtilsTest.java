@@ -2,6 +2,9 @@ package com.ford.syncV4.util;
 
 import junit.framework.TestCase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -55,5 +58,13 @@ public class CommonUtilsTest extends TestCase {
 
         mErrorMessage = null;
         assertFalse(CommonUtils.isUSBNoSuchDeviceError(mErrorMessage));
+    }
+
+    public static JSONObject paramsToRequestObject(JSONObject paramsObject) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject requestObject = new JSONObject();
+        jsonObject.put("request", requestObject);
+        requestObject.put("parameters", paramsObject);
+        return jsonObject;
     }
 }
