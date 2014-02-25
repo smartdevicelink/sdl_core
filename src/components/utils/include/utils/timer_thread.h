@@ -232,7 +232,7 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
   delegate_->setTimeOut(timeout_seconds);
   if (delegate_ && thread_) {
     is_running_ = true;
-    size_t kStackSize = 16384;
+    const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   }
 }
