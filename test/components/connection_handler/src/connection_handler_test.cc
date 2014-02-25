@@ -62,7 +62,7 @@ public:
   }
 };
 
-class SessionTest: public ::testing::Test {
+class ConnectionHandlerTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     session_observer_.reset(new ConnectionHandlerImplWrapper);
@@ -83,7 +83,7 @@ class SessionTest: public ::testing::Test {
   transport_manager::ConnectionUID uid;
 };
 
-TEST_F(SessionTest, SessionStarted_Fial_NoConnection) {
+TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
   //null sessionId for start new session
   const uint8_t sessionID = 0;
   //start new session with RPC service
@@ -94,7 +94,7 @@ TEST_F(SessionTest, SessionStarted_Fial_NoConnection) {
   EXPECT_TRUE(session_observer_->getConnectionList().empty());
 }
 
-TEST_F(SessionTest, SessionStarted_RPC) {
+TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
   //null sessionId for start new session
   const uint8_t sessionID = 0;
 
@@ -118,7 +118,7 @@ TEST_F(SessionTest, SessionStarted_RPC) {
   EXPECT_NE(it, serviceList.cend());
 }
 
-TEST_F(SessionTest, SessionStarted_Secure) {
+TEST_F(ConnectionHandlerTest, SessionStarted_Secure) {
   //null sessionId for start new session
   const uint8_t start_session_id = 0;
 
@@ -142,7 +142,7 @@ TEST_F(SessionTest, SessionStarted_Secure) {
   EXPECT_EQ(connection_list_new.begin()->first, 0);
 }
 
-TEST_F(SessionTest, SessionEnded_Secure) {
+TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
   //null sessionId for start new session
   const uint8_t start_session_id = 0;
 
