@@ -50,7 +50,8 @@ PipeStreamerAdapter::PipeStreamerAdapter()
     thread_("PipeStreamerAdapter", new Streamer(this)) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::PipeStreamerAdapter");
 
-  thread_.startWithOptions(threads::ThreadOptions(16384));
+  const size_t kStackSize = 16384;
+  thread_.startWithOptions(threads::ThreadOptions(kStackSize));
 }
 
 PipeStreamerAdapter::~PipeStreamerAdapter() {

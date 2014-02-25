@@ -53,6 +53,8 @@ log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
 std::string ConvertPacketDataToString(const uint8_t *data,
                                       const std::size_t data_size);
 
+const size_t kStackSize = 16384;
+
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     transport_manager::TransportManager* transport_manager_param)
     : protocol_observers_(),
@@ -66,7 +68,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
           )),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,
-          threads::ThreadOptions(16384)) {
+          threads::ThreadOptions(kStackSize)) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
