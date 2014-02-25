@@ -231,7 +231,13 @@ public class RegisterAppInterface extends RPCRequest {
      * @return {@link java.lang.String} uniquely identify of the current state of all app data
      */
     public String getHashID() {
-        return (String) parameters.get(Names.hashID);
+        if (!parameters.containsKey(Names.hashID)) {
+            return null;
+        }
+        if (parameters.get(Names.hashID) instanceof String) {
+            return (String) parameters.get(Names.hashID);
+        }
+        return null;
     }
 
     /**

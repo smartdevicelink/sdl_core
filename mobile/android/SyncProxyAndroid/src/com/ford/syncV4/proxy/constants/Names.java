@@ -459,4 +459,5 @@ public class Names {
     public static final String messageData = "messageData";
     public static final String messageDataResult = "messageDataResult";
     public static final String hashID = "hashID";
+    public static final String OnHashChange = "OnHashChange";
 }
