@@ -105,17 +105,20 @@ bool SocketStreamerAdapter::is_app_performing_activity(
   return (application_key == current_application_);
 }
 
-void SocketStreamerAdapter::SendData(
-  int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
-
-  if(NULL == thread_) {
+void SocketStreamerAdapter::Init() {
+  if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
     thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
     thread_->startWithOptions(
         threads::ThreadOptions(threads::Thread::kMinStackSize));
   }
+}
+
+void SocketStreamerAdapter::SendData(
+  int32_t application_key,
+  const protocol_handler::RawMessagePtr& message) {
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
+
 
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Currently working with other app "

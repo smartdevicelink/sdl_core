@@ -487,7 +487,7 @@ class ProtocolPacket {
 
     /**
     * \brief Connection Identifier
-    * Obtained from Cconnection_handler
+    * Obtained from connection_handler
     */
     uint8_t connection_key_;
 

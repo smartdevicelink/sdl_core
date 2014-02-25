@@ -43,6 +43,8 @@ log4cxx::LoggerPtr logger =
 PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::PipeAudioStreamerAdapter");
   named_pipe_path_ = profile::Profile::instance()->named_audio_pipe_path();
+
+  Init();
 }
 
 PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {

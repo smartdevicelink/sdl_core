@@ -525,7 +525,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
     }
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case default!!!");
-      break;
+      return RESULT_FAIL;
     }
   }
 

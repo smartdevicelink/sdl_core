@@ -67,13 +67,6 @@ void PipeStreamerAdapter::SendData(
   const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
-  if(NULL == thread_) {
-    LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
-    thread_->startWithOptions(
-        threads::ThreadOptions(threads::Thread::kMinStackSize));
-  }
-
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Wrong application " << application_key);
     return;
@@ -125,6 +118,15 @@ void PipeStreamerAdapter::StopActivity(int32_t application_key) {
 bool PipeStreamerAdapter::is_app_performing_activity(
   int32_t application_key) {
   return (application_key == current_application_);
+}
+
+void PipeStreamerAdapter::Init() {
+  if (!thread_) {
+    LOG4CXX_INFO(logger, "Create and start sending thread");
+    thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
+    thread_->startWithOptions(
+        threads::ThreadOptions(threads::Thread::kMinStackSize));
+  }
 }
 
 PipeStreamerAdapter::Streamer::Streamer(

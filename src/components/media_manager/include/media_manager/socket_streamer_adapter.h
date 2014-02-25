@@ -53,6 +53,12 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     virtual bool is_app_performing_activity(int32_t application_key);
 
   protected:
+
+    /*
+     * @brief Start streamer thread
+     */
+    virtual void Init();
+
     int32_t port_;
     std::string ip_;
 

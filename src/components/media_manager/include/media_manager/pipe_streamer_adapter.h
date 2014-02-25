@@ -54,6 +54,11 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
   protected:
     std::string named_pipe_path_;
 
+    /*
+     * @brief Start streamer thread
+     */
+    virtual void Init();
+
   private:
     class Streamer : public threads::ThreadDelegate {
       public:
