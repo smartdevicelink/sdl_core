@@ -32,13 +32,66 @@
 
 
 #include <gtest/gtest.h>
+#include <algorithm>
 #include "connection_handler/connection.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/service_type.h"
+#include "utils/shared_ptr.h"
 
 using namespace connection_handler;
 
 namespace test {
 namespace components {
 namespace connection_handle {
+
+class ConnectionTest: public ::testing::Test {
+ protected:
+  void SetUp() OVERRIDE {
+    const ConnectionHandle connectionHandle = 0;
+    const DeviceHandle device_handle = 0;
+    connection_.reset(new Connection(connectionHandle, device_handle,
+                                     ConnectionHandlerImpl::instance(), 10000));
+  }
+
+  utils::SharedPtr<Connection> connection_;
+};
+
+TEST_F(ConnectionTest, Session_AddNewSession) {
+  const int32_t session_id = connection_->AddNewSession();
+  EXPECT_NE(session_id, -1);
+  const SessionMap sessionMap = connection_->session_map();
+  EXPECT_FALSE(sessionMap.empty());
+  const ServiceList serviceList = sessionMap.cbegin()->second;
+  EXPECT_FALSE(serviceList.empty());
+  const ServiceList::const_iterator it =
+      std::find(serviceList.cbegin(), serviceList.cend(), protocol_handler::kRpc);
+  EXPECT_NE(it, serviceList.cend());
+}
+
+TEST_F(ConnectionTest, Session_StartSecureService) {
+  const int32_t session_id = connection_->AddNewSession();
+  EXPECT_NE(session_id, -1);
+  const SessionMap sessionMap = connection_->session_map();
+  EXPECT_FALSE(sessionMap.empty());
+  const ServiceList serviceList = sessionMap.cbegin()->second;
+  EXPECT_FALSE(serviceList.empty());
+  const ServiceList::const_iterator it =
+      std::find(serviceList.cbegin(), serviceList.cend(), protocol_handler::kRpc);
+  EXPECT_NE(it, serviceList.cend());
+
+  //TODO: check Secure plugin enable
+
+  const bool result = connection_->AddNewService(session_id, protocol_handler::kSecure);
+  EXPECT_TRUE(result);
+  const SessionMap newSessionMap = connection_->session_map();
+  EXPECT_FALSE(newSessionMap.empty());
+  const ServiceList newServiceList = newSessionMap.cbegin()->second;
+  EXPECT_FALSE(newServiceList.empty());
+  const ServiceList::const_iterator it2 =
+      std::find(newServiceList.cbegin(), newServiceList.cend(), protocol_handler::kSecure);
+  EXPECT_NE(it2, newServiceList.cend());
+
+}
 
 } // connection_handle
 } // namespace components

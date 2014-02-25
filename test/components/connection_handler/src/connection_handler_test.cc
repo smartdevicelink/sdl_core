@@ -1,7 +1,4 @@
 /*
- * \file test_schema.cc
- * \brief
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
