@@ -5,6 +5,7 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
+  ../../../src/components/crypto_manager/include
   ../../../test/components/protocol_handler/include
 )
 

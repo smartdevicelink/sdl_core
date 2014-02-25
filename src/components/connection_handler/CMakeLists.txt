@@ -3,6 +3,7 @@ include_directories (
   ../transport_manager/include/
   ../protocol_handler/include/
   ../config_profile/include/
+  ../crypto_manager/include/
   ../utils/include/
 )
 
@@ -17,4 +18,4 @@ set(LIBRARIES
     ConfigProfile
 )
 
-add_library("connectionHandler" ${SOURCES})
+add_library(connectionHandler ${SOURCES})

@@ -45,6 +45,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol_handler/service_type.h"
+#include "crypto_manager/ssl_context.h"
 
 /**
  * \namespace connection_handler
@@ -151,7 +152,7 @@ class Connection {
 
   /**
    * \brief Removes session from connection
-   * \param aSession session ID
+   * \param session session ID
    * \return sessionID or -1 in case of issues
    */
   int32_t RemoveSession(uint8_t session);
@@ -160,15 +161,37 @@ class Connection {
    * \brief Adds service to session
    * \return TRUE on success, otherwise FALSE
    */
-  bool AddNewService(uint8_t session, protocol_handler::ServiceType service);
+  bool AddNewService(uint8_t session,
+                     protocol_handler::ServiceType service);
 
   /**
    * \brief Removes service from session
-   * \param aSession session ID
+   * \param session session ID
    * \return TRUE on success, otherwise FALSE
    */
-  bool RemoveService(uint8_t session, uint8_t service);
+  bool RemoveService(uint8_t session,
+                     protocol_handler::ServiceType service_type);
 
+  /**
+   * \brief Sets crypto context of service
+     * \param sessionId Identifier of the session
+   * \param service_type Type of service
+   * \return \c true in case of service is protected or \c false otherwise
+   */
+  bool SetSSLContext(
+    uint8_t session,
+    protocol_handler::ServiceType service_type,
+    crypto_manager::SSLContext* context);
+
+  /**
+   * \brief Gets crypto context of service
+     * \param sessionId Identifier of the session
+   * \param service_type Type of service
+   * \return \c true in case of service is protected or \c false otherwise
+   */
+  crypto_manager::SSLContext* GetSSLContext(
+      uint8_t session,
+      protocol_handler::ServiceType service_type) const;
   /**
    * \brief Returns map of sessions which have been opened in
    *  current connection.

@@ -176,7 +176,7 @@ class ProtocolHandlerImpl
     /**
      * \brief Sends acknowledgement of starting session to mobile application
      * with session number and hash code for second version of protocol.
-     * \param connection_handle Identifier of connection whithin which session
+     * \param connection_handle Identifier of connection within which session
      * was started
      * \param session_id ID of session to be sent to mobile applicatin.
      * \param protocol_version Version of protocol used for communication
@@ -194,7 +194,7 @@ class ProtocolHandlerImpl
 
     /**
      * \brief Sends fail of starting session to mobile application.
-     * \param connection_handle Identifier of connection whithin which session
+     * \param connection_handle Identifier of connection within which session
      * ment to be started
      * \param session_id ID of session to be sent to mobile applicatin.
      * \param protocol_version Version of protocol used for communication
@@ -209,7 +209,7 @@ class ProtocolHandlerImpl
     /**
      * \brief Sends acknowledgement of end session/service to mobile application
      * with session number and hash code for second version of protocol.
-     * \param connection_handle Identifier of connection whithin which session
+     * \param connection_handle Identifier of connection within which session
      * was started
      * \param session_id ID of session to be sent to mobile applicatin.
      * \param protocol_version Version of protocol used for communication
@@ -227,7 +227,7 @@ class ProtocolHandlerImpl
 
     /**
      * \brief Sends fail of ending session to mobile application.
-     * \param connection_handle Identifier of connection whithin which
+     * \param connection_handle Identifier of connection within which
      * session exists
      * \param session_id ID of session ment to be ended
      * \param protocol_version Version of protocol used for communication

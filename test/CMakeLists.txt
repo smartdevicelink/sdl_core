@@ -20,6 +20,7 @@ include_directories (
   ../src/components/media_manager/include
   ../src/components/config_profile/include
   ../src/components/protocol_handler/include
+  ../src/components/crypto_manager/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include

@@ -289,6 +289,9 @@ void ConnectionHandlerImpl::RemoveConnection(
       return -1;
     }
     new_session_id = sessionId;
+    if(protocol_handler::kSecure != service_type)
+      {
+      }
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
     return -1;
@@ -477,6 +480,41 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   result = 0;
 
   return result;
+}
+
+bool ConnectionHandlerImpl::SetSSLContext(
+    const uint32_t &key, protocol_handler::ServiceType service_type,
+    crypto_manager::SSLContext *context) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::SetSSLContext");
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionListIterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown connection!");
+      return false;
+    }
+  Connection& connection = *it->second;
+  return connection.SetSSLContext(session_id, service_type, context);
+}
+
+crypto_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
+      const uint32_t &key, protocol_handler::ServiceType service_type) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetSSLContext");
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionListIterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+      LOG4CXX_ERROR(logger_, "Unknown connection!");
+      return NULL;
+    }
+  Connection& connection = *it->second;
+  return connection.GetSSLContext(session_id, service_type);
 }
 
 void ConnectionHandlerImpl::set_transport_manager(

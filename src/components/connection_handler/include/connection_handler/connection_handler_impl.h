@@ -158,7 +158,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
-     * \param connection_handle Connection identifier whithin which session has to be started.
+     * \param connection_handle Connection identifier within which session has to be started.
      * \param sessionId Identifier of the session to be started
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
@@ -170,7 +170,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
-     * \param connection_handle Connection identifier whithin which session exists
+     * \param connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
@@ -184,8 +184,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
-     * whithin which session exists and session number.
-     * \param  connection_handle Connection identifier whithin which session exists
+     * within which session exists and session number.
+     * \param  connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session
      * \return int32_t Unique key for session
      */
@@ -196,7 +196,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Returns connection identifier and session number from given session key
      * \param key Unique key used by other components as session identifier
-     * \param connection_handle Returned: Connection identifier whithin which session exists
+     * \param connection_handle Returned: Connection identifier within which session exists
      * \param sessionId Returned: Number of session
      */
     virtual void PairFromKey(uint32_t key,
@@ -228,6 +228,26 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
+    /**
+     * \brief Sets crypto context of service
+     * \param key Unique key used by other components as session identifier
+     * \param service_type Type of service
+     * \return \c true in case of service is protected or \c false otherwise
+     */
+    virtual bool SetSSLContext(
+      const uint32_t& key,
+      protocol_handler::ServiceType service_type,
+      crypto_manager::SSLContext* context) OVERRIDE;
+
+    /**
+     * \brief Gets crypto context of service
+     * \param key Unique key used by other components as session identifier
+     * \param service_type Type of service
+     * \return \c true in case of service is protected or \c false otherwise
+     */
+    crypto_manager::SSLContext* GetSSLContext(
+        const uint32_t& key,
+        protocol_handler::ServiceType service_type) OVERRIDE;
 
     /**
      * \brief Method which should start devices discoveryng
@@ -311,7 +331,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      *  \brief Lock for applications list
      */
-    sync_primitives::Lock connection_list_lock_;
+    mutable sync_primitives::Lock connection_list_lock_;
 
     /**
      * \brief List of sessions that must be resumed

@@ -506,8 +506,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
         return RESULT_FAIL;
       }
 
-      int32_t connection_key = session_observer_->KeyFromPair(
-          connection_id, packet->session_id());
+      const int32_t connection_key =
+          session_observer_->KeyFromPair(connection_id, packet->session_id());
+
+      crypto_manager::SSLContext* context =
+          session_observer_->GetSSLContext(
+            connection_key, static_cast<ServiceType>(packet->service_type()));
+      if(context) {
+          //FIXME: EZamakhov add encrypte call
+      }
 
       RawMessagePtr raw_message(
           new RawMessage(connection_key, packet->protocol_version(), packet->data(),

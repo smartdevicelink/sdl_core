@@ -68,6 +68,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
+  ../components/crypto_manager/include
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/

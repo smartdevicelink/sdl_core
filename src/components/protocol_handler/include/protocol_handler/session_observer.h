@@ -40,6 +40,7 @@
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "connection_handler/connection_handler.h"
+#include "crypto_manager/ssl_context.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -51,14 +52,20 @@ namespace protocol_handler {
  * \brief Interface for making a bridge between ProtocolHandler and
  * ConnectionHandler components.
  */
+//TODO:(EZamakhov) Rename SessionObserver to SessionManager
+//TODO:(EZamakhov) Unificate interface (references)
+//TODO:(EZamakhov) cahnge brief info (callback, spaces)
+//TODO:(EZamakhov) rename KeyFromPair and PairFromKey
+//TODO:(EZamakhov) Add const modifiers to const methods
 class SessionObserver {
-  public:
+public:
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
-     * \param connection_handle Connection identifier whithin which session
+     * \param connection_handle Connection identifier within which session
      * has to be started.
      * \param sessionId Identifier of the session to be ended
+     * \param service_type Type of service
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
@@ -69,10 +76,11 @@ class SessionObserver {
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
-     * \param connection_handle Connection identifier whithin which session exists
+     * \param connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
+     * \param service_type Type of service
      * \return uint32_t 0 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
@@ -84,8 +92,8 @@ class SessionObserver {
     /**
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
-     * whithin which session exists and session number.
-     * \param  connection_handle Connection identifier whithin which session exists
+     * within which session exists and session number.
+     * \param connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session
      * \return uint32_t Unique key for session
      */
@@ -97,7 +105,7 @@ class SessionObserver {
      * \brief Returns connection identifier and session number from given
      * session key
      * \param key Unique key used by other components as session identifier
-     * \param connection_handle Returned: Connection identifier whithin which
+     * \param connection_handle Returned: Connection identifier within which
      * session exists
      * \param sessionId Returned: Number of session
      */
@@ -133,6 +141,26 @@ class SessionObserver {
       std::list<uint32_t>* applications_list,
       std::string* mac_address) = 0;
 
+    /**
+     * \brief Sets crypto context of service
+     * \param key Unique key used by other components as session identifier
+     * \param service_type Type of service
+     * \return \c true in case of service is protected or \c false otherwise
+     */
+    virtual bool SetSSLContext(
+      const uint32_t& key,
+      protocol_handler::ServiceType service_type,
+      crypto_manager::SSLContext* context) = 0;
+
+    /**
+     * \brief Gets crypto context of service
+     * \param key Unique key used by other components as session identifier
+     * \param service_type Type of service
+     * \return \c true in case of service is protected or \c false otherwise
+     */
+    virtual crypto_manager::SSLContext* GetSSLContext(
+        const uint32_t& key,
+        protocol_handler::ServiceType service_type) = 0;
   protected:
     /**
      * \brief Destructor

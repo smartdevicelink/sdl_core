@@ -127,7 +127,7 @@ bool Connection::AddNewService(uint8_t session,
   return result;
 }
 
-bool Connection::RemoveService(uint8_t session, uint8_t service) {
+bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType service_type) {
   sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 
@@ -138,16 +138,32 @@ bool Connection::RemoveService(uint8_t session, uint8_t service) {
   }
 
   ServiceListIterator service_it = find(session_it->second.begin(),
-                                        session_it->second.end(), service);
+                                        session_it->second.end(), service_type);
   if (service_it != session_it->second.end()) {
     session_it->second.erase(service_it);
     result = true;
   } else {
     LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
-                  " service " << service);
+                  " service " << service_type);
   }
 
   return result;
+}
+
+bool Connection::SetSSLContext( uint8_t session,
+                                protocol_handler::ServiceType service_type,
+                                crypto_manager::SSLContext *context){
+  //FIXME: EZamakhov
+  assert(!"not_implemented");
+  return false;
+}
+
+crypto_manager::SSLContext* Connection::GetSSLContext(
+    uint8_t session,
+    protocol_handler::ServiceType service_type) const {
+  //FIXME: EZamakhov
+  assert(!"not_implemented");
+  return NULL;
 }
 
 ConnectionHandle Connection::connection_handle() const {
