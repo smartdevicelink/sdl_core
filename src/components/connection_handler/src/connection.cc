@@ -103,7 +103,8 @@ int32_t Connection::RemoveSession(uint8_t session) {
   return result;
 }
 
-bool Connection::AddNewService(uint8_t session, ServiceType service) {
+bool Connection::AddNewService(uint8_t session,
+                               protocol_handler::ServiceType service) {
   sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 

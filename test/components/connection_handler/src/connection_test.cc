@@ -67,11 +67,11 @@ TEST_F(ConnectionTest, Session_AddNewSession) {
   EXPECT_NE(session_id, -1);
   const SessionMap sessionMap = connection_->session_map();
   EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.cbegin()->second;
+  const ServiceList serviceList = sessionMap.begin()->second;
   EXPECT_FALSE(serviceList.empty());
   const ServiceList::const_iterator it =
-      std::find(serviceList.cbegin(), serviceList.cend(), protocol_handler::kRpc);
-  EXPECT_NE(it, serviceList.cend());
+      std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
+  EXPECT_NE(it, serviceList.end());
 }
 
 TEST_F(ConnectionTest, Session_SecureService) {
@@ -79,11 +79,11 @@ TEST_F(ConnectionTest, Session_SecureService) {
   EXPECT_NE(session_id, -1);
   const SessionMap sessionMap = connection_->session_map();
   EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.cbegin()->second;
+  const ServiceList serviceList = sessionMap.begin()->second;
   EXPECT_FALSE(serviceList.empty());
   const ServiceList::const_iterator it =
-      std::find(serviceList.cbegin(), serviceList.cend(), protocol_handler::kRpc);
-  EXPECT_NE(it, serviceList.cend());
+      std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
+  EXPECT_NE(it, serviceList.end());
 
   //TODO: check Secure plugin enable
 
@@ -91,21 +91,21 @@ TEST_F(ConnectionTest, Session_SecureService) {
   EXPECT_TRUE(result);
   const SessionMap newSessionMap = connection_->session_map();
   EXPECT_FALSE(newSessionMap.empty());
-  const ServiceList newServiceList = newSessionMap.cbegin()->second;
+  const ServiceList newServiceList = newSessionMap.begin()->second;
   EXPECT_FALSE(newServiceList.empty());
   const ServiceList::const_iterator it1 =
-      std::find(newServiceList.cbegin(), newServiceList.cend(), protocol_handler::kSecure);
-  EXPECT_NE(it1, newServiceList.cend());
+      std::find(newServiceList.begin(), newServiceList.end(), protocol_handler::kSecure);
+  EXPECT_NE(it1, newServiceList.end());
 
   const bool result2 = connection_->RemoveService(session_id, protocol_handler::kSecure);
   EXPECT_TRUE(result2);
   const SessionMap newSessionMap2 = connection_->session_map();
   EXPECT_FALSE(newSessionMap2.empty());
-  const ServiceList newServiceList2 = newSessionMap2.cbegin()->second;
+  const ServiceList newServiceList2 = newSessionMap2.begin()->second;
   EXPECT_FALSE(newServiceList2.empty());
   const ServiceList::const_iterator it2 =
-      std::find(newServiceList2.cbegin(), newServiceList2.cend(), protocol_handler::kSecure);
-  EXPECT_EQ(it2, newServiceList2.cend());
+      std::find(newServiceList2.begin(), newServiceList2.end(), protocol_handler::kSecure);
+  EXPECT_EQ(it2, newServiceList2.end());
 }
 
 } // connection_handle

@@ -111,8 +111,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
   EXPECT_EQ(sessionMap.begin()->first, session_id_on_rpc_secure);
   const ServiceList serviceList = sessionMap.begin()->second;
   const ServiceList::const_iterator it =
-      std::find(serviceList.cbegin(), serviceList.cend(), protocol_handler::kRpc);
-  EXPECT_NE(it, serviceList.cend());
+      std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
+  EXPECT_NE(it, serviceList.end());
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_Secure) {

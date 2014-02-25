@@ -85,12 +85,7 @@ typedef std::map<uint8_t, uint32_t>::iterator ResumeSessionMapIt;
 /**
  * \brief Type for Session Services
  */
-typedef protocol_handler::ServiceType ServiceType;
-
-/**
- * \brief Type for Session Services
- */
-typedef std::vector<ServiceType> ServiceList;
+typedef std::vector<protocol_handler::ServiceType> ServiceList;
 
 /**
  * \brief Type for Services iterator
@@ -165,7 +160,7 @@ class Connection {
    * \brief Adds service to session
    * \return TRUE on success, otherwise FALSE
    */
-  bool AddNewService(uint8_t session, ServiceType service);
+  bool AddNewService(uint8_t session, protocol_handler::ServiceType service);
 
   /**
    * \brief Removes service from session
