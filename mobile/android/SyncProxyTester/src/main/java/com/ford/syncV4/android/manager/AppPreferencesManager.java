@@ -55,4 +55,26 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getString(Const.Policy.PREF_KEY_POLICY_UPDATE_FILE_PATH, "");
     }
+
+    /**
+     * Set a value of the auto replay scenario in case of processing Policy Table Snapshot data
+     *
+     * @param value {@link java.lang.Boolean} true | false
+     */
+    public static void setPolicyTableUpdateAutoReplay(boolean value) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_AUTO_REPLAY, value);
+        editor.commit();
+    }
+
+    /**
+     * Return a value of the auto replay scenario in case of processing Policy Table Snapshot data
+     *
+     * @return {@link java.lang.Boolean} true | false
+     */
+    public static boolean getPolicyTableUpdateAutoReplay() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_AUTO_REPLAY, true);
+    }
 }

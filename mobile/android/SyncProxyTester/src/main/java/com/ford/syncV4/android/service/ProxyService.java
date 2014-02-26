@@ -25,6 +25,7 @@ import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
+import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.utils.AppUtils;
@@ -409,6 +410,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
         unregisterReceiver(mediaButtonReceiver);
         super.onDestroy();
+    }
+
+    public void sendPolicyTableUpdate() {
+        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, mLogAdapter);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {

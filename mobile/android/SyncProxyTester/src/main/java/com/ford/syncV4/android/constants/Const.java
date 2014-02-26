@@ -58,6 +58,7 @@ public class Const {
     // Policy properties
     public static final class Policy {
         public static final String PREF_KEY_POLICY_UPDATE_FILE_PATH = "PolicyUpdateFilePath";
+        public static final String PREF_KEY_POLICY_UPDATE_AUTO_REPLAY = "PolicyUpdateAutoReplay";
     }
 
 	// Keys to pass objects via IntentHelper

@@ -56,6 +56,7 @@ import com.ford.syncV4.android.manager.IBluetoothDeviceManager;
 import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
+import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.receivers.ISyncReceiver;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.ICloseSession;
@@ -3136,6 +3137,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             Log.w(LOG_TAG, "Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
         }
         mLatestAddSubmenu = syncSubMenu;
+    }
+
+    /**
+     *
+     */
+    public void onPolicyFilesSetUpDialogResult_SendUpdate() {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.sendPolicyTableUpdate();
+        }
     }
 
     /**

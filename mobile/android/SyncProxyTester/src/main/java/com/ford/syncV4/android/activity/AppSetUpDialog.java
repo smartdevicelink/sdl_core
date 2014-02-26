@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
@@ -23,6 +24,7 @@ import android.widget.ToggleButton;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -59,6 +61,15 @@ public class AppSetUpDialog extends DialogFragment {
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
         langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        final CheckBox policyFileUpdateAutoReplayView =
+                (CheckBox) view.findViewById(R.id.policy_file_update_auto_replay_view);
+        policyFileUpdateAutoReplayView.setChecked(AppPreferencesManager.getPolicyTableUpdateAutoReplay());
+        policyFileUpdateAutoReplayView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
+            }
+        });
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
