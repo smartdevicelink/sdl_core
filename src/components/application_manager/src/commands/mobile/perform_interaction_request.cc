@@ -623,7 +623,8 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::timeout] = default_timeout_;
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params);
+  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params,
+                 true);
 }
 
 void PerformInteractionRequest::DeleteParameterFromTTSChunk
