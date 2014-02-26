@@ -22,6 +22,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
+import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -65,6 +66,7 @@ import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
@@ -162,9 +164,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private PutFileTransferManager mPutFileTransferManager;
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
-    // This Vector keep all RPC requests since the last successful application start
-    private final Vector<RPCRequest> rpcRequestsResumable = new Vector<RPCRequest>();
+    // This manager provide functionality to process RPC requests which are involved in app resumption
+    private RPCRequestsResumableManager mRpcRequestsResumableManager =
+            new RPCRequestsResumableManager();
 
+    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -205,6 +209,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, ProxyService.class.getSimpleName() + " OnStartCommand");
         createInfoMessageForAdapter("ProxyService.onStartCommand()");
@@ -645,6 +650,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }
         }
+    }
+
+    @Override
+    public void onHashChange(OnHashChange onHashChange) {
+
     }
 
     /**
@@ -1580,8 +1590,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
 
-        // Restore a PutFile which has not been sent
-        resendUnsentPutFiles();
+        try {
+            processRegisterAppInterfaceResponse(response);
+        } catch (SyncException e) {
+            createErrorMessageForAdapter("Can not process RAIResponse:" + e.getMessage());
+        }
     }
 
     @Override
@@ -1946,8 +1959,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
 
-        // TODO : Implement here a procedure of the keep in collection request
-        rpcRequestsResumable.add(request);
+        if (mSyncProxy.getIsConnected()) {
+            mRpcRequestsResumableManager.addRequestConnected(request);
+        } else {
+            mRpcRequestsResumableManager.addRequestDisconnected(request);
+        }
 
         syncProxySendRPCRequest(request);
     }
@@ -2008,6 +2024,34 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         syncProxySendRPCRequest(setAppIcon);
 
         mAwaitingInitIconResponseCorrelationID = 0;
+    }
+
+    /**
+     * Process a response of the {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request
+     *
+     * @param response {@link com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse} object
+     */
+    private void processRegisterAppInterfaceResponse(RegisterAppInterfaceResponse response)
+            throws SyncException {
+
+        if (!response.getSuccess()) {
+            return;
+        }
+
+        if (response.getResultCode() == Result.SUCCESS) {
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+        } else if (response.getResultCode() == Result.RESUME_FAILED) {
+            mRpcRequestsResumableManager.sendAllRequestsConnected(mSyncProxy);
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+        }
+
+        mRpcRequestsResumableManager.cleanAllRequestsConnected();
+        mRpcRequestsResumableManager.cleanAllRequestsDisconnected();
+
+        // Restore a PutFile which has not been sent
+        resendUnsentPutFiles();
+        // Restore Services
+        mSyncProxy.restoreServices();
     }
 
     // TODO: Reconsider this section, this is a first step to optimize log procedure
