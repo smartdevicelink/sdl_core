@@ -152,12 +152,12 @@ local tcp_port = 12345
 local tcp_dissector_table = DissectorTable.get("tcp.port")
 tcp_dissector_table:add(tcp_port, p_sdlproto)
 
--- register the dissector for the standard USB AOA vendor&product
--- requires wireshark 1.10.0+
+-- attempt to register the dissector for the standard USB AOA vendor&product
+-- (requires wireshark 1.10.0+)
 -- this may fail if wireshark doesn't get device descriptors
-local usb_product_dissector_table = DissectorTable.get("usb.product")
-print(usb_product_dissector_table == nil)
-if usb_product_dissector_table ~= nil then
+local success, data = pcall(function() return DissectorTable.get("usb.product") end)
+if success then
+  local usb_product_dissector_table = data
   usb_product_dissector_table:add(0x18d12d01, p_sdlproto)
 else
   -- pre wireshark 1.10.0
