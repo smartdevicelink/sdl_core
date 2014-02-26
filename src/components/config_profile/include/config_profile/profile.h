@@ -385,7 +385,7 @@ class Profile : public utils::Singleton<Profile> {
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(Profile);
+    FRIEND_BASE_SINGLETON_CLASS(Profile);
 };
 
 }  //  namespace profile

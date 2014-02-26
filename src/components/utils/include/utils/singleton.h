@@ -75,9 +75,9 @@ class Singleton {
  * class MySingleton : public Singleton<MySingleton> {...};
  *
  * All such classes must declare instance() method as friend
- * by adding FRIEND_BASE_SINGLETON_CLASS_INSTANCE macro from macro.h to class definition:
+ * by adding FRIEND_BASE_SINGLETON_CLASS macro from macro.h to class definition:
  *
- * FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MySingleton);
+ * FRIEND_BASE_SINGLETON_CLASS(MySingleton);
  *
  * Instance of this class (if created) can be deleted by Deleter destructor
  * which is called after main() (or from exit())
@@ -92,10 +92,38 @@ class Singleton {
  * @brief Returns the singleton of class
  */
   static T* instance();
+/**
+ * @brief Destroys the singleton (if it had been created)
+ */
+  static void destroy();
+/**
+ * @brief Checks whether singleton exists
+ */
+  static bool exists();
+
+ private:
+  typedef enum {New, Delete, Value} CtlOperation;
+
+  static T* ctl(CtlOperation operation);
 };
 
 template<typename T, class Deleter>
 T* Singleton<T, Deleter>::instance() {
+  return ctl(New);
+}
+
+template<typename T, class Deleter>
+void Singleton<T, Deleter>::destroy() {
+  ctl(Delete);
+}
+
+template<typename T, class Deleter>
+bool Singleton<T, Deleter>::exists() {
+  return ctl(Value) != 0;
+}
+
+template<typename T, class Deleter>
+T* Singleton<T, Deleter>::ctl(CtlOperation operation) {
   static T* instance = 0;
   static Deleter deleter;
   static sync_primitives::Lock lock;
@@ -103,16 +131,36 @@ T* Singleton<T, Deleter>::instance() {
   T* local_instance = 0;
   atomic_or(&local_instance, instance);
   memory_barrier();
-  if (!local_instance) {
-    lock.Ackquire();
-    local_instance = instance;
-    if (!local_instance) {
-      local_instance = new T();
-      memory_barrier();
-      deleter.grab(local_instance);
-      atomic_or(&instance, local_instance); // we know that instance = 0 before this instruction
-    }
-    lock.Release();
+
+  switch (operation) {
+    case New:
+      if (!local_instance) {
+        lock.Ackquire();
+        local_instance = instance;
+        if (!local_instance) {
+          local_instance = new T();
+          memory_barrier();
+          deleter.grab(local_instance);
+          atomic_or(&instance, local_instance); // we know that instance = 0 before this instruction
+        }
+        lock.Release();
+      }
+      break;
+    case Delete:
+      if (local_instance) {
+        lock.Ackquire();
+        local_instance = instance;
+        if (local_instance) {
+          atomic_zero(&instance);
+          delete local_instance;
+          local_instance = 0; // only not to return wild pointer
+          deleter.grab(0);
+        }
+        lock.Release();
+      }
+      break;
+    case Value:
+      break;
   }
 
   return local_instance;

@@ -569,7 +569,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ApplicationManagerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {

@@ -251,23 +251,23 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   app_manager_->Stop();
-  delete app_manager_;
+  application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
-  delete policy_manager_;
+  policies::PolicyManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   transport_manager_->Stop();
-  delete transport_manager_;
+  transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
-  delete media_manager_;
+  media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   protocol_handler_->set_session_observer(NULL);
-  delete connection_handler_;
+  connection_handler::ConnectionHandlerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
@@ -277,7 +277,7 @@ void LifeCycle::StopComponents() {
   if (dbus_adapter_) {
     if (hmi_handler_) {
       hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-      delete hmi_handler_;
+      hmi_message_handler::HMIMessageHandlerImpl::destroy();
     }
     if (dbus_adapter_thread_) {
       dbus_adapter_thread_->Stop();
@@ -289,7 +289,7 @@ void LifeCycle::StopComponents() {
 #endif  // QT_HMI
 #ifdef WEB_HMI
   hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-  delete hmi_handler_;
+  hmi_message_handler::HMIMessageHandlerImpl::destroy();
   mb_adapter_->unregisterController();
   mb_adapter_thread_->Stop();
   mb_adapter_thread_->Join();

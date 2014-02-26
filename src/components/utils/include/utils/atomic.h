@@ -64,4 +64,13 @@
 #define atomic_or(ptr, value) *(ptr) |= (value)
 #endif
 
+#if defined(__QNXNTO__)
+#define atomic_zero(ptr) atomic_clr((unsigned*)(ptr), (unsigned) 0)
+#elif defined(__GNUG__)
+#define atomic_zero(ptr) __sync_fetch_and_and((ptr), 0)
+#else
+#warning "atomic_zero() implementation is not atomic"
+#define atomic_zero(ptr) *(ptr) = 0
+#endif
+
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_

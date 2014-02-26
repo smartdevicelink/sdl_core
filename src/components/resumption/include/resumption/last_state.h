@@ -61,7 +61,7 @@ class LastState : public utils::Singleton<LastState> {
 
   DISALLOW_COPY_AND_ASSIGN(LastState);
 
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LastState);
+  FRIEND_BASE_SINGLETON_CLASS(LastState);
 };
 
 }  // namespace resumption
