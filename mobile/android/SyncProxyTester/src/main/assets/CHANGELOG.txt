@@ -1,4 +1,5 @@
 [CW9]
++ Add possibility to send Policy Table Update manually from Dialog
 * Fix request / response notification messages
 - Remove AlertManeuver UI.
 
