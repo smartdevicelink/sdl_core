@@ -152,4 +152,26 @@ local tcp_port = 12345
 local tcp_dissector_table = DissectorTable.get("tcp.port")
 tcp_dissector_table:add(tcp_port, p_sdlproto)
 
+-- register the dissector for the standard USB AOA vendor&product
+-- requires wireshark 1.10.0+
+-- this may fail if wireshark doesn't get device descriptors
+local usb_product_dissector_table = DissectorTable.get("usb.product")
+print(usb_product_dissector_table == nil)
+if usb_product_dissector_table ~= nil then
+  usb_product_dissector_table:add(0x18d12d01, p_sdlproto)
+else
+  -- pre wireshark 1.10.0
+  -- register the dissector for USB device class
+
+  -- from packet-usb.h
+  IF_CLASS_DEVICE = 0x00
+  IF_CLASS_VENDOR_SPECIFIC = 0xFF
+  IF_CLASS_UNKNOWN = 0xFFFF
+
+  local usb_bulk_dissector_table = DissectorTable.get("usb.bulk")
+  usb_bulk_dissector_table:add(IF_CLASS_DEVICE, p_sdlproto)
+  usb_bulk_dissector_table:add(IF_CLASS_VENDOR_SPECIFIC, p_sdlproto)
+  usb_bulk_dissector_table:add(IF_CLASS_UNKNOWN, p_sdlproto)
+end
+
 -- vim: expandtab softtabstop=2 tabstop=2 shiftwidth=2
