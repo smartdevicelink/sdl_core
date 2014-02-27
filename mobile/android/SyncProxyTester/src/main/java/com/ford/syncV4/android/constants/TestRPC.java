@@ -9,13 +9,10 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.AddCommand;
-import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
-import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
@@ -27,21 +24,18 @@ import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThru;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
-import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.ReadDID;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.ScrollableMessage;
 import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayout;
-import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimer;
 import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
@@ -63,7 +57,7 @@ public class TestRPC {
 		} else if (functionName.equalsIgnoreCase(Names.UnregisterAppInterface)) {
 			rpc = new UnregisterAppInterface();
 		} else if (functionName.equalsIgnoreCase(Names.SetGlobalProperties)) {
-			rpc = new SetGlobalProperties();
+			rpc = RPCRequestFactory.buildSetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.ResetGlobalProperties)) {
 			rpc = new ResetGlobalProperties();
 		} else if (functionName.equalsIgnoreCase(Names.AddCommand)) {
@@ -95,11 +89,11 @@ public class TestRPC {
 		} else if (functionName.equalsIgnoreCase(Names.EndAudioPassThru)) {
 			rpc = new EndAudioPassThru();
 		} else if (functionName.equalsIgnoreCase(Names.SubscribeButton)) {
-			rpc = new SubscribeButton();
+			rpc = RPCRequestFactory.buildSubscribeButton();
 		} else if (functionName.equalsIgnoreCase(Names.UnsubscribeButton)) {
 			rpc = new UnsubscribeButton();
 		} else if (functionName.equalsIgnoreCase(Names.SubscribeVehicleData)) {
-			rpc = new SubscribeVehicleData();
+			rpc = RPCRequestFactory.buildSubscribeVehicleData();
 	    } else if (functionName.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
 			rpc = new UnsubscribeVehicleData();
 	    } else if (functionName.equalsIgnoreCase(Names.GetVehicleData)) {

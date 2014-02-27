@@ -13,6 +13,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -67,7 +68,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -125,7 +126,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -184,7 +185,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -248,7 +249,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -309,7 +310,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -369,7 +370,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override

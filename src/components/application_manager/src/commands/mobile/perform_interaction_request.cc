@@ -560,18 +560,18 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  if ((*message_)[strings::msg_params].keyExists(strings::help_promt)) {
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
 
-    msg_params[strings::help_promt] =
-        (*message_)[strings::msg_params][strings::help_promt];
+    msg_params[strings::help_prompt] =
+        (*message_)[strings::msg_params][strings::help_prompt];
 
-    DeleteParameterFromTTSChunk(&msg_params[strings::help_promt]);
+    DeleteParameterFromTTSChunk(&msg_params[strings::help_prompt]);
   } else {
 
     smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-    msg_params[strings::help_promt] =
+    msg_params[strings::help_prompt] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     int32_t index = 0;
@@ -589,20 +589,20 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
             item[strings::text] = vr_commands[0].asString();
-            msg_params[strings::help_promt][index++] = item;
+            msg_params[strings::help_prompt][index++] = item;
           }
         }
       }
     }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::timeout_promt)) {
-    msg_params[strings::timeout_promt] =
-            (*message_)[strings::msg_params][strings::timeout_promt];
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+    msg_params[strings::timeout_prompt] =
+            (*message_)[strings::msg_params][strings::timeout_prompt];
 
-    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_promt]);
+    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_prompt]);
   } else {
-    msg_params[strings::timeout_promt] = msg_params[strings::help_promt];
+    msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
@@ -623,7 +623,8 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::timeout] = default_timeout_;
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params);
+  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params,
+                 true);
 }
 
 void PerformInteractionRequest::DeleteParameterFromTTSChunk

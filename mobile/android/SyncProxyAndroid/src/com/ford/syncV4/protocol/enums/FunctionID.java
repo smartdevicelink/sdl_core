@@ -96,6 +96,7 @@ public class FunctionID {
             put(Names.OnAudioPassThru, 32777);
             put(Names.OnLanguageChange, 32778);
             put(Names.OnSystemRequest, 32781);
+            put(Names.OnHashChange, 32782);
 
             /*
                 Ford Specific Request / Response RPCs

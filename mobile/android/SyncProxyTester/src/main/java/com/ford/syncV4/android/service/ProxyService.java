@@ -21,10 +21,13 @@ import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
+import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
+import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.utils.AppUtils;
@@ -39,11 +42,13 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
 import com.ford.syncV4.proxy.rpc.Choice;
+import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
@@ -62,6 +67,7 @@ import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
@@ -79,8 +85,10 @@ import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
+import com.ford.syncV4.proxy.rpc.SetAppIcon;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
 import com.ford.syncV4.proxy.rpc.SetDisplayLayoutResponse;
+import com.ford.syncV4.proxy.rpc.SetGlobalProperties;
 import com.ford.syncV4.proxy.rpc.SetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.SetMediaClockTimerResponse;
 import com.ford.syncV4.proxy.rpc.Show;
@@ -90,12 +98,14 @@ import com.ford.syncV4.proxy.rpc.SliderResponse;
 import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
+import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
@@ -111,6 +121,7 @@ import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.TestConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -155,7 +166,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private PutFileTransferManager mPutFileTransferManager;
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
+    // This manager provide functionality to process RPC requests which are involved in app resumption
+    private RPCRequestsResumableManager mRpcRequestsResumableManager =
+            new RPCRequestsResumableManager();
+    // This Config object stores all the necessary data for SDK testing
+    private TestConfig mTestConfig = new TestConfig();
 
+    @Override
     public void onCreate() {
         super.onCreate();
 
@@ -196,6 +213,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i(TAG, ProxyService.class.getSimpleName() + " OnStartCommand");
         createInfoMessageForAdapter("ProxyService.onStartCommand()");
@@ -262,6 +280,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             doStartProxy = true;
         }
         if (doStartProxy) {
+
+            // Prepare all necessary data that need to be use in the Tests
+            prepareTestConfig();
+
             boolean result = startProxy();
             Log.i(TAG, ProxyService.class.getSimpleName() + " Proxy complete result:" + result);
             /*if (result) {
@@ -272,6 +294,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }*/
         }
+    }
+
+    /**
+     * Prepare all necessary parameters to be passed to Sync proxy
+     */
+    private void prepareTestConfig() {
+        mTestConfig.setUseHashId(AppPreferencesManager.getUseHashId());
+        mTestConfig.setCustomHashId(AppPreferencesManager.getCustomHashId());
+        mTestConfig.setUseCustomHashId(AppPreferencesManager.getUseCustomHashId());
     }
 
     private boolean startProxy() {
@@ -346,7 +377,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-                        config);
+                        config, mTestConfig);
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -403,6 +434,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         super.onDestroy();
     }
 
+    public void sendPolicyTableUpdate() {
+        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, mLogAdapter);
+    }
+
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
         mCloseSessionCallback = closeSessionCallback;
     }
@@ -449,25 +484,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             createErrorMessageForAdapter("Error sending show", e);
         }
 
-        try {
-            subscribeToButton(ButtonName.OK);
-            subscribeToButton(ButtonName.SEEKLEFT);
-            subscribeToButton(ButtonName.SEEKRIGHT);
-            subscribeToButton(ButtonName.TUNEUP);
-            subscribeToButton(ButtonName.TUNEDOWN);
-            Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[]{
-                    ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
-                    ButtonName.TUNEDOWN}));
-            SyncProxyTester.getInstance().buttonsSubscribed(buttons);
-        } catch (SyncException e) {
-            createErrorMessageForAdapter("Error subscribing to buttons", e);
-        }
+        commandSubscribeButtonPredefined(ButtonName.OK, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.SEEKLEFT, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.SEEKRIGHT, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.TUNEUP, getNextCorrelationID());
+        commandSubscribeButtonPredefined(ButtonName.TUNEDOWN, getNextCorrelationID());
+
+        Vector<ButtonName> buttons = new Vector<ButtonName>(Arrays.asList(new ButtonName[]{
+                ButtonName.OK, ButtonName.SEEKLEFT, ButtonName.SEEKRIGHT, ButtonName.TUNEUP,
+                ButtonName.TUNEDOWN}));
+        SyncProxyTester.getInstance().buttonsSubscribed(buttons);
 
         commandAddCommandPredefined(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
         commandAddCommandPredefined(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
     }
 
-    private void setInitAppIcon() {
+    private void sendPutFileForAppIcon() {
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
         commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
                 mAwaitingInitIconResponseCorrelationID);
@@ -478,16 +510,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         msg.setCorrelationID(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(msg, true);
-        }
-        mSyncProxy.sendRPCRequest(msg);
-    }
-
-    private void subscribeToButton(ButtonName buttonName) throws SyncException {
-        SubscribeButton msg = new SubscribeButton();
-        msg.setCorrelationID(getNextCorrelationID());
-        msg.setButtonName(buttonName);
         if (mLogAdapter != null) {
             mLogAdapter.logMessage(msg, true);
         }
@@ -583,7 +605,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
             if (!isModuleTesting()) {
-                setInitAppIcon();
+                sendPutFileForAppIcon();
             }
         }
 
@@ -645,6 +667,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }
         }
+    }
+
+    @Override
+    public void onHashChange(OnHashChange onHashChange) {
+        createDebugMessageForAdapter(onHashChange);
     }
 
     /**
@@ -943,17 +970,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(response);
         int mCorrelationId = response.getCorrelationID();
         if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
-            try {
-                mSyncProxy.setAppIcon(ICON_SYNC_FILENAME, getNextCorrelationID());
-                if (mLogAdapter != null) {
-                    mLogAdapter.logMessage("SetAppIcon sent", true);
-                }
-            } catch (SyncException e) {
-                if (mLogAdapter != null) {
-                    mLogAdapter.logMessage("SetAppIcon send error: " + e, Log.ERROR, e);
-                }
-            }
-            mAwaitingInitIconResponseCorrelationID = 0;
+            setAppIcon();
         }
         if (isModuleTesting()) {
             ModuleTest.responses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
@@ -1590,8 +1607,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
 
-        // Restore a PutFile which has not been sent
-        resendUnsentPutFiles();
+        try {
+            processRegisterAppInterfaceResponse(response);
+        } catch (SyncException e) {
+            createErrorMessageForAdapter("Can not process RAIResponse:" + e.getMessage());
+        }
     }
 
     @Override
@@ -1741,33 +1761,80 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
-        try {
-            if (mSyncProxy != null) {
-                mSyncProxy.putFile(newPutFile);
-            }
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage(newPutFile, true);
-            }
-        } catch (SyncException e) {
-            mLogAdapter.logMessage("PutFile send error: " + e, Log.ERROR, e);
-            mAwaitingInitIconResponseCorrelationID = 0;
-        }
+        syncProxySendRPCRequest(newPutFile);
+
+        //mAwaitingInitIconResponseCorrelationID = 0;
     }
 
     /**
-     * Call a method from SDK to create and send <b>AddCommand</b> request
+     * Call a method from SDK to send <b>SubscribeButton</b> request
+     *
+     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     */
+    public void commandSubscribeButtonPredefined(ButtonName buttonName, int correlationId) {
+        SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
+        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setButtonName(buttonName);
+
+        syncProxySendRPCRequest(subscribeButton);
+    }
+
+    /**
+     * Call a method from SDK to send <b>SubscribeButton</b> request which will be used in application
+     * resumption.
+     *
+     * @param correlationId Unique identifier of the command
+     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     */
+    public void commandSubscribeButtonResumable(ButtonName buttonName, int correlationId) {
+        SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
+        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setButtonName(buttonName);
+
+        syncProxySendRPCRequestResumable(subscribeButton);
+    }
+
+    /**
+     * Call a method from SDK to send <b>UnsubscribeVehicleData</b> request.
+     *
+     * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
+     */
+    public void commandUnsubscribeVehicleInterface(UnsubscribeVehicleData unsubscribeVehicleData) {
+        syncProxySendRPCRequest(unsubscribeVehicleData);
+    }
+
+    /**
+     * Call a method from SDK to send <b>SubscribeVehicleData</b> request which will be used in
+     * application resumption.
+     *
+     * @param subscribeVehicleData {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData}
+     */
+    public void commandSubscribeVehicleInterfaceResumable(SubscribeVehicleData subscribeVehicleData) {
+        syncProxySendRPCRequestResumable(subscribeVehicleData);
+    }
+
+    /**
+     * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
+     * resumption.
      *
      * @param commandId Id of the command
      * @param vrCommands Vector of the VR Commands
      * @param menuName Name of the Menu
      */
-    public void commandAddCommand(Integer commandId, Vector<String> vrCommands,
-                                  String menuName) {
+    public void commandAddCommandResumable(Integer commandId, Vector<String> vrCommands,
+                                           String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
                 getNextCorrelationID());
         syncProxySendRPCRequestResumable(addCommand);
     }
 
+    /**
+     * Call a method from SDK to send <b>AddCommand</b> request
+     *
+     * @param commandId Id of the command
+     * @param vrCommands Vector of the VR Commands
+     * @param menuName Name of the Menu
+     */
     public void commandAddCommandPredefined(Integer commandId, Vector<String> vrCommands,
                                   String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
@@ -1775,29 +1842,52 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         syncProxySendRPCRequest(addCommand);
     }
 
-    public void commandAddCommand(AddCommand addCommand) {
+    /**
+     * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
+     * resumption.
+     *
+     * @param addCommand {@link com.ford.syncV4.proxy.rpc.AddCommand} object
+     */
+    public void commandAddCommandResumable(AddCommand addCommand) {
         syncProxySendRPCRequestResumable(addCommand);
     }
 
     /**
-     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request
+     * Call a method from SDK to send <b>AddSubMenu</b> request which will be used in application
+     * resumption.
+     *
+     * @param setGlobalProperties {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties}
+     */
+    public void commandSetGlobalPropertiesResumable(SetGlobalProperties setGlobalProperties) {
+        syncProxySendRPCRequestResumable(setGlobalProperties);
+    }
+
+    /**
+     * Call a method from SDK to send <b>AddSubMenu</b> request which will be used in application
+     * resumption.
+     *
+     * @param addSubMenu {@link com.ford.syncV4.proxy.rpc.AddSubMenu} object
+     */
+    public void commandAddSubMenuResumable(AddSubMenu addSubMenu) {
+        syncProxySendRPCRequestResumable(addSubMenu);
+    }
+
+    /**
+     * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request which
+     * will be used in application resumption.
      *
      * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
      * @param interactionChoiceSetID Id of the interaction Choice set
      * @param correlationID correlation Id
      */
-    public void commandCreateInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
-                                                  Integer correlationID) {
-        try {
-            mSyncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("CreateInteractionChoiceSet sent", true);
-            }
-        } catch (SyncException e) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("CreateInteractionChoiceSet send error: " + e, Log.ERROR, e);
-            }
-        }
+    public void commandCreateInteractionChoiceSetResumable(Vector<Choice> choiceSet,
+                                                           Integer interactionChoiceSetID,
+                                                           Integer correlationID) {
+
+        CreateInteractionChoiceSet createInteractionChoiceSet =
+                RPCRequestFactory.buildCreateInteractionChoiceSet(choiceSet,
+                        interactionChoiceSetID, correlationID);
+        syncProxySendRPCRequestResumable(createInteractionChoiceSet);
     }
 
     /**
@@ -1852,15 +1942,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * This method is send a RPC Request to the Sync Proxy
+     * This method is send RPC Request to the Sync Proxy
      *
      * @param request object of {@link com.ford.syncV4.proxy.RPCRequest} type
      */
     public void syncProxySendRPCRequest(RPCRequest request) {
         if (request == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request is NULL", Log.ERROR);
-            }
+            createErrorMessageForAdapter("RPC request is NULL");
             return;
         }
         try {
@@ -1869,17 +1957,34 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             } else {
                 mSyncProxy.sendRPCRequest(request);
             }
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request '" + request.getFunctionName() + "'" +
-                        " sent", true);
-            }
+            createDebugMessageForAdapter(request);
         } catch (SyncException e) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC request '" + request.getFunctionName() + "'" +
-                        " send error: " + e, Log.ERROR, e);
-            }
+            createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
+                    " send error");
         }
     }
+
+    /**
+     * This method is for the requests on which resumption is depends on. All the requests will be
+     * stored in the collection in order to re-use them when resumption will have place.
+     *
+     * @param request {@link com.ford.syncV4.proxy.RPCRequest} object
+     */
+    public void syncProxySendRPCRequestResumable(RPCRequest request) {
+        if (request == null) {
+            createErrorMessageForAdapter("Resumable RPC request is NULL");
+            return;
+        }
+
+        if (mSyncProxy.getIsConnected()) {
+            mRpcRequestsResumableManager.addRequestConnected(request);
+        } else {
+            mRpcRequestsResumableManager.addRequestDisconnected(request);
+        }
+
+        syncProxySendRPCRequest(request);
+    }
+
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
         if (mSyncProxy != null) {
@@ -1928,23 +2033,42 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    private void setAppIcon() {
+        SetAppIcon setAppIcon = RPCRequestFactory.buildSetAppIcon();
+        setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
+        setAppIcon.setCorrelationID(getNextCorrelationID());
+
+        syncProxySendRPCRequest(setAppIcon);
+
+        mAwaitingInitIconResponseCorrelationID = 0;
+    }
+
     /**
-     * This method is for the requests on which resumption is depends on. All the requests here are
-     * keeping in the collection in order to re-use them when resumption will have place.
+     * Process a response of the {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request
      *
-     * @param request {@link com.ford.syncV4.proxy.RPCRequest} object
+     * @param response {@link com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse} object
      */
-    public void syncProxySendRPCRequestResumable(RPCRequest request) {
-        if (request == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("Resumable RPC request is NULL", Log.ERROR);
-            }
+    private void processRegisterAppInterfaceResponse(RegisterAppInterfaceResponse response)
+            throws SyncException {
+
+        if (!response.getSuccess()) {
             return;
         }
 
-        // TODO : Implement here a procedure of the keep in collection request
+        if (response.getResultCode() == Result.SUCCESS) {
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+        } else if (response.getResultCode() == Result.RESUME_FAILED) {
+            mRpcRequestsResumableManager.sendAllRequestsConnected(mSyncProxy);
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+        }
 
-        syncProxySendRPCRequest(request);
+        mRpcRequestsResumableManager.cleanAllRequestsConnected();
+        mRpcRequestsResumableManager.cleanAllRequestsDisconnected();
+
+        // Restore a PutFile which has not been sent
+        resendUnsentPutFiles();
+        // Restore Services
+        mSyncProxy.restoreServices();
     }
 
     // TODO: Reconsider this section, this is a first step to optimize log procedure

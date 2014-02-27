@@ -132,6 +132,8 @@ class CommandRequestImpl : public CommandImpl,
 
  protected:
   unsigned int  default_timeout_;
+  bool          is_timeout_expired_;
+  mutable bool  is_request_completed_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);

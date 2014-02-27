@@ -86,7 +86,7 @@ namespace impl {
 struct RawFordMessageFromMobile: public ProtocolFramePtr {
   explicit RawFordMessageFromMobile(const ProtocolFramePtr& message)
       : ProtocolFramePtr(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
       get()->service_type())).OrderingValue(); }
 };
@@ -94,14 +94,14 @@ struct RawFordMessageFromMobile: public ProtocolFramePtr {
 struct RawFordMessageToMobile: public ProtocolFramePtr {
   explicit RawFordMessageToMobile(const ProtocolFramePtr& message, bool final_message)
       : ProtocolFramePtr(message), is_final(final_message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
       get()->service_type())).OrderingValue(); }
-  // Signals wether connection to mobile must be closed after processing this message
+  // Signals whether connection to mobile must be closed after processing this message
   bool is_final;
 };
 
-// Short type names for proiritized message queues
+// Short type names for prioritized message queues
 typedef threads::MessageLoopThread<
                utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
@@ -157,8 +157,8 @@ class ProtocolHandlerImpl
     void set_session_observer(SessionObserver* observer);
 
     /**
-     * \brief Method for sending message to Mobile Application.
-     * \param message Message with params to be sent to Mobile App.
+     * \brief Method for sending message to Mobile Application
+     * \param message Message with params to be sent to Mobile App
      */
     void SendMessageToMobileApp(const RawMessagePtr& message,
                                 bool final_message) OVERRIDE;
@@ -175,15 +175,14 @@ class ProtocolHandlerImpl
 
     /**
      * \brief Sends acknowledgement of starting session to mobile application
-     * with session number and hash code for second version of protocol.
-     * \param connection_handle Identifier of connection within which session
+     * with session number and hash code for second version of protocol
      * was started
-     * \param session_id ID of session to be sent to mobile applicatin.
+     * \param session_id ID of session to be sent to mobile application
      * \param protocol_version Version of protocol used for communication
      * \param hash_code For second version of protocol: identifier of session
      * to be sent to
-     * mobile app for using when ending session.
-     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     * mobile app for using when ending session
+     * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
     void SendStartSessionAck(
       ConnectionID connection_id,
@@ -193,12 +192,10 @@ class ProtocolHandlerImpl
       uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
-     * \brief Sends fail of starting session to mobile application.
-     * \param connection_handle Identifier of connection within which session
-     * ment to be started
-     * \param session_id ID of session to be sent to mobile applicatin.
+     * \brief Sends fail of starting session to mobile application
+     * \param session_id ID of session to be sent to mobile application
      * \param protocol_version Version of protocol used for communication
-     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
     void SendStartSessionNAck(
       ConnectionID connection_id,
@@ -209,14 +206,16 @@ class ProtocolHandlerImpl
     /**
      * \brief Sends acknowledgement of end session/service to mobile application
      * with session number and hash code for second version of protocol.
+     * \param connection_id Identifier of connection whithin which session
+     * with session number and hash code for second version of protocol
      * \param connection_handle Identifier of connection within which session
      * was started
-     * \param session_id ID of session to be sent to mobile applicatin.
+     * \param session_id ID of session to be sent to mobile application
      * \param protocol_version Version of protocol used for communication
      * \param hash_code For second version of protocol: identifier of session
      * to be sent to
      * mobile app for using when ending session.
-     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
     void SendEndSessionAck(
       ConnectionID connection_id ,
@@ -226,12 +225,12 @@ class ProtocolHandlerImpl
       uint8_t service_type = SERVICE_TYPE_RPC);
 
     /**
-     * \brief Sends fail of ending session to mobile application.
-     * \param connection_handle Identifier of connection within which
+     * \brief Sends fail of ending session to mobile application
+     * \param connection_id Identifier of connection within which
      * session exists
      * \param session_id ID of session ment to be ended
      * \param protocol_version Version of protocol used for communication
-     * \param service_type Type of session: RPC or BULK Data. RPC by default.
+     * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
     void SendEndSessionNAck(
       ConnectionID connection_id ,
@@ -248,9 +247,9 @@ class ProtocolHandlerImpl
                           uint32_t message_id);
 
     /**
-     * @brief Notifies about recieving message from TM.
+     * @brief Notifies about receiving message from TM.
      *
-     * @param message Recieved message
+     * @param message Received message
      **/
     virtual void OnTMMessageReceived(
       const RawMessagePtr message);
@@ -258,7 +257,7 @@ class ProtocolHandlerImpl
     /**
      * @brief Notifies about error on receiving message from TM.
      *
-     * @param error Occured error
+     * @param error Occurred error
      **/
     virtual void OnTMMessageReceiveFailed(
       const transport_manager::DataReceiveError& error);
@@ -270,11 +269,11 @@ class ProtocolHandlerImpl
     virtual void OnTMMessageSend(const RawMessagePtr message);
 
     /**
-     * @brief Notifies about error occured during
+     * @brief Notifies about error occurred during
      * sending message.
      *
-     * @param error Describes occured error.
-     * @param message Message during sending which error occured.
+     * @param error Describes occurred error.
+     * @param message Message during sending which error occurred.
      **/
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,

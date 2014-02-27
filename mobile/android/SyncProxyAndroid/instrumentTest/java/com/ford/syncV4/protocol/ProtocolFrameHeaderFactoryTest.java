@@ -121,14 +121,14 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
 
     public void testCreatedHeartbeatShouldHaveCorrectHeaderValues() {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createHeartbeat(
-                ServiceType.valueOf(SESSION_TYPE_RPC), PROTOCOL_VERSION);
+                ServiceType.Heartbeat, PROTOCOL_VERSION);
 
         assertThat("Wrong version", header.getVersion(), is(PROTOCOL_VERSION));
         assertThat("Wrong compression flag", header.isCompressed(), is(false));
         assertThat("Wrong frame type", header.getFrameType(),
                 is(FrameType.Control));
         assertThat("Wrong currentSession type", header.getServiceType(),
-                is(ServiceType.RPC));
+                is(ServiceType.Heartbeat));
         assertThat("Wrong frame data", header.getFrameData(),
                 is(FrameDataControlFrameType.Heartbeat.value()));
         assertThat("Wrong currentSession id", header.getSessionID(), is((byte) 0));

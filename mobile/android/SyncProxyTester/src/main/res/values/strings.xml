@@ -266,8 +266,12 @@
     <string name="app_setup_dialog_title">Please set up application properties</string>
     <string name="nsd_use_label">Network Service Discovery:</string>
     <string name="nsd_unsupported_api_level_text">NSD is supported from Android 4.1 Jellybean</string>
-    <string name="policy_files_setup_dialog_title">Set up Policy files</string>
+    <string name="policy_files_setup_dialog_title">Set Up Policy files</string>
 
     <string name="rpc_service_not_started">RPS Service is not started</string>
+    <string name="local_policy_file_name_label">Local Policy Update File Name</string>
+    <string name="ellipsis">…</string>
+    <string name="send_policy_table_update_label">Send Policy Table Update file</string>
+    <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
 
 </resources>

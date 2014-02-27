@@ -524,7 +524,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
         Log.d(TAG, "Asked to send heartbeat");
         final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.RPC,
+                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat,
                         (byte) 2);
         final byte[] bytes = heartbeat.assembleHeaderBytes();
         onProtocolMessageBytesToSend(bytes, 0, bytes.length);

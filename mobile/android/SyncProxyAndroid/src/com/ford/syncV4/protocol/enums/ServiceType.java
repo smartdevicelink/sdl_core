@@ -13,7 +13,8 @@ public class ServiceType extends ByteEnumer {
 	byte i = 0x00;
 	
 	protected ServiceType(byte value, String name) {super(value, name);}
-	public final static ServiceType RPC = new ServiceType((byte)0x07, "RPC");
+    public final static ServiceType Heartbeat = new ServiceType((byte) 0, "Heartbeat_Service");
+    public final static ServiceType RPC = new ServiceType((byte)0x07, "RPC");
 	public final static ServiceType Bulk_Data = new ServiceType((byte)0xF, "Bulk_Data");
     public final static ServiceType Mobile_Nav = new ServiceType((byte)0xB, "Mobile_Nav");
     public final static ServiceType Audio_Service = new ServiceType((byte)10, "Audio_Service");
@@ -23,6 +24,7 @@ public class ServiceType extends ByteEnumer {
 		theList.addElement(Bulk_Data);
         theList.addElement(Mobile_Nav);
         theList.addElement(Audio_Service);
+        theList.addElement(Heartbeat);
 	}
 	
 	public static ServiceType valueOf(byte passedButton) {

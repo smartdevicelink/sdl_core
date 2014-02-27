@@ -58,6 +58,14 @@ public class Const {
     // Policy properties
     public static final class Policy {
         public static final String PREF_KEY_POLICY_UPDATE_FILE_PATH = "PolicyUpdateFilePath";
+        public static final String PREF_KEY_POLICY_UPDATE_AUTO_REPLAY = "PolicyUpdateAutoReplay";
+    }
+
+    // HashId properties
+    public static final class HashId {
+        public static final String PREF_KEY_USE_HASH_ID = "UseHashId";
+        public static final String PREF_KEY_USE_CUSTOM_HASH_ID = "UseCustomHashId";
+        public static final String PREF_KEY_CUSTOM_HASH_ID = "CustomHashId";
     }
 
 	// Keys to pass objects via IntentHelper

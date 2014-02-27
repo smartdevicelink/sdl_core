@@ -20,6 +20,7 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.util.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -137,7 +138,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
@@ -534,7 +535,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
-                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1);
+                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null);
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);

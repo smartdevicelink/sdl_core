@@ -67,14 +67,12 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
-import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
-import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
@@ -87,7 +85,6 @@ import com.ford.syncV4.proxy.rpc.EndAudioPassThru;
 import com.ford.syncV4.proxy.rpc.GetDTCs;
 import com.ford.syncV4.proxy.rpc.GetVehicleData;
 import com.ford.syncV4.proxy.rpc.Image;
-import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -107,9 +104,7 @@ import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.SoftButton;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
-import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
@@ -118,15 +113,12 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
-import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
-import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
-import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
@@ -155,7 +147,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -187,7 +178,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int ALERT_MAXSOFTBUTTONS = 4;
     private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
     private static final int SHOW_MAXSOFTBUTTONS = 8;
-    private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
     private static final int CREATECHOICESET_MAXCHOICES = 100;
@@ -223,6 +213,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
     private final int MNU_WAKELOCK = 17;
     private final int MNU_SET_UP_POLICY_FILES = 18;
+    private final int MNU_HASH_ID_SETUP = 19;
     private ModuleTest _testerMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
@@ -235,7 +226,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Latest choiceSetId, required to add it to the adapter when a successful
      * CreateInteractionChoiceSetResponse comes.
      */
-    private int _latestCreateChoiceSetId = CHOICESETID_UNSET;
+    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
     /**
      * Latest choiceSetId, required to delete it from the adapter when a
      * successful DeleteInteractionChoiceSetResponse comes.
@@ -250,13 +241,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Latest SyncSubMenu, required to add the submenu from the adapter when a
      * successful AddSubMenuResponse comes.
      */
-    private SyncSubMenu _latestAddSubmenu = null;
+    private SyncSubMenu mLatestAddSubmenu = null;
     private Pair<Integer, Integer> mLatestAddCommand = null;
     private Integer _latestDeleteCommandCmdID = null;
     private int mAutoIncCorrId = 101;
     private int autoIncChoiceSetId = 1;
     private int autoIncChoiceSetIdCmdId = 1;
-    private int submenucmdID = 1000;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
     private boolean[] isButtonSubscribed = null;
     private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
@@ -271,11 +261,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * check it when the user has explicitly set the soft buttons.
      */
     private CheckBox chkIncludeSoftButtons;
-    /**
-     * KeyboardProperties object passed between KeyboardPropertiesActivity and
-     * this activity.
-     */
-    private KeyboardProperties currentKbdProperties;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
      * filename is set after choosing.
@@ -342,6 +327,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
+    private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
+    private final static String SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG = "SubscriptionVehicleDataDialogTag";
+    private final static String REGISTER_APP_INTERFACE_DIALOG_TAG = "RegisterAppInterfaceDialogTag";
+    private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -600,6 +590,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             if (mStopProxyServiceTimeOutHandler != null) {
                 mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
             }
+
+            if (mStopServicesTimeOutHandler == null && mStopProxyServiceTimeOutHandler == null) {
+                getExitDialog().dismiss();
+                return;
+            }
+
             MainApp.getInstance().unbindProxyFromMainApp();
             runInUIThread(new Runnable() {
                 @Override
@@ -858,6 +854,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 /*			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");*/
             menu.add(0, MNU_APP_VERSION, 0, "App version");
             menu.add(0, MNU_CLOSESESSION, 0, "Close Session");
+            menu.add(0, MNU_HASH_ID_SETUP, 0, "HashId setup");
             menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
             menu.add(0, XML_TEST, 0, "XML Test");
             menu.add(0, POLICIES_TEST, 0, "Policies Test");
@@ -971,6 +968,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 break;
             case MNU_WAKELOCK:
                 toggleDisableLock();
+                break;
+            case MNU_HASH_ID_SETUP:
+                DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
+                hashIdSetUpDialog.show(getFragmentManager(), HASH_ID_SET_UP_DIALOG_TAG);
                 break;
         }
 
@@ -1163,7 +1164,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             addToFunctionsAdapter(adapter, Names.ReadDID);
             addToFunctionsAdapter(adapter, Names.GetDTCs);
             addToFunctionsAdapter(adapter, Names.ShowConstantTBT);
-            addToFunctionsAdapter(adapter, Names.AlertManeuver);
             addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
             addToFunctionsAdapter(adapter, Names.DiagnosticMessage);
@@ -1273,12 +1273,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         ButtonName buttonName = ButtonName.values()[which];
                                         int corrId = getCorrelationid();
                                         if (needToSubscribe) {
-                                            SubscribeButton msg = new SubscribeButton();
-                                            msg.setCorrelationID(corrId);
-                                            msg.setButtonName(buttonName);
-                                            mLogAdapter.logMessage(msg, true);
                                             if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                                mBoundProxyService.commandSubscribeButtonResumable(
+                                                        buttonName, corrId);
                                             }
                                         } else {
                                             UnsubscribeButton msg = new UnsubscribeButton();
@@ -1571,19 +1568,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 sendGetDTCs();
                             } else if (adapter.getItem(which).equals(Names.ShowConstantTBT)) {
                                 sendShowConstantTBT();
-                            } else if (adapter.getItem(which).equals(Names.AlertManeuver)) {
-                                sendAlertManeuver();
                             } else if (adapter.getItem(which).equals(Names.UpdateTurnList)) {
                                 sendUpdateTurnList();
                             } else if (adapter.getItem(which).equals(Names.SetDisplayLayout)) {
                                 sendSetDisplayLayout();
                             } else if (adapter.getItem(which).equals(Names.UnregisterAppInterface)) {
                                 sendUnregisterAppInterface();
-                            } else if (adapter.getItem(which).equals(
-                                    Names.RegisterAppInterface)) {
+                            } else if (adapter.getItem(which).equals(Names.RegisterAppInterface)) {
                                 sendRegisterAppInterface();
-                            } else if (adapter.getItem(which)
-                                              .equals(Names.DiagnosticMessage)) {
+                            } else if (adapter.getItem(which).equals(Names.DiagnosticMessage)) {
                                 sendDiagnosticMessage();
                             } else if (adapter.getItem(which).equals(GenericRequest.NAME)) {
                                 sendGenericRequest();
@@ -1595,88 +1588,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 curCount = 0;
                             }
                             messageSelectCount.put(function, curCount + 1);
-                        }
-
-                        private void sendAlertManeuver() {
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.alertmaneuver, null);
-
-                            final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
-                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.alertManeuver_chkIncludeSBs);
-
-                            SoftButton sb1 = new SoftButton();
-                            sb1.setSoftButtonID(
-                                    SyncProxyTester.getNewSoftButtonId());
-                            sb1.setText("Reply");
-                            sb1.setType(SoftButtonType.SBT_TEXT);
-                            sb1.setIsHighlighted(false);
-                            sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-                            SoftButton sb2 = new SoftButton();
-                            sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                            sb2.setText("Close");
-                            sb2.setType(SoftButtonType.SBT_TEXT);
-                            sb2.setIsHighlighted(false);
-                            sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-                            currentSoftButtons = new Vector<SoftButton>();
-                            currentSoftButtons.add(sb1);
-                            currentSoftButtons.add(sb2);
-
-                            Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
-                            btnSoftButtons.setOnClickListener(new OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    IntentHelper.addObjectForKey(
-                                            currentSoftButtons,
-                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
-                                    Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
-                                            ALERTMANEUVER_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
-                                }
-                            });
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
-                                    String ttsChunksString = txtTtsChunks.getText().toString();
-                                    for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
-                                        TTSChunk chunk = TTSChunkFactory.createChunk(
-                                                SpeechCapabilities.TEXT,
-                                                ttsChunk);
-                                        ttsChunks.add(chunk);
-                                    }
-
-                                    if (!ttsChunks.isEmpty()) {
-                                        AlertManeuver msg = new AlertManeuver();
-                                        msg.setTtsChunks(ttsChunks);
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (useSoftButtons.isChecked()) {
-                                            if (currentSoftButtons != null) {
-                                                msg.setSoftButtons(currentSoftButtons);
-                                            } else {
-                                                msg.setSoftButtons(new Vector<SoftButton>());
-                                            }
-                                        }
-                                        currentSoftButtons = null;
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    } else {
-                                        SafeToast.showToastAnyThread("No TTS Chunks entered");
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    currentSoftButtons = null;
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
                         }
 
                         /**
@@ -1892,22 +1803,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         /**
-                         * Calls the setter with setterName on the msg.
-                         */
-                        private void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
-                            try {
-                                Method setter = msgClass.getMethod(setterName, Boolean.class);
-                                setter.invoke(msg, true);
-                            } catch (NoSuchMethodException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            } catch (IllegalAccessException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            } catch (InvocationTargetException e) {
-                                Log.e(LOG_TAG, "Can't set vehicle data", e);
-                            }
-                        }
-
-                        /**
                          * Opens the dialog for GetDTCs message and sends it.
                          */
                         private void sendGetDTCs() {
@@ -2029,72 +1924,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Opens the dialog for AddSubMenu message and sends it.
                          */
                         private void sendAddSubmenu() {
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.addsubmenu,
-                                    (ViewGroup) findViewById(R.id.submenu_Root));
-
-                            final EditText editMenuName = (EditText) layout.findViewById(R.id.addsubmenu_menuName);
-                            final EditText editMenuID = (EditText) layout.findViewById(R.id.addsubmenu_menuID);
-                            final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addsubmenu_useMenuPos);
-                            final EditText editMenuPos = (EditText) layout.findViewById(R.id.addsubmenu_menuPos);
-
-                            // set suggested value
-                            editMenuID.setText(String.valueOf(submenucmdID++));
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    String subMenuIDString = editMenuID.getText().toString();
-                                    int subMenuID = -1;
-                                    try {
-                                        subMenuID = Integer.parseInt(subMenuIDString);
-                                    } catch (NumberFormatException e) {
-                                        Toast.makeText(mContext, "Couldn't parse number " + subMenuIDString,
-                                                Toast.LENGTH_LONG).show();
-                                        return;
-                                    }
-
-                                    int pos = -1;
-                                    if (chkUseMenuPos.isChecked()) {
-                                        String posString = editMenuPos.getText().toString();
-                                        try {
-                                            pos = Integer.parseInt(posString);
-                                        } catch (NumberFormatException e) {
-                                            Toast.makeText(mContext, "Couldn't parse number " + posString,
-                                                    Toast.LENGTH_LONG).show();
-                                            return;
-                                        }
-                                    }
-
-                                    AddSubMenu msg = RPCRequestFactory.buildAddSubMenu();
-                                    msg.setCorrelationID(getCorrelationid());
-
-                                    SyncSubMenu sm = new SyncSubMenu();
-                                    sm.setName(editMenuName.getText().toString());
-                                    sm.setSubMenuId(subMenuID);
-                                    msg.setMenuID(sm.getSubMenuId());
-                                    msg.setMenuName(sm.getName());
-                                    if (chkUseMenuPos.isChecked()) {
-                                        msg.setPosition(pos);
-                                    }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
-                                    if (_latestAddSubmenu != null) {
-                                        Log.w(LOG_TAG, "Latest addSubmenu should be null, but equals to " + _latestAddSubmenu);
-                                    }
-                                    _latestAddSubmenu = sm;
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
+                            DialogFragment addSubMenuDialogFragment = AddSubMenuDialog.newInstance();
+                            addSubMenuDialogFragment.show(getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
                         }
 
                         /**
@@ -2902,291 +2733,17 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
 
                         private void sendVehicleDataSubscriptions() {
-                            AlertDialog.Builder builder;
-                            final Context mContext = adapter.getContext();
-
-                            // the local copy of isVehicleDataSubscribed
-                            final boolean[] checkedVehicleDataTypes = isVehicleDataSubscribed.clone();
-
-                            builder = new AlertDialog.Builder(mContext);
-                            builder.setMultiChoiceItems(vehicleDataTypeNames(), checkedVehicleDataTypes, new OnMultiChoiceClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
-                                    /**
-                                     * NB! This method is intentionally left empty. If the 3rd
-                                     * parameter to setMultiChoiceItems() is null, the user's
-                                     * changes to checked items don't save.
-                                     **/
-                                }
-                            });
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<VehicleDataType> subscribeVehicleData = new Vector<VehicleDataType>();
-                                    Vector<VehicleDataType> unsubscribeVehicleData = new Vector<VehicleDataType>();
-                                    VehicleDataType[] dataTypes = VehicleDataType.values();
-
-                                    // subscribe and unsubscribe to new checked/unchecked items only
-                                    for (int i = 0; i < checkedVehicleDataTypes.length; i++) {
-                                        boolean checked = checkedVehicleDataTypes[i];
-                                        boolean wasChecked = isVehicleDataSubscribed[i];
-                                        if (checked && !wasChecked) {
-                                            subscribeVehicleData.add(dataTypes[i]);
-                                        } else if (!checked && wasChecked) {
-                                            unsubscribeVehicleData.add(dataTypes[i]);
-                                        }
-                                    }
-
-                                    final Map<VehicleDataType, String> methodNamesMap =
-                                            new HashMap<VehicleDataType, String>() {{
-                                                put(VehicleDataType.VEHICLEDATA_GPS, "Gps");
-                                                put(VehicleDataType.VEHICLEDATA_SPEED, "Speed");
-                                                put(VehicleDataType.VEHICLEDATA_RPM, "Rpm");
-                                                put(VehicleDataType.VEHICLEDATA_FUELLEVEL, "FuelLevel");
-                                                put(VehicleDataType.VEHICLEDATA_FUELLEVEL_STATE, "FuelLevel_State");
-                                                put(VehicleDataType.VEHICLEDATA_FUELCONSUMPTION, "InstantFuelConsumption");
-                                                put(VehicleDataType.VEHICLEDATA_EXTERNTEMP, "ExternalTemperature");
-//                                                put(VehicleDataType.VEHICLEDATA_VIN, "VIN");
-                                                put(VehicleDataType.VEHICLEDATA_PRNDL, "Prndl");
-                                                put(VehicleDataType.VEHICLEDATA_TIREPRESSURE, "TirePressure");
-                                                put(VehicleDataType.VEHICLEDATA_ODOMETER, "Odometer");
-                                                put(VehicleDataType.VEHICLEDATA_BELTSTATUS, "BeltStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BODYINFO, "BodyInformation");
-                                                put(VehicleDataType.VEHICLEDATA_DEVICESTATUS, "DeviceStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BRAKING, "DriverBraking");
-                                                put(VehicleDataType.VEHICLEDATA_WIPERSTATUS, "WiperStatus");
-                                                put(VehicleDataType.VEHICLEDATA_HEADLAMPSTATUS, "HeadLampStatus");
-                                                put(VehicleDataType.VEHICLEDATA_BATTVOLTAGE, "BatteryVoltage");
-                                                put(VehicleDataType.VEHICLEDATA_ENGINETORQUE, "EngineTorque");
-                                                put(VehicleDataType.VEHICLEDATA_ACCPEDAL, "AccPedalPosition");
-                                                put(VehicleDataType.VEHICLEDATA_STEERINGWHEEL, "SteeringWheelAngle");
-                                                put(VehicleDataType.VEHICLEDATA_ECALLINFO, "ECallInfo");
-                                                put(VehicleDataType.VEHICLEDATA_AIRBAGSTATUS, "AirbagStatus");
-                                                put(VehicleDataType.VEHICLEDATA_EMERGENCYEVENT, "EmergencyEvent");
-                                                put(VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS, "ClusterModeStatus");
-                                                put(VehicleDataType.VEHICLEDATA_MYKEY, "MyKey");
-                                            }};
-
-                                    if (!subscribeVehicleData.isEmpty()) {
-                                        SubscribeVehicleData msg = new SubscribeVehicleData();
-                                        for (VehicleDataType vdt : subscribeVehicleData) {
-                                            setVehicleDataParam(msg, SubscribeVehicleData.class,
-                                                    "set" + methodNamesMap.get(vdt));
-                                        }
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    }
-
-                                    if (!unsubscribeVehicleData.isEmpty()) {
-                                        UnsubscribeVehicleData msg = new UnsubscribeVehicleData();
-                                        for (VehicleDataType vdt : unsubscribeVehicleData) {
-                                            setVehicleDataParam(msg, UnsubscribeVehicleData.class,
-                                                    "set" + methodNamesMap.get(vdt));
-                                        }
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    }
-                                    isVehicleDataSubscribed = checkedVehicleDataTypes.clone();
-
-                                    if (subscribeVehicleData.isEmpty() && unsubscribeVehicleData.isEmpty()) {
-                                        Toast.makeText(mContext, "Nothing new here", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.show();
-                        }
-
-                        private String[] vehicleDataTypeNames() {
-                            return new String[]{ "GPS", "Speed", "RPM",
-                                    "Fuel Level", "Fuel Level State",
-                                    "Fuel Consumption", "External Temp",
-                                    "VIN", "PRNDL", "Tire Pressure",
-                                    "Odometer", "Belt Status",
-                                    "Body Info", "Device Status",
-                                    "Braking", "Wiper Status",
-                                    "Head Lamp Status", "Batt Voltage",
-                                    "Engine Torque", "Acc Pedal",
-                                    "Steering Wheel", "ECall Info",
-                                    "Airbag Status", "Emergency Event",
-                                    "Cluster Mode Status", "MyKey" };
+                            DialogFragment subscriptionsVehicleDataDialog =
+                                    SubscriptionsVehicleDataDialog.newInstance();
+                            subscriptionsVehicleDataDialog.show(getFragmentManager(),
+                                    SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG);
                         }
 
                         private void sendSetGlobalProperties() {
-                            AlertDialog.Builder builder;
-
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.setglobalproperties,
-                                    (ViewGroup) findViewById(R.id.setglobalproperties_Root));
-
-                            final EditText helpPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_helpPrompt);
-                            final EditText timeoutPrompt = (EditText) layout.findViewById(R.id.setglobalproperties_timeoutPrompt);
-                            final EditText vrHelpTitle = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpTitle);
-                            final EditText vrHelpItemText = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemText);
-                            final CheckBox useVRHelpItemImage = (CheckBox) layout.findViewById(R.id.setglobalproperties_useVRHelpItemImage);
-                            final EditText vrHelpItemImage = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemImage);
-                            final EditText vrHelpItemPos = (EditText) layout.findViewById(R.id.setglobalproperties_vrHelpItemPos);
-                            final CheckBox choiceHelpPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceHelpPrompt);
-                            final CheckBox choiceTimeoutPrompt = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceTimeoutPrompt);
-                            final CheckBox choiceVRHelpTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpTitle);
-                            final CheckBox choiceVRHelpItem = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceVRHelpItem);
-                            final CheckBox choiceMenuTitle = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuTitle);
-                            final EditText menuTitle = (EditText) layout.findViewById(R.id.setglobalproperties_menuTitle);
-                            final CheckBox choiceMenuIcon = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceMenuIcon);
-                            final EditText menuIcon = (EditText) layout.findViewById(R.id.setglobalproperties_menuIcon);
-                            final Spinner menuIconType = (Spinner) layout.findViewById(R.id.setglobalproperties_menuIconType);
-                            final CheckBox chkKbdProperties = (CheckBox) layout.findViewById(R.id.setglobalproperties_choiceKbdProperties);
-
-                            menuIconType.setAdapter(imageTypeAdapter);
-                            menuIconType.setSelection(imageTypeAdapter.getPosition(ImageType.DYNAMIC));
-
-                            currentKbdProperties = new KeyboardProperties();
-                            currentKbdProperties.setLanguage(Language.EN_US);
-                            currentKbdProperties.setKeyboardLayout(
-                                    KeyboardLayout.QWERTY);
-                            currentKbdProperties.setKeypressMode(
-                                    KeypressMode.SINGLE_KEYPRESS);
-                            currentKbdProperties.setAutoCompleteText(getString(
-                                    R.string.keyboardproperties_autoCompleteTextDefault));
-                            currentKbdProperties.setLimitedCharacterList(new Vector<String>() {{
-                                add("a");
-                                add("b");
-                                add("c");
-                            }});
-
-                            Button btnKbdProperties = (Button) layout.findViewById(R.id.setglobalproperties_kbdProperties);
-                            btnKbdProperties.setOnClickListener(
-                                    new OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            IntentHelper.addObjectForKey(
-                                                    currentKbdProperties,
-                                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-                                            Intent intent = new Intent(mContext,
-                                                    KeyboardPropertiesActivity.class);
-                                            startActivityForResult(intent,
-                                                    Const.REQUEST_EDIT_KBDPROPERTIES);
-                                        }
-                                    });
-
-                            builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    SetGlobalProperties msg = new SetGlobalProperties();
-                                    int numberOfChoices = 0;
-
-                                    if (choiceHelpPrompt.isChecked()) {
-                                        Vector<TTSChunk> help = new Vector<TTSChunk>();
-                                        String helpString = helpPrompt.getText().toString();
-                                        for (String ttsChunk : helpString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            help.add(chunk);
-                                        }
-                                        msg.setHelpPrompt(help);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceTimeoutPrompt.isChecked()) {
-                                        Vector<TTSChunk> timeout = new Vector<TTSChunk>();
-                                        String timeoutString = timeoutPrompt.getText().toString();
-                                        for (String ttsChunk : timeoutString.split(JOIN_STRING)) {
-                                            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, ttsChunk);
-                                            timeout.add(chunk);
-                                        }
-                                        msg.setTimeoutPrompt(timeout);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceVRHelpTitle.isChecked()) {
-                                        msg.setVrHelpTitle(vrHelpTitle.getText().toString());
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceVRHelpItem.isChecked()) {
-                                        Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
-
-                                        String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
-                                        String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
-                                        String[] itemImageArray = vrHelpItemImage.getText().toString()
-                                                .split(JOIN_STRING);
-                                        int itemsCount = Math.min(itemTextArray.length,
-                                                Math.min(itemPosArray.length, itemImageArray.length));
-
-                                        for (int i = 0; i < itemsCount; ++i) {
-                                            VrHelpItem item = new VrHelpItem();
-                                            item.setText(itemTextArray[i]);
-
-                                            try {
-                                                item.setPosition(Integer.parseInt(itemPosArray[i]));
-                                            } catch (NumberFormatException e) {
-                                                // set default position
-                                                item.setPosition(1);
-                                            }
-
-                                            if (useVRHelpItemImage.isChecked()) {
-                                                Image image = new Image();
-                                                image.setValue(
-                                                        itemImageArray[i]);
-                                                image.setImageType(
-                                                        ImageType.DYNAMIC);
-                                                item.setImage(image);
-                                            }
-
-                                            vrHelpItems.add(item);
-                                        }
-
-                                        msg.setVrHelp(vrHelpItems);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceMenuTitle.isChecked()) {
-                                        String title = menuTitle.getText().toString();
-                                        msg.setMenuTitle(title);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (choiceMenuIcon.isChecked()) {
-                                        Image image = new Image();
-                                        image.setValue(menuIcon.getText().toString());
-                                        image.setImageType(imageTypeAdapter.getItem(menuIconType.getSelectedItemPosition()));
-                                        msg.setMenuIcon(image);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (chkKbdProperties.isChecked() &&
-                                            (currentKbdProperties != null)) {
-                                        msg.setKeyboardProperties(currentKbdProperties);
-                                        ++numberOfChoices;
-                                    }
-
-                                    if (numberOfChoices > 0) {
-                                        msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                        currentKbdProperties = null;
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), "No items selected", Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    currentKbdProperties = null;
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.create().show();
+                            DialogFragment setGlobalPropertiesDialog =
+                                    SetGlobalPropertiesDialog.newInstance();
+                            setGlobalPropertiesDialog.show(getFragmentManager(),
+                                    SET_GLOBAL_PROPERTIES_DIALOG_TAG);
                         }
 
                         private void sendResetGlobalProperties() {
@@ -3473,160 +3030,36 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Sends RegisterAppInterface message.
      */
     private void sendRegisterAppInterface() {
-        final Context mContext = this;
-        LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View layout = inflater.inflate(R.layout.registerappinterface,
-                (ViewGroup) findViewById(R.id.registerappinterface_Root));
-
-        final CheckBox useSyncMsgVersion = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useSyncMsgVersion);
-        final EditText syncMsgVersionMajor = (EditText) layout
-                .findViewById(R.id.registerappinterface_syncMsgVersionMajor);
-        final EditText syncMsgVersionMinor = (EditText) layout
-                .findViewById(R.id.registerappinterface_syncMsgVersionMinor);
-        final CheckBox useAppName = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppName);
-        final EditText appName = (EditText) layout
-                .findViewById(R.id.registerappinterface_appName);
-        final CheckBox useTTSName = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useTTSName);
-        final EditText ttsName = (EditText) layout
-                .findViewById(R.id.registerappinterface_ttsName);
-        final CheckBox useNgnAppName = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useNgnAppName);
-        final EditText ngnAppName = (EditText) layout
-                .findViewById(R.id.registerappinterface_ngnAppName);
-        final CheckBox useVRSynonyms = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useVRSynonyms);
-        final EditText vrSynonyms = (EditText) layout
-                .findViewById(R.id.registerappinterface_vrSynonyms);
-
-        final CheckBox isMediaApp = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_isMediaApp);
-        final CheckBox useDesiredLang = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useDesiredLang);
-        final Spinner desiredLangSpinner = (Spinner) layout
-                .findViewById(R.id.registerappinterface_desiredLangSpinner);
-        final CheckBox useHMIDesiredLang = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useHMIDesiredLang);
-        final Spinner hmiDesiredLangSpinner = (Spinner) layout
-                .findViewById(R.id.registerappinterface_hmiDesiredLangSpinner);
-        final CheckBox useAppHMITypes = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppHMITypes);
-        final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
-                .findViewById(R.id.registerappinterface_appHMITypeSpinner);
-        final CheckBox useAppID = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppID);
-        final EditText appID =
-                (EditText) layout.findViewById(R.id.registerappinterface_appID);
-
-        final ArrayAdapter<Language> languageAdapter =
-                new ArrayAdapter<Language>(mContext,
-                        android.R.layout.simple_spinner_item,
-                        Language.values());
-        languageAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
-        // FIXME: use AppHMIType!
-        final ArrayAdapter<AppHMIType> appHMITypeAdapter =
-                new ArrayAdapter<AppHMIType>(mContext,
-                        android.R.layout.simple_spinner_item,
-                        AppHMIType.values());
-        appHMITypeAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
-
-        desiredLangSpinner.setAdapter(languageAdapter);
-        hmiDesiredLangSpinner.setAdapter(languageAdapter);
-        appHMITypeSpinner
-                .setItems(Arrays.asList(AppHMIType.values()), "All", null);
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                RegisterAppInterface msg = new RegisterAppInterface();
-                msg.setCorrelationID(getCorrelationid());
-
-                if (useSyncMsgVersion.isChecked()) {
-                    SyncMsgVersion version = new SyncMsgVersion();
-                    String versionStr = null;
-
-                    try {
-                        versionStr = syncMsgVersionMinor.getText().toString();
-                        version.setMinorVersion(Integer.parseInt(versionStr));
-                    } catch (NumberFormatException e) {
-                        version.setMinorVersion(2);
-                        Toast.makeText(mContext,
-                                "Couldn't parse minor version " + versionStr,
-                                Toast.LENGTH_SHORT).show();
-                    }
-
-                    try {
-                        versionStr = syncMsgVersionMajor.getText().toString();
-                        version.setMajorVersion(Integer.parseInt(versionStr));
-                    } catch (NumberFormatException e) {
-                        version.setMajorVersion(2);
-                        Toast.makeText(mContext,
-                                "Couldn't parse major version " + versionStr,
-                                Toast.LENGTH_SHORT).show();
-                    }
-
-                    msg.setSyncMsgVersion(version);
-                }
-
-                if (useAppName.isChecked()) {
-                    msg.setAppName(appName.getText().toString());
-                }
-                if (useTTSName.isChecked()) {
-                    msg.setTtsName(ttsChunksFromString(ttsName.getText().toString()));
-                }
-                if (useNgnAppName.isChecked()) {
-                    msg.setNgnMediaScreenAppName(ngnAppName.getText().toString());
-                }
-                if (useVRSynonyms.isChecked()) {
-                    msg.setVrSynonyms(new Vector<String>(Arrays.asList(
-                            vrSynonyms.getText().toString().split(JOIN_STRING))));
-                }
-                msg.setIsMediaApplication(isMediaApp.isChecked());
-                if (useDesiredLang.isChecked()) {
-                    msg.setLanguageDesired(languageAdapter.getItem(
-                            desiredLangSpinner.getSelectedItemPosition()));
-                }
-                if (useHMIDesiredLang.isChecked()) {
-                    msg.setHmiDisplayLanguageDesired(languageAdapter.getItem(
-                            hmiDesiredLangSpinner.getSelectedItemPosition()));
-                }
-                if (useAppHMITypes.isChecked()) {
-                    msg.setAppType(new Vector<AppHMIType>(appHMITypeSpinner.getSelectedItems()));
-                }
-                if (useAppID.isChecked()) {
-                    msg.setAppID(appID.getText().toString());
-                }
-                if (mBoundProxyService != null) {
-                    mBoundProxyService.syncProxySendRPCRequest(msg);
-                }
-            }
-        });
-        builder.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        builder.setView(layout);
-        builder.show();
+        DialogFragment registerAppInterfaceDialog = RegisterAppInterfaceDialog.newInstance();
+        registerAppInterfaceDialog.show(getFragmentManager(), REGISTER_APP_INTERFACE_DIALOG_TAG);
     }
 
     /**
      * Splits the string with a comma and returns a vector of TTSChunks.
      */
-    private Vector<TTSChunk> ttsChunksFromString(String string) {
+    public Vector<TTSChunk> ttsChunksFromString(String string) {
         Vector<TTSChunk> chunks = new Vector<TTSChunk>();
         for (String stringChunk : string.split(JOIN_STRING)) {
-            TTSChunk chunk = TTSChunkFactory
-                    .createChunk(SpeechCapabilities.TEXT, stringChunk);
+            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
             chunks.add(chunk);
         }
         return chunks;
+    }
+
+    /**
+     * Calls the setter with setterName on the msg.
+     */
+    public void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
+        try {
+            Method setter = msgClass.getMethod(setterName, Boolean.class);
+            setter.invoke(msg, true);
+        } catch (NoSuchMethodException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        } catch (IllegalAccessException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        } catch (InvocationTargetException e) {
+            Log.e(LOG_TAG, "Can't set vehicle data", e);
+        }
     }
 
     public void addSubMenuToList(final SyncSubMenu sm) {
@@ -3659,13 +3092,75 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     /**
      * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SubscriptionsVehicleDataDialog}
+     *
+     * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
+     */
+    public void onUnsubscribeVehicleDialogResult(UnsubscribeVehicleData unsubscribeVehicleData) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandUnsubscribeVehicleInterface(unsubscribeVehicleData);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SubscriptionsVehicleDataDialog}
+     *
+     * @param subscribeVehicleData {@link com.ford.syncV4.proxy.rpc.SubscribeVehicleData}
+     */
+    public void onSubscribeVehicleDialogResult(SubscribeVehicleData subscribeVehicleData) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandSubscribeVehicleInterfaceResumable(subscribeVehicleData);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SetGlobalPropertiesDialog}
+     *
+     * @param setGlobalProperties {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
+     */
+    public void onSetGlobalPropertiesDialogResult(SetGlobalProperties setGlobalProperties) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandSetGlobalPropertiesResumable(setGlobalProperties);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AddSubMenuDialog}
+     *
+     * @param addSubMenu {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
+     * @param syncSubMenu SubMenu structure
+     */
+    public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.commandAddSubMenuResumable(addSubMenu);
+        }
+        if (mLatestAddSubmenu != null) {
+            Log.w(LOG_TAG, "Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
+        }
+        mLatestAddSubmenu = syncSubMenu;
+    }
+
+    /**
+     *
+     */
+    public void onPolicyFilesSetUpDialogResult_SendUpdate() {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.sendPolicyTableUpdate();
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
      * {@link com.ford.syncV4.android.activity.AddCommandDialog}
      *
      * @param addCommand {@link com.ford.syncV4.proxy.rpc.AddCommand}
      */
     public void onAddCommandDialogResult(AddCommand addCommand) {
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandAddCommand(addCommand);
+            mBoundProxyService.commandAddCommandResumable(addCommand);
         }
 
         if (mLatestAddCommand != null) {
@@ -3678,6 +3173,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             parentID = addCommand.getMenuParams().getParentID();
         }
         mLatestAddCommand = new Pair<Integer, Integer>(addCommand.getCmdID(), parentID);
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     *
+     * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     */
+    public void onRegisterAppInterfaceDialogResult(RegisterAppInterface registerAppInterface) {
+        if (mBoundProxyService != null) {
+            if (mBoundProxyService.isSyncProxyConnected()) {
+                mBoundProxyService.syncProxySendRPCRequest(registerAppInterface);
+            } else {
+                // This may happen if "UnregisterAppInterface" command has been sent manually
+                // from the SPT
+
+                Log.w(LOG_TAG, "OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
+
+                onSetUpDialogResult();
+            }
+        } else {
+            Log.w(LOG_TAG, "OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
+        }
     }
 
     /**
@@ -3739,15 +3257,40 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
+     * Return a clone of the {@code isVehicleDataSubscribed}
+     * @return a clone of the {@code isVehicleDataSubscribed}
+     */
+    public boolean[] cloneIsVehicleDataSubscribed() {
+        return isVehicleDataSubscribed.clone();
+    }
+
+    /**
+     *
+     * @param position position in the array
+     * @return
+     */
+    public boolean getIsVehicleDataSubscribedAt(int position) {
+        return isVehicleDataSubscribed[position];
+    }
+
+    /**
+     * Set a velue of the {@code isVehicleDataSubscribed} array
+     * @param value
+     */
+    public void setIsVehicleDataSubscribed(boolean[] value) {
+        isVehicleDataSubscribed = value;
+    }
+
+    /**
      * Called when a CreateChoiceSetResponse comes. If successful, add it to the
      * adapter. In any case, remove the key from the map.
      */
     public void onCreateChoiceSetResponse(boolean success) {
-        if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+        if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
             if (success) {
-                mChoiceSetAdapter.add(_latestCreateChoiceSetId);
+                mChoiceSetAdapter.add(mLatestCreateChoiceSetId);
             }
-            _latestCreateChoiceSetId = CHOICESETID_UNSET;
+            mLatestCreateChoiceSetId = CHOICESETID_UNSET;
         } else {
             Log.w(LOG_TAG, "Latest createChoiceSetId is unset");
         }
@@ -3798,11 +3341,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * adapter.
      */
     public void onAddSubMenuResponse(boolean success) {
-        if (_latestAddSubmenu != null) {
+        if (mLatestAddSubmenu != null) {
             if (success) {
-                addSubMenuToList(_latestAddSubmenu);
+                addSubMenuToList(mLatestAddSubmenu);
             }
-            _latestAddSubmenu = null;
+            mLatestAddSubmenu = null;
         } else {
             Log.w(LOG_TAG, "Latest addSubMenu is unset");
         }
@@ -3996,14 +3539,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
         int choiceSetID = autoIncChoiceSetId++;
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandCreateInteractionChoiceSet(choices, choiceSetID,
+            mBoundProxyService.commandCreateInteractionChoiceSetResumable(choices, choiceSetID,
                     getCorrelationid());
 
-            if (_latestCreateChoiceSetId != CHOICESETID_UNSET) {
+            if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
                 Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " +
-                        _latestCreateChoiceSetId);
+                        mLatestCreateChoiceSetId);
             }
-            _latestCreateChoiceSetId = choiceSetID;
+            mLatestCreateChoiceSetId = choiceSetID;
         }
     }
 
@@ -4046,18 +3589,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         xmlTestContinue(filePath);
                     }
                 }
-                break;
-
-            case Const.REQUEST_EDIT_KBDPROPERTIES:
-                if (resultCode == RESULT_OK) {
-                    currentKbdProperties =
-                            (KeyboardProperties) IntentHelper.getObjectForKey(
-                                    Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-                    if (currentKbdProperties == null) {
-                        Log.w(LOG_TAG, "Returned kbdProperties is null!");
-                    }
-                }
-                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
                 break;
 
             default:

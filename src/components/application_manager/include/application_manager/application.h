@@ -134,8 +134,8 @@ class DynamicApplicationData {
   public:
     virtual ~DynamicApplicationData() {
     }
-    virtual const smart_objects::SmartObject* help_promt() const = 0;
-    virtual const smart_objects::SmartObject* timeout_promt() const = 0;
+    virtual const smart_objects::SmartObject* help_prompt() const = 0;
+    virtual const smart_objects::SmartObject* timeout_prompt() const = 0;
     virtual const smart_objects::SmartObject* vr_help_title() const = 0;
     virtual const smart_objects::SmartObject* vr_help() const = 0;
     virtual const mobile_api::TBTState::eType& tbt_state() const = 0;
@@ -143,9 +143,9 @@ class DynamicApplicationData {
     virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
 
     virtual void set_help_prompt(
-      const smart_objects::SmartObject& help_promt) = 0;
+      const smart_objects::SmartObject& help_prompt) = 0;
     virtual void set_timeout_prompt(
-      const smart_objects::SmartObject& timeout_promt) = 0;
+      const smart_objects::SmartObject& timeout_prompt) = 0;
     virtual void set_vr_help_title(
       const smart_objects::SmartObject& vr_help_title) = 0;
     virtual void reset_vr_help_title() = 0;

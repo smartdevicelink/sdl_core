@@ -2,24 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
     android:minWidth="300dp"
     android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
+    android:padding="20dip" >
 
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Local Policy Update File Name"
+        android:paddingBottom="5dp"
+        android:text="@string/local_policy_file_name_label"
         android:textStyle="bold" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/policy_update_local_file_name"
@@ -27,8 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:ems="10"
-            android:freezesText="true"
-            android:visibility="visible" >
+            android:freezesText="true" >
             <requestFocus />
         </EditText>
 
@@ -37,7 +35,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="…" />
+            android:text="@string/ellipsis" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/send_policy_table_update_btn_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:enabled="true"
+        android:layout_marginBottom="20dp"
+        android:text="@string/send_policy_table_update_label"/>
 
 </LinearLayout>

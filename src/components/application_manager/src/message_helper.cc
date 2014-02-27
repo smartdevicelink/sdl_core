@@ -165,7 +165,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl, bool is_resumption) {
+  const Application& application_impl) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -178,8 +178,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   message[strings::params][strings::message_type] =
     static_cast<int32_t>(application_manager::MessageType::kNotification);
-  message[strings::msg_params][strings::resume] = is_resumption;
-
   message[strings::msg_params][strings::application][strings::app_name] =
     application_impl.name();
 
@@ -440,7 +438,7 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app) {
   }
 
   // TTS global properties
-  if (app->help_promt() || app->timeout_promt()) {
+  if (app->help_prompt() || app->timeout_prompt()) {
     smart_objects::SmartObject* tts_global_properties =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -461,11 +459,11 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app) {
 
     smart_objects::SmartObject tts_msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
-    if (app->help_promt()) {
-      tts_msg_params[strings::help_prompt] = (*app->help_promt());
+    if (app->help_prompt()) {
+      tts_msg_params[strings::help_prompt] = (*app->help_prompt());
     }
-    if (app->timeout_promt()) {
-      tts_msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    if (app->timeout_prompt()) {
+      tts_msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
     tts_msg_params[strings::app_id] = app->app_id();
 
@@ -779,7 +777,7 @@ void MessageHelper::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
   ResetGlobalproperties(app);
 }
 
-void MessageHelper::SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app, bool is_resuming) {
+void MessageHelper::SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -792,7 +790,6 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr ap
     hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
-  message[strings::msg_params][strings::resume] = is_resuming;
   message[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
@@ -927,21 +924,21 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
 }
 
 void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
-  // reset help_promt
-  const std::vector<std::string>& help_promt = profile::Profile::instance()
-      ->help_promt();
+  // reset help_prompt
+  const std::vector<std::string>& help_prompt = profile::Profile::instance()
+      ->help_prompt();
 
-  smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
+  smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < help_promt.size(); ++i) {
+  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_promt[i];
-    so_help_promt[i] = helpPrompt;
+    helpPrompt[strings::text] = help_prompt[i];
+    so_help_prompt[i] = helpPrompt;
   }
 
-  app->set_help_prompt(so_help_promt);
+  app->set_help_prompt(so_help_prompt);
 
   // reset timeout prompt
   const std::vector<std::string>& time_out_promt = profile::Profile::instance()

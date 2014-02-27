@@ -22,6 +22,7 @@ import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
@@ -326,6 +327,16 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onAudioServiceStart();
 
     public void onStartServiceNackReceived(ServiceType serviceType);
+
+    /**
+     * Notification containing an updated hashID which can be used over connection cycles
+     * (i.e. loss of connection, ignition cycles, etc.).
+     * Sent after initial registration and subsequently after any change in the calculated hash
+     * of all persisted app data.
+     *
+     * @param onHashChange {@link com.ford.syncV4.proxy.rpc.OnHashChange} notification
+     */
+    public void onHashChange(OnHashChange onHashChange);
 
     /**
      * Provide a callback to listener in case of USB problem
