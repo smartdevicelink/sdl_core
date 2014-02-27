@@ -562,7 +562,7 @@ void ApplicationManagerImpl::OnMessageReceived(
     NOTREACHED();
     return;
   }
-
+  //Return empty SharedPtr on not kRpc or kBulk service
   utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
   if (outgoing_message) {
     messages_from_mobile_.PostMessage(

@@ -259,6 +259,7 @@ void LifeCycle::StopComponents() {
   media_manager_->SetProtocolHandler(NULL);
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  //TODO: (EZamakhov) set_session_observer(NULL) do nothing
   protocol_handler_->set_session_observer(NULL);
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
