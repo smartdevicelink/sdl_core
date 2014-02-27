@@ -56,7 +56,6 @@ import com.ford.syncV4.android.manager.IBluetoothDeviceManager;
 import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
-import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.receivers.ISyncReceiver;
 import com.ford.syncV4.android.receivers.SyncReceiver;
 import com.ford.syncV4.android.service.ICloseSession;
@@ -106,7 +105,6 @@ import com.ford.syncV4.proxy.rpc.SoftButton;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
-import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
@@ -115,7 +113,6 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
-import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
@@ -216,6 +213,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_CLEAR_FUNCTIONS_USAGE = 16;
     private final int MNU_WAKELOCK = 17;
     private final int MNU_SET_UP_POLICY_FILES = 18;
+    private final int MNU_HASH_ID_SETUP = 19;
     private ModuleTest _testerMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
@@ -333,6 +331,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
     private final static String SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG = "SubscriptionVehicleDataDialogTag";
     private final static String REGISTER_APP_INTERFACE_DIALOG_TAG = "RegisterAppInterfaceDialogTag";
+    private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -855,6 +854,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 /*			menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");*/
             menu.add(0, MNU_APP_VERSION, 0, "App version");
             menu.add(0, MNU_CLOSESESSION, 0, "Close Session");
+            menu.add(0, MNU_HASH_ID_SETUP, 0, "HashId setup");
             menu.add(0, MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
             menu.add(0, XML_TEST, 0, "XML Test");
             menu.add(0, POLICIES_TEST, 0, "Policies Test");
@@ -968,6 +968,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 break;
             case MNU_WAKELOCK:
                 toggleDisableLock();
+                break;
+            case MNU_HASH_ID_SETUP:
+                DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
+                hashIdSetUpDialog.show(getFragmentManager(), HASH_ID_SET_UP_DIALOG_TAG);
                 break;
         }
 

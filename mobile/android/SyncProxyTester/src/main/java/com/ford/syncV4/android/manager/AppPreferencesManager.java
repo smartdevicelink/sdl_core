@@ -77,4 +77,70 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_AUTO_REPLAY, true);
     }
+
+    /**
+     * Set <b>true</b> if application need to use HashId, <b>false</b> - otherwise
+     *
+     * @param value {@link java.lang.Boolean} true | false
+     */
+    public static void setUseHashId(boolean value) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.HashId.PREF_KEY_USE_HASH_ID, value);
+        editor.commit();
+    }
+
+    /**
+     * Return <b>true</b> if application need to use HashId, <b>false</b> - otherwise
+     *
+     * @return {@link java.lang.Boolean} true | false
+     */
+    public static boolean getUseHashId() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.HashId.PREF_KEY_USE_HASH_ID, true);
+    }
+
+    /**
+     * Set <b>true</b> if application need to use Custom HashId, <b>false</b> - otherwise
+     *
+     * @param value {@link java.lang.Boolean} true | false
+     */
+    public static void setUseCustomHashId(boolean value) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, value);
+        editor.commit();
+    }
+
+    /**
+     * Return <b>true</b> if application need to use Custom HashId, <b>false</b> - otherwise
+     *
+     * @return {@link java.lang.Boolean} true | false
+     */
+    public static boolean getUseCustomHashId() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, true);
+    }
+
+    /**
+     * Set custom {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#setHashID(String)} field value for the
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     *
+     * @param value {@link java.lang.String}
+     */
+    public static void setCustomHashId(String value) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(Const.HashId.PREF_KEY_CUSTOM_HASH_ID, value);
+        editor.commit();
+    }
+
+    /**
+     * @return custom {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#setHashID(String)}
+     * field value for the {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     */
+    public static String getCustomHashId() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getString(Const.HashId.PREF_KEY_CUSTOM_HASH_ID, "");
+    }
 }

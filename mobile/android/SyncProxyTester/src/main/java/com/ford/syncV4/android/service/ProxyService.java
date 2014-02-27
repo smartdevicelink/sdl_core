@@ -21,6 +21,7 @@ import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
 import com.ford.syncV4.android.module.ModuleTest;
@@ -120,6 +121,7 @@ import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.TestConfig;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -167,6 +169,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     // This manager provide functionality to process RPC requests which are involved in app resumption
     private RPCRequestsResumableManager mRpcRequestsResumableManager =
             new RPCRequestsResumableManager();
+    // This Config object stores all the necessary data for SDK testing
+    private TestConfig mTestConfig = new TestConfig();
 
     @Override
     public void onCreate() {
@@ -276,6 +280,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             doStartProxy = true;
         }
         if (doStartProxy) {
+
+            // Prepare all necessary data that need to be use in the Tests
+            prepareTestConfig();
+
             boolean result = startProxy();
             Log.i(TAG, ProxyService.class.getSimpleName() + " Proxy complete result:" + result);
             /*if (result) {
@@ -286,6 +294,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }*/
         }
+    }
+
+    /**
+     * Prepare all necessary parameters to be passed to Sync proxy
+     */
+    private void prepareTestConfig() {
+        mTestConfig.setUseHashId(AppPreferencesManager.getUseHashId());
+        mTestConfig.setCustomHashId(AppPreferencesManager.getCustomHashId());
+        mTestConfig.setUseCustomHashId(AppPreferencesManager.getUseCustomHashId());
     }
 
     private boolean startProxy() {
@@ -360,7 +377,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-                        config);
+                        config, mTestConfig);
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -654,7 +671,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onHashChange(OnHashChange onHashChange) {
-
+        createDebugMessageForAdapter(onHashChange);
     }
 
     /**

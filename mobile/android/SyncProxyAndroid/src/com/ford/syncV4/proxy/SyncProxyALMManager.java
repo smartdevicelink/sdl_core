@@ -99,6 +99,7 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.TestConfig;
 
 public class SyncProxyALMManager {
 	
@@ -385,7 +386,7 @@ public class SyncProxyALMManager {
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, isMediaApp, 
-				languageDesired, hmiDisplayLanguageDesired, appID);
+				languageDesired, hmiDisplayLanguageDesired, appID, new TestConfig());
 	}
 	
 	/**
@@ -412,7 +413,7 @@ public class SyncProxyALMManager {
 		this(lifeCycleListener);
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, new TestConfig());
 	}
 	
 	/**
@@ -420,9 +421,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
-	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
-	 * @param appName - Name of the application displayed on SYNC. 
+	 * @param appName - Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName - Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms - A vector of strings, all of which can be used as voice commands to 
@@ -442,7 +441,7 @@ public class SyncProxyALMManager {
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, syncProxyConfigurationResources, 
 				appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, new TestConfig());
 	}
 	
 	/**
@@ -450,8 +449,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
-	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param appName - Name of the application displayed on SYNC. 
+	 * @param appName - Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName - Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms - A vector of strings, all of which can be used as voice commands to 
@@ -472,7 +470,8 @@ public class SyncProxyALMManager {
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, appName, ngnMediaScreenAppName, 
 				vrSynonyms, isMediaApp, syncMsgVersion, 
-				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, callbackToUIThread);
+				languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, callbackToUIThread,
+                new TestConfig());
 	}
 	
 	/**
@@ -480,9 +479,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * Takes advantage of the advanced lifecycle management. 
 	 * 
-	 * @param listener - Reference to the object in the App listening to callbacks from SYNC. 
-	 * @param applicationContext - Context of the application. Used to access application specific resources.
-	 * @param appName - Name of the application displayed on SYNC. 
+	 * @param appName - Name of the application displayed on SYNC.
 	 * @param ngnMediaScreenAppName - Name of the application displayed on SYNC for Navigation equipped 
 	 * vehicles. Limited to five characters. 
 	 * @param vrSynonyms - A vector of strings, all of which can be used as voice commands to 
@@ -504,7 +501,7 @@ public class SyncProxyALMManager {
 		
 		syncProxy = new SyncProxyALM(_almInterfaceBroker, syncProxyConfigurationResources, appName, ngnMediaScreenAppName, 
 				vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appID, autoActivateID, 
-				callbackToUIThread);		
+				callbackToUIThread, new TestConfig());
 	}
 	
 	// Private constructor called by all public constructors
@@ -893,11 +890,9 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param commandID
 	 * @param menuText
 	 * @param vrCommands
-	 * @param _correlationID
-	 * @return 
+	 * @return
 	 * @throws SyncException
 	 */
 	public SyncCommand addSyncCommand(String menuText, Vector<String> vrCommands, Object tag, ISyncCommandListener listener) 
@@ -909,10 +904,8 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param commandID
 	 * @param vrCommands
-	 * @param _correlationID
-	 * @return 
+	 * @return
 	 * @throws SyncException
 	 */
 	public SyncCommand addSyncCommand(Vector<String> vrCommands, Object tag, ISyncCommandListener listener) 
@@ -924,11 +917,9 @@ public class SyncProxyALMManager {
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *
-	 *@param commandID
 	 *@param menuText
 	 *@param position
-	 *@param _correlationID
-	 * @return 
+	 * @return
 	 *@throws SyncException
 	 */
 	public SyncCommand addSyncCommand(String menuText, Integer position, Object tag,
@@ -941,10 +932,8 @@ public class SyncProxyALMManager {
 	/**
 	 *Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 *
-	 *@param commandID
 	 *@param menuText
-	 *@param _correlationID
-	 * @return 
+	 * @return
 	 *@throws SyncException
 	 */
 	public SyncCommand addSyncCommand(String menuText, Object tag, ISyncCommandListener listener) 
@@ -956,10 +945,8 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends an AddSyncSubMenu RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param menuID
 	 * @param menuName
 	 * @param position
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void addSyncSubMenu(String menuName, Integer position, Object tag,
@@ -992,9 +979,7 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends an AddSyncSubMenu RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param menuID
 	 * @param menuName
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void addSyncSubMenu(String menuName, Object tag, ISyncAddSubMenuResponseListener listener) 
@@ -1007,7 +992,6 @@ public class SyncProxyALMManager {
 	 * Sends an EncodedData RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param data
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void encodedSyncPData(Vector<String> data, Object tag, 
@@ -1038,7 +1022,6 @@ public class SyncProxyALMManager {
 	 * @param alertText2
 	 * @param playTone
 	 * @param duration
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void alert(String ttsText, String alertText1,
@@ -1069,7 +1052,6 @@ public class SyncProxyALMManager {
 	 * @param alertText2
 	 * @param playTone
 	 * @param duration
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void alert(Vector<TTSChunk> ttsChunks,
@@ -1097,7 +1079,6 @@ public class SyncProxyALMManager {
 	 * 
 	 * @param ttsText
 	 * @param playTone
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void alert(String ttsText, Boolean playTone, Object tag,
@@ -1112,7 +1093,6 @@ public class SyncProxyALMManager {
 	 * @param alertText1
 	 * @param alertText2
 	 * @param duration
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void alert(String alertText1, String alertText2, Boolean playTone,
@@ -1127,7 +1107,6 @@ public class SyncProxyALMManager {
 	 * 
 	 * @param chunks
 	 * @param playTone
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void alert(Vector<TTSChunk> chunks, Boolean playTone, Object tag,
@@ -1274,8 +1253,6 @@ public class SyncProxyALMManager {
 	/**
 	 * Sends a DeleteSubMenu RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param menuID
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void deleteSyncSubMenu(SyncSubMenu syncSubMenuToDelete, Object tag,
@@ -1307,7 +1284,6 @@ public class SyncProxyALMManager {
 	 * @param initPrompt
 	 * @param displayText
 	 * @param syncChoiceSet
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void performInteraction(String initPrompt, String displayText, 
@@ -1341,7 +1317,6 @@ public class SyncProxyALMManager {
 	 * @param initPrompt
 	 * @param displayText
 	 * @param syncChoiceSet
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void performInteraction(String initPrompt,
@@ -1381,7 +1356,6 @@ public class SyncProxyALMManager {
 	 * @param timeoutPrompt
 	 * @param interactionMode
 	 * @param timeout
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void performInteraction(String initPrompt,
@@ -1433,7 +1407,6 @@ public class SyncProxyALMManager {
 	 * @param timeoutChunks
 	 * @param interactionMode
 	 * @param timeout
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void performInteraction(
@@ -1481,7 +1454,6 @@ public class SyncProxyALMManager {
 	 * 
 	 * @param helpPrompt
 	 * @param timeoutPrompt
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void setGlobalProperties(String helpPrompt, String timeoutPrompt, 
@@ -1509,7 +1481,6 @@ public class SyncProxyALMManager {
 	 * 
 	 * @param helpChunks
 	 * @param timeoutChunks
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void setGlobalProperties(
@@ -1560,7 +1531,6 @@ public class SyncProxyALMManager {
 	 * @param minutes
 	 * @param seconds
 	 * @param updateMode
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void setMediaClockTimer(Integer hours,
@@ -1587,7 +1557,6 @@ public class SyncProxyALMManager {
 	/**
 	 * Pauses the media clock. Responses are captured through callback on IProxyListener.
 	 * 
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void pauseMediaClockTimer(Object tag, ISyncSetMediaClockTimerResponseListener listener) 
@@ -1696,7 +1665,6 @@ public class SyncProxyALMManager {
 	 * @param mainText1
 	 * @param mainText2
 	 * @param alignment
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void show(String mainText1, String mainText2,
@@ -1737,7 +1705,6 @@ public class SyncProxyALMManager {
 	 * Sends a Speak RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param ttsChunks
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void speak(Vector<TTSChunk> ttsChunks, Object tag,
@@ -1771,7 +1738,6 @@ public class SyncProxyALMManager {
 	 * Sends a SubscribeButton RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param buttonName
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void subscribeButton(ButtonName buttonName, Object tag,
@@ -1799,7 +1765,6 @@ public class SyncProxyALMManager {
 	 * Sends an UnsubscribeButton RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
 	 * 
 	 * @param buttonName
-	 * @param _correlationID
 	 * @throws SyncException
 	 */
 	public void unsubscribeButton(ButtonName buttonName, Object tag,
