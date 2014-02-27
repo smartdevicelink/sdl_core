@@ -23,6 +23,8 @@ public interface IProtocolListener {
      */
     void onProtocolHeartbeatACK();
 
+    void onResetHeartbeat();
+
 	// Called to indicate that a protocol error was detected in received data.
 	void onProtocolError(String info, Exception e);
 
