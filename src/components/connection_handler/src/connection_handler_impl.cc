@@ -204,7 +204,7 @@ void ConnectionHandlerImpl::OnConnectionFailed(
 
 void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
-  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
 
   OnConnectionEnded(connection_id);
 }
@@ -542,9 +542,12 @@ void ConnectionHandlerImpl::StartTransportManager() {
 }
 
 void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection by HB");
+
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
+
   CloseConnection(connection_handle);
 }
 
