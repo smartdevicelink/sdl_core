@@ -33,11 +33,12 @@
 #ifndef SECURE_MANAGER_H
 #define SECURE_MANAGER_H
 
+#include <log4cxx/log4cxx.h>
+
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/raw_message.h"
 
-#include "utils/message_queue.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
 
@@ -55,7 +56,8 @@ namespace crypto_manager {
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct SecureServiceMessage: public SecureServiceQuery {
+struct SecureServiceMessagePtr: public SecureServiceQueryPtr {
+  explicit SecureServiceMessagePtr(const SecureServiceQueryPtr&) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const {
     return protocol_handler::MessagePriority::FromServiceType(
@@ -64,7 +66,7 @@ struct SecureServiceMessage: public SecureServiceQuery {
 };
 
 typedef threads::MessageLoopThread<
-utils::PrioritizedQueue<SecureServiceMessage> > SecureServiceMessageQueue;
+utils::PrioritizedQueue<SecureServiceMessagePtr> > SecureServiceMessageQueue;
 
 
 //TODO: (EZAmakhov) add brief
@@ -94,12 +96,12 @@ public:
    * with deep copy data.
    * \param message ProtocoloHandler raw message
    */
-  static SecureServiceMessage SecureMessageFromRawMessage(
+  static SecureServiceQueryPtr SecureMessageFromRawMessage(
       const protocol_handler::RawMessagePtr& message);
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON message_for_encryption thread!
-  void Handle(const SecureServiceMessage& message);
+  void Handle(const SecureServiceMessagePtr& message);
  private:
   crypto_manager::SecureServiceManager* secure_manager_;
 
@@ -107,6 +109,8 @@ public:
   SecureServiceMessageQueue secure_message_message_;
 
   DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
+
+  static log4cxx::LoggerPtr logger_;
 };
 } //crypto_manager
 #endif // SECURE_MANAGER_H

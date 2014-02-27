@@ -32,11 +32,20 @@
 
 #include "crypto_manager/secure_service_manager.h"
 using namespace crypto_manager;
+//TODO add info
+inline uint32_t getUInt8Value(const uint8_t* const data){
+  DCHECK(data);
+  return
+      data[0] << 24 | data[1] << 16 |
+      data[2] <<  8 | data[3];
+}
+
+log4cxx::LoggerPtr SecureServiceManager::logger_ = log4cxx::LoggerPtr(
+      log4cxx::Logger::getLogger("SecureServiceManager"));
 
 SecureServiceManager::SecureServiceManager() :
   secure_message_message_("SecureManager::message_for_encryption", this),
   secure_manager_(new crypto_manager::SecureServiceManager()){
-
 }
 
 void SecureServiceManager::OnMessageReceived(
@@ -45,13 +54,33 @@ void SecureServiceManager::OnMessageReceived(
       //LOG4CXX_WARN(logger_, "Incorrect message received");
       return;
     }
-  secure_message_message_.PostMessage(SecureMessageFromRawMessage(message));
+  const SecureServiceMessagePtr serviceQueryPtr(
+        SecureMessageFromRawMessage(message));
+  if(serviceQueryPtr) {
+      secure_message_message_.PostMessage(serviceQueryPtr);
+    } else {
+      LOG4CXX_WARN(logger_, "Incorrect message received");
+    }
 }
 
-SecureServiceMessage SecureServiceManager::SecureMessageFromRawMessage(
+SecureServiceQueryPtr SecureServiceManager::SecureMessageFromRawMessage(
     const protocol_handler::RawMessagePtr &message) {
   assert(!"not implemented");
-  return SecureServiceMessage();
+  DCHECK(message->service_type() == protocol_handler::kSecure);
+  const uint8_t* const binary_data = message->data();
+
+  if(message->data_size() < sizeof(SecureServiceQuery::QueryHeader)) {
+      LOG4CXX_ERROR(logger_, "Received invalid message: wrong query size.");
+      return SecureServiceQueryPtr();
+    }
+
+  SecureServiceQuery::QueryHeader header;
+  header.query_id_ = binary_data[0];
+  header.seq_number_ = getUInt8Value(binary_data + 1);
+  header.seq_number_ = getUInt8Value(binary_data + 5);
+  return SecureServiceMessagePtr(
+        new SecureServiceQuery(header,
+                               binary_data + sizeof(SecureServiceQuery::QueryHeader)));
 }
 
 void SecureServiceManager::OnMobileMessageSent(
@@ -59,6 +88,6 @@ void SecureServiceManager::OnMobileMessageSent(
   assert(!"not implemented");
 }
 
-void SecureServiceManager::Handle(const SecureServiceMessage &message) {
+void SecureServiceManager::Handle(const SecureServiceMessagePtr &message) {
   assert(!"not implemented");
 }

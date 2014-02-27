@@ -32,21 +32,22 @@
 
 #include "crypto_manager/secure_service_query.h"
 #include <cstring>
+#include "utils/macro.h"
 
 using namespace crypto_manager;
 
-SecureServiceQuery::SecureServiceQuery() :
-  query_id_(InvalidSecureServiceQuery),
-  seq_number_(0), data_size_(0), data_(NULL) {
+SecureServiceQuery::SecureServiceQuery() : header_(), data_(NULL) {
 }
 
-SecureServiceQuery::SecureServiceQuery(
-    uint8_t query_id, uint32_t seq_number,
-    uint32_t data_size, void *data):
-  query_id_(query_id), seq_number_(seq_number),
-  data_size_(data_size) {
+SecureServiceQuery::SecureServiceQuery(const QueryHeader& header, const void * const data)
+  : header_(header) {
+  DCHECK(data);
+  data_ = new uint8_t[header_.data_size_];
+  memcpy(data_, data, header_.data_size_);
+}
 
-  data_ = new uint8_t[data_size_];
-  memcpy(data_, data, data_size_);
+SecureServiceQuery::~SecureServiceQuery() {
+  delete data_;
+  data_=NULL;
 }
 

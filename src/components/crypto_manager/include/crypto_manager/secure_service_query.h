@@ -36,6 +36,7 @@
 #include <cstddef>
 //TODO: EZamakhov remove <cstdint> as C++11
 #include <cstdint>
+#include "utils/shared_ptr.h"
 
 namespace crypto_manager {
 
@@ -56,15 +57,21 @@ enum ProtectServiceResult {
 
 class SecureServiceQuery {
 public:
+  struct QueryHeader {
+    QueryHeader() : query_id_(InvalidSecureServiceQuery),
+      seq_number_(0), data_size_(0) {}
+    uint8_t  query_id_;    // API function identifier
+    uint32_t seq_number_;  // request sequential number
+    uint32_t data_size_;   // size of data in bytes
+  };
+
   SecureServiceQuery();
-  SecureServiceQuery(uint8_t  query_id, uint32_t seq_number,
-                     uint32_t data_size, void* data);
+  SecureServiceQuery(const QueryHeader& header, const void* const data);
   ~SecureServiceQuery();
 private:
-  uint8_t  query_id_;    // API function identifier
-  uint32_t seq_number_;  // request sequential number
-  uint32_t data_size_;   // size of data in bytes
+  QueryHeader header_;
   void* data_;
 };
+typedef utils::SharedPtr<SecureServiceQuery> SecureServiceQueryPtr;
 }
 #endif // SECURE_SERVICE_QUERY_H

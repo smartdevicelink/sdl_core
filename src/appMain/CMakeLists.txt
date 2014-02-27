@@ -31,6 +31,7 @@ set(LIBRARIES
   ProtocolHandler
   connectionHandler
   TransportManager
+  CryptoManager
   HMIMessageHandler
   MessageBroker
   ${BROKER_LIBRARIES}
