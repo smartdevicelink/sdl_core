@@ -1,6 +1,9 @@
 -- Put this file into ~/.wireshark/plugins/ directory
 -- source: https://delog.wordpress.com/2010/09/27/create-a-wireshark-dissector-in-lua/
 
+-- print debug info?
+local DEBUG = false
+
 -- create sdlproto protocol and its fields
 local p_protoname = "sdlproto"
 p_sdlproto = Proto(p_protoname, "Ford's Smart Device Link Protocol")
@@ -52,12 +55,23 @@ local f_frameInfo_ConsecutiveFrame = ProtoField.uint8(p_protoname..".frame_info"
 local f_dataSize = ProtoField.uint32(p_protoname..".data_size", "Data Size", base.DEC)
 local f_sessionID = ProtoField.uint8(p_protoname..".session_id", "Session ID", base.HEX)
 local f_messageID = ProtoField.uint32(p_protoname..".message_id", "Message ID", base.HEX)
+local f_totalDataBytes = ProtoField.uint32(p_protoname..".total_data_bytes", "Total Data Bytes", base.DEC)
+local f_numberOfConsecutiveFrames = ProtoField.uint32(p_protoname..".number_of_consecutive_frames", "Number of consecutive frames", base.DEC)
+local f_data = ProtoField.bytes(p_protoname..".data", "Data")
 
 p_sdlproto.fields = {
   f_version, f_compressionFlag, f_frameType, f_serviceType,
   f_frameInfo, f_frameInfo_ControlFrame, f_frameInfo_ConsecutiveFrame,
-  f_dataSize, f_sessionID, f_messageID
+  f_dataSize, f_sessionID, f_messageID,
+  f_totalDataBytes, f_numberOfConsecutiveFrames,
+  f_data
 }
+
+local HEADER_LENGTH = 12
+local FIRSTFRAME_DATASIZE = 0x00000008
+
+-- how many bytes left that are data of the latest packet
+local g_expectedBytesLeft = 0
 
 -- sdlproto dissector function
 function p_sdlproto.dissector(buf, pkt, root)
@@ -104,12 +118,18 @@ function p_sdlproto.dissector(buf, pkt, root)
   local l_dataSizeBytes = buf(4, 4)
   local l_dataSizeValue = l_dataSizeBytes:uint()
   local l_dataSizeTreeItem = subtree:add(f_dataSize, l_dataSizeBytes)
+  local l_isFirstFrame = false
   if f_frameTypeValue_FirstFrame == l_frameType then
-    if l_dataSizeValue ~= 0x00000008 then
-      l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_ERROR, "Should be 0x00000008")
+    if l_dataSizeValue == FIRSTFRAME_DATASIZE then
+      g_expectedBytesLeft = l_dataSizeValue
+      l_isFirstFrame = true
+    else
+      l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_ERROR, "Should be " .. FIRSTFRAME_DATASIZE)
     end
   elseif (f_frameTypeValue_ConsecutiveFrame == l_frameType) or
          (f_frameTypeValue_SingleFrame == l_frameType) then
+    g_expectedBytesLeft = l_dataSizeValue
+    if DEBUG then print("set g_expectedBytesLeft to " .. g_expectedBytesLeft) end
     l_dataSizeTreeItem:append_text(" -- Total data bytes in this frame")
 
     if l_dataSizeValue < 0x00000001 then
@@ -137,6 +157,34 @@ function p_sdlproto.dissector(buf, pkt, root)
   l_messageIDTreeItem:append_text(l_messageIDDescription)
   if l_messageIDValue < 0x00000001 then
     l_messageIDTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Should be >= 0x00000001")
+  end
+
+  local l_bytesLeft = buf:len() - HEADER_LENGTH
+  if g_expectedBytesLeft > 0 then
+    -- we expect more bytes for this message
+    if g_expectedBytesLeft > l_bytesLeft then
+      -- we have fewer bytes that we need; ask wireshark to supply more
+      pkt.desegment_len = g_expectedBytesLeft - l_bytesLeft
+      if DEBUG then print("want " .. pkt.desegment_len .. " more bytes") end
+      return
+    else
+      -- special case with First Frame
+      if l_isFirstFrame then
+        local l_totalDataBytesBytes = buf(12, 4)
+        subtree:add(f_totalDataBytes, l_totalDataBytesBytes)
+
+        local l_numberOfConsecutiveFramesBytes = buf(16, 4)
+        subtree:add(f_numberOfConsecutiveFrames, l_numberOfConsecutiveFramesBytes)
+      else
+        local l_dataLengthAvailable = math.min(g_expectedBytesLeft, l_bytesLeft)
+        if DEBUG then print("expect ".. g_expectedBytesLeft .. ", and have " .. l_bytesLeft .. ", and use " .. l_dataLengthAvailable) end
+        local l_dataBytes = buf(HEADER_LENGTH, l_dataLengthAvailable)
+        subtree:add(f_data, l_dataBytes)
+
+        g_expectedBytesLeft = g_expectedBytesLeft - l_dataLengthAvailable
+        if DEBUG then print("updated g_expectedBytesLeft to " .. g_expectedBytesLeft) end
+      end
+    end
   end
 
   -- TODO subdissector for RPC messages
