@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "crypto_manager/secure_manager.h"
+#include "crypto_manager/secure_service_manager.h"
 using namespace crypto_manager;
 
 SecureServiceManager::SecureServiceManager() :

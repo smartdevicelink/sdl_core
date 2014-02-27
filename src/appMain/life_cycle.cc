@@ -35,6 +35,7 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
+#include "crypto_manager/secure_service_manager.h"
 
 using threads::Thread;
 
@@ -105,6 +106,7 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
+  protocol_handler_->AddProtocolObserver(new crypto_manager::SecureServiceManager());
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
