@@ -1,0 +1,15 @@
+regexp=Smart Device Link Protocol
+colours=green
+===
+# expert info start
+regexp=\[Expert Info
+colours=yellow
+count=block
+===
+# expert info end
+regexp=\[Group: .*\]$
+colours=yellow
+count=unblock
+===
+regexp=(Lua Error|.*Lua: syntax error).*
+colours=red
