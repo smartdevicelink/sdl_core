@@ -442,6 +442,7 @@ class Parser(object):
 
         self._ignore_attribute(attributes, "hexvalue")
         self._ignore_attribute(attributes, "scope")
+        self._ignore_attribute(attributes, "rootscreen")
 
         internal_name = None
         value = None

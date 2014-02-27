@@ -705,6 +705,131 @@
     </element>
   </enum>
 
+  <enum name="PredefinedLayout" platform="documentation">
+    <description>Predefined screen layout.</description>
+
+    <element name="DEFAULT" rootscreen="true">
+        <description>
+                Default media / non-media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="MEDIA" rootscreen="true">
+        <description>
+                Default Media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NON_MEDIA" rootscreen="true">
+        <description>
+                Default Non-media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="ONSCREEN_PRESETS" rootscreen="true">
+        <description>
+                Custom root media screen containing app-defined onscreen presets.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_FULLSCREEN_MAP" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing full screen map with navigation controls.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_LIST" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing video represented list.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_KEYBOARD" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing video represented keyboard.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXT" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with lines of text.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXT_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing lines of text with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TILES_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXTBUTTONS_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only text SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TILES" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TILES_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing tiled SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with text and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing text and SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with text only SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXTBUTTONS_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing text only SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="LARGE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing a large graphic and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="DOUBLE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing two graphics and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="LARGE_GRAPHIC_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only a large graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+  </enum>
+
   <enum name="CharacterSet">
     <description>The list of potential character sets</description>
     <element name="TYPE2SET">
