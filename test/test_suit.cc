@@ -6,6 +6,7 @@
 #include "protocol_handler/protocol_handler_tm_test.h"
 //#include "request_watchdog/request_watchdog_test.h"
 #include "application_manager/formatters_commands.h"
+#include "crypto_manager/crypto_manager_impl_test.h"
 //#include "media_manager/media_manager_impl_test.h"
 //#include "SmartObjectDraftTest.h"
 //#include "SmartObjectInvalidTest.h"
