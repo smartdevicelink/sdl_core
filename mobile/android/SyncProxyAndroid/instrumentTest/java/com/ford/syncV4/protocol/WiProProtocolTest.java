@@ -27,6 +27,7 @@ import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -66,6 +67,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
                 @Override
                 public void onProtocolHeartbeatACK() {
+                }
+
+                @Override
+                public void onResetHeartbeat() {
+
                 }
 
                 @Override
@@ -426,6 +432,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
+            public void onResetHeartbeat() {
+
+            }
+
+            @Override
             public void onProtocolError(String info, Exception e) {
             }
 
@@ -542,6 +553,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolHeartbeatACK() {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
 
@@ -681,4 +697,18 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("", correlationIdCaptor.getValue());
     }
 
+
+    public void testHeartBeatMonitorResetOnMessageSent() throws Exception {
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener);
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.RPC);
+        frameHeader.setDataSize(0);
+        protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
+        verify(protocolListener).onResetHeartbeat();
+    }
 }

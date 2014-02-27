@@ -44,6 +44,10 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     // TODO stop?
                 }
             }
+            rescheduleHeartbeat();
+        }
+
+        private void rescheduleHeartbeat() {
             synchronized (HeartbeatThreadHandler_Lock) {
                 if (heartbeatThreadHandler != null) {
                     if (!Thread.interrupted()) {
