@@ -119,7 +119,7 @@ public class AppPreferencesManager {
      */
     public static boolean getUseCustomHashId() {
         SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
-        return sharedPreferences.getBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, true);
+        return sharedPreferences.getBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, false);
     }
 
     /**

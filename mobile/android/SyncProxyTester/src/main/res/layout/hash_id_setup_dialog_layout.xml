@@ -17,7 +17,7 @@
     <CheckBox
         android:id="@+id/hash_id_set_up_use_custom_hash_id_view"
         android:text="Use Custom HashId in RegisterAppInterface"
-        android:checked="true"
+        android:checked="false"
         android:textSize="18sp"
         android:layout_marginBottom="20dp"
         android:layout_width="fill_parent"
