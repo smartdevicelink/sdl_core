@@ -43,6 +43,8 @@ log4cxx::LoggerPtr logger =
 PipeVideoStreamerAdapter::PipeVideoStreamerAdapter() {
   LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::PipeVideoStreamerAdapter");
   named_pipe_path_ = profile::Profile::instance()->named_video_pipe_path();
+
+  Init();
 }
 
 PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {

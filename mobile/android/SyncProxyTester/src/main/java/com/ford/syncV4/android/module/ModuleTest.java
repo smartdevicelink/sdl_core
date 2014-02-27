@@ -66,7 +66,6 @@ import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
@@ -511,11 +510,11 @@ public class ModuleTest {
 								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
 									rpc = new EndAudioPassThru();
 								} else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
-									rpc = new SubscribeButton();
+									rpc = RPCRequestFactory.buildSubscribeButton();
 								} else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
 									rpc = new UnsubscribeButton();
 								} else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
-									rpc = new SubscribeVehicleData();
+									rpc = RPCRequestFactory.buildSubscribeVehicleData();
 							    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
 									rpc = new UnsubscribeVehicleData();
 							    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {

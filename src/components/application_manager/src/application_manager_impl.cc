@@ -488,6 +488,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
     if (!audio_pass_thru_active_) {
       LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
                     " when PassThrough is not active");
+
       return;
     }
   }
@@ -1422,7 +1423,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     MessageHelper::SendStopAudioPathThru();
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   applications_.erase(it);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
@@ -1532,24 +1533,24 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string&
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {
-      if (file_size != offset) {
-          LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
-          return mobile_apis::Result::INVALID_DATA;
-        }
-      file_stream = file_system::Open(file_system::FullPath(save_path),
-                                      std::ios_base::app);
-    }  else {
-      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
-       // if offset == 0: rewrite file
-      file_stream = file_system::Open(file_system::FullPath(save_path),
-                                      std::ios_base::out);
+    if (file_size != offset) {
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+      return mobile_apis::Result::INVALID_DATA;
     }
+    file_stream = file_system::Open(file_system::FullPath(save_path),
+                                    std::ios_base::app);
+  } else {
+    LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+    // if offset == 0: rewrite file
+    file_stream = file_system::Open(file_system::FullPath(save_path),
+                                    std::ios_base::out);
+  }
 
   if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
-      file_stream->close();
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
-  file_stream->close();
+    file_system::Close(file_stream);
+    return mobile_apis::Result::GENERIC_ERROR;
+  }
+  file_system::Close(file_stream);
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }

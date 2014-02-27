@@ -78,16 +78,16 @@ class DynamicApplicationDataImpl : public virtual Application {
   public:
     DynamicApplicationDataImpl();
     ~DynamicApplicationDataImpl();
-    const smart_objects::SmartObject* help_promt() const;
-    const smart_objects::SmartObject* timeout_promt() const;
+    const smart_objects::SmartObject* help_prompt() const;
+    const smart_objects::SmartObject* timeout_prompt() const;
     const smart_objects::SmartObject* vr_help_title() const;
     const smart_objects::SmartObject* vr_help() const;
     const mobile_api::TBTState::eType& tbt_state() const;
     const smart_objects::SmartObject* show_command() const;
     const smart_objects::SmartObject* tbt_show_command() const;
 
-    void set_help_prompt(const smart_objects::SmartObject& help_promt);
-    void set_timeout_prompt(const smart_objects::SmartObject& timeout_promt);
+    void set_help_prompt(const smart_objects::SmartObject& help_prompt);
+    void set_timeout_prompt(const smart_objects::SmartObject& timeout_prompt);
     void set_vr_help_title(const smart_objects::SmartObject& vr_help_title);
     void reset_vr_help_title();
     void set_vr_help(const smart_objects::SmartObject& vr_help);
@@ -261,8 +261,8 @@ class DynamicApplicationDataImpl : public virtual Application {
     inline bool is_reset_global_properties_active() const;
 
   protected:
-    smart_objects::SmartObject* help_promt_;
-    smart_objects::SmartObject* timeout_promt_;
+    smart_objects::SmartObject* help_prompt_;
+    smart_objects::SmartObject* timeout_prompt_;
     smart_objects::SmartObject* vr_help_title_;
     smart_objects::SmartObject* vr_help_;
     mobile_api::TBTState::eType tbt_state_;

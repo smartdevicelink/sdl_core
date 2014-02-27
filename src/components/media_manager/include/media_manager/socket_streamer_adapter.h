@@ -53,6 +53,12 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     virtual bool is_app_performing_activity(int32_t application_key);
 
   protected:
+
+    /*
+     * @brief Start streamer thread
+     */
+    virtual void Init();
+
     int32_t port_;
     std::string ip_;
 
@@ -119,7 +125,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
 
     int32_t                                       socket_fd_;
     bool                                          is_ready_;
-    threads::Thread                               thread_;
+    threads::Thread*                              thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);

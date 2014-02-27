@@ -29,7 +29,8 @@ public enum Result {
     CANCEL_ROUTE,
     TRUNCATED_DATA,
     RETRY,
-    WARNINGS;
+    WARNINGS,
+    RESUME_FAILED;
 
     public static Result valueForString(String value) {
         return valueOf(value);

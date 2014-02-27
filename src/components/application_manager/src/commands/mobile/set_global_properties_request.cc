@@ -216,14 +216,14 @@ void SetGlobalPropertiesRequest::Run() {
 
     if (is_help_prompt_present) {
       app->set_help_prompt(
-          msg_params.getElement(strings::help_promt));
-      params[strings::help_prompt] = (*app->help_promt());
+          msg_params.getElement(strings::help_prompt));
+      params[strings::help_prompt] = (*app->help_prompt());
     }
 
     if (is_timeout_prompt_present) {
       app->set_timeout_prompt(
-          msg_params.getElement(strings::timeout_promt));
-      params[strings::timeout_prompt] = (*app->timeout_promt());
+          msg_params.getElement(strings::timeout_prompt));
+      params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
 
     params[strings::app_id] = app->app_id();

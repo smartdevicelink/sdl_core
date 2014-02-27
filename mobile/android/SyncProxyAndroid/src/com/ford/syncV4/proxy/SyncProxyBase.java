@@ -360,6 +360,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private String _autoActivateIdDesired = null;
     private SyncMsgVersion _syncMsgVersionRequest = null;
     private Vector<String> _vrSynonyms = null;
+    // Updated hashID which can be used over connection cycles
+    // (i.e. loss of connection, ignition cycles, etc.)
+    private String mHashId = null;
+
+    /**
+     * Set hashID which can be used over connection cycles
+     *
+     * @return value of the hashId
+     */
+    public String getHashId() {
+        return mHashId;
+    }
+
+    /**
+     * Get hashID which can be used over connection cycles
+     *
+     * @param mHashId value of the hashId
+     */
+    public void setHashId(String mHashId) {
+        this.mHashId = mHashId;
+    }
 
     public OnLanguageChange getLastLanguageChange() {
         return _lastLanguageChange;
@@ -1805,7 +1826,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void restartRPCProtocolSession() {
-        // Set Proxy Lifecyclek Available
+        // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
 
             try {
@@ -1820,7 +1841,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _hmiDisplayLanguageDesired, _appHMIType,
                         _appID,
                         _autoActivateIdDesired,
-                        REGISTER_APP_INTERFACE_CORRELATION_ID);
+                        REGISTER_APP_INTERFACE_CORRELATION_ID,
+                        getHashId());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. Check parameter values given to SyncProxy constructor.", e);
@@ -2446,22 +2468,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // Protected registerAppInterface used to ensure only non-ALM applications call
-    // reqisterAppInterface
+    // ReqisterAppInterface
     protected void registerAppInterfacePrivate(
             SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID)
+            String appID, String autoActivateID, Integer correlationID, String hashId)
             throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID);
+                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId);
 
         sendRPCRequestPrivate(msg);
 
         logOnRegisterAppRequest(msg);
-
     }
 
     private void logOnRegisterAppRequest(final RegisterAppInterface msg) {
@@ -3092,7 +3113,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(response);
             }
         }
-        // Restore Services
+    }
+
+    /**
+     * Restore interrupted Services
+     */
+    public void restoreServices() {
         if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             if (currentSession.hasService(ServiceType.Mobile_Nav)) {
                 mSyncConnection.startMobileNavService(currentSession);

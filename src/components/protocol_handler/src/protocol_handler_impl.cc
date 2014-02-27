@@ -114,7 +114,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -525,7 +525,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
     }
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case default!!!");
-      break;
+      return RESULT_FAIL;
     }
   }
 
