@@ -50,8 +50,6 @@ PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
   timer_(this, &PerformInteractionRequest::onTimer),
-  is_keyboard_trigger_source_(false),
-  trigger_source_(mobile_apis::TriggerSource::INVALID_ENUM),
   tts_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM) {
 
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
@@ -215,18 +213,8 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ProcessVRNotification(event.smart_object());
       break;
     }
-    case hmi_apis::FunctionID::Buttons_OnButtonPress: {
-      LOG4CXX_INFO(logger_, "Recived Buttons_OnButtonPress");
-      is_keyboard_trigger_source_ = true;
-      break;
-    }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
-      if (is_keyboard_trigger_source_) {
-        trigger_source_ = mobile_apis::TriggerSource::TS_KEYBOARD;
-      } else {
-        trigger_source_ = mobile_apis::TriggerSource::TS_MENU;
-      }
       ProcessPerformInteractionResponse(event.smart_object());
       break;
     }
@@ -407,7 +395,11 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
         message[strings::params][hmi_response::code].asInt();
     if (hmi_apis::Common_Result::SUCCESS ==
         hmi_apis::Common_Result::eType(hmi_response_code)) {
-      msg_params[strings::trigger_source] = static_cast<int>(trigger_source_);
+      if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
+        msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
+      } else {
+        msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
+      }
       result = true;
     }
 

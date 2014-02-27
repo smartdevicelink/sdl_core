@@ -211,8 +211,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
-  bool is_keyboard_trigger_source_;
-  mobile_apis::TriggerSource::eType trigger_source_;
   mobile_apis::Result::eType tts_perform_interaction_code_;
 };
 
