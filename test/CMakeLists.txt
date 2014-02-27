@@ -25,6 +25,7 @@ include_directories (
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
+  ../src/components/crypto_manager/include
   ../src/components/formatters/include
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
@@ -32,6 +33,7 @@ include_directories (
   ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
+  ../test/components/crypto_manager/include
   ../test/components/json_handler/include
   ../test/components/smart_objects
   ../test/components/transport_manager
@@ -73,6 +75,7 @@ set(LIBRARIES
     ProtocolHandler
     Utils
     ConfigProfile
+    test_CryptoManager
     #test_JSONHandler_v4_protocol_v2_0_revP
     #test_json_handler
     #test_SmartObjectTest
