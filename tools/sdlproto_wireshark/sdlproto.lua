@@ -175,6 +175,8 @@ function p_sdlproto.dissector(buf, pkt, root)
 
         local l_numberOfConsecutiveFramesBytes = buf(16, 4)
         subtree:add(f_numberOfConsecutiveFrames, l_numberOfConsecutiveFramesBytes)
+
+        g_expectedBytesLeft = 0
       else
         local l_dataLengthAvailable = math.min(g_expectedBytesLeft, l_bytesLeft)
         if DEBUG then print("expect ".. g_expectedBytesLeft .. ", and have " .. l_bytesLeft .. ", and use " .. l_dataLengthAvailable) end
@@ -183,12 +185,17 @@ function p_sdlproto.dissector(buf, pkt, root)
 
         g_expectedBytesLeft = g_expectedBytesLeft - l_dataLengthAvailable
         if DEBUG then print("updated g_expectedBytesLeft to " .. g_expectedBytesLeft) end
+
+        -- are there any more unprocessed bytes on wire? dissect them
+        l_bytesLeft = l_bytesLeft - l_dataLengthAvailable
+        if l_bytesLeft > 0 then
+          Dissector.get(p_protoname):call(buf(l_bytesLeft):tvb(), pkt, root)
+        end
       end
     end
   end
 
   -- TODO subdissector for RPC messages
-  -- TODO test for 2+ messages in the same TCP packet
 end
 
 -- Initialization routine
