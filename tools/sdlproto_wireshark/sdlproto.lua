@@ -182,6 +182,8 @@ function p_sdlproto.dissector(buf, pkt, root)
         if DEBUG then print("expect ".. g_expectedBytesLeft .. ", and have " .. l_bytesLeft .. ", and use " .. l_dataLengthAvailable) end
         local l_dataBytes = buf(HEADER_LENGTH, l_dataLengthAvailable)
         subtree:add(f_data, l_dataBytes)
+        -- make this packet look shorter in case there unprocessed bytes after it
+        subtree:set_len(HEADER_LENGTH + l_dataLengthAvailable)
 
         g_expectedBytesLeft = g_expectedBytesLeft - l_dataLengthAvailable
         if DEBUG then print("updated g_expectedBytesLeft to " .. g_expectedBytesLeft) end
