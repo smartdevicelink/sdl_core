@@ -225,7 +225,7 @@ const char ign_off_count[] = "ign_off_count";
 const char connection_info[] = "connection_info";
 const char is_download_complete[] = "is_download_complete";
 const char hash[] = "hash";
-
+const char manual_text_entry[] = "manualTextEntry";
 }  // namespace strings
 
 namespace mobile_notification {

@@ -639,7 +639,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         initialize();
                     } else {
                         try {
-                            if (!mWaitingForResponse && mTesterMain.getThreadContext() != null) {
+                            if (mTesterMain != null && !mWaitingForResponse && mTesterMain.getThreadContext() != null) {
                                 show("Sync Proxy", "Tester Ready");
                             }
                         } catch (SyncException e) {
