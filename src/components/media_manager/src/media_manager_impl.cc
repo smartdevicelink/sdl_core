@@ -287,6 +287,7 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 
 void MediaManagerImpl::OnMessageReceived(
   const protocol_handler::RawMessagePtr& message) {
+  //WARNING: (EZamakhov) Not sure that message data copied
   if (message->service_type()
       == protocol_handler::kMobileNav) {
     if (!(application_manager::ApplicationManagerImpl::instance()->

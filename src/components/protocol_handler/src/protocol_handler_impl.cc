@@ -509,10 +509,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       const int32_t connection_key =
           session_observer_->KeyFromPair(connection_id, packet->session_id());
 
+      uint8_t* data = packet->data();
+      size_t data_size = packet->data_size();
       crypto_manager::SSLContext* context =
           session_observer_->GetSSLContext(
             connection_key, static_cast<ServiceType>(packet->service_type()));
       if(context) {
+//          uint8_t* data = packet->data();
+//          uint8_t* data_size = packet->data_size();
+//          context->Encrypt(data, data_size, );
           //FIXME: EZamakhov add encrypte call
       }
 
