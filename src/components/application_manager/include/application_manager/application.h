@@ -348,7 +348,6 @@ class Application : public virtual InitialApplicationData,
      */
     virtual const smart_objects::SmartObject* active_message() const = 0;
 
-<<<<<<< HEAD
     /**
      * @brief Change Hash value and return it
      * @return next Hash value
