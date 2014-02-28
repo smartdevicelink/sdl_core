@@ -49,22 +49,22 @@
  * client and server negotiate about encryption algorithms to use
  * and produce a session key.
  *
- * \param in_data[in]      data sent by client
- * \param in_data_size[in] size of \ref in_data
- * \param out_data[out]    buffer for data to store response of server
- * \param out_data_size[in,out] input: size of \ref out_data, output: amount of data written to \ref out_data
-
+ * \param data[in]      data sent by client
+ * \param data_size[in] size of \ref in_data
+ * \param out_data_size[out] length of server response
+ * \return response of server
  */
 
 namespace secure_service_manager {
 class SSLContext {
  public:
-  virtual size_t DoHandshake(char *in_data,  size_t  in_data_size,
-                           char *out_data, size_t out_data_size)=0;
-  virtual size_t Encrypt(char *in_data,  size_t  in_data_size,
-              char *out_data, size_t out_data_size)=0;
-  virtual size_t Decrypt(char *in_data,  size_t  in_data_size,
-              char *out_data, size_t out_data_size)=0;
+  virtual void* DoHandshakeStep(void* client_data,  size_t client_data_size,
+                               size_t* server_data_size)=0;
+  virtual void* Encrypt(void* data,  size_t data_size,
+                        size_t* encrypted_data_size)=0;
+  virtual void* Decrypt(void* encrypted_data,  size_t encrypted_data_size,
+                        size_t* data_size)=0;
+  virtual bool  IsInitCompleted()=0;
   virtual ~SSLContext() { };
 };
 } // namespace secure_service_manager

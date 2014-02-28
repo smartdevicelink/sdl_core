@@ -15,5 +15,3 @@ set (SOURCES
 
 add_library(CryptoManager ${SOURCES})
 target_link_libraries(CryptoManager crypto ssl ProtocolHandler)
-
-add_subdirectory(test)
