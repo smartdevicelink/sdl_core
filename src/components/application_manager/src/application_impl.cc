@@ -47,6 +47,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
+      hmi_supports_navi_streaming_(false),
       allowed_support_navigation_(false),
       hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
@@ -187,6 +188,14 @@ void ApplicationImpl::set_hmi_level(
   }
 
   hmi_level_ = hmi_level;
+}
+
+void ApplicationImpl::set_hmi_supports_navi_streaming(const bool& supports) {
+  hmi_supports_navi_streaming_ = supports;
+}
+
+bool ApplicationImpl::hmi_supports_navi_streaming() const {
+  return hmi_supports_navi_streaming_;
 }
 
 void ApplicationImpl::increment_put_file_in_none_count() {

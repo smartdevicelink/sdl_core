@@ -62,6 +62,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void MakeNotAudible();
   bool allowed_support_navigation() const;
   void set_allowed_support_navigation(bool allow);
+  bool hmi_supports_navi_streaming() const ;
+  void set_hmi_supports_navi_streaming(const bool& supports);
   inline bool app_allowed() const;
   bool has_been_activated() const;
 
@@ -139,6 +141,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool is_app_allowed_;
   bool has_been_activated_;
   bool tts_speak_state_;
+  bool hmi_supports_navi_streaming_;
 
   mobile_api::HMILevel::eType hmi_level_;
   uint32_t put_file_in_none_count_;

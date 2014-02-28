@@ -730,7 +730,8 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
 
   const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
 
-  if (mobile_api::HMILevel::HMI_FULL == hmi_level) {
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level &&
+      app->hmi_supports_navi_streaming() ) {
     return true;
   }
 

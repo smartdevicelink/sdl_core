@@ -348,6 +348,7 @@ class Application : public virtual InitialApplicationData,
      */
     virtual const smart_objects::SmartObject* active_message() const = 0;
 
+<<<<<<< HEAD
     /**
      * @brief Change Hash value and return it
      * @return next Hash value
@@ -374,6 +375,8 @@ class Application : public virtual InitialApplicationData,
     virtual void MakeNotAudible() = 0;
     virtual bool allowed_support_navigation() const = 0;
     virtual void set_allowed_support_navigation(bool allow) = 0;
+    virtual bool hmi_supports_navi_streaming() const = 0;
+    virtual void set_hmi_supports_navi_streaming(const bool& supports) = 0;
     virtual bool app_allowed() const = 0;
     virtual bool has_been_activated() const = 0;
 
