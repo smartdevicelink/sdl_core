@@ -44,8 +44,7 @@ namespace commands {
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
  : CommandImpl(message),
    default_timeout_(profile::Profile::instance()->default_timeout()),
-   is_timeout_expired_(false),
-   is_request_completed_(false) {
+   current_state_(kAwaitingHMIResponse) {
 }
 
 CommandRequestImpl::~CommandRequestImpl() {
@@ -65,12 +64,13 @@ void CommandRequestImpl::Run() {
 void CommandRequestImpl::onTimeOut() {
   LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
-  if (is_request_completed_) {
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  if (kCompleted == current_state_) {
     // don't send timeout if request completed
     return;
   }
 
-  is_timeout_expired_ = true;
+  current_state_ = kTimedOut;
   smart_objects::SmartObject* response =
     MessageHelper::CreateNegativeResponse(connection_key(), function_id(),
     correlation_id(), mobile_api::Result::TIMED_OUT);
@@ -83,14 +83,15 @@ void CommandRequestImpl::on_event(const event_engine::Event& event) {
 
 void CommandRequestImpl::SendResponse(
     const bool success, const mobile_apis::Result::eType& result_code,
-    const char* info, const NsSmart::SmartObject* response_params) const {
+    const char* info, const NsSmart::SmartObject* response_params) {
 
-  // don't send response if request timeout expired
-  if (is_timeout_expired_) {
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  if (kTimedOut == current_state_) {
+    // don't send response if request timeout expired
     return;
   }
 
-  is_request_completed_ = true;
+  current_state_ = kCompleted;
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
   if (!result) {
