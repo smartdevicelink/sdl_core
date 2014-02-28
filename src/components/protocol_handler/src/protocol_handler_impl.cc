@@ -34,11 +34,10 @@
  */
 
 #include "protocol_handler/protocol_handler_impl.h"
-
 #include <memory.h>
-
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
+#include "secure_service_manager/crypto_manager.h"
 
 namespace protocol_handler {
 
@@ -398,13 +397,13 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     size_t new_data_size;
     //FIXME: EZamakhov
     assert(!"Not implemented Encrypt logics");
-    const uint8_t * new_data = context->Decrypt(data, data_size, new_data_size);
+    const uint8_t * new_data = static_cast<uint8_t*>
+        (context->Decrypt(data, data_size, &new_data_size));
     if(!new_data) {
       LOG4CXX_WARN(logger_, "Decryption fail: " <<
-                   secure_service_manager::getError());
+                   secure_service_manager::LastError());
       return RESULT_FAIL;
       }
-    packet->set_data_bytes(new_data, new_data_size);
     ptr.reset(
           new protocol_handler::ProtocolPacket(
             connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
@@ -542,10 +541,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
           uint8_t* data = packet->data();
           size_t data_size = packet->data_size();
           size_t new_data_size;
-          const uint8_t * new_data = context->Encrypt(data, data_size, new_data_size);
+          const uint8_t *new_data = static_cast<uint8_t *>
+              (context->Encrypt(data, data_size, &new_data_size));
           if(!new_data){
               LOG4CXX_WARN(logger_, "Encrypttion fail: " <<
-                           secure_service_manager::getError());
+                           secure_service_manager::LastError());
               return RESULT_FAIL;
             }
           packet->set_data_bytes(new_data, new_data_size);

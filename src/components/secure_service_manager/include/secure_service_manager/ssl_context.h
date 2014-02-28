@@ -65,7 +65,7 @@ class SSLContext {
   virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                         size_t* data_size)=0;
   virtual bool  IsInitCompleted()=0;
-  virtual ~SSLContext() { };
+  virtual ~SSLContext() { }
 };
 } // namespace secure_service_manager
 #endif // SRC_COMPONENTS_secure_service_manager_INCLUDE_secure_service_manager_SSL_CONTEXT_H

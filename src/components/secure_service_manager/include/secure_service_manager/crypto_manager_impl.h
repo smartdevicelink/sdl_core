@@ -43,8 +43,6 @@
 #include "secure_service_manager/ssl_context.h"
 
 namespace secure_service_manager {
-  std::string LastError();
-
   class CryptoManagerImpl : public CryptoManager {
    private:
 

@@ -32,9 +32,11 @@
 
 #ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
 #define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+#include <string>
 
 namespace secure_service_manager {
 class SSLContext;
+std::string LastError();
 class CryptoManager {
  public:
   virtual bool Init()=0;

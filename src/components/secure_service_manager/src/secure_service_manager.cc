@@ -205,9 +205,10 @@ bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &message
   const uint8_t * data = message->getData();
   const size_t data_size = message->getDataSize();
   size_t out_data_size;
-  const uint8_t * new_data = sslContext->DoHandshake(data, data_size, out_data_size);
+  const uint8_t * new_data  = static_cast<uint8_t *>
+      (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
   if(!new_data){
-      LOG4CXX_WARN(logger_, "Handshake fail: " << getError());
+      LOG4CXX_WARN(logger_, "Handshake fail: " << LastError());
       return false;
     }
   assert(!"Not implemented push logics");
