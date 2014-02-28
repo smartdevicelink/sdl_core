@@ -144,13 +144,20 @@ void RegisterAppInterfaceRequest::Run() {
     }
 
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
     if (app->tts_name()) {
       SendTTSChunksToHMI(*app);
+
     } else {
       SendRegisterAppInterfaceResponseToMobile();
+      uint32_t hash_id = 0;
+      if (msg_params.keyExists(strings::hash_id)) {
+        hash_id = msg_params[strings::hash_id].asUInt();
+      }
+      resumer.StartResumption(app, hash_id);
     }
   }
 }

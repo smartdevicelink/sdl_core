@@ -2123,6 +2123,8 @@
     <element name="DiagnosticMessageID" value="37" hexvalue="25" />    
     <element name="SystemRequestID" value="38" hexvalue="26" /> 
 
+
+
 <!--
 	Base Notifications
 	Range = 0x 0000 8000 - 0x 0000 FFFF
@@ -2142,7 +2144,7 @@
     <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
     <element name="OnTouchEventID" value="32780" hexvalue="800C" /> 
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
-
+    <element name="OnHashChangeID" value="32782" hexvalue="800E" />
 <!--
 	Ford Specific Request / Response RPCs
 	Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -4415,7 +4417,17 @@
       	Currently only predefined screen layouts are defined.
       </description>
     </param>
+  </function>
 
+  <function name="OnHashChange" functionID="OnHashChangeID" messagetype="notification">
+      <description>
+              Notification containing an updated hashID which can be used over connection cycles (i.e. loss of connection, ignition cycles, etc.).
+              Sent after initial registration and subsequently after any change in the calculated hash of all persisted app data.
+      </description>
+
+      <param name="hashID" type="String" maxlength="100" mandatory="true">
+              <description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
+      </param>
   </function>
 
   <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">

@@ -82,7 +82,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL)
+    media_manager_(NULL),
+    resume_ctrl_(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   if (!policies_manager_.Init()) {
@@ -364,6 +365,84 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
         MessageHelper::RemoveAppDataFromHMI(curr_app);
       }
     }
+  }
+  return true;
+}
+
+bool ApplicationManagerImpl::PutApplicationInLimited(ApplicationSharedPtr app) {
+  DCHECK(app.get())
+
+  bool is_new_app_media = app->is_media_application();
+  mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_LIMITED;
+
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    ApplicationSharedPtr curr_app = *it;
+    if (app->app_id() == curr_app->app_id()) {
+      continue;
+    }
+
+    if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+      result = mobile_api::HMILevel::HMI_BACKGROUND;
+      break;
+    }
+    if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+      if (curr_app->is_media_application()) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+      } else {
+        result = mobile_api::HMILevel::HMI_LIMITED;
+      }
+      break;
+    }
+
+  }
+  app->set_hmi_level(result);
+  return true;
+}
+
+bool ApplicationManagerImpl::PutApplicationInFull(ApplicationSharedPtr app) {
+  DCHECK(app.get())
+
+  bool is_new_app_media = app->is_media_application();
+  mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
+
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    ApplicationSharedPtr curr_app = *it;
+    if (app->app_id() == curr_app->app_id()) {
+      continue;
+    }
+
+    if (is_new_app_media) {
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+        if (curr_app->is_media_application()) {
+          result = mobile_api::HMILevel::HMI_BACKGROUND;
+        } else {
+          result = mobile_api::HMILevel::HMI_LIMITED;
+        }
+        break;
+      }
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
+      }
+    } else {
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
+      }
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+        result = mobile_api::HMILevel::HMI_FULL;
+        break;
+      }
+    }
+  }
+
+  if ( result == mobile_api::HMILevel::HMI_FULL) {
+    MessageHelper::SendActivateAppToHMI(app->app_id());
+    MessageHelper::SendHMIStatusNotification(*(app.get()));
   }
   return true;
 }
@@ -763,6 +842,7 @@ void ApplicationManagerImpl::set_hmi_message_handler(
 void ApplicationManagerImpl::set_connection_handler(
   connection_handler::ConnectionHandler* handler) {
   connection_handler_ = handler;
+  resume_ctrl_.LoadApplications();
 }
 
 void ApplicationManagerImpl::set_policy_manager(
@@ -1402,6 +1482,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
+  resume_ctrl_.SavetoFileSystem();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
@@ -1416,6 +1497,9 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     return;
   }
   ApplicationSharedPtr app_to_remove = it->second;
+  if (is_resuming) {
+    resume_ctrl_.SaveApplication(app_to_remove);
+  }
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     end_audio_pass_thru();

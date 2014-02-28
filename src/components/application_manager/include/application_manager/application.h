@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
+#include <set>
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -141,6 +142,9 @@ class DynamicApplicationData {
     virtual const mobile_api::TBTState::eType& tbt_state() const = 0;
     virtual const smart_objects::SmartObject* show_command() const = 0;
     virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
+    virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const = 0;
+    virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+    virtual const smart_objects::SmartObject* keyboard_props() const = 0;
 
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
@@ -156,6 +160,8 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& show_command) = 0;
     virtual void set_tbt_show_command(
       const smart_objects::SmartObject& tbt_show) = 0;
+    virtual void set_keyboard_props(
+        const smart_objects::SmartObject& keyboard_props) = 0;
 
     /*
      * @brief Adds a command to the in application menu
@@ -342,15 +348,34 @@ class Application : public virtual InitialApplicationData,
      */
     virtual const smart_objects::SmartObject* active_message() const = 0;
 
-  virtual void CloseActiveMessage() = 0;
-  virtual bool IsFullscreen() const = 0;
-  virtual bool MakeFullscreen() = 0;
-  virtual bool IsAudible() const = 0;
-  virtual void MakeNotAudible() = 0;
-  virtual bool allowed_support_navigation() const = 0;
-  virtual void set_allowed_support_navigation(bool allow) = 0;
-  virtual bool app_allowed() const = 0;
-  virtual bool has_been_activated() const = 0;
+    /**
+     * @brief Change Hash value and return it
+     * @return next Hash value
+     */
+    virtual uint32_t nextHash() = 0;
+
+    /**
+     * @brief returns cuurent hash value
+     * @return current Hash value
+     */
+    virtual uint32_t curHash() const = 0;
+
+    /**
+     * @brief Change Hash for current application
+     * and send notification to mobile
+     * @return updated_hash
+     */
+    virtual uint32_t UpdateHash() = 0;
+
+    virtual void CloseActiveMessage() = 0;
+    virtual bool IsFullscreen() const = 0;
+    virtual bool MakeFullscreen() = 0;
+    virtual bool IsAudible() const = 0;
+    virtual void MakeNotAudible() = 0;
+    virtual bool allowed_support_navigation() const = 0;
+    virtual void set_allowed_support_navigation(bool allow) = 0;
+    virtual bool app_allowed() const = 0;
+    virtual bool has_been_activated() const = 0;
 
     virtual const Version& version() const = 0;
     virtual uint32_t app_id() const = 0;
