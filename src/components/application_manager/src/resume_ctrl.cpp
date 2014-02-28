@@ -297,51 +297,73 @@ void ResumeCtrl::SavetoFileSystem() {
 }
 
 
-bool ResumeCtrl::StartResumption(ApplicationSharedPtr application, uint32_t hash) {
+bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
+                                 uint32_t hash) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption " << hash);
   DCHECK(application.get());
 
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-      it != saved_applications_.end(); ) {
-    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  for (; it != saved_applications_.end(); ++it) {
+    if ((*it)[strings::app_id].asInt() ==
+        application->mobile_app_id()->asInt()) {
+
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
       if (hash == saved_hash) {
         RestoreApplicationData(application);
       }
-      waiting_for_timer_.insert(std::make_pair(application->app_id(), time_stamp));
+
+      waiting_for_timer_.insert(std::make_pair(application->app_id(),
+                                               time_stamp));
       timer_.start(kTimeStep);
       return true;
-    } else {
-      ++it;
     }
   }
+
+  return false;
+}
+
+bool ResumeCtrl::CheckApplicationHash(uint32_t app_id, uint32_t hash) {
+  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  for (; it != saved_applications_.end(); ++it) {
+    if ((*it)[strings::app_id].asInt() == app_id) {
+      uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
+      if (hash == saved_hash) {
+        return true;
+      }
+    }
+  }
+
   return false;
 }
 
 void ResumeCtrl::onTimer() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()");
 
-  std::set<application_timestamp,TimeStampComparator>::iterator it;
-  it = waiting_for_timer_.begin();
+  std::set<application_timestamp, TimeStampComparator>::iterator it=
+      waiting_for_timer_.begin();
   for(; it != waiting_for_timer_.end(); ++it ) {
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application((*it).first);
+    ApplicationSharedPtr app =
+        ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << (*it).first);
-      NOTREACHED();
+      return;
     }
+
     RestoreApplicationHMILevel(app);
     RemoveApplicationFromSaved(app);
+    waiting_for_timer_.erase(it);
   }
 }
 
 Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands" << app_id);
 
-  Json::Value result;
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
+  Json::Value result;
   const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
   for (;it != commands.end(); ++it) {
@@ -354,11 +376,14 @@ Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
   return result;
 }
 
-Json::Value ResumeCtrl::GetApplicationInteractionChoiseSets(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationInteractionChoiseSets" << app_id);
+Json::Value ResumeCtrl::GetApplicationInteractionChoiseSets(
+    const uint32_t app_id) {
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationInteractionChoiseSets"
+               << app_id);
 
   Json::Value result;
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
   const ChoiceSetMap& choices = app->choice_set_map();
@@ -377,7 +402,8 @@ Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationGlobalProperties" << app_id);
 
   Json::Value result;
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
   const smart_objects::SmartObject* help_promt = app->help_prompt();
@@ -387,7 +413,6 @@ Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
   const smart_objects::SmartObject* vr_synonyms = app->vr_synonyms();
 
   Json::Value sgp;
-
   sgp[strings::help_prompt] = JsonFromSO(help_promt);
   sgp[strings::timeout_prompt] = JsonFromSO(timeout_prompt);
   sgp[strings::vr_help] = JsonFromSO(vr_help);
@@ -401,7 +426,8 @@ Json::Value ResumeCtrl::GetApplicationSubscriptions(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationSubscriptions" << app_id);
 
   Json::Value result;
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
   std::set<mobile_apis::ButtonName::eType>::iterator it_button ;
@@ -422,7 +448,8 @@ Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationFiles" << app_id);
 
   Json::Value result;
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
   const AppFilesMap& app_files = app->getAppFiles();
@@ -451,10 +478,12 @@ Json::Value ResumeCtrl::JsonFromSO(const smart_objects::SmartObject *so) {
 bool ResumeCtrl::ProcessHMIRequest(smart_objects::SmartObject* request,
                                    bool use_events) {
   if (use_events) {
-    const hmi_apis::FunctionID::eType function_id = static_cast<hmi_apis::FunctionID::eType>
-                                                    ((*request)[strings::function_id].asInt());
+    const hmi_apis::FunctionID::eType function_id =
+        static_cast<hmi_apis::FunctionID::eType>(
+            (*request)[strings::function_id].asInt());
 
-    const int32_t hmi_correlation_id = (*request)[strings::correlation_id].asInt();
+    const int32_t hmi_correlation_id =
+        (*request)[strings::correlation_id].asInt();
     subscribe_on_event(function_id, hmi_correlation_id);
   }
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(request)) {

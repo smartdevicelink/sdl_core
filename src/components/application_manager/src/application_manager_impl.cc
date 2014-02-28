@@ -407,9 +407,8 @@ bool ApplicationManagerImpl::PutApplicationInFull(ApplicationSharedPtr app) {
   bool is_new_app_media = app->is_media_application();
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
 
-  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
+  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+  for (; application_list_.end() != it; ++it) {
     ApplicationSharedPtr curr_app = *it;
     if (app->app_id() == curr_app->app_id()) {
       continue;
@@ -1593,15 +1592,16 @@ void ApplicationManagerImpl::Unmute() {
   }
 }
 
-mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
-														    const std::vector<uint8_t>& binary_data,
-                                                            const std::string& save_path,
-                                                            const uint32_t offset) {
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
+    const std::string& app_name, const std::vector<uint8_t>& binary_data,
+    const std::string& save_path, const uint32_t offset) {
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
+
+  LOG4CXX_INFO(logger_, "SaveBinaryWithOffset  binary_size = "
                << binary_data.size() << " offset = " << offset);
+
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {

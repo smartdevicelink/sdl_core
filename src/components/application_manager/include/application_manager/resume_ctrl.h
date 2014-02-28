@@ -66,7 +66,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     explicit ResumeCtrl(ApplicationManagerImpl* app_mngr);
 
     /**
-     * @brief Event, thar raised if application get resumption response from HMI
+     * @brief Event, that raised if application get resumption response from HMI
      * @param event : event object, that contains smart_object with HMI message
      */
     virtual void on_event(const event_engine::Event& event);
@@ -78,8 +78,8 @@ class ResumeCtrl: public event_engine::EventObserver {
 
     /**
      * @brief Save application persistent info for future resuming
-     * @param application is applicatint whitch need to be saved
-     * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will saveto to file system
+     * @param application is application witch need to be saved
+     * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will save to to file system
      */
     void SaveApplication(ApplicationConstSharedPtr application);
 
@@ -91,29 +91,29 @@ class ResumeCtrl: public event_engine::EventObserver {
 
     /**
      * @brief Set application HMI Level as saved
-     * @param application is applicatint whitch HMI Level is need to restore
-     * @return true if succes, otherwise return false
+     * @param application is application witch HMI Level is need to restore
+     * @return true if success, otherwise return false
      */
     bool RestoreApplicationHMILevel(ApplicationSharedPtr application);
 
     /**
      * @brief Set application HMI Level as saved
-     * @param application is applicatint whitch HMI Level is need to restore
-     * @return true if succes, otherwise return false
+     * @param application is application witch HMI Level is need to restore
+     * @return true if success, otherwise return false
      */
     bool RestoreApplicationData(ApplicationSharedPtr application);
 
     /**
-     * @brief Check if Resume contriller have saved instance of application
-     * @param application is applicatint whitch need to be checked
-     * @return true if exist, false otherway
+     * @brief Check if Resume controller have saved instance of application
+     * @param application is application witch need to be checked
+     * @return true if exist, false otherwise
      */
     bool ApplicationIsSaved(ApplicationConstSharedPtr application);
 
     /**
      * @brief Remove application from list of saved applications
-     * @param application is applicatint whitch need to be removed
-     * @return return true, if succes, otherwise return false
+     * @param application is application witch need to be removed
+     * @return return true, if success, otherwise return false
      */
     bool RemoveApplicationFromSaved(ApplicationConstSharedPtr application);
 
@@ -124,10 +124,17 @@ class ResumeCtrl: public event_engine::EventObserver {
 
     /**
      * @brief Start timer for resumption applications
-     * @param application that is need to be resaterted
+     * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
     bool StartResumption(ApplicationSharedPtr application, uint32_t hash);
+
+    /**
+     * @brief Check application hash
+     * @param application that is need to be restored
+     * @return true if it was saved, otherwise return false
+     */
+    bool CheckApplicationHash(uint32_t app_id, uint32_t hash);
 
     /**
      * @brief Timer callback function
@@ -186,7 +193,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Check if Resume controller have saved instance of application
      * @param app_id - application id witch is the same as session_key or connection_key
-     * @return true if exist, false otherway
+     * @return true if exist, false otherwise
      */
     bool ApplicationIsSaved(const uint32_t app_id);
 

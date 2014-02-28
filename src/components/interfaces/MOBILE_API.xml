@@ -120,9 +120,18 @@
     <element name="TRUNCATED_DATA">
       <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
     </element>
-    <element name="SAVED" />
-    <element name="INVALID_CERT"/> 
-    <element name="EXPIRED_CERT"/>
+    <element name="SAVED">
+      <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
+    </element>           
+    <element name="INVALID_CERT">
+      <description>The certificate provided during authentication is invalid.</description>
+    </element>
+    <element name="EXPIRED_CERT">
+      <description>The certificate provided during authentication is expired.</description>
+    </element>
+    <element name="RESUME_FAILED">
+      <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -2247,12 +2256,18 @@
       	If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
       </description>
     </param>
-
     <param name="appHMIType" type="AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	See AppHMIType
       	List of all applicable app HMI types stating which HMI classifications to be given to the app.
       	e.g. for platforms like GEN2, this will determine which "corner(s)" the app can populate.
+      </description>
+    </param>
+    <param name="hashID" type="String" maxlength="100" mandatory="false">
+      <description>
+        ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
+        This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
+        If omitted, then the previous state of an app's commands, etc. will not be restored. 
       </description>
     </param>
     <param name="appID" type="String" maxlength="100" mandatory="true">
@@ -2281,6 +2296,7 @@
       <element name="WRONG_LANGUAGE"/>
       <element name="DISALLOWED"/>
       <element name="WARNINGS"/>
+      <element name="RESUME_FAILED"/>         
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4699,23 +4715,31 @@
   <function name="OnSystemRequest" functionID="OnSystemRequestID" messagetype="notification" scope="partner">
       <description> An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
-	<param name="requestType" type="RequestType" mandatory="true">
+		<param name="requestType" type="RequestType" mandatory="true">
            <description>The type of system request.</description>
-	</param>
-	<param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
-           <description>Optional array of URL(s) for HTTP requests.</description>
-        </param>
-        <param name="fileType" type="FileType" mandatory="false">
-           <description>Optional file type (meant for HTTP file requests).</description>
-        </param>
-        <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-           <description>Optional offset in bytes for resuming partial data chunks</description>
-        </param>
-        <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-           <description>Optional length in bytes for resuming partial data chunks</description>
-        </param>    
+		</param>
+		<param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Optional array of URL(s) for HTTP requests.
+				If blank, the binary data shall be forwarded to the app.
+	      If not blank, the binary data shall be forwarded to the url(s) with a provided timeout in seconds.
+			</description>	
+    </param>
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      <description>
+      	Optional timeout for HTTP requests
+      	Required if a URL is provided
+      </description>
+    </param>  	
+    <param name="fileType" type="FileType" mandatory="false">
+       <description>Optional file type (meant for HTTP file requests).</description>
+    </param>
+    <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+       <description>Optional offset in bytes for resuming partial data chunks</description>
+    </param>
+    <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+       <description>Optional length in bytes for resuming partial data chunks</description>
+    </param>    
   </function>	
-  
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
