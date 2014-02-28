@@ -73,7 +73,7 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() {
 }
 
 void* CryptoManagerImpl::SSLContextImpl::
-DoHandshakeStep(void* client_data,  size_t client_data_size,
+DoHandshakeStep(const void* client_data,  size_t client_data_size,
                 size_t* server_data_size) {
   if (IsInitCompleted()) {
     return NULL;
@@ -110,7 +110,7 @@ DoHandshakeStep(void* client_data,  size_t client_data_size,
 }
 
 void* CryptoManagerImpl::SSLContextImpl::
-Encrypt(void* data,  size_t data_size,
+Encrypt(const void* data,  size_t data_size,
         size_t* encrypted_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
@@ -129,7 +129,7 @@ Encrypt(void* data,  size_t data_size,
 }
 
 void* CryptoManagerImpl::SSLContextImpl::
-Decrypt(void* encrypted_data,  size_t encrypted_data_size,
+Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
         size_t* data_size) {
 
   if (!SSL_is_init_finished(connection_)) {

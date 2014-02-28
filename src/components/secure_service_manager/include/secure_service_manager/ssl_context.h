@@ -58,11 +58,11 @@
 namespace secure_service_manager {
 class SSLContext {
  public:
-  virtual void* DoHandshakeStep(void* client_data,  size_t client_data_size,
+  virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
                                size_t* server_data_size)=0;
-  virtual void* Encrypt(void* data,  size_t data_size,
+  virtual void* Encrypt(const void* data,  size_t data_size,
                         size_t* encrypted_data_size)=0;
-  virtual void* Decrypt(void* encrypted_data,  size_t encrypted_data_size,
+  virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                         size_t* data_size)=0;
   virtual bool  IsInitCompleted()=0;
   virtual ~SSLContext() { };
