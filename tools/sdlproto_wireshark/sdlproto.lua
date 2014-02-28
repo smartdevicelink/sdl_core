@@ -4,6 +4,133 @@
 -- print debug info?
 local DEBUG = false
 
+--- SDL RPC protocol
+
+local p_rpc_protoname = "sdlproto.rpc"
+p_rpc_sdlproto = Proto(p_rpc_protoname, "SDL RPC Service")
+
+local f_rpc_type_values = {
+  [0x0] = "Request",
+  [0x1] = "Response",
+  [0x2] = "Notification"
+  -- TODO check the values not in the list
+}
+-- according to v3.0_revL
+local f_rpc_functionID_values = {
+  [0x1] = "RegisterAppInterface",
+  [0x2] = "UnregisterAppInterface",
+  [0x3] = "SetGlobalProperties",
+  [0x4] = "ResetGlobalProperties",
+  [0x5] = "AddCommand",
+  [0x6] = "DeleteCommand",
+  [0x7] = "AddSubMenu",
+  [0x8] = "DeleteSubMenu",
+  [0x9] = "CreateInteractionChoiceSet",
+  [0xA] = "PerformInteraction",
+  [0xB] = "DeleteInteractionChoiceSet",
+  [0xC] = "Alert",
+  [0xD] = "Show",
+  [0xE] = "Speak",
+  [0xF] = "SetMediaClockTimer",
+  [0x10] = "PerformAudioPassThru",
+  [0x11] = "EndAudioPassThru",
+  [0x12] = "SubscribeButton",
+  [0x13] = "UnsubscribeButton",
+  [0x14] = "SubscribeVehicleData",
+  [0x15] = "UnsubscribeVehicleData",
+  [0x16] = "GetVehicleData",
+  [0x17] = "ReadDID",
+  [0x18] = "GetDTCs",
+  [0x19] = "ScrollableMessage",
+  [0x1A] = "Slider",
+  [0x1B] = "ShowConstantTBT",
+  [0x1C] = "AlertManeuver",
+  [0x1D] = "UpdateTurnList",
+  [0x1E] = "ChangeRegistration",
+  [0x1F] = "GenericResponse",
+  [0x20] = "PutFile",
+  [0x21] = "DeleteFile",
+  [0x22] = "ListFiles",
+  [0x23] = "SetAppIcon",
+  [0x24] = "SetDisplayLayout",
+  [0x25] = "DiagnosticMessage",
+  [0x26] = "SystemRequest",
+  [0x8000] = "OnHMIStatus",
+  [0x8001] = "OnAppInterfaceUnregistered",
+  [0x8002] = "OnButtonEvent",
+  [0x8003] = "OnButtonPress",
+  [0x8004] = "OnVehicleData",
+  [0x8005] = "OnCommand",
+  [0x8006] = "OnTBTClientState",
+  [0x8007] = "OnDriverDistraction",
+  [0x8008] = "OnPermissionsChange",
+  [0x8009] = "OnAudioPassThru",
+  [0x800A] = "OnLanguageChange",
+  [0x800B] = "OnKeyboardInput",
+  [0x800C] = "OnTouchEvent",
+  [0x800D] = "OnSystemRequest",
+  [0x10000] = "EncodedSyncPData",
+  [0x10001] = "SyncPData",
+  [0x18000] = "OnEncodedSyncPData",
+  [0x18001] = "OnSyncPData"
+  -- TODO check the values not in the list
+}
+
+local f_rpc_type = ProtoField.uint8(p_rpc_protoname..".type", "RPC Type", base.HEX, f_rpc_type_values, 0xF0)
+local f_rpc_functionID = ProtoField.uint32(p_rpc_protoname..".functionID", "RPC Function ID", base.HEX, f_rpc_functionID_values, 0x0FFFFFFF)
+local f_rpc_correlationID = ProtoField.uint32(p_rpc_protoname..".correlationID", "RPC Correlation ID", base.HEX)
+local f_rpc_jsonSize = ProtoField.uint32(p_rpc_protoname..".jsonSize", "JSON Size", base.DEC)
+local f_rpc_json = ProtoField.string(p_rpc_protoname..".json", "JSON")
+local f_rpc_data = ProtoField.bytes(p_rpc_protoname..".data", "Data")
+
+p_rpc_sdlproto.fields = {
+  f_rpc_type, f_rpc_functionID, f_rpc_correlationID, f_rpc_jsonSize, f_rpc_json,
+  f_rpc_data
+}
+
+local RPC_HEADER_LENGTH = 12
+
+-- rpc_sdlproto dissector function
+function p_rpc_sdlproto.dissector(buf, pkt, root)
+  -- validate packet length is adequate, otherwise quit
+  if buf:len() == 0 then return end
+
+  --pkt.cols.protocol = p_rpc_protoname.name
+
+  -- create subtree for rpc_sdlproto
+  subtree = root:add(p_rpc_sdlproto, buf(0))
+
+  -- add protocol fields to subtree
+  subtree:add(f_rpc_type, buf(0, 1))
+  subtree:add(f_rpc_functionID, buf(0, 4))
+  subtree:add(f_rpc_correlationID, buf(4, 4))
+
+  local l_rpc_jsonSizeBytes = buf(8, 4)
+  local l_rpc_jsonSizeValue = l_rpc_jsonSizeBytes:uint()
+  subtree:add(f_rpc_jsonSize, l_rpc_jsonSizeBytes)
+
+  -- after the header, we should have some data (JSON and/or binary)
+  local l_dataOffset = RPC_HEADER_LENGTH
+  local l_bytesLeft = buf:len() - l_dataOffset
+  if l_bytesLeft > 0 then
+    -- we do have something
+    if l_rpc_jsonSizeValue > 0 then
+      -- if we expect to have JSON, calculate how much we have
+      local l_rpc_jsonSizeAvailable = math.min(l_bytesLeft, l_rpc_jsonSizeValue)
+      subtree:add(f_rpc_json, buf(l_dataOffset, l_rpc_jsonSizeAvailable))
+      l_dataOffset = l_dataOffset + l_rpc_jsonSizeAvailable
+    end
+
+    if l_dataOffset < buf:len() then
+      -- we have something after JSON
+      subtree:add(f_rpc_data, buf(l_dataOffset))
+    end
+  end
+end
+
+
+--- SDL protocol
+
 -- create sdlproto protocol and its fields
 local p_protoname = "sdlproto"
 p_sdlproto = Proto(p_protoname, "Ford's Smart Device Link Protocol")
@@ -19,9 +146,11 @@ local f_frameTypeValues = {
   [f_frameTypeValue_ConsecutiveFrame] = "Consecutive Frame"
   -- TODO check the values not in the list
 }
+local f_serviceTypeValue_RPC = 0x07
+local f_serviceTypeValue_Bulk = 0x0F
 local f_serviceTypeValues = {
-  [0x07] = "Remote Procedure Call [RPC Service]",
-  [0x0F] = "Bulk Data [Hybrid Service]"
+  [f_serviceTypeValue_RPC] = "Remote Procedure Call [RPC Service]",
+  [f_serviceTypeValue_Bulk] = "Bulk Data [Hybrid Service]"
   -- TODO check the values not in the list
 }
 local f_frameInfoValue_StartServiceACK = 0x02
@@ -95,7 +224,9 @@ function p_sdlproto.dissector(buf, pkt, root)
   subtree:add(f_compressionFlag, l_byte0)
   subtree:add(f_frameType, l_byte0)
 
-  subtree:add(f_serviceType, buf(1, 1))
+  local l_serviceTypeBytes = buf(1, 1)
+  local l_serviceTypeValue = l_serviceTypeBytes:uint()
+  subtree:add(f_serviceType, l_serviceTypeBytes)
 
   -- Frame Info depends on Frame Type
   local l_frameType = l_byte0:bitfield(5, 3)
@@ -181,7 +312,16 @@ function p_sdlproto.dissector(buf, pkt, root)
         local l_dataLengthAvailable = math.min(g_expectedBytesLeft, l_bytesLeft)
         if DEBUG then print("expect ".. g_expectedBytesLeft .. ", and have " .. l_bytesLeft .. ", and use " .. l_dataLengthAvailable) end
         local l_dataBytes = buf(HEADER_LENGTH, l_dataLengthAvailable)
-        subtree:add(f_data, l_dataBytes)
+
+        local l_isServiceTypeRPC =
+          (f_serviceTypeValue_RPC == l_serviceTypeValue) or
+          (f_serviceTypeValue_Bulk == l_serviceTypeValue)
+        if l_isServiceTypeRPC then
+          Dissector.get(p_rpc_protoname):call(l_dataBytes:tvb(), pkt, subtree)
+        else
+          subtree:add(f_data, l_dataBytes)
+        end
+
         -- make this packet look shorter in case there unprocessed bytes after it
         subtree:set_len(HEADER_LENGTH + l_dataLengthAvailable)
 
@@ -196,8 +336,6 @@ function p_sdlproto.dissector(buf, pkt, root)
       end
     end
   end
-
-  -- TODO subdissector for RPC messages
 end
 
 -- Initialization routine
