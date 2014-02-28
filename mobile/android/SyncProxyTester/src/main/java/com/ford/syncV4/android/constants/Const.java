@@ -66,6 +66,7 @@ public class Const {
         public static final String PREF_KEY_USE_HASH_ID = "UseHashId";
         public static final String PREF_KEY_USE_CUSTOM_HASH_ID = "UseCustomHashId";
         public static final String PREF_KEY_CUSTOM_HASH_ID = "CustomHashId";
+        public static final String PREF_KEY_LAST_HASH_IDS = "LastHashIds";
     }
 
 	// Keys to pass objects via IntentHelper

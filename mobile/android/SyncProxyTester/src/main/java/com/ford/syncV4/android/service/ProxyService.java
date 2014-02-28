@@ -15,6 +15,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
@@ -22,6 +23,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
+import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
 import com.ford.syncV4.android.module.ModuleTest;
@@ -129,6 +131,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
@@ -191,6 +194,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         //startProxyIfNetworkConnected();
 
         mPutFileTransferManager = new PutFileTransferManager();
+
+        MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
 
     public void showLockMain() {
@@ -453,6 +458,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void disposeSyncProxy() {
         createInfoMessageForAdapter("ProxyService.disposeSyncProxy()");
 
+        MainApp.getInstance().getLastUsedHashIdsManager().save();
+
         if (mSyncProxy != null) {
             try {
                 mSyncProxy.dispose();
@@ -672,6 +679,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onHashChange(OnHashChange onHashChange) {
         createDebugMessageForAdapter(onHashChange);
+
+        LastUsedHashIdsManager lastUsedHashIdsManager = MainApp.getInstance().getLastUsedHashIdsManager();
+        lastUsedHashIdsManager.addNewId(onHashChange.getHashID());
     }
 
     /**

@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 
 import com.ford.syncV4.android.constants.Const;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -123,8 +126,8 @@ public class AppPreferencesManager {
     }
 
     /**
-     * Set custom {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#setHashID(String)} field value for the
-     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     * Set custom {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#setHashID(String)} field
+     * value for the {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
      *
      * @param value {@link java.lang.String}
      */
@@ -142,5 +145,25 @@ public class AppPreferencesManager {
     public static String getCustomHashId() {
         SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getString(Const.HashId.PREF_KEY_CUSTOM_HASH_ID, "");
+    }
+
+    /**
+     * Set last used {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} Set
+     *
+     * @param value {@link java.util.Set}
+     */
+    public static void setLastUsedHashIds(String value) {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(Const.HashId.PREF_KEY_LAST_HASH_IDS, value);
+        editor.commit();
+    }
+
+    /**
+     * @return last used {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} Set
+     */
+    public static String getLastUsedHashIds() {
+        SharedPreferences sharedPreferences = mAppContext.getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getString(Const.HashId.PREF_KEY_LAST_HASH_IDS, "");
     }
 }

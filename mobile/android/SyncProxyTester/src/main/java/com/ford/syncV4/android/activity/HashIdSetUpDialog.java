@@ -10,14 +10,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
+import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
+
+import java.util.LinkedHashSet;
 
 /**
  * Created with Android Studio.
@@ -42,6 +48,33 @@ public class HashIdSetUpDialog extends DialogFragment {
         final View layout = inflater.inflate(R.layout.hash_id_setup_dialog_layout,
                 (ViewGroup) getActivity().findViewById(R.id.itemRoot));
 
+        LastUsedHashIdsManager lastUsedHashIdsManager = MainApp.getInstance().getLastUsedHashIdsManager();
+        // Array of choices
+        final String lastIds[] = lastUsedHashIdsManager.getDataForAdapter();
+
+        final Spinner lastHashIdsView = (Spinner) layout.findViewById(R.id.hash_id_set_up_ids_spinner_view);
+        ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, lastIds);
+        // The drop down view
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        lastHashIdsView.setAdapter(spinnerArrayAdapter);
+        final boolean[] adapterInitWorkaround = {false};
+        lastHashIdsView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (adapterInitWorkaround[0]) {
+                    setSelectedHashId(layout, lastIds[position]);
+                }
+                adapterInitWorkaround[0] = true;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         final CheckBox useHashIdView = (CheckBox) layout.findViewById(R.id.hash_id_set_up_use_hash_id_view);
         useHashIdView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -64,13 +97,20 @@ public class HashIdSetUpDialog extends DialogFragment {
         processUseCustomHashIdCheckBoxEvent(layout, AppPreferencesManager.getUseHashId() &&
                 AppPreferencesManager.getUseCustomHashId());
 
+        final EditText customHashIdView = (EditText) layout.findViewById(R.id.hash_id_set_up_custom_id_view);
+        Log.d(LOG_TAG, "GetHashId, hashId:" + AppPreferencesManager.getCustomHashId());
+        customHashIdView.setText(AppPreferencesManager.getCustomHashId());
+
         return new AlertDialog.Builder(mContext)
+                .setCancelable(false)
                 .setTitle("HashId set up")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         final EditText customHashIdView = (EditText) layout.findViewById(
                                 R.id.hash_id_set_up_custom_id_view);
+                        Log.d(LOG_TAG, "SetSelectedHashId on click, hashId:" +
+                                customHashIdView.getText().toString().trim());
                         AppPreferencesManager.setCustomHashId(
                                 customHashIdView.getText().toString().trim());
                     }
@@ -94,6 +134,10 @@ public class HashIdSetUpDialog extends DialogFragment {
         useCustomHashIdView.setEnabled(isChecked);
 
         AppPreferencesManager.setUseHashId(isChecked);
+
+        if (isChecked) {
+            processUseCustomHashIdCheckBoxEvent(layout, AppPreferencesManager.getUseCustomHashId());
+        }
     }
 
     private void processUseCustomHashIdCheckBoxEvent(View layout, boolean isChecked) {
@@ -110,5 +154,13 @@ public class HashIdSetUpDialog extends DialogFragment {
         lastHashIdsView.setEnabled(isChecked);
 
         AppPreferencesManager.setUseCustomHashId(isChecked);
+    }
+
+    private void setSelectedHashId(View layout, String hashId) {
+        final EditText customHashIdView = (EditText) layout.findViewById(R.id.hash_id_set_up_custom_id_view);
+        customHashIdView.setText(hashId);
+
+        Log.d(LOG_TAG, "SetSelectedHashId, hashId:" + hashId);
+        AppPreferencesManager.setCustomHashId(hashId);
     }
 }
