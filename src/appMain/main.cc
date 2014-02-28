@@ -50,7 +50,7 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA)
 #include <gst/gst.h>
 #endif
 
@@ -212,7 +212,7 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger, "Application version " << kApplicationVersion);
 
   // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   gst_init(&argc, &argv);
 #endif
 

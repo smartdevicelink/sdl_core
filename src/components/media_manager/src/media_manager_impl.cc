@@ -39,7 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #endif
@@ -96,7 +96,7 @@ void MediaManagerImpl::SetProtocolHandler(
 void MediaManagerImpl::Init() {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
 
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
   a2dp_player_ = new A2DPSourcePlayerAdapter();
   from_mic_recorder_ = new FromMicRecorderAdapter();
@@ -160,7 +160,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
   relative_file_path += "/";
   relative_file_path += output_file;
   from_mic_listener_ = new FromMicRecorderListener(relative_file_path);
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -199,7 +199,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
 
 void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StopMicrophoneRecording");
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   if (from_mic_recorder_) {
     from_mic_recorder_->StopActivity(application_key);
   }
