@@ -224,9 +224,9 @@ bool ShowRequest::CheckMenuFieldsNames() {
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     const std::string& str = (*message_)[strings::msg_params]
                                          [strings::main_field_4].asString();
-    if (CheckSyntax(str, true)) {
+    if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "main_field_4 syntax check failed");
-      return false;
+      return  false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
