@@ -92,7 +92,7 @@ TEST(HandshakeTest, Positive) {
   int res = 0;
 
   char *outBuf = new char[1024 * 1024];
-  char *inBuf = new char[1024 * 1024];
+  char *inBuf;
 
   for(;;) {
     res = SSL_do_handshake(connection);
@@ -105,11 +105,12 @@ TEST(HandshakeTest, Positive) {
       if (outLen) {
         BIO_read(bioOut, outBuf, outLen);
       }
-      size_t inLen = 1024 * 1024;
-      size_t resp_size = server_ctx->DoHandshake(outBuf, outLen, inBuf, inLen);
+      size_t inLen;
+      inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+      EXPECT_TRUE(inBuf != NULL);
 
-      if (resp_size) {
-        BIO_write(bioIn, inBuf, resp_size);
+      if (inLen) {
+        BIO_write(bioIn, inBuf, inLen);
       }
     } else {
       break;
@@ -122,20 +123,30 @@ TEST(HandshakeTest, Positive) {
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
 
   char text[] = "Hello, it's the text to be encrypted";
-  BIO_write(bioF, text, sizeof(text));
-
-  size_t len = BIO_ctrl_pending(bioOut);
   char *encryptedText = new char[1024];
-  BIO_read(bioOut, encryptedText, len);
+  char *decryptedText;
+  size_t text_len;
 
-  char *decryptedText= new char[1024];
-  len = server_ctx->Decrypt(encryptedText, len, decryptedText, 1024);
+  // Encrypt text on client side
+  BIO_write(bioF, text, sizeof(text));
+  text_len = BIO_ctrl_pending(bioOut);
+  size_t len = BIO_read(bioOut, encryptedText, text_len);
+
+  // Decrypt text on server
+  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+
+  delete[] encryptedText;
+
+  EXPECT_TRUE(decryptedText != NULL);
+  std::cout << "decrypted: " << decryptedText << std::endl;
   EXPECT_EQ(strcmp(decryptedText, text), 0);
 
-  len = server_ctx->Encrypt(text, sizeof(text), encryptedText, 1024);
+  // Encrypt text on server
+  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, sizeof(text), &text_len));
 
-  BIO_write(bioIn, encryptedText, len);
-  len = BIO_read(bioF, decryptedText, 1024);
+  // Decrypt it on client
+  BIO_write(bioIn, encryptedText, text_len);
+  text_len = BIO_read(bioF, decryptedText, 1024);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
 
   EVP_cleanup();

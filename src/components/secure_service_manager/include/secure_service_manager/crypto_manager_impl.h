@@ -51,18 +51,22 @@ namespace secure_service_manager {
     class SSLContextImpl : public SSLContext {
      public:
       SSLContextImpl(SSL *conn, BIO *bioIn, BIO *bioOut);
-      virtual size_t DoHandshake(char *in_data,  size_t in_data_size,
-                                 char *out_data, size_t out_data_size);
-      virtual size_t Encrypt(char *in_data,  size_t in_data_size,
-                             char *out_data, size_t out_data_size);
-      virtual size_t Decrypt(char *in_data,  size_t in_data_size,
-                             char *out_data, size_t out_data_size);
+      virtual void* DoHandshakeStep(void* client_data,  size_t client_data_size,
+                                    size_t* server_data_size);
+      virtual void* Encrypt(void* data,  size_t data_size,
+                            size_t* encrypted_data_size);
+      virtual void* Decrypt(void* encrypted_data,  size_t encrypted_data_size,
+                            size_t* data_size);
+      bool  IsInitCompleted();
       virtual ~SSLContextImpl();
      private:
+      void EnsureBufferSize(size_t size);
       SSL *connection_;
       BIO *bioIn_;
       BIO *bioOut_;
       BIO *bioFilter_;
+      size_t buffer_size_;
+      char *buffer_;
     };
 
    public:

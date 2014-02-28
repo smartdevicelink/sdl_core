@@ -33,8 +33,7 @@
 
 #include <assert.h>
 #include <openssl/err.h>
-
-#include <iostream>
+#include <memory.h>
 
 namespace secure_service_manager {
 
@@ -44,7 +43,9 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn,
   : connection_(conn),
     bioIn_(bioIn),
     bioOut_(bioOut),
-    bioFilter_(NULL) {
+    bioFilter_(NULL),
+    buffer_size_(1024), // TODO: Collect some statistics, determine the most appropriate value
+    buffer_(new char[buffer_size_]) {
 }
 
 std::string LastError() {
@@ -57,79 +58,99 @@ std::string LastError() {
   }
 }
 
-size_t CryptoManagerImpl::SSLContextImpl
-::DoHandshake(char *in_data,  size_t in_data_size,
-              char *out_data, size_t out_data_size) {
-
-  if (SSL_is_init_finished(connection_)) {
-    return 0;
+void CryptoManagerImpl::SSLContextImpl::EnsureBufferSize(size_t size) {
+  if (size > buffer_size_) {
+    char* new_buf = new char[size];
+    memcpy(new_buf, buffer_, buffer_size_);
+    delete[] buffer_;
+    buffer_ = new_buf;
+    buffer_size_ = size;
   }
-
-  if (in_data && (in_data_size > 0)) {
-    int ret = BIO_write(bioIn_, in_data, in_data_size);
-
-    ret = SSL_do_handshake(connection_);
-    if (ret == 1) {
-      bioFilter_ = BIO_new(BIO_f_ssl());
-      BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
-    }
-
-    int pen = BIO_pending(bioOut_);
-    if (pen) {
-      ret = BIO_read(bioOut_, out_data, out_data_size);
-      if (ret > 0) {
-        return ret;
-      } else {
-        return 0;
-      }
-    }
-  }
-
-  return 0;
 }
 
-size_t CryptoManagerImpl::SSLContextImpl
-::Encrypt(char *in_data,  size_t in_data_size,
-          char *out_data, size_t out_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() {
+  return SSL_is_init_finished(connection_);
+}
+
+void* CryptoManagerImpl::SSLContextImpl::
+DoHandshakeStep(void* client_data,  size_t client_data_size,
+                size_t* server_data_size) {
+  if (IsInitCompleted()) {
+    return NULL;
+  }
+
+  if (!client_data || !client_data_size) {
+    return NULL;
+  }
+
+  int ret = BIO_write(bioIn_, client_data, client_data_size);
+  if (ret <= 0) {
+    return NULL;
+  }
+  ret = SSL_do_handshake(connection_);
+  if (ret == 1) {
+    bioFilter_ = BIO_new(BIO_f_ssl());
+    BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
+  }
+
+  int pen = BIO_pending(bioOut_);
+
+  if (!pen) {
+    return NULL;
+  }
+
+  EnsureBufferSize(pen);
+  ret = BIO_read(bioOut_, static_cast<char*>(buffer_), pen);
+  if (ret > 0) {
+    *server_data_size = ret;
+    return buffer_;
+  } else {
+    return NULL;
+  }
+}
+
+void* CryptoManagerImpl::SSLContextImpl::
+Encrypt(void* data,  size_t data_size,
+        size_t* encrypted_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
-    return 0;
+    return NULL;
   }
 
-  if (in_data && in_data_size) {
-    BIO_write(bioFilter_, in_data, in_data_size);
+  if (!data || !data_size) {
+    return NULL;
   }
-
+  BIO_write(bioFilter_, data, data_size);
   size_t len = BIO_ctrl_pending(bioOut_);
-  if (0 < len && len <= out_data_size) {
-    return BIO_read(bioOut_, out_data, len);
-  }
-
-  return 0;
+  EnsureBufferSize(len);
+  len = BIO_read(bioOut_, buffer_, len);
+  *encrypted_data_size = len;
+  return buffer_;
 }
 
-size_t CryptoManagerImpl::SSLContextImpl
-::Decrypt(char *in_data,  size_t in_data_size,
-          char *out_data, size_t out_data_size) {
+void* CryptoManagerImpl::SSLContextImpl::
+Decrypt(void* encrypted_data,  size_t encrypted_data_size,
+        size_t* data_size) {
+
   if (!SSL_is_init_finished(connection_)) {
-    return 0;
+    return NULL;
   }
 
-  if (in_data && in_data_size) {
-    BIO_write(bioIn_, in_data, in_data_size);
+  if (!encrypted_data || !encrypted_data_size) {
+    return NULL;
   }
-
+  BIO_write(bioIn_, encrypted_data, encrypted_data_size);
   size_t len = BIO_ctrl_pending(bioFilter_);
-  if (0 < len && len <= out_data_size) {
-    return BIO_read(bioFilter_, out_data, len);
-  }
-
-  return 0;
+  EnsureBufferSize(len);
+  len = BIO_read(bioFilter_, buffer_, len);
+  *data_size = len;
+  return buffer_;
 }
 
 CryptoManagerImpl::SSLContextImpl::
 ~SSLContextImpl() {
   SSL_shutdown(connection_);
+  delete[] buffer_;
 }
 
 }  // namespace secure_service_manager
