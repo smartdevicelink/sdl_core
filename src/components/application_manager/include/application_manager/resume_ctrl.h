@@ -137,7 +137,6 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     bool RestoreApplicationHMILevel(Application* application);
 
-
   private:
 
     timer::TimerThread<ResumeCtrl> timer_;

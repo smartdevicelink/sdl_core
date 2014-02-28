@@ -144,7 +144,6 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
   return false;
 }
 
-
 bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "RestoreApplicationData");
   DCHECK(application.get());
