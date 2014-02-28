@@ -58,15 +58,13 @@ enum ProtectServiceResult {
 class SecureServiceQuery {
 public:
   struct QueryHeader {
-    QueryHeader() : query_id_(InvalidSecureServiceQuery),
-      seq_number_(0), data_size_(0) {}
+    QueryHeader() : query_id_(InvalidSecureServiceQuery), seq_number_(0){}
     uint8_t  query_id_;    // API function identifier
     uint32_t seq_number_;  // request sequential number
-    uint32_t data_size_;   // size of data in bytes
   };
 
   SecureServiceQuery();
-  SecureServiceQuery(const QueryHeader& header, const void* const data);
+  bool setData(const void* const message_data, const size_t message_data_size);
   ~SecureServiceQuery();
 private:
   QueryHeader header_;

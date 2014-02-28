@@ -36,13 +36,13 @@
 #include <log4cxx/log4cxx.h>
 
 #include "protocol_handler/protocol_observer.h"
-#include "protocol_handler/protocol_handler_impl.h"
 #include "protocol_handler/raw_message.h"
 
 #include "utils/message_queue.h"
-#include "utils/prioritized_queue.h"
+#include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
 
-#include "crypto_manager/crypto_manager_impl.h"
+#include "crypto_manager/crypto_manager.h"
 #include "crypto_manager/secure_service_query.h"
 
 namespace crypto_manager {
@@ -56,23 +56,21 @@ namespace crypto_manager {
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct SecureServiceMessagePtr: public SecureServiceQueryPtr {
-  explicit SecureServiceMessagePtr(const SecureServiceQueryPtr&) {}
+struct SecureServiceMessage: public SecureServiceQueryPtr {
+  SecureServiceMessage(const SecureServiceQueryPtr& message)
+    : SecureServiceQueryPtr(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const {
-    return protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::kSecure).OrderingValue();
-  }
+  size_t PriorityOrder() const { return 0; }
 };
 
-typedef threads::MessageLoopThread<
-utils::PrioritizedQueue<SecureServiceMessagePtr> > SecureServiceMessageQueue;
+typedef utils::PrioritizedQueue<SecureServiceMessage> SecureServiceMessageQueue;
 
+typedef threads::MessageLoopThread<SecureServiceMessageQueue> SecureServiceMessageLoop;
 
-//TODO: (EZAmakhov) add brief
+// TODO: (EZAmakhov) add brief
 class SecureServiceManager :
     public protocol_handler::ProtocolObserver,
-    public SecureServiceMessageQueue::Handler {
+    public SecureServiceMessageLoop::Handler {
 public:
 
   /**
@@ -101,12 +99,12 @@ public:
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON message_for_encryption thread!
-  void Handle(const SecureServiceMessagePtr& message);
+  void Handle(const SecureServiceMessageLoop::Message& message) OVERRIDE;
  private:
-  crypto_manager::SecureServiceManager* secure_manager_;
+  crypto_manager::CryptoManager* crypto_manager_;
 
   // Thread that pumps handshake data
-  SecureServiceMessageQueue secure_message_message_;
+  SecureServiceMessageLoop secure_service_messages_;
 
   DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
 

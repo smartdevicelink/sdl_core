@@ -31,33 +31,29 @@
  */
 
 #include "crypto_manager/secure_service_manager.h"
+#include "crypto_manager/crypto_manager_impl.h"
 using namespace crypto_manager;
-//TODO add info
-inline uint32_t getUInt8Value(const uint8_t* const data){
-  DCHECK(data);
-  return
-      data[0] << 24 | data[1] << 16 |
-      data[2] <<  8 | data[3];
-}
 
 log4cxx::LoggerPtr SecureServiceManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecureServiceManager"));
 
 SecureServiceManager::SecureServiceManager() :
-  secure_message_message_("SecureManager::message_for_encryption", this),
-  secure_manager_(new crypto_manager::SecureServiceManager()){
+  secure_service_messages_("SecureServiceManager::secure_service_messages_", this),
+  crypto_manager_(new crypto_manager::CryptoManagerImpl()){
 }
 
 void SecureServiceManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
+  LOG4CXX_INFO(logger_, "SecureServiceManager::OnMessageReceived");
   if(message->service_type() == protocol_handler::kSecure) {
-      //LOG4CXX_WARN(logger_, "Incorrect message received");
+      LOG4CXX_WARN(logger_, "Incorrect message service type "
+                   << message->service_type());
       return;
     }
-  const SecureServiceMessagePtr serviceQueryPtr(
+  const SecureServiceQueryPtr serviceQueryPtr(
         SecureMessageFromRawMessage(message));
   if(serviceQueryPtr) {
-      secure_message_message_.PostMessage(serviceQueryPtr);
+      secure_service_messages_.PostMessage(serviceQueryPtr);
     } else {
       LOG4CXX_WARN(logger_, "Incorrect message received");
     }
@@ -65,29 +61,34 @@ void SecureServiceManager::OnMessageReceived(
 
 SecureServiceQueryPtr SecureServiceManager::SecureMessageFromRawMessage(
     const protocol_handler::RawMessagePtr &message) {
-  assert(!"not implemented");
+  LOG4CXX_INFO(logger_, "SecureServiceManager::SecureMessageFromRawMessage");
   DCHECK(message->service_type() == protocol_handler::kSecure);
-  const uint8_t* const binary_data = message->data();
-
-  if(message->data_size() < sizeof(SecureServiceQuery::QueryHeader)) {
-      LOG4CXX_ERROR(logger_, "Received invalid message: wrong query size.");
+  SecureServiceQueryPtr query(new SecureServiceQuery());
+  const bool result = query->setData(message->data(), message->data_size());
+  if(!result) {
+      LOG4CXX_ERROR(logger_, "Incorrect message received");
       return SecureServiceQueryPtr();
     }
-
-  SecureServiceQuery::QueryHeader header;
-  header.query_id_ = binary_data[0];
-  header.seq_number_ = getUInt8Value(binary_data + 1);
-  header.seq_number_ = getUInt8Value(binary_data + 5);
-  return SecureServiceMessagePtr(
-        new SecureServiceQuery(header,
-                               binary_data + sizeof(SecureServiceQuery::QueryHeader)));
+  return SecureServiceQueryPtr(query);
 }
 
 void SecureServiceManager::OnMobileMessageSent(
     const protocol_handler::RawMessagePtr &message) {
+  LOG4CXX_INFO(logger_, "SecureServiceManager::OnMobileMessageSent");
   assert(!"not implemented");
 }
 
-void SecureServiceManager::Handle(const SecureServiceMessagePtr &message) {
+void SecureServiceManager::Handle(const SecureServiceMessageLoop::Message &message) {
+  LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
   assert(!"not implemented");
 }
+
+//void SecureServiceManager::ProcessMessageFromMobile(const utils::SharedPtr<Message> &message)
+//{
+
+//}
+
+//void SecureServiceManager::ProcessMessageFromHMI(const utils::SharedPtr<Message> &message)
+//{
+
+//}

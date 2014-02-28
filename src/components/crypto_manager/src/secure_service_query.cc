@@ -36,14 +36,37 @@
 
 using namespace crypto_manager;
 
+//TODO add info
+inline uint32_t getUInt8Value(const uint8_t* const data){
+  DCHECK(data);
+  return
+      data[0] << 24 | data[1] << 16 |
+      data[2] <<  8 | data[3];
+}
+
 SecureServiceQuery::SecureServiceQuery() : header_(), data_(NULL) {
 }
 
-SecureServiceQuery::SecureServiceQuery(const QueryHeader& header, const void * const data)
-  : header_(header) {
-  DCHECK(data);
-  data_ = new uint8_t[header_.data_size_];
-  memcpy(data_, data, header_.data_size_);
+bool SecureServiceQuery::setData(const void * const message_data,
+                                 const size_t message_data_size) {
+  DCHECK(message_data);
+  const size_t header_size = sizeof(QueryHeader);
+  if(message_data_size < header_size) {
+      return false;
+    }
+
+  const uint8_t* const binary_data =
+      static_cast<const uint8_t* const>(message_data);
+  SecureServiceQuery::QueryHeader header;
+  header.query_id_ = binary_data[0];
+  header.seq_number_ = getUInt8Value(binary_data + 1);
+  header.seq_number_ = getUInt8Value(binary_data + 5);
+  const int data_size = message_data_size - header_size;
+  if(data_size > 0) {
+      data_ = new uint8_t[data_size];
+      memcpy(data_, message_data + header_size, data_size);
+    }
+  return true;
 }
 
 SecureServiceQuery::~SecureServiceQuery() {
