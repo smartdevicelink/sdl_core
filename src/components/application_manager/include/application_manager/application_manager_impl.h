@@ -346,10 +346,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(const connection_handler::DeviceHandle& device_handle,
                                   const int32_t& session_key,
                                   const protocol_handler::ServiceType& type);
-    bool OnServiceResumedCallback(
-                const connection_handler::DeviceHandle& device_handle,
-                const int32_t& old_session_key, const int32_t& new_session_key,
-                const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
                                 const protocol_handler::ServiceType& type);
 

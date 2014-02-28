@@ -791,18 +791,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   return true;
 }
 
-bool ApplicationManagerImpl::OnServiceResumedCallback(
-    const connection_handler::DeviceHandle& device_handle,
-    const int32_t& old_session_key, const int32_t& new_session_key,
-    const protocol_handler::ServiceType& type) {
-  LOG4CXX_INFO_EXT(logger_,
-                   "OnServiceResumedCallback previous session key= "
-                   << old_session_key << " new session key= "
-                   << new_session_key);
-
-  return true;
-}
-
 void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO_EXT(
