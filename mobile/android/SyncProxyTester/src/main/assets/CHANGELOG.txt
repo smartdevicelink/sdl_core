@@ -1,4 +1,5 @@
 [CW9]
++ SYncProxyAndroid SDK: update heartbeat logic
 + 'HashId' management dialog
 + App resumption: save RPC requests (re-send them), save and re-use hashId
 + Add possibility to send Policy Table Update manually from Dialog
