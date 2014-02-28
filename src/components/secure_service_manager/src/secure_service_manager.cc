@@ -98,46 +98,118 @@ void SecureServiceManager::set_session_observer(
 void SecureServiceManager::Handle(const SecureServiceMessage &message) {
   DCHECK(message); DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
-  const SecureServiceQuery::QueryHeader &header = message->getHeader();
-  if(header.query_id_ == SecureServiceQuery::ProtectServiceRequest) {
-      if(message->getDataSize() != 1) {
-          LOG4CXX_ERROR(logger_,
-                        "ProtectServiceRequest: wrong arguments size." <<
-                        message->getDataSize());
-          return;
+  switch (message->getHeader().query_id_) {
+    case SecureServiceQuery::ProtectServiceRequest:
+      if(!ProtectServiceRequest(message)) {
+          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
-      const uint8_t service_id = *message->getData();
-      const protocol_handler::ServiceType service_type =
-          protocol_handler::ServiceTypeFromByte(service_id);
-      if(service_type == protocol_handler::kInvalidServiceType) {
-          LOG4CXX_ERROR(logger_,
-                        "ProtectServiceRequest: Wrong ServiceType "
-                        << service_id);
-          return;
+      return;
+    case SecureServiceQuery::ProtectServiceResponse:
+      if(!ProtectServiceResponse(message)) {
+          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
-      secure_service_manager::SSLContext * const context =
-          crypto_manager_->CreateSSLContext();
-      if(!context) {
-          LOG4CXX_ERROR(logger_,
-                        "CryptoManager: could not create SSl context.");
-          return;
+      return;
+    case SecureServiceQuery::SendHandshakeData:
+      if(!SendHandshakeData(message)) {
+          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
-      const bool result = session_observer_->SetSSLContext(
-            message->getConnectionKey(), service_type, context);
-      if(!result) {
-          LOG4CXX_ERROR(logger_,
-                        "SessionObserver: could not set SSl context.");
-          return;
-        }
+      return;
+    default: // SecureServiceQuery::InvalidSecureServiceQuery
+      LOG4CXX_ERROR(logger_, "Secure Service message: unknown query");
     }
 }
 
-//void SecureServiceManager::ProcessMessageFromMobile(const utils::SharedPtr<Message> &message)
-//{
+bool SecureServiceManager::ProtectServiceRequest(
+    const SecureServiceMessage &message) {
+  LOG4CXX_INFO(logger_, "ProtectServiceRequest processing");
+  DCHECK(message->getHeader().query_id_ == SecureServiceQuery::ProtectServiceRequest);
+  DCHECK(message); DCHECK(session_observer_);
+  if(message->getDataSize() != 1) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtectServiceRequest: wrong arguments size." <<
+                    message->getDataSize());
+      return false;
+    }
+  const uint8_t service_id = *message->getData();
+  const protocol_handler::ServiceType service_type =
+      protocol_handler::ServiceTypeFromByte(service_id);
+  if(service_type == protocol_handler::kInvalidServiceType) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtectServiceRequest: Wrong ServiceType "
+                    << service_id);
+      return false;
+    }
+  secure_service_manager::SSLContext * const sslContext =
+      crypto_manager_->CreateSSLContext();
+  if(!sslContext) {
+      LOG4CXX_ERROR(logger_,
+                    "CryptoManager: could not create SSl context.");
+      return false;
+    }
+  const bool result = session_observer_->SetSSLContext(
+        message->getConnectionKey(), service_type, sslContext);
+  if(!result) {
+      LOG4CXX_ERROR(logger_,
+                    "SessionObserver: could not set SSL context.");
+      return false;
+    }
+  return true;
+}
 
-//}
+bool SecureServiceManager::ProtectServiceResponse(const SecureServiceMessage &message) {
+  LOG4CXX_INFO(logger_, "ProtectServiceResponse processing");
+  DCHECK(message->getHeader().query_id_ == SecureServiceQuery::ProtectServiceResponse);
+  DCHECK(message); DCHECK(session_observer_);
+  if(message->getDataSize() != 1) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtectServiceResponse: wrong arguments size." <<
+                    message->getDataSize());
+      return false;
+    }
+//  const uint8_t service_id = *message->getData();
+//  const protocol_handler::ServiceType service_type =
+//      protocol_handler::ServiceTypeFromByte(service_id);
+//  if(service_type == protocol_handler::kInvalidServiceType) {
+//      LOG4CXX_ERROR(logger_,
+//                    "ProtectServiceRequest: Wrong ServiceType "
+//                    << service_id);
+//      return false;
+//    }
+  assert(!"Not implemented push logics");
+  return true;
+}
 
-//void SecureServiceManager::ProcessMessageFromHMI(const utils::SharedPtr<Message> &message)
-//{
-
-//}
+bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &message) {
+  LOG4CXX_INFO(logger_, "SendHandshakeData processing");
+  DCHECK(message->getHeader().query_id_ == SecureServiceQuery::SendHandshakeData);
+  DCHECK(message);
+  if(message->getDataSize() > 0) {
+      LOG4CXX_ERROR(logger_, "SendHandshakeData: null arguments size.");
+      return false;
+    }
+  const uint8_t service_id = *message->getData();
+  const protocol_handler::ServiceType service_type =
+      protocol_handler::ServiceTypeFromByte(service_id);
+  if(service_type == protocol_handler::kInvalidServiceType) {
+      LOG4CXX_ERROR(logger_,
+                    "ProtectServiceRequest: Wrong ServiceType "
+                    << service_id);
+      return false;
+    }
+  SSLContext * sslContext =
+      session_observer_->GetSSLContext(message->getConnectionKey(), service_type);
+  if(!sslContext) {
+      LOG4CXX_ERROR(logger_, "SendHandshakeData: No ssl context");
+      return false;
+    }
+  const uint8_t * data = message->getData();
+  const size_t data_size = message->getDataSize();
+  size_t out_data_size;
+  const uint8_t * new_data = sslContext->DoHandshake(data, data_size, out_data_size);
+  if(!new_data){
+      LOG4CXX_WARN(logger_, "Handshake fail: " << getError());
+      return false;
+    }
+  assert(!"Not implemented push logics");
+  return true;
+}

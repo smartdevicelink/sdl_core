@@ -110,6 +110,10 @@ public:
   // CALLED ON message_for_encryption thread!
   void Handle(const SecureServiceMessage& message) OVERRIDE;
  private:
+
+  bool ProtectServiceRequest(const SecureServiceMessage &message);
+  bool ProtectServiceResponse(const SecureServiceMessage &message);
+  bool SendHandshakeData(const SecureServiceMessage &message);
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;
 

@@ -289,7 +289,21 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
     }
     packet_data_.data = new uint8_t[dataBytes];
     packet_data_.totalDataBytes = dataBytes;
-  }
+    }
+}
+
+void ProtocolPacket::set_data_bytes(
+    const uint8_t * const data, const uint32_t dataBytes){
+  if (dataBytes) {
+    if (packet_data_.data) {
+      delete[] packet_data_.data;
+      packet_data_.data = 0;
+    }
+    packet_data_.totalDataBytes = dataBytes;
+    packet_data_.data = new uint8_t[dataBytes];
+    if(data)
+      memcpy(packet_data_.data, data, packet_data_.totalDataBytes);
+    }
 }
 
 uint32_t ProtocolPacket::total_data_bytes() const {

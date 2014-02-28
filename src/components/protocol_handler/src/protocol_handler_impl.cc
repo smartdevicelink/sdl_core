@@ -385,11 +385,37 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
-  }
+    }
+  const int32_t connection_key =
+      session_observer_->KeyFromPair(connection_id, session_id);
 
-  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
-      session_id, data_size, message_counters_[session_id]++, data));
+  ProtocolFramePtr ptr;
+
+  secure_service_manager::SSLContext* context =
+      session_observer_->GetSSLContext(
+        connection_key, ServiceTypeFromByte(service_type));
+  if(context) {
+    size_t new_data_size;
+    //FIXME: EZamakhov
+    assert(!"Not implemented Encrypt logics");
+    const uint8_t * new_data = context->Decrypt(data, data_size, new_data_size);
+    if(!new_data) {
+      LOG4CXX_WARN(logger_, "Decryption fail: " <<
+                   secure_service_manager::getError());
+      return RESULT_FAIL;
+      }
+    packet->set_data_bytes(new_data, new_data_size);
+    ptr.reset(
+          new protocol_handler::ProtocolPacket(
+            connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
+            session_id, new_data_size, message_counters_[session_id]++, new_data));
+    }
+  else {
+    ptr.reset(
+          new protocol_handler::ProtocolPacket(
+            connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
+            session_id, data_size, message_counters_[session_id]++, data));
+    }
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -509,16 +535,20 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       const int32_t connection_key =
           session_observer_->KeyFromPair(connection_id, packet->session_id());
 
-      uint8_t* data = packet->data();
-      size_t data_size = packet->data_size();
       secure_service_manager::SSLContext* context =
           session_observer_->GetSSLContext(
-            connection_key, static_cast<ServiceType>(packet->service_type()));
+            connection_key, ServiceTypeFromByte(packet->service_type()));
       if(context) {
-//          uint8_t* data = packet->data();
-//          uint8_t* data_size = packet->data_size();
-//          context->Encrypt(data, data_size, );
-          //FIXME: EZamakhov add encrypte call
+          uint8_t* data = packet->data();
+          size_t data_size = packet->data_size();
+          size_t new_data_size;
+          const uint8_t * new_data = context->Encrypt(data, data_size, new_data_size);
+          if(!new_data){
+              LOG4CXX_WARN(logger_, "Encrypttion fail: " <<
+                           secure_service_manager::getError());
+              return RESULT_FAIL;
+            }
+          packet->set_data_bytes(new_data, new_data_size);
       }
 
       RawMessagePtr raw_message(
