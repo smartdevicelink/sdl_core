@@ -556,6 +556,29 @@ FFW.BasicCommunication = FFW.RPCObserver
                 };
                 this.client.send(JSONMessage);
             }
+        },
+
+        /**
+         * Initiated by HMI.
+         */
+        OnSystemRequest: function() {
+
+            Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
+
+            // send request
+
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "BasicCommunication.OnStartDeviceDiscovery",
+                "params":{
+                    "requestType": "HTTP",
+                    "url": "http://127.0.0.1",
+                    "fileType": "BINARY",
+                    "offset": 1000,
+                    "length": 10000
+                }
+            };
+            this.client.send(JSONMessage);
         }
 
     })

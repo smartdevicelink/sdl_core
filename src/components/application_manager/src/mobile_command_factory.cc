@@ -73,6 +73,7 @@
 #include "application_manager/commands/mobile/on_permissions_change_notification.h"
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
+#include "application_manager/commands/mobile/on_hash_change_notification.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/perform_interaction_request.h"
@@ -538,6 +539,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnSystemRequestID: {
       command.reset(new commands::mobile::OnSystemRequestNotification(message));
+      break;
+    }
+    case mobile_apis::FunctionID::OnHashChangeID: {
+      command.reset(new commands::mobile::OnHashChangeNotification(message));
       break;
     }
     default: {

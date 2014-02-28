@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,45 +31,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HASH_CHANGE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HASH_CHANGE_NOTIFICATION_H_
+
 #include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
+namespace mobile {
 
-CommandNotificationImpl::CommandNotificationImpl(
-    const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+/**
+ * @brief OnHashChangeNotification class
+ **/
+class OnHashChangeNotification : public CommandNotificationImpl {
+ public:
+  /**
+   * @brief OnHashChangeNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnHashChangeNotification(const MessageSharedPtr& message);
 
-CommandNotificationImpl::~CommandNotificationImpl() {
-}
+  /**
+   * @brief OnHashChangeNotification class destructor
+   **/
+  virtual ~OnHashChangeNotification();
 
-bool CommandNotificationImpl::Init() {
-  return true;
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-bool CommandNotificationImpl::CleanUp() {
-  return true;
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnHashChangeNotification);
+};
 
-void CommandNotificationImpl::Run() {
-}
-
-void CommandNotificationImpl::SendNotification() {
-  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
-  (*message_)[strings::params][strings::message_type] =
-      static_cast<int32_t>(application_manager::MessageType::kNotification);
-
-  LOG4CXX_INFO(logger_, "SendNotification");
-  MessageHelper::PrintSmartObject(*message_);
-
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
-}
-
+}   // namespace mobile
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HASH_CHANGE_NOTIFICATION_H_

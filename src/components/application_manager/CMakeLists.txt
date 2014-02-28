@@ -141,6 +141,7 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/on_keyboard_input_notification.cc
 ./src/commands/mobile/on_touch_event_notification.cc
 ./src/commands/mobile/on_system_request_notification.cc
+./src/commands/mobile/on_hash_change_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES

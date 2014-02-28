@@ -1894,7 +1894,9 @@
       </param>
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
-      </param>    
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
+      </param>
     </function>
 
 </interface>

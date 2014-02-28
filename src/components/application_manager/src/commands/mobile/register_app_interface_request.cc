@@ -144,11 +144,13 @@ void RegisterAppInterfaceRequest::Run() {
     }
 
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+
     if (app->vr_synonyms()) {
       SendVrCommandsOnRegisterAppToHMI(*app);
     }
     if (app->tts_name()) {
       SendTTSChunksToHMI(*app);
+
     } else {
       SendRegisterAppInterfaceResponseToMobile();
     }
@@ -189,7 +191,6 @@ void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
                 message[strings::params][hmi_response::code].asInt());
 
       SendRegisterAppInterfaceResponseToMobile(tts_result);
-
       break;
     }
     default: {
@@ -212,6 +213,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   smart_objects::SmartObject& response_params = *params;
 
@@ -231,9 +234,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
           hmi_capabilities.active_vr_language() ||
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
-
-    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-        connection_key());
 
     LOG4CXX_WARN_EXT(
       logger_,
@@ -343,8 +343,19 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
+  uint32_t hash_id = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+    hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
+  }
+
+  ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+  if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
+                                    hash_id)) {
+    result = mobile_apis::Result::RESUME_FAILED;
+  }
 
   SendResponse(true, result, "", params);
+  resumer.StartResumption(application, hash_id);
 }
 
 mobile_apis::Result::eType

@@ -108,10 +108,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
 
+  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
+  virtual const  std::set<uint32_t>& SubscribesIVI() const;
+
+  virtual uint32_t nextHash();
+  virtual uint32_t curHash() const;
+
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
+  virtual uint32_t UpdateHash();
+
+
  protected:
   void CleanupFiles();
 
  private:
+
+  uint32_t hash_val_;
+
   smart_objects::SmartObject* active_message_;
 
   Version version_;

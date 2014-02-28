@@ -33,6 +33,7 @@
 #include <string>
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+#include "application_manager/message_helper.h"
 
 namespace {
 log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
@@ -298,6 +299,29 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.erase(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size - 1);
+}
+
+const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {
+  return subscribed_buttons_;
+}
+
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+
+uint32_t ApplicationImpl::nextHash() {
+  hash_val_ = time(NULL);
+  return hash_val_;
+}
+
+uint32_t ApplicationImpl::curHash() const {
+  return hash_val_;
+}
+
+uint32_t ApplicationImpl::UpdateHash() {
+  uint32_t new_hash= nextHash();
+  MessageHelper::SendHashUpdateNotification(app_id());
+  return new_hash;
 }
 
 void ApplicationImpl::CleanupFiles() {

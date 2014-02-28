@@ -1,4 +1,6 @@
+
 /*
+
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,44 +32,42 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/commands/mobile/on_hash_change_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/application_impl.h"
+#include "interfaces/MOBILE_API.h"
+#include <string>
 
 namespace application_manager {
 
 namespace commands {
 
-CommandNotificationImpl::CommandNotificationImpl(
+namespace mobile {
+
+OnHashChangeNotification::OnHashChangeNotification(
     const MessageSharedPtr& message)
-    : CommandImpl(message) {
+    : CommandNotificationImpl(message) {
 }
 
-CommandNotificationImpl::~CommandNotificationImpl() {
+OnHashChangeNotification::~OnHashChangeNotification() {
 }
 
-bool CommandNotificationImpl::Init() {
-  return true;
-}
+void OnHashChangeNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnHashChangeNotification::Run");
 
-bool CommandNotificationImpl::CleanUp() {
-  return true;
-}
-
-void CommandNotificationImpl::Run() {
-}
-
-void CommandNotificationImpl::SendNotification() {
-  (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;
-  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
 
-  LOG4CXX_INFO(logger_, "SendNotification");
-  MessageHelper::PrintSmartObject(*message_);
-
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  int32_t app_id;
+  app_id = (*message_)[strings::params][strings::connection_key].asInt();
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  std::stringstream stream;
+  stream << app->curHash();
+  (*message_)[strings::msg_params][strings::hash_id] = stream.str();
+  SendNotification();
 }
+
+}  //namespace mobile
 
 }  // namespace commands
 
