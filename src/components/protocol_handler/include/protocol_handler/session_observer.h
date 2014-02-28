@@ -40,7 +40,7 @@
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "connection_handler/connection_handler.h"
-#include "crypto_manager/ssl_context.h"
+#include "secure_service_manager/ssl_context.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -150,7 +150,7 @@ public:
     virtual bool SetSSLContext(
       const uint32_t& key,
       protocol_handler::ServiceType service_type,
-      crypto_manager::SSLContext* context) = 0;
+      secure_service_manager::SSLContext* context) = 0;
 
     /**
      * \brief Gets crypto context of service
@@ -158,7 +158,7 @@ public:
      * \param service_type Type of service
      * \return \c true in case of service is protected or \c false otherwise
      */
-    virtual crypto_manager::SSLContext* GetSSLContext(
+    virtual secure_service_manager::SSLContext* GetSSLContext(
         const uint32_t& key,
         protocol_handler::ServiceType service_type) = 0;
   protected:

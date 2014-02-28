@@ -1,7 +1,4 @@
 /*
- * \file crypto_manager_impl.h
- * \brief 
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,47 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef CRYPTO_MANAGER_IMPL_H_
-#define CRYPTO_MANAGER_IMPL_H_
+#ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+#define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
 
-#include <openssl/bio.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+namespace secure_service_manager {
+class SSLContext;
+class CryptoManager {
+ public:
+  virtual bool Init()=0;
+  virtual SSLContext *CreateSSLContext()=0;
+  virtual ~CryptoManager() { }
+};
 
-#include <string>
+} // namespace secure_service_manager
 
-#include "crypto_manager/crypto_manager.h"
-#include "crypto_manager/ssl_context.h"
-
-namespace crypto_manager {
-  std::string LastError();
-
-  class CryptoManagerImpl : public CryptoManager {
-   private:
-
-    class SSLContextImpl : public SSLContext {
-     public:
-      SSLContextImpl(SSL *conn, BIO *bioIn, BIO *bioOut);
-      virtual size_t DoHandshake(char *in_data,  size_t in_data_size,
-                                 char *out_data, size_t out_data_size);
-      virtual size_t Encrypt(char *in_data,  size_t in_data_size,
-                             char *out_data, size_t out_data_size);
-      virtual size_t Decrypt(char *in_data,  size_t in_data_size,
-                             char *out_data, size_t out_data_size);
-      virtual ~SSLContextImpl();
-     private:
-      SSL *connection_;
-      BIO *bioIn_;
-      BIO *bioOut_;
-      BIO *bioFilter_;
-    };
-
-   public:
-    virtual bool Init();
-    virtual SSLContext *CreateSSLContext();
-   private:
-    SSL_CTX *context_;
-  };
-} // namespace crypto_manager
-
-#endif /* CRYPTO_MANAGER_IMPL_H_ */
+#endif // SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H

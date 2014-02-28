@@ -152,13 +152,13 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
 
 bool Connection::SetSSLContext( uint8_t session,
                                 protocol_handler::ServiceType service_type,
-                                crypto_manager::SSLContext *context){
+                                secure_service_manager::SSLContext *context){
   //FIXME: EZamakhov
   assert(!"not_implemented");
   return false;
 }
 
-crypto_manager::SSLContext* Connection::GetSSLContext(
+secure_service_manager::SSLContext* Connection::GetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type) const {
   //FIXME: EZamakhov

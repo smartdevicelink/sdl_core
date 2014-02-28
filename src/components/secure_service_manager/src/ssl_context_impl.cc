@@ -29,14 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "crypto_manager/crypto_manager_impl.h"
+#include "secure_service_manager/crypto_manager_impl.h"
 
 #include <assert.h>
 #include <openssl/err.h>
 
 #include <iostream>
 
-namespace crypto_manager {
+namespace secure_service_manager {
 
 CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn,
                                                   BIO *bioIn,
@@ -132,4 +132,4 @@ CryptoManagerImpl::SSLContextImpl::
   SSL_shutdown(connection_);
 }
 
-}  // namespace crypto_manager
+}  // namespace secure_service_manager

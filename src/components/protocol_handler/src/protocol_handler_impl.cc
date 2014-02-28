@@ -511,7 +511,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
 
       uint8_t* data = packet->data();
       size_t data_size = packet->data_size();
-      crypto_manager::SSLContext* context =
+      secure_service_manager::SSLContext* context =
           session_observer_->GetSSLContext(
             connection_key, static_cast<ServiceType>(packet->service_type()));
       if(context) {

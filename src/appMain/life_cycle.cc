@@ -35,7 +35,7 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
-#include "crypto_manager/secure_service_manager.h"
+#include "secure_service_manager/secure_service_manager.h"
 
 using threads::Thread;
 
@@ -97,8 +97,8 @@ bool LifeCycle::StartComponents() {
   DCHECK(hmi_handler_ != NULL)
 
       //TODO: add delete
-  crypto_manager::SecureServiceManager*secure_service_manager =
-      new crypto_manager::SecureServiceManager();
+  secure_service_manager::SecureServiceManager*secure_service_manager =
+      new secure_service_manager::SecureServiceManager();
   secure_service_manager->set_session_observer(connection_handler_);
 
   transport_manager_->AddEventListener(protocol_handler_);

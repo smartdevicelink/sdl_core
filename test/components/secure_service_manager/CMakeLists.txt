@@ -1,8 +1,8 @@
 include_directories (
+  ./include/
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
-  ../../../src/components/crypto_manager/include
-  include/
+  ../../../src/components/secure_service_manager/include
 )
 
 set (SOURCES

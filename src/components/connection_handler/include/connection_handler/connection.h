@@ -45,7 +45,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol_handler/service_type.h"
-#include "crypto_manager/ssl_context.h"
+#include "secure_service_manager/ssl_context.h"
 
 /**
  * \namespace connection_handler
@@ -181,7 +181,7 @@ class Connection {
   bool SetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type,
-    crypto_manager::SSLContext* context);
+    secure_service_manager::SSLContext* context);
 
   /**
    * \brief Gets crypto context of service
@@ -189,7 +189,7 @@ class Connection {
    * \param service_type Type of service
    * \return \c true in case of service is protected or \c false otherwise
    */
-  crypto_manager::SSLContext* GetSSLContext(
+  secure_service_manager::SSLContext* GetSSLContext(
       uint8_t session,
       protocol_handler::ServiceType service_type) const;
   /**

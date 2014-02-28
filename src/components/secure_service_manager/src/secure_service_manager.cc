@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "crypto_manager/secure_service_manager.h"
-#include "crypto_manager/crypto_manager_impl.h"
-using namespace crypto_manager;
+#include "secure_service_manager/secure_service_manager.h"
+#include "secure_service_manager/crypto_manager_impl.h"
+using namespace secure_service_manager;
 
 log4cxx::LoggerPtr SecureServiceManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecureServiceManager"));
 
 SecureServiceManager::SecureServiceManager() :
   secure_service_messages_("SecureServiceManager::secure_service_messages_", this),
-  crypto_manager_(new crypto_manager::CryptoManagerImpl()),
+  crypto_manager_(new secure_service_manager::CryptoManagerImpl()),
   session_observer_(0){
   if(!crypto_manager_->Init()) {
       LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
@@ -115,7 +115,7 @@ void SecureServiceManager::Handle(const SecureServiceMessage &message) {
                         << service_id);
           return;
         }
-      crypto_manager::SSLContext * const context =
+      secure_service_manager::SSLContext * const context =
           crypto_manager_->CreateSSLContext();
       if(!context) {
           LOG4CXX_ERROR(logger_,

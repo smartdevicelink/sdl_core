@@ -50,7 +50,7 @@ include_directories (
   ./include/video/
   ../utils/include/
   ../protocol_handler/include/
-  ../crypto_manager/include/
+  ../secure_service_manager/include/
   ../connection_handler/include/
   ../transport_manager/include/
   ../application_manager/include/

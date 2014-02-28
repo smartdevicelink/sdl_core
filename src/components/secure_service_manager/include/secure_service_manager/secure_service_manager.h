@@ -43,10 +43,11 @@
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
-#include "crypto_manager/crypto_manager.h"
-#include "crypto_manager/secure_service_query.h"
+#include "secure_service_manager/crypto_manager.h"
+#include "secure_service_manager/secure_service_manager.h"
+#include "secure_service_manager/secure_service_query.h"
 
-namespace crypto_manager {
+namespace secure_service_manager {
 
 /*
  * These dummy classes are here to locally impose strong typing on different
@@ -112,7 +113,7 @@ public:
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;
 
-  crypto_manager::CryptoManager* crypto_manager_;
+  secure_service_manager::CryptoManager* crypto_manager_;
 
   /**
    *\brief Pointer on instance of class implementing ISessionObserver
@@ -123,5 +124,5 @@ public:
   DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
   static log4cxx::LoggerPtr logger_;
 };
-} //crypto_manager
+} //secure_service_manager
 #endif // SECURE_MANAGER_H

@@ -30,42 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_SSL_CONTEXT_H
-#define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_SSL_CONTEXT_H
+#ifndef CRYPTO_MANAGER_IMPL_H_
+#define CRYPTO_MANAGER_IMPL_H_
 
-#include <cstddef> // for size_t typedef
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #include <string>
 
-/**
- * \class crypto_manager::SSLContext
- * \brief Class responsible for SSL connection establishing
- *        and data encryption and decryption within this connection
- *
- * \fn crypto_manager::SSLContext::DoHandshake(char *in_data,  size_t  in_data_size, char *out_data, size_t *out_data_size)
- * \brief Performs SSL handshake
- * In order to establish an SSL connection it's
- * necessary to perform handshake process. During this process
- * client and server negotiate about encryption algorithms to use
- * and produce a session key.
- *
- * \param in_data[in]      data sent by client
- * \param in_data_size[in] size of \ref in_data
- * \param out_data[out]    buffer for data to store response of server
- * \param out_data_size[in,out] input: size of \ref out_data, output: amount of data written to \ref out_data
+#include "secure_service_manager/crypto_manager.h"
+#include "secure_service_manager/ssl_context.h"
 
- */
+namespace secure_service_manager {
+  std::string LastError();
 
-namespace crypto_manager {
-class SSLContext {
- public:
-  virtual size_t DoHandshake(char *in_data,  size_t  in_data_size,
-                           char *out_data, size_t out_data_size)=0;
-  virtual size_t Encrypt(char *in_data,  size_t  in_data_size,
-              char *out_data, size_t out_data_size)=0;
-  virtual size_t Decrypt(char *in_data,  size_t  in_data_size,
-              char *out_data, size_t out_data_size)=0;
-  virtual ~SSLContext() { };
-};
-} // namespace crypto_manager
-#endif // SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_SSL_CONTEXT_H
+  class CryptoManagerImpl : public CryptoManager {
+   private:
+
+    class SSLContextImpl : public SSLContext {
+     public:
+      SSLContextImpl(SSL *conn, BIO *bioIn, BIO *bioOut);
+      virtual size_t DoHandshake(char *in_data,  size_t in_data_size,
+                                 char *out_data, size_t out_data_size);
+      virtual size_t Encrypt(char *in_data,  size_t in_data_size,
+                             char *out_data, size_t out_data_size);
+      virtual size_t Decrypt(char *in_data,  size_t in_data_size,
+                             char *out_data, size_t out_data_size);
+      virtual ~SSLContextImpl();
+     private:
+      SSL *connection_;
+      BIO *bioIn_;
+      BIO *bioOut_;
+      BIO *bioFilter_;
+    };
+
+   public:
+    virtual bool Init();
+    virtual SSLContext *CreateSSLContext();
+   private:
+    SSL_CTX *context_;
+  };
+} // namespace secure_service_manager
+
+#endif /* CRYPTO_MANAGER_IMPL_H_ */

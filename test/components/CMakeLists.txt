@@ -29,7 +29,7 @@ add_subdirectory(./utils)
 # --- Audio Manager
 #add_subdirectory(./media_manager)
 
-add_subdirectory(./crypto_manager)
+add_subdirectory(./secure_service_manager)
 
 # --- policies (Policy Manager)
 add_subdirectory(./policies)

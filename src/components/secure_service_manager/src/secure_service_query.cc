@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "crypto_manager/secure_service_query.h"
+#include "secure_service_manager/secure_service_query.h"
 #include <cstring>
 #include "utils/macro.h"
 
-using namespace crypto_manager;
+using namespace secure_service_manager;
 
 //TODO add info
 inline uint32_t getUInt8Value(const uint8_t* const data){

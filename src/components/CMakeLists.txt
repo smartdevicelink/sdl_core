@@ -68,7 +68,7 @@ add_subdirectory(./config_profile)
 add_subdirectory(./media_manager)
 
 # --- CryptoManager
-add_subdirectory(./crypto_manager)
+add_subdirectory(./secure_service_manager)
 
 # --- Policies
 add_subdirectory(./policies)

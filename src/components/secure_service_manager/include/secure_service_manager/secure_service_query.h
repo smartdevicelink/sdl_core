@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,18 +30,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
-#define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+#ifndef SECURE_SERVICE_QUERY_H
+#define SECURE_SERVICE_QUERY_H
 
-namespace crypto_manager {
-class SSLContext;
-class CryptoManager {
- public:
-  virtual bool Init()=0;
-  virtual SSLContext *CreateSSLContext()=0;
-  virtual ~CryptoManager() { }
+#include <cstddef>
+//TODO: EZamakhov remove <cstdint> as C++11
+#include <cstdint>
+#include "utils/shared_ptr.h"
+
+namespace secure_service_manager {
+
+
+class SecureServiceQuery {
+public:
+  enum SecureServiceQueryId {
+    ProtectServiceRequest  = 0x1,
+    ProtectServiceResponse = 0x2,
+    SendHandshakeData = 0x3,
+    InvalidSecureServiceQuery
+  };
+
+  enum ProtectServiceResult {
+    SUCCESS = 0x1,
+    PENDING = 0x2,     //Handshake in progress
+    SERVICE_ALREADY_PROTECTED = 0x3,
+    SERVICE_NOT_FOUND = 0x4,
+    INTERNAL_ERROR = 0xFF
+  };
+
+  struct QueryHeader {
+    QueryHeader() : query_id_(InvalidSecureServiceQuery), seq_number_(0){}
+    uint8_t  query_id_;    // API function identifier
+    uint32_t seq_number_;  // request sequential number
+  };
+
+  SecureServiceQuery();
+  ~SecureServiceQuery();
+  bool setData(const uint8_t * const binary_data, const size_t bin_data_size);
+  void setConnectionKey(const uint32_t connection_key);
+
+  const QueryHeader& getHeader() const;
+  const uint8_t* const getData() const;
+  size_t const getDataSize() const;
+  uint32_t getConnectionKey() const;
+private:
+  QueryHeader header_;
+  uint32_t connection_key_;
+  uint8_t* data_;
+  size_t data_size_;
 };
-
-} // namespace crypto_manager
-
-#endif // SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+typedef utils::SharedPtr<SecureServiceQuery> SecureServiceQueryPtr;
+}
+#endif // SECURE_SERVICE_QUERY_H

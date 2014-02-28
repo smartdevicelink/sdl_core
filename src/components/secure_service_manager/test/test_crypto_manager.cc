@@ -29,15 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef CRYPTO_MANAGER_IMPL_TEST_H_
-#define CRYPTO_MANAGER_IMPL_TEST_H_
-
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
-#include <gtest/gtest.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,13 +41,11 @@
 
 #include <iostream>
 
-#include "crypto_manager/crypto_manager.h"
-#include "crypto_manager/crypto_manager_impl.h"
-#include "crypto_manager/ssl_context.h"
+#include "secure_service_manager/crypto_manager.h"
+#include "secure_service_manager/crypto_manager_impl.h"
+#include "secure_service_manager/ssl_context.h"
 
-namespace test {
-namespace components {
-namespace crypto_manager_test {
+using namespace secure_service_manager;
 
 bool isErrorFatal(SSL *connection, int res) {
   int error = SSL_get_error(connection, res);
@@ -61,12 +53,7 @@ bool isErrorFatal(SSL *connection, int res) {
       error != SSL_ERROR_WANT_WRITE);
 }
 
-TEST(HandshakeTest, Positive) {
-
-  using crypto_manager::CryptoManager;
-  using crypto_manager::CryptoManagerImpl;
-  using crypto_manager::SSLContext;
-
+int main() {
   SSL_load_error_strings();
   ERR_load_BIO_strings();
   OpenSSL_add_all_algorithms();
@@ -83,6 +70,7 @@ TEST(HandshakeTest, Positive) {
   SSL_set_bio(connection, bioIn, bioOut);
 
   SSL_set_connect_state(connection);
+
 
   CryptoManager* crypto_manager = new CryptoManagerImpl();
   crypto_manager->Init();
@@ -116,7 +104,11 @@ TEST(HandshakeTest, Positive) {
     }
   }
 
-  EXPECT_EQ(res, 1);
+  if (res == 0) {
+    std::cout << "Handshake failed" << std::endl;
+  } else {
+    std::cout << "Handshake finished" << std::endl;
+  }
 
   BIO *bioF = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
@@ -128,21 +120,20 @@ TEST(HandshakeTest, Positive) {
   char *encryptedText = new char[1024];
   BIO_read(bioOut, encryptedText, len);
 
+  std::cout << "Encrypted text: " << std::string(encryptedText, len) << std::endl;
+
   char *decryptedText= new char[1024];
   len = server_ctx->Decrypt(encryptedText, len, decryptedText, 1024);
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+
+  std::cout << "Decrypted text: " << std::string(decryptedText, len) << std::endl;
 
   len = server_ctx->Encrypt(text, sizeof(text), encryptedText, 1024);
+  std::cout << "Encrypted text: " << std::string(encryptedText, len) << std::endl;
+
 
   BIO_write(bioIn, encryptedText, len);
   len = BIO_read(bioF, decryptedText, 1024);
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  std::cout << "Decrypted text: " << std::string(decryptedText, len) << std::endl;
 
   EVP_cleanup();
 }
-
-}  // namespace crypto_manager_test
-}  // namespace components
-}  // namespace test
-
-#endif /* CRYPTO_MANAGER_IMPL_TEST_H_ */

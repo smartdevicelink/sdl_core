@@ -3,7 +3,7 @@ include_directories (
   ../transport_manager/include/
   ../protocol_handler/include/
   ../config_profile/include/
-  ../crypto_manager/include/
+  ../secure_service_manager/include/
   ../utils/include/
 )
 
