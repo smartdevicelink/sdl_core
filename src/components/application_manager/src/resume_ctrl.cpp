@@ -1,7 +1,6 @@
-#include "application_manager/resume_ctrl.h"
-
 #include <fstream>
 
+#include "application_manager/resume_ctrl.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -12,7 +11,6 @@
 #include "connection_handler/connection.h"
 #include "formatters/CFormatterJsonBase.hpp"
 #include "application_manager/commands/command_impl.h"
-
 
 namespace application_manager {
   log4cxx::LoggerPtr ResumeCtrl::logger_ = log4cxx::LoggerPtr(
@@ -59,29 +57,29 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
     saved_applications_.push_back(Json::Value());
     json_app = &(saved_applications_.back());
   }
+
   uint32_t connection_key = application->app_id();
   (*json_app)[strings::app_id] = app_id;
   (*json_app)[strings::connection_key] = connection_key;
-  (*json_app)[strings::hmi_level] = static_cast<int32_t> (application->hmi_level());
+  (*json_app)[strings::hmi_level] =
+      static_cast<int32_t> (application->hmi_level());
   (*json_app)[strings::ign_off_count] = 0;
   (*json_app)[strings::hash_id] = application->curHash();
-  (*json_app)[strings::application_commands] = GetApplicationCommands(connection_key);
-  (*json_app)[strings::application_choise_sets] = GetApplicationInteractionChoiseSets(connection_key);
-  (*json_app)[strings::application_global_properties] = GetApplicationGlobalProperties(connection_key);
-  (*json_app)[strings::application_subscribtions] = GetApplicationSubscriptions(connection_key);
+  (*json_app)[strings::application_commands] =
+      GetApplicationCommands(connection_key);
+  (*json_app)[strings::application_choise_sets] =
+      GetApplicationInteractionChoiseSets(connection_key);
+  (*json_app)[strings::application_global_properties] =
+      GetApplicationGlobalProperties(connection_key);
+  (*json_app)[strings::application_subscribtions] =
+      GetApplicationSubscriptions(connection_key);
   (*json_app)[strings::application_files] = GetApplicationFiles(connection_key);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
-
 }
 
 void ResumeCtrl::LoadApplications() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::LoadApplications");
   DCHECK(app_mngr_);
-  DCHECK(app_mngr_->connection_handler_);
-
-  connection_handler::ConnectionHandlerImpl* conn_handler;
-  conn_handler = static_cast<connection_handler::ConnectionHandlerImpl*>(
-                   app_mngr_->connection_handler_);
 
   const std::string& storage =
     profile::Profile::instance()->app_info_storage();
@@ -99,7 +97,6 @@ void ResumeCtrl::LoadApplications() {
     LOG4CXX_INFO(logger_, "There are no Saved applications");
     return;
   }
-  connection_handler::ResumeSessionMap resume_session_map;
 
   for (Json::Value::iterator it = root.begin(); it != root.end(); ++it) {
     Json::Value cur_app_data = (*it);
@@ -107,13 +104,7 @@ void ResumeCtrl::LoadApplications() {
 						  cur_app_data.toStyledString());
     saved_applications_.push_back(cur_app_data);
     uint32_t session_key = cur_app_data[strings::connection_key].asUInt();
-
-    transport_manager::ConnectionUID connection_handle = 0;
-    uint8_t session_id = 0;
-    conn_handler->PairFromKey(session_key, &connection_handle, &session_id);
-    resume_session_map[session_id] = session_key;
   }
-  conn_handler->set_resume_session_map(resume_session_map);
 }
 
 void ResumeCtrl::on_event(const event_engine::Event& event) {
@@ -126,11 +117,13 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
       it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+    if ((*it)[strings::app_id].asInt() ==
+        application->mobile_app_id()->asInt()) {
+
       mobile_apis::HMILevel::eType saved_hmi_level;
-      saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>((*it)
-                                                                  [strings::hmi_level]
-                                                                   .asInt());
+      saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
+                            (*it)[strings::hmi_level].asInt());
+
       if (saved_hmi_level == mobile_apis::HMILevel::HMI_FULL) {
         app_mngr_->PutApplicationInFull(application);
       } else if (saved_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
@@ -138,9 +131,14 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       } else {
         application->set_hmi_level(saved_hmi_level);
       }
+
+      LOG4CXX_INFO(logger_, "Restore Application "
+                   << (*it)[strings::app_id].asInt()
+                   << " to HMILevel " << saved_hmi_level);
       return true;
     }
   }
+
   return false;
 }
 
@@ -148,10 +146,10 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "RestoreApplicationData");
   DCHECK(application.get());
 
-  std::vector<Json::Value>::iterator it;
-  for (it = saved_applications_.begin();
-      it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  for (; it != saved_applications_.end(); ++it) {
+    if ((*it)[strings::app_id].asInt() ==
+        application->mobile_app_id()->asInt()) {
       break;
     }
   }

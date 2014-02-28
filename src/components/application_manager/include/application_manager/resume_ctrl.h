@@ -58,7 +58,18 @@ class ApplicationManagerImpl;
 class Application;
 class ResumeCtrl: public event_engine::EventObserver {
   public:
-    ResumeCtrl(ApplicationManagerImpl* app_mngr);
+
+  /**
+   * @brief Constructor
+   * @param app_mngr ApplicationManager pointer
+   */
+    explicit ResumeCtrl(ApplicationManagerImpl* app_mngr);
+
+    /**
+     * @brief Event, thar raised if application get resumption response from HMI
+     * @param event : event object, that contains smart_object with HMI message
+     */
+    virtual void on_event(const event_engine::Event& event);
 
     /**
      * @brief Save all applications info to the file system
@@ -77,12 +88,6 @@ class ResumeCtrl: public event_engine::EventObserver {
      *        You can use this function only if connection handler is ready
      */
     void LoadApplications();
-
-    /**
-     * @brief Event, thar raised if application get resumption response from HMI
-     * @param event : event object, that contains smart_object with HMI message
-     */
-    virtual void on_event(const event_engine::Event& event);
 
     /**
      * @brief Set application HMI Level as saved
@@ -130,13 +135,6 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     void onTimer();
 
-    /**
-     * @brief Set application HMI Level as saved
-     * @param application is application whitch HMI Level is need to restore
-     * @return true if succes, otherwise return false
-     */
-    bool RestoreApplicationHMILevel(Application* application);
-
   private:
 
     timer::TimerThread<ResumeCtrl> timer_;
@@ -174,7 +172,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     *       wait for timer to resume HMI Level
     *
     */
-    std::set<application_timestamp,TimeStampComparator> waiting_for_timer_;
+    std::set<application_timestamp, TimeStampComparator> waiting_for_timer_;
 
 
     ApplicationManagerImpl* app_mngr_;
@@ -204,8 +202,9 @@ class ResumeCtrl: public event_engine::EventObserver {
                         const smart_objects::SmartObject* msg_params = NULL,
                         bool use_events = false);
 
-    bool ProcessHMIRequest(NsSmartDeviceLink::NsSmartObjects::SmartObject* request = NULL,
-                        bool use_events = false);
+    bool ProcessHMIRequest(
+        NsSmartDeviceLink::NsSmartObjects::SmartObject* request = NULL,
+        bool use_events = false);
 };
 
 }  // namespace application_manager
