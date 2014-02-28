@@ -10,6 +10,7 @@ package com.ford.syncV4.android.manager;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.rpc.PutFile;
 
 import java.util.Vector;
 
@@ -25,6 +26,9 @@ public class RPCRequestsResumableManager {
     // This Vector keep all RPC requests since the last successful application start in case of
     // connection does not exists
     private final Vector<RPCRequest> rpcRequestsResumableDisconnected = new Vector<RPCRequest>();
+
+    // This Vector keep all PutFiles since the last successful application start
+    private final Vector<PutFile> putFiles = new Vector<PutFile>();
 
     /**
      * Constructor
@@ -52,6 +56,15 @@ public class RPCRequestsResumableManager {
     }
 
     /**
+     *
+     *
+     * @param putFile
+     */
+    public void addPutFile(PutFile putFile) {
+        putFiles.add(putFile);
+    }
+
+    /**
      * Send all RPC requests which were add when there were connection to SDL.
      *
      * @param syncProxy {@link com.ford.syncV4.proxy.SyncProxyALM} proxy object
@@ -76,10 +89,28 @@ public class RPCRequestsResumableManager {
     }
 
     /**
+     *
+     * @param syncProxy
+     * @throws SyncException
+     */
+    public void sendAllPutFiles(SyncProxyALM syncProxy) throws SyncException {
+        for (PutFile putFile : putFiles) {
+            syncProxy.sendRPCRequest(putFile);
+        }
+    }
+
+    /**
      * Clean all RPC requests which were add when there were connection to SDL.
      */
     public void cleanAllRequestsDisconnected() {
         rpcRequestsResumableDisconnected.clear();
+    }
+
+    /**
+     *
+     */
+    public void cleanAllPutFiles() {
+        putFiles.clear();
     }
 
     /**
@@ -105,5 +136,13 @@ public class RPCRequestsResumableManager {
      */
     public int getRequestsDisconnectedSize() {
         return rpcRequestsResumableDisconnected.size();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getPutFilesSize() {
+        return putFiles.size();
     }
 }
