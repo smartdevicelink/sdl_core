@@ -165,6 +165,13 @@ FFW.RPCClient = Em.Object
         onWSClose: function(evt) {
 
             Em.Logger.log("RPCClient: Connection is closed");
+
+            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
+
+            var self = this;
+            setTimeout(function(){
+                    self.connect(self.observer, self.idStart);
+                }, 5000);
             this.observer.onRPCDisconnected();
         },
 
