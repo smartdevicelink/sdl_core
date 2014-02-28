@@ -96,6 +96,11 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
 
+      //TODO: add delete
+  crypto_manager::SecureServiceManager*secure_service_manager =
+      new crypto_manager::SecureServiceManager();
+  secure_service_manager->set_session_observer(connection_handler_);
+
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
@@ -106,7 +111,7 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-  protocol_handler_->AddProtocolObserver(new crypto_manager::SecureServiceManager());
+  protocol_handler_->AddProtocolObserver(secure_service_manager);
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);

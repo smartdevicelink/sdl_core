@@ -37,6 +37,7 @@
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/raw_message.h"
+#include "protocol_handler/session_observer.h"
 
 #include "utils/message_queue.h"
 #include "utils/message_queue.h"
@@ -90,6 +91,13 @@ public:
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr& message) OVERRIDE;
 
   /**
+   * \brief Sets pointer for Connection Handler layer for managing sessions
+   * \param observer Pointer to object of the class implementing
+   * ISessionObserver
+   */
+  void set_session_observer(protocol_handler::SessionObserver* observer);
+
+  /**
    * \brief Convert RawMessagePtr to SecureMessagePtr
    * with deep copy data.
    * \param message ProtocoloHandler raw message
@@ -99,15 +107,20 @@ public:
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON message_for_encryption thread!
-  void Handle(const SecureServiceMessageLoop::Message& message) OVERRIDE;
+  void Handle(const SecureServiceMessage& message) OVERRIDE;
  private:
-  crypto_manager::CryptoManager* crypto_manager_;
-
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;
 
-  DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
+  crypto_manager::CryptoManager* crypto_manager_;
 
+  /**
+   *\brief Pointer on instance of class implementing ISessionObserver
+   *\brief (Connection Handler)
+   */
+  protocol_handler::SessionObserver* session_observer_;
+
+  DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
   static log4cxx::LoggerPtr logger_;
 };
 } //crypto_manager

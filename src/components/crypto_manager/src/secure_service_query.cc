@@ -44,33 +44,50 @@ inline uint32_t getUInt8Value(const uint8_t* const data){
       data[2] <<  8 | data[3];
 }
 
-SecureServiceQuery::SecureServiceQuery() : header_(), data_(NULL) {
+SecureServiceQuery::SecureServiceQuery() :
+  header_(), connection_key_(0), data_(NULL) {
 }
-
-bool SecureServiceQuery::setData(const void * const message_data,
-                                 const size_t message_data_size) {
-  DCHECK(message_data);
+SecureServiceQuery::~SecureServiceQuery() {
+  delete data_;
+  data_=NULL;
+}
+bool SecureServiceQuery::setData(const uint8_t * const binary_data,
+                                 const size_t bin_data_size) {
+  DCHECK(binary_data);
   const size_t header_size = sizeof(QueryHeader);
-  if(message_data_size < header_size) {
+  if(bin_data_size < header_size) {
       return false;
     }
-
-  const uint8_t* const binary_data =
-      static_cast<const uint8_t* const>(message_data);
-  SecureServiceQuery::QueryHeader header;
-  header.query_id_ = binary_data[0];
-  header.seq_number_ = getUInt8Value(binary_data + 1);
-  header.seq_number_ = getUInt8Value(binary_data + 5);
-  const int data_size = message_data_size - header_size;
+  header_.query_id_ = binary_data[0];
+  header_.seq_number_ = getUInt8Value(binary_data + 1);
+  header_.seq_number_ = getUInt8Value(binary_data + 5);
+  const int data_size = bin_data_size - header_size;
   if(data_size > 0) {
-      data_ = new uint8_t[data_size];
-      memcpy(data_, message_data + header_size, data_size);
+      delete data_;
+      data_size_ = data_size;
+      data_ = new uint8_t[data_size_];
+      memcpy(data_, binary_data + header_size, data_size_);
     }
   return true;
 }
 
-SecureServiceQuery::~SecureServiceQuery() {
-  delete data_;
-  data_=NULL;
+void SecureServiceQuery::setConnectionKey(const uint32_t connection_key) {
+  connection_key_ = connection_key;
+}
+
+const SecureServiceQuery::QueryHeader &SecureServiceQuery::getHeader() const {
+  return header_;
+}
+
+const uint8_t * const SecureServiceQuery::getData() const {
+  return data_;
+}
+
+const size_t SecureServiceQuery::getDataSize() const {
+  return data_size_;
+}
+
+uint32_t SecureServiceQuery::getConnectionKey() const {
+  return connection_key_;
 }
 

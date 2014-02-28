@@ -39,7 +39,11 @@ log4cxx::LoggerPtr SecureServiceManager::logger_ = log4cxx::LoggerPtr(
 
 SecureServiceManager::SecureServiceManager() :
   secure_service_messages_("SecureServiceManager::secure_service_messages_", this),
-  crypto_manager_(new crypto_manager::CryptoManagerImpl()){
+  crypto_manager_(new crypto_manager::CryptoManagerImpl()),
+  session_observer_(0){
+  if(!crypto_manager_->Init()) {
+      LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+    }
 }
 
 void SecureServiceManager::OnMessageReceived(
@@ -48,6 +52,10 @@ void SecureServiceManager::OnMessageReceived(
   if(message->service_type() == protocol_handler::kSecure) {
       LOG4CXX_WARN(logger_, "Incorrect message service type "
                    << message->service_type());
+      return;
+    }
+  if(!session_observer_) {
+      LOG4CXX_ERROR(logger_, "No SessionObserver for usage.");
       return;
     }
   const SecureServiceQueryPtr serviceQueryPtr(
@@ -69,6 +77,7 @@ SecureServiceQueryPtr SecureServiceManager::SecureMessageFromRawMessage(
       LOG4CXX_ERROR(logger_, "Incorrect message received");
       return SecureServiceQueryPtr();
     }
+  query->setConnectionKey(message->connection_key());
   return SecureServiceQueryPtr(query);
 }
 
@@ -78,9 +87,49 @@ void SecureServiceManager::OnMobileMessageSent(
   assert(!"not implemented");
 }
 
-void SecureServiceManager::Handle(const SecureServiceMessageLoop::Message &message) {
+void SecureServiceManager::set_session_observer(
+    protocol_handler::SessionObserver *observer) {
+  if (!observer) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    return;
+  }
+  session_observer_ = observer;
+}
+void SecureServiceManager::Handle(const SecureServiceMessage &message) {
+  DCHECK(message); DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
-  assert(!"not implemented");
+  const SecureServiceQuery::QueryHeader &header = message->getHeader();
+  if(header.query_id_ == SecureServiceQuery::ProtectServiceRequest) {
+      if(message->getDataSize() != 1) {
+          LOG4CXX_ERROR(logger_,
+                        "ProtectServiceRequest: wrong arguments size." <<
+                        message->getDataSize());
+          return;
+        }
+      const uint8_t service_id = *message->getData();
+      const protocol_handler::ServiceType service_type =
+          protocol_handler::ServiceTypeFromByte(service_id);
+      if(service_type == protocol_handler::kInvalidServiceType) {
+          LOG4CXX_ERROR(logger_,
+                        "ProtectServiceRequest: Wrong ServiceType "
+                        << service_id);
+          return;
+        }
+      crypto_manager::SSLContext * const context =
+          crypto_manager_->CreateSSLContext();
+      if(!context) {
+          LOG4CXX_ERROR(logger_,
+                        "CryptoManager: could not create SSl context.");
+          return;
+        }
+      const bool result = session_observer_->SetSSLContext(
+            message->getConnectionKey(), service_type, context);
+      if(!result) {
+          LOG4CXX_ERROR(logger_,
+                        "SessionObserver: could not set SSl context.");
+          return;
+        }
+    }
 }
 
 //void SecureServiceManager::ProcessMessageFromMobile(const utils::SharedPtr<Message> &message)
