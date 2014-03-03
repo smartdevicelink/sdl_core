@@ -110,7 +110,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     }
 
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
-        byte[] data = BitConverter.intToByteArray(0);
+        final byte[] data = BitConverter.intToByteArray(0);
         final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(ServiceType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
 
@@ -128,9 +128,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                                                      int length) {
                 super.onProtocolMessageBytesToSend(msgBytes, offset, length);
                 if (count == 0) {
-                    assertTrue("Arrays should be equal", Arrays.equals(msgBytes, header.assembleHeaderBytes()));
+                    byte[] commonArray = new byte[msgBytes.length];
+                    System.arraycopy(header.assembleHeaderBytes(), 0, commonArray, 0, header.assembleHeaderBytes().length);
+                    System.arraycopy(data, 0, commonArray, header.assembleHeaderBytes().length, data.length);
+                    assertTrue("Arrays should be equal", Arrays.equals(msgBytes, commonArray));
                     assertEquals("Offset should be 0", offset, 0);
-                    assertEquals("Length should be 12", length, 12);
+                    assertEquals("Length should be 12", length, 16);
                     count++;
                 }
             }
