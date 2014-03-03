@@ -51,11 +51,11 @@ public interface ISyncALMLifeCycleListener {
 	
 	/**
 	 * onError() being called indicates that the proxy has experienced an error.
-	 * 
-	 * @param info - Any info present about the error that occurred.
-	 * @param e - Any exception thrown by the error.
-	 */
-	public void onError(String info, Exception e);
+	 *
+     * @param info - Any info present about the error that occurred.
+     * @param e - Any exception thrown by the error.
+     */
+	public void onError(String info, Throwable e);
 	
 	/**
 	 * onGenericResponse() being called indicates that the SYNC could not determine the
