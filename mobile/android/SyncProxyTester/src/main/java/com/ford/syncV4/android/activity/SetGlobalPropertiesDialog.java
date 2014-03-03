@@ -236,12 +236,19 @@ public class SetGlobalPropertiesDialog extends DialogFragment {
         }
 
         if (requestCode == Const.REQUEST_EDIT_KBDPROPERTIES) {
-            mCurrentKbdProperties = (KeyboardProperties) IntentHelper.getObjectForKey(
-                            Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-            if (mCurrentKbdProperties == null) {
-                Log.w(LOG_TAG, "Returned kbdProperties is null!");
+            if (IntentHelper.containsKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES)) {
+                mCurrentKbdProperties = (KeyboardProperties) IntentHelper.getObjectForKey(
+                        Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                if (mCurrentKbdProperties == null) {
+                    Log.w(LOG_TAG, "Returned kbdProperties is null");
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+            } else if (IntentHelper.containsKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY)) {
+                mCurrentKbdProperties = null;
+                Log.w(LOG_TAG, "Returned kbdProperties is null, probably none of the properties " +
+                        "were selected");
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY);
             }
-            IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
         }
     }
 }

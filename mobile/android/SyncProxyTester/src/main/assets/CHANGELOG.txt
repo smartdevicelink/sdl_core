@@ -1,4 +1,5 @@
 [CW10]
+* Fix SPT.SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure behaviour
 * Log messages of the PutFile request when resume application
 
 [CW9]
