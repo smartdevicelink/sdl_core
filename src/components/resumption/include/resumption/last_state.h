@@ -53,6 +53,10 @@ class LastState : public utils::Singleton<LastState> {
   Dictionary dictionary;
 
  private:
+  /**
+   * @brief File to save Dictionary
+   */
+  std::string filename;
 /**
  * @brief Private default constructor
  */

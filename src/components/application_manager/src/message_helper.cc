@@ -277,6 +277,7 @@ void MessageHelper::SendHelpVrCommand() {
 
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(const uint32_t app_id) {
 
+  LOG4CXX_INFO(g_logger, "GetHashUpdateNotification" << app_id);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 

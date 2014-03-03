@@ -57,6 +57,9 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class ApplicationManagerImpl;
 class Application;
 class ResumeCtrl: public event_engine::EventObserver {
+
+  mutable sync_primitives::Lock queue_lock_;
+
   public:
 
   /**
