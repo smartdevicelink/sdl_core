@@ -59,7 +59,7 @@ namespace secure_service_manager {
  * when we have them.
  */
 struct SecureServiceMessage: public SecureServiceQueryPtr {
-  SecureServiceMessage(const SecureServiceQueryPtr& message)
+  explicit SecureServiceMessage(const SecureServiceQueryPtr& message)
     : SecureServiceQueryPtr(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return 0; }
@@ -116,13 +116,17 @@ public:
   void Handle(const SecureServiceMessage& message) OVERRIDE;
  private:
 
-  bool ProtectServiceRequest(const SecureServiceMessage &message);
+  bool ProtectServiceRequest(const SecureServiceMessage &requestMessage);
   bool ProtectServiceResponse(const SecureServiceMessage &message);
-  bool SendHandshakeData(const SecureServiceMessage &message);
+  bool SendHandshakeData(const SecureServiceMessage &inMessage);
 
   void PostProtectServiceResponse(
       const SecureServiceMessage &requestMessage,
       const SecureServiceQuery::ProtectServiceResult response);
+
+  void PostSendHandshakeData(
+      const SecureServiceMessage &inMessage,
+      const uint8_t * const data, const size_t data_size);
 
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;

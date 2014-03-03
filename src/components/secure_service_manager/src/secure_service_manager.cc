@@ -58,7 +58,7 @@ void SecureServiceManager::OnMessageReceived(
       LOG4CXX_ERROR(logger_, "No SessionObserver for usage.");
       return;
     }
-  const SecureServiceQueryPtr serviceQueryPtr(
+  const SecureServiceMessage serviceQueryPtr(
         SecureMessageFromRawMessage(message));
   if(serviceQueryPtr) {
       secure_service_messages_.PostMessage(serviceQueryPtr);
@@ -205,23 +205,25 @@ bool SecureServiceManager::ProtectServiceRequest(
   return true;
 }
 
-bool SecureServiceManager::ProtectServiceResponse(const SecureServiceMessage &message) {
+bool SecureServiceManager::ProtectServiceResponse(
+    const SecureServiceMessage &responseMessage) {
   LOG4CXX_INFO(logger_, "ProtectServiceResponse processing");
-  DCHECK(message->getHeader().query_id_ == SecureServiceQuery::ProtectServiceResponse);
-  DCHECK(message); DCHECK(session_observer_);
-  if(message->getDataSize() != 1) {
+  DCHECK(responseMessage->getHeader().query_id_ ==
+         SecureServiceQuery::ProtectServiceResponse);
+  DCHECK(responseMessage); DCHECK(session_observer_);
+  if(responseMessage->getDataSize() != 1) {
       LOG4CXX_ERROR(logger_,
                     "ProtectServiceResponse: wrong arguments size." <<
-                    message->getDataSize());
+                    responseMessage->getDataSize());
       return false;
     }
 
-  uint8_t* rawData = new uint8_t[message->getDataSize()];
-  memcpy(rawData, message->getData(), message->getDataSize());
+  uint8_t* rawData = new uint8_t[responseMessage->getDataSize()];
+  memcpy(rawData, responseMessage->getData(), responseMessage->getDataSize());
 
   protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage( message->getConnectionKey(), 2,
-                                          rawData, message->getDataSize(),
+        new protocol_handler::RawMessage( responseMessage->getConnectionKey(), 2,
+                                          rawData, responseMessage->getDataSize(),
                                           protocol_handler::kSecure));
 
   if (!rawMessagePtr) {
@@ -232,15 +234,15 @@ bool SecureServiceManager::ProtectServiceResponse(const SecureServiceMessage &me
   return true;
 }
 
-bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &message) {
+bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
-  DCHECK(message->getHeader().query_id_ == SecureServiceQuery::SendHandshakeData);
-  DCHECK(message);
-  if(message->getDataSize() > 0) {
+  DCHECK(inMessage->getHeader().query_id_ == SecureServiceQuery::SendHandshakeData);
+  DCHECK(inMessage);
+  if(inMessage->getDataSize() > 0) {
       LOG4CXX_ERROR(logger_, "SendHandshakeData: null arguments size.");
       return false;
     }
-  const uint8_t service_id = *message->getData();
+  const uint8_t service_id = *inMessage->getData();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
   if(service_type == protocol_handler::kInvalidServiceType) {
@@ -250,21 +252,21 @@ bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &message
       return false;
     }
   SSLContext * sslContext =
-      session_observer_->GetSSLContext(message->getConnectionKey(), service_type);
+      session_observer_->GetSSLContext(inMessage->getConnectionKey(), service_type);
   if(!sslContext) {
       LOG4CXX_ERROR(logger_, "SendHandshakeData: No ssl context");
       return false;
     }
-  const uint8_t * data = message->getData();
-  const size_t data_size = message->getDataSize();
+  const uint8_t * data = inMessage->getData();
+  const size_t data_size = inMessage->getDataSize();
   size_t out_data_size;
-  const uint8_t * new_data  = static_cast<uint8_t *>
+  const uint8_t * out_data  = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
-  if(!new_data){
+  if(!out_data){
       LOG4CXX_WARN(logger_, "Handshake fail: " << LastError());
       return false;
     }
-  assert(!"Not implemented push logics");
+  PostSendHandshakeData(inMessage, out_data, out_data_size);
   return true;
   }
 
@@ -272,15 +274,32 @@ void SecureServiceManager::PostProtectServiceResponse(
     const SecureServiceMessage &requestMessage,
     const SecureServiceQuery::ProtectServiceResult response){
     LOG4CXX_INFO(logger_, "SecureServiceManager::GenerateProtectServiceResponse");
-    DCHECK(requestMessage->getHeader().query_id_ == SecureServiceQuery::ProtectServiceRequest);
+    DCHECK(requestMessage->getHeader().query_id_==
+           SecureServiceQuery::ProtectServiceRequest);
 
     SecureServiceQuery::QueryHeader header;
     header.query_id_ = SecureServiceQuery::ProtectServiceResponse;
     header.seq_number_ = requestMessage->getHeader().seq_number_;
 
-    SecureServiceQueryPtr query(
+    SecureServiceMessage query(
           new SecureServiceQuery(header, requestMessage->getConnectionKey()));
     const uint8_t data = response;
     query->setData(&data, 1);
+    secure_service_messages_.PostMessage(query);
+  }
+
+void SecureServiceManager::PostSendHandshakeData(
+    const SecureServiceMessage &inMessage,
+    const uint8_t * const data, const size_t data_size) {
+    LOG4CXX_INFO(logger_, "SecureServiceManager::PostSendHandshakeData");
+    DCHECK(data); DCHECK(data_size);
+    DCHECK(inMessage->getHeader().query_id_ ==
+           SecureServiceQuery::SendHandshakeData);
+
+    SecureServiceQuery::QueryHeader header = inMessage->getHeader();
+
+    SecureServiceMessage query(
+          new SecureServiceQuery(header, inMessage->getConnectionKey()));
+    query->setData(data, data_size);
     secure_service_messages_.PostMessage(query);
   }
