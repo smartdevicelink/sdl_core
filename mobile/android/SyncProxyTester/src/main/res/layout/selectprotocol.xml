@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content">
 
     <LinearLayout
         android:id="@+id/selectprotocol_Root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <CheckBox
             android:layout_width="wrap_content"
@@ -32,28 +32,28 @@
             android:text="@string/mobileNavi" />
 
         <RadioGroup
-                android:id="@+id/selectprotocol_radioGroupVideoSource"
+            android:id="@+id/selectprotocol_radioGroupVideoSource"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/selectprotocol_radioSourceMP4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:text="@string/selectprotocol_sourceMP4"
+                android:checked="true" />
 
             <RadioButton
-                    android:id="@+id/selectprotocol_radioSourceMP4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/selectprotocol_sourceMP4"
-                    android:checked="true" />
-
-            <RadioButton
-                    android:id="@+id/selectprotocol_radioSourceH264"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/selectprotocol_sourceH264" />
+                android:id="@+id/selectprotocol_radioSourceH264"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/selectprotocol_sourceH264" />
         </RadioGroup>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -72,20 +72,19 @@
                 android:ems="10"
                 android:inputType="textCapSentences"
                 android:maxLength="25"
-                android:text="@string/selectprotocol_appNameDefault" >
-            </EditText>
+                android:text="@string/selectprotocol_appNameDefault"></EditText>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false" >
+            android:baselineAligned="false">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -104,7 +103,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical" >
+                android:orientation="vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -124,7 +123,7 @@
             android:id="@+id/selectprotocol_radioGroupTransport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" >
+            android:orientation="horizontal">
 
             <RadioButton
                 android:id="@+id/selectprotocol_radioWiFi"
@@ -156,7 +155,7 @@
         <LinearLayout
             android:id="@+id/nsd_use_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/nsd_label_view"
@@ -184,12 +183,12 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:visibility="gone"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="20dp" />
 
         <LinearLayout
             android:id="@+id/ip_address_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -214,7 +213,7 @@
         <LinearLayout
             android:id="@+id/port_layout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -250,6 +249,13 @@
             android:checked="true"
             android:text="@string/selectprotocol_autoSetAppIcon" />
 
-        </LinearLayout>
+        <CheckBox
+            android:id="@+id/policy_file_update_auto_replay_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/policy_file_update_auto_replay_label" />
+
+    </LinearLayout>
 
 </ScrollView>

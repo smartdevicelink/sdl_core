@@ -31,6 +31,7 @@ import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
@@ -860,11 +861,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         getMainUIHandler().post(new Runnable() {
                             @Override
                             public void run() {
-                                getProxyListener().onOnHMIStatus((OnHMIStatus) msg);
+                                getProxyListener().onOnHMIStatus(msg);
                             }
                         });
                     } else {
-                        getProxyListener().onOnHMIStatus((OnHMIStatus) msg);
+                        getProxyListener().onOnHMIStatus(msg);
                     }
                 }
             } else if (functionName.equals(Names.OnCommand)) {
@@ -876,11 +877,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnCommand((OnCommand) msg);
+                            getProxyListener().onOnCommand(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnCommand((OnCommand) msg);
+                    getProxyListener().onOnCommand(msg);
                 }
             } else if (functionName.equals(Names.OnDriverDistraction)) {
                 // OnDriverDistration
@@ -996,11 +997,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnButtonPress((OnButtonPress) msg);
+                            getProxyListener().onOnButtonPress(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnButtonPress((OnButtonPress) msg);
+                    getProxyListener().onOnButtonPress(msg);
                 }
             } else if (functionName.equals(Names.OnButtonEvent)) {
                 // OnButtonEvent
@@ -1011,11 +1012,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnButtonEvent((OnButtonEvent) msg);
+                            getProxyListener().onOnButtonEvent(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnButtonEvent((OnButtonEvent) msg);
+                    getProxyListener().onOnButtonEvent(msg);
                 }
             } else if (functionName.equals(Names.OnLanguageChange)) {
                 // OnLanguageChange
@@ -1027,12 +1028,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnLanguageChange(
-                                    (OnLanguageChange) msg);
+                            getProxyListener().onOnLanguageChange(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnLanguageChange((OnLanguageChange) msg);
+                    getProxyListener().onOnLanguageChange(msg);
                 }
             } else if (functionName.equals(Names.OnAudioPassThru)) {
                 // OnAudioPassThru
@@ -1042,12 +1042,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnAudioPassThru(
-                                    (OnAudioPassThru) msg);
+                            getProxyListener().onOnAudioPassThru(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnAudioPassThru((OnAudioPassThru) msg);
+                    getProxyListener().onOnAudioPassThru(msg);
                 }
             } else if (functionName.equals(Names.OnVehicleData)) {
                 // OnVehicleData
@@ -1057,11 +1056,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnVehicleData((OnVehicleData) msg);
+                            getProxyListener().onOnVehicleData(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnVehicleData((OnVehicleData) msg);
+                    getProxyListener().onOnVehicleData(msg);
                 }
             } else if (functionName.equals(Names.OnTouchEvent)) {
                 // OnTouchEvent
@@ -1071,11 +1070,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onOnTouchEvent((OnTouchEvent) msg);
+                            getProxyListener().onOnTouchEvent(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onOnTouchEvent((OnTouchEvent) msg);
+                    getProxyListener().onOnTouchEvent(msg);
                 }
             } else if (functionName.equals(Names.OnKeyboardInput)) {
                 // OnKeyboardInput
@@ -1085,12 +1084,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onKeyboardInput(
-                                    (OnKeyboardInput) msg);
+                            getProxyListener().onKeyboardInput(msg);
                         }
                     });
                 } else {
-                    getProxyListener().onKeyboardInput((OnKeyboardInput) msg);
+                    getProxyListener().onKeyboardInput(msg);
                 }
             } else if (functionName.equals(Names.OnSystemRequest)) {
                 syncProxyBase.handleOnSystemRequest(hash);
@@ -1130,8 +1128,24 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 } else {
                     syncProxyBase.notifyOnAppInterfaceUnregistered(msg);
                 }
-            } else {
+            } else if (functionName.equals(Names.OnHashChange)) {
+                // OnHashChange
+                final OnHashChange onHashChange = new OnHashChange(hash);
 
+                syncProxyBase.setHashId(onHashChange.getHashID());
+
+                if (getCallbackToUIThread()) {
+                    // Run in UI thread
+                    getMainUIHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            getProxyListener().onHashChange(onHashChange);
+                        }
+                    });
+                } else {
+                    getProxyListener().onHashChange(onHashChange);
+                }
+            } else {
                 try {
                     if (syncProxyBase.getSyncMsgVersion() != null) {
                         DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString() +
@@ -1142,8 +1156,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 } catch (SyncException e) {
                     e.printStackTrace();
                 }
-            } // end-if
-        } // end-if notification
+            }
+        }
 
         SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SyncProxyBase.SYNC_LIB_TRACE_KEY);
     }
@@ -1159,5 +1173,4 @@ public class RPCMessageHandler implements IRPCMessageHandler {
     private Boolean getCallbackToUIThread() {
         return syncProxyBase.getCallbackToUIThread();
     }
-
 }

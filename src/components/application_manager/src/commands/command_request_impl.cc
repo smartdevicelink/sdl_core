@@ -43,8 +43,8 @@ namespace commands {
 
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
  : CommandImpl(message),
-   default_timeout_(profile::Profile::instance()->default_timeout()) {
-
+   default_timeout_(profile::Profile::instance()->default_timeout()),
+   current_state_(kAwaitingHMIResponse) {
 }
 
 CommandRequestImpl::~CommandRequestImpl() {
@@ -64,6 +64,13 @@ void CommandRequestImpl::Run() {
 void CommandRequestImpl::onTimeOut() {
   LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  if (kCompleted == current_state_) {
+    // don't send timeout if request completed
+    return;
+  }
+
+  current_state_ = kTimedOut;
   smart_objects::SmartObject* response =
     MessageHelper::CreateNegativeResponse(connection_key(), function_id(),
     correlation_id(), mobile_api::Result::TIMED_OUT);
@@ -76,8 +83,15 @@ void CommandRequestImpl::on_event(const event_engine::Event& event) {
 
 void CommandRequestImpl::SendResponse(
     const bool success, const mobile_apis::Result::eType& result_code,
-    const char* info, const NsSmart::SmartObject* response_params) const {
+    const char* info, const NsSmart::SmartObject* response_params) {
 
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  if (kTimedOut == current_state_) {
+    // don't send response if request timeout expired
+    return;
+  }
+
+  current_state_ = kCompleted;
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
   if (!result) {
@@ -107,6 +121,19 @@ void CommandRequestImpl::SendResponse(
   response[strings::msg_params][strings::result_code] = result_code;
 
   ApplicationManagerImpl::instance()->ManageMobileCommand(result);
+}
+
+bool CommandRequestImpl::CheckSyntax(std::string str, bool allow_empty_line) {
+  if (std::string::npos != str.find_first_of("\t\n")) {
+    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    return false;
+  }
+  if (!allow_empty_line) {
+    if ((std::string::npos == str.find_first_not_of(' '))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void CommandRequestImpl::SendHMIRequest(

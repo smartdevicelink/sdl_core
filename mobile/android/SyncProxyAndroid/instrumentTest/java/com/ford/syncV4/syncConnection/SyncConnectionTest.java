@@ -2,6 +2,8 @@ package com.ford.syncV4.syncConnection;
 
 import android.test.InstrumentationTestCase;
 
+import com.ford.syncV4.protocol.AbstractProtocol;
+import com.ford.syncV4.protocol.BinaryFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
@@ -14,13 +16,19 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
 import java.util.Arrays;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -295,5 +303,44 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.closeConnection((byte) 0, true, true);
         verify(connection.getHeartbeatMonitor(), never()).stop();
         assertNotNull("heartbeat monitor should not be null",connection.getHeartbeatMonitor());
+    }
+
+    public void testHeartbeatMonitorResetOnHeartbeatReset() throws Exception {
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setHeartbeatMonitor(heartbeatMonitor);
+        connection.onResetHeartbeat();
+        verify(heartbeatMonitor).notifyTransportActivity();
+    }
+
+    public void testHeartbeatSendDoNotResetHeartbeat() throws Exception {
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.sendHeartbeat(heartbeatMonitor);
+        verify(heartbeatMonitor, never()).notifyTransportActivity();
+    }
+
+    public void testMaxJsonSizeInIncomingMessageShouldCallOnProtocolError() {
+        final ISyncConnectionListener connectionListenerMock =
+                mock(ISyncConnectionListener.class);
+        SyncConnection connection = new SyncConnection(connectionListenerMock);
+        connection.init(null, mock(SyncTransport.class));
+        final WiProProtocol protocol = new WiProProtocol(connection);
+        protocol.setVersion((byte) 0x02);
+        connection._protocol = protocol;
+
+        final byte maxByte = (byte) 0xFF;
+        final byte[] bytes =
+                { 0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00 };
+        connection.onTransportBytesReceived(bytes, bytes.length);
+
+        ArgumentCaptor<Throwable> throwableArgumentCaptor =
+                ArgumentCaptor.forClass(Throwable.class);
+        verify(connectionListenerMock, timeout(100).times(1)).onProtocolError(
+                anyString(), throwableArgumentCaptor.capture());
+        assertThat(throwableArgumentCaptor.getValue().toString(),
+                containsString(OutOfMemoryError.class.getSimpleName()));
     }
 }

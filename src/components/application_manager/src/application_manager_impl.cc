@@ -82,7 +82,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
-    media_manager_(NULL)
+    media_manager_(NULL),
+    resume_ctrl_(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   if (!policies_manager_.Init()) {
@@ -368,6 +369,83 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   return true;
 }
 
+bool ApplicationManagerImpl::PutApplicationInLimited(ApplicationSharedPtr app) {
+  DCHECK(app.get())
+
+  bool is_new_app_media = app->is_media_application();
+  mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_LIMITED;
+
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    ApplicationSharedPtr curr_app = *it;
+    if (app->app_id() == curr_app->app_id()) {
+      continue;
+    }
+
+    if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+      result = mobile_api::HMILevel::HMI_BACKGROUND;
+      break;
+    }
+    if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+      if (curr_app->is_media_application()) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+      } else {
+        result = mobile_api::HMILevel::HMI_LIMITED;
+      }
+      break;
+    }
+
+  }
+  app->set_hmi_level(result);
+  return true;
+}
+
+bool ApplicationManagerImpl::PutApplicationInFull(ApplicationSharedPtr app) {
+  DCHECK(app.get())
+
+  bool is_new_app_media = app->is_media_application();
+  mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
+
+  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+  for (; application_list_.end() != it; ++it) {
+    ApplicationSharedPtr curr_app = *it;
+    if (app->app_id() == curr_app->app_id()) {
+      continue;
+    }
+
+    if (is_new_app_media) {
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+        if (curr_app->is_media_application()) {
+          result = mobile_api::HMILevel::HMI_BACKGROUND;
+        } else {
+          result = mobile_api::HMILevel::HMI_LIMITED;
+        }
+        break;
+      }
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
+      }
+    } else {
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
+        result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
+      }
+      if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
+        result = mobile_api::HMILevel::HMI_FULL;
+        break;
+      }
+    }
+  }
+
+  if ( result == mobile_api::HMILevel::HMI_FULL) {
+    MessageHelper::SendActivateAppToHMI(app->app_id());
+    MessageHelper::SendHMIStatusNotification(*(app.get()));
+  }
+  return true;
+}
+
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
   MessageHelper::SendDeleteCommandRequestToHMI(app);
   MessageHelper::ResetGlobalproperties(app);
@@ -488,6 +566,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
     if (!audio_pass_thru_active_) {
       LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
                     " when PassThrough is not active");
+
       return;
     }
   }
@@ -651,7 +730,8 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
 
   const mobile_api::HMILevel::eType& hmi_level = app->hmi_level();
 
-  if (mobile_api::HMILevel::HMI_FULL == hmi_level) {
+  if (mobile_api::HMILevel::HMI_FULL == hmi_level &&
+      app->hmi_supports_navi_streaming() ) {
     return true;
   }
 
@@ -711,18 +791,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   return true;
 }
 
-bool ApplicationManagerImpl::OnServiceResumedCallback(
-    const connection_handler::DeviceHandle& device_handle,
-    const int32_t& old_session_key, const int32_t& new_session_key,
-    const protocol_handler::ServiceType& type) {
-  LOG4CXX_INFO_EXT(logger_,
-                   "OnServiceResumedCallback previous session key= "
-                   << old_session_key << " new session key= "
-                   << new_session_key);
-
-  return true;
-}
-
 void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO_EXT(
@@ -762,6 +830,7 @@ void ApplicationManagerImpl::set_hmi_message_handler(
 void ApplicationManagerImpl::set_connection_handler(
   connection_handler::ConnectionHandler* handler) {
   connection_handler_ = handler;
+  resume_ctrl_.LoadApplications();
 }
 
 void ApplicationManagerImpl::set_policy_manager(
@@ -1401,6 +1470,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
+  resume_ctrl_.SavetoFileSystem();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
@@ -1415,6 +1485,9 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     return;
   }
   ApplicationSharedPtr app_to_remove = it->second;
+  if (is_resuming) {
+    resume_ctrl_.SaveApplication(app_to_remove);
+  }
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     end_audio_pass_thru();
@@ -1422,7 +1495,7 @@ void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool 
     MessageHelper::SendStopAudioPathThru();
   }
   MessageHelper::RemoveAppDataFromHMI(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second, is_resuming);
+  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   applications_.erase(it);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
@@ -1520,36 +1593,37 @@ void ApplicationManagerImpl::Unmute() {
   }
 }
 
-mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(const std::string& app_name,
-														    const std::vector<uint8_t>& binary_data,
-                                                            const std::string& save_path,
-                                                            const uint32_t offset) {
+mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
+    const std::string& app_name, const std::vector<uint8_t>& binary_data,
+    const std::string& save_path, const uint32_t offset) {
   if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset  binary_size = "
+
+  LOG4CXX_INFO(logger_, "SaveBinaryWithOffset  binary_size = "
                << binary_data.size() << " offset = " << offset);
+
   uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
   std::ofstream* file_stream;
   if (offset != 0) {
-      if (file_size != offset) {
-          LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
-          return mobile_apis::Result::INVALID_DATA;
-        }
-      file_stream = file_system::Open(file_system::FullPath(save_path),
-                                      std::ios_base::app);
-    }  else {
-      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
-       // if offset == 0: rewrite file
-      file_stream = file_system::Open(file_system::FullPath(save_path),
-                                      std::ios_base::out);
+    if (file_size != offset) {
+      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+      return mobile_apis::Result::INVALID_DATA;
     }
+    file_stream = file_system::Open(file_system::FullPath(save_path),
+                                    std::ios_base::app);
+  } else {
+    LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+    // if offset == 0: rewrite file
+    file_stream = file_system::Open(file_system::FullPath(save_path),
+                                    std::ios_base::out);
+  }
 
   if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
-      file_stream->close();
-      return mobile_apis::Result::GENERIC_ERROR;
-    }
-  file_stream->close();
+    file_system::Close(file_stream);
+    return mobile_apis::Result::GENERIC_ERROR;
+  }
+  file_system::Close(file_stream);
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }

@@ -98,6 +98,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
 
   SendResponse(true, result_);
+  app->UpdateHash();
 }
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(

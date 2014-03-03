@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # All the branches excluding release branches and virtual HEAD branch
-ALL_BRANCHES=`git branch -r | grep -v '\(HEAD\|origin/release\)'`
+ALL_BRANCHES=`git branch -r | grep -v '\(origin/master$\|HEAD\|origin/release\)'`
 
 # Branch names, access dates and last committer names
 # The format is "<unix-date>  <oldness-text>  <author>  <branch-name>"

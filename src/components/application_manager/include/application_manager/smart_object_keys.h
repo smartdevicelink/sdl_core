@@ -49,7 +49,6 @@ const char error_msg[] = "message";
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
-const char resume[] = "resume";
 const char app_id[] = "appID";
 const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
@@ -69,8 +68,7 @@ const char app_type[] = "appType";
 const char app_hmi_type[] = "appHMIType";
 const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
-const char help_promt[] = "helpPrompt";
-const char timeout_promt[] = "timeoutPrompt";
+const char timeout_prompt[] = "timeoutPrompt";
 const char timeout[] = "timeout";
 const char vr_help_title[] = "vrHelpTitle";
 const char vr_help[] = "vrHelp";
@@ -205,7 +203,6 @@ const char emergency_event[] = "emergencyEvent";
 const char cluster_mode_status[] = "clusterModeStatus";
 const char my_key[] = "myKey";
 const char help_prompt[] = "helpPrompt";
-const char timeout_prompt[] = "timeoutPrompt";
 const char scroll_message_body[] = "scrollableMessageBody";
 const char data_result[] = "dataResult";
 const char dtc_list[] = "dtcList";
@@ -214,6 +211,23 @@ const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
 const char prerecorded_speech[] = "prerecordedSpeech";
 const char supported_diag_modes[] = "supportedDiagModes";
+
+//resuming
+const char application_commands[] = "applicationCommands";
+const char application_choise_sets[] = "applicationChoiceSets";
+const char application_global_properties[] = "globalProperties";
+const char application_vehicle_info[] = "vehicleInfo";
+const char application_buttons[] = "buttons";
+const char application_subscribtions[] = "subscribtions";
+const char application_files[] = "applicationFiles";
+const char resumption[] = "resumption";
+const char ign_off_count[] = "ign_off_count";
+const char connection_info[] = "connection_info";
+const char is_download_complete[] = "is_download_complete";
+
+const char hash_id[] = "hashID";
+const char time_stamp[] = "timeStamp";
+const char manual_text_entry[] = "manualTextEntry";
 }  // namespace strings
 
 namespace mobile_notification {

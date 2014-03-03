@@ -6,6 +6,7 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -23,6 +24,8 @@ import java.util.Vector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.contains;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -98,5 +101,22 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
         assertThat(notification.getFileType(), is(fileType));
         assertThat(notification.getOffset(), is(offset));
         assertThat(notification.getLength(), is(length));
+    }
+
+    public void testOnHashChangeShouldBeCalledOnNotification() throws SyncException,
+            JSONException {
+        String hashId = "1234567890";
+
+        // send OnHashChange
+        Hashtable<String, Object> params = new Hashtable<String, Object>();
+        params.put(Names.hashID, hashId);
+        proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(Names.OnHashChange,
+                params, ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
+
+        ArgumentCaptor<OnHashChange> notificationCaptor = ArgumentCaptor.forClass(OnHashChange.class);
+        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).onHashChange(notificationCaptor.capture());
+
+        final OnHashChange notification = notificationCaptor.getValue();
+        assertThat(notification.getHashID(), is(hashId));
     }
 }

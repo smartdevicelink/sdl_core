@@ -8,6 +8,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.util.TestConfig;
 
 import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.eq;
@@ -39,7 +40,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.resetProxy();
@@ -64,7 +65,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.closeSession(true);
@@ -84,7 +85,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.closeSession(false);

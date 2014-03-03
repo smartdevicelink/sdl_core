@@ -18,6 +18,7 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
+import com.ford.syncV4.util.TestConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -81,7 +82,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock);
+                null, connectionMock, new TestConfig());
         marshaller = proxy.getJsonRPCMarshaller();
 
         handlerMock = mock(IOnSystemRequestHandler.class);

@@ -44,6 +44,8 @@ SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::SocketVideoStreamerAdapter");
   port_ = profile::Profile::instance()->video_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
+
+  Init();
 }
 
 SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {

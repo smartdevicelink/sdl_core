@@ -45,6 +45,8 @@ SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketAudioStreamerAdapter::SocketAudioStreamerAdapter");
   port_ = profile::Profile::instance()->audio_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
+
+  Init();
 }
 
 SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {

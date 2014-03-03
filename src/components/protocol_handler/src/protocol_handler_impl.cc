@@ -53,6 +53,8 @@ log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
 std::string ConvertPacketDataToString(const uint8_t *data,
                                       const std::size_t data_size);
 
+const size_t kStackSize = 32768;
+
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     transport_manager::TransportManager* transport_manager_param)
     : protocol_observers_(),
@@ -61,12 +63,10 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       kPeriodForNaviAck(5),
       raw_ford_messages_from_mobile_(
           "MessagesFromMobileAppHandler", this,
-          threads::ThreadOptions(
-                                 profile::Profile::instance()->thread_min_stack_size()
-          )),
+          threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_(
           "MessagesToMobileAppHandler", this,
-          threads::ThreadOptions(threads::Thread::kMinStackSize)) {
+          threads::ThreadOptions(kStackSize)) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -114,7 +114,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -525,7 +525,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
     }
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case default!!!");
-      break;
+      return RESULT_FAIL;
     }
   }
 

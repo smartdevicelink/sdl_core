@@ -64,7 +64,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, e.toString());
+            Log.e(TAG, "H264 error",e);
         }
     }
 

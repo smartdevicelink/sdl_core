@@ -77,6 +77,21 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
             static_cast<mobile_apis::Result::eType>(
                 message[strings::params][hmi_response::code].asInt());
       bool response_success = mobile_apis::Result::SUCCESS == result_code;
+      if (response_success) {
+        HMICapabilities& hmi_capabilities =
+            ApplicationManagerImpl::instance()->hmi_capabilities();
+        if (message[strings::msg_params].keyExists(hmi_response::display_capabilities)) {
+          hmi_capabilities.set_display_capabilities(
+                message[strings::msg_params][hmi_response::display_capabilities]);
+        }
+
+        if (message[strings::msg_params].keyExists(
+                                            hmi_response::soft_button_capabilities)) {
+          hmi_capabilities.set_soft_button_capabilities(
+            message[strings::msg_params][hmi_response::soft_button_capabilities]);
+        }
+
+      }
       SendResponse(response_success, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

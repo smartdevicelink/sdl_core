@@ -58,7 +58,7 @@ Profile::Profile()
       server_port_(8087),
       video_streaming_port_(5050),
       audio_streaming_port_(5080),
-      help_promt_(),
+      help_prompt_(),
       time_out_promt_(),
       min_tread_stack_size_(threads::Thread::kMinStackSize),
       is_mixing_audio_supported_(false),
@@ -114,8 +114,8 @@ const std::string& Profile::server_address() const {
   return server_address_;
 }
 
-const std::vector<std::string>& Profile::help_promt() const {
-  return help_promt_;
+const std::vector<std::string>& Profile::help_prompt() const {
+  return help_prompt_;
 }
 
 const std::vector<std::string>& Profile::time_out_promt() const {
@@ -474,7 +474,7 @@ void Profile::UpdateValues() {
     LOG4CXX_INFO(logger_, "Set App Directory Quota " << app_dir_quota_);
   }
 
-  help_promt_.clear();
+  help_prompt_.clear();
   *value = '\0';
   if ((0
       != ini_read_value(config_file_name_.c_str(), "GLOBAL PROPERTIES",
@@ -483,7 +483,7 @@ void Profile::UpdateValues() {
     str = strtok(value, ",");
     while (str != NULL) {
       LOG4CXX_INFO(logger_, "Add HelpPromt string" << str);
-      help_promt_.push_back(std::string(str));
+      help_prompt_.push_back(std::string(str));
       str = strtok(NULL, ",");
     }
   }

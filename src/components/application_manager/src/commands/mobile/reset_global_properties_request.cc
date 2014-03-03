@@ -73,7 +73,7 @@ void ResetGlobalPropertiesRequest::Run() {
                       .length();
 
   bool helpt_promt = false;
-  bool timeout_promt = false;
+  bool timeout_prompt = false;
   bool vr_help_title = false;
   bool vr_help_items = false;
   bool menu_name = false;
@@ -87,7 +87,7 @@ void ResetGlobalPropertiesRequest::Run() {
         break;
       }
       case GlobalProperty::TIMEOUTPROMT: {
-        timeout_promt = ResetTimeoutPromt(app);
+        timeout_prompt = ResetTimeoutPromt(app);
         break;
       }
       case GlobalProperty::VRHELPTITLE: {
@@ -118,6 +118,15 @@ void ResetGlobalPropertiesRequest::Run() {
         break;
       }
     }
+  }
+
+  if (vr_help_title || vr_help_items || menu_name || menu_icon
+      || is_key_board_properties) {
+    is_ui_send_ = true;
+  }
+
+  if (timeout_prompt || helpt_promt) {
+    is_tts_send_ = true;
   }
 
   app->set_reset_global_properties_active(true);
@@ -165,17 +174,17 @@ void ResetGlobalPropertiesRequest::Run() {
                        &msg_params, true);
   }
 
-  if (timeout_promt || helpt_promt) {
+  if (timeout_prompt || helpt_promt) {
     // create ui request
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
     if (helpt_promt) {
-      msg_params[strings::help_prompt] = (*app->help_promt());
+      msg_params[strings::help_prompt] = (*app->help_prompt());
     }
 
-    if (timeout_promt) {
-      msg_params[strings::timeout_prompt] = (*app->timeout_promt());
+    if (timeout_prompt) {
+      msg_params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
 
     msg_params[strings::app_id] = app->app_id();
@@ -193,21 +202,21 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     return false;
   }
 
-  const std::vector<std::string>& help_promt = profile::Profile::instance()
-      ->help_promt();
+  const std::vector<std::string>& help_prompt = profile::Profile::instance()
+      ->help_prompt();
 
-  smart_objects::SmartObject so_help_promt = smart_objects::SmartObject(
+  smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  for (uint32_t i = 0; i < help_promt.size(); ++i) {
+  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_promt[i];
+    helpPrompt[strings::text] = help_prompt[i];
     helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_help_promt[i] = helpPrompt;
+    so_help_prompt[i] = helpPrompt;
   }
 
-  app->set_help_prompt(so_help_promt);
+  app->set_help_prompt(so_help_prompt);
 
   return true;
 }
@@ -288,36 +297,45 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-        && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-        || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-            && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-        || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
-            && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+  if (!IsPendingResponseExist()) {
+    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
-  mobile_apis::Result::eType result_code;
-  const char* return_info = NULL;
+    mobile_apis::Result::eType result_code;
+    const char* return_info = NULL;
 
-  if (result) {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
-      result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      } else {
+        result_code = static_cast<mobile_apis::Result::eType>(
+        std::max(ui_result_, tts_result_));
+      }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-      std::max(ui_result_, tts_result_));
+          std::max(ui_result_, tts_result_));
     }
-  } else {
-    result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
-  }
 
-  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                   return_info, &(message[strings::msg_params]));
+    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                     return_info, &(message[strings::msg_params]));
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+        CommandRequestImpl::connection_key());
+
+    if (!app) {
+      LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+      return;
+    }
+    app->UpdateHash();
+  }
 }
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
 }
 

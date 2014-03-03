@@ -98,6 +98,7 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.TestConfig;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -360,6 +361,39 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private String _autoActivateIdDesired = null;
     private SyncMsgVersion _syncMsgVersionRequest = null;
     private Vector<String> _vrSynonyms = null;
+    // Updated hashID which can be used over connection cycles
+    // (i.e. loss of connection, ignition cycles, etc.)
+    private String mHashId = null;
+    // This Config object stores all the necessary data for SDK testing
+    private TestConfig mTestConfig;
+
+    /**
+     * Set hashID which can be used over connection cycles
+     *
+     * @return value of the hashId
+     */
+    public String getHashId() {
+        // For the Test Cases
+        if (mTestConfig != null) {
+            if (!mTestConfig.isUseHashId()) {
+                return null;
+            }
+            if (mTestConfig.isUseCustomHashId()) {
+                return mTestConfig.getCustomHashId();
+            }
+        }
+
+        return mHashId;
+    }
+
+    /**
+     * Get hashID which can be used over connection cycles
+     *
+     * @param mHashId value of the hashId
+     */
+    public void setHashId(String mHashId) {
+        this.mHashId = mHashId;
+    }
 
     public OnLanguageChange getLastLanguageChange() {
         return _lastLanguageChange;
@@ -458,8 +492,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig)
+                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
             throws SyncException {
+
+        mTestConfig = testConfig;
 
         setupSyncProxyBaseComponents(callbackToUIThread);
         // Set variables for Advanced Lifecycle Management
@@ -504,8 +540,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
                             String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
-                            BaseTransportConfig transportConfig, SyncConnection connection)
+                            BaseTransportConfig transportConfig, SyncConnection connection, TestConfig testConfig)
             throws SyncException {
+
+        mTestConfig = testConfig;
 
         setWiProVersion((byte) version);
         setAppInterfacePreRegisterd(preRegister);
@@ -1377,11 +1415,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onError(msg.getInfo(), msg.getException());
+                            _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                         }
                     });
                 } else {
-                    _proxyListener.onError(msg.getInfo(), msg.getException());
+                    _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
             } else if (message.getFunctionName().equals(Names.OnProxyOpened)) {
@@ -1770,7 +1808,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void passErrorToProxyListener(final String info, final Exception e) {
+    private void passErrorToProxyListener(final String info, final Throwable e) {
         OnError message = new OnError(info, e);
         queueInternalMessage(message);
     }
@@ -1805,7 +1843,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void restartRPCProtocolSession() {
-        // Set Proxy Lifecyclek Available
+        // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
 
             try {
@@ -1820,7 +1858,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _hmiDisplayLanguageDesired, _appHMIType,
                         _appID,
                         _autoActivateIdDesired,
-                        REGISTER_APP_INTERFACE_CORRELATION_ID);
+                        REGISTER_APP_INTERFACE_CORRELATION_ID,
+                        getHashId());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. Check parameter values given to SyncProxy constructor.", e);
@@ -2446,22 +2485,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // Protected registerAppInterface used to ensure only non-ALM applications call
-    // reqisterAppInterface
+    // ReqisterAppInterface
     protected void registerAppInterfacePrivate(
             SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID)
+            String appID, String autoActivateID, Integer correlationID, String hashId)
             throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID);
+                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId);
 
         sendRPCRequestPrivate(msg);
 
         logOnRegisterAppRequest(msg);
-
     }
 
     private void logOnRegisterAppRequest(final RegisterAppInterface msg) {
@@ -3034,7 +3072,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolError(String info, Exception e) {
+        public void onProtocolError(String info, Throwable e) {
             passErrorToProxyListener(info, e);
         }
 
@@ -3071,6 +3109,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void processRegisterAppInterfaceResponse(final RegisterAppInterfaceResponse response) {
+        if (!response.getSuccess()) {
+            setHashId(null);
+        }
+
+        if (response.getResultCode() == Result.RESUME_FAILED) {
+            setHashId(null);
+        }
+
         // Create callback
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -3092,7 +3138,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 ((IProxyListenerALMTesting) _proxyListener).onRegisterAppInterfaceResponse(response);
             }
         }
-        // Restore Services
+    }
+
+    /**
+     * Restore interrupted Services
+     */
+    public void restoreServices() {
         if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             if (currentSession.hasService(ServiceType.Mobile_Nav)) {
                 mSyncConnection.startMobileNavService(currentSession);
