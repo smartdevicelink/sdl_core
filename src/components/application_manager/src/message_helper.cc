@@ -828,7 +828,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
 
-if (ui_command) {
+    if (ui_command) {
       ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
     }
 
