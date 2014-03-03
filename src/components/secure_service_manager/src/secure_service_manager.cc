@@ -50,35 +50,21 @@ void SecureServiceManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "SecureServiceManager::OnMessageReceived");
   if(message->service_type() == protocol_handler::kSecure) {
-      LOG4CXX_WARN(logger_, "Incorrect message service type "
-                   << message->service_type());
-      return;
-    }
+    LOG4CXX_WARN(logger_, "Incorrect message service type "
+                 << message->service_type());
+    return;
+  }
   if(!session_observer_) {
-      LOG4CXX_ERROR(logger_, "No SessionObserver for usage.");
-      return;
-    }
+    LOG4CXX_ERROR(logger_, "No SessionObserver for usage.");
+    return;
+  }
   const SecureServiceMessage serviceQueryPtr(
         SecureMessageFromRawMessage(message));
   if(serviceQueryPtr) {
-      secure_service_messages_.PostMessage(serviceQueryPtr);
-    } else {
-      LOG4CXX_WARN(logger_, "Incorrect message received");
-    }
-}
-
-SecureServiceQueryPtr SecureServiceManager::SecureMessageFromRawMessage(
-    const protocol_handler::RawMessagePtr &message) {
-  LOG4CXX_INFO(logger_, "SecureServiceManager::SecureMessageFromRawMessage");
-  DCHECK(message->service_type() == protocol_handler::kSecure);
-  SecureServiceQueryPtr query(new SecureServiceQuery());
-  const bool result = query->Parse(message->data(), message->data_size());
-  if(!result) {
-      LOG4CXX_ERROR(logger_, "Incorrect message received");
-      return SecureServiceQueryPtr();
-    }
-  query->setConnectionKey(message->connection_key());
-  return SecureServiceQueryPtr(query);
+    secure_service_messages_.PostMessage(serviceQueryPtr);
+  } else {
+    LOG4CXX_ERROR(logger_, "Incorrect message received");
+  }
 }
 
 void SecureServiceManager::OnMobileMessageSent(
@@ -86,9 +72,9 @@ void SecureServiceManager::OnMobileMessageSent(
   LOG4CXX_INFO(logger_, "SecureServiceManager::OnMobileMessageSent");
   assert(!"not implemented");
   if(!protocol_handler_) {
-      LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");
-      return;
-    }
+    LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");
+    return;
+  }
   //FIXME(EZ): final_message - true / false?
   protocol_handler_->SendMessageToMobileApp(message, false);
 }
@@ -111,22 +97,37 @@ void SecureServiceManager::set_protocol_handler(
     protocol_handler_ = handler;
   }
 
+SecureServiceMessage SecureServiceManager::SecureMessageFromRawMessage(
+    const protocol_handler::RawMessagePtr &message) {
+  LOG4CXX_INFO(logger_, "SecureServiceManager::SecureMessageFromRawMessage");
+  DCHECK(message->service_type() == protocol_handler::kSecure);
+  SecureServiceMessage query(new SecureServiceQuery());)
+  const bool result = query->Parse(message->data(), message->data_size());
+  if(!result) {
+    //result will be false only if data less then query header
+    LOG4CXX_ERROR(logger_, "Incorrect message received");
+    return SecureServiceMessage();
+  }
+  query->setConnectionKey(message->connection_key());
+  return SecureServiceMessage(query);
+}
+
 void SecureServiceManager::Handle(const SecureServiceMessage &message) {
   DCHECK(message); DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
   switch (message->getHeader().query_id_) {
     case SecureServiceQuery::ProtectServiceRequest:
-      if(!ProtectServiceRequest(message)) {
+      if(!ParseProtectServiceRequest(message)) {
           LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
       return;
     case SecureServiceQuery::ProtectServiceResponse:
-      if(!ProtectServiceResponse(message)) {
+      if(!SendProtectServiceResponse(message)) {
           LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
       return;
     case SecureServiceQuery::SendHandshakeData:
-      if(!SendHandshakeData(message)) {
+      if(!ParseHandshakeData(message)) {
           LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
       return;
@@ -135,7 +136,7 @@ void SecureServiceManager::Handle(const SecureServiceMessage &message) {
     }
 }
 
-bool SecureServiceManager::ProtectServiceRequest(
+bool SecureServiceManager::ParseProtectServiceRequest(
     const SecureServiceMessage &requestMessage) {
   LOG4CXX_INFO(logger_, "ProtectServiceRequest processing");
   DCHECK(requestMessage->getHeader().query_id_ ==
@@ -205,7 +206,7 @@ bool SecureServiceManager::ProtectServiceRequest(
   return true;
 }
 
-bool SecureServiceManager::ProtectServiceResponse(
+bool SecureServiceManager::SendProtectServiceResponse(
     const SecureServiceMessage &responseMessage) {
   LOG4CXX_INFO(logger_, "ProtectServiceResponse processing");
   DCHECK(responseMessage->getHeader().query_id_ ==
@@ -225,16 +226,11 @@ bool SecureServiceManager::ProtectServiceResponse(
         new protocol_handler::RawMessage( responseMessage->getConnectionKey(), 2,
                                           rawData, responseMessage->getDataSize(),
                                           protocol_handler::kSecure));
-
-  if (!rawMessagePtr) {
-    LOG4CXX_ERROR(logger_, "Failed to create raw message.");
-    return false;
-    }
   OnMobileMessageSent(rawMessagePtr);
   return true;
 }
 
-bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &inMessage) {
+bool SecureServiceManager::ParseHandshakeData(const SecureServiceMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage->getHeader().query_id_ == SecureServiceQuery::SendHandshakeData);
   DCHECK(inMessage);
@@ -266,7 +262,7 @@ bool SecureServiceManager::SendHandshakeData(const SecureServiceMessage &inMessa
       LOG4CXX_WARN(logger_, "Handshake fail: " << LastError());
       return false;
     }
-  PostSendHandshakeData(inMessage, out_data, out_data_size);
+  SendHandshakeData(inMessage, out_data, out_data_size);
   return true;
   }
 
@@ -288,7 +284,7 @@ void SecureServiceManager::PostProtectServiceResponse(
     secure_service_messages_.PostMessage(query);
   }
 
-void SecureServiceManager::PostSendHandshakeData(
+void SecureServiceManager::SendHandshakeData(
     const SecureServiceMessage &inMessage,
     const uint8_t * const data, const size_t data_size) {
     LOG4CXX_INFO(logger_, "SecureServiceManager::PostSendHandshakeData");
@@ -296,10 +292,13 @@ void SecureServiceManager::PostSendHandshakeData(
     DCHECK(inMessage->getHeader().query_id_ ==
            SecureServiceQuery::SendHandshakeData);
 
-    SecureServiceQuery::QueryHeader header = inMessage->getHeader();
+    uint8_t* rawData = new uint8_t[data_size];
+    memcpy(rawData, data, data_size);
 
-    SecureServiceMessage query(
-          new SecureServiceQuery(header, inMessage->getConnectionKey()));
-    query->setData(data, data_size);
-    secure_service_messages_.PostMessage(query);
+    protocol_handler::RawMessagePtr rawMessagePtr(
+          new protocol_handler::RawMessage( inMessage->getConnectionKey(), 2,
+                                            rawData, data_size,
+                                            protocol_handler::kSecure));
+
+    OnMobileMessageSent(rawMessagePtr);
   }

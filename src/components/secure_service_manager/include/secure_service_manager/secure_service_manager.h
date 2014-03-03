@@ -108,7 +108,7 @@ public:
    * with deep copy data.
    * \param message ProtocoloHandler raw message
    */
-  static SecureServiceQueryPtr SecureMessageFromRawMessage(
+  static SecureServiceMessage SecureMessageFromRawMessage(
       const protocol_handler::RawMessagePtr& message);
 
   // threads::MessageLoopThread<*>::Handler implementations
@@ -116,15 +116,15 @@ public:
   void Handle(const SecureServiceMessage& message) OVERRIDE;
  private:
 
-  bool ProtectServiceRequest(const SecureServiceMessage &requestMessage);
-  bool ProtectServiceResponse(const SecureServiceMessage &message);
-  bool SendHandshakeData(const SecureServiceMessage &inMessage);
+  bool ParseProtectServiceRequest(const SecureServiceMessage &requestMessage);
+  bool SendProtectServiceResponse(const SecureServiceMessage &message);
+  bool ParseHandshakeData(const SecureServiceMessage &inMessage);
 
   void PostProtectServiceResponse(
       const SecureServiceMessage &requestMessage,
       const SecureServiceQuery::ProtectServiceResult response);
 
-  void PostSendHandshakeData(
+  void SendHandshakeData(
       const SecureServiceMessage &inMessage,
       const uint8_t * const data, const size_t data_size);
 
