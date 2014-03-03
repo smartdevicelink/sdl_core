@@ -195,6 +195,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         mPutFileTransferManager = new PutFileTransferManager();
 
+        mRpcRequestsResumableManager.setCallback(new RPCRequestsResumableManager.RPCRequestsResumableManagerCallback() {
+            @Override
+            public void onSendRequest(RPCRequest request) {
+                syncProxySendRPCRequest(request);
+            }
+        });
+
         MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
 
@@ -2096,12 +2103,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (response.getResultCode() == Result.SUCCESS) {
-            mRpcRequestsResumableManager.sendAllPutFiles(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         } else if (response.getResultCode() == Result.RESUME_FAILED) {
-            mRpcRequestsResumableManager.sendAllPutFiles(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsConnected(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsConnected();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         }
 
         mRpcRequestsResumableManager.cleanAllPutFiles();
