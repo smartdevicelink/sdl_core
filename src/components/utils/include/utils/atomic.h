@@ -55,13 +55,15 @@
 #define atomic_post_dec(ptr) (*(ptr))--
 #endif
 
-#if defined(__QNXNTO__)
-#define atomic_or(ptr, value) atomic_set((unsigned*)(ptr), (unsigned)(value))
+#if defined(_QNXNTO__)
+// on QNX pointer assignment is believed to be atomic
+#define atomic_pointer_assign(dst, src) (dst) = (src)
 #elif defined(__GNUG__)
-#define atomic_or(ptr, value) __sync_fetch_and_or((ptr), (value))
+// with g++ pointer assignment is believed to be atomic
+#define atomic_pointer_assign(dst, src) (dst) = (src)
 #else
-#warning "atomic_or() implementation is not atomic"
-#define atomic_or(ptr, value) *(ptr) |= (value)
+#warning atomic_pointer_assign() implementation may be non-atomic
+#define atomic_pointer_assign(dst, src) (dst) = (src)
 #endif
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_

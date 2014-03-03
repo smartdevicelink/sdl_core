@@ -312,7 +312,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ConnectionHandlerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

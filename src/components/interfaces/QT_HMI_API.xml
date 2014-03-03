@@ -1820,6 +1820,9 @@
       <param name="application" type="Common.HMIApplication" mandatory="true">
         <description>The information about application registered. See HMIApplication. </description>
       </param>
+      <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description> TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".</description>
+      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>

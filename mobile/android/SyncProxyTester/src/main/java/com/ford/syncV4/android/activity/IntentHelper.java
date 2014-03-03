@@ -13,29 +13,34 @@ import java.util.Map;
  * 
  */
 public class IntentHelper {
-	private static IntentHelper _instance;
-	private Map<String, Object> _map;
+
+	private static IntentHelper sInstance;
+	private Map<String, Object> mMap;
 
 	private IntentHelper() {
-		_map = new Hashtable<String, Object>();
+		mMap = new Hashtable<String, Object>();
 	}
 
 	private static IntentHelper getInstance() {
-		if (_instance == null) {
-			_instance = new IntentHelper();
+		if (sInstance == null) {
+			sInstance = new IntentHelper();
 		}
-		return _instance;
+		return sInstance;
 	}
 
 	public static void addObjectForKey(Object obj, String key) {
-		getInstance()._map.put(key, obj);
+		getInstance().mMap.put(key, obj);
 	}
 
 	public static Object getObjectForKey(String key) {
-		return getInstance()._map.get(key);
+		return getInstance().mMap.get(key);
 	}
 
+    public static boolean containsKey(String key) {
+        return getInstance().mMap.containsKey(key);
+    }
+
 	public static void removeObjectForKey(String key) {
-		getInstance()._map.remove(key);
+		getInstance().mMap.remove(key);
 	}
 }

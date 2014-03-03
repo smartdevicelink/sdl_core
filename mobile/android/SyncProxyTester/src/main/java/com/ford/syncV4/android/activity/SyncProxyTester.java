@@ -1061,9 +1061,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void showAppVersion() {
         String appVersion;
+        int appCode = 0;
         try {
             appVersion = getPackageManager()
                     .getPackageInfo(getPackageName(), 0).versionName;
+            appCode = getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionCode;
         } catch (NameNotFoundException e) {
             Log.d(LOG_TAG, "Can't get package info", e);
             appVersion = "Unknown";
@@ -1075,9 +1078,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         new AlertDialog.Builder(this)
                 .setTitle("App version")
-                .setMessage(
-                        appVersion + ", " + buildInfo + "\n\nCHANGELOG:\n"
-                                + changelog)
+                .setMessage("Ver:" + appVersion + ", " + "Code:" + String.valueOf(appCode) + "\n" +
+                        buildInfo + "\n\nCHANGELOG:\n" + changelog)
                 .setNeutralButton(android.R.string.ok, null).create().show();
     }
 

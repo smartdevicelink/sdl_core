@@ -350,8 +350,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.HandleReceivedBytes(receivedBytes,
-                        receivedBytesLength);
+                try {
+                    _protocol.HandleReceivedBytes(receivedBytes,
+                            receivedBytesLength);
+                } catch (OutOfMemoryError e) {
+                    final String info =
+                            "Out of memory while handling incoming message";
+                    if (_connectionListener != null) {
+                        _connectionListener.onProtocolError(info, e);
+                    } else {
+                        Log.e(TAG, info, e);
+                    }
+                }
             }
         }
     }

@@ -326,6 +326,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                      return_info, &(message[strings::msg_params]));
     ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
         CommandRequestImpl::connection_key());
+
+    if (!app) {
+      LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+      return;
+    }
     app->UpdateHash();
   }
 }

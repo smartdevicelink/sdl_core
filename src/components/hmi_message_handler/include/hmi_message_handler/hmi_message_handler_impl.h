@@ -117,7 +117,7 @@ class HMIMessageHandlerImpl
 
   DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(HMIMessageHandlerImpl);
+  FRIEND_BASE_SINGLETON_CLASS(HMIMessageHandlerImpl);
 };
 }  // namespace hmi_message_handler
 
