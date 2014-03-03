@@ -47,7 +47,7 @@ set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
 set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
-option(DEFAULT_MEDIA_FLAG "Possibility to compile with/without default media manager features" OFF)
+option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GSteamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
@@ -62,7 +62,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(BUILD_BT_SUPPORT OFF)
   SET(BUILD_AVAHI_SUPPORT OFF)
   SET(BUILD_BACKTRACE_SUPPORT OFF)
-  SET(DEFAULT_MEDIA_FLAG OFF)
+  SET(EXTENDED_MEDIA_MODE OFF)
 endif()
 
 if (BUILD_USB_SUPPORT)
@@ -97,8 +97,8 @@ ELSE (CMAKE_C_FLAGS_DEBUG)
 ENDIF(CMAKE_C_FLAGS_DEBUG)
 
 
-if (DEFAULT_MEDIA_FLAG)
-add_definitions(-DDEFAULT_MEDIA)
+if (EXTENDED_MEDIA_MODE)
+add_definitions(-DEXTENDED_MEDIA)
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)

@@ -42,8 +42,6 @@ SDL.ControlButtons = Em.ContainerView
             'driverDistractionControl',
             'infoTable',
             'sendData',
-            'sendDataCheckBox',
-            'sendDataLabel',
             'vehicleInfo',
             'tbtClientState',
             'ExitApp',
@@ -166,35 +164,10 @@ SDL.ControlButtons = Em.ContainerView
             classNames: 'sendData btnNotPressed',
             action: function() {
 
-                FFW.BasicCommunication.SendData(null);
+                FFW.BasicCommunication.OnSystemRequest();
             },
-            text: 'Send Data',
+            text: 'OnSystemRequest',
             templateName: 'text'
-        }),
-
-        /**
-         * Select for extended param of SendData
-         */
-        sendDataCheckBox: Em.Checkbox.extend( {
-
-            elementId: 'sendDataCheckBox',
-
-            classNames: 'sendDataCheckBox',
-
-            checkedBinding: 'SDL.SDLModel.sendDataExtend'
-
-        }),
-
-        /*
-         * Label for sendDataCheckBox
-         */
-        sendDataLabel: SDL.Label.extend( {
-
-            elementId: 'sendDataLabel',
-
-            classNames: 'sendDataLabel',
-
-            content: 'Use URL'
         }),
 
         /**

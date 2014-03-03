@@ -296,4 +296,19 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         verify(connection.getHeartbeatMonitor(), never()).stop();
         assertNotNull("heartbeat monitor should not be null",connection.getHeartbeatMonitor());
     }
+
+    public void testHeartbeatMonitorResetOnHeartbeatReset() throws Exception {
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.setHeartbeatMonitor(heartbeatMonitor);
+        connection.onResetHeartbeat();
+        verify(heartbeatMonitor).notifyTransportActivity();
+    }
+
+    public void testHeartbeatSendDoNotResetHeartbeat() throws Exception {
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.sendHeartbeat(heartbeatMonitor);
+        verify(heartbeatMonitor, never()).notifyTransportActivity();
+    }
 }

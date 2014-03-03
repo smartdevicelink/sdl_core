@@ -262,6 +262,10 @@ DynamicApplicationDataImpl::tbt_show_command() const {
   return tbt_show_command_;
 }
 
+const NsSmartDeviceLink::NsSmartObjects::SmartObject *DynamicApplicationDataImpl::keyboard_props() const {
+  return keyboard_props_;
+}
+
 void DynamicApplicationDataImpl::set_help_prompt(
     const smart_objects::SmartObject& help_prompt) {
   if (help_prompt_) {
@@ -328,6 +332,15 @@ void DynamicApplicationDataImpl::set_tbt_show_command(
   }
   tbt_show_command_ = new smart_objects::SmartObject(tbt_show);
 }
+
+void DynamicApplicationDataImpl::set_keyboard_props(
+    const smart_objects::SmartObject &keyboard_props) {
+  if (keyboard_props_) {
+    delete keyboard_props_;
+  }
+  keyboard_props_ = new smart_objects::SmartObject(keyboard_props);
+}
+
 
 void DynamicApplicationDataImpl::AddCommand(
   uint32_t cmd_id, const smart_objects::SmartObject& command) {

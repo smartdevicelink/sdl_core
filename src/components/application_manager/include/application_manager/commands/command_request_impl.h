@@ -37,6 +37,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/lock.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -53,6 +54,13 @@ namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 class CommandRequestImpl : public CommandImpl,
     public event_engine::EventObserver   {
  public:
+
+  enum RequestState {
+    kAwaitingHMIResponse = 0,
+    kTimedOut,
+    kCompleted
+  };
+
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
   virtual bool Init();
@@ -107,7 +115,15 @@ class CommandRequestImpl : public CommandImpl,
   void SendResponse(const bool success,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
-                    const NsSmart::SmartObject* response_params = NULL) const;
+                    const NsSmart::SmartObject* response_params = NULL);
+
+  /**
+   * @brief Check syntax of string from mobile
+   * @param str - string that need to be checked
+   * @param allow_empty_string if true methos allow empty sting
+   * @return true if succes otherwise return false
+   */
+  bool CheckSyntax(std::string str, bool allow_empty_line = false);
 
   /*
    * @brief Sends HMI request
@@ -131,9 +147,9 @@ class CommandRequestImpl : public CommandImpl,
                              const NsSmart::SmartObject& msg_params) const;
 
  protected:
-  unsigned int  default_timeout_;
-  bool          is_timeout_expired_;
-  mutable bool  is_request_completed_;
+  unsigned int                default_timeout_;
+  RequestState                current_state_;
+  sync_primitives::Lock       state_lock_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);

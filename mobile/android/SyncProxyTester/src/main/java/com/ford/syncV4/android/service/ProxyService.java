@@ -15,6 +15,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
@@ -22,6 +23,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
+import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
 import com.ford.syncV4.android.module.ModuleTest;
@@ -129,6 +131,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
@@ -191,6 +194,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         //startProxyIfNetworkConnected();
 
         mPutFileTransferManager = new PutFileTransferManager();
+
+        mRpcRequestsResumableManager.setCallback(new RPCRequestsResumableManager.RPCRequestsResumableManagerCallback() {
+            @Override
+            public void onSendRequest(RPCRequest request) {
+                syncProxySendRPCRequest(request);
+            }
+        });
+
+        MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
 
     public void showLockMain() {
@@ -453,6 +465,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void disposeSyncProxy() {
         createInfoMessageForAdapter("ProxyService.disposeSyncProxy()");
 
+        MainApp.getInstance().getLastUsedHashIdsManager().save();
+
         if (mSyncProxy != null) {
             try {
                 mSyncProxy.dispose();
@@ -475,6 +489,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void initialize() {
+        Log.d(TAG, "Initialize predefined view");
         playingAudio = true;
         playAnnoyingRepetitiveAudio();
 
@@ -500,9 +515,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void sendPutFileForAppIcon() {
+        Log.d(TAG, "PutFileForAppIcon");
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
         commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
-                mAwaitingInitIconResponseCorrelationID);
+                mAwaitingInitIconResponseCorrelationID, true);
     }
 
     private void show(String mainField1, String mainField2) throws SyncException {
@@ -605,7 +621,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
             if (!isModuleTesting()) {
-                sendPutFileForAppIcon();
+                // Process an init state of the predefined requests here, assume that if
+                // hashId is not null means this is resumption
+                if (mSyncProxy.getHashId() == null) {
+                    sendPutFileForAppIcon();
+                }
             }
         }
 
@@ -636,10 +656,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         showLockMain();
                         mTesterMain = new ModuleTest(this, mLogAdapter);
                         //mTesterMain = ModuleTest.getModuleTestInstance();
-                        initialize();
+
+                        // Process an init state of the predefined requests here, assume that if
+                        // hashId is not null means this is resumption
+                        if (mSyncProxy.getHashId() == null) {
+                            initialize();
+                        } else {
+                            setAppIcon();
+                        }
                     } else {
                         try {
-                            if (!mWaitingForResponse && mTesterMain.getThreadContext() != null) {
+                            if (mTesterMain != null && !mWaitingForResponse && mTesterMain.getThreadContext() != null) {
                                 show("Sync Proxy", "Tester Ready");
                             }
                         } catch (SyncException e) {
@@ -655,14 +682,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 if (hmiChange && firstHMIStatusChange) {
                     firstHMIStatusChange = false;
 
-                    try {
-                        // upload turn icons
-                        sendIconFromResource(R.drawable.turn_left);
-                        sendIconFromResource(R.drawable.turn_right);
-                        sendIconFromResource(R.drawable.turn_forward);
-                        sendIconFromResource(R.drawable.action);
-                    } catch (SyncException e) {
-                        Log.w(TAG, "Failed to put images", e);
+                    // Process an init state of the predefined requests here, assume that if
+                    // hashId is not null means this is resumption
+                    if (mSyncProxy.getHashId() == null) {
+                        try {
+                            // upload turn icons
+                            sendIconFromResource(R.drawable.turn_left);
+                            sendIconFromResource(R.drawable.turn_right);
+                            sendIconFromResource(R.drawable.turn_forward);
+                            sendIconFromResource(R.drawable.action);
+                        } catch (SyncException e) {
+                            Log.w(TAG, "Failed to put images", e);
+                        }
                     }
                 }
             }
@@ -672,6 +703,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onHashChange(OnHashChange onHashChange) {
         createDebugMessageForAdapter(onHashChange);
+
+        LastUsedHashIdsManager lastUsedHashIdsManager = MainApp.getInstance().getLastUsedHashIdsManager();
+        lastUsedHashIdsManager.addNewId(onHashChange.getHashID());
     }
 
     /**
@@ -686,7 +720,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void sendIconFromResource(int resource) throws SyncException {
         commandPutFile(FileType.GRAPHIC_PNG,
                 getResources().getResourceEntryName(resource) + ICON_FILENAME_SUFFIX,
-                AppUtils.contentsOfResource(resource));
+                AppUtils.contentsOfResource(resource), getNextCorrelationID(), true);
     }
 
     @Override
@@ -1761,7 +1795,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
-        syncProxySendRPCRequest(newPutFile);
+        syncProxySendPutFilesResumable(newPutFile);
 
         //mAwaitingInitIconResponseCorrelationID = 0;
     }
@@ -1985,6 +2019,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         syncProxySendRPCRequest(request);
     }
 
+    /**
+     *
+     *
+     * @param putFile
+     */
+    public void syncProxySendPutFilesResumable(PutFile putFile) {
+        if (putFile == null) {
+            createErrorMessageForAdapter("Resumable PuFile is NULL");
+            return;
+        }
+
+        //mRpcRequestsResumableManager.addPutFile(putFile);
+
+        syncProxySendRPCRequest(putFile);
+    }
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
         if (mSyncProxy != null) {
@@ -2056,12 +2105,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (response.getResultCode() == Result.SUCCESS) {
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            //mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         } else if (response.getResultCode() == Result.RESUME_FAILED) {
-            mRpcRequestsResumableManager.sendAllRequestsConnected(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            //mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsConnected();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         }
 
+        //mRpcRequestsResumableManager.cleanAllPutFiles();
         mRpcRequestsResumableManager.cleanAllRequestsConnected();
         mRpcRequestsResumableManager.cleanAllRequestsDisconnected();
 

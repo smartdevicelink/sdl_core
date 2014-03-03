@@ -72,18 +72,6 @@ typedef std::map<int32_t, Connection*> ConnectionList;
 typedef ConnectionList::iterator ConnectionListIterator;
 
 /**
- * \brief Type for Resume Session Map
- * @param uint8_t  session ID
- * @param uint32_t session_key
- */
-typedef std::map<uint8_t, uint32_t> ResumeSessionMap;
-
-/**
- * \brief Type for Resume Sessions iterator
- */
-typedef std::map<uint8_t, uint32_t>::iterator ResumeSessionMapIt;
-
-/**
  * \brief Type for Session Services
  */
 typedef std::vector<protocol_handler::ServiceType> ServiceList;

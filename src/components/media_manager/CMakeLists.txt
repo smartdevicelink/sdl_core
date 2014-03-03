@@ -1,4 +1,4 @@
-if (DEFAULT_MEDIA_FLAG)
+if (EXTENDED_MEDIA_MODE)
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
 find_package(PkgConfig)
@@ -27,7 +27,7 @@ set(LIBRARIES
   gobject-2.0
   glib-2.0
 )
-else(DEFAULT_MEDIA_FLAG)
+else(EXTENDED_MEDIA_MODE)
 set(default_includes
 )
 set(default_sources

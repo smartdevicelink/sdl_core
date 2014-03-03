@@ -118,6 +118,21 @@ SDL.SDLController = Em.Object
         },
 
         /**
+         * Registered components handler
+         *
+         * @type object
+         */
+        unregisterComponentStatus: function(component) {
+
+            for ( var i = 0; i < SDL.SDLModel.registeredComponents.length; i++) {
+                if (SDL.SDLModel.registeredComponents[i].type == component) {
+                    SDL.SDLModel.set('registeredComponents.' + i + '.state',  false);
+                    return;
+                }
+            }
+        },
+
+        /**
          * Notification from state manager about triggered state
          * Method aborts all popups and requests currently in process
          *

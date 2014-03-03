@@ -3109,6 +3109,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void processRegisterAppInterfaceResponse(final RegisterAppInterfaceResponse response) {
+        if (!response.getSuccess()) {
+            setHashId(null);
+        }
+
+        if (response.getResultCode() == Result.RESUME_FAILED) {
+            setHashId(null);
+        }
+
         // Create callback
         if (_callbackToUIThread) {
             // Run in UI thread

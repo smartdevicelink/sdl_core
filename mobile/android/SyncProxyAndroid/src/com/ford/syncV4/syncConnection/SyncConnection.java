@@ -13,12 +13,10 @@ import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
-import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
@@ -475,6 +473,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolHeartbeatACK() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.heartbeatACKReceived();
+        }
+    }
+
+    @Override
+    public void onResetHeartbeat(){
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.notifyTransportActivity();
         }
     }
 

@@ -12,11 +12,11 @@ cmake_policy(SET CMP0015 NEW)
 link_directories(../thirdPartyLibs/libusbx)
 cmake_policy(POP)
 
-if (DEFAULT_MEDIA_FLAG)
+if (EXTENDED_MEDIA_MODE)
 set(default_media_inc
 ${GSTREAMER_gst_INCLUDE_DIR}
 )
-else(DEFAULT_MEDIA_FLAG)
+else(EXTENDED_MEDIA_MODE)
 set(default_media_inc
 )
 endif()

@@ -36,6 +36,9 @@
 #include <string>
 #include <fstream>
 #include "media_manager/media_adapter_impl.h"
+#include "utils/message_queue.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace media_manager {
 
@@ -48,10 +51,60 @@ class VideoStreamToFileAdapter : public MediaAdapterImpl {
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
+
+    /*
+     * @brief Start streamer thread
+     */
+    virtual void Init();
+
   private:
-    void CloseCurrent();
-    std::string file_name_;
-    std::ofstream* file_stream_;
+    class Streamer : public threads::ThreadDelegate {
+      public:
+        /*
+         * Default constructor
+         *
+         * @param server  Server pointer
+         */
+        explicit Streamer(VideoStreamToFileAdapter* server);
+
+        /*
+         * Destructor
+         */
+        ~Streamer();
+
+        /*
+         * @brief Function called by thread on start
+         */
+        void threadMain();
+
+        /*
+         * @brief Function called by thread on exit
+         */
+        bool exitThreadMain();
+
+        /*
+         * @brief Opens file
+         */
+        void open();
+
+        /*
+         * @brief Closes file
+         */
+        void close();
+
+      private:
+        VideoStreamToFileAdapter*   server_;
+        volatile bool               stop_flag_;
+        std::ofstream*              file_stream_;
+
+        DISALLOW_COPY_AND_ASSIGN(Streamer);
+    };
+
+  private:
+    std::string                                   file_name_;
+    bool                                          is_ready_;
+    threads::Thread*                              thread_;
+    MessageQueue<protocol_handler::RawMessagePtr> messages_;
 };
 }  //  namespace media_manager
 

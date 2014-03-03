@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.service.IProxyServiceBinder;
 import com.ford.syncV4.android.service.IProxyServiceConnection;
 import com.ford.syncV4.android.service.ProxyService;
@@ -28,11 +29,18 @@ public class MainApp extends Application implements IProxyServiceConnection {
             new ProxyServiceConnectionProxy(this);
     private ProxyService mBoundProxyService;
     private IProxyServiceBinder mProxyServiceBinder;
+    /**
+     * This manager keep last used hash id's which are in use at the
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()}
+      */
+    private LastUsedHashIdsManager mLastUsedHashIdsManager;
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
 
     public MainApp() {
         super();
         sInstance = this;
+
+        mLastUsedHashIdsManager = new LastUsedHashIdsManager();
     }
 
     /**
@@ -79,6 +87,15 @@ public class MainApp extends Application implements IProxyServiceConnection {
 
     public void exitApp() {
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
+
+    /**
+     * Return {@link com.ford.syncV4.android.manager.LastUsedHashIdsManager} reference
+     *
+     * @return {@link com.ford.syncV4.android.manager.LastUsedHashIdsManager}
+     */
+    public LastUsedHashIdsManager getLastUsedHashIdsManager() {
+        return mLastUsedHashIdsManager;
     }
 
     public ProxyService getBoundProxyService() {
