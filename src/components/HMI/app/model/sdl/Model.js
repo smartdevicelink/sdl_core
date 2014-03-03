@@ -630,6 +630,8 @@ SDL.SDLModel = Em.Object.create({
             return;
         }
 
+        SDL.VRPopUp.AddActivateApp(params.ttsName.text ,params.appID);
+
         if (params.isMediaApplication) {
             applicationType = 0;
         }
