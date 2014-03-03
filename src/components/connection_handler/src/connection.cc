@@ -153,16 +153,36 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
 bool Connection::SetSSLContext( uint8_t session,
                                 protocol_handler::ServiceType service_type,
                                 secure_service_manager::SSLContext *context){
-  //FIXME: EZamakhov
-  assert(!"not_implemented");
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator sit = session_map_.find(session);
+  if (sit == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return NULL;
+  }
+  ServiceList& list = sit->second;
+  ServiceList::iterator it = std::find(list.begin(), list.end(), service_type);
+  if (it != list.end()) {
+    it->ssl_context = context;
+    return true;
+  }
   return false;
 }
 
 secure_service_manager::SSLContext* Connection::GetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type) const {
-  //FIXME: EZamakhov
-  assert(!"not_implemented");
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::const_iterator sit = session_map_.find(session);
+  if (sit == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return NULL;
+  }
+  const ServiceList& list = sit->second;
+  ServiceList::const_iterator it = std::find(list.begin(), list.end(), service_type);
+  if (it != list.end()) {
+    return it->ssl_context;
+  }
+
   return NULL;
 }
 
