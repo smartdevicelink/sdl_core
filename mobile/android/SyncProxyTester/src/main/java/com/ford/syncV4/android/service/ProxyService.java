@@ -131,7 +131,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
@@ -801,7 +800,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onError(String info, Exception e) {
+    public void onError(String info, Throwable e) {
         createErrorMessageForAdapter("******onProxyError******", e);
         createErrorMessageForAdapter("Proxy error info: " + info);
     }
