@@ -120,6 +120,15 @@ void ResetGlobalPropertiesRequest::Run() {
     }
   }
 
+  if (vr_help_title || vr_help_items || menu_name || menu_icon
+      || is_key_board_properties) {
+    is_ui_send_ = true;
+  }
+
+  if (timeout_prompt || helpt_promt) {
+    is_tts_send_ = true;
+  }
+
   app->set_reset_global_properties_active(true);
 
   if (vr_help_title || vr_help_items || menu_name || menu_icon
@@ -288,36 +297,40 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-        && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-        || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-            && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-        || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
-            && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+  if (!IsPendingResponseExist()) {
+    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
-  mobile_apis::Result::eType result_code;
-  const char* return_info = NULL;
+    mobile_apis::Result::eType result_code;
+    const char* return_info = NULL;
 
-  if (result) {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
-      result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+    if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
+      } else {
+        result_code = static_cast<mobile_apis::Result::eType>(
+        std::max(ui_result_, tts_result_));
+      }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-      std::max(ui_result_, tts_result_));
+          std::max(ui_result_, tts_result_));
     }
-  } else {
-    result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
-  }
 
-  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                   return_info, &(message[strings::msg_params]));
+    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                     return_info, &(message[strings::msg_params]));
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+        CommandRequestImpl::connection_key());
+    app->UpdateHash();
+  }
 }
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
-
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
 }
 
