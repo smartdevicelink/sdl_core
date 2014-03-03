@@ -94,9 +94,14 @@ public:
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param observer Pointer to object of the class implementing
-   * ISessionObserver
    */
   void set_session_observer(protocol_handler::SessionObserver* observer);
+
+  /**
+   * \brief Sets pointer for Protocol Handler layer for sending
+   * \param Secure Service Requests and Handshake data.
+   */
+  void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
 
   /**
    * \brief Convert RawMessagePtr to SecureMessagePtr
@@ -114,16 +119,27 @@ public:
   bool ProtectServiceRequest(const SecureServiceMessage &message);
   bool ProtectServiceResponse(const SecureServiceMessage &message);
   bool SendHandshakeData(const SecureServiceMessage &message);
+
+  void PostProtectServiceResponse(
+      const SecureServiceMessage &requestMessage,
+      const SecureServiceQuery::ProtectServiceResult response);
+
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;
 
   secure_service_manager::CryptoManager* crypto_manager_;
 
   /**
-   *\brief Pointer on instance of class implementing ISessionObserver
+   *\brief Pointer on instance of class implementing SessionObserver
    *\brief (Connection Handler)
    */
   protocol_handler::SessionObserver* session_observer_;
+
+  /**
+   *\brief Pointer on instance of class implementing ProtocolHandler
+   *\brief (Protocol Handler)
+   */
+  protocol_handler::ProtocolHandler* protocol_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
   static log4cxx::LoggerPtr logger_;

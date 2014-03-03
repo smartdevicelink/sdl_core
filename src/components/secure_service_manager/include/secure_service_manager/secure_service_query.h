@@ -65,10 +65,14 @@ public:
   };
 
   SecureServiceQuery();
+  explicit SecureServiceQuery(const QueryHeader& header,
+                              const uint32_t connection_key);
   ~SecureServiceQuery();
-  bool setData(const uint8_t * const binary_data, const size_t bin_data_size);
+  bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
+  void setData(const uint8_t * const binary_data, const size_t bin_data_size);
   void setConnectionKey(const uint32_t connection_key);
 
+  void setHeader(const QueryHeader& header);
   const QueryHeader& getHeader() const;
   const uint8_t* const getData() const;
   size_t const getDataSize() const;

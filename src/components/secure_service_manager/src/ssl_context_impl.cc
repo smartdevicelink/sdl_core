@@ -68,7 +68,7 @@ void CryptoManagerImpl::SSLContextImpl::EnsureBufferSize(size_t size) {
   }
 }
 
-bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() {
+bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
   return SSL_is_init_finished(connection_);
 }
 

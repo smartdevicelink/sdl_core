@@ -96,10 +96,9 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
 
-      //TODO: add delete
+  //TODO: add delete
   secure_service_manager::SecureServiceManager*secure_service_manager =
       new secure_service_manager::SecureServiceManager();
-  secure_service_manager->set_session_observer(connection_handler_);
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -116,6 +115,9 @@ bool LifeCycle::StartComponents() {
 
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
+
+  secure_service_manager->set_session_observer(connection_handler_);
+  secure_service_manager->set_protocol_handler(protocol_handler_);
 
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere

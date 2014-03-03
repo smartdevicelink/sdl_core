@@ -55,7 +55,7 @@ namespace secure_service_manager {
                             size_t* encrypted_data_size);
       virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                             size_t* data_size);
-      bool  IsInitCompleted();
+      bool  IsInitCompleted() const;
       virtual ~SSLContextImpl();
      private:
       void EnsureBufferSize(size_t size);

@@ -46,21 +46,27 @@ inline uint32_t getUInt8Value(const uint8_t* const data){
 
 SecureServiceQuery::SecureServiceQuery() :
   header_(), connection_key_(0), data_(NULL) {
-}
+  }
+
+SecureServiceQuery::SecureServiceQuery(
+    const SecureServiceQuery::QueryHeader &header,
+    const uint32_t connection_key) :
+  header_(header), connection_key_(connection_key), data_(NULL) {
+  }
+
 SecureServiceQuery::~SecureServiceQuery() {
   delete data_;
-  data_=NULL;
+  data_ = NULL;
 }
-bool SecureServiceQuery::setData(const uint8_t * const binary_data,
+bool SecureServiceQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
-  DCHECK(binary_data);
+    DCHECK(binary_data); DCHECK(bin_data_size);
   const size_t header_size = sizeof(QueryHeader);
   if(bin_data_size < header_size) {
       return false;
     }
   header_.query_id_ = binary_data[0];
   header_.seq_number_ = getUInt8Value(binary_data + 1);
-  header_.seq_number_ = getUInt8Value(binary_data + 5);
   const int data_size = bin_data_size - header_size;
   if(data_size > 0) {
       delete data_;
@@ -69,11 +75,25 @@ bool SecureServiceQuery::setData(const uint8_t * const binary_data,
       memcpy(data_, binary_data + header_size, data_size_);
     }
   return true;
-}
+  }
+
+void SecureServiceQuery::setData(const uint8_t * const binary_data,
+                                 const size_t bin_data_size) {
+    DCHECK(binary_data); DCHECK(bin_data_size);
+    delete data_;
+    data_size_ = bin_data_size;
+    data_ = new uint8_t[data_size_];
+    memcpy(data_, binary_data, data_size_);
+  }
 
 void SecureServiceQuery::setConnectionKey(const uint32_t connection_key) {
-  connection_key_ = connection_key;
-}
+    connection_key_ = connection_key;
+  }
+
+void SecureServiceQuery::setHeader(
+    const SecureServiceQuery::QueryHeader &header) {
+    header_ = header;
+  }
 
 const SecureServiceQuery::QueryHeader &SecureServiceQuery::getHeader() const {
   return header_;
@@ -90,4 +110,3 @@ const size_t SecureServiceQuery::getDataSize() const {
 uint32_t SecureServiceQuery::getConnectionKey() const {
   return connection_key_;
 }
-
