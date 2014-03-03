@@ -31,7 +31,7 @@ public class RPCRequestsResumableManager {
     private final Vector<RPCRequest> rpcRequestsResumableDisconnected = new Vector<RPCRequest>();
 
     // This Vector keep all PutFiles since the last successful application start
-    private final Vector<PutFile> putFiles = new Vector<PutFile>();
+    //private final Vector<PutFile> putFiles = new Vector<PutFile>();
 
     private RPCRequestsResumableManagerCallback callback;
 
@@ -74,9 +74,9 @@ public class RPCRequestsResumableManager {
      *
      * @param putFile {@link com.ford.syncV4.proxy.rpc.PutFile} request
      */
-    public void addPutFile(PutFile putFile) {
+    /*public void addPutFile(PutFile putFile) {
         putFiles.add(putFile);
-    }
+    }*/
 
     /**
      * Send all RPC requests which were add when there were connection to SDL.
@@ -109,13 +109,13 @@ public class RPCRequestsResumableManager {
      *
      * @throws SyncException
      */
-    public void sendAllPutFiles() throws SyncException {
+    /*public void sendAllPutFiles() throws SyncException {
         for (PutFile putFile : putFiles) {
             if (callback != null) {
                 callback.onSendRequest(putFile);
             }
         }
-    }
+    }*/
 
     /**
      * Clean all RPC requests which were add when there were connection to SDL.
@@ -127,9 +127,9 @@ public class RPCRequestsResumableManager {
     /**
      * Clean all {@link com.ford.syncV4.proxy.rpc.PutFile}'s requests collection
      */
-    public void cleanAllPutFiles() {
+    /*public void cleanAllPutFiles() {
         putFiles.clear();
-    }
+    }*/
 
     /**
      * Clean all RPC requests which were add when there were no connection to SDL.
@@ -159,7 +159,7 @@ public class RPCRequestsResumableManager {
     /**
      * @return a size of the {@link com.ford.syncV4.proxy.rpc.PutFile}'s requests collection
      */
-    public int getPutFilesSize() {
+    /*public int getPutFilesSize() {
         return putFiles.size();
-    }
+    }*/
 }
