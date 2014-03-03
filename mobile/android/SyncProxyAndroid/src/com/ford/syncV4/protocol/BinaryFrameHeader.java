@@ -3,7 +3,8 @@ package com.ford.syncV4.protocol;
 import com.ford.syncV4.util.BitConverter;
 
 public class BinaryFrameHeader {
-	private byte _rpcType;
+    private static final int WIPRO_PROTOCOL_HEADER_LENGTH = 12;
+    private byte _rpcType;
 	private int _functionID;
 	private int _correlationID;
 	private int _jsonSize;
@@ -27,20 +28,32 @@ public class BinaryFrameHeader {
 		
 		int _jsonSize = BitConverter.intFromByteArray(binHeader, 8);
 		msg.setJsonSize(_jsonSize);
-		
-		if (_jsonSize > 0) {
-			byte[] _jsonData = new byte[_jsonSize];
-			System.arraycopy(binHeader, 12, _jsonData, 0, _jsonSize);
-			msg.setJsonData(_jsonData);
-		}
-		
-		if (binHeader.length - _jsonSize - 12 > 0) {
-			byte[] _bulkData = new byte[binHeader.length - _jsonSize - 12];
-			System.arraycopy(binHeader, 12 + _jsonSize, _bulkData, 0, _bulkData.length);
-			msg.setBulkData(_bulkData);
-		}		
-		
-		return msg;
+
+        if (_jsonSize > 0) {
+            byte[] _jsonData = new byte[_jsonSize];
+            System.arraycopy(binHeader, WIPRO_PROTOCOL_HEADER_LENGTH, _jsonData,
+                    0, _jsonSize);
+            msg.setJsonData(_jsonData);
+        } else if (_jsonSize < 0) {
+            // the size is over 2 GB; Java doesn't allow us to create such arrays
+            final long jsonSize =
+                    BitConverter.unsignedIntFromByteArray(binHeader, 8);
+            throw new OutOfMemoryError(
+                    String.format("Can't allocate memory for JSON of %d bytes",
+                            jsonSize));
+        }
+
+        final int binaryDataSize = binHeader.length - _jsonSize -
+                WIPRO_PROTOCOL_HEADER_LENGTH;
+        if (binaryDataSize > 0) {
+            byte[] _bulkData = new byte[binaryDataSize];
+            System.arraycopy(binHeader,
+                    WIPRO_PROTOCOL_HEADER_LENGTH + _jsonSize, _bulkData, 0,
+                    _bulkData.length);
+            msg.setBulkData(_bulkData);
+        }
+
+        return msg;
 	}
 	
 	protected byte[] assembleHeaderBytes() {
@@ -49,7 +62,7 @@ public class BinaryFrameHeader {
         binHeader &= 0xFFFFFFFF >>> 4;
 		binHeader |= (_rpcType << 28);
 		
-		byte[] ret = new byte[12];
+		byte[] ret = new byte[WIPRO_PROTOCOL_HEADER_LENGTH];
 		System.arraycopy(BitConverter.intToByteArray(binHeader), 0, ret, 0, 4);
 		System.arraycopy(BitConverter.intToByteArray(_correlationID), 0, ret, 4, 4);
 		System.arraycopy(BitConverter.intToByteArray(_jsonSize), 0, ret, 8, 4);
