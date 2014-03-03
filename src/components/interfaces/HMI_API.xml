@@ -1834,7 +1834,18 @@
         <description>The information about application registered. See HMIApplication. </description>
       </param>
       <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description> TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".</description>
+        <description> TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+          Needs to be unique over all applications.
+          May not be empty.
+          May not start with a new line character.
+          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+        </description>
+      </param>
+      <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>
+          Defines additional voice recognition commands.
+          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+        </description>
       </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
