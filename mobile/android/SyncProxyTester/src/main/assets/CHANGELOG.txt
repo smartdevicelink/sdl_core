@@ -1,8 +1,9 @@
 [CW10]
+* SyncProxyAndroid SDK: changed send message logic
 * Log messages of the PutFile request when resume application
 
 [CW9]
-+ SYncProxyAndroid SDK: update heartbeat logic
++ SyncProxyAndroid SDK: update heartbeat logic
 + 'HashId' management dialog
 + App resumption: save RPC requests (re-send them), save and re-use hashId
 + Add possibility to send Policy Table Update manually from Dialog
