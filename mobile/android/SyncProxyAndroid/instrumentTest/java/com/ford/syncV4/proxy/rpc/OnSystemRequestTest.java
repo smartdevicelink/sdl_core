@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy.rpc;
 
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 
@@ -318,4 +319,44 @@ public class OnSystemRequestTest extends TestCase {
         assertThat(msg, notNullValue());
         assertThat(msg.getLength(), nullValue());
     }
+
+    public void testDeserializedTimeoutShouldBeNil() throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.timeout, "88");
+
+        OnSystemRequest msg = new OnSystemRequest(
+                TestCommon.deserializeJSONRequestObject(jsonObject));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getTimeout(), nullValue());
+    }
+
+    public void testDeserializedTimeoutShouldContainValue() throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        int timeout = 666;
+        jsonObject.put(Names.timeout, timeout);
+
+        OnSystemRequest msg = new OnSystemRequest(
+                TestCommon.deserializeJSONRequestObject(jsonObject));
+        assertThat(msg, notNullValue());
+        assertThat(msg.getTimeout(), is(timeout));
+    }
+
+    public void testGetTimeoutShouldReturnSetValue() throws JSONException {
+        OnSystemRequest msg = new OnSystemRequest();
+
+        final int timeout = 88;
+        msg.setTimeout(timeout);
+
+        assertThat(msg.getTimeout(), is(timeout));
+    }
+
+    public void testSettingNullTimeoutShouldRemoveValue() throws JSONException {
+        OnSystemRequest msg = new OnSystemRequest();
+
+        msg.setTimeout(12);
+        msg.setTimeout(null);
+
+        assertThat(msg.getLength(), nullValue());
+    }
+
 }
