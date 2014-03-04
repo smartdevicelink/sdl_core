@@ -29,6 +29,7 @@ import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -840,5 +841,86 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         Mockito.verify(mock).onSecureServiceStarted(versionCaptor.capture());
         assertEquals(2, versionCaptor.getValue().byteValue());
+    }
+
+    public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener);
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(ProtocolFrameHeader.FrameDataSingleFrame);
+        frameHeader.setFrameType(FrameType.Single);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        byte [] data = new byte[10];
+        for (int i = 0; i < data.length; i ++){
+            data[i] = (byte) (i+1);
+        }
+        protocol.handleProtocolFrameToSend(frameHeader, data, 0, data.length);
+        byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
+        byte [] expectedResult = new byte[frameHeaderArray.length + data.length];
+        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 0 , expectedResult,frameHeaderArray.length, data.length);
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
+    }
+
+    public void testFrameHeaderSendWithNoData() throws Exception {
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener);
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(ProtocolFrameHeader.FrameDataSingleFrame);
+        frameHeader.setFrameType(FrameType.Single);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
+        byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(frameHeaderArray, 0, frameHeaderArray.length);
+    }
+
+    public void testFrameHeaderAndDataSendWithPartialChunk() throws Exception {
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener);
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(ProtocolFrameHeader.FrameDataFinalConsecutiveFrame);
+        frameHeader.setFrameType(FrameType.Consecutive);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        byte [] data = new byte[100];
+        for (int i = 0; i < data.length; i ++){
+            data[i] = (byte) (i+1);
+        }
+        protocol.handleProtocolFrameToSend(frameHeader, data, 20, 20);
+        byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
+        byte [] expectedResult = new byte[frameHeaderArray.length + 20];
+        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 20 , expectedResult,frameHeaderArray.length, 20);
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
+    }
+
+    public void testFrameHeaderAndDataSendWithPartialChunkWithLengthToBig() throws Exception {
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener);
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(ProtocolFrameHeader.FrameDataFinalConsecutiveFrame);
+        frameHeader.setFrameType(FrameType.Consecutive);
+        frameHeader.setSessionID(SESSION_ID);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Mobile_Nav);
+        frameHeader.setDataSize(0);
+        byte [] data = new byte[100];
+        for (int i = 0; i < data.length; i ++){
+            data[i] = (byte) (i+1);
+        }
+        protocol.handleProtocolFrameToSend(frameHeader, data, 90, 20);
+        byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
+        byte [] expectedResult = new byte[frameHeaderArray.length + 10];
+        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 90 , expectedResult,frameHeaderArray.length, 10);
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
 }

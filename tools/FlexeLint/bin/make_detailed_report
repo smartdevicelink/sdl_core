@@ -8,12 +8,14 @@ awk '{system("./get_code_author " $1 " " $2); print " " $0}' ../tmp/err_warn_inf
 
 touch ../results/developers/total.txt
 
-while read line    
+./commiters_page.py ../results/developers/index.html
+
+while read line
 do
-	name=$(echo "$line" | awk '{print $1}') 
-		
+	name=$(echo "$line" | awk '{print $1}')
+
 	touch ../tmp/developers_report.tmp
-		
+
 	for alias in $(echo "$line" | awk '{$1=""; print $0}'); do
 		awk -v a=$alias '$1 == a {$1=""; $2=""; print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' >> ../tmp/developers_report.tmp
     done
@@ -32,7 +34,7 @@ do
 	echo -e ' \t 'Infos:    $info_quantity >> ../results/developers/$name.txt
 	echo -e ' \t 'Notes:    $note_quantity >> ../results/developers/$name.txt
 	echo >> ../results/developers/$name.txt
-	echo >> ../results/developers/$name.txt	
+	echo >> ../results/developers/$name.txt
 
 	cat ../tmp/developers_report.tmp >> ../results/developers/$name.txt
 	rm ../tmp/developers_report.tmp

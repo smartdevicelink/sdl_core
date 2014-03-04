@@ -14,6 +14,7 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 
 public abstract class AbstractProtocol {
     private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
@@ -93,14 +94,31 @@ public abstract class AbstractProtocol {
         SyncTrace.logProtocolEvent(InterfaceActivityDirection.Transmit, header, data,
                 offset, length, SYNC_LIB_TRACE_KEY);
         resetHeartbeat();
+        composeMessage(header, data, offset, length);
+    }
+
+    private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
         synchronized (_frameLock) {
-            byte[] frameHeader = header.assembleHeaderBytes();
-            handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
-
             if (data != null) {
-                handleProtocolMessageBytesToSend(data, offset, length);
-            }
+                if (offset >= data.length) {
+                    throw new IllegalArgumentException("offset should not be more then length");
+                }
+                byte[] dataChunk = null;
+                if (offset + length >= data.length) {
+                    dataChunk = Arrays.copyOfRange(data, offset, data.length);
+                } else {
+                    dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+                }
 
+                byte[] frameHeader = header.assembleHeaderBytes();
+                byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+                System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+                System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+                handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+            } else {
+                byte[] frameHeader = header.assembleHeaderBytes();
+                handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
+            }
         } // end-if
     }
 
