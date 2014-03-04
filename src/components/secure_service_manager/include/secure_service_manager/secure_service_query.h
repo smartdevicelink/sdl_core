@@ -47,7 +47,8 @@ public:
     ProtectServiceRequest  = 0x1,
     ProtectServiceResponse = 0x2,
     SendHandshakeData = 0x3,
-    InvalidSecureServiceQuery
+    InternalError = 0x4,
+    InvalidQuery
   };
 
   enum ProtectServiceResult {
@@ -59,7 +60,8 @@ public:
   };
 
   struct QueryHeader {
-    QueryHeader() : query_id_(InvalidSecureServiceQuery), seq_number_(0){}
+    QueryHeader(const SecureServiceQueryId id,
+                const uint32_t seq_umber);
     uint8_t  query_id_;    // API function identifier
     uint32_t seq_number_;  // request sequential number
   };
@@ -76,10 +78,10 @@ public:
   const QueryHeader& getHeader() const;
   const uint8_t* const getData() const;
   size_t const getDataSize() const;
-  uint32_t getConnectionKey() const;
+  int32_t getConnectionKey() const;
 private:
   QueryHeader header_;
-  uint32_t connection_key_;
+  int32_t connection_key_;
   uint8_t* data_;
   size_t data_size_;
 };

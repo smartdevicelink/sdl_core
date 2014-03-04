@@ -69,7 +69,8 @@ typedef utils::PrioritizedQueue<SecureServiceMessage> SecureServiceMessageQueue;
 
 typedef threads::MessageLoopThread<SecureServiceMessageQueue> SecureServiceMessageLoop;
 
-// TODO: (EZAmakhov) add brief
+//TODO(EZ): add brief
+//TODO(EZ): rename to SecurityManager
 class SecureServiceManager :
     public protocol_handler::ProtocolObserver,
     public SecureServiceMessageLoop::Handler {
@@ -104,29 +105,34 @@ public:
   void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
 
   /**
-   * \brief Convert RawMessagePtr to SecureMessagePtr
-   * with deep copy data.
-   * \param message ProtocoloHandler raw message
+   * \brief Handle SecureServiceMessage from mobile for processing
+   * threads::MessageLoopThread<*>::Handler implementations
+   * CALLED ON secure_service_messages_ thread
    */
-  static SecureServiceMessage SecureMessageFromRawMessage(
-      const protocol_handler::RawMessagePtr& message);
-
-  // threads::MessageLoopThread<*>::Handler implementations
-  // CALLED ON message_for_encryption thread!
   void Handle(const SecureServiceMessage& message) OVERRIDE;
- private:
 
+ private:
   bool ParseProtectServiceRequest(const SecureServiceMessage &requestMessage);
-  bool SendProtectServiceResponse(const SecureServiceMessage &message);
   bool ParseHandshakeData(const SecureServiceMessage &inMessage);
 
-  void PostProtectServiceResponse(
-      const SecureServiceMessage &requestMessage,
-      const SecureServiceQuery::ProtectServiceResult response);
+  void SendProtectServiceResponse(
+      const SecureServiceMessage &message,
+      const SecureServiceQuery::ProtectServiceResult result);
 
-  void SendHandshakeData(
-      const SecureServiceMessage &inMessage,
-      const uint8_t * const data, const size_t data_size);
+  void SendInternalError(const int32_t connectionKey,
+                         const uint32_t seq_umber,
+                         const std::string& error);
+
+  //Create new array for handling header + data
+  void SendData(const int32_t connectionKey,
+                const SecureServiceQuery::QueryHeader& header,
+                const uint8_t * const data,
+                const size_t data_size);
+
+  //post income array as park of RawMessage
+  void SendBinaryData(const int32_t connectionKey,
+                          uint8_t *data,
+                          size_t data_size);
 
   // Thread that pumps handshake data
   SecureServiceMessageLoop secure_service_messages_;

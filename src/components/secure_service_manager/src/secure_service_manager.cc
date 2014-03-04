@@ -49,28 +49,37 @@ SecureServiceManager::SecureServiceManager() :
 void SecureServiceManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "SecureServiceManager::OnMessageReceived");
-  if(message->service_type() == protocol_handler::kSecure) {
+  if(message->service_type() != protocol_handler::kSecure) {
     LOG4CXX_WARN(logger_, "Incorrect message service type "
                  << message->service_type());
     return;
   }
-  if(!session_observer_) {
-    LOG4CXX_ERROR(logger_, "No SessionObserver for usage.");
+
+  SecureServiceMessage serviceQueryPtr(new SecureServiceQuery());
+  const bool result = serviceQueryPtr->Parse(message->data(),
+                                             message->data_size());
+  if(!result) {
+    //result will be false only if data less then query header
+    const std::string error("Incorrect message received");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(message->connection_key(), 0, error);
     return;
   }
-  const SecureServiceMessage serviceQueryPtr(
-        SecureMessageFromRawMessage(message));
-  if(serviceQueryPtr) {
-    secure_service_messages_.PostMessage(serviceQueryPtr);
-  } else {
-    LOG4CXX_ERROR(logger_, "Incorrect message received");
-  }
+  serviceQueryPtr->setConnectionKey(message->connection_key());
+
+  const SecureServiceQuery::QueryHeader &header = serviceQueryPtr->getHeader();
+  if(header.query_id_ == SecureServiceQuery::InvalidQuery) {
+    const std::string error("Unknown query identifier.");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(message->connection_key(), header.seq_number_, error);
+    }
+  //Post message to messqge query for next processong in thread
+  secure_service_messages_.PostMessage(serviceQueryPtr);
 }
 
 void SecureServiceManager::OnMobileMessageSent(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "SecureServiceManager::OnMobileMessageSent");
-  assert(!"not implemented");
   if(!protocol_handler_) {
     LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");
     return;
@@ -86,34 +95,19 @@ void SecureServiceManager::set_session_observer(
     return;
   }
   session_observer_ = observer;
-  }
+}
 
 void SecureServiceManager::set_protocol_handler(
     protocol_handler::ProtocolHandler *handler) {
-    if (!handler) {
-      LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ProtocolHandler.");
-      return;
-    }
-    protocol_handler_ = handler;
+  if (!handler) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ProtocolHandler.");
+    return;
   }
-
-SecureServiceMessage SecureServiceManager::SecureMessageFromRawMessage(
-    const protocol_handler::RawMessagePtr &message) {
-  LOG4CXX_INFO(logger_, "SecureServiceManager::SecureMessageFromRawMessage");
-  DCHECK(message->service_type() == protocol_handler::kSecure);
-  SecureServiceMessage query(new SecureServiceQuery());)
-  const bool result = query->Parse(message->data(), message->data_size());
-  if(!result) {
-    //result will be false only if data less then query header
-    LOG4CXX_ERROR(logger_, "Incorrect message received");
-    return SecureServiceMessage();
-  }
-  query->setConnectionKey(message->connection_key());
-  return SecureServiceMessage(query);
+  protocol_handler_ = handler;
 }
 
 void SecureServiceManager::Handle(const SecureServiceMessage &message) {
-  DCHECK(message); DCHECK(session_observer_);
+  DCHECK(message);DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
   switch (message->getHeader().query_id_) {
     case SecureServiceQuery::ProtectServiceRequest:
@@ -121,17 +115,27 @@ void SecureServiceManager::Handle(const SecureServiceMessage &message) {
           LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
         }
       return;
-    case SecureServiceQuery::ProtectServiceResponse:
-      if(!SendProtectServiceResponse(message)) {
-          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
-        }
-      return;
     case SecureServiceQuery::SendHandshakeData:
       if(!ParseHandshakeData(message)) {
-          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
+          LOG4CXX_ERROR(logger_, "SendHandshakeData failed");
         }
       return;
-    default: // SecureServiceQuery::InvalidSecureServiceQuery
+    case SecureServiceQuery::ProtectServiceResponse:
+      {
+      const std::string error("ProtectServiceResponse couldn't be received from mobile side.");
+      LOG4CXX_ERROR(logger_, error);
+      SendInternalError(message->getConnectionKey(),
+                        message->getHeader().seq_number_, error);
+      }
+      return;
+    case SecureServiceQuery::InternalError:
+      {
+      const char* const error_str = reinterpret_cast<const char*>(message->getData());
+      const std::string error(error_str, message->getDataSize());
+      LOG4CXX_ERROR(logger_, "InternalError error received" << error);
+      }
+      return;
+    default: // SecureServiceQuery::InvalidQuery
       LOG4CXX_ERROR(logger_, "Secure Service message: unknown query");
     }
 }
@@ -139,45 +143,41 @@ void SecureServiceManager::Handle(const SecureServiceMessage &message) {
 bool SecureServiceManager::ParseProtectServiceRequest(
     const SecureServiceMessage &requestMessage) {
   LOG4CXX_INFO(logger_, "ProtectServiceRequest processing");
+  DCHECK(requestMessage); DCHECK(session_observer_);
   DCHECK(requestMessage->getHeader().query_id_ ==
          SecureServiceQuery::ProtectServiceRequest);
-  DCHECK(requestMessage); DCHECK(session_observer_);
   if(requestMessage->getDataSize() != 1) {
-      LOG4CXX_ERROR(logger_, "Wrong arguments size." <<
-                    requestMessage->getDataSize());
-      PostProtectServiceResponse(requestMessage,
-                                 SecureServiceQuery::INTERNAL_ERROR);
-      return false;
-    }
+    LOG4CXX_ERROR(logger_, "ProtectServiceRequest wrong arguments size.");
+    SendProtectServiceResponse(requestMessage,
+                               SecureServiceQuery::INTERNAL_ERROR);
+    return false;
+  }
   const uint8_t service_id = *requestMessage->getData();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
   if(service_type == protocol_handler::kInvalidServiceType) {
-      LOG4CXX_ERROR(logger_, "Wrong Service type" << service_id);
-      //Generate response query and post to secure_service_messages_
-      PostProtectServiceResponse(requestMessage,
-                                 SecureServiceQuery::SERVICE_ALREADY_PROTECTED);
+      LOG4CXX_ERROR(logger_, "Invalid Service type.");
+      SendProtectServiceResponse(requestMessage,
+                                 SecureServiceQuery::INTERNAL_ERROR);
       return false;
     }
 
   const secure_service_manager::SSLContext * const currentSSLContext =
       session_observer_->GetSSLContext(
         requestMessage->getConnectionKey(), service_type);
-  //check current SSl context
-  if(currentSSLContext){
+  if(currentSSLContext) {
     if(currentSSLContext->IsInitCompleted()) {
       LOG4CXX_WARN(logger_, "Service is already protected, service_id"
                    << service_id);
-      //Generate response query and post to secure_service_messages_
-      PostProtectServiceResponse(requestMessage,
+      SendProtectServiceResponse(requestMessage,
                                  SecureServiceQuery::SERVICE_ALREADY_PROTECTED);
       }
     else {
       LOG4CXX_WARN(logger_, "Secure protection is pending, service_id"
                    << service_id);
       //Generate response query and post to secure_service_messages_
-      PostProtectServiceResponse(requestMessage,
-                                 SecureServiceQuery::SERVICE_ALREADY_PROTECTED);
+      SendProtectServiceResponse(requestMessage,
+                                 SecureServiceQuery::PENDING);
       }
     return false;
   }
@@ -187,7 +187,7 @@ bool SecureServiceManager::ParseProtectServiceRequest(
   if(!newSSLContext) {
       LOG4CXX_ERROR(logger_, "CryptoManager could not create SSl context.");
       //Generate response query and post to secure_service_messages_
-      PostProtectServiceResponse(requestMessage,
+      SendProtectServiceResponse(requestMessage,
                                  SecureServiceQuery::INTERNAL_ERROR);
       return false;
     }
@@ -197,36 +197,12 @@ bool SecureServiceManager::ParseProtectServiceRequest(
       LOG4CXX_ERROR(logger_,
                     "SessionObserver: could not set SSL context.");
       //Generate response query and post to secure_service_messages_
-      PostProtectServiceResponse(requestMessage,
-                                 SecureServiceQuery::INTERNAL_ERROR);
+      SendProtectServiceResponse(requestMessage,
+                                 SecureServiceQuery::SERVICE_ALREADY_PROTECTED);
       return false;
     }
   //Generate response query and post to secure_service_messages_
-  PostProtectServiceResponse(requestMessage, SecureServiceQuery::SUCCESS);
-  return true;
-}
-
-bool SecureServiceManager::SendProtectServiceResponse(
-    const SecureServiceMessage &responseMessage) {
-  LOG4CXX_INFO(logger_, "ProtectServiceResponse processing");
-  DCHECK(responseMessage->getHeader().query_id_ ==
-         SecureServiceQuery::ProtectServiceResponse);
-  DCHECK(responseMessage); DCHECK(session_observer_);
-  if(responseMessage->getDataSize() != 1) {
-      LOG4CXX_ERROR(logger_,
-                    "ProtectServiceResponse: wrong arguments size." <<
-                    responseMessage->getDataSize());
-      return false;
-    }
-
-  uint8_t* rawData = new uint8_t[responseMessage->getDataSize()];
-  memcpy(rawData, responseMessage->getData(), responseMessage->getDataSize());
-
-  protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage( responseMessage->getConnectionKey(), 2,
-                                          rawData, responseMessage->getDataSize(),
-                                          protocol_handler::kSecure));
-  OnMobileMessageSent(rawMessagePtr);
+  SendProtectServiceResponse(requestMessage, SecureServiceQuery::SUCCESS);
   return true;
 }
 
@@ -262,43 +238,68 @@ bool SecureServiceManager::ParseHandshakeData(const SecureServiceMessage &inMess
       LOG4CXX_WARN(logger_, "Handshake fail: " << LastError());
       return false;
     }
-  SendHandshakeData(inMessage, out_data, out_data_size);
+
+  //FIXME(EZ): add header to data array
+  uint8_t* rawData = new uint8_t[data_size];
+  memcpy(rawData, data, data_size);
+
+  SendBinaryData(inMessage->getConnectionKey(), rawData, data_size);
+
   return true;
-  }
+}
 
-void SecureServiceManager::PostProtectServiceResponse(
+void SecureServiceManager::SendProtectServiceResponse(
     const SecureServiceMessage &requestMessage,
-    const SecureServiceQuery::ProtectServiceResult response){
-    LOG4CXX_INFO(logger_, "SecureServiceManager::GenerateProtectServiceResponse");
-    DCHECK(requestMessage->getHeader().query_id_==
-           SecureServiceQuery::ProtectServiceRequest);
+    const SecureServiceQuery::ProtectServiceResult result){
+  LOG4CXX_INFO(logger_, "SecureServiceManager::SendProtectServiceResponse");
+  DCHECK(requestMessage->getHeader().query_id_==
+         SecureServiceQuery::ProtectServiceRequest);
 
-    SecureServiceQuery::QueryHeader header;
-    header.query_id_ = SecureServiceQuery::ProtectServiceResponse;
-    header.seq_number_ = requestMessage->getHeader().seq_number_;
+  const SecureServiceQuery::QueryHeader header(
+        SecureServiceQuery::ProtectServiceResponse,
+        requestMessage->getHeader().seq_number_);
 
-    SecureServiceMessage query(
-          new SecureServiceQuery(header, requestMessage->getConnectionKey()));
-    const uint8_t data = response;
-    query->setData(&data, 1);
-    secure_service_messages_.PostMessage(query);
-  }
+  const uint8_t data_result = result;
+  SendData(requestMessage->getConnectionKey(), header, &data_result, 1);
+}
 
-void SecureServiceManager::SendHandshakeData(
-    const SecureServiceMessage &inMessage,
+void SecureServiceManager::SendInternalError(const int32_t connectionKey,
+                                             const uint32_t seq_umber,
+                                             const std::string &error) {
+  const SecureServiceQuery::QueryHeader header(
+        SecureServiceQuery::InvalidQuery, seq_umber);
+  const uint8_t* const error_str = reinterpret_cast<const uint8_t*>(error.c_str());
+  SendData(connectionKey, header, error_str, error.size());
+}
+
+void SecureServiceManager::SendData(
+    const int32_t connectionKey,
+    const SecureServiceQuery::QueryHeader& header,
     const uint8_t * const data, const size_t data_size) {
-    LOG4CXX_INFO(logger_, "SecureServiceManager::PostSendHandshakeData");
-    DCHECK(data); DCHECK(data_size);
-    DCHECK(inMessage->getHeader().query_id_ ==
-           SecureServiceQuery::SendHandshakeData);
+  const size_t data_sending_size = sizeof(header) + data_size;
+  uint8_t* data_sending = new uint8_t[data_sending_size];
 
-    uint8_t* rawData = new uint8_t[data_size];
-    memcpy(rawData, data, data_size);
+  memcpy(data_sending, &header, sizeof(header));
+  memcpy(data_sending + sizeof(header), data, data_size);
 
-    protocol_handler::RawMessagePtr rawMessagePtr(
-          new protocol_handler::RawMessage( inMessage->getConnectionKey(), 2,
-                                            rawData, data_size,
-                                            protocol_handler::kSecure));
+  SendBinaryData(connectionKey, data_sending, data_sending_size);
+}
 
-    OnMobileMessageSent(rawMessagePtr);
+void SecureServiceManager::SendBinaryData(const int32_t connectionKey,
+                                          uint8_t * data,
+                                          size_t data_size)
+{
+  LOG4CXX_INFO(logger_, "SecureServiceManager::SendBinaryDataData");
+  if(!protocol_handler_) {
+    LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");
+    return;
   }
+  const protocol_handler::RawMessagePtr rawMessagePtr(
+        new protocol_handler::RawMessage( connectionKey,
+                                          protocol_handler::PROTOCOL_VERSION_2,
+                                          data, data_size,
+                                          protocol_handler::kSecure));
+  //Add RawMessage to ProtocolHandler messsage query
+  //FIXME(EZ): final_message - false?
+  protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
+}

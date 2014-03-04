@@ -37,15 +37,20 @@
 using namespace secure_service_manager;
 
 //TODO add info
-inline uint32_t getUInt8Value(const uint8_t* const data){
+inline uint32_t getUInt32Value(const uint8_t* const data){
   DCHECK(data);
   return
       data[0] << 24 | data[1] << 16 |
       data[2] <<  8 | data[3];
 }
 
+SecureServiceQuery::QueryHeader::QueryHeader(const SecureServiceQueryId id,
+                                             uint32_t seq_umber) :
+  query_id_(id), seq_number_(0){
+}
+
 SecureServiceQuery::SecureServiceQuery() :
-  header_(), connection_key_(0), data_(NULL) {
+  header_(InvalidQuery, 0), connection_key_(0), data_(NULL) {
   }
 
 SecureServiceQuery::SecureServiceQuery(
@@ -65,8 +70,23 @@ bool SecureServiceQuery::Parse(const uint8_t * const binary_data,
   if(bin_data_size < header_size) {
       return false;
     }
-  header_.query_id_ = binary_data[0];
-  header_.seq_number_ = getUInt8Value(binary_data + 1);
+  switch (binary_data[0]) {
+    case ProtectServiceRequest:
+      header_.query_id_ = ProtectServiceRequest;
+      break;
+    case ProtectServiceResponse:
+      header_.query_id_ = ProtectServiceResponse;
+      break;
+    case SendHandshakeData:
+      header_.query_id_ = SendHandshakeData;
+      break;
+    case InternalError:
+      header_.query_id_ = InternalError;
+      break;
+    default: // On wrong query id
+      header_.query_id_ = InvalidQuery;
+    }
+  header_.seq_number_ = getUInt32Value(binary_data + 1);
   const int data_size = bin_data_size - header_size;
   if(data_size > 0) {
       delete data_;
@@ -107,6 +127,6 @@ const size_t SecureServiceQuery::getDataSize() const {
   return data_size_;
 }
 
-uint32_t SecureServiceQuery::getConnectionKey() const {
+int32_t SecureServiceQuery::getConnectionKey() const {
   return connection_key_;
 }
