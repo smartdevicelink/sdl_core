@@ -2158,7 +2158,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onError(String info, Exception e) {
+		public void onError(String info, Throwable e) {
 			_lifecycleListener.onError(info, e);
 		}
 		

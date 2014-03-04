@@ -144,16 +144,8 @@ void RegisterAppInterfaceRequest::Run() {
     }
 
     MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
+    SendRegisterAppInterfaceResponseToMobile();
 
-    if (app->vr_synonyms()) {
-      SendVrCommandsOnRegisterAppToHMI(*app);
-    }
-    if (app->tts_name()) {
-      SendTTSChunksToHMI(*app);
-
-    } else {
-      SendRegisterAppInterfaceResponseToMobile();
-    }
   }
 }
 

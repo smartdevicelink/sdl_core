@@ -1415,11 +1415,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onError(msg.getInfo(), msg.getException());
+                            _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                         }
                     });
                 } else {
-                    _proxyListener.onError(msg.getInfo(), msg.getException());
+                    _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
             } else if (message.getFunctionName().equals(Names.OnProxyOpened)) {
@@ -1808,7 +1808,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void passErrorToProxyListener(final String info, final Exception e) {
+    private void passErrorToProxyListener(final String info, final Throwable e) {
         OnError message = new OnError(info, e);
         queueInternalMessage(message);
     }
@@ -3072,7 +3072,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolError(String info, Exception e) {
+        public void onProtocolError(String info, Throwable e) {
             passErrorToProxyListener(info, e);
         }
 

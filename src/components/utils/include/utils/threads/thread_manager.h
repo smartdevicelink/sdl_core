@@ -108,8 +108,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 
-  FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ThreadManager);
-  FRIEND_DELETER_DESTRUCTOR(ThreadManager);
+  FRIEND_BASE_SINGLETON_CLASS(ThreadManager);
 };
 
 } // namespace impl

@@ -123,4 +123,18 @@ public class OnSystemRequest extends RPCNotification {
             parameters.remove(Names.length);
         }
     }
+
+    public Integer getTimeout(){
+        if (parameters.get(Names.timeout) instanceof Integer) {
+            return (Integer)parameters.get(Names.timeout);
+        }
+        return null;
+    }
+    public void setTimeout(Integer timeout) {
+        if (timeout != null) {
+            parameters.put(Names.timeout, timeout);
+        } else {
+            parameters.remove(Names.timeout);
+        }
+    }
 }

@@ -131,7 +131,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
@@ -194,6 +193,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         //startProxyIfNetworkConnected();
 
         mPutFileTransferManager = new PutFileTransferManager();
+
+        mRpcRequestsResumableManager.setCallback(new RPCRequestsResumableManager.RPCRequestsResumableManagerCallback() {
+            @Override
+            public void onSendRequest(RPCRequest request) {
+                syncProxySendRPCRequest(request);
+            }
+        });
 
         MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
@@ -511,7 +517,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         Log.d(TAG, "PutFileForAppIcon");
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
         commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
-                mAwaitingInitIconResponseCorrelationID);
+                mAwaitingInitIconResponseCorrelationID, true);
     }
 
     private void show(String mainField1, String mainField2) throws SyncException {
@@ -654,6 +660,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         // hashId is not null means this is resumption
                         if (mSyncProxy.getHashId() == null) {
                             initialize();
+                        } else {
+                            setAppIcon();
                         }
                     } else {
                         try {
@@ -711,7 +719,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void sendIconFromResource(int resource) throws SyncException {
         commandPutFile(FileType.GRAPHIC_PNG,
                 getResources().getResourceEntryName(resource) + ICON_FILENAME_SUFFIX,
-                AppUtils.contentsOfResource(resource));
+                AppUtils.contentsOfResource(resource), getNextCorrelationID(), true);
     }
 
     @Override
@@ -792,7 +800,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onError(String info, Exception e) {
+    public void onError(String info, Throwable e) {
         createErrorMessageForAdapter("******onProxyError******", e);
         createErrorMessageForAdapter("Proxy error info: " + info);
     }
@@ -2021,7 +2029,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
 
-        mRpcRequestsResumableManager.addPutFile(putFile);
+        //mRpcRequestsResumableManager.addPutFile(putFile);
 
         syncProxySendRPCRequest(putFile);
     }
@@ -2096,15 +2104,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (response.getResultCode() == Result.SUCCESS) {
-            mRpcRequestsResumableManager.sendAllPutFiles(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            //mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         } else if (response.getResultCode() == Result.RESUME_FAILED) {
-            mRpcRequestsResumableManager.sendAllPutFiles(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsConnected(mSyncProxy);
-            mRpcRequestsResumableManager.sendAllRequestsDisconnected(mSyncProxy);
+            //mRpcRequestsResumableManager.sendAllPutFiles();
+            mRpcRequestsResumableManager.sendAllRequestsConnected();
+            mRpcRequestsResumableManager.sendAllRequestsDisconnected();
         }
 
-        mRpcRequestsResumableManager.cleanAllPutFiles();
+        //mRpcRequestsResumableManager.cleanAllPutFiles();
         mRpcRequestsResumableManager.cleanAllRequestsConnected();
         mRpcRequestsResumableManager.cleanAllRequestsDisconnected();
 

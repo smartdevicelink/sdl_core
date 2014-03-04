@@ -5,13 +5,13 @@ import com.ford.syncV4.proxy.constants.Names;
 public class OnError extends InternalProxyMessage {
 
 	private String _info;
-	private Exception _e;
+	private Throwable _e;
 	
 	public OnError() {
 		super(Names.OnProxyError);
 	}
 
-	public OnError(String info, Exception e) {
+	public OnError(String info, Throwable e) {
 		super(Names.OnProxyError);
 		this._info = info;
 		this._e = e;
@@ -21,7 +21,7 @@ public class OnError extends InternalProxyMessage {
 		return _info;
 	}
 	
-	public Exception getException() {
+	public Throwable getThrowable() {
 		return _e;
 	}
 }

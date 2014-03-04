@@ -247,7 +247,12 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     message[strings::msg_params][strings::application][strings::app_type] =
       *app_type;
   }
-
+  if (application_impl.vr_synonyms()) {
+    message[strings::msg_params][strings::vr_synonyms] = *(application_impl.vr_synonyms());
+  }
+  if (application_impl.tts_name()) {
+    message[strings::msg_params][strings::tts_name] = *(application_impl.tts_name());
+  }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
@@ -277,6 +282,7 @@ void MessageHelper::SendHelpVrCommand() {
 
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(const uint32_t app_id) {
 
+  LOG4CXX_INFO(g_logger, "GetHashUpdateNotification" << app_id);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   DCHECK(app.get());
 
@@ -828,7 +834,7 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr
           hmi_apis::FunctionID::UI_ChangeRegistration, app->ui_language(),
           app->app_id());
 
-if (ui_command) {
+    if (ui_command) {
       ApplicationManagerImpl::instance()->ManageHMICommand(ui_command);
     }
 

@@ -206,8 +206,23 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
     bool ActivateApplication(ApplicationSharedPtr app);
-    bool PutApplicationInLimited(ApplicationSharedPtr app);
-    bool PutApplicationInFull(ApplicationSharedPtr app);
+    /**
+     * @brief Put application in Limited HMI Level if possible,
+     *        otherwise put applicatuion other HMI level.
+     *        do not send any notifications to mobile
+     * @param app, application, that need to be puted in Limeted
+     * @return seted HMI Level
+     */
+    mobile_api::HMILevel::eType PutApplicationInLimited(ApplicationSharedPtr app);
+
+    /**
+     * @brief Put application in FULL HMI Level if possible,
+     *        otherwise put applicatuion other HMI level.
+     *        do not send any notifications to mobile
+     * @param app, application, that need to be puted in FULL
+     * @return seted HMI Level
+     */
+    mobile_api::HMILevel::eType PutApplicationInFull(ApplicationSharedPtr app);
 
     void DeactivateApplication(ApplicationSharedPtr app);
     void ConnectToDevice(uint32_t id);
@@ -572,7 +587,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ApplicationManagerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {

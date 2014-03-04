@@ -85,7 +85,7 @@ class MediaManagerImpl : public MediaManager,
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(MediaManagerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(MediaManagerImpl);
 };
 
 }  //  namespace media_manager
