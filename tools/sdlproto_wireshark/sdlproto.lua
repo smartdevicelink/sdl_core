@@ -105,9 +105,9 @@ function p_rpc_sdlproto.dissector(buf, pkt, root)
   subtree:add(f_rpc_functionID, buf(0, 4))
   subtree:add(f_rpc_correlationID, buf(4, 4))
 
-  local l_rpc_jsonSizeBytes = buf(8, 4)
-  local l_rpc_jsonSizeValue = l_rpc_jsonSizeBytes:uint()
-  subtree:add(f_rpc_jsonSize, l_rpc_jsonSizeBytes)
+  local l_rpc_jsonSizeBuf = buf(8, 4)
+  local l_rpc_jsonSizeValue = l_rpc_jsonSizeBuf:uint()
+  subtree:add(f_rpc_jsonSize, l_rpc_jsonSizeBuf)
 
   -- after the header, we should have some data (JSON and/or binary)
   local l_dataOffset = RPC_HEADER_LENGTH
@@ -224,21 +224,21 @@ function p_sdlproto.dissector(buf, pkt, root)
   subtree:add(f_compressionFlag, l_byte0)
   subtree:add(f_frameType, l_byte0)
 
-  local l_serviceTypeBytes = buf(1, 1)
-  local l_serviceTypeValue = l_serviceTypeBytes:uint()
-  subtree:add(f_serviceType, l_serviceTypeBytes)
+  local l_serviceTypeBuf = buf(1, 1)
+  local l_serviceTypeValue = l_serviceTypeBuf:uint()
+  subtree:add(f_serviceType, l_serviceTypeBuf)
 
   -- Frame Info depends on Frame Type
   local l_frameType = l_byte0:bitfield(5, 3)
-  local l_frameInfoBytes = buf(2, 1)
+  local l_frameInfoBuf = buf(2, 1)
   if f_frameTypeValue_ControlFrame == l_frameType then
-    subtree:add(f_frameInfo_ControlFrame, l_frameInfoBytes)
+    subtree:add(f_frameInfo_ControlFrame, l_frameInfoBuf)
   elseif f_frameTypeValue_ConsecutiveFrame == l_frameType then
-    subtree:add(f_frameInfo_ConsecutiveFrame, l_frameInfoBytes)
+    subtree:add(f_frameInfo_ConsecutiveFrame, l_frameInfoBuf)
   else
-    local l_frameInfoTreeItem = subtree:add(f_frameInfo, l_frameInfoBytes)
+    local l_frameInfoTreeItem = subtree:add(f_frameInfo, l_frameInfoBuf)
 
-    if l_frameInfoBytes:uint() ~= 0x00 then
+    if l_frameInfoBuf:uint() ~= 0x00 then
       l_frameInfoTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Reserved, should be 0x00")
     end
   end
@@ -246,9 +246,9 @@ function p_sdlproto.dissector(buf, pkt, root)
   subtree:add(f_sessionID, buf(3, 1))
 
   -- Data Size depends on Frame Type
-  local l_dataSizeBytes = buf(4, 4)
-  local l_dataSizeValue = l_dataSizeBytes:uint()
-  local l_dataSizeTreeItem = subtree:add(f_dataSize, l_dataSizeBytes)
+  local l_dataSizeBuf = buf(4, 4)
+  local l_dataSizeValue = l_dataSizeBuf:uint()
+  local l_dataSizeTreeItem = subtree:add(f_dataSize, l_dataSizeBuf)
   local l_isFirstFrame = false
   if f_frameTypeValue_FirstFrame == l_frameType then
     if l_dataSizeValue == FIRSTFRAME_DATASIZE then
@@ -273,10 +273,10 @@ function p_sdlproto.dissector(buf, pkt, root)
   end
 
   -- Message ID depends on Frame Data (value of Frame Info)
-  local l_messageIDBytes = buf(8, 4)
-  local l_messageIDValue = l_messageIDBytes:uint()
-  local l_frameInfo = l_frameInfoBytes
-  local l_messageIDTreeItem = subtree:add(f_messageID, l_messageIDBytes)
+  local l_messageIDBuf = buf(8, 4)
+  local l_messageIDValue = l_messageIDBuf:uint()
+  local l_frameInfo = l_frameInfoBuf
+  local l_messageIDTreeItem = subtree:add(f_messageID, l_messageIDBuf)
   local l_messageIDDescription = ""
   if f_frameInfoValue_StartServiceACK == l_frameInfo then
     l_messageIDDescription = " -- Hash code for End Session"
@@ -301,25 +301,25 @@ function p_sdlproto.dissector(buf, pkt, root)
     else
       -- special case with First Frame
       if l_isFirstFrame then
-        local l_totalDataBytesBytes = buf(12, 4)
-        subtree:add(f_totalDataBytes, l_totalDataBytesBytes)
+        local l_totalDataBytesBuf = buf(12, 4)
+        subtree:add(f_totalDataBytes, l_totalDataBytesBuf)
 
-        local l_numberOfConsecutiveFramesBytes = buf(16, 4)
-        subtree:add(f_numberOfConsecutiveFrames, l_numberOfConsecutiveFramesBytes)
+        local l_numberOfConsecutiveFramesBuf = buf(16, 4)
+        subtree:add(f_numberOfConsecutiveFrames, l_numberOfConsecutiveFramesBuf)
 
         g_expectedBytesLeft = 0
       else
         local l_dataLengthAvailable = math.min(g_expectedBytesLeft, l_bytesLeft)
         if DEBUG then print("expect ".. g_expectedBytesLeft .. ", and have " .. l_bytesLeft .. ", and use " .. l_dataLengthAvailable) end
-        local l_dataBytes = buf(HEADER_LENGTH, l_dataLengthAvailable)
+        local l_dataBuf = buf(HEADER_LENGTH, l_dataLengthAvailable)
 
         local l_isServiceTypeRPC =
           (f_serviceTypeValue_RPC == l_serviceTypeValue) or
           (f_serviceTypeValue_Bulk == l_serviceTypeValue)
         if l_isServiceTypeRPC then
-          Dissector.get(p_rpc_protoname):call(l_dataBytes:tvb(), pkt, subtree)
+          Dissector.get(p_rpc_protoname):call(l_dataBuf:tvb(), pkt, subtree)
         else
-          subtree:add(f_data, l_dataBytes)
+          subtree:add(f_data, l_dataBuf)
         end
 
         -- make this packet look shorter in case there unprocessed bytes after it
