@@ -533,6 +533,7 @@ SDL.SDLController = Em.Object
 
             //this.getApplicationModel(appID).set('unregistered', true);
             this.getApplicationModel(appID).onDeleteApplication(appID);
+            SDL.VRPopUp.DeleteActivateApp(appID);
             SDL.SDLAppController.set('model', null);
         },
         /**

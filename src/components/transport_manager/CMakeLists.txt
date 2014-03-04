@@ -5,6 +5,7 @@ include_directories (
   ../connection_handler/include
   ../config_profile/include
   ../resumption/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
 )
 if (BUILD_BT_SUPPORT)
@@ -25,6 +26,7 @@ set (SOURCES
   ./src/transport_adapter/transport_adapter_event.cc
   ./src/tcp/tcp_socket_connection.cc
   ./src/tcp/tcp_connection_factory.cc
+  ../resumption/src/last_state.cc
 )
 
 if (BUILD_AVAHI_SUPPORT)

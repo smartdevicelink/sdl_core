@@ -52,6 +52,16 @@ class Dictionary {
   * @brief Typedef for subitems const iterator
   */
   typedef typename SubitemContainer::const_iterator const_iterator;
+
+/**
+  * @brief Typedef for items iterator
+  */
+  typedef typename ItemContainer::iterator rec_iterator;
+/**
+  * @brief Typedef for items const iterator
+  */
+  typedef typename ItemContainer::const_iterator rec_const_iterator;
+
 /**
  * @brief add an item to the dictionary
  * @param key - item key
@@ -93,11 +103,25 @@ class Dictionary {
  * @return iterator pointing to the first subitem
  */
   iterator begin();
+
 /**
  * @brief first subitem
  * @return const iterator pointing to the first subitem
  */
   const_iterator begin() const;
+
+/**
+  * @brief first item
+  * @return iterator pointing to the first item
+  */
+  rec_iterator rec_begin();
+
+/**
+  * @brief first item
+  * @return iterator pointing to the first item
+  */
+  rec_const_iterator rec_begin() const;
+
 /**
  * @brief end of subitem list
  * @return iterator pointing to the end of subitem list
@@ -108,6 +132,18 @@ class Dictionary {
  * @return const iterator pointing to the end of subitem list
  */
   const_iterator end() const;
+
+  /**
+  * @brief end of item list
+  * @return iterator pointing to the end of item list
+  */
+  rec_iterator rec_end();
+
+  /**
+  * @brief end of item list
+  * @return const iterator pointing to the end of item list
+  */
+  rec_const_iterator rec_end() const;
 
 private:
  ItemContainer items_;
@@ -155,6 +191,16 @@ typename Dictionary<Key, Record>::const_iterator Dictionary<Key, Record>::begin(
 }
 
 template<typename Key, typename Record>
+typename Dictionary<Key, Record>::rec_iterator Dictionary<Key, Record>::rec_begin() {
+  return items_.begin();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::rec_const_iterator Dictionary<Key, Record>::rec_begin() const {
+  return items_.begin();
+}
+
+template<typename Key, typename Record>
 typename Dictionary<Key, Record>::iterator Dictionary<Key, Record>::end() {
   return subitems_.end();
 }
@@ -162,6 +208,16 @@ typename Dictionary<Key, Record>::iterator Dictionary<Key, Record>::end() {
 template<typename Key, typename Record>
 typename Dictionary<Key, Record>::const_iterator Dictionary<Key, Record>::end() const {
   return subitems_.end();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::rec_iterator Dictionary<Key, Record>::rec_end() {
+  return items_.end();
+}
+
+template<typename Key, typename Record>
+typename Dictionary<Key, Record>::rec_const_iterator Dictionary<Key, Record>::rec_end() const {
+  return items_.end();
 }
 
 }  // namespace utils

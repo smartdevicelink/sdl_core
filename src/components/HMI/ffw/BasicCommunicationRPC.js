@@ -153,7 +153,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             this._super();
 
             if (notification.method == this.onAppRegisteredNotification) {
-                SDL.SDLModel.onAppRegistered(notification.params.application);
+                SDL.SDLModel.onAppRegistered(notification.params);
                 this.OnFindApplications();
             }
 

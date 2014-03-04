@@ -38,6 +38,7 @@
 #include "utils/macro.h"
 #include "utils/dict.h"
 #include "utils/singleton.h"
+#include "json/json.h"
 
 namespace resumption {
 
@@ -52,16 +53,43 @@ class LastState : public utils::Singleton<LastState> {
  */
   Dictionary dictionary;
 
- private:
+  /**
+    * @brief Convert utils::Dictionary<std::string, std::string> to Json
+    * @param dict - input dictionary
+    * @return created Json value
+    */
+  static Json::Value toJson(const Dictionary &dict);
+
+  /**
+    * @brief Convert Json to utils::Dictionary<std::string, std::string>
+    * @param json_val - Json Kson
+    * @return created Dictionary
+    */
+  static Dictionary fromJson(const Json::Value& json_val);
+
+  private:
+
   /**
    * @brief File to save Dictionary
    */
-  std::string filename;
-/**
+  static const std::string filename;
+
+  /**
+   * @brief Saving dictionary to filesystem as Json
+   */
+  void SaveToFileSystem();
+
+  /**
+   * @brief Load dictionary from filesystem as Json
+   */
+  void LoadFromFileSystem();
+
+ /**
  * @brief Private default constructor
  */
-  LastState() {
-  }
+  LastState();
+  ~LastState();
+
 
   DISALLOW_COPY_AND_ASSIGN(LastState);
 
