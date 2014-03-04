@@ -13,5 +13,5 @@ set (SOURCES
   src/ssl_context_impl.cc
 )
 
-add_library(CryptoManager ${SOURCES})
-target_link_libraries(CryptoManager crypto ssl ProtocolHandler)
+add_library(SecurityManager ${SOURCES})
+target_link_libraries(SecurityManager crypto ssl ProtocolHandler)

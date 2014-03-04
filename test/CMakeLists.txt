@@ -37,6 +37,7 @@ include_directories (
   ../test/components/json_handler/include
   ../test/components/smart_objects
   ../test/components/transport_manager
+  ../test/components/connection_handler/include
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager
@@ -75,7 +76,7 @@ set(LIBRARIES
     ProtocolHandler
     Utils
     ConfigProfile
-    test_CryptoManager
+    test_SecurityManager
     #test_JSONHandler_v4_protocol_v2_0_revP
     #test_json_handler
     #test_SmartObjectTest

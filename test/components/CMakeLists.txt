@@ -13,7 +13,6 @@ add_subdirectory(./smart_objects)
 # --- AppMgr
 add_subdirectory(./application_manager)
 
-
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)
 

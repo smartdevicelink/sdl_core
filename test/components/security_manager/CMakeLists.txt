@@ -10,16 +10,16 @@ set (SOURCES
 )
 
 set (LIBRARIES
-	crypto
-	ssl
-	gtest
-	gtest_main
-	CryptoManager
+  crypto
+  ssl
+  gtest
+  gtest_main
+  SecurityManager
 )
 
-add_library("test_CryptoManager" ${SOURCES})
-target_link_libraries("test_CryptoManager" ssl gtest CryptoManager crypto)
+add_library("test_SecurityManager" ${SOURCES})
+target_link_libraries("test_SecurityManager" ssl gtest SecurityManager crypto)
 
-create_test("test_CryptoManagerTest" "${SOURCES}" "${LIBRARIES}")
+create_test("test_SecurityManagerTest" "${SOURCES}" "${LIBRARIES}")
 
 # vim: set ts=2 sw=2 et:
