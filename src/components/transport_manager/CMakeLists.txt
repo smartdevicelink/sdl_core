@@ -26,7 +26,6 @@ set (SOURCES
   ./src/transport_adapter/transport_adapter_event.cc
   ./src/tcp/tcp_socket_connection.cc
   ./src/tcp/tcp_connection_factory.cc
-  ../resumption/src/last_state.cc
 )
 
 if (BUILD_AVAHI_SUPPORT)

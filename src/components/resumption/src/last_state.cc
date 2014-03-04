@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "resumption/last_state.h"
 #include "utils/file_system.h"
 
@@ -45,7 +46,7 @@ Json::Value LastState::toJson(const Dictionary& dict) {
 
   for ( ; rec_it != dict.rec_end() ;++rec_it) {
     std::string key = rec_it->first;
-    std::string value= rec_it->second;
+    std::string value = rec_it->second;
     val[key] = value;
   }
   for ( ; it != dict.end() ;++it) {
