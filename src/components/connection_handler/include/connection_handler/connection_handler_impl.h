@@ -261,12 +261,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
     void KeepConnectionAlive(uint32_t connection_key);
-//FIXME: Fix on Singlton reimplementation (with @deleteInstanse methode)
-#ifdef BUILD_TESTS
-    protected:
-#else
-    private:
-#endif
+private:
     /**
      * \brief Default class constructor
      */
@@ -338,6 +333,16 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
+#ifdef BUILD_TESTS
+    /*
+     * Methods for test usage
+     */
+public:
+    ConnectionList& getConnectionList();
+    bool addDeviceConnection(
+        const transport_manager::DeviceInfo& device_info,
+        const transport_manager::ConnectionUID& connection_id);
+#endif
 };
 }/* namespace connection_handler */
 

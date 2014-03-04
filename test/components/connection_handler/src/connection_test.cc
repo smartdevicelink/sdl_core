@@ -44,22 +44,22 @@ namespace test {
 namespace components {
 namespace connection_handle {
 
-class ConnectionHandlerImplWrapper : public ConnectionHandlerImpl{
-public:
-  ConnectionHandlerImplWrapper() : ConnectionHandlerImpl() {}
-};
-
 class ConnectionTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
+    connection_handler_ = ConnectionHandlerImpl::instance();
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0;
     connection_.reset(new Connection(connectionHandle, device_handle,
-                                     &connectionHandler_, 10000));
+                                     connection_handler_, 10000));
+  }
+
+  void TearDown() OVERRIDE {
+    ConnectionHandlerImpl::destroy();
   }
 
   utils::SharedPtr<Connection> connection_;
-  ConnectionHandlerImplWrapper connectionHandler_;
+  ConnectionHandlerImpl* connection_handler_;
 };
 
 TEST_F(ConnectionTest, Session_AddNewSession) {

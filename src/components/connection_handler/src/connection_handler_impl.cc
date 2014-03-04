@@ -578,7 +578,7 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
     it->second->KeepAlive();
-  }
+    }
 }
 
 void ConnectionHandlerImpl::OnConnectionEnded(
@@ -611,5 +611,21 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   delete itr->second;
   connection_list_.erase(itr);
 }
+
+#ifdef BUILD_TESTS
+ConnectionList &ConnectionHandlerImpl::getConnectionList(){
+  return connection_list_;
+}
+
+bool ConnectionHandlerImpl::addDeviceConnection(const transport_manager::DeviceInfo &device_info, const transport_manager::ConnectionUID &connection_id) {
+  //Add Device
+  const bool result =
+      AddDeviceInDeviceListIfNotExist(device_info);
+  if(result)
+    //Add connection
+    OnConnectionEstablished(device_info, connection_id);
+  return result;
+}
+#endif
 
 }/* namespace connection_handler */

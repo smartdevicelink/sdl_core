@@ -30,8 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include "connection_handler/connection_handler_impl.h"
+#include "connection_handler/connection_handler_impl_test.h"
 
 using namespace connection_handler;
 
@@ -39,31 +38,14 @@ namespace test {
 namespace components {
 namespace connection_handle {
 
-class ConnectionHandlerImplWrapper : public ConnectionHandlerImpl{
-public:
-  ConnectionHandlerImplWrapper() : ConnectionHandlerImpl() {}
-
-  ConnectionList& getConnectionList(){
-    return connection_list_;
-  }
-  bool addDeviceConnection(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID& connection_id) {
-    //Add Device
-    const bool result =
-        AddDeviceInDeviceListIfNotExist(device_info);
-    if(result)
-      //Add connection
-      OnConnectionEstablished(device_info, connection_id);
-    return result;
-  }
-};
-
 class ConnectionHandlerTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    session_observer_.reset(new ConnectionHandlerImplWrapper);
+    connection_handler_ = ConnectionHandlerImpl::instance();
     uid = 0;
+  }
+  void TearDown() OVERRIDE {
+    ConnectionHandlerImpl::destroy();
   }
   //Additional SetUp
   void AddTestDeviceConenction() {
@@ -72,11 +54,11 @@ class ConnectionHandlerTest: public ::testing::Test {
           device_handle, std::string("test_address"), std::string("test_name"));
     //Add Device and connection
     const bool result =
-        session_observer_->addDeviceConnection(device_info, uid);
+        connection_handler_->addDeviceConnection(device_info, uid);
     EXPECT_TRUE(result);
   }
 
-  utils::SharedPtr<ConnectionHandlerImplWrapper> session_observer_;
+  ConnectionHandlerImpl* connection_handler_;
   transport_manager::ConnectionUID uid;
 };
 
@@ -85,10 +67,10 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
   const uint8_t sessionID = 0;
   //start new session with RPC service
   const int32_t result_fail =
-      session_observer_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
   //Unknown connection error is '-1'
   EXPECT_EQ(result_fail, -1);
-  EXPECT_TRUE(session_observer_->getConnectionList().empty());
+  EXPECT_TRUE(connection_handler_->getConnectionList().empty());
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
@@ -100,9 +82,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
 
   //start new session with RPC service
   const int32_t session_id_on_rpc_secure =
-      session_observer_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
   EXPECT_NE(session_id_on_rpc_secure, -1);
-  const ConnectionList& connection_list = session_observer_->getConnectionList();
+  const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
   const Connection* const connection = connection_list.begin()->second;
   EXPECT_NE(connection, static_cast<Connection*>(NULL));
@@ -124,17 +106,17 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Secure) {
 
   //start new session with RPC service
   const int32_t session_id =
-      session_observer_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
   EXPECT_NE(session_id, -1);
-  const ConnectionList& connection_list = session_observer_->getConnectionList();
+  const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
   EXPECT_EQ(connection_list.begin()->first, 0);
 
   //start new session with RPC service
   const int32_t session_id_on_start_secure =
-      session_observer_->OnSessionStartedCallback(uid, session_id, protocol_handler::kSecure);
+      connection_handler_->OnSessionStartedCallback(uid, session_id, protocol_handler::kSecure);
   EXPECT_EQ(session_id_on_start_secure, session_id);
-  ConnectionList& connection_list_new = session_observer_->getConnectionList();
+  ConnectionList& connection_list_new = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_new.empty());
   EXPECT_EQ(connection_list_new.begin()->first, 0);
 }
@@ -148,25 +130,27 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
 
   //start new session with RPC service
   const int32_t session_id =
-      session_observer_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
   EXPECT_NE(session_id, -1);
-  const ConnectionList& connection_list = session_observer_->getConnectionList();
+  const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
   EXPECT_EQ(connection_list.begin()->first, 0);
 
   //start new session with RPC service
   const int32_t session_id_on_start_secure =
-      session_observer_->OnSessionStartedCallback(uid, session_id, protocol_handler::kSecure);
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kSecure);
   EXPECT_EQ(session_id_on_start_secure, session_id);
-  ConnectionList& connection_list_start_secure = session_observer_->getConnectionList();
+  ConnectionList& connection_list_start_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_start_secure.empty());
   EXPECT_EQ(connection_list_start_secure.begin()->first, 0);
 
   //start new session with RPC service
   const int32_t session_id_on_end_secure =
-      session_observer_->OnSessionEndedCallback(uid, session_id, 0, protocol_handler::kSecure);
+      connection_handler_->OnSessionEndedCallback(uid, session_id, 0,
+                                                  protocol_handler::kSecure);
   EXPECT_EQ(session_id_on_end_secure, session_id);
-  ConnectionList& connection_list_on_end_secure = session_observer_->getConnectionList();
+  ConnectionList& connection_list_on_end_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_on_end_secure.empty());
   EXPECT_EQ(connection_list_on_end_secure.begin()->first, 0);
 }
