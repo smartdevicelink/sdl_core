@@ -11,8 +11,7 @@ kResultsDir = ""
 
 def MakeListItem(commiter_info):
   report_file_name = commiter_info.email.split('@')[0] + ".txt";
-  return HTML.link(commiter_info.name,
-                   kResultsDir + report_file_name.lower())
+  return HTML.link(commiter_info.name, kResultsDir + report_file_name)
 
 
 # Parse args
