@@ -18,7 +18,7 @@ public class ServiceType extends ByteEnumer {
     public final static ServiceType Mobile_Nav = new ServiceType((byte) 0xB, "Mobile_Nav");
     public final static ServiceType Audio_Service = new ServiceType((byte) 10, "Audio_Service");
     // TODO : Replace byte value when it will be considered
-    public final static ServiceType Secure_Service = new ServiceType((byte) 11, "Secure_Service");
+    public final static ServiceType Secure_Service = new ServiceType((byte) 0x11, "Secure_Service");
 
     static {
         sVector.addElement(RPC);

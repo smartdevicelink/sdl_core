@@ -61,7 +61,7 @@ public class ServiceTypeTest extends AndroidTestCase {
     // TODO : Replace byte value when it will be considered
     public void testServiceTypeSecureValueIs11() throws Exception {
         byte value = ServiceType.Secure_Service.getValue();
-        assertEquals(value, (byte) 11);
+        assertEquals(value, (byte) 0x11);
     }
 
     public void testSecureServiceIsInServiceTypeList() throws Exception {
