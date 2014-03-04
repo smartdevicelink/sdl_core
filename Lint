@@ -201,7 +201,6 @@ if $MISRA_ENABLED; then
 fi
 
 if [ "$SCOPE" == "ALL" ]; then
-	./tools/FlexeLint/bin/commiters_page.py tools/FlexeLint/results/index.html
   EXLUDE_FROM_SOURCE_CODE_PATH=$(echo $EXLUDE_FROM_SOURCE_CODE_PATH | awk '{gsub(/ /,"\\|")}; 1')
   find $SOURCE_CODE_PATH \( -name "*.cc" -o -name "*.cpp" \) | awk '{print "../../../" $0}' | grep -v "./src/components/qt_hmi/" | grep -v $EXLUDE_FROM_SOURCE_CODE_PATH > ./tools/FlexeLint/tmp/sdl-modules.lnt
 elif [ "$SCOPE" == "FILE" ]; then
