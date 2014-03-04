@@ -347,13 +347,15 @@ local tcp_port = 12345
 local tcp_dissector_table = DissectorTable.get("tcp.port")
 tcp_dissector_table:add(tcp_port, p_sdlproto)
 
--- attempt to register the dissector for the standard USB AOA vendor&product
+-- attempt to register the dissector for the standard USB AOA vendor&product IDs
 -- (requires wireshark 1.10.0+)
 -- this may fail if wireshark doesn't get device descriptors
 local success, data = pcall(function() return DissectorTable.get("usb.product") end)
 if success then
   local usb_product_dissector_table = data
-  usb_product_dissector_table:add(0x18d12d01, p_sdlproto)
+  for id = 0x18d12d00, 0x18d12d05 do
+    usb_product_dissector_table:add(id, p_sdlproto)
+  end
 else
   -- pre wireshark 1.10.0
   -- register the dissector for USB device class
