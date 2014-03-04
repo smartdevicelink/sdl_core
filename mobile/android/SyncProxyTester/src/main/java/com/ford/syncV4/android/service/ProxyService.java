@@ -1775,8 +1775,31 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * @param doSetPersistent
      * @param putFile         PurFile to be send
      */
-    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
-                               int correlationId, Boolean doSetPersistent, PutFile putFile) {
+    public void commandPutFile(FileType fileType, String syncFileName,
+                               byte[] bulkData, int correlationId,
+                               Boolean doSetPersistent, PutFile putFile) {
+        commandPutFile(fileType, syncFileName, bulkData, correlationId,
+                doSetPersistent, null, null, null, putFile);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType        Type of the File
+     * @param syncFileName    Name of the File
+     * @param bulkData        Data of the File
+     * @param correlationId   Unique identifier of the command
+     * @param doSetPersistent
+     * @param isSystemFile
+     * @param length
+     * @param offset
+     * @param putFile         PurFile to be send
+     */
+    public void commandPutFile(FileType fileType, String syncFileName,
+                               byte[] bulkData, int correlationId,
+                               Boolean doSetPersistent, Boolean isSystemFile,
+                               Integer length, Integer offset,
+                               PutFile putFile) {
         int mCorrelationId = correlationId;
         if (correlationId == -1) {
             mCorrelationId = getNextCorrelationID();
@@ -1790,6 +1813,19 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (doSetPersistent != null) {
                 newPutFile.setPersistentFile(doSetPersistent);
             }
+
+            if (isSystemFile != null) {
+                newPutFile.setSystemFile(isSystemFile);
+            }
+
+            if (length != null) {
+                newPutFile.setLength(length);
+            }
+
+            if (offset != null) {
+                newPutFile.setOffset(offset);
+            }
+
             newPutFile.setBulkData(bulkData);
         } else {
             newPutFile = putFile;

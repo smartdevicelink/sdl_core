@@ -1875,7 +1875,7 @@
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" scope="partner">
       <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
     </param>
-    <param name="screenParams" type="ScreenParams" mandatory="false">
+    <param name="screenParams" type="ScreenParams" mandatory="false" scope="partner">
       <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
     </param>
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
@@ -2637,7 +2637,7 @@
   <function name="DeleteSubMenu" functionID="DeleteSubMenuID" messagetype="request">
     <description>Deletes a submenu from the in-application menu.</description>
 
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
       <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
     </param>
 

@@ -58,7 +58,7 @@ class LastState : public utils::Singleton<LastState> {
     * @param dict - input dictionary
     * @return created Json value
     */
-  static Json::Value toJson(const Dictionary &dict);
+  static Json::Value toJson(const Dictionary& dict);
 
   /**
     * @brief Convert Json to utils::Dictionary<std::string, std::string>
