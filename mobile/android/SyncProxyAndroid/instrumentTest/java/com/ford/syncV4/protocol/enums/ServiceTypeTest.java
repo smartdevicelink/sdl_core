@@ -2,14 +2,13 @@ package com.ford.syncV4.protocol.enums;
 
 import android.test.AndroidTestCase;
 
-import java.util.Vector;
-
 /**
  * Created by Andrew Batutin on 8/20/13.
  */
 public class ServiceTypeTest extends AndroidTestCase {
 
     public ServiceTypeTest() {
+
     }
 
     public void testServiceTypeMobNavNameIsMobile_Nav() throws Exception {
@@ -23,8 +22,7 @@ public class ServiceTypeTest extends AndroidTestCase {
     }
 
     public void testMobileNavIsInServiceTypeList() throws Exception {
-        Vector sessionTypes = ServiceType.getList();
-        assertTrue(sessionTypes.contains(ServiceType.Mobile_Nav));
+        assertTrue(ServiceType.containsService(ServiceType.Mobile_Nav));
     }
 
     public void testServiceTypeAudioNameIsAudio_Service() throws Exception {
@@ -38,8 +36,7 @@ public class ServiceTypeTest extends AndroidTestCase {
     }
 
     public void testAudioServiceIsInServiceTypeList() throws Exception {
-        Vector sessionTypes = ServiceType.getList();
-        assertTrue(sessionTypes.contains(ServiceType.Audio_Service));
+        assertTrue(ServiceType.containsService(ServiceType.Audio_Service));
     }
 
     public void testServiceTypeHeartbeatNameIsHeartbeat_Service() throws Exception {
@@ -53,8 +50,21 @@ public class ServiceTypeTest extends AndroidTestCase {
     }
 
     public void testHeartbeatIsInServiceTypeList() throws Exception {
-        Vector sessionTypes = ServiceType.getList();
-        assertTrue(sessionTypes.contains(ServiceType.Heartbeat));
+        assertTrue(ServiceType.containsService(ServiceType.Heartbeat));
     }
 
+    public void testServiceTypeSecureNameIsSecure_Service() throws Exception {
+        String name = ServiceType.Secure_Service.getName();
+        assertEquals(name, "Secure_Service");
+    }
+
+    // TODO : Replace byte value when it will be considered
+    public void testServiceTypeSecureValueIs11() throws Exception {
+        byte value = ServiceType.Secure_Service.getValue();
+        assertEquals(value, (byte) 11);
+    }
+
+    public void testSecureServiceIsInServiceTypeList() throws Exception {
+        assertTrue(ServiceType.containsService(ServiceType.Secure_Service));
+    }
 }
