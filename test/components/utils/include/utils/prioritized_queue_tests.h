@@ -9,14 +9,14 @@
 namespace test  {
 namespace components  {
 namespace utils  {
-  TEST(PrioritizedQueueTest, CommonTests) {
-    ASSERT_TRUE(true);
   struct TestMessage {
     int order;
     int priority;
     int PriorityOrder() const { return priority; }
   };
 
+  TEST(PrioritizedQueueTest, CommonTests) {
+    ASSERT_TRUE(true);
   const size_t kSequenceLength = 8;
   TestMessage input[kSequenceLength] = {
       {0, 0}, {1, 0}, {2, 2}, {3, 0}, {4, 2}, {5, 0}, {6, 9}, {7, 1}
