@@ -34,8 +34,7 @@
 #define security_query_H
 
 #include <cstddef>
-//TODO: EZamakhov remove <cstdint> as C++11
-#include <cstdint>
+#include <stdint.h>
 #include "utils/shared_ptr.h"
 
 namespace security_manager {

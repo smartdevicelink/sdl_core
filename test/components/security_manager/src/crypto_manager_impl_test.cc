@@ -1,6 +1,6 @@
 /*
  * \file crypto_manager_impl_test.cc
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -33,6 +33,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "security_manager/crypto_manager_impl.h"
-
-
+#include "security_manager/crypto_manager_impl_test.h"
