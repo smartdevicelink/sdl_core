@@ -40,6 +40,7 @@ set(LIBRARIES
   ConfigProfile
   RequestWatchdog
   MediaManager
+  Resumption	
   policies
   apr-1
   aprutil-1

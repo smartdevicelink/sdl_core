@@ -5,6 +5,7 @@ include_directories (
   ../connection_handler/include
   ../config_profile/include
   ../resumption/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
 )
 if (BUILD_BT_SUPPORT)

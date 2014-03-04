@@ -5,14 +5,14 @@ set -e
 function print_usage {
 	echo
 	echo "Usage: Lint [FILE=file|ALL] BUILD_PATH=path [-v] [w0|w1|w2|w3|w4] [MISRA=ON|MISRA=OFF]"
-	echo 
+	echo
 	echo "\"FILE=file|ALL\" Sets the scope of linting"
 	echo -e '\t' "FILE sets the scope to single \"file\""
 	echo -e '\t' "ALL sets the scope to all project modules"
 	echo -e '\t' "If none is set then localy changes files will be linted"
-	echo 
+	echo
 	echo "\"BUILD_PATH=path\" is the only mandatory parameter which sets"
-	echo -e '\t' "the path to the build product directory"  
+	echo -e '\t' "the path to the build product directory"
 	echo
 	echo "\"-v\" Turns verbose mode on (off by default)"
 	echo
@@ -35,7 +35,7 @@ function print_usage {
 echo
 echo "=========== Lint SMART DEVICE LINK project ==========="
 echo
- 
+
 ########################################################################
 ##### Process input arguments ##########################################
 ########################################################################
@@ -56,7 +56,7 @@ while test $# -gt 0; do
         MISRA=ON)
 			MISRA_ENABLED=true
 			shift
-			;;	
+			;;
 		MISRA=OFF)
 			MISRA_ENABLED=false
 			shift
@@ -64,7 +64,7 @@ while test $# -gt 0; do
 		w0|w1|w2|w3|w4)
 			WARNING_LEVEL=$1
 			shift
-			;;	
+			;;
 		ALL)
 			if [ "$SCOPE" != "LOCAL_CHANGES" ]; then
 				echo "Wrong input. It is not allowed to use FILE and ALL at the same time"
@@ -73,7 +73,7 @@ while test $# -gt 0; do
 			fi
 			SCOPE=ALL
 			shift
-			;;	
+			;;
 		-v|--verbose)
 			VERBOSE=true
 			shift
@@ -81,14 +81,14 @@ while test $# -gt 0; do
 		*)
 			LHS=$(echo $1 | awk 'BEGIN { FS = "=" } ; { print $1 }')
 			RHS=$(echo $1 | awk 'BEGIN { FS = "=" } ; { print $2 }')
-			
+
 			if [ ${LHS} == 'FILE' ]; then
 				if [ "$SCOPE" != "LOCAL_CHANGES" ]; then
 					echo "Wrong input. It is not allowed to use FILE and ALL at the same time"
 					print_usage
 					exit 1;
 				fi
-				
+
 				if [ "${RHS}" == "" ]; then
 					echo "Wrong input. Provide valid FILE value"
 					print_usage
@@ -103,7 +103,7 @@ while test $# -gt 0; do
 					exit 1;
 				fi
 				BUILD_PATH=$RHS
-			else 
+			else
 				echo "Wrong input"
 				print_usage
 				exit 1;
@@ -125,7 +125,7 @@ if [ "$SCOPE" == "LOCAL_CHANGES" ]; then
 elif [ "$SCOPE" == "FILE" ]; then
 	echo -e '\t' "Lining scope is limitted to file " $FILE_PATH
 elif [ "$SCOPE" == "ALL" ]; then
-	
+
 #	echo "You a going to Lint the whole project. It takes a lot of time."
 #	echo -n "Are you sure? [Y/n] "
 
@@ -136,7 +136,7 @@ elif [ "$SCOPE" == "ALL" ]; then
 #		n|N)
 #			exit 0
 #			;;
-#		*) 
+#		*)
 #			exit 0
 #			;;
 #	esac
@@ -151,24 +151,24 @@ else
 fi
 
 case "$WARNING_LEVEL" in
-	w0) 
+	w0)
 		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- No messages (except for fatal errors)"
 		;;
-	w1)  
+	w1)
 		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error messages only -- no Warnings or Informationals."
 		;;
-	w2)  
+	w2)
 		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error and Warning messages only"
 		;;
-	w3) 
+	w3)
 		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- Error, Warning and Informational messages (this is the default)"
 		;;
-	w4) 
+	w4)
 		echo -e '\t' "Warning is set to " $WARNING_LEVEL " --- All messages."
 		;;
 esac
 
-if $VERBOSE; then 
+if $VERBOSE; then
 	echo -e '\t' "Verbose mode is on"
 fi
 
@@ -201,6 +201,7 @@ if $MISRA_ENABLED; then
 fi
 
 if [ "$SCOPE" == "ALL" ]; then
+	./tools/FlexeLint/bin/commiters_page.py tools/FlexeLint/results/index.html
   EXLUDE_FROM_SOURCE_CODE_PATH=$(echo $EXLUDE_FROM_SOURCE_CODE_PATH | awk '{gsub(/ /,"\\|")}; 1')
   find $SOURCE_CODE_PATH \( -name "*.cc" -o -name "*.cpp" \) | awk '{print "../../../" $0}' | grep -v "./src/components/qt_hmi/" | grep -v $EXLUDE_FROM_SOURCE_CODE_PATH > ./tools/FlexeLint/tmp/sdl-modules.lnt
 elif [ "$SCOPE" == "FILE" ]; then
@@ -234,7 +235,7 @@ echo
 
 cd ./tools/FlexeLint/bin
 
-if $VERBOSE; then 
+if $VERBOSE; then
 	./${FLINT_BINARY} -$WARNING_LEVEL $SUPPRESS -zero -u --i../../../$BUILD_PATH/src/components/ $OTHER_PARAMS $WORDSIZE ../config/smartdevicelink.lnt | tee ../results/raw_flexelint_report.txt
 else
 	./${FLINT_BINARY} -$WARNING_LEVEL $SUPPRESS -zero -u --i../../../$BUILD_PATH/src/components/ -os ../results/raw_flexelint_report.txt $OTHER_PARAMS $WORDSIZE ../config/smartdevicelink.lnt
@@ -275,7 +276,7 @@ function clean-up {
 	rm -R ../tmp
 	cd ../config
 	make -f co-gcc.mak clean > /dev/null
-	
+
 }
 
 clean-up

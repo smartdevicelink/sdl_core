@@ -1,0 +1,9 @@
+CW10 04.03.2014
+Changes:
+	1. Heartbeat fix: service=0 is used now for heartbeat, 
+			  heartbeat during media streaming.
+	2. Simultenious Audio and Video streaming.
+	3. Priority messages.
+	4. API v 3.0 rev O.
+	5. Application resumption.
+	

@@ -99,6 +99,25 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     },
 
+    AddActivateApp: function( AppName, appID ) {
+
+        this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
+            action: 'onActivateSDLApp',
+            target: 'SDL.SDLController',
+            appID: appID,
+            text: AppName,
+            classNames: 'list-item',
+            templateName: 'text'
+        } ) );
+
+    },
+
+    DeleteActivateApp: function( appID ) {
+
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'appID', appID ) );
+
+    },
+
     /**
      * List for option on SDLOptionsView screen
      */

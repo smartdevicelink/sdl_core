@@ -93,7 +93,7 @@ void GetVehicleDataRequest::Run() {
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
-  const smart_objects::SmartObject& message = event.smart_object();
+  smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
@@ -109,6 +109,10 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
       const char *info = NULL;
       std::string error_message;
+      if (true ==
+          message[strings::msg_params].keyExists(hmi_response::method)) {
+        message[strings::msg_params].erase(hmi_response::method);
+      }
       if (true == message[strings::params].keyExists(strings::error_msg)) {
         error_message = message[strings::params][strings::error_msg].asString();
         info = error_message.c_str();

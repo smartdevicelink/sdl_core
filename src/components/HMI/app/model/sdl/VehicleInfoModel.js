@@ -170,7 +170,11 @@ SDL.SDLVehicleInfoModel = Em.Object
             'bodyInformation': {
                 'parkBrakeActive': false,
                 'ignitionStableStatus': "MISSING_FROM_TRANSMITTER",
-                'ignitionStatus': "UNKNOWN"
+                'ignitionStatus': "UNKNOWN",
+                'driverDoorAjar': true,
+                'passengerDoorAjar': true,
+                'rearLeftDoorAjar': true,
+                'rearRightDoorAjar': true
             },
             'deviceStatus': {
                 'voiceRecOn': false,
