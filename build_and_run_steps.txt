@@ -76,6 +76,9 @@
           DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --fork --session --print-address`
           export DBUS_SESSION_BUS_ADDRESS
         fi"
+    3.4.6. Set up USB access mode
+      3.4.6.1 If file "/etc/rc.d/rc.local" is either absent or empty then copy file "<Project_Root_Src>/qnx/rc.local" to folder "/etc/rc.d"
+      3.4.6.2 If file "/etc/rc.d/rc.local" exists and is nonempty then append the last line of file "<Project_Root_Src>/qnx/rc.local" to its end
 
   3.5. To set up Android Simulator for using instead of real device:
     3.5.1. Install and configure the Android Simulator in keeping with the following instructions https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+and+setup+android+emulator+on+Ubuntu
@@ -124,7 +127,7 @@
   7.1. Log as root and make sure you are not running Photon
   7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
-    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+    Note: For QML usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.

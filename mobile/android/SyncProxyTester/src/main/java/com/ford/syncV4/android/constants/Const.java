@@ -73,6 +73,7 @@ public class Const {
 	public static final String INTENTHELPER_KEY_OBJECT = "IntentObject";
 	public static final String INTENTHELPER_KEY_OBJECTSLIST = "IntentObjectsList";
     public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES = "IntentKeyboardProperties";
+    public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY = "IntentKeyboardPropertiesEmpty";
 
 	// Keys to pass values via Intent
 	public static final String INTENT_KEY_OBJECTS_MAXNUMBER = "MaxObjectsNumber";

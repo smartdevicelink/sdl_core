@@ -508,7 +508,7 @@ FFW.UI = FFW.RPCObserver.create({
                                             "doublePressAvailable": false
                                         }
                                     },
-                                    "numCustomPresetsAvailable": 6
+                                    "numCustomPresetsAvailable": 8
                                 },
                                 "buttonCapabilities": [
                                     {
@@ -889,7 +889,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "doublePressAvailable": false
                                     }
                                 },
-                                "numCustomPresetsAvailable": 6
+                                "numCustomPresetsAvailable": 8
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",

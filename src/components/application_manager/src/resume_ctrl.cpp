@@ -121,20 +121,23 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
         application->mobile_app_id()->asInt()) {
 
       mobile_apis::HMILevel::eType saved_hmi_level;
+      mobile_apis::HMILevel::eType restored_hmi_level;
+
       saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
                             (*it)[strings::hmi_level].asInt());
 
       if (saved_hmi_level == mobile_apis::HMILevel::HMI_FULL) {
-        app_mngr_->PutApplicationInFull(application);
+        restored_hmi_level = app_mngr_->PutApplicationInFull(application);
       } else if (saved_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
-        app_mngr_->PutApplicationInLimited(application);
+        restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
       } else {
+        restored_hmi_level = saved_hmi_level;
         application->set_hmi_level(saved_hmi_level);
       }
-
+      MessageHelper::SendHMIStatusNotification(*(application.get()));
       LOG4CXX_INFO(logger_, "Restore Application "
                    << (*it)[strings::app_id].asInt()
-                   << " to HMILevel " << saved_hmi_level);
+                   << " to HMILevel " << restored_hmi_level);
       return true;
     }
   }
@@ -256,6 +259,7 @@ bool ResumeCtrl::ApplicationIsSaved(const uint32_t app_id) {
 }
 
 bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr application) {
+  LOG4CXX_INFO(logger_, "ResumeCtrl::RemoveApplicationFromSaved ");
   DCHECK(application.get());
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
@@ -299,8 +303,10 @@ void ResumeCtrl::SavetoFileSystem() {
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
+
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption " << hash);
   DCHECK(application.get());
+  sync_primitives::AutoLock auto_lock(queue_lock_);
 
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
@@ -339,21 +345,25 @@ bool ResumeCtrl::CheckApplicationHash(uint32_t app_id, uint32_t hash) {
 
 void ResumeCtrl::onTimer() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()");
+  sync_primitives::AutoLock auto_lock(queue_lock_);
 
   std::set<application_timestamp, TimeStampComparator>::iterator it=
       waiting_for_timer_.begin();
-  for(; it != waiting_for_timer_.end(); ++it ) {
+
+  for (; it != waiting_for_timer_.end(); ++it ){
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << (*it).first);
-      return;
+      break;
     }
 
     RestoreApplicationHMILevel(app);
     RemoveApplicationFromSaved(app);
     waiting_for_timer_.erase(it);
+    LOG4CXX_INFO(logger_, "Erased");
   }
+  LOG4CXX_INFO(logger_, "onTimer end");
 }
 
 Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {

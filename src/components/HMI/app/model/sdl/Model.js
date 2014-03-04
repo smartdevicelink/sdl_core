@@ -626,15 +626,26 @@ SDL.SDLModel = Em.Object.create({
 
         var applicationType = 1;
 
-        if (SDL.SDLController.getApplicationModel(params.appID)) {
+        if (SDL.SDLController.getApplicationModel(params.application.appID)) {
             return;
         }
 
-        if (params.isMediaApplication) {
+        if (params.ttsName) {
+            SDL.VRPopUp.AddActivateApp(params.ttsName.text ,params.appID);
+        }
+
+        if (params.vrSynonyms) {
+            var length = params.vrSynonyms.length
+            for (var i = 0; i < length; i++) {
+                SDL.VRPopUp.AddActivateApp(params.vrSynonyms[i] ,params.application.appID);
+            }
+        }
+
+        if (params.application.isMediaApplication) {
             applicationType = 0;
         }
 
-        SDL.SDLController.registerApplication(params, applicationType);
+        SDL.SDLController.registerApplication(params.application, applicationType);
     },
 
     /**

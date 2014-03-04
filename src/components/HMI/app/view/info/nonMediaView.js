@@ -202,7 +202,9 @@ SDL.InfoNonMedia = Em.ContainerView
                             'perset3',
                             'perset4',
                             'perset5',
-                            'perset6'
+                            'perset6',
+                            'perset7',
+                            'perset8'
                         ],
 
                         perset1: SDL.Button.extend(SDL.PresetEvents, {
@@ -228,6 +230,14 @@ SDL.InfoNonMedia = Em.ContainerView
                         perset6: SDL.Button.extend(SDL.PresetEvents, {
                             textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
                             presetName: 'PRESET_6'
+                        }),
+                        perset7: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.6',
+                            presetName: 'PRESET_7'
+                        }),
+                        perset8: SDL.Button.extend(SDL.PresetEvents, {
+                            textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.7',
+                            presetName: 'PRESET_8'
                         })
                     })
             })

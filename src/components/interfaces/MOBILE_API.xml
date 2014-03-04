@@ -1306,16 +1306,16 @@
     <param name="ignitionStatus" type="IgnitionStatus">
       <description>References signal "Ignition_status". See IgnitionStatus.</description>
 	</param>
-    <param name="driverDoorAjar" type="Boolean">
+    <param name="driverDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatDrv_B_Actl".</description>
 	</param>
-    <param name="passengerDoorAjar" type="Boolean">
+    <param name="passengerDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatPsngr_B_Actl".</description>
 	</param>
-    <param name="rearLeftDoorAjar" type="Boolean">
+    <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRl_B_Actl".</description>
 	</param>
-    <param name="rearRightDoorAjar" type="Boolean">
+    <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRr_B_Actl".</description>
 	</param>
   </struct>

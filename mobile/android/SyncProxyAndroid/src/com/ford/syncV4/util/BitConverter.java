@@ -55,6 +55,15 @@ public class BitConverter {
     	return ret;
     }
 
+    public static long unsignedIntFromByteArray(byte[] sizeBuf, int offset) {
+        long ret = 0;
+        for (int i = offset; i < offset + 4; i++) {
+            ret <<= 8;
+            ret |= 0xFF & sizeBuf[i];
+        }
+        return ret;
+    }
+
 	public static final byte[] shortToByteArray(short value) {
 		return new byte[] {
 				(byte)(value >>> 8),

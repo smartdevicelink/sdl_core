@@ -369,7 +369,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   return true;
 }
 
-bool ApplicationManagerImpl::PutApplicationInLimited(ApplicationSharedPtr app) {
+mobile_apis::HMILevel::eType ApplicationManagerImpl::PutApplicationInLimited(
+    ApplicationSharedPtr app) {
   DCHECK(app.get())
 
   bool is_new_app_media = app->is_media_application();
@@ -398,10 +399,11 @@ bool ApplicationManagerImpl::PutApplicationInLimited(ApplicationSharedPtr app) {
 
   }
   app->set_hmi_level(result);
-  return true;
+  return result;
 }
 
-bool ApplicationManagerImpl::PutApplicationInFull(ApplicationSharedPtr app) {
+mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
+    ApplicationSharedPtr app) {
   DCHECK(app.get())
 
   bool is_new_app_media = app->is_media_application();
@@ -441,9 +443,8 @@ bool ApplicationManagerImpl::PutApplicationInFull(ApplicationSharedPtr app) {
 
   if ( result == mobile_api::HMILevel::HMI_FULL) {
     MessageHelper::SendActivateAppToHMI(app->app_id());
-    MessageHelper::SendHMIStatusNotification(*(app.get()));
   }
-  return true;
+  return result;
 }
 
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
