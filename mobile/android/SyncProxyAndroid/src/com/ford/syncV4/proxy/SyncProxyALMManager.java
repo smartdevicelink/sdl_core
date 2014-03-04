@@ -2624,5 +2624,10 @@ public class SyncProxyALMManager {
         public void onHashChange(OnHashChange onHashChange) {
 
         }
+
+        @Override
+        public void onSecureServiceStart() {
+
+        }
     }
 }

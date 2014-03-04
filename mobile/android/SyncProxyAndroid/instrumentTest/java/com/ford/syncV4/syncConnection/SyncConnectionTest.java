@@ -2,8 +2,6 @@ package com.ford.syncV4.syncConnection;
 
 import android.test.InstrumentationTestCase;
 
-import com.ford.syncV4.protocol.AbstractProtocol;
-import com.ford.syncV4.protocol.BinaryFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
@@ -16,8 +14,6 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
@@ -34,7 +30,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by Andrew Batutin on 8/22/13.
+ * Created by Andrew Batutin on 8/22/13
  */
 public class SyncConnectionTest extends InstrumentationTestCase {
 
@@ -48,6 +44,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     private TCPTransportConfig config;
 
     public SyncConnectionTest() {
+
     }
 
     @Override
@@ -261,7 +258,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertEquals("should end session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
     }
 
-    public void testStartSessionWithCorrectId() throws Exception {
+    // TODO : To be reconsider
+    /*public void testStartSessionWithCorrectId() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.setSessionId(SESSION_ID);
         connection.init(config);
@@ -274,7 +272,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         verify(connection._protocol, times(1)).StartProtocolSession(sessionIDCaptor.capture());
         assertEquals("Should start session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
-    }
+    }*/
 
     public void testOnCloseSessionAudioPacketizerStops() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
@@ -293,7 +291,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.setHeartbeatMonitor(mock(IHeartbeatMonitor.class));
         assertNotNull(connection.getHeartbeatMonitor());
         connection.closeConnection((byte) 0, false, true);
-        assertNull("heartbeat monitor should be stopped and null",connection.getHeartbeatMonitor());
+        assertNull("heartbeat monitor should be stopped and null", connection.getHeartbeatMonitor());
     }
 
     public void testHeartbeatMonitorNotStoppedIfConnectionClosedWithKeepConnection() throws Exception {
@@ -302,7 +300,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertNotNull(connection.getHeartbeatMonitor());
         connection.closeConnection((byte) 0, true, true);
         verify(connection.getHeartbeatMonitor(), never()).stop();
-        assertNotNull("heartbeat monitor should not be null",connection.getHeartbeatMonitor());
+        assertNotNull("heartbeat monitor should not be null", connection.getHeartbeatMonitor());
     }
 
     public void testHeartbeatMonitorResetOnHeartbeatReset() throws Exception {
@@ -342,5 +340,17 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 anyString(), throwableArgumentCaptor.capture());
         assertThat(throwableArgumentCaptor.getValue().toString(),
                 containsString(OutOfMemoryError.class.getSimpleName()));
+    }
+
+    public void testStartSecureServiceOnTransportConnect() {
+        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection.init(config);
+        connection._protocol = mock(WiProProtocol.class);
+        connection._transport = mock(SyncTransport.class);
+        when(connection._transport.getIsConnected()).thenReturn(true);
+
+        connection.onTransportConnected();
+
+        verify(connection._protocol, times(1)).StartSecureService();
     }
 }

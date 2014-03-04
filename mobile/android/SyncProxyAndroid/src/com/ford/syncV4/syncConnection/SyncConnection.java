@@ -98,6 +98,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @param transport an instance of transport (Bluetooth, USB, WiFi)
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
+        init(transportConfig, transport, null);
+    }
+
+    /**
+     * Initialize transport with provided configuration and transport instance
+     *
+     * @param transportConfig configuration of the transport to be used, refer to
+     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     * @param protocol an instance of {@link com.ford.syncV4.protocol.AbstractProtocol}
+     *                 implementation
+     */
+    public void init(BaseTransportConfig transportConfig, SyncTransport transport,
+                     AbstractProtocol protocol) {
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             // Ensure transport is null
@@ -375,7 +389,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
         }
-        startProtocolSession();
+
+        //startProtocolSession();
+        startSecureSession();
+    }
+
+    private void startSecureSession() {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                Log.d(TAG, "StartSecureService");
+                _protocol.StartSecureService();
+            }
+        }
     }
 
     private void startProtocolSession() {
@@ -453,6 +478,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                                          byte version, String correlationID) {
 
         _connectionListener.onProtocolSessionStarted(session, version, correlationID);
+    }
+
+    @Override
+    public void onSecureServiceStarted(byte version) {
+        _connectionListener.onSecureServiceStarted(version);
     }
 
     @Override

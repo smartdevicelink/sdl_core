@@ -21,6 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
@@ -29,7 +31,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 /**
  * Created by Andrew Batutin on 8/21/13.
@@ -97,12 +98,22 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 public void onStartServiceNackReceived(ServiceType serviceType) {
 
                 }
+
+                @Override
+                public void onSecureServiceStarted(byte version) {
+
+                }
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
     private WiProProtocol sut;
     private ProtocolFrameHeader currentFrameHeader;
     private byte[] currentData;
+
+    /**
+     * Time out of the {@link java.util.concurrent.CountDownLatch}, in milliseconds
+     */
+    private static final int TIME_OUT = 1000;
 
     public WiProProtocolTest() {
     }
@@ -459,6 +470,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
+
+            @Override
+            public void onSecureServiceStarted(byte version) {
+
+            }
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -538,16 +554,20 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                assertEquals("currentSession id should be SESSION_ID", SESSION_ID, session.getSessionId());
+            public void onProtocolSessionStarted(Session session, byte version,
+                                                 String correlationID) {
+                assertEquals("currentSession id should be SESSION_ID", SESSION_ID,
+                        session.getSessionId());
                 Service service = session.getServiceList().get(0);
                 assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-                assertEquals("service should belong to the currentSession", session, service.getSession());
+                assertEquals("service should belong to the currentSession", session,
+                        service.getSession());
                 passed[0] = true;
             }
 
             @Override
-            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
+                                               String correlationID) {
 
             }
 
@@ -577,7 +597,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version, String correlationID) {
 
             }
 
@@ -585,11 +606,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
+
+            @Override
+            public void onSecureServiceStarted(byte version) {
+
+            }
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
         assertTrue("test should pass", passed[0]);
     }
-
 
     public void testStartServiceACK_RPC_FrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
@@ -672,7 +697,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         }
     }
 
-
     public void testStartServiceACK_AudioService_FrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
@@ -697,7 +721,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("", correlationIdCaptor.getValue());
     }
 
-
     public void testHeartBeatMonitorResetOnMessageSent() throws Exception {
         IProtocolListener protocolListener = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -710,5 +733,112 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
         verify(protocolListener).onResetHeartbeat();
+    }
+
+    public void testHandleProtocolFrameReceived_SecureServiceStart() throws InterruptedException {
+        final boolean[] passed = {false};
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
+        WiProProtocol protocol = new WiProProtocol(new IProtocolListener() {
+            @Override
+            public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset, int length) {
+
+            }
+
+            @Override
+            public void onProtocolMessageReceived(ProtocolMessage msg) {
+
+            }
+
+            @Override
+            public void onProtocolSessionStarted(Session session, byte version,
+                                                 String correlationID) {
+
+            }
+
+            @Override
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
+                                               String correlationID) {
+
+            }
+
+            @Override
+            public void onProtocolHeartbeatACK() {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
+
+            }
+
+            @Override
+            public void onProtocolError(String info, Exception e) {
+
+            }
+
+            @Override
+            public void onMobileNavAckReceived(int frameReceivedNumber) {
+
+            }
+
+            @Override
+            public void onProtocolAppUnregistered() {
+
+            }
+
+            @Override
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version, String correlationID) {
+
+            }
+
+            @Override
+            public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onSecureServiceStarted(byte version) {
+                assertEquals((byte) 2, version);
+                passed[0] = true;
+                countDownLatch.countDown();
+            }
+        });
+
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Secure_Service);
+
+        protocol.setVersion((byte) 2);
+
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+
+        protocol.handleProtocolFrameReceived(frameHeader, new byte[0], messageFrameAssembler);
+        countDownLatch.await(TIME_OUT, TimeUnit.MILLISECONDS);
+
+        assertTrue("test should pass", passed[0]);
+    }
+
+    public void testStartSecureServiceACK_FrameReceived() throws Exception {
+        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
+        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
+        frameHeader.setFrameType(FrameType.Control);
+        frameHeader.setVersion((byte) 2);
+        frameHeader.setServiceType(ServiceType.Secure_Service);
+        frameHeader.setDataSize(0);
+
+        IProtocolListener mock = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(mock);
+        protocol.setVersion((byte) 2);
+
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
+
+        Mockito.verify(mock).onSecureServiceStarted(versionCaptor.capture());
+        assertEquals(2, versionCaptor.getValue().byteValue());
     }
 }

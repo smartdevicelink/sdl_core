@@ -58,6 +58,12 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
+    /**
+     * Start a special service "Secure Service" provides management system for data sessions
+     * encryption and encryption initialization.
+     */
+    public abstract void StartSecureService();
+
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
     // This method ends a protocol currentSession.  A corresponding call to the protocol
@@ -200,6 +206,16 @@ public abstract class AbstractProtocol {
                                                 byte sessionID, byte version, String correlationID) {
         Session session = Session.createSession(serviceType, sessionID);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
+    }
+
+    /**
+     * Handles Service of {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service} start
+     * procedure
+     *
+     * @param version protocol version
+     */
+    protected void handleSecureServiceStarted(byte version) {
+        _protocolListener.onSecureServiceStarted(version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,

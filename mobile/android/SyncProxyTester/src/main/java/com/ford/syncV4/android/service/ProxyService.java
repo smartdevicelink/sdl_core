@@ -1676,6 +1676,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(notification);
     }
 
+    @Override
+    public void onSecureServiceStart() {
+        createDebugMessageForAdapter("Secure Service started");
+    }
+
     private void resendUnsentPutFiles() {
         SparseArray<PutFile> unsentPutFiles = mPutFileTransferManager.getCopy();
         mPutFileTransferManager.clear();

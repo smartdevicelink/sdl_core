@@ -3066,6 +3066,28 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
+        public void onSecureServiceStarted(byte version) {
+            if (_wiproVersion == 1) {
+                if (version == 2) setWiProVersion(version);
+            }
+
+            Log.i(TAG, "Secure Service started");
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _proxyListener.onSecureServiceStart();
+                    }
+                });
+            } else {
+                _proxyListener.onSecureServiceStart();
+            }
+
+            // TODO : Start RPC Service from here
+        }
+
+        @Override
         public void onProtocolServiceEnded(ServiceType serviceType,
                                            byte sessionID, String correlationID) {
             handleEndServiceAck(serviceType, sessionID, correlationID);

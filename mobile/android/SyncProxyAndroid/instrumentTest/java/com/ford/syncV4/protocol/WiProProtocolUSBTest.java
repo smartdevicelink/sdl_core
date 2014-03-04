@@ -65,6 +65,11 @@ public class WiProProtocolUSBTest extends TestCase {
             public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
+
+            @Override
+            public void onSecureServiceStarted(byte version) {
+
+            }
         };
 
         requiredMethodCalled = false;
@@ -148,6 +153,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onSecureServiceStarted(byte version) {
 
             }
         };
