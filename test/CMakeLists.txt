@@ -20,12 +20,12 @@ include_directories (
   ../src/components/media_manager/include
   ../src/components/config_profile/include
   ../src/components/protocol_handler/include
-  ../src/components/secure_service_manager/include
+  ../src/components/security_manager/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
-  ../src/components/secure_service_manager/include
+  ../src/components/security_manager/include
   ../src/components/formatters/include
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
@@ -33,7 +33,7 @@ include_directories (
   ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
-  ../test/components/secure_service_manager/include
+  ../test/components/security_manager/include
   ../test/components/json_handler/include
   ../test/components/smart_objects
   ../test/components/transport_manager

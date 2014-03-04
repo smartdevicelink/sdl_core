@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "secure_service_manager/crypto_manager_impl.h"
+#include "security_manager/crypto_manager_impl.h"
 
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
-namespace secure_service_manager {
+namespace security_manager {
 
 bool CryptoManagerImpl::Init() {
   SSL_load_error_strings();
@@ -77,4 +77,4 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   return new SSLContextImpl(conn, bioIn, bioOut);
 }
 
-} // namespace secure_service_manager
+} // namespace security_manager

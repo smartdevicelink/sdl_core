@@ -230,7 +230,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual bool SetSSLContext(
       const uint32_t& key,
       protocol_handler::ServiceType service_type,
-      secure_service_manager::SSLContext* context) OVERRIDE;
+      security_manager::SSLContext* context) OVERRIDE;
 
     /**
      * \brief Gets crypto context of service
@@ -238,7 +238,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param service_type Type of service
      * \return \c true in case of service is protected or \c false otherwise
      */
-    secure_service_manager::SSLContext* GetSSLContext(
+    security_manager::SSLContext* GetSSLContext(
         const uint32_t& key,
         protocol_handler::ServiceType service_type) OVERRIDE;
 

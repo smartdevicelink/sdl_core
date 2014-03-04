@@ -39,10 +39,10 @@
 
 #include <string>
 
-#include "secure_service_manager/crypto_manager.h"
-#include "secure_service_manager/ssl_context.h"
+#include "security_manager/crypto_manager.h"
+#include "security_manager/ssl_context.h"
 
-namespace secure_service_manager {
+namespace security_manager {
   class CryptoManagerImpl : public CryptoManager {
    private:
 
@@ -73,6 +73,6 @@ namespace secure_service_manager {
    private:
     SSL_CTX *context_;
   };
-} // namespace secure_service_manager
+} // namespace security_manager
 
 #endif /* CRYPTO_MANAGER_IMPL_H_ */

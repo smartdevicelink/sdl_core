@@ -5,7 +5,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
-  ${CMAKE_SOURCE_DIR}/src/components/secure_service_manager/include
+  ${CMAKE_SOURCE_DIR}/src/components/security_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16/libusb/

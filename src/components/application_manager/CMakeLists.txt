@@ -3,7 +3,7 @@ include_directories (
   ../utils/include/
   ../formatters/include/
   ../protocol_handler/include/
-  ../secure_service_manager/include/
+  ../security_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../media_manager/include/

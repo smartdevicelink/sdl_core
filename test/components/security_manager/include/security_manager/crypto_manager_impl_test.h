@@ -47,13 +47,13 @@
 
 #include <iostream>
 
-#include "secure_service_manager/crypto_manager.h"
-#include "secure_service_manager/crypto_manager_impl.h"
-#include "secure_service_manager/ssl_context.h"
+#include "security_manager/crypto_manager.h"
+#include "security_manager/crypto_manager_impl.h"
+#include "security_manager/ssl_context.h"
 
 namespace test {
 namespace components {
-namespace secure_service_manager_test {
+namespace security_manager_test {
 
 bool isErrorFatal(SSL *connection, int res) {
   int error = SSL_get_error(connection, res);
@@ -63,9 +63,9 @@ bool isErrorFatal(SSL *connection, int res) {
 
 TEST(HandshakeTest, Positive) {
 
-  using secure_service_manager::CryptoManager;
-  using secure_service_manager::CryptoManagerImpl;
-  using secure_service_manager::SSLContext;
+  using security_manager::CryptoManager;
+  using security_manager::CryptoManagerImpl;
+  using security_manager::SSLContext;
 
   SSL_load_error_strings();
   ERR_load_BIO_strings();

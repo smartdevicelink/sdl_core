@@ -30,19 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_secure_service_manager_INCLUDE_secure_service_manager_SSL_CONTEXT_H
-#define SRC_COMPONENTS_secure_service_manager_INCLUDE_secure_service_manager_SSL_CONTEXT_H
+#ifndef SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H
+#define SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H
 
 #include <cstddef> // for size_t typedef
 
 #include <string>
 
 /**
- * \class secure_service_manager::SSLContext
+ * \class security_manager::SSLContext
  * \brief Class responsible for SSL connection establishing
  *        and data encryption and decryption within this connection
  *
- * \fn secure_service_manager::SSLContext::DoHandshake(char *in_data,  size_t  in_data_size, char *out_data, size_t *out_data_size)
+ * \fn security_manager::SSLContext::DoHandshake(char *in_data,  size_t  in_data_size, char *out_data, size_t *out_data_size)
  * \brief Performs SSL handshake
  * In order to establish an SSL connection it's
  * necessary to perform handshake process. During this process
@@ -55,7 +55,7 @@
  * \return response of server
  */
 
-namespace secure_service_manager {
+namespace security_manager {
 class SSLContext {
  public:
   virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
@@ -67,5 +67,5 @@ class SSLContext {
   virtual bool  IsInitCompleted() const = 0;
   virtual ~SSLContext() { }
 };
-} // namespace secure_service_manager
-#endif // SRC_COMPONENTS_secure_service_manager_INCLUDE_secure_service_manager_SSL_CONTEXT_H
+} // namespace security_manager
+#endif // SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H

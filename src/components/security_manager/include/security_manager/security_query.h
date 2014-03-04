@@ -30,20 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SECURE_SERVICE_QUERY_H
-#define SECURE_SERVICE_QUERY_H
+#ifndef security_query_H
+#define security_query_H
 
 #include <cstddef>
 //TODO: EZamakhov remove <cstdint> as C++11
 #include <cstdint>
 #include "utils/shared_ptr.h"
 
-namespace secure_service_manager {
+namespace security_manager {
 
-
-class SecureServiceQuery {
+class SecuityQuery {
 public:
-  enum SecureServiceQueryId {
+  enum SecuityQueryId {
     ProtectServiceRequest  = 0x1,
     ProtectServiceResponse = 0x2,
     SendHandshakeData = 0x3,
@@ -60,16 +59,16 @@ public:
   };
 
   struct QueryHeader {
-    QueryHeader(const SecureServiceQueryId id,
+    QueryHeader(const SecuityQueryId id,
                 const uint32_t seq_umber);
     uint8_t  query_id_;    // API function identifier
     uint32_t seq_number_;  // request sequential number
   };
 
-  SecureServiceQuery();
-  explicit SecureServiceQuery(const QueryHeader& header,
+  SecuityQuery();
+  explicit SecuityQuery(const QueryHeader& header,
                               const uint32_t connection_key);
-  ~SecureServiceQuery();
+  ~SecuityQuery();
   bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
   void setData(const uint8_t * const binary_data, const size_t bin_data_size);
   void setConnectionKey(const uint32_t connection_key);
@@ -85,6 +84,6 @@ private:
   uint8_t* data_;
   size_t data_size_;
 };
-typedef utils::SharedPtr<SecureServiceQuery> SecureServiceQueryPtr;
+typedef utils::SharedPtr<SecuityQuery> SecuityQueryPtr;
 }
-#endif // SECURE_SERVICE_QUERY_H
+#endif // security_query_H

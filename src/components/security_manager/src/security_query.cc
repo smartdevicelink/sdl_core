@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "secure_service_manager/secure_service_query.h"
+#include "security_manager/security_query.h"
 #include <cstring>
 #include "utils/macro.h"
 
-using namespace secure_service_manager;
+using namespace security_manager;
 
 //TODO add info
 inline uint32_t getUInt32Value(const uint8_t* const data){
@@ -44,26 +44,26 @@ inline uint32_t getUInt32Value(const uint8_t* const data){
       data[2] <<  8 | data[3];
 }
 
-SecureServiceQuery::QueryHeader::QueryHeader(const SecureServiceQueryId id,
+SecuityQuery::QueryHeader::QueryHeader(const SecuityQueryId id,
                                              uint32_t seq_umber) :
   query_id_(id), seq_number_(0){
 }
 
-SecureServiceQuery::SecureServiceQuery() :
+SecuityQuery::SecuityQuery() :
   header_(InvalidQuery, 0), connection_key_(0), data_(NULL) {
   }
 
-SecureServiceQuery::SecureServiceQuery(
-    const SecureServiceQuery::QueryHeader &header,
+SecuityQuery::SecuityQuery(
+    const SecuityQuery::QueryHeader &header,
     const uint32_t connection_key) :
   header_(header), connection_key_(connection_key), data_(NULL) {
   }
 
-SecureServiceQuery::~SecureServiceQuery() {
+SecuityQuery::~SecuityQuery() {
   delete data_;
   data_ = NULL;
 }
-bool SecureServiceQuery::Parse(const uint8_t * const binary_data,
+bool SecuityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
     DCHECK(binary_data); DCHECK(bin_data_size);
   const size_t header_size = sizeof(QueryHeader);
@@ -97,7 +97,7 @@ bool SecureServiceQuery::Parse(const uint8_t * const binary_data,
   return true;
   }
 
-void SecureServiceQuery::setData(const uint8_t * const binary_data,
+void SecuityQuery::setData(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
     DCHECK(binary_data); DCHECK(bin_data_size);
     delete data_;
@@ -106,27 +106,27 @@ void SecureServiceQuery::setData(const uint8_t * const binary_data,
     memcpy(data_, binary_data, data_size_);
   }
 
-void SecureServiceQuery::setConnectionKey(const uint32_t connection_key) {
+void SecuityQuery::setConnectionKey(const uint32_t connection_key) {
     connection_key_ = connection_key;
   }
 
-void SecureServiceQuery::setHeader(
-    const SecureServiceQuery::QueryHeader &header) {
+void SecuityQuery::setHeader(
+    const SecuityQuery::QueryHeader &header) {
     header_ = header;
   }
 
-const SecureServiceQuery::QueryHeader &SecureServiceQuery::getHeader() const {
+const SecuityQuery::QueryHeader &SecuityQuery::getHeader() const {
   return header_;
 }
 
-const uint8_t * const SecureServiceQuery::getData() const {
+const uint8_t * const SecuityQuery::getData() const {
   return data_;
 }
 
-const size_t SecureServiceQuery::getDataSize() const {
+const size_t SecuityQuery::getDataSize() const {
   return data_size_;
 }
 
-int32_t SecureServiceQuery::getConnectionKey() const {
+int32_t SecuityQuery::getConnectionKey() const {
   return connection_key_;
 }

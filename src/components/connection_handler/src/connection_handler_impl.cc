@@ -458,7 +458,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
 
 bool ConnectionHandlerImpl::SetSSLContext(
     const uint32_t &key, protocol_handler::ServiceType service_type,
-    secure_service_manager::SSLContext *context) {
+    security_manager::SSLContext *context) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::SetSSLContext");
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
@@ -474,7 +474,7 @@ bool ConnectionHandlerImpl::SetSSLContext(
   return connection.SetSSLContext(session_id, service_type, context);
 }
 
-secure_service_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
+security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
       const uint32_t &key, protocol_handler::ServiceType service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetSSLContext");
   transport_manager::ConnectionUID connection_handle = 0;

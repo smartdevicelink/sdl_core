@@ -37,7 +37,7 @@
 #include <memory.h>
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
-#include "secure_service_manager/crypto_manager.h"
+#include "security_manager/crypto_manager.h"
 
 namespace protocol_handler {
 
@@ -390,7 +390,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 
   ProtocolFramePtr ptr;
 
-  secure_service_manager::SSLContext* context =
+  security_manager::SSLContext* context =
       session_observer_->GetSSLContext(
         connection_key, ServiceTypeFromByte(service_type));
   if(context) {
@@ -401,7 +401,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
         (context->Decrypt(data, data_size, &new_data_size));
     if(!new_data) {
       LOG4CXX_WARN(logger_, "Decryption fail: " <<
-                   secure_service_manager::LastError());
+                   security_manager::LastError());
       return RESULT_FAIL;
       }
     ptr.reset(
@@ -534,7 +534,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       const int32_t connection_key =
           session_observer_->KeyFromPair(connection_id, packet->session_id());
 
-      secure_service_manager::SSLContext* context =
+      security_manager::SSLContext* context =
           session_observer_->GetSSLContext(
             connection_key, ServiceTypeFromByte(packet->service_type()));
       if(context) {
@@ -545,7 +545,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
               (context->Encrypt(data, data_size, &new_data_size));
           if(!new_data){
               LOG4CXX_WARN(logger_, "Encrypttion fail: " <<
-                           secure_service_manager::LastError());
+                           security_manager::LastError());
               return RESULT_FAIL;
             }
           packet->set_data_bytes(new_data, new_data_size);

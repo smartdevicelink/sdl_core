@@ -43,11 +43,11 @@
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
-#include "secure_service_manager/crypto_manager.h"
-#include "secure_service_manager/secure_service_manager.h"
-#include "secure_service_manager/secure_service_query.h"
+#include "security_manager/crypto_manager.h"
+#include "security_manager/security_manager.h"
+#include "security_manager/security_query.h"
 
-namespace secure_service_manager {
+namespace security_manager {
 
 /*
  * These dummy classes are here to locally impose strong typing on different
@@ -58,30 +58,26 @@ namespace secure_service_manager {
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct SecureServiceMessage: public SecureServiceQueryPtr {
-  explicit SecureServiceMessage(const SecureServiceQueryPtr& message)
-    : SecureServiceQueryPtr(message) {}
+struct SecurityMessage: public SecuityQueryPtr {
+  explicit SecurityMessage(const SecuityQueryPtr& message)
+    : SecuityQueryPtr(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return 0; }
 };
 
-typedef utils::PrioritizedQueue<SecureServiceMessage> SecureServiceMessageQueue;
+typedef utils::PrioritizedQueue<SecurityMessage> SecurityMessageQueue;
 
-typedef threads::MessageLoopThread<SecureServiceMessageQueue> SecureServiceMessageLoop;
+typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
 
 //TODO(EZ): add brief
-//TODO(EZ): rename to SecurityManager
-class SecureServiceManager :
+class SecurityManager :
     public protocol_handler::ProtocolObserver,
-    public SecureServiceMessageLoop::Handler {
+    public SecurityMessageLoop::Handler {
 public:
-
   /**
    * \brief Constructor
    */
-  SecureServiceManager();
-
-  // TODO: (EZamakhov) StartSecureService ????
+  SecurityManager();
 
   /**
    * \brief Add message from mobile to
@@ -105,27 +101,28 @@ public:
   void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
 
   /**
-   * \brief Handle SecureServiceMessage from mobile for processing
+   * \brief Handle SecurityMessage from mobile for processing
    * threads::MessageLoopThread<*>::Handler implementations
    * CALLED ON secure_service_messages_ thread
    */
-  void Handle(const SecureServiceMessage& message) OVERRIDE;
+  void Handle(const SecurityMessage& message) OVERRIDE;
 
  private:
-  bool ParseProtectServiceRequest(const SecureServiceMessage &requestMessage);
-  bool ParseHandshakeData(const SecureServiceMessage &inMessage);
+  bool ParseProtectServiceRequest(const SecurityMessage &requestMessage);
+  bool ParseHandshakeData(const SecurityMessage &inMessage);
 
   void SendProtectServiceResponse(
-      const SecureServiceMessage &message,
-      const SecureServiceQuery::ProtectServiceResult result);
+      const SecurityMessage &message,
+      const SecuityQuery::ProtectServiceResult result);
 
+  //Create new array for handling header + data
   void SendInternalError(const int32_t connectionKey,
                          const uint32_t seq_umber,
                          const std::string& error);
 
   //Create new array for handling header + data
   void SendData(const int32_t connectionKey,
-                const SecureServiceQuery::QueryHeader& header,
+                const SecuityQuery::QueryHeader& header,
                 const uint8_t * const data,
                 const size_t data_size);
 
@@ -135,9 +132,9 @@ public:
                           size_t data_size);
 
   // Thread that pumps handshake data
-  SecureServiceMessageLoop secure_service_messages_;
+  SecurityMessageLoop security_messages_;
 
-  secure_service_manager::CryptoManager* crypto_manager_;
+  security_manager::CryptoManager* crypto_manager_;
 
   /**
    *\brief Pointer on instance of class implementing SessionObserver
@@ -151,8 +148,8 @@ public:
    */
   protocol_handler::ProtocolHandler* protocol_handler_;
 
-  DISALLOW_COPY_AND_ASSIGN(SecureServiceManager);
+  DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   static log4cxx::LoggerPtr logger_;
 };
-} //secure_service_manager
+} //security_manager
 #endif // SECURE_MANAGER_H

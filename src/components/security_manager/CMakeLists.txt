@@ -7,8 +7,8 @@ include_directories(
 )
 
 set (SOURCES
-  src/secure_service_manager.cc
-  src/secure_service_query.cc
+  src/security_manager.cc
+  src/security_query.cc
   src/crypto_manager_impl.cc
   src/ssl_context_impl.cc
 )

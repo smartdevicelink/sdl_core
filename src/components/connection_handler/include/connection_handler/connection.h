@@ -45,7 +45,7 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol_handler/service_type.h"
-#include "secure_service_manager/ssl_context.h"
+#include "security_manager/ssl_context.h"
 
 /**
  * \namespace connection_handler
@@ -73,7 +73,7 @@ typedef ConnectionList::iterator ConnectionListIterator;
 
 struct Service {
   protocol_handler::ServiceType service_type;
-  secure_service_manager::SSLContext* ssl_context;
+  security_manager::SSLContext* ssl_context;
   Service()
     : service_type(protocol_handler::kInvalidServiceType),
       ssl_context(NULL) {
@@ -185,7 +185,7 @@ class Connection {
   bool SetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type,
-    secure_service_manager::SSLContext* context);
+    security_manager::SSLContext* context);
 
   /**
    * \brief Gets crypto context of service
@@ -193,7 +193,7 @@ class Connection {
    * \param service_type Type of service
    * \return \c true in case of service is protected or \c false otherwise
    */
-  secure_service_manager::SSLContext* GetSSLContext(
+  security_manager::SSLContext* GetSSLContext(
       uint8_t session,
       protocol_handler::ServiceType service_type) const;
   /**

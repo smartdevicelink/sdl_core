@@ -33,6 +33,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "secure_service_manager/crypto_manager_impl.h"
+#include "security_manager/crypto_manager_impl.h"
 
 

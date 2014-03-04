@@ -152,7 +152,7 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
 
 bool Connection::SetSSLContext( uint8_t session,
                                 protocol_handler::ServiceType service_type,
-                                secure_service_manager::SSLContext *context){
+                                security_manager::SSLContext *context){
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator sit = session_map_.find(session);
   if (sit == session_map_.end()) {
@@ -168,7 +168,7 @@ bool Connection::SetSSLContext( uint8_t session,
   return false;
 }
 
-secure_service_manager::SSLContext* Connection::GetSSLContext(
+security_manager::SSLContext* Connection::GetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type) const {
   sync_primitives::AutoLock lock(session_map_lock_);

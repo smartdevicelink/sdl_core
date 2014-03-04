@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
 #include <string>
 
-namespace secure_service_manager {
+namespace security_manager {
 class SSLContext;
 std::string LastError();
 class CryptoManager {
@@ -44,6 +44,6 @@ class CryptoManager {
   virtual ~CryptoManager() { }
 };
 
-} // namespace secure_service_manager
+} // namespace security_manager
 
 #endif // SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
