@@ -153,29 +153,9 @@ bool SecurityManager::ParseProtectServiceRequest(
   if(service_type == protocol_handler::kInvalidServiceType) {
       LOG4CXX_ERROR(logger_, "Invalid Service type.");
       SendProtectServiceResponse(requestMessage,
-                                 SecuityQuery::INTERNAL_ERROR);
+                                 SecuityQuery::SERVICE_NOT_FOUND);
       return false;
     }
-
-  const security_manager::SSLContext * const currentSSLContext =
-      session_observer_->GetSSLContext(
-        requestMessage->getConnectionKey(), service_type);
-  if(currentSSLContext) {
-    if(currentSSLContext->IsInitCompleted()) {
-      LOG4CXX_WARN(logger_, "Service is already protected, service_id"
-                   << service_id);
-      SendProtectServiceResponse(requestMessage,
-                                 SecuityQuery::SERVICE_ALREADY_PROTECTED);
-      }
-    else {
-      LOG4CXX_WARN(logger_, "Secure protection is pending, service_id"
-                   << service_id);
-      //Generate response query and post to secure_service_messages_
-      SendProtectServiceResponse(requestMessage,
-                                 SecuityQuery::PENDING);
-      }
-    return false;
-  }
 
   security_manager::SSLContext * const newSSLContext =
       crypto_manager_->CreateSSLContext();
@@ -185,19 +165,55 @@ bool SecurityManager::ParseProtectServiceRequest(
       SendProtectServiceResponse(requestMessage,
                                  SecuityQuery::INTERNAL_ERROR);
       return false;
-    }
-  const bool result = session_observer_->SetSSLContext(
+  }
+  const int result = session_observer_->SetSSLContext(
         requestMessage->getConnectionKey(), service_type, newSSLContext);
-  if(!result) {
-      LOG4CXX_ERROR(logger_,
-                    "SessionObserver: could not set SSL context.");
+  //delete SSLContex on any error
+  if(SecuityQuery::SUCCESS != result)
+  //FIXME(EZ): return DeleteSSLContext
+//        crypto_manager_->DeleteSSLContext(newSSLContext);
+    ;
+  switch (result) {
+    case SecuityQuery::SUCCESS:
+      //Generate response query and post to secure_service_messages_
+      SendProtectServiceResponse(requestMessage, SecuityQuery::SUCCESS);
+      break;
+    case SecuityQuery::SERVICE_ALREADY_PROTECTED:
+      {
+      const security_manager::SSLContext * const currentSSLContext =
+          session_observer_->GetSSLContext(
+            requestMessage->getConnectionKey(), service_type);
+      if(currentSSLContext) {
+        if(currentSSLContext->IsInitCompleted()) {
+          LOG4CXX_WARN(logger_, "Service is already protected, service_id"
+                       << service_id);
+          SendProtectServiceResponse(requestMessage,
+                                     SecuityQuery::SERVICE_ALREADY_PROTECTED);
+        }
+        else {
+          LOG4CXX_WARN(logger_, "Secure protection is pending, service_id"
+                       << service_id);
+          //Generate response query and post to secure_service_messages_
+          SendProtectServiceResponse(requestMessage,
+                                     SecuityQuery::PENDING);
+        }
+      }
+      }
+      break;
+    case SecuityQuery::SERVICE_NOT_FOUND:
+      LOG4CXX_WARN(logger_, "Secure protection is pending, service_id"
+                   << service_id);
       //Generate response query and post to secure_service_messages_
       SendProtectServiceResponse(requestMessage,
-                                 SecuityQuery::SERVICE_ALREADY_PROTECTED);
+                                 SecuityQuery::SERVICE_NOT_FOUND);
+      break;
+    default: // SecuityQuery::INTERNAL_ERROR
+      LOG4CXX_ERROR(logger_,
+                    "SessionObserver: could not set SSL context.");
+      SendProtectServiceResponse(requestMessage,
+                                 SecuityQuery::INTERNAL_ERROR);
       return false;
     }
-  //Generate response query and post to secure_service_messages_
-  SendProtectServiceResponse(requestMessage, SecuityQuery::SUCCESS);
   return true;
 }
 
@@ -205,41 +221,45 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage->getHeader().query_id_ == SecuityQuery::SendHandshakeData);
   DCHECK(inMessage);
+  const uint32_t seqNumber = inMessage->getHeader().seq_number_;
+  const uint32_t connectionKey = inMessage->getHeader().seq_number_;
+
   if(inMessage->getDataSize() > 0) {
-      LOG4CXX_ERROR(logger_, "SendHandshakeData: null arguments size.");
-      return false;
-    }
+    const std::string error("SendHandshakeData: null arguments size.");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(connectionKey, seqNumber, error);
+    return false;
+  }
   const uint8_t service_id = *inMessage->getData();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
   if(service_type == protocol_handler::kInvalidServiceType) {
-      LOG4CXX_ERROR(logger_,
-                    "ProtectServiceRequest: Wrong ServiceType "
-                    << service_id);
-      return false;
-    }
+    const std::string error("SendHandshakeData: Invalid Service Type.");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(connectionKey, seqNumber, error);
+    return false;
+  }
   SSLContext * sslContext =
-      session_observer_->GetSSLContext(inMessage->getConnectionKey(), service_type);
+      session_observer_->GetSSLContext(connectionKey, service_type);
   if(!sslContext) {
-      LOG4CXX_ERROR(logger_, "SendHandshakeData: No ssl context");
-      return false;
-    }
+    const std::string error("SendHandshakeData: No ssl context.");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(connectionKey, seqNumber, error);
+    return false;
+  }
   const uint8_t * data = inMessage->getData();
   const size_t data_size = inMessage->getDataSize();
   size_t out_data_size;
-  const uint8_t * out_data  = static_cast<uint8_t *>
+  const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
   if(!out_data){
-      LOG4CXX_WARN(logger_, "Handshake fail: " << LastError());
-      return false;
-    }
-
-  //FIXME(EZ): add header to data array
-  uint8_t* rawData = new uint8_t[data_size];
-  memcpy(rawData, data, data_size);
-
-  SendBinaryData(inMessage->getConnectionKey(), rawData, data_size);
-
+    const std::string error("SendHandshakeData: Handshake failed.");
+    LOG4CXX_WARN(logger_, error + LastError());
+    SendInternalError(connectionKey, seqNumber, error + LastError());
+    return false;
+  }
+  //answer with the same header as income message
+  SendData(connectionKey, inMessage->getHeader(), out_data, out_data_size);
   return true;
 }
 

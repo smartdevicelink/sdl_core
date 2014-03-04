@@ -147,7 +147,7 @@ public:
      * \param service_type Type of service
      * \return \c true in case of service is protected or \c false otherwise
      */
-    virtual bool SetSSLContext(
+    virtual int SetSSLContext(
       const uint32_t& key,
       protocol_handler::ServiceType service_type,
       security_manager::SSLContext* context) = 0;

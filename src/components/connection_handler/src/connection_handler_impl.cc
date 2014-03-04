@@ -41,6 +41,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
 #include "config_profile/profile.h"
+#include "security_manager/security_query.h"
 
 namespace {
 int32_t HeartBeatTimeout() {
@@ -456,7 +457,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   return result;
 }
 
-bool ConnectionHandlerImpl::SetSSLContext(
+int ConnectionHandlerImpl::SetSSLContext(
     const uint32_t &key, protocol_handler::ServiceType service_type,
     security_manager::SSLContext *context) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::SetSSLContext");
@@ -468,7 +469,8 @@ bool ConnectionHandlerImpl::SetSSLContext(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Unknown connection!");
-      return false;
+      //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
+      return security_manager::SecuityQuery::INTERNAL_ERROR;
     }
   Connection& connection = *it->second;
   return connection.SetSSLContext(session_id, service_type, context);

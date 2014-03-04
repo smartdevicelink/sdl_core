@@ -182,7 +182,7 @@ class Connection {
    * \param service_type Type of service
    * \return \c true in case of service is protected or \c false otherwise
    */
-  bool SetSSLContext(
+  int SetSSLContext(
     uint8_t session,
     protocol_handler::ServiceType service_type,
     security_manager::SSLContext* context);

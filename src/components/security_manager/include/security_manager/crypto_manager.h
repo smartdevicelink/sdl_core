@@ -41,6 +41,7 @@ class CryptoManager {
  public:
   virtual bool Init()=0;
   virtual SSLContext *CreateSSLContext()=0;
+//  virtual DeleteSSLContext(SSLContext *)=0;
   virtual ~CryptoManager() { }
 };
 

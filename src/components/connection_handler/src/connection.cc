@@ -38,6 +38,7 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
+#include "security_manager/security_query.h"
 
 /**
  * \namespace connection_handler
@@ -150,22 +151,25 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
   return result;
 }
 
-bool Connection::SetSSLContext( uint8_t session,
+int Connection::SetSSLContext( uint8_t session,
                                 protocol_handler::ServiceType service_type,
                                 security_manager::SSLContext *context){
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator sit = session_map_.find(session);
   if (sit == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return NULL;
+    //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
+    return security_manager::SecuityQuery::INTERNAL_ERROR;
   }
   ServiceList& list = sit->second;
   ServiceList::iterator it = std::find(list.begin(), list.end(), service_type);
   if (it != list.end()) {
+    if(it->ssl_context)
+      return security_manager::SecuityQuery::SERVICE_ALREADY_PROTECTED;
     it->ssl_context = context;
-    return true;
+    return security_manager::SecuityQuery::SUCCESS;
   }
-  return false;
+  return security_manager::SecuityQuery::SERVICE_NOT_FOUND;
 }
 
 security_manager::SSLContext* Connection::GetSSLContext(
