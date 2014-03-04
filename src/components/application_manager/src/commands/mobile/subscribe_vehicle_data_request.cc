@@ -47,7 +47,7 @@ SubscribeVehicleDataRequest::SubscribeVehicleDataRequest(
 SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
 }
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
 namespace {
   struct Subrequest {
     hmi_apis::FunctionID::eType func_id;
@@ -81,7 +81,7 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
   };
 }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
@@ -135,12 +135,12 @@ void SubscribeVehicleDataRequest::Run() {
                  "Already subscribed on provided VehicleData");
     return;
   }
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
                  &msg_params, true);
-#endif // #ifdef WEB_HMI
+#endif // #ifdef HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
   //Generate list of subrequests
   for (int i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
@@ -158,7 +158,7 @@ void SubscribeVehicleDataRequest::Run() {
   //Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin(); it != hmi_requests_.end(); ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 }
 
 void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
@@ -166,7 +166,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& message = event.smart_object();
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -193,8 +193,8 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                result_code,
                return_info,
                &(message[strings::msg_params]));
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // #ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
       it != hmi_requests_.end(); ++it) {
     HmiRequest & hmi_request = *it;
@@ -242,7 +242,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     LOG4CXX_INFO(logger_, "All HMI requests are complete");
     SendResponse(any_arg_success, status, NULL, &response_params);
   }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 }
 
 bool SubscribeVehicleDataRequest::IsAnythingAlreadySubscribed() {

@@ -45,7 +45,7 @@ namespace commands {
 
 namespace str = strings;
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
 }
@@ -123,8 +123,9 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // HMI_JSON_API
+
+#ifdef HMI_DBUS_API
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
 }
@@ -283,7 +284,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     SendResponse( any_arg_success, status, info, &response_params);
   }
 }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 } // namespace commands
 

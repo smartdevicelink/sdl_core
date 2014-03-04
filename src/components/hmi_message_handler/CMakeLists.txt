@@ -16,15 +16,16 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/
 )
 
-IF (${QT_HMI})
+IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
     set (DBUS_ADAPTER DBus)
-ENDIF (${QT_HMI})
+ENDIF ()
 
 set (SOURCES
     ./src/hmi_message_handler_impl.cc
     ./src/messagebroker_adapter.cc
     ./src/hmi_message_adapter.cc
+    ./src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
 

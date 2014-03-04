@@ -188,6 +188,7 @@ bool InitHmi() {
   return Execute(kStartHmi, NULL);
 }
 #endif  // QT_HMI
+
 }
 
 /**
@@ -236,6 +237,7 @@ int32_t main(int32_t argc, char** argv) {
         std::string(kLocalHostAddress)) {
       LOG4CXX_INFO(logger, "Start HMI on localhost");
 
+#ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
 // without this line log4cxx threads continue using some instances destroyed by exit()
@@ -243,6 +245,7 @@ int32_t main(int32_t argc, char** argv) {
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");
+#endif // #ifndef NO_HMI
     }
   }
   // --------------------------------------------------------------------------

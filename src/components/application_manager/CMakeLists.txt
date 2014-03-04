@@ -296,7 +296,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_display_layout_response.cc
 )
 
-set (HMI_COMMANDS_SOURCES_WEBHMI
+set (HMI_COMMANDS_SOURCES_JSON
 ./src/commands/hmi/vi_get_vehicle_data_request.cc
 ./src/commands/hmi/vi_get_vehicle_data_response.cc
 ./src/commands/hmi/vi_subscribe_vehicle_data_request.cc
@@ -306,7 +306,7 @@ set (HMI_COMMANDS_SOURCES_WEBHMI
 ./src/commands/hmi/on_vi_vehicle_data_notification.cc
 )
 
-set (HMI_COMMANDS_SOURCES_QTHMI
+set (HMI_COMMANDS_SOURCES_DBUS
 ./src/commands/hmi/on_vi_gps_data_notification.cc
 ./src/commands/hmi/on_vi_speed_notification.cc
 ./src/commands/hmi/on_vi_rpm_notification.cc
@@ -330,12 +330,12 @@ set (HMI_COMMANDS_SOURCES_QTHMI
 ./src/commands/hmi/on_vi_my_key_notification.cc
 )
 
-if (${WEB_HMI})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_WEBHMI})
-endif (${WEB_HMI})
-if (${QT_HMI})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_QTHMI})
-endif (${QT_HMI})
+if (${HMI_JSON_API})
+    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
+endif (${HMI_JSON_API})
+if (${HMI_DBUS_API})
+    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+endif (${HMI_DBUS_API})
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
 target_link_libraries ("ApplicationManager" log4cxx)
