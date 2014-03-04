@@ -127,7 +127,7 @@
   7.1. Log as root and make sure you are not running Photon
   7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
-    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+    Note: For QML usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.
