@@ -3,21 +3,34 @@ package com.ford.syncV4.proxy;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
+import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
+
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -67,7 +80,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -125,7 +138,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -184,7 +197,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -248,7 +261,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -280,7 +293,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID, "correlationID");
-        Mockito.verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());
@@ -309,7 +322,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -342,7 +355,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID), VERSION, "correlationID");
-        Mockito.verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());
     }
@@ -369,7 +382,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf) {
+                conf, new TestConfig()) {
 
 
             @Override
@@ -399,5 +412,40 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         };
         SyncProxyALM.setHeartBeatInterval(50);
         assertEquals("Heartbeat should be 50", 50, SyncProxyALM.getHeartBeatInterval());
+    }
+
+
+    public void testMaxJsonSizeInIncomingMessageShouldCallOnError()
+            throws SyncException, NoSuchFieldException, IllegalAccessException {
+        final WiProProtocol protocol =
+                new WiProProtocol(mock(IProtocolListener.class));
+        protocol.setVersion((byte) 0x02);
+        final SyncConnection syncConnectionMock = mock(SyncConnection.class);
+        when(syncConnectionMock.getWiProProtocol()).thenReturn(protocol);
+
+        IProxyListenerALMTesting proxyListenerMock =
+                mock(IProxyListenerALMTesting.class);
+        SyncProxyALM proxy =
+                new SyncProxyALM(proxyListenerMock, null, "a", null, null,
+                        false, null, null, null, null, null, null, false, false,
+                        2, null, syncConnectionMock, new TestConfig());
+        SyncConnection connection =
+                new SyncConnection(proxy.getInterfaceBroker());
+        connection.init(null, mock(SyncTransport.class));
+        proxy.setSyncConnection(connection);
+
+        final byte maxByte = (byte) 0xFF;
+        final byte[] bytes =
+                { 0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00 };
+        connection.onTransportBytesReceived(bytes, bytes.length);
+
+        ArgumentCaptor<Throwable> throwableArgumentCaptor =
+                ArgumentCaptor.forClass(Throwable.class);
+        verify(proxyListenerMock, timeout(100).times(1)).onError(anyString(),
+                throwableArgumentCaptor.capture());
+        assertThat(throwableArgumentCaptor.getValue().toString(),
+                containsString(OutOfMemoryError.class.getSimpleName()));
     }
 }

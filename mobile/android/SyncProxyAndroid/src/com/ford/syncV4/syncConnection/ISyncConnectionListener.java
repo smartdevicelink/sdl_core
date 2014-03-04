@@ -18,7 +18,7 @@ public interface ISyncConnectionListener {
 	public void onProtocolServiceEnded(ServiceType serviceType,
                                        byte sessionID, String correlationID);
 	
-	public void onProtocolError(String info, Exception e);
+	public void onProtocolError(String info, Throwable e);
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
 

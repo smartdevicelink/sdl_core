@@ -98,6 +98,7 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.TestConfig;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -363,6 +364,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Updated hashID which can be used over connection cycles
     // (i.e. loss of connection, ignition cycles, etc.)
     private String mHashId = null;
+    // This Config object stores all the necessary data for SDK testing
+    private TestConfig mTestConfig;
 
     /**
      * Set hashID which can be used over connection cycles
@@ -370,6 +373,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @return value of the hashId
      */
     public String getHashId() {
+        // For the Test Cases
+        if (mTestConfig != null) {
+            if (!mTestConfig.isUseHashId()) {
+                return null;
+            }
+            if (mTestConfig.isUseCustomHashId()) {
+                return mTestConfig.getCustomHashId();
+            }
+        }
+
         return mHashId;
     }
 
@@ -479,8 +492,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig)
+                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
             throws SyncException {
+
+        mTestConfig = testConfig;
 
         setupSyncProxyBaseComponents(callbackToUIThread);
         // Set variables for Advanced Lifecycle Management
@@ -525,8 +540,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
                             String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
-                            BaseTransportConfig transportConfig, SyncConnection connection)
+                            BaseTransportConfig transportConfig, SyncConnection connection, TestConfig testConfig)
             throws SyncException {
+
+        mTestConfig = testConfig;
 
         setWiProVersion((byte) version);
         setAppInterfacePreRegisterd(preRegister);
@@ -1398,11 +1415,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onError(msg.getInfo(), msg.getException());
+                            _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                         }
                     });
                 } else {
-                    _proxyListener.onError(msg.getInfo(), msg.getException());
+                    _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
             } else if (message.getFunctionName().equals(Names.OnProxyOpened)) {
@@ -1791,7 +1808,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void passErrorToProxyListener(final String info, final Exception e) {
+    private void passErrorToProxyListener(final String info, final Throwable e) {
         OnError message = new OnError(info, e);
         queueInternalMessage(message);
     }
@@ -3055,7 +3072,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolError(String info, Exception e) {
+        public void onProtocolError(String info, Throwable e) {
             passErrorToProxyListener(info, e);
         }
 
@@ -3092,6 +3109,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void processRegisterAppInterfaceResponse(final RegisterAppInterfaceResponse response) {
+        if (!response.getSuccess()) {
+            setHashId(null);
+        }
+
+        if (response.getResultCode() == Result.RESUME_FAILED) {
+            setHashId(null);
+        }
+
         // Create callback
         if (_callbackToUIThread) {
             // Run in UI thread

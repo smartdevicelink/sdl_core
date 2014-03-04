@@ -23,7 +23,7 @@ public abstract class AbstractProtocol {
     private Object _frameLock = new Object();
     private static File audioFile;
     private static File videoFile;
-    private static FileOutputStream  audioOutputFileStream;
+    private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
 
     // Caller must provide a non-null IProtocolListener interface reference.
@@ -86,9 +86,8 @@ public abstract class AbstractProtocol {
     protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
         SyncTrace.logProtocolEvent(InterfaceActivityDirection.Transmit, header, data,
                 offset, length, SYNC_LIB_TRACE_KEY);
-
+        resetHeartbeat();
         synchronized (_frameLock) {
-
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
 
@@ -97,6 +96,12 @@ public abstract class AbstractProtocol {
             }
 
         } // end-if
+    }
+
+    private synchronized void resetHeartbeat() {
+        if (_protocolListener != null) {
+            _protocolListener.onResetHeartbeat();
+        }
     }
 
     private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
@@ -110,29 +115,29 @@ public abstract class AbstractProtocol {
 
     private void initVideoDumpStream() {
         String filename = "ford_video.txt";
-        if( videoFile == null){
-        videoFile = new File(Environment.getExternalStorageDirectory(), filename);
+        if (videoFile == null) {
+            videoFile = new File(Environment.getExternalStorageDirectory(), filename);
         }
-        if ( videoOutputFileStream == null ){
-        try {
-            videoOutputFileStream = new FileOutputStream(videoFile);
-        } catch (FileNotFoundException e) {
-            // handle exception
-        }
+        if (videoOutputFileStream == null) {
+            try {
+                videoOutputFileStream = new FileOutputStream(videoFile);
+            } catch (FileNotFoundException e) {
+                // handle exception
+            }
         }
     }
 
     private void initAudioDumpStream() {
         String filename = "ford_audio.txt";
-        if (audioFile == null ){
-        audioFile = new File(Environment.getExternalStorageDirectory(), filename);
+        if (audioFile == null) {
+            audioFile = new File(Environment.getExternalStorageDirectory(), filename);
         }
-        if ( audioOutputFileStream == null ){
-        try {
-            audioOutputFileStream = new FileOutputStream(audioFile);
-        } catch (FileNotFoundException e) {
-            // handle exception
-        }
+        if (audioOutputFileStream == null) {
+            try {
+                audioOutputFileStream = new FileOutputStream(audioFile);
+            } catch (FileNotFoundException e) {
+                // handle exception
+            }
         }
     }
 
@@ -146,7 +151,7 @@ public abstract class AbstractProtocol {
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
                 }*/
-               // Log.d("ford_audio.txt","audio: " + new String(data));
+                // Log.d("ford_audio.txt","audio: " + new String(data));
             } else {
                 Log.w("SyncProxyTester", "wrong frame type for video streaming");
             }
@@ -163,7 +168,7 @@ public abstract class AbstractProtocol {
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
                 }*/
-               // Log.d("ford_video.txt","video: " + new String(data));
+                // Log.d("ford_video.txt","video: " + new String(data));
             } else {
                 Log.w("SyncProxyTester", "wrong frame type for video streaming");
             }

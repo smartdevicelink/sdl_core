@@ -204,7 +204,7 @@ void ConnectionHandlerImpl::OnConnectionFailed(
 
 void ConnectionHandlerImpl::OnConnectionClosed(
   transport_manager::ConnectionUID connection_id) {
-  LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
 
   OnConnectionEnded(connection_id);
 }
@@ -250,8 +250,6 @@ void ConnectionHandlerImpl::RemoveConnection(
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
   int32_t new_session_id = -1;
-  bool is_session_resumption = false;
-  ResumeSessionMapIt resume_session_it;
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -266,23 +264,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
     }
-  } else if ((0 != sessionId) && (protocol_handler::kRpc == service_type)) {
-    resume_session_it = resume_session_map_.find(sessionId);
-    if (resume_session_it == resume_session_map_.end()) {
-      LOG4CXX_ERROR(logger_, "Unable to establish service!");
-      return -1;
-    }
-
-    LOG4CXX_INFO(logger_,
-                 "Start resume session " << static_cast<int32_t>(sessionId));
-    new_session_id = (it->second)->AddNewSession();
-    if (0 > new_session_id) {
-      LOG4CXX_ERROR(logger_, "Not possible to resume session!");
-      return -1;
-    }
-    is_session_resumption = true;
-    resume_session_map_.erase(resume_session_it);
-
   } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)) {
     if (!(it->second)->AddNewService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
@@ -297,16 +278,9 @@ void ConnectionHandlerImpl::RemoveConnection(
   if (connection_handler_observer_) {
     int32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
-    bool success = false;
+    bool success = connection_handler_observer_->OnServiceStartedCallback(
+        (it->second)->connection_device_handle(), session_key, service_type);
 
-    if (is_session_resumption) {
-      success = connection_handler_observer_->OnServiceResumedCallback(
-          (it->second)->connection_device_handle(), resume_session_it->second,
-          session_key, service_type);
-    } else {
-      success = connection_handler_observer_->OnServiceStartedCallback(
-          (it->second)->connection_device_handle(), session_key, service_type);
-    }
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
       new_session_id = -1;
@@ -524,13 +498,6 @@ void ConnectionHandlerImpl::ConnectToDevice(
   }
 }
 
-void ConnectionHandlerImpl::set_resume_session_map(
-    const ResumeSessionMap& map) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_resume_session_map()");
-
-  resume_session_map_ = map;
-}
-
 void ConnectionHandlerImpl::StartTransportManager() {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::StartTransportManager()");
   if (NULL == transport_manager_) {
@@ -542,9 +509,12 @@ void ConnectionHandlerImpl::StartTransportManager() {
 }
 
 void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection by HB");
+
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
+
   CloseConnection(connection_handle);
 }
 
@@ -590,9 +560,6 @@ void ConnectionHandlerImpl::OnConnectionEnded(
          end = session_map.end(); session_it != end; ++session_it) {
 
       uint32_t session_key = KeyFromPair(connection_id, session_it->first);
-      resume_session_map_.insert(
-          std::pair<uint8_t, uint32_t>(session_it->first, session_key));
-
       for (ServiceListConstIterator service_it = session_it->second.begin(),
           end = session_it->second.end(); service_it != end; ++service_it) {
 

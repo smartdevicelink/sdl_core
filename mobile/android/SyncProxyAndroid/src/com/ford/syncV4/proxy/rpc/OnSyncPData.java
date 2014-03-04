@@ -1,9 +1,9 @@
 package com.ford.syncV4.proxy.rpc;
 
-import java.util.Hashtable;
-
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
+
+import java.util.Hashtable;
 
 public class OnSyncPData extends RPCNotification {
 	public OnSyncPData() {
@@ -35,6 +35,7 @@ public class OnSyncPData extends RPCNotification {
         	parameters.remove(Names.timeout);
         }
     }
+
     public void setSyncPData(byte[] syncPData) {
         if (syncPData != null) {
             store.put(Names.bulkData, syncPData);

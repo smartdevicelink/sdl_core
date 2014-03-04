@@ -12,7 +12,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
-if (DEFAULT_MEDIA_FLAG)
+if (EXTENDED_MEDIA_MODE)
   include_directories (
     ${GSTREAMER_gst_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
@@ -40,7 +40,7 @@ set (LIBRARIES
     log4cxx
 )
 
-if (DEFAULT_MEDIA_FLAG)
+if (EXTENDED_MEDIA_MODE)
   list(APPEND LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY})
 endif()

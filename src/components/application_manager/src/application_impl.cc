@@ -33,6 +33,7 @@
 #include <string>
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+#include "application_manager/message_helper.h"
 
 namespace {
 log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
@@ -46,6 +47,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
+      hmi_supports_navi_streaming_(false),
       allowed_support_navigation_(false),
       hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
@@ -188,6 +190,14 @@ void ApplicationImpl::set_hmi_level(
   hmi_level_ = hmi_level;
 }
 
+void ApplicationImpl::set_hmi_supports_navi_streaming(const bool& supports) {
+  hmi_supports_navi_streaming_ = supports;
+}
+
+bool ApplicationImpl::hmi_supports_navi_streaming() const {
+  return hmi_supports_navi_streaming_;
+}
+
 void ApplicationImpl::increment_put_file_in_none_count() {
   ++put_file_in_none_count_;
 }
@@ -298,6 +308,29 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.erase(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size - 1);
+}
+
+const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {
+  return subscribed_buttons_;
+}
+
+const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
+  return subscribed_vehicle_info_;
+}
+
+uint32_t ApplicationImpl::nextHash() {
+  hash_val_ = time(NULL);
+  return hash_val_;
+}
+
+uint32_t ApplicationImpl::curHash() const {
+  return hash_val_;
+}
+
+uint32_t ApplicationImpl::UpdateHash() {
+  uint32_t new_hash= nextHash();
+  MessageHelper::SendHashUpdateNotification(app_id());
+  return new_hash;
 }
 
 void ApplicationImpl::CleanupFiles() {

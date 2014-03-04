@@ -206,6 +206,24 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
     bool ActivateApplication(ApplicationSharedPtr app);
+    /**
+     * @brief Put application in Limited HMI Level if possible,
+     *        otherwise put applicatuion other HMI level.
+     *        do not send any notifications to mobile
+     * @param app, application, that need to be puted in Limeted
+     * @return seted HMI Level
+     */
+    mobile_api::HMILevel::eType PutApplicationInLimited(ApplicationSharedPtr app);
+
+    /**
+     * @brief Put application in FULL HMI Level if possible,
+     *        otherwise put applicatuion other HMI level.
+     *        do not send any notifications to mobile
+     * @param app, application, that need to be puted in FULL
+     * @return seted HMI Level
+     */
+    mobile_api::HMILevel::eType PutApplicationInFull(ApplicationSharedPtr app);
+
     void DeactivateApplication(ApplicationSharedPtr app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
@@ -343,10 +361,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(const connection_handler::DeviceHandle& device_handle,
                                   const int32_t& session_key,
                                   const protocol_handler::ServiceType& type);
-    bool OnServiceResumedCallback(
-                const connection_handler::DeviceHandle& device_handle,
-                const int32_t& old_session_key, const int32_t& new_session_key,
-                const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
                                 const protocol_handler::ServiceType& type);
 
@@ -416,6 +430,12 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsVideoStreamingAllowed(uint32_t connection_key) const;
 
+    /**
+      * Getter for resume_controller
+      * @return Resume Controller
+      */
+    ResumeCtrl& resume_controller() { return resume_ctrl_; }
+
     /*
      * @brief Save binary data to specified directory
      *
@@ -473,9 +493,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
 
-
-
-
     // threads::MessageLoopThread<*>::Handler implementations
     /*
      * @brief Handles for threads pumping different types
@@ -497,6 +514,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
 
     // members
+    ResumeCtrl resume_ctrl_;
 
     /**
      * @brief Resume controler is responcible for save and load information
@@ -569,7 +587,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ApplicationManagerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {

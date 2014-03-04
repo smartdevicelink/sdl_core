@@ -91,13 +91,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
       transport_manager::TransportManager* transport_mngr);
 
     /**
-     * \brief Sets resume session map. Used on start up by AppMngr to identify
-     * session that must be resumed.
-     * \param map Map of sessions Id and session_key to be resumed
-     **/
-    virtual void set_resume_session_map(const ResumeSessionMap& map);
-
-    /**
      * \brief Connects to all services of device
      * \param deviceHandle Handle of device to connect to
      */
@@ -308,11 +301,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     sync_primitives::Lock connection_list_lock_;
 
-    /**
-     * \brief List of sessions that must be resumed
-     */
-    ResumeSessionMap    resume_session_map_;
-
     /*
      * \brief Cleans connection list on destruction
      */
@@ -324,7 +312,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(ConnectionHandlerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

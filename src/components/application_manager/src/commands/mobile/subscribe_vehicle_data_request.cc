@@ -166,6 +166,9 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& message = event.smart_object();
 
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      CommandRequestImpl::connection_key());
+
 #ifdef HMI_JSON_API
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -193,6 +196,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                result_code,
                return_info,
                &(message[strings::msg_params]));
+  app->UpdateHash();
 #endif // #ifdef HMI_JSON_API
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
@@ -241,6 +245,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
     LOG4CXX_INFO(logger_, "All HMI requests are complete");
     SendResponse(any_arg_success, status, NULL, &response_params);
+    app->UpdateHash();
   }
 #endif // #ifdef HMI_DBUS_API
 }

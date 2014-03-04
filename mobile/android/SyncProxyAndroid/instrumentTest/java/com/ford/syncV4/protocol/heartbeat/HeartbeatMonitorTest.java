@@ -184,4 +184,5 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
 
         heartbeatMonitor.stop();
     }
+
 }

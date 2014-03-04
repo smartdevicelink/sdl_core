@@ -160,50 +160,66 @@ SDL.SDLMediaControlls = Em.ContainerView.create( {
                     '3',
                     '4',
                     '5',
-                    '6'
+                    '6',
+                    '7',
+                    '8'
                 ],
 
             1: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button1',
-                classNames: 'a0 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.0',
                 templateName: 'text',
                 presetName: 'PRESET_1'
             } ),
             2: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button2',
-                classNames: 'a1 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.1',
                 templateName: 'text',
                 presetName: 'PRESET_2'
             } ),
             3: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button3',
-                classNames: 'a2 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.2',
                 templateName: 'text',
                 presetName: 'PRESET_3'
             } ),
             4: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button4',
-                classNames: 'a3 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.3',
                 templateName: 'text',
                 presetName: 'PRESET_4'
             } ),
             5: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button5',
-                classNames: 'a4 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.4',
                 templateName: 'text',
                 presetName: 'PRESET_5'
             } ),
             6: SDL.Button.extend( SDL.PresetEvents, {
                 elementId: 'sdl_media_preset_button6',
-                classNames: 'a5 preset-item',
+                classNames: 'preset-item',
                 textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.5',
                 templateName: 'text',
                 presetName: 'PRESET_6'
+            } ),
+            7: SDL.Button.extend( SDL.PresetEvents, {
+                elementId: 'sdl_media_preset_button7',
+                classNames: 'preset-item',
+                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.6',
+                templateName: 'text',
+                presetName: 'PRESET_7'
+            } ),
+            8: SDL.Button.extend( SDL.PresetEvents, {
+                elementId: 'sdl_media_preset_button8',
+                classNames: 'preset-item',
+                textBinding: 'SDL.SDLAppController.model.appInfo.customPresets.7',
+                templateName: 'text',
+                presetName: 'PRESET_8'
             } )
         } )
     } )

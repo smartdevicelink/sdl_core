@@ -1,4 +1,11 @@
+[CW10]
+* SyncProxyAndroid SDK: Handle incoming messages with very big JSON size.
+* Fix SPT.SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure behaviour
+* Log messages of the PutFile request when resume application
+
 [CW9]
++ SYncProxyAndroid SDK: update heartbeat logic
++ 'HashId' management dialog
 + App resumption: save RPC requests (re-send them), save and re-use hashId
 + Add possibility to send Policy Table Update manually from Dialog
 * Fix request / response notification messages

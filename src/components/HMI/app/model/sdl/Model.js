@@ -630,6 +630,17 @@ SDL.SDLModel = Em.Object.create({
             return;
         }
 
+        if (params.ttsName) {
+            SDL.VRPopUp.AddActivateApp(params.ttsName.text ,params.appID);
+        }
+
+        if (params.vrSynonyms) {
+            var length = params.vrSynonyms.length
+            for (var i = 0; i < length; i++) {
+                SDL.VRPopUp.AddActivateApp(params.vrSynonyms[i] ,params.appID);
+            }
+        }
+
         if (params.isMediaApplication) {
             applicationType = 0;
         }

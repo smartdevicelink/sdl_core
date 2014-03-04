@@ -7,7 +7,7 @@
   1.4. To run SDL under virtualized QNX with Web HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.1; 5.1; 5.5; 7; 8.
   1.5. To run SDL under virtualized QNX with QML HMI under Linux Host please follow   steps: 3.1; 3.2; 3.3; 4.2; 5.2; 5.5; 5.4; 5.5; 9.
   1.6. To run SDL under virtualized QNX with QML HMI under QNX Host please follow     steps: 3.1; 3.2; 3.3; 5.2; 5.5; 7.
-  1.7. To turn media features (like audio/video streaming) on/off please set DEFAULT_MEDIA_FLAG to ON/OFF (e.g. "cmake -DEFAULT_MEDIA_FLAG=OFF").
+  1.7. To turn media features (like audio/video streaming) on/off please set EXTENDED_MEDIA_MODE to ON/OFF (e.g. "cmake -DEXTENDED_MEDIA_MODE=OFF").
 
 ==========================================================================================================
 2. Known problems.
@@ -76,6 +76,9 @@
           DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --fork --session --print-address`
           export DBUS_SESSION_BUS_ADDRESS
         fi"
+    3.4.6. Set up USB access mode
+      3.4.6.1 If file "/etc/rc.d/rc.local" is either absent or empty then copy file "<Project_Root_Src>/qnx/rc.local" to folder "/etc/rc.d"
+      3.4.6.2 If file "/etc/rc.d/rc.local" exists and is nonempty then append the last line of file "<Project_Root_Src>/qnx/rc.local" to its end
 
   3.5. To set up Android Simulator for using instead of real device:
     3.5.1. Install and configure the Android Simulator in keeping with the following instructions https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+and+setup+android+emulator+on+Ubuntu
@@ -107,10 +110,10 @@
     “cmake <Project_Root_Src> -DCMAKE_TOOLCHAIN_FILE=<Project_Root_Src>/qnx_6.5.0_linux_x86.cmake -DHMI2=ON -DCMAKE_BUILD_TYPE=Release”.
   5.3. For Linux with Web HMI run command
     "mkdir <Project_Linux_Build_WebHMI>  && cd <Project_Linux_Build_WebHMI>
-    "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON".
+    "cmake <Project_Root_Src> -DEXTENDED_MEDIA_MODE=ON".
   5.4. For Linux with QML HMI run command
     "mkdir <Project_Linux_Build_Qt>  && cd <Project_Linux_Build_Qt>
-    "cmake <Project_Root_Src> -DDEFAULT_MEDIA_FLAG=ON -DHMI2=ON".
+    "cmake <Project_Root_Src> -DEXTENDED_MEDIA_MODE=ON -DHMI2=ON".
   5.5. Run build process “make install” in previous directory.
 
 ==========================================================================================================
@@ -124,7 +127,7 @@
   7.1. Log as root and make sure you are not running Photon
   7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
-    Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
+    Note: For QML usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.

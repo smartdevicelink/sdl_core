@@ -120,9 +120,18 @@
     <element name="TRUNCATED_DATA">
       <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
     </element>
-    <element name="SAVED" />
-    <element name="INVALID_CERT"/> 
-    <element name="EXPIRED_CERT"/>
+    <element name="SAVED">
+      <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
+    </element>           
+    <element name="INVALID_CERT">
+      <description>The certificate provided during authentication is invalid.</description>
+    </element>
+    <element name="EXPIRED_CERT">
+      <description>The certificate provided during authentication is expired.</description>
+    </element>
+    <element name="RESUME_FAILED">
+      <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -705,6 +714,131 @@
     </element>
   </enum>
 
+  <enum name="PredefinedLayout" platform="documentation">
+    <description>Predefined screen layout.</description>
+
+    <element name="DEFAULT" rootscreen="true">
+        <description>
+                Default media / non-media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="MEDIA" rootscreen="true">
+        <description>
+                Default Media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NON_MEDIA" rootscreen="true">
+        <description>
+                Default Non-media screen.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="ONSCREEN_PRESETS" rootscreen="true">
+        <description>
+                Custom root media screen containing app-defined onscreen presets.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_FULLSCREEN_MAP" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing full screen map with navigation controls.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_LIST" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing video represented list.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="NAV_KEYBOARD" rootscreen="true" scope="partner">
+        <description>
+                Custom root template screen containing video represented keyboard.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXT" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with lines of text.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXT_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing lines of text with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TILES_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXTBUTTONS_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only text SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TILES" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with tiled SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TILES_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing tiled SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with text and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing text and SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="GRAPHIC_WITH_TEXTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing half-screen graphic with text only SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="TEXTBUTTONS_WITH_GRAPHIC" rootscreen="true">
+        <description>
+                Custom root template screen containing text only SoftButtons with half-screen graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="LARGE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing a large graphic and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="DOUBLE_GRAPHIC_WITH_SOFTBUTTONS" rootscreen="true">
+        <description>
+                Custom root template screen containing two graphics and SoftButtons.
+                Can be set as a root screen.
+        </description>
+    </element>
+    <element name="LARGE_GRAPHIC_ONLY" rootscreen="true">
+        <description>
+                Custom root template screen containing only a large graphic.
+                Can be set as a root screen.
+        </description>
+    </element>
+  </enum>
+
   <enum name="CharacterSet">
     <description>The list of potential character sets</description>
     <element name="TYPE2SET">
@@ -1172,16 +1306,16 @@
     <param name="ignitionStatus" type="IgnitionStatus">
       <description>References signal "Ignition_status". See IgnitionStatus.</description>
 	</param>
-    <param name="driverDoorAjar" type="Boolean">
+    <param name="driverDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatDrv_B_Actl".</description>
 	</param>
-    <param name="passengerDoorAjar" type="Boolean">
+    <param name="passengerDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatPsngr_B_Actl".</description>
 	</param>
-    <param name="rearLeftDoorAjar" type="Boolean">
+    <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRl_B_Actl".</description>
 	</param>
-    <param name="rearRightDoorAjar" type="Boolean">
+    <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
       <description>References signal "DrStatRr_B_Actl".</description>
 	</param>
   </struct>
@@ -1998,6 +2132,8 @@
     <element name="DiagnosticMessageID" value="37" hexvalue="25" />    
     <element name="SystemRequestID" value="38" hexvalue="26" /> 
 
+
+
 <!--
 	Base Notifications
 	Range = 0x 0000 8000 - 0x 0000 FFFF
@@ -2017,7 +2153,7 @@
     <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
     <element name="OnTouchEventID" value="32780" hexvalue="800C" /> 
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
-
+    <element name="OnHashChangeID" value="32782" hexvalue="800E" />
 <!--
 	Ford Specific Request / Response RPCs
 	Range = 0x 0001 0000 - 0x 0001 7FFF
@@ -2120,12 +2256,18 @@
       	If there is a mismatch with SYNC, the app will be able to change this registration with changeRegistration prior to app being brought into focus.
       </description>
     </param>
-
     <param name="appHMIType" type="AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	See AppHMIType
       	List of all applicable app HMI types stating which HMI classifications to be given to the app.
       	e.g. for platforms like GEN2, this will determine which "corner(s)" the app can populate.
+      </description>
+    </param>
+    <param name="hashID" type="String" maxlength="100" mandatory="false">
+      <description>
+        ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
+        This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
+        If omitted, then the previous state of an app's commands, etc. will not be restored. 
       </description>
     </param>
     <param name="appID" type="String" maxlength="100" mandatory="true">
@@ -2154,6 +2296,7 @@
       <element name="WRONG_LANGUAGE"/>
       <element name="DISALLOWED"/>
       <element name="WARNINGS"/>
+      <element name="RESUME_FAILED"/>         
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4290,7 +4433,17 @@
       	Currently only predefined screen layouts are defined.
       </description>
     </param>
+  </function>
 
+  <function name="OnHashChange" functionID="OnHashChangeID" messagetype="notification">
+      <description>
+              Notification containing an updated hashID which can be used over connection cycles (i.e. loss of connection, ignition cycles, etc.).
+              Sent after initial registration and subsequently after any change in the calculated hash of all persisted app data.
+      </description>
+
+      <param name="hashID" type="String" maxlength="100" mandatory="true">
+              <description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
+      </param>
   </function>
 
   <function name="SetDisplayLayout" functionID="SetDisplayLayoutID" messagetype="response">
@@ -4562,23 +4715,31 @@
   <function name="OnSystemRequest" functionID="OnSystemRequestID" messagetype="notification" scope="partner">
       <description> An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
-	<param name="requestType" type="RequestType" mandatory="true">
+		<param name="requestType" type="RequestType" mandatory="true">
            <description>The type of system request.</description>
-	</param>
-	<param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
-           <description>Optional array of URL(s) for HTTP requests.</description>
-        </param>
-        <param name="fileType" type="FileType" mandatory="false">
-           <description>Optional file type (meant for HTTP file requests).</description>
-        </param>
-        <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-           <description>Optional offset in bytes for resuming partial data chunks</description>
-        </param>
-        <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-           <description>Optional length in bytes for resuming partial data chunks</description>
-        </param>    
+		</param>
+		<param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Optional array of URL(s) for HTTP requests.
+				If blank, the binary data shall be forwarded to the app.
+	      If not blank, the binary data shall be forwarded to the url(s) with a provided timeout in seconds.
+			</description>	
+    </param>
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      <description>
+      	Optional timeout for HTTP requests
+      	Required if a URL is provided
+      </description>
+    </param>  	
+    <param name="fileType" type="FileType" mandatory="false">
+       <description>Optional file type (meant for HTTP file requests).</description>
+    </param>
+    <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+       <description>Optional offset in bytes for resuming partial data chunks</description>
+    </param>
+    <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+       <description>Optional length in bytes for resuming partial data chunks</description>
+    </param>    
   </function>	
-  
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->

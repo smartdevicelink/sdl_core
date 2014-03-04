@@ -61,10 +61,19 @@ public class Const {
         public static final String PREF_KEY_POLICY_UPDATE_AUTO_REPLAY = "PolicyUpdateAutoReplay";
     }
 
+    // HashId properties
+    public static final class HashId {
+        public static final String PREF_KEY_USE_HASH_ID = "UseHashId";
+        public static final String PREF_KEY_USE_CUSTOM_HASH_ID = "UseCustomHashId";
+        public static final String PREF_KEY_CUSTOM_HASH_ID = "CustomHashId";
+        public static final String PREF_KEY_LAST_HASH_IDS = "LastHashIds";
+    }
+
 	// Keys to pass objects via IntentHelper
 	public static final String INTENTHELPER_KEY_OBJECT = "IntentObject";
 	public static final String INTENTHELPER_KEY_OBJECTSLIST = "IntentObjectsList";
     public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES = "IntentKeyboardProperties";
+    public static final String INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY = "IntentKeyboardPropertiesEmpty";
 
 	// Keys to pass values via Intent
 	public static final String INTENT_KEY_OBJECTS_MAXNUMBER = "MaxObjectsNumber";

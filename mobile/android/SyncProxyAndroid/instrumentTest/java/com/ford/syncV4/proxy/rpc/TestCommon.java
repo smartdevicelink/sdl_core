@@ -10,6 +10,7 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.syncConnection.SyncConnection;
+import com.ford.syncV4.util.TestConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,7 +52,7 @@ public class TestCommon {
 
         return new SyncProxyALM(proxyListener, null, "!", null, null, true,
                 null, null, null, null, null, null, false, false, 2, null,
-                connectionMock);
+                connectionMock, new TestConfig());
     }
 
     public static byte[] getRandomBytes(int dataSize) {

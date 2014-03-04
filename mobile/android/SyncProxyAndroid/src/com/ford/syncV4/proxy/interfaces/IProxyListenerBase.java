@@ -83,11 +83,11 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	
 	/**
 	 * onProxyError() being called indicates that the SYNC Proxy experenced an error.
-	 * 
-	 * @param info - Includes information about the Exception that occurred.
-	 * @param e - The exception that occurred. 
-	 */
-	public void onError(String info, Exception e);
+	 *
+     * @param info - Includes information about the Exception that occurred.
+     * @param e - The exception that occurred.
+     */
+	public void onError(String info, Throwable e);
 	
 	
 	/**

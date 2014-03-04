@@ -26,6 +26,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
+import com.ford.syncV4.util.TestConfig;
 
 import org.hamcrest.core.IsNull;
 import org.json.JSONException;
@@ -92,7 +93,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock);
+                null, connectionMock, new TestConfig());
 
         final SystemPutFileRPCRequestConverter converter = new SystemPutFileRPCRequestConverter();
         maxDataSize = 64;

@@ -106,7 +106,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(LifeCycle);
+    FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
 };
 }  //  namespace main_namespace
 

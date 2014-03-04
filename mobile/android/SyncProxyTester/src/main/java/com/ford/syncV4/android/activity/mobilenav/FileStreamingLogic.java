@@ -78,11 +78,13 @@ public class FileStreamingLogic {
             public void onDataReceived(final byte[] data) {
                 if (outputStream != null && data != null) {
                     try {
-                        Log.d(TAG, "On read data:" + data);
+                        //Log.d(TAG, "On read data:" + data);
                         outputStream.write(data);
                     } catch (IOException e) {
+                        Log.e(TAG, "FIle streamer error", e);
                        cancelStreaming();
                        SyncProxyTester tester = (SyncProxyTester) context.getActivity();
+
                        tester.logError(e);
                     }
                 }

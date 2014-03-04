@@ -190,7 +190,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
             // Magic number is a count of Preset Buttons on HMI = 6
             if (params.customPresets) {
                 this.appInfo.set('customPresets', []);
-                for (var i = 0; i < 6; i++) {
+                for (var i = 0; i < 8; i++) {
                     if (params.customPresets[i] != '' || params.customPresets[i] != null) {
                         this.appInfo.get('customPresets').pushObject(params.customPresets[i]);
                     } else {

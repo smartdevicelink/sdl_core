@@ -50,7 +50,7 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA)
 #include <gst/gst.h>
 #endif
 
@@ -67,6 +67,7 @@ const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
+const char kApplicationVersion[] = "Develop";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
@@ -206,11 +207,13 @@ int32_t main(int32_t argc, char** argv) {
                                 log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-  LOG4CXX_INFO(logger, " Application started!");
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
+  LOG4CXX_INFO(logger, "Application started!");
+  LOG4CXX_INFO(logger, "Application version " << kApplicationVersion);
+
   // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   gst_init(&argc, &argv);
 #endif
 
