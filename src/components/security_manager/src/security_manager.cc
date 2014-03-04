@@ -38,7 +38,7 @@ log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecurityManager"));
 
 SecurityManager::SecurityManager() :
-  security_messages_("SecurityManager::secure_service_messages_", this),
+  security_messages_("SecurityManager::security_messages_", this),
   crypto_manager_(new security_manager::CryptoManagerImpl()),
   session_observer_(NULL), protocol_handler_(NULL) {
   if(!crypto_manager_->Init()) {
@@ -55,8 +55,8 @@ void SecurityManager::OnMessageReceived(
     return;
   }
 
-  SecurityMessage serviceQueryPtr(new SecuityQuery());
-  const bool result = serviceQueryPtr->Parse(message->data(),
+  SecurityMessage securityMessagePtr(new SecuityQuery());
+  const bool result = securityMessagePtr->Parse(message->data(),
                                              message->data_size());
   if(!result) {
     //result will be false only if data less then query header
@@ -65,16 +65,16 @@ void SecurityManager::OnMessageReceived(
     SendInternalError(message->connection_key(), 0, error);
     return;
   }
-  serviceQueryPtr->setConnectionKey(message->connection_key());
+  securityMessagePtr->setConnectionKey(message->connection_key());
 
-  const SecuityQuery::QueryHeader &header = serviceQueryPtr->getHeader();
+  const SecuityQuery::QueryHeader &header = securityMessagePtr->getHeader();
   if(header.query_id_ == SecuityQuery::InvalidQuery) {
     const std::string error("Unknown query identifier.");
     LOG4CXX_ERROR(logger_, error);
     SendInternalError(message->connection_key(), header.seq_number_, error);
     }
   //Post message to messqge query for next processong in thread
-  security_messages_.PostMessage(serviceQueryPtr);
+  security_messages_.PostMessage(securityMessagePtr);
 }
 
 void SecurityManager::OnMobileMessageSent(
@@ -103,7 +103,7 @@ void SecurityManager::set_protocol_handler(
 
 void SecurityManager::Handle(const SecurityMessage &message) {
   DCHECK(message);DCHECK(session_observer_);
-  LOG4CXX_INFO(logger_, "Received Secure Service message from Mobile side");
+  LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
   switch (message->getHeader().query_id_) {
     case SecuityQuery::ProtectServiceRequest:
       if(!ParseProtectServiceRequest(message)) {
@@ -131,7 +131,7 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       return;
     default: // SecuityQuery::InvalidQuery
-      LOG4CXX_ERROR(logger_, "Secure Service message: unknown query");
+      LOG4CXX_ERROR(logger_, "Security message: unknown query");
     }
 }
 
@@ -181,7 +181,7 @@ bool SecurityManager::ParseProtectServiceRequest(
       crypto_manager_->CreateSSLContext();
   if(!newSSLContext) {
       LOG4CXX_ERROR(logger_, "CryptoManager could not create SSl context.");
-      //Generate response query and post to secure_service_messages_
+      //Generate response query and post to security_messages_
       SendProtectServiceResponse(requestMessage,
                                  SecuityQuery::INTERNAL_ERROR);
       return false;
