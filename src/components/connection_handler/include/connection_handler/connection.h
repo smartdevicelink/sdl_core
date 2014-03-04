@@ -62,7 +62,7 @@ typedef int32_t ConnectionHandle;
 
 /**
  * \brief Type for Connections map
- * Key is ConnectionHandle which is uniq
+ * Key is ConnectionHandle which is unique
  */
 typedef std::map<int32_t, Connection*> ConnectionList;
 
@@ -71,10 +71,26 @@ typedef std::map<int32_t, Connection*> ConnectionList;
  */
 typedef ConnectionList::iterator ConnectionListIterator;
 
+struct Service {
+  protocol_handler::ServiceType service_type;
+  secure_service_manager::SSLContext* ssl_context;
+  Service()
+    : service_type(protocol_handler::kInvalidServiceType),
+      ssl_context(NULL) {
+  }
+  Service(protocol_handler::ServiceType service_type)
+    : service_type(service_type),
+      ssl_context(NULL) {
+  }
+  bool operator==(const protocol_handler::ServiceType service_type) const {
+    return this->service_type == service_type;
+  }
+};
+
 /**
  * \brief Type for Session Services
  */
-typedef std::vector<protocol_handler::ServiceType> ServiceList;
+typedef std::vector<Service> ServiceList;
 
 /**
  * \brief Type for Services iterator
