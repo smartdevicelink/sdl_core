@@ -247,7 +247,12 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     message[strings::msg_params][strings::application][strings::app_type] =
       *app_type;
   }
-
+  if (application_impl.vr_synonyms()) {
+    message[strings::msg_params][strings::vr_synonyms] = *(application_impl.vr_synonyms());
+  }
+  if (application_impl.tts_name()) {
+    message[strings::msg_params][strings::tts_name] = *(application_impl.tts_name());
+  }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
