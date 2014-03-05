@@ -871,6 +871,23 @@ Run Wireshark as <strong>a regular user</strong> (not using <code>sudo</code>). 
 </div>
 </div>
 <div class="sect2">
+<h3 id="_filtering_on_usb">Filtering on USB</h3>
+<div class="paragraph"><p>To filter packets on USB, you need to know the Bus and Device ID. Run</p></div>
+<div class="listingblock">
+<div class="content"><div class="highlight"><pre>lsusb | grep -i <span class="s1">&#39;18d1:2d0&#39;</span>
+</pre></div></div></div>
+<div class="paragraph"><p>You&#8217;ll see info like</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Bus 001 Device 013: ID 18d1:2d01 Google Inc.</code></pre>
+</div></div>
+<div class="paragraph"><p>In Wireshark, start monitoring on <code>usbmonX</code> interface, where <code>X</code> is the bus number. Use a filter similar to</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>(usb.device_address == 13) and (usb.data_flag == "present (0)")</code></pre>
+</div></div>
+</div>
+<div class="sect2">
 <h3 id="_running_as_root">Running as root</h3>
 <div class="admonitionblock">
 <table><tr>
@@ -996,7 +1013,7 @@ Using Lua in Wireshark: <a href="https://delog.wordpress.com/category/wireshark-
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2014-03-04 12:01:35 EET
+Last updated 2014-03-05 14:21:05 EET
 </div>
 </div>
 </body>

@@ -46,6 +46,23 @@ Open any captured file with SDL data in Wireshark and you should see the results
 
 image::01.wireshark.png[]
 
+=== Filtering on USB
+
+To filter packets on USB, you need to know the Bus and Device ID. Run
+
+[source,bash]
+lsusb | grep -i '18d1:2d0'
+
+You'll see info like
+
+[listing]
+Bus 001 Device 013: ID 18d1:2d01 Google Inc.
+
+In Wireshark, start monitoring on +usbmonX+ interface, where +X+ is the bus number. Use a filter similar to
+
+[listing]
+(usb.device_address == 13) and (usb.data_flag == "present (0)")
+
 === Running as root
 
 CAUTION: When run as root, Wireshark disables scripting to improve security. You should NOT run Wireshark as root: http://wiki.wireshark.org/Security
