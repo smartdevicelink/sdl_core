@@ -39,7 +39,7 @@ do
 	cat ../tmp/developers_report.tmp >> ../results/developers/$name.txt
 	rm ../tmp/developers_report.tmp
 
-done < ../config/names_and_aliases.txt
+done < <(./commiters_list.py) 
 
 total_error_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Error" -v counter=0 '$5==val {counter++} END {print counter}')
 total_warning_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
