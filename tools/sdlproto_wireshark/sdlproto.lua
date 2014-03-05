@@ -97,13 +97,31 @@ function p_rpc_sdlproto.dissector(buf, pkt, root)
 
   --pkt.cols.protocol = p_rpc_protoname.name
 
+  local l_infoColumnText = " | "
+
   -- create subtree for rpc_sdlproto
   subtree = root:add(p_rpc_sdlproto, buf(0))
 
   -- add protocol fields to subtree
-  subtree:add(f_rpc_type, buf(0, 1))
-  subtree:add(f_rpc_functionID, buf(0, 4))
-  subtree:add(f_rpc_correlationID, buf(4, 4))
+  local l_rpc_typeBuf = buf(0, 1)
+  subtree:add(f_rpc_type, l_rpc_typeBuf)
+  local l_rpc_functionIDBuf = buf(0, 4)
+  subtree:add(f_rpc_functionID, l_rpc_functionIDBuf)
+  local l_rpc_correlationIDBuf = buf(4, 4)
+  subtree:add(f_rpc_correlationID, l_rpc_correlationIDBuf)
+
+  local l_rpc_functionIDValueString = f_rpc_functionID_values[l_rpc_functionIDBuf:bitfield(4, 28)]
+  if l_rpc_functionIDValueString ~= nil then
+    l_infoColumnText = l_infoColumnText .. l_rpc_functionIDValueString
+  end
+
+  local l_rpc_typeValueString = f_rpc_type_values[l_rpc_typeBuf:bitfield(0, 4)]
+  if l_rpc_typeValueString ~= nil then
+    l_infoColumnText = l_infoColumnText .. l_rpc_typeValueString
+  end
+
+  local l_rpc_correlationIDValue = l_rpc_correlationIDBuf:uint()
+  l_infoColumnText = l_infoColumnText .. " (corrID " .. l_rpc_correlationIDValue .. ")"
 
   local l_rpc_jsonSizeBuf = buf(8, 4)
   local l_rpc_jsonSizeValue = l_rpc_jsonSizeBuf:uint()
@@ -126,6 +144,8 @@ function p_rpc_sdlproto.dissector(buf, pkt, root)
       subtree:add(f_rpc_data, buf(l_dataOffset))
     end
   end
+
+  pkt.cols.info:append(l_infoColumnText)
 end
 
 
@@ -152,6 +172,10 @@ local f_serviceTypeValues = {
   [f_serviceTypeValue_RPC] = "Remote Procedure Call [RPC Service]",
   [f_serviceTypeValue_Bulk] = "Bulk Data [Hybrid Service]"
   -- TODO check the values not in the list
+}
+local f_serviceTypeConciseValues = {
+  [f_serviceTypeValue_RPC] = "RPC",
+  [f_serviceTypeValue_Bulk] = "Bulk"
 }
 local f_frameInfoValue_StartServiceACK = 0x02
 local f_frameInfoValue_ServiceDataACK = 0xFE
@@ -209,6 +233,9 @@ function p_sdlproto.dissector(buf, pkt, root)
 
   pkt.cols.protocol = p_sdlproto.name
 
+  -- the text that will be displayed in the Info column
+  local l_infoColumnText = "SDL"
+
   -- create subtree for sdlproto
   subtree = root:add(p_sdlproto, buf(0))
 
@@ -216,9 +243,15 @@ function p_sdlproto.dissector(buf, pkt, root)
   local l_byte0 = buf(0, 1)
   local l_versionTreeItem = subtree:add(f_version, l_byte0)
 
-  local l_version = l_byte0:bitfield(0, 4)
-  if l_version ~= 2 then
+  local l_versionValue = l_byte0:bitfield(0, 4)
+  if l_versionValue ~= 2 then
     l_versionTreeItem:add_expert_info(PI_REQUEST_CODE, PI_WARN, "Only version 2 is supported (maybe the message is incorrect?)")
+  end
+  l_infoColumnText = l_infoColumnText .. " (v." .. l_versionValue .. ")"
+
+  if (pkt.src_port ~= nil) and (pkt.dst_port ~= nil) then
+    -- append src & dst ports if on TCP
+    l_infoColumnText = l_infoColumnText .. " (" .. pkt.src_port .. " => " .. pkt.dst_port .. ")"
   end
 
   subtree:add(f_compressionFlag, l_byte0)
@@ -229,12 +262,27 @@ function p_sdlproto.dissector(buf, pkt, root)
   local l_serviceTypeValue = l_serviceTypeBuf:uint()
   subtree:add(f_serviceType, l_serviceTypeBuf)
 
+  local l_serviceTypeValueString = f_serviceTypeConciseValues[l_serviceTypeValue]
+  if l_serviceTypeValueString ~= nil then
+    l_infoColumnText = l_infoColumnText .. ": " .. l_serviceTypeValueString
+  end
+
+  local l_frameInfoValueString = f_frameTypeValues[l_frameTypeValue]
+  if l_frameInfoValueString ~= nil then
+    l_infoColumnText = l_infoColumnText .. ", " .. l_frameInfoValueString
+  end
+
   -- Frame Info depends on Frame Type
   local l_frameInfoBuf = buf(2, 1)
   local l_frameInfoValue = l_frameInfoBuf:uint()
   local l_isFirstConsecutiveFrame = false
   if f_frameTypeValue_ControlFrame == l_frameTypeValue then
     subtree:add(f_frameInfo_ControlFrame, l_frameInfoBuf)
+
+    local l_frameInfoValueString = f_frameInfoValues_ControlFrame[l_frameInfoValue]
+    if l_frameInfoValueString ~= nil then
+      l_infoColumnText = l_infoColumnText .. ", " .. l_frameInfoValueString
+    end
   elseif f_frameTypeValue_ConsecutiveFrame == l_frameTypeValue then
     subtree:add(f_frameInfo_ConsecutiveFrame, l_frameInfoBuf)
 
@@ -250,7 +298,10 @@ function p_sdlproto.dissector(buf, pkt, root)
     end
   end
 
-  subtree:add(f_sessionID, buf(3, 1))
+  local l_sessionIDBuf = buf(3, 1)
+  local l_sessionIDValue = l_sessionIDBuf:uint()
+  subtree:add(f_sessionID, l_sessionIDBuf)
+  l_infoColumnText = l_infoColumnText .. " {session " .. l_sessionIDValue .. "}"
 
   -- Data Size depends on Frame Type
   local l_dataSizeBuf = buf(4, 4)
@@ -296,6 +347,8 @@ function p_sdlproto.dissector(buf, pkt, root)
   if l_messageIDValue < 0x00000001 then
     l_messageIDTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Should be >= 0x00000001")
   end
+
+  pkt.cols.info = l_infoColumnText
 
   local l_bytesLeft = buf:len() - HEADER_LENGTH
   if g_expectedBytesLeft > 0 then
