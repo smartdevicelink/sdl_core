@@ -13,3 +13,4 @@ if [ $HMI_TYPE ] && [ $HMI_TYPE = "QML2" ]; then
 fi
 
 cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+make install
