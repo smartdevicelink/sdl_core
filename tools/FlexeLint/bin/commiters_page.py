@@ -25,7 +25,7 @@ args = parser.parse_args()
 commiter_infos = gittools.BranchCommiters()
 
 # Produce HTML
-commiters_link_list = map(MakeListItem, commiter_infos)
+commiters_link_list = [ MakeListItem(i) for i in commiter_infos ]
 commiters_link_list.append(HTML.link("Total", kResultsDir + "total.txt"))
 args.destfile.write("<H1>Flexelint reports for users</H1>")
 args.destfile.write(HTML.list(commiters_link_list))
