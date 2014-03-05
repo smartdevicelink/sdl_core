@@ -12,5 +12,6 @@ if [ $HMI_TYPE ] && [ $HMI_TYPE = "QML2" ]; then
      HMI_OPTION="-DHMI2=ON"
 fi
 
-cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
-make install
+echo cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+#cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+#make install
