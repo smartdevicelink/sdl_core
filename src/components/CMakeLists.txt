@@ -34,6 +34,9 @@ add_subdirectory(./interfaces)
 # --- TransportManager
 add_subdirectory(./transport_manager)
 
+# --- Policies
+add_subdirectory(./resumption)
+
 # --- formatters
 add_subdirectory(./formatters)
 

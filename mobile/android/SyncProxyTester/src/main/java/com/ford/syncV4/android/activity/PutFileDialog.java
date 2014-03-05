@@ -99,7 +99,13 @@ public class PutFileDialog extends DialogFragment {
         spnFileType.setAdapter(spinnerAdapter);
 
         final CheckBox chkPersistentFile = (CheckBox) layout.findViewById(R.id.chkPersistentFile);
+        final CheckBox chkSystemFile = (CheckBox) layout.findViewById(R.id.putfile_chkSystemFile);
         mSelectedFileNameView = (EditText) layout.findViewById(R.id.putfile_localFileName);
+
+        final CheckBox chkOffset = (CheckBox) layout.findViewById(R.id.putfile_useOffset);
+        final EditText txtOffset = (EditText) layout.findViewById(R.id.putfile_offset);
+        final CheckBox chkLength = (CheckBox) layout.findViewById(R.id.putfile_useLength);
+        final EditText txtLength = (EditText) layout.findViewById(R.id.putfile_length);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -116,9 +122,30 @@ public class PutFileDialog extends DialogFragment {
                         mListener.onPutFileSelected(syncFileName);
 
                         if (MainApp.getInstance().getBoundProxyService() != null) {
+                            Integer offset = null;
+                            if (chkLength.isChecked()) {
+                                try {
+                                    offset = Integer.valueOf(txtOffset.getText().toString());
+                                } catch (NumberFormatException e) {
+                                    offset = 0;
+                                    SafeToast.showToastAnyThread("Can't convert offset to integer");
+                                }
+                            }
+
+                            Integer length = null;
+                            if (chkLength.isChecked()) {
+                                try {
+                                    length = Integer.valueOf(txtLength.getText().toString());
+                                } catch (NumberFormatException e) {
+                                    length = 0;
+                                    SafeToast.showToastAnyThread("Can't convert length to integer");
+                                }
+                            }
+
                             MainApp.getInstance().getBoundProxyService().commandPutFile(
                                     (FileType) spnFileType.getSelectedItem(), syncFileName, data,
-                                    mCorrelationid, chkPersistentFile.isChecked());
+                                    mCorrelationid, chkPersistentFile.isChecked(),
+                                    chkSystemFile.isChecked(), length, offset, null);
                         }
                     } else {
                         SafeToast.showToastAnyThread("Can't read data from file");

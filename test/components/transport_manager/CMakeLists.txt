@@ -23,9 +23,11 @@ set (LIBRARIES
     gmock_main
     TransportManager
     ProtocolHandler
+    Resumption
     Utils
     ConfigProfile
     jsoncpp
+    
     ${RTLIB}
 )
 
