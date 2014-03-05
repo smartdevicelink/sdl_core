@@ -3016,7 +3016,7 @@
       </description>
     </param>
 
-    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App labeled on-screen presets (i.e. GEN2).
       	If omitted on supported displays, the presets will be shown as not defined.
