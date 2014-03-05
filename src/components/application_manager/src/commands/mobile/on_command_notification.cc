@@ -67,6 +67,10 @@ void OnCommandNotification::Run() {
   }
 
   (*message_)[strings::params][strings::connection_key] = app->app_id();
+  // remove app_id from notification
+  if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+    (*message_)[strings::msg_params].erase(strings::app_id);
+  }
 
   SendNotification();
 }
