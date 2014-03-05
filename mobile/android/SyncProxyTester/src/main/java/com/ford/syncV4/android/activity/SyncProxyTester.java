@@ -592,19 +592,31 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
 
             if (mStopServicesTimeOutHandler == null && mStopProxyServiceTimeOutHandler == null) {
-                getExitDialog().dismiss();
+                dismissExitDialog();
                 return;
             }
 
-            MainApp.getInstance().unbindProxyFromMainApp();
-            runInUIThread(new Runnable() {
-                @Override
-                public void run() {
-                    getExitDialog().dismiss();
-                    exitApp();
-                }
-            });
+            closeApplication();
         }
+    }
+
+    private void dismissExitDialog() {
+        runInUIThread(new Runnable() {
+            public void run() {
+                getExitDialog().dismiss();
+            }
+        });
+    }
+
+    private void closeApplication() {
+        MainApp.getInstance().unbindProxyFromMainApp();
+        runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                getExitDialog().dismiss();
+                exitApp();
+            }
+        });
     }
 
     @Override
@@ -701,7 +713,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     /**
      * Return the next correlation id
-     * 
+     *
      * @return int
      */
     public int getCorrelationid() {
@@ -1769,7 +1781,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     GetVehicleData msg = new GetVehicleData();
 
                                     final String[] methodNames =
-                                            { "Gps", "Speed", "Rpm",
+                                            {"Gps", "Speed", "Rpm",
                                                     "FuelLevel",
                                                     "FuelLevel_State",
                                                     "InstantFuelConsumption",
@@ -1791,7 +1803,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                     "AirbagStatus",
                                                     "EmergencyEvent",
                                                     "ClusterModeStatus",
-                                                    "MyKey" };
+                                                    "MyKey"};
                                     final String setterName = "set" + methodNames[which];
                                     setVehicleDataParam(msg, GetVehicleData.class, setterName);
 
@@ -2445,70 +2457,70 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                 private void sendPerformInteractionRequest(Vector<Integer> choiceSetIDs) {
 
-                                        PerformInteraction msg = new PerformInteraction();
-                                        msg.setCorrelationID(getCorrelationid());
-                                        msg.setInitialText(initialText.getText().toString());
-                                        msg.setInitialPrompt(ttsChunksFromString(initialPrompt.getText().toString()));
-                                        msg.setInteractionMode(
-                                                interactionModeAdapter.getItem(
-                                                        interactionModeSpinner
-                                                                .getSelectedItemPosition()));
-                                        msg.setInteractionChoiceSetIDList(choiceSetIDs);
+                                    PerformInteraction msg = new PerformInteraction();
+                                    msg.setCorrelationID(getCorrelationid());
+                                    msg.setInitialText(initialText.getText().toString());
+                                    msg.setInitialPrompt(ttsChunksFromString(initialPrompt.getText().toString()));
+                                    msg.setInteractionMode(
+                                            interactionModeAdapter.getItem(
+                                                    interactionModeSpinner
+                                                            .getSelectedItemPosition()));
+                                    msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
-                                        if (helpPromptCheck.isChecked()) {
-                                            msg.setHelpPrompt(ttsChunksFromString(helpPrompt.getText().toString()));
+                                    if (helpPromptCheck.isChecked()) {
+                                        msg.setHelpPrompt(ttsChunksFromString(helpPrompt.getText().toString()));
+                                    }
+
+                                    if (timeoutPromptCheck.isChecked()) {
+                                        msg.setTimeoutPrompt(ttsChunksFromString(timeoutPrompt.getText().toString()));
+                                    }
+
+                                    if (timeoutCheck.isChecked()) {
+                                        try {
+                                            msg.setTimeout(Integer.parseInt(timeout.getText().toString()));
+                                        } catch (NumberFormatException e) {
+                                            // set default timeout
+                                            msg.setTimeout(10000);
                                         }
+                                    }
 
-                                        if (timeoutPromptCheck.isChecked()) {
-                                            msg.setTimeoutPrompt(ttsChunksFromString(timeoutPrompt.getText().toString()));
-                                        }
+                                    if (vrHelpItemCheck.isChecked()) {
+                                        Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
 
-                                        if (timeoutCheck.isChecked()) {
+                                        String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
+                                        String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
+                                        String[] itemImageArray = vrHelpItemImage.getText().toString()
+                                                .split(JOIN_STRING);
+                                        int itemsCount = Math.min(itemTextArray.length,
+                                                Math.min(itemPosArray.length, itemImageArray.length));
+
+                                        for (int i = 0; i < itemsCount; ++i) {
+                                            VrHelpItem item = new VrHelpItem();
+                                            item.setText(itemTextArray[i]);
+
                                             try {
-                                                msg.setTimeout(Integer.parseInt(timeout.getText().toString()));
+                                                item.setPosition(Integer.parseInt(itemPosArray[i]));
                                             } catch (NumberFormatException e) {
-                                                // set default timeout
-                                                msg.setTimeout(10000);
-                                            }
-                                        }
-
-                                        if (vrHelpItemCheck.isChecked()) {
-                                            Vector<VrHelpItem> vrHelpItems = new Vector<VrHelpItem>();
-
-                                            String[] itemTextArray = vrHelpItemText.getText().toString().split(JOIN_STRING);
-                                            String[] itemPosArray = vrHelpItemPos.getText().toString().split(JOIN_STRING);
-                                            String[] itemImageArray = vrHelpItemImage.getText().toString()
-                                                    .split(JOIN_STRING);
-                                            int itemsCount = Math.min(itemTextArray.length,
-                                                    Math.min(itemPosArray.length, itemImageArray.length));
-
-                                            for (int i = 0; i < itemsCount; ++i) {
-                                                VrHelpItem item = new VrHelpItem();
-                                                item.setText(itemTextArray[i]);
-
-                                                try {
-                                                    item.setPosition(Integer.parseInt(itemPosArray[i]));
-                                                } catch (NumberFormatException e) {
-                                                    // set default position
-                                                    item.setPosition(1);
-                                                }
-
-                                                Image image = new Image();
-                                                image.setValue(itemImageArray[i]);
-                                                image.setImageType(ImageType.DYNAMIC);
-                                                item.setImage(image);
-
-                                                vrHelpItems.add(item);
+                                                // set default position
+                                                item.setPosition(1);
                                             }
 
-                                            msg.setVrHelp(vrHelpItems);
+                                            Image image = new Image();
+                                            image.setValue(itemImageArray[i]);
+                                            image.setImageType(ImageType.DYNAMIC);
+                                            item.setImage(image);
+
+                                            vrHelpItems.add(item);
                                         }
 
-                                        if (interactionLayoutCheck.isChecked()) {
-                                            msg.setInteractionLayout(interactionLayoutAdapter
-                                                            .getItem(interactionLayoutSpinner
-                                                                            .getSelectedItemPosition()));
-                                        }
+                                        msg.setVrHelp(vrHelpItems);
+                                    }
+
+                                    if (interactionLayoutCheck.isChecked()) {
+                                        msg.setInteractionLayout(interactionLayoutAdapter
+                                                .getItem(interactionLayoutSpinner
+                                                        .getSelectedItemPosition()));
+                                    }
                                     if (mBoundProxyService != null) {
                                         mBoundProxyService.syncProxySendRPCRequest(msg);
                                     }
@@ -3002,8 +3014,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                     if (useMessageData.isChecked()) {
                         final String[] msgData = txtMessageData.getText()
-                                                               .toString()
-                                                               .split(JOIN_STRING);
+                                .toString()
+                                .split(JOIN_STRING);
                         final Vector<Integer> data = new Vector<Integer>();
                         for (String s : msgData) {
                             data.add(Integer.valueOf(s));
@@ -3132,7 +3144,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * This is a callback function for the result of the
      * {@link com.ford.syncV4.android.activity.AddSubMenuDialog}
      *
-     * @param addSubMenu {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
+     * @param addSubMenu  {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
      * @param syncSubMenu SubMenu structure
      */
     public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
@@ -3260,6 +3272,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     /**
      * Return a clone of the {@code isVehicleDataSubscribed}
+     *
      * @return a clone of the {@code isVehicleDataSubscribed}
      */
     public boolean[] cloneIsVehicleDataSubscribed() {
@@ -3267,7 +3280,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
-     *
      * @param position position in the array
      * @return
      */
@@ -3277,6 +3289,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     /**
      * Set a velue of the {@code isVehicleDataSubscribed} array
+     *
      * @param value
      */
     public void setIsVehicleDataSubscribed(boolean[] value) {
@@ -3432,7 +3445,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 audioPassThruMediaPlayer.setDataSource(outFile.toString());
             } else {
                 /*
-				 * setDataSource with a filename on the internal storage throws
+                 * setDataSource with a filename on the internal storage throws
 				 * "java.io.IOException: Prepare failed.: status=0x1", so we
 				 * open the file with a special method
 				 */
@@ -3782,6 +3795,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     // TODO : Move this block to MainApp
+
     /**
      * Stops the proxy service.
      */

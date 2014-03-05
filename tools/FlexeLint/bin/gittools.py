@@ -12,6 +12,9 @@ class CommiterInfo(object):
 
 def BranchCommiters():
   # Call git and parse it's output
-  git_shortlog = subprocess.check_output(["git", "shortlog", "-sne"],
-                                       stderr=subprocess.PIPE)
-  return map(lambda s: CommiterInfo(s), git_shortlog.splitlines())
+  # Despite git shortlog doesn't really need git log piped in,
+  # for unknown reason it produces no output when launched from Jenkins
+  git_shortlog = subprocess.check_output(["git log|git shortlog -sne"],
+                                       stderr=subprocess.STDOUT,
+                                       shell=True)
+  return [CommiterInfo(s) for s in git_shortlog.splitlines()]
