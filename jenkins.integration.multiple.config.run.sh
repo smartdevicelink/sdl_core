@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 DBG_OPTION=""
 TOOLCHAIN_OPTION=""
 HMI_OPTION=""
