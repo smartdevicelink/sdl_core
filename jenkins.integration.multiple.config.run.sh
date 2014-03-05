@@ -2,7 +2,7 @@
 DBG_OPTION=""
 TOOLCHAIN_OPTION=""
 HMI_OPTION=""
-if [ $DEBUG ] && [ $DEBUG = "OFF" ]; then
+if [ $DEBUG ] && [ $DEBUG = "DBG_OFF" ]; then
      DBG_OPTION="-DCMAKE_BUILD_TYPE=Release"
 fi
 if [ $OS_TYPE ] && [ $OS_TYPE = "QNX" ]; then
@@ -12,4 +12,6 @@ if [ $HMI_TYPE ] && [ $HMI_TYPE = "QML2" ]; then
      HMI_OPTION="-DHMI2=ON"
 fi
 
-cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+echo cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+#cmake ${DBG_OPTION} ${TOOLCHAIN_OPTION} ${HMI_OPTION} .
+#make install
