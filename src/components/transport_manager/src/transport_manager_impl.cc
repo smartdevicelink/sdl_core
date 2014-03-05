@@ -537,6 +537,7 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
     DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
     device_list_.push_back(std::make_pair(ta, info));
     new_devices.insert(info);
+    ConnectDevice(device_handle);
   }
 
   std::set<DeviceInfo> added_devices;
