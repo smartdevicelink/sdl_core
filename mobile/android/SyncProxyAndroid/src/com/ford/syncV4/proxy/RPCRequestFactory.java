@@ -1,8 +1,9 @@
 package com.ford.syncV4.proxy;
 
-import java.util.Hashtable;
 import java.util.Vector;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
@@ -39,11 +40,15 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
+/**
+ * This class provides the functionality to create messages of
+ * {@link com.ford.syncV4.proxy.RPCMessage} type
+ */
 public class RPCRequestFactory {
 
-	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
-	public static final int SYNC_MSG_MAJOR_VERSION = 1;
-	public static final int SYNC_MSG_MINOR_VERSION = 0;
+	private static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
+    private static final int SYNC_MSG_MAJOR_VERSION = 1;
+    private static final int SYNC_MSG_MINOR_VERSION = 0;
 
 	public static EncodedSyncPData buildEncodedSyncPData(
 			Vector<String> data, Integer correlationID) {
@@ -670,4 +675,35 @@ public class RPCRequestFactory {
 
 		return msg;
 	}
+
+    /**
+     * Secirity Service section
+     */
+
+    /**
+     * Build a {@link com.ford.syncV4.protocol.ProtocolMessage} for the start securing of the
+     * provided service
+     *
+     * @param serviceType a type of the service to be secured
+     *
+     * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
+     */
+    public ProtocolMessage buildProtectServiceRequest(ServiceType serviceType) {
+
+        // TODO : To be implemented
+        return new ProtocolMessage();
+    }
+
+    /**
+     * Build a {@link com.ford.syncV4.protocol.ProtocolMessage} for the handshake procedure
+     *
+     * @param serviceType a type of the service to be secured
+     *
+     * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
+     */
+    public ProtocolMessage buildHandshakeRequest(ServiceType serviceType) {
+
+        // TODO : To be implemented
+        return new ProtocolMessage();
+    }
 }
