@@ -17,7 +17,7 @@ public abstract class ByteEnumer {
 	public String getName() { return name; }
 	
 	public boolean equals(ByteEnumer other) {
-		return name == other.getName();
+		return name.equals(other.getName());
 	}
 	
 	public boolean eq(ByteEnumer other) {
