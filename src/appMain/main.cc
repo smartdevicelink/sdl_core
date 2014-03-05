@@ -50,7 +50,7 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#if defined(EXTENDED_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
 #endif
 
