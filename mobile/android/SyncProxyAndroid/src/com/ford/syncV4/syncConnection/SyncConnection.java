@@ -485,7 +485,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         // TODO : Start RPC Service from here
 
-        //startProtocolSession();
+        startProtocolSession();
     }
 
     @Override
@@ -537,8 +537,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
+                                         String correlationID) {
         _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+
+        _protocol.startSecureService(serviceType);
     }
 
     @Override
@@ -549,6 +552,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onStartServiceNackReceived(ServiceType serviceType) {
         _connectionListener.onStartServiceNackReceived(serviceType);
+
+        if (serviceType == ServiceType.Secure_Service) {
+            startProtocolSession();
+        }
     }
 
     /**

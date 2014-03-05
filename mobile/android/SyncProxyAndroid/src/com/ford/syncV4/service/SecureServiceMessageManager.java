@@ -8,6 +8,7 @@ package com.ford.syncV4.service;
  */
 
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.ServiceType;
 
 /**
  * This class provides main functionality to manage (process, etc ...) SecureService messages
@@ -15,16 +16,37 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 public class SecureServiceMessageManager {
 
     /**
+     * Callback handler
+     */
+    private ISecureServiceMessageCallback mMessageCallback;
+
+    /**
+     * Set a listener for the message parsing results
+     *
+     * @param value an instance of the {@link com.ford.syncV4.service.ISecureServiceMessageCallback}
+     */
+    public void setMessageCallback(ISecureServiceMessageCallback value) {
+        mMessageCallback = value;
+    }
+
+    /**
      * Process {@link com.ford.syncV4.protocol.ProtocolMessage} in order to extract secured data
      *
      * @param protocolMessage protocol message
-     * @param callback a callback function
      */
-    public void processProtocolSecureMessage(ProtocolMessage protocolMessage,
-                                             ISecureServiceMessageCallback callback) {
+    public void processMessage(ProtocolMessage protocolMessage) {
+
+        if (mMessageCallback == null) {
+            throw new NullPointerException(SecureServiceMessageManager.class.getSimpleName() +
+                    " processMessage, SecureServiceMessageCallback must be set before process" +
+                    " message");
+        }
 
         // TODO : To be implement
 
-        callback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS);
+        // ServiceType could be obtained from ProtocolMessage
+        ServiceType serviceType = protocolMessage.getServiceType();
+
+        mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }
 }

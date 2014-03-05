@@ -9,6 +9,7 @@ import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
@@ -79,6 +80,24 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
                 sessionId, _version);
         sendFrameToTransport(header);
+    }
+
+    @Override
+    public void startSecureService(ServiceType serviceType) {
+        DebugTool.logInfo("Start Secure Service:" + serviceType);
+
+        ProtocolMessage protocolMessage = RPCRequestFactory.buildProtectServiceRequest(serviceType);
+
+        SendMessage(protocolMessage);
+    }
+
+    @Override
+    public void startSecureHandshake(ServiceType serviceType) {
+        DebugTool.logInfo("Start Secure Handshake:" + serviceType);
+
+        ProtocolMessage protocolMessage = RPCRequestFactory.buildHandshakeRequest(serviceType);
+
+        SendMessage(protocolMessage);
     }
 
     @Override
@@ -380,8 +399,8 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     handleSingleFrameMessageFrame(header, data);
                 }
-            } // end-if
-        } // end-method
+            }
+        }
 
         private void handleProtocolHeartbeatACK(ProtocolFrameHeader header,
                                                 byte[] data) {

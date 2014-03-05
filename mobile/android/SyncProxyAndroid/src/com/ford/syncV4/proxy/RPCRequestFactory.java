@@ -688,7 +688,7 @@ public class RPCRequestFactory {
      *
      * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
      */
-    public ProtocolMessage buildProtectServiceRequest(ServiceType serviceType) {
+    public static ProtocolMessage buildProtectServiceRequest(ServiceType serviceType) {
 
         // TODO : To be implemented
         return new ProtocolMessage();
@@ -701,7 +701,7 @@ public class RPCRequestFactory {
      *
      * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
      */
-    public ProtocolMessage buildHandshakeRequest(ServiceType serviceType) {
+    public static ProtocolMessage buildHandshakeRequest(ServiceType serviceType) {
 
         // TODO : To be implemented
         return new ProtocolMessage();

@@ -165,9 +165,9 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void setSyncConnection(SyncConnection syncConnection) {
-                if (syncConnection != null) {
-                    super.setSyncConnection(syncConnection);
+            public void setSyncConnection(SyncConnection value) {
+                if (value != null) {
+                    super.setSyncConnection(value);
                 }
             }
         };

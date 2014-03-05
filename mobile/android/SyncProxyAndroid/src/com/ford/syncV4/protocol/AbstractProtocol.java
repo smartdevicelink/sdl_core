@@ -72,6 +72,20 @@ public abstract class AbstractProtocol {
     // currentSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
+    /**
+     * Start a procedure to register a Service to be secured
+     *
+     * @param serviceType a type of the service
+     */
+    public abstract void startSecureService(ServiceType serviceType);
+
+    /**
+     * Start a handshake procedure with selected Service
+     *
+     * @param serviceType a type of the service
+     */
+    public abstract void startSecureHandshake(ServiceType serviceType);
+
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
     // sent to SYNC.
@@ -239,10 +253,12 @@ public abstract class AbstractProtocol {
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create RPC service without creating " +
+                    "currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
-            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create service with id 0. serviceType" +
+                    serviceType + ";sessionID " + sessionID);
         }
         _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
     }

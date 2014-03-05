@@ -85,6 +85,8 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
+import com.ford.syncV4.service.SecureServiceMessageCallback;
+import com.ford.syncV4.service.SecureServiceMessageManager;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
@@ -463,8 +465,31 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private int lastCorrelationId = 40000;
 
-    public void setSyncConnection(SyncConnection syncConnection) {
-        this.mSyncConnection = syncConnection;
+    /**
+     * An object which process Secure Service messages
+     */
+    private SecureServiceMessageManager mSecureServiceMessageManager;
+
+    /**
+     * An object which handle responses of the {@link com.ford.syncV4.service.SecureServiceMessageManager}
+     */
+    private SecureServiceMessageCallback mSecureServiceMessageCallback;
+
+    /**
+     * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
+     *
+     * @param value new {@link com.ford.syncV4.syncConnection.SyncConnection} reference
+     */
+    public void setSyncConnection(SyncConnection value) {
+        mSyncConnection = value;
+
+        if (mSyncConnection == null) {
+            return;
+        }
+        if (mSecureServiceMessageCallback == null) {
+            return;
+        }
+        mSecureServiceMessageCallback.setSyncConnection(mSyncConnection);
     }
 
     /**
@@ -497,6 +522,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         mTestConfig = testConfig;
 
+        setUpSecureServiceManager();
         setupSyncProxyBaseComponents(callbackToUIThread);
         // Set variables for Advanced Lifecycle Management
         setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
@@ -545,6 +571,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         mTestConfig = testConfig;
 
+        setUpSecureServiceManager();
         setWiProVersion((byte) version);
         setAppInterfacePreRegisterd(preRegister);
 
@@ -760,7 +787,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     new IDispatchingStrategy<ProtocolMessage>() {
                         @Override
                         public void dispatch(ProtocolMessage message) {
-                            dispatchIncomingMessage((ProtocolMessage) message);
+                            dispatchIncomingMessage(message);
                         }
 
                         @Override
@@ -1063,9 +1090,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null) {
-                mSyncConnection = new SyncConnection(_interfaceBroker);
-                final HeartbeatMonitor heartbeatMonitor =
-                        new HeartbeatMonitor();
+
+                setSyncConnection(new SyncConnection(_interfaceBroker));
+
+                mSyncConnection = getSyncConnection();
+                final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
 
@@ -3048,6 +3077,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
+
+            // Process Secure Service first (start secure service, handshake response, etc ...) and
+            // do not put these messages into queue
+            if (msg.getServiceType() == ServiceType.Secure_Service) {
+                mSecureServiceMessageManager.processMessage(msg);
+                return;
+            }
+
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data
             if (msg.getData().length > 0 || msg.getBulkData().length > 0) {
@@ -3220,5 +3257,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         sendRPCRequest(putFile);
         internalRequestCorrelationIDs.add(correlationID);
+    }
+
+    private void setUpSecureServiceManager() {
+        mSecureServiceMessageManager = new SecureServiceMessageManager();
+        mSecureServiceMessageCallback = new SecureServiceMessageCallback();
+        mSecureServiceMessageManager.setMessageCallback(mSecureServiceMessageCallback);
     }
 }
