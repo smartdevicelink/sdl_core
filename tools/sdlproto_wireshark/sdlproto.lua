@@ -223,22 +223,29 @@ function p_sdlproto.dissector(buf, pkt, root)
 
   subtree:add(f_compressionFlag, l_byte0)
   subtree:add(f_frameType, l_byte0)
+  local l_frameTypeValue = l_byte0:bitfield(5, 3)
 
   local l_serviceTypeBuf = buf(1, 1)
   local l_serviceTypeValue = l_serviceTypeBuf:uint()
   subtree:add(f_serviceType, l_serviceTypeBuf)
 
   -- Frame Info depends on Frame Type
-  local l_frameType = l_byte0:bitfield(5, 3)
   local l_frameInfoBuf = buf(2, 1)
-  if f_frameTypeValue_ControlFrame == l_frameType then
+  local l_frameInfoValue = l_frameInfoBuf:uint()
+  local l_isFirstConsecutiveFrame = false
+  if f_frameTypeValue_ControlFrame == l_frameTypeValue then
     subtree:add(f_frameInfo_ControlFrame, l_frameInfoBuf)
-  elseif f_frameTypeValue_ConsecutiveFrame == l_frameType then
+  elseif f_frameTypeValue_ConsecutiveFrame == l_frameTypeValue then
     subtree:add(f_frameInfo_ConsecutiveFrame, l_frameInfoBuf)
+
+    -- TODO check for value overflow, when the value is also 0x01
+    if l_frameInfoValue == 0x01 then
+      l_isFirstConsecutiveFrame = true
+    end
   else
     local l_frameInfoTreeItem = subtree:add(f_frameInfo, l_frameInfoBuf)
 
-    if l_frameInfoBuf:uint() ~= 0x00 then
+    if l_frameInfoValue ~= 0x00 then
       l_frameInfoTreeItem:add_expert_info(PI_PROTOCOL, PI_WARN, "Reserved, should be 0x00")
     end
   end
@@ -250,15 +257,15 @@ function p_sdlproto.dissector(buf, pkt, root)
   local l_dataSizeValue = l_dataSizeBuf:uint()
   local l_dataSizeTreeItem = subtree:add(f_dataSize, l_dataSizeBuf)
   local l_isFirstFrame = false
-  if f_frameTypeValue_FirstFrame == l_frameType then
+  if f_frameTypeValue_FirstFrame == l_frameTypeValue then
     if l_dataSizeValue == FIRSTFRAME_DATASIZE then
       g_expectedBytesLeft = l_dataSizeValue
       l_isFirstFrame = true
     else
       l_dataSizeTreeItem:add_expert_info(PI_PROTOCOL, PI_ERROR, "Should be " .. FIRSTFRAME_DATASIZE)
     end
-  elseif (f_frameTypeValue_ConsecutiveFrame == l_frameType) or
-         (f_frameTypeValue_SingleFrame == l_frameType) then
+  elseif (f_frameTypeValue_ConsecutiveFrame == l_frameTypeValue) or
+         (f_frameTypeValue_SingleFrame == l_frameTypeValue) then
     g_expectedBytesLeft = l_dataSizeValue
     if DEBUG then print("set g_expectedBytesLeft to " .. g_expectedBytesLeft) end
     l_dataSizeTreeItem:append_text(" -- Total data bytes in this frame")
@@ -316,7 +323,9 @@ function p_sdlproto.dissector(buf, pkt, root)
         local l_isServiceTypeRPC =
           (f_serviceTypeValue_RPC == l_serviceTypeValue) or
           (f_serviceTypeValue_Bulk == l_serviceTypeValue)
-        if l_isServiceTypeRPC then
+        local l_isSingleFrame = (f_frameTypeValue_SingleFrame == l_frameTypeValue)
+        if l_isServiceTypeRPC and
+          (l_isFirstConsecutiveFrame or l_isSingleFrame) then
           Dissector.get(p_rpc_protoname):call(l_dataBuf:tvb(), pkt, subtree)
         else
           subtree:add(f_data, l_dataBuf)
