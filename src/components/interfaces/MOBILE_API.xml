@@ -2709,7 +2709,7 @@
       <description>Text to be displayed first.</description>
     </param>
 
-    <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true">
+    <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	This is the intial prompt spoken to the user at the start of an interaction.
       	An array of text chunks of type TTSChunk. See TTSChunk.
