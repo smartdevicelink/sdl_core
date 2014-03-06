@@ -85,8 +85,8 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
-import com.ford.syncV4.service.SecureServiceMessageCallback;
-import com.ford.syncV4.service.SecureServiceMessageManager;
+import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
+import com.ford.syncV4.service.secure.SecureServiceMessageManager;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
@@ -471,7 +471,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private SecureServiceMessageManager mSecureServiceMessageManager;
 
     /**
-     * An object which handle responses of the {@link com.ford.syncV4.service.SecureServiceMessageManager}
+     * An object which handle responses of the {@link com.ford.syncV4.service.secure.SecureServiceMessageManager}
      */
     private SecureServiceMessageCallback mSecureServiceMessageCallback;
 

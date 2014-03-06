@@ -555,9 +555,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onStartServiceNackReceived(ServiceType serviceType) {
         _connectionListener.onStartServiceNackReceived(serviceType);
 
-        if (serviceType == ServiceType.Secure_Service) {
+        /*if (serviceType == ServiceType.Secure_Service) {
             startProtocolSession();
-        }
+        }*/
     }
 
     /**

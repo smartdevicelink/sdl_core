@@ -9,8 +9,8 @@ import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
@@ -86,7 +86,8 @@ public class WiProProtocol extends AbstractProtocol {
     public void startSecureService(ServiceType serviceType) {
         DebugTool.logInfo("Start Secure Service:" + serviceType);
 
-        ProtocolMessage protocolMessage = RPCRequestFactory.buildProtectServiceRequest(serviceType);
+        ProtocolMessage protocolMessage =
+                SecureServiceMessageFactory.buildProtectServiceRequest(serviceType);
 
         SendMessage(protocolMessage);
     }
@@ -95,7 +96,8 @@ public class WiProProtocol extends AbstractProtocol {
     public void startSecureHandshake(ServiceType serviceType) {
         DebugTool.logInfo("Start Secure Handshake:" + serviceType);
 
-        ProtocolMessage protocolMessage = RPCRequestFactory.buildHandshakeRequest(serviceType);
+        ProtocolMessage protocolMessage =
+                SecureServiceMessageFactory.buildHandshakeRequest(serviceType);
 
         SendMessage(protocolMessage);
     }
