@@ -43,7 +43,7 @@ using hmi_message_handler::MqueueAdapter;
 using application_manager::Message;
 
 class MockHandler : public HMIMessageHandler {
-  public:
+ public:
   MOCK_METHOD1(OnMessageReceived, void(MessageSharedPointer message));
   virtual void AddHMIMessageAdapter(HMIMessageAdapter* adapter) {}
   virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) {}
@@ -76,15 +76,20 @@ TEST(MqueueAdapter, Receive) {
 
   using ::testing::Property;
   using ::testing::Pointee;
-  EXPECT_CALL(handler, OnMessageReceived(Property(&MessageSharedPointer::get, Pointee(Property(&Message::json_message, std::string("()"))))));
-  //EXPECT_CALL(handler, OnMessageReceived(Property(&MessageSharedPointer::get, Pointee(Property(&Message::json_message, ::testing::Eq(std::string("()")))))));
+  EXPECT_CALL(
+      handler,
+      OnMessageReceived(Property(
+          &MessageSharedPointer::get,
+          Pointee(Property(&Message::json_message, std::string("()"))))));
+  // EXPECT_CALL(handler, OnMessageReceived(Property(&MessageSharedPointer::get,
+  // Pointee(Property(&Message::json_message,
+  // ::testing::Eq(std::string("()")))))));
 
   mqd_t mqd = mq_open("/hmi_to_sdl", O_WRONLY);
   ASSERT_NE(-1, mqd);
   const char buf[] = "()";
-  int rc = mq_send(mqd, buf, sizeof(buf)-1, 0);
+  int rc = mq_send(mqd, buf, sizeof(buf) - 1, 0);
   ASSERT_EQ(0, rc);
 
   delete adapter;
 }
-

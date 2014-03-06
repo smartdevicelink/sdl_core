@@ -1,5 +1,5 @@
-/**
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -132,6 +132,8 @@ void MqueueAdapter::SendMessageToHMI(const MessageSharedPointer message) {
   LOG4CXX_TRACE_EXIT(logger);
 }
 
-void MqueueAdapter::SubscribeTo() {}
+void MqueueAdapter::SubscribeTo() {
+  // empty implementation of pure virtual method, actually it's not called
+}
 
 }  // namespace hmi_message_handler
