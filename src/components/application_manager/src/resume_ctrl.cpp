@@ -350,7 +350,7 @@ void ResumeCtrl::onTimer() {
   std::set<application_timestamp, TimeStampComparator>::iterator it=
       waiting_for_timer_.begin();
 
-  for (; it != waiting_for_timer_.end(); ++it ){
+  for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
@@ -360,10 +360,9 @@ void ResumeCtrl::onTimer() {
 
     RestoreApplicationHMILevel(app);
     RemoveApplicationFromSaved(app);
-    waiting_for_timer_.erase(it);
-    LOG4CXX_INFO(logger_, "Erased");
   }
-  LOG4CXX_INFO(logger_, "onTimer end");
+
+  waiting_for_timer_.clear();
 }
 
 Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
