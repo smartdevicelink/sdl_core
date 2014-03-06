@@ -2045,12 +2045,6 @@
       	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
       </description>
     </param> 
-    
-    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-      <description>In this mode, all keypresses will be sent as they occur.</description>
-      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-      <description>If omitted, this value will be set to FALSE.</description>      
-    </param>
 
     <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Array of keyboard characters to enable.</description>
