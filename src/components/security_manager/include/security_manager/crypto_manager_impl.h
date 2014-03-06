@@ -48,7 +48,7 @@ namespace security_manager {
 
     class SSLContextImpl : public SSLContext {
      public:
-      SSLContextImpl(SSL *conn, BIO *bioIn, BIO *bioOut);
+      SSLContextImpl(SSL *conn);
       virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
                                     size_t* server_data_size);
       virtual void* Encrypt(const void* data,  size_t data_size,
@@ -68,7 +68,9 @@ namespace security_manager {
     };
 
    public:
+    CryptoManagerImpl();
     virtual bool Init();
+    virtual void Finish();
     virtual SSLContext *CreateSSLContext();
     virtual void ReleaseSSLContext(SSLContext* context);
    private:

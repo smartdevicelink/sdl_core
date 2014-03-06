@@ -40,6 +40,7 @@ std::string LastError();
 class CryptoManager {
  public:
   virtual bool Init()=0;
+  virtual void Finish()=0;
   virtual SSLContext *CreateSSLContext()=0;
   virtual void ReleaseSSLContext(SSLContext* context)=0;
   virtual ~CryptoManager() { }

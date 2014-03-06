@@ -38,12 +38,15 @@
 
 namespace security_manager {
 
-bool CryptoManagerImpl::Init() {
+CryptoManagerImpl::CryptoManagerImpl()
+    : context_(NULL) {
   SSL_load_error_strings();
   ERR_load_BIO_strings();
   OpenSSL_add_all_algorithms();
   SSL_library_init();
+}
 
+bool CryptoManagerImpl::Init() {
   context_ = SSL_CTX_new(SSLv23_server_method());
   if (!SSL_CTX_use_certificate_file(context_, "mycert.pem", SSL_FILETYPE_PEM)) {
     return false;
@@ -56,9 +59,12 @@ bool CryptoManagerImpl::Init() {
   }
   SSL_CTX_set_cipher_list(context_, "ALL");
   SSL_CTX_set_verify(context_, SSL_VERIFY_NONE, NULL);
-  //SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
   return true;
+}
+
+void CryptoManagerImpl::Finish() {
 }
 
 SSLContext * CryptoManagerImpl::CreateSSLContext() {
@@ -66,15 +72,11 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   if (conn == NULL)
     return NULL;
 
-  BIO *bioIn = BIO_new(BIO_s_mem());
-  BIO *bioOut = BIO_new(BIO_s_mem());
-  SSL_set_bio(conn, bioIn, bioOut);
-
   SSL_set_accept_state(conn);
   int ret = SSL_accept(conn);
   long error = ERR_get_error();
   const char *errstr = ERR_reason_error_string(error);
-  return new SSLContextImpl(conn, bioIn, bioOut);
+  return new SSLContextImpl(conn);
 }
 
 void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {

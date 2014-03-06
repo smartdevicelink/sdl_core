@@ -146,6 +146,9 @@ TEST(HandshakeTest, Positive) {
   text_len = BIO_read(bioF, decryptedText, 1024);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
 
+  crypto_manager->ReleaseSSLContext(server_ctx);
+  crypto_manager->Finish();
+
   EVP_cleanup();
 }
 
