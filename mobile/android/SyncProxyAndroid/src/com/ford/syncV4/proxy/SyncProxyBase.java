@@ -1842,7 +1842,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolService(final byte sessionID, final String correlationID) {
+    private void onRPCProtocolServiceStarted(final byte sessionID, final String correlationID) {
         currentSession.setSessionId(sessionID);
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
@@ -1860,6 +1860,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         restartRPCProtocolSession();
+
+        getSyncConnection().startSecureService();
     }
 
     private void addIfNotExsistRpcServiceToSession() {
@@ -3095,10 +3097,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
             if (_wiproVersion == 1) {
-                if (version == 2) setWiProVersion(version);
+                if (version == 2) {
+                    setWiProVersion(version);
+                }
             }
             if (session.hasService(ServiceType.RPC)) {
-                startRPCProtocolService(session.getSessionId(), correlationID);
+                onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
             }
         }
 
@@ -3143,9 +3147,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
             if (_wiproVersion == 2) {
-                if (serviceType.equals(ServiceType.Mobile_Nav)) {
+                if (serviceType == ServiceType.Mobile_Nav) {
                     startMobileNaviService(sessionID, correlationID);
-                } else if (serviceType.equals(ServiceType.Audio_Service)) {
+                } else if (serviceType == ServiceType.Audio_Service) {
                     startAudioService(sessionID, correlationID);
                 }
             }

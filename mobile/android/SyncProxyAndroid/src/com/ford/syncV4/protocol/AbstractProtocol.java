@@ -59,12 +59,6 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    /**
-     * Start a special service "Secure Service" provides management system for data sessions
-     * encryption and encryption initialization.
-     */
-    public abstract void StartSecureService();
-
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
     // This method ends a protocol currentSession.  A corresponding call to the protocol
@@ -73,11 +67,17 @@ public abstract class AbstractProtocol {
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     /**
+     * Start a special service "Secure Service" provides management system for data sessions
+     * encryption and encryption initialization.
+     */
+    public abstract void startSecureService(byte sessionId);
+
+    /**
      * Start a procedure to register a Service to be secured
      *
      * @param serviceType a type of the service
      */
-    public abstract void startSecureService(ServiceType serviceType);
+    public abstract void startSecuringService(ServiceType serviceType);
 
     /**
      * Start a handshake procedure with selected Service

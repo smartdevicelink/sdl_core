@@ -390,14 +390,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             _heartbeatMonitor.start();
         }
 
-        startSecureSession();
+        startProtocolSession();
     }
 
-    private void startSecureSession() {
+    public void startSecureService() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                Log.d(TAG, "StartSecureService");
-                _protocol.StartSecureService();
+                Log.d(TAG, "Start Secure Service, session id:" + mSessionId);
+                _protocol.startSecureService(mSessionId);
             }
         }
     }
@@ -405,7 +405,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                Log.d(TAG, "StartProtocolSession, id:" + mSessionId);
+                Log.d(TAG, "StartProtocolSession, session id:" + mSessionId);
                 _protocol.StartProtocolSession(mSessionId);
             }
         }
@@ -483,9 +483,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onSecureServiceStarted(byte version) {
         _connectionListener.onSecureServiceStarted(version);
 
-        // TODO : Start RPC Service from here
-
-        startProtocolSession();
+        // TODO : Secure Service started
     }
 
     @Override
@@ -541,9 +539,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                                          String correlationID) {
         _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
 
-        if (serviceType == ServiceType.Audio_Service || serviceType == ServiceType.Mobile_Nav) {
-            _protocol.startSecureService(serviceType);
-        }
+        /*if (serviceType == ServiceType.Audio_Service || serviceType == ServiceType.Mobile_Nav) {
+            _protocol.startSecuringService(serviceType);
+        }*/
     }
 
     @Override

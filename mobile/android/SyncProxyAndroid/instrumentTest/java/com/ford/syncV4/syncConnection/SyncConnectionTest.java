@@ -344,16 +344,4 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertThat(throwableArgumentCaptor.getValue().toString(),
                 containsString(OutOfMemoryError.class.getSimpleName()));
     }
-
-    public void testStartSecureServiceOnTransportConnect() {
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.init(config);
-        connection._protocol = mock(WiProProtocol.class);
-        connection._transport = mock(SyncTransport.class);
-        when(connection._transport.getIsConnected()).thenReturn(true);
-
-        connection.onTransportConnected();
-
-        verify(connection._protocol, times(1)).StartSecureService();
-    }
 }

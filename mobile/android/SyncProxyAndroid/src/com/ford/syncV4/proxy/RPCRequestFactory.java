@@ -2,8 +2,6 @@ package com.ford.syncV4.proxy;
 
 import java.util.Vector;
 
-import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
