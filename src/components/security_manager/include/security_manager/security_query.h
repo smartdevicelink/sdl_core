@@ -60,6 +60,12 @@ public:
   struct QueryHeader {
     QueryHeader(const SecuityQueryId id,
                 const uint32_t seq_umber);
+    /* FIXME(EZ): Add
+     * RpcType  rpc_type;
+     * uint32_t rpc_function_id;
+     * uint32_t corellation_id;
+     * uint32_t json_size;
+     */
     SecuityQueryId  query_id_;    // API function identifier
     uint32_t seq_number_;  // request sequential number
   };
