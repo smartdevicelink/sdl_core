@@ -319,7 +319,8 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
 }
 
 uint32_t ApplicationImpl::nextHash() {
-  hash_val_ = time(NULL);
+  srand(time(NULL));
+  hash_val_ = rand();
   return hash_val_;
 }
 
