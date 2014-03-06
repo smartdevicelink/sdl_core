@@ -104,6 +104,7 @@ MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
 }
 
 MqueueAdapter::~MqueueAdapter() {
+  if (receiver_thread_.get()) receiver_thread_->stop();
   if (-1 != hmi_to_sdl_mqueue_) mq_close(hmi_to_sdl_mqueue_);
   if (-1 != sdl_to_hmi_mqueue_) mq_close(sdl_to_hmi_mqueue_);
   mq_unlink(kHmiToSdlQueue);

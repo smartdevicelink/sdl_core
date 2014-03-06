@@ -30,6 +30,7 @@ set (SOURCES
 )
 
 set (LIBRARIES
+    Utils
     log4cxx
     ${DBUS_ADAPTER}
 )
