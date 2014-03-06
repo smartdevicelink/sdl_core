@@ -171,6 +171,17 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
   return err;
 }
 
+TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
+    const DeviceUID& device_handle) {
+  DeviceSptr device = FindDevice(device_handle);
+  if (device) {
+    return ConnectDevice(device);
+  }
+  else {
+    return BAD_PARAM;
+  }
+}
+
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   if (!initialised_) return BAD_STATE;
@@ -263,6 +274,9 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
          it != listeners_.end(); ++it) {
       (*it)->OnDeviceListUpdated(this);
     }
+    if (ToBeAutoConnected(device)) {
+      ConnectDevice(device);
+    }
     return device;
   }
 }
@@ -306,24 +320,32 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   }
   pthread_mutex_unlock(&connections_mutex_);
 
+  DeviceMap all_devices = new_devices;
   pthread_mutex_lock(&devices_mutex_);
   for (DeviceMap::iterator it = devices_.begin(); it != devices_.end(); ++it) {
     DeviceSptr existing_device = it->second;
 
-    if (new_devices.end() == new_devices.find(it->first)) {
+    if (all_devices.end() == all_devices.find(it->first)) {
       if (connected_devices.end() != connected_devices.find(it->first)) {
         existing_device->set_keep_on_disconnect(false);
-        new_devices[it->first] = existing_device;
+        all_devices[it->first] = existing_device;
       }
     }
   }
-  devices_ = new_devices;
+  devices_ = all_devices;
   pthread_mutex_unlock(&devices_mutex_);
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
     (*it)->OnDeviceListUpdated(this);
     (*it)->OnSearchDeviceDone(this);
+  }
+
+  for (DeviceMap::iterator it = new_devices.begin(); it != new_devices.end(); ++it) {
+    DeviceSptr device = it->second;
+    if (ToBeAutoConnected(device)) {
+      ConnectDevice(device);
+    }
   }
 }
 
@@ -542,6 +564,10 @@ bool TransportAdapterImpl::Restore() {
   return true;
 }
 
+bool TransportAdapterImpl::ToBeAutoConnected(DeviceSptr device) const {
+  return false;
+}
+
 ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   ConnectionSptr connection;
@@ -554,6 +580,33 @@ ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
   }
   pthread_mutex_unlock(&connections_mutex_);
   return connection;
+}
+
+TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
+  DeviceUID device_id = device->unique_device_id();
+  ApplicationList app_list = device->GetApplicationList();
+  bool errors_occured = false;
+  for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
+    ApplicationHandle app_handle = *it;
+    LOG4CXX_INFO(logger_, "Attempt to connect device " << device_id <<
+                          ", channel " << app_handle);
+    Error error = Connect(device_id, app_handle);
+    switch (error) {
+      case OK:
+        LOG4CXX_DEBUG(logger_, "OK");
+        break;
+      case ALREADY_EXISTS:
+        LOG4CXX_INFO(logger_, "Already connected");
+        break;
+      default:
+        LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
+                               ", channel " << app_handle <<
+                               " failed with error " << error);
+        errors_occured = true;
+        break;
+    }
+  }
+  return errors_occured ? OK : FAIL;
 }
 
 }  // namespace transport_adapter
