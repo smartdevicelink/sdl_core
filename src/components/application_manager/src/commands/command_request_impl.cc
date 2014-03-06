@@ -64,13 +64,16 @@ void CommandRequestImpl::Run() {
 void CommandRequestImpl::onTimeOut() {
   LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  if (kCompleted == current_state_) {
-    // don't send timeout if request completed
-    return;
+  {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    if (kCompleted == current_state_) {
+      // don't send timeout if request completed
+      return;
+    }
+
+    current_state_ = kTimedOut;
   }
 
-  current_state_ = kTimedOut;
   smart_objects::SmartObject* response =
     MessageHelper::CreateNegativeResponse(connection_key(), function_id(),
     correlation_id(), mobile_api::Result::TIMED_OUT);
@@ -85,13 +88,16 @@ void CommandRequestImpl::SendResponse(
     const bool success, const mobile_apis::Result::eType& result_code,
     const char* info, const NsSmart::SmartObject* response_params) {
 
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  if (kTimedOut == current_state_) {
-    // don't send response if request timeout expired
-    return;
+  {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    if (kTimedOut == current_state_) {
+      // don't send response if request timeout expired
+      return;
+    }
+
+    current_state_ = kCompleted;
   }
 
-  current_state_ = kCompleted;
   NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
       new NsSmartDeviceLink::NsSmartObjects::SmartObject;
   if (!result) {
