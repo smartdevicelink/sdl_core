@@ -1,4 +1,4 @@
-package com.ford.syncV4.service;
+package com.ford.syncV4.service.secure;
 
 /**
  * Created with Android Studio.
@@ -20,7 +20,7 @@ public interface ISecureServiceMessageCallback {
      * {@link com.ford.syncV4.proxy.RPCRequestFactory#buildProtectServiceRequest(com.ford.syncV4.protocol.enums.ServiceType)}
      * is received
      *
-     * @param result {@link com.ford.syncV4.service.ProtectServiceResponse}
+     * @param result {@link ProtectServiceResponse}
      * @param serviceType a type of the Service
      */
     public void onProtectServiceResponse(ProtectServiceResponse result, ServiceType serviceType);

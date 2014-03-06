@@ -1,4 +1,4 @@
-package com.ford.syncV4.service;
+package com.ford.syncV4.service.secure;
 
 /**
  * Created with Android Studio.
@@ -13,7 +13,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.syncConnection.SyncConnection;
 
 /**
- * This class is implement {@link com.ford.syncV4.service.ISecureServiceMessageCallback}
+ * This class is implement {@link ISecureServiceMessageCallback}
  */
 public class SecureServiceMessageCallback implements ISecureServiceMessageCallback {
 

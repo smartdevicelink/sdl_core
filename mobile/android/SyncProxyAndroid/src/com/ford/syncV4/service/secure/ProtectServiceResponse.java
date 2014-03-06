@@ -1,4 +1,4 @@
-package com.ford.syncV4.service;
+package com.ford.syncV4.service.secure;
 
 /**
  * Created with Android Studio.

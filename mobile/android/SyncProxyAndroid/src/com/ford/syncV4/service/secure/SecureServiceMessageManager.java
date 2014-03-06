@@ -1,4 +1,4 @@
-package com.ford.syncV4.service;
+package com.ford.syncV4.service.secure;
 
 /**
  * Created with Android Studio.
@@ -23,7 +23,7 @@ public class SecureServiceMessageManager {
     /**
      * Set a listener for the message parsing results
      *
-     * @param value an instance of the {@link com.ford.syncV4.service.ISecureServiceMessageCallback}
+     * @param value an instance of the {@link ISecureServiceMessageCallback}
      */
     public void setMessageCallback(ISecureServiceMessageCallback value) {
         mMessageCallback = value;
