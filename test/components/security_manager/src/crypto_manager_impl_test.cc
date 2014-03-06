@@ -31,3 +31,5 @@
  */
 
 #include "security_manager/crypto_manager_impl_test.h"
+
+//TODO(DChemerev): add key files copy for correct build
