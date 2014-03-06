@@ -176,7 +176,11 @@ endmacro(GenerateInterface)
 macro(create_test NAME SOURCES LIBS)
     add_executable("${NAME}" ${SOURCES})
     target_link_libraries("${NAME}" ${LIBS})
-    add_test(${NAME} ${NAME})
+    if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+        add_test(${NAME} ${CMAKE_SOURCE_DIR}/qnx/remote_run_test.sh ${NAME})
+    else()
+        add_test(${NAME} ${NAME})
+    endif()
 endmacro(create_test)
 
 # Building application
