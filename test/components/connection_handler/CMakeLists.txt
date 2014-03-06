@@ -1,4 +1,5 @@
 include_directories (
+  ./include/
   ../../../src/thirdPartyLibs/gmock-1.6.0/include
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/transport_manager/include
@@ -6,7 +7,6 @@ include_directories (
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../src/components/security_manager/include
-  ../../../test/components/connection_handler/include
 )
 
 set (LIBRARIES

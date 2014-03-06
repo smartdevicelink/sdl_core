@@ -34,33 +34,110 @@
 #define SECURITY_MANAGER_TEST_H
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include "security_manager/security_manager.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_handler_impl.h"
+
+using ::testing::_;
 
 namespace test  {
 namespace components  {
 namespace security_manager_test {
+
+  //MOCK implementation of SessionObserver interface
+  class SessionObserver: public protocol_handler::SessionObserver {
+  public:
+    MOCK_METHOD3(SetSSLContext,
+                 int( const uint32_t& key,
+                      protocol_handler::ServiceType service_type,
+                      security_manager::SSLContext* context));
+    MOCK_METHOD2(GetSSLContext,
+                 security_manager::SSLContext* (
+                   const uint32_t& key,
+                   protocol_handler::ServiceType service_type));
+    MOCK_METHOD3(OnSessionStartedCallback,
+                 int32_t(
+                   const transport_manager::ConnectionUID& connection_handle,
+                   const uint8_t& sessionId,
+                   const protocol_handler::ServiceType& service_type));
+    MOCK_METHOD4(OnSessionEndedCallback,
+                 uint32_t(
+                   const transport_manager::ConnectionUID& connection_handle,
+                   const uint8_t& sessionId,
+                   const uint32_t& hashCode,
+                   const protocol_handler::ServiceType& service_type));
+    MOCK_METHOD2(KeyFromPair,
+                 uint32_t(
+                   transport_manager::ConnectionUID connection_handle,
+                   uint8_t sessionId));
+    MOCK_METHOD3(PairFromKey,
+                 void(
+                   uint32_t key,
+                   transport_manager::ConnectionUID* connection_handle,
+                   uint8_t* sessionId));
+    MOCK_METHOD4(GetDataOnSessionKey,
+                 int32_t(uint32_t key,
+                         uint32_t* app_id,
+                         std::list<int32_t>* sessions_list,
+                         uint32_t* device_id));
+    MOCK_METHOD4(GetDataOnDeviceID,
+                 int32_t(
+                   uint32_t device_handle,
+                   std::string* device_name,
+                   std::list<uint32_t>* applications_list,
+                   std::string* mac_address));
+  };
+  //MOCK implementation of ProtocolObserver interface
+  class ProtocoloObserver: public protocol_handler::ProtocolHandler {
+  public:
+    MOCK_METHOD2(SendMessageToMobileApp,
+                 void(const protocol_handler::RawMessagePtr& message,
+                      bool final_message));
+    MOCK_METHOD1(AddProtocolObserver,
+                 void(protocol_handler::ProtocolObserver* observer));
+    MOCK_METHOD1(RemoveProtocolObserver,
+                 void(protocol_handler::ProtocolObserver* observer));
+    MOCK_METHOD2(SendFramesNumber,
+                 void(int32_t connection_key, int32_t number_of_frames));
+  };
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
     void SetUp() OVERRIDE {
       security_manager_.reset(new security_manager::SecurityManager());
     }
+
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
-    const int32_t connectionKey = 0;
+
+    const int32_t key = 0;
     const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
+    const bool is_final = false;
   };
 
-  TEST_F(SecurityManagerTest, OnMessageReceived) {
+  TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
+    testing::StrictMock<SessionObserver>   mock_session_observer;
+    testing::StrictMock<ProtocoloObserver> mock_protocol_observer;
+    security_manager_->set_session_observer(&mock_session_observer);
+    security_manager_->set_protocol_handler(&mock_protocol_observer);
+
+    const protocol_handler::ServiceType type = protocol_handler::kSecure;
     uint8_t* data = NULL;
     uint32_t data_size = 0;
-    uint8_t type = protocol_handler::kRpc;
     const protocol_handler::RawMessagePtr rawMessagePtr(
-          new protocol_handler::RawMessage( connectionKey,
+          new protocol_handler::RawMessage( key,
                                             protocolVersion,
                                             data, data_size,
                                             type));
 
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext(key, type, _)).Times(0);
+
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(_, is_final)).Times(1);
+
     security_manager_->OnMessageReceived(rawMessagePtr);
+    sleep(1);
   }
 } // connection_handle
 } // namespace components

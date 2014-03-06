@@ -50,7 +50,7 @@ void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "SecurityManager::OnMessageReceived");
   if(message->service_type() != protocol_handler::kSecure) {
-    LOG4CXX_WARN(logger_, "Incorrect message service type "
+    LOG4CXX_WARN(logger_, "Incorrect message service type of income message"
                  << message->service_type());
     return;
   }
@@ -157,6 +157,7 @@ bool SecurityManager::ParseProtectServiceRequest(
       return false;
     }
 
+  DCHECK(crypto_manager_);
   security_manager::SSLContext * const newSSLContext =
       crypto_manager_->CreateSSLContext();
   if(!newSSLContext) {
@@ -302,8 +303,7 @@ void SecurityManager::SendData(
 
 void SecurityManager::SendBinaryData(const int32_t connectionKey,
                                           uint8_t * data,
-                                          size_t data_size)
-{
+                                          size_t data_size) {
   LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
   if(!protocol_handler_) {
     LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");

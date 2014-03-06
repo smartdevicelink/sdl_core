@@ -111,9 +111,8 @@ public:
   bool ParseProtectServiceRequest(const SecurityMessage &requestMessage);
   bool ParseHandshakeData(const SecurityMessage &inMessage);
 
-  void SendProtectServiceResponse(
-      const SecurityMessage &message,
-      const SecuityQuery::ProtectServiceResult result);
+  void SendProtectServiceResponse( const SecurityMessage &message,
+                                   const SecuityQuery::ProtectServiceResult result);
 
   //Create new array for handling header + data
   void SendInternalError(const int32_t connectionKey,
@@ -128,8 +127,7 @@ public:
 
   //post income array as park of RawMessage
   void SendBinaryData(const int32_t connectionKey,
-                          uint8_t *data,
-                          size_t data_size);
+                      uint8_t *data, size_t data_size);
 
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
