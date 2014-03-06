@@ -40,7 +40,7 @@ using namespace connection_handler;
 
 namespace test {
 namespace components {
-namespace connection_handle {
+namespace connection_handle_test {
 
 class ConnectionHandlerTest: public ::testing::Test {
  protected:
@@ -159,7 +159,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
   EXPECT_EQ(connection_list_on_end_secure.begin()->first, 0);
 }
 
-} // connection_handle
+} // connection_handle_test
 } // namespace components
 } // namespace test
 

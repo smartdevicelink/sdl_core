@@ -30,4 +30,4 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "security_manager/crypto_manager_impl_test.h"
+#include "security_manager/security_manager_test.h"

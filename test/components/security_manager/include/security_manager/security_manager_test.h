@@ -30,4 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "security_manager/crypto_manager_impl_test.h"
+#ifndef SECURITY_MANAGER_TEST_H
+#define SECURITY_MANAGER_TEST_H
+
+#include <gtest/gtest.h>
+#include "security_manager/security_manager.h"
+
+namespace test  {
+namespace components  {
+namespace security_manager_test {
+
+  class SecurityManagerTest: public ::testing::Test {
+   protected:
+    void SetUp() OVERRIDE {
+      security_manager_.reset(new security_manager::SecurityManager());
+    }
+    ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
+    const int32_t connectionKey = 0;
+    const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
+  };
+
+  TEST_F(SecurityManagerTest, OnMessageReceived) {
+    uint8_t* data = NULL;
+    uint32_t data_size = 0;
+    uint8_t type = protocol_handler::kRpc;
+    const protocol_handler::RawMessagePtr rawMessagePtr(
+          new protocol_handler::RawMessage( connectionKey,
+                                            protocolVersion,
+                                            data, data_size,
+                                            type));
+
+    security_manager_->OnMessageReceived(rawMessagePtr);
+  }
+} // connection_handle
+} // namespace components
+} // namespace test
+#endif // SECURITY_MANAGER_TEST_H
