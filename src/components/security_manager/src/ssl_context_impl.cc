@@ -122,9 +122,11 @@ Encrypt(const void* data,  size_t data_size,
     return NULL;
   }
   BIO_write(bioFilter_, data, data_size);
-  size_t len = BIO_ctrl_pending(bioOut_);
+  int len = BIO_ctrl_pending(bioOut_);
   EnsureBufferSize(len);
   len = BIO_read(bioOut_, buffer_, len);
+  if (len < 0)
+    return NULL;
   *encrypted_data_size = len;
   return buffer_;
 }
@@ -141,9 +143,11 @@ Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
     return NULL;
   }
   BIO_write(bioIn_, encrypted_data, encrypted_data_size);
-  size_t len = BIO_ctrl_pending(bioFilter_);
+  int len = BIO_ctrl_pending(bioFilter_);
   EnsureBufferSize(len);
   len = BIO_read(bioFilter_, buffer_, len);
+  if (len < 0)
+    return NULL;
   *data_size = len;
   return buffer_;
 }

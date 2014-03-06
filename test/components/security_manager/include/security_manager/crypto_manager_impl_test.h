@@ -59,33 +59,61 @@ bool isErrorFatal(SSL *connection, int res) {
       error != SSL_ERROR_WANT_WRITE);
 }
 
-TEST(HandshakeTest, Positive) {
+class SSLTest : public testing::Test {
+ protected:
+  static void SetUpTestCase() {
+    SSL_load_error_strings();
+    ERR_load_BIO_strings();
+    OpenSSL_add_all_algorithms();
+    SSL_library_init();
 
+    ctx = SSL_CTX_new(SSLv23_client_method());
+    SSL_CTX_set_cipher_list(ctx, "ALL");
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
+
+    crypto_manager = new security_manager::CryptoManagerImpl();
+    crypto_manager->Init();
+  }
+
+  static void TearDownTestCase() {
+    SSL_CTX_free(ctx);
+    EVP_cleanup();
+
+    crypto_manager->Finish();
+    delete crypto_manager;
+  }
+
+  virtual void SetUp() {
+    connection = SSL_new(ctx);
+    bioIn = BIO_new(BIO_s_mem());
+    bioOut = BIO_new(BIO_s_mem());
+    SSL_set_bio(connection, bioIn, bioOut);
+    SSL_set_connect_state(connection);
+
+    server_ctx = crypto_manager->CreateSSLContext();
+  }
+
+  virtual void TearDown() {
+    crypto_manager->ReleaseSSLContext(server_ctx);
+    SSL_shutdown(connection);
+    SSL_free(connection);
+  }
+
+  static SSL_CTX * ctx;
+  static security_manager::CryptoManager* crypto_manager;
+  SSL *connection;
+  BIO *bioIn;
+  BIO *bioOut;
+  security_manager::SSLContext *server_ctx;
+};
+
+SSL_CTX *SSLTest::ctx;
+security_manager::CryptoManager* SSLTest::crypto_manager;
+
+TEST_F(SSLTest, BrokenHandshake) {
   using security_manager::CryptoManager;
   using security_manager::CryptoManagerImpl;
   using security_manager::SSLContext;
-
-  SSL_load_error_strings();
-  ERR_load_BIO_strings();
-  OpenSSL_add_all_algorithms();
-  SSL_library_init();
-
-  SSL_CTX * ctx = SSL_CTX_new(SSLv23_client_method());
-  SSL_CTX_set_cipher_list(ctx, "ALL");
-  SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
-
-  SSL * connection = SSL_new(ctx);
-
-  BIO* bioIn = BIO_new(BIO_s_mem());
-  BIO* bioOut = BIO_new(BIO_s_mem());
-  SSL_set_bio(connection, bioIn, bioOut);
-
-  SSL_set_connect_state(connection);
-
-  CryptoManager* crypto_manager = new CryptoManagerImpl();
-  crypto_manager->Init();
-
-  SSLContext *server_ctx = crypto_manager->CreateSSLContext();
 
   int res = 0;
 
@@ -94,24 +122,114 @@ TEST(HandshakeTest, Positive) {
 
   for(;;) {
     res = SSL_do_handshake(connection);
-    if (res < 0) {
-      if (isErrorFatal(connection, res)) {
-        break;
-      }
-
-      size_t outLen  = BIO_ctrl_pending(bioOut);
-      if (outLen) {
-        BIO_read(bioOut, outBuf, outLen);
-      }
-      size_t inLen;
-      inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
-      EXPECT_TRUE(inBuf != NULL);
-
-      if (inLen) {
-        BIO_write(bioIn, inBuf, inLen);
-      }
-    } else {
+    if (res >= 0) {
       break;
+    }
+
+    if (isErrorFatal(connection, res)) {
+      break;
+    }
+
+    size_t outLen  = BIO_ctrl_pending(bioOut);
+    if (outLen) {
+      BIO_read(bioOut, outBuf, outLen);
+      // Make some data improvements
+      outBuf[outLen / 2] ^= 0x80;
+    }
+
+    size_t inLen;
+    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    EXPECT_TRUE(inBuf != NULL);
+
+    if (inLen) {
+      BIO_write(bioIn, inBuf, inLen);
+    }
+  }
+
+  EXPECT_EQ(res, 0);
+}
+
+TEST_F(SSLTest, BadData) {
+  int res = 0;
+
+  char *outBuf = new char[1024 * 1024];
+  char *inBuf;
+
+  for(;;) {
+    res = SSL_do_handshake(connection);
+    if (res >= 0) {
+      break;
+    }
+
+    if (isErrorFatal(connection, res)) {
+      break;
+    }
+
+    size_t outLen  = BIO_ctrl_pending(bioOut);
+    if (outLen) {
+      BIO_read(bioOut, outBuf, outLen);
+    }
+    size_t inLen;
+    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    EXPECT_TRUE(inBuf != NULL);
+
+    if (inLen) {
+      BIO_write(bioIn, inBuf, inLen);
+    }
+  }
+
+  EXPECT_EQ(res, 1);
+
+  BIO *bioF = BIO_new(BIO_f_ssl());
+  BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
+
+  char text[] = "Hello, it's the text to be encrypted";
+  char *encryptedText = new char[1024];
+  char *decryptedText;
+  size_t text_len;
+
+  // Encrypt text on client side
+  BIO_write(bioF, text, sizeof(text));
+  text_len = BIO_ctrl_pending(bioOut);
+  size_t len = BIO_read(bioOut, encryptedText, text_len);
+
+  // Make improvements
+  encryptedText[len / 3] ^= 0x80;
+
+  // Decrypt text on server
+  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+
+  delete[] encryptedText;
+
+  EXPECT_TRUE(decryptedText == NULL);
+}
+
+TEST_F(SSLTest, Positive) {
+  int res = 0;
+
+  char *outBuf = new char[1024 * 1024];
+  char *inBuf;
+
+  for(;;) {
+    res = SSL_do_handshake(connection);
+    if (res >= 0) {
+      break;
+    }
+
+    if (isErrorFatal(connection, res)) {
+      break;
+    }
+
+    size_t outLen  = BIO_ctrl_pending(bioOut);
+    if (outLen) {
+      BIO_read(bioOut, outBuf, outLen);
+    }
+    size_t inLen;
+    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    EXPECT_TRUE(inBuf != NULL);
+
+    if (inLen) {
+      BIO_write(bioIn, inBuf, inLen);
     }
   }
 
@@ -145,11 +263,6 @@ TEST(HandshakeTest, Positive) {
   BIO_write(bioIn, encryptedText, text_len);
   text_len = BIO_read(bioF, decryptedText, 1024);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
-
-  crypto_manager->ReleaseSSLContext(server_ctx);
-  crypto_manager->Finish();
-
-  EVP_cleanup();
 }
 
 }  // namespace crypto_manager_test
