@@ -4,10 +4,10 @@ include_directories (
   ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
   ../../../src/components/security_manager/include
   ../../../src/components/transport_manager/include
-  ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../src/components/security_manager/include
+  ../../../src/components/utils/include
 )
 
 set (SOURCES
