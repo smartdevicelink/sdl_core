@@ -283,5 +283,6 @@
     <string name="ellipsis">…</string>
     <string name="send_policy_table_update_label">Send Policy Table Update file</string>
     <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
+    <string name="use_request_type">Use request type</string>
 
 </resources>
