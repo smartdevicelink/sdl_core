@@ -40,6 +40,10 @@
 #include "protocol_handler/protocol_handler_impl.h"
 
 using ::testing::_;
+using ::testing::NotNull;
+using ::testing::Pointee;
+using ::protocol_handler::RawMessage;
+using ::protocol_handler::RawMessagePtr;
 
 namespace test  {
 namespace components  {
@@ -92,8 +96,7 @@ namespace security_manager_test {
   class ProtocoloObserver: public protocol_handler::ProtocolHandler {
   public:
     MOCK_METHOD2(SendMessageToMobileApp,
-                 void(const protocol_handler::RawMessagePtr& message,
-                      bool final_message));
+                 void(const RawMessagePtr& message, bool final_message));
     MOCK_METHOD1(AddProtocolObserver,
                  void(protocol_handler::ProtocolObserver* observer));
     MOCK_METHOD1(RemoveProtocolObserver,
@@ -102,43 +105,125 @@ namespace security_manager_test {
                  void(int32_t connection_key, int32_t number_of_frames));
   };
 
+  //Mock matcher for check equal RawMessages
+  MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
+             std::string(negation ? "is not" : "is") + " equal ") {
+    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
+    const size_t arg_data_size = arg->data_size();
+    if(arg_data_size != exp_data_size) {
+//      result_listener << std::string("Got ") << arg_data_size << " bytes"
+//                      << "expected " << exp_data_size << " bytes";
+      return false;
+      }
+    const uint8_t * arg_data = arg->data();
+    for (int i = 0; i < arg_data_size; ++i) {
+      if(arg_data[i] != exp_data[i]) {
+//        result_listener << std::string("Fail in ") << i << "byte";
+        return false;
+        }
+      }
+    return true;
+  }
+
+  //Mock matcher for check RawMessage as InternalError message with substring
+  MATCHER_P(InternalErrorHasSubstr, expected,
+             std::string(negation ? "is not" : "is") + " equal " + expected) {
+    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
+    if(arg->data_size() < header_size)
+      return false;
+    if(security_manager::SecuityQuery::InternalError != arg->data()[0])
+      return false;
+    const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);
+    const std::string string(string_data, arg->data_size() - header_size);
+    return std::string::npos != string.find(expected);
+  }
+
+  ///////////////////
+
   class SecurityManagerTest: public ::testing::Test {
    protected:
     void SetUp() OVERRIDE {
       security_manager_.reset(new security_manager::SecurityManager());
+      security_manager_->set_session_observer(&mock_session_observer);
+      security_manager_->set_protocol_handler(&mock_protocol_observer);
+    }
+
+    //SecurityManager::OnMessageReceived Wrapper
+    void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
+                                const protocol_handler::ServiceType serviceType) {
+      const RawMessagePtr rawMessagePtr(
+            new RawMessage( key, protocolVersion, data, dataSize, serviceType));
+      security_manager_->OnMessageReceived(rawMessagePtr);
     }
 
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
-
-    const int32_t key = 0;
-    const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
-    const bool is_final = false;
-  };
-
-  TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
+    //Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<SessionObserver>   mock_session_observer;
     testing::StrictMock<ProtocoloObserver> mock_protocol_observer;
-    security_manager_->set_session_observer(&mock_session_observer);
-    security_manager_->set_protocol_handler(&mock_protocol_observer);
+    //const values
+    const int32_t key = 0;
+    const protocol_handler::ServiceType secureServiceType = protocol_handler::kSecure;
+    const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
+    const bool is_final = false;
+    const uint32_t seq_number = 1;
+  };
 
-    const protocol_handler::ServiceType type = protocol_handler::kSecure;
-    uint8_t* data = NULL;
-    uint32_t data_size = 0;
-    const protocol_handler::RawMessagePtr rawMessagePtr(
-          new protocol_handler::RawMessage( key,
-                                            protocolVersion,
-                                            data, data_size,
-                                            type));
-
-    EXPECT_CALL(mock_session_observer,
-                SetSSLContext(key, type, _)).Times(0);
-
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(_, is_final)).Times(1);
-
-    security_manager_->OnMessageReceived(rawMessagePtr);
+  TEST_F(SecurityManagerTest, OnMessageReceived_WrongService) {
+    //Call with wrong Service type
+    call_OnMessageReceived(NULL, 0, protocol_handler::kZero);
+    call_OnMessageReceived(NULL, 0, protocol_handler::kRpc);
+    call_OnMessageReceived(NULL, 0, protocol_handler::kAudio);
+    call_OnMessageReceived(NULL, 0, protocol_handler::kMobileNav);
+    call_OnMessageReceived(NULL, 0, protocol_handler::kBulk);
+    call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
+    //Wait call methods in thread
     sleep(1);
   }
+
+  TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(InternalErrorHasSubstr("Incorrect message"),
+                                       is_final)).Times(1);
+    //Call with NULL data
+    call_OnMessageReceived(NULL, 0, secureServiceType);
+    //Wait call methods in thread
+    sleep(1);
+  }
+
+  TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
+    const security_manager::SecuityQuery::QueryHeader header(
+          security_manager::SecuityQuery::InvalidQuery, seq_number);
+    const void* data = &header;
+    uint32_t data_size = sizeof(header);
+
+    //Expect eror message with string
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(InternalErrorHasSubstr("Unknown query"),
+                                       is_final)) .Times(1);
+
+    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+                           data_size, secureServiceType);
+    //Wait call methods in thread
+    sleep(1);
+  }
+
+  TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest) {
+//    const security_manager::SecuityQuery::QueryHeader header(
+//          security_manager::SecuityQuery::ProtectServiceRequest, seq_number);
+//    const void* data = &header;
+//    uint32_t data_size = sizeof(header);
+//    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);
+
+//    EXPECT_CALL(mock_protocol_observer,
+//                SendMessageToMobileApp(RawMessageEq(uint8_data, data_size), is_final))
+//        .Times(1);
+
+//    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+//                           data_size, secureServiceType);
+//    //Wait call methods in thread
+//    sleep(1);
+  }
+
 } // connection_handle
 } // namespace components
 } // namespace test
