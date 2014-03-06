@@ -31,6 +31,7 @@
  */
 
 #include <string>
+#include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #include "application_manager/message_helper.h"
