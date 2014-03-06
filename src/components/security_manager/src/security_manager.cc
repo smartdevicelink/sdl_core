@@ -299,11 +299,13 @@ void SecurityManager::SendData(
   memcpy(data_sending + sizeof(header), data, data_size);
 
   SendBinaryData(connectionKey, data_sending, data_sending_size);
+
+  delete[] data_sending;
 }
 
 void SecurityManager::SendBinaryData(const int32_t connectionKey,
-                                          uint8_t * data,
-                                          size_t data_size) {
+                                     const uint8_t * const data,
+                                     size_t data_size) {
   LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
   if(!protocol_handler_) {
     LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");

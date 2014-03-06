@@ -127,12 +127,13 @@ public:
 
   //post income array as park of RawMessage
   void SendBinaryData(const int32_t connectionKey,
-                      uint8_t *data, size_t data_size);
+                      const uint8_t * const data,
+                      size_t data_size);
 
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 
-  security_manager::CryptoManager* crypto_manager_;
+  utils::SharedPtr<security_manager::CryptoManager> crypto_manager_;
 
   /**
    *\brief Pointer on instance of class implementing SessionObserver

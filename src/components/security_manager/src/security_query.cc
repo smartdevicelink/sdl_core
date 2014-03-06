@@ -109,10 +109,9 @@ void SecuityQuery::setConnectionKey(const uint32_t connection_key) {
     connection_key_ = connection_key;
   }
 
-void SecuityQuery::setHeader(
-    const SecuityQuery::QueryHeader &header) {
-    header_ = header;
-  }
+void SecuityQuery::setHeader(const SecuityQuery::QueryHeader &header) {
+  header_ = header;
+}
 
 const SecuityQuery::QueryHeader &SecuityQuery::getHeader() const {
   return header_;

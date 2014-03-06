@@ -40,7 +40,7 @@
 namespace protocol_handler {
 
 RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
-                       uint8_t* data_param, uint32_t data_sz,
+                       const uint8_t *const data_param, uint32_t data_sz,
                        uint8_t type)
   : connection_key_(connectionKey),
     protocol_version_(protocolVersion),
