@@ -47,7 +47,6 @@
 
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
-//#include "transport_manager/tcp/dnssd_service_browser.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
 #include "utils/logger.h"
