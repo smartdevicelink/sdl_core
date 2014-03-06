@@ -541,7 +541,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                                          String correlationID) {
         _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
 
-        _protocol.startSecureService(serviceType);
+        if (serviceType == ServiceType.Audio_Service || serviceType == ServiceType.Mobile_Nav) {
+            _protocol.startSecureService(serviceType);
+        }
     }
 
     @Override
