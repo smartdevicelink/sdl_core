@@ -61,7 +61,7 @@ namespace security_manager {
 struct SecurityMessage: public SecuityQueryPtr {
   explicit SecurityMessage(const SecuityQueryPtr& message)
     : SecuityQueryPtr(message) {}
-  // PrioritizedQueue requres this method to decide which priority to assign
+  // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return 0; }
 };
 

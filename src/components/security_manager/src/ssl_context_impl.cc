@@ -32,20 +32,21 @@
 #include "security_manager/crypto_manager_impl.h"
 
 #include <assert.h>
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <memory.h>
 
 namespace security_manager {
 
-CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn,
-                                                  BIO *bioIn,
-                                                  BIO *bioOut)
+CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn)
   : connection_(conn),
-    bioIn_(bioIn),
-    bioOut_(bioOut),
+    bioIn_(BIO_new(BIO_s_mem())),
+    bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
     buffer_size_(1024), // TODO: Collect some statistics, determine the most appropriate value
     buffer_(new char[buffer_size_]) {
+  SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
 std::string LastError() {
@@ -121,9 +122,11 @@ Encrypt(const void* data,  size_t data_size,
     return NULL;
   }
   BIO_write(bioFilter_, data, data_size);
-  size_t len = BIO_ctrl_pending(bioOut_);
+  int len = BIO_ctrl_pending(bioOut_);
   EnsureBufferSize(len);
   len = BIO_read(bioOut_, buffer_, len);
+  if (len < 0)
+    return NULL;
   *encrypted_data_size = len;
   return buffer_;
 }
@@ -140,9 +143,11 @@ Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
     return NULL;
   }
   BIO_write(bioIn_, encrypted_data, encrypted_data_size);
-  size_t len = BIO_ctrl_pending(bioFilter_);
+  int len = BIO_ctrl_pending(bioFilter_);
   EnsureBufferSize(len);
   len = BIO_read(bioFilter_, buffer_, len);
+  if (len < 0)
+    return NULL;
   *data_size = len;
   return buffer_;
 }
@@ -150,6 +155,7 @@ Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
 CryptoManagerImpl::SSLContextImpl::
 ~SSLContextImpl() {
   SSL_shutdown(connection_);
+  SSL_free(connection_);
   delete[] buffer_;
 }
 

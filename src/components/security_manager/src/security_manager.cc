@@ -73,7 +73,7 @@ void SecurityManager::OnMessageReceived(
     LOG4CXX_ERROR(logger_, error);
     SendInternalError(message->connection_key(), header.seq_number_, error);
     }
-  //Post message to messqge query for next processong in thread
+  // Post message to message query for next processing in thread
   security_messages_.PostMessage(securityMessagePtr);
 }
 
