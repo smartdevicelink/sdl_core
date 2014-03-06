@@ -77,4 +77,8 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   return new SSLContextImpl(conn, bioIn, bioOut);
 }
 
+void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {
+  delete context;
+}
+
 } // namespace security_manager

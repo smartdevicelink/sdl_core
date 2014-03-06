@@ -45,8 +45,6 @@
 
 #include <unistd.h>
 
-#include <iostream>
-
 #include "security_manager/crypto_manager.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/ssl_context.h"
@@ -138,7 +136,6 @@ TEST(HandshakeTest, Positive) {
   delete[] encryptedText;
 
   EXPECT_TRUE(decryptedText != NULL);
-  std::cout << "decrypted: " << decryptedText << std::endl;
   EXPECT_EQ(strcmp(decryptedText, text), 0);
 
   // Encrypt text on server

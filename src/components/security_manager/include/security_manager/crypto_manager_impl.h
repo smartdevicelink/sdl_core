@@ -70,6 +70,7 @@ namespace security_manager {
    public:
     virtual bool Init();
     virtual SSLContext *CreateSSLContext();
+    virtual void ReleaseSSLContext(SSLContext* context);
    private:
     SSL_CTX *context_;
   };
