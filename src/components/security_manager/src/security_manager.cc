@@ -283,7 +283,7 @@ void SecurityManager::SendInternalError(const int32_t connectionKey,
                                              const uint32_t seq_umber,
                                              const std::string &error) {
   const SecuityQuery::QueryHeader header(
-        SecuityQuery::InvalidQuery, seq_umber);
+        SecuityQuery::InternalError, seq_umber);
   const uint8_t* const error_str = reinterpret_cast<const uint8_t*>(error.c_str());
   SendData(connectionKey, header, error_str, error.size());
 }
