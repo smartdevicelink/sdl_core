@@ -65,7 +65,6 @@ SecuityQuery::~SecuityQuery() {
 }
 bool SecuityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
-    DCHECK(binary_data); DCHECK(bin_data_size);
   const size_t header_size = sizeof(QueryHeader);
   if(bin_data_size < header_size) {
       return false;
