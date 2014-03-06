@@ -39,54 +39,131 @@
 
 namespace dbus {
 
-class Message {
- public:
-  Message(DBusMessage* message);
-  Message(const Message& that);
-  static Message MethodCall(const char* bus_name,
-                            const char* path,
-                            const char* interface,
-                            const char* method);
-  static Message Signal(const char  *path,
-                        const char  *interface,
-                        const char  *name);
-  ~Message();
-  Message& operator=(const Message& that);
-  std::string GetInterface() const;
-  std::string GetMember() const;
- protected:
+enum ContainerType {
+  kArray = DBUS_TYPE_ARRAY,
+  kStruct = DBUS_TYPE_STRUCT,
+  kDictEntry = DBUS_TYPE_DICT_ENTRY
+};
+
+class MessageRefKeeper {
+public:
+  MessageRefKeeper();
+  MessageRefKeeper(DBusMessage* message);
+  ~MessageRefKeeper();
+  MessageRefKeeper(const MessageRefKeeper& other);
+  MessageRefKeeper& operator=(MessageRefKeeper other);
+  DBusMessage* get() const;
+  DBusMessage* Pass();
+  void swap(MessageRefKeeper& other);
+private:
   DBusMessage* raw_message_;
 };
 
-class MessageIterator {
+class MessageRef {
  public:
-  MessageIterator(DBusMessage* message);
-  bool IsNull() const;
-  bool IsBool() const;
-  bool GetBool();
-  bool IsInt32() const;
-  int32_t GetInt32();
-  void PutInt32(int32_t value);
-  bool IsDouble() const;
-  double GetDouble();
-  void PutDouble(double value);
-  bool IsString() const;
-  std::string GetString();
-  void PutString(const std::string& value);
-  void PutString(const char* value);
-  bool IsArray() const;
-  MessageIterator GetArrayReadMessageIterator();
-  MessageIterator GetArrayWriteMessageIterator(
-      const char* item_type_signature);
-  bool IsStruct() const;
-  MessageIterator GetStructReadMessageIterator();
-  MessageIterator GetStructWriteMessageIterator();
+  MessageRef(DBusMessage* message);
+  ~MessageRef();
+  std::string GetInterface() const;
+  std::string GetMember() const;
+ protected:
+  MessageRefKeeper raw_message_ref_;
+  friend class MessageReader;
+  friend class MessageWriter;
+};
+
+class MessageReader {
+ public:
+  // Main constructor
+  MessageReader(const MessageRef& message);
+  bool has_failed() const;
+  bool HasNext() const;
+  void Next();
+  // Type checkers
+  bool NextIsInvalid() const;
+  bool NextIsBool() const;
+  bool NextIsByte() const;
+  bool NextIsInt16() const;
+  bool NextIsUint16() const;
+  bool NextIsInt32() const;
+  bool NextIsUint32() const;
+  bool NextIsInt64() const;
+  bool NextIsUint64() const;
+  bool NextIsDouble() const;
+  bool NextIsString() const;
+  bool NextIsArray() const;
+  bool NextIsStruct() const;
+  bool NextIsDictEntry() const;
+  // Readers
+  bool     ReadBool();
+  uint8_t  ReadByte();
+  int16_t  ReadInt16();
+  uint16_t ReadUin16();
+  int32_t  ReadInt32();
+  uint32_t ReadUint32();
+  int64_t  ReadInt64();
+  uint64_t ReadUint64();
+  double   ReadDouble();
+  std::string ReadString();
+  MessageReader GetArrayReader();
+  MessageReader GetStructReader();
+  MessageReader GetDictEntryReader();
  private:
-  MessageIterator();
-  int GetCurrentArgType() const;
+  typedef int DataType;
+  // Container reader constructor
+  MessageReader(MessageReader* reader,
+                DataType container_data_type);
+  void MarkFailed();
+  DataType NextValueType() const;
+  void ReadNextValue(DataType type, void* value);
+ private:
+  // Fields
+  MessageReader* parent_reader_;
+  bool failed_;
   DBusMessageIter iterator_;
 };
 
+class MessageWriter {
+ public:
+  // Methods
+  // Container writer constructor
+  MessageWriter(const MessageRef& message);
+  MessageWriter(MessageWriter* parent,
+                ContainerType type,
+                const char* array_signature);
+  ~MessageWriter();
+  void WriteBool(bool value);
+  void WriteByte(uint8_t value);
+  void WriteInt16(int16_t value);
+  void WriteUint16(uint16_t value);
+  void WriteInt32(int32_t value);
+  void WriteUint32(uint32_t value);
+  void WriteInt64(int64_t value);
+  void WriteUint64(uint64_t value);
+  void WriteDouble(double value);
+  void WriteString(const std::string& value);
+ private:
+  typedef int DataType;
+  // Main constructor
+  void WriteAndCheck(DataType value_type, const void* value);
+  void CloseWriter();
+ private:
+  //Fields
+  bool has_opened_subcontainer_;
+  MessageWriter* parent_writer_;
+  DBusMessageIter iterator_;
+
+  // Disallow copy and assign
+  MessageWriter(const MessageWriter& other);
+  MessageWriter& operator=(const MessageWriter& other);
+};
+
+MessageRef MethodCall(const char* bus_name,
+                      const char* path,
+                      const char* interface,
+                      const char* method);
+MessageRef Signal(const char  *path,
+                  const char  *interface,
+                  const char  *name);
 } // namespace dbus
 
 #endif // DBUS_DBUS_MESSAGE_H

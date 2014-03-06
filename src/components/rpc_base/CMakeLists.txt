@@ -22,4 +22,4 @@ set (HEADERS
 )
 
 add_library(rpc_base ${HEADERS} ${SOURCES})
-target_link_libraries(rpc_base jsoncpp)
+target_link_libraries(rpc_base jsoncpp dbus-1)

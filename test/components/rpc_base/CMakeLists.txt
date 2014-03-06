@@ -17,6 +17,7 @@ set (LIBRARIES
 )
 
 set (SOURCES
+  rpc_base_dbus_test.cc
   rpc_base_json_test.cc
   rpc_base_test.cc
 )
