@@ -81,9 +81,6 @@ TEST(MqueueAdapter, Receive) {
       OnMessageReceived(Property(
           &MessageSharedPointer::get,
           Pointee(Property(&Message::json_message, std::string("()"))))));
-  // EXPECT_CALL(handler, OnMessageReceived(Property(&MessageSharedPointer::get,
-  // Pointee(Property(&Message::json_message,
-  // ::testing::Eq(std::string("()")))))));
 
   mqd_t mqd = mq_open("/hmi_to_sdl", O_WRONLY);
   ASSERT_NE(-1, mqd);
