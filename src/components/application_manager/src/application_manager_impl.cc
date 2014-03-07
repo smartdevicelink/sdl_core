@@ -135,7 +135,7 @@ bool ApplicationManagerImpl::Stop() {
     LOG4CXX_ERROR(logger_,
                   "An error occured during unregistering applications.");
   }
-
+  MessageHelper::SendOnSdlCloseNotificationToHMI();
   return true;
 }
 
