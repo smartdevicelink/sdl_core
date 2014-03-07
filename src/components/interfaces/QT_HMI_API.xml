@@ -362,6 +362,7 @@
     <element name="MFD5">
     <description> 5 inch GEN1.1 display </description>
     </element>
+    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
   </enum>
 
 <enum name="ImageType">
@@ -447,6 +448,7 @@
     <description> Tertiary text for Choice</description>
   </element>
   <element name="timeToDestination"/>
+  <!-- TO DO to be removed -->
   <element name="turnText"/>
 </enum>
 
@@ -617,6 +619,8 @@
   </element>
   <element name="EIGHTH">
   </element>
+  <element name="FAULT">
+  </element>
 </enum>
 
 <enum name="VehicleDataEventStatus">
@@ -761,6 +765,8 @@
   <element name="ON" internal_name="WLS_ON">
   </element>
   <element name="FLASH" internal_name="WLS_FLASH">
+  </element>
+  <element name="NOT_USED" internal_name="WLS_NOT_USED">
   </element>
 </enum>
 
@@ -963,6 +969,8 @@
   <element name="NORMAL" internal_name="VDNS_NORMAL">
   </element>
   <element name="ACTIVE" internal_name="VDNS_ACTIVE">
+  </element>
+  <element name="NOT_USED" internal_name="VDNS_NOT_USED">
   </element>
 </enum>
 
@@ -1221,7 +1229,7 @@
   <param name="image" type="Common.Image" mandatory="false">
     <description>Image struct for VR Help item</description>
   </param>
-  <param name="position" type="Integer" minvalue="1" maxvalue="8" mandatory="true">
+  <param name="position" type="Integer" minvalue="1" maxvalue="100" mandatory="true">
     <description>Position to display item in VR Help list</description>
   </param>
 </struct>
@@ -1510,76 +1518,76 @@
 </struct>
 
 <struct name="TireStatus">
-<description>The status and pressure of the tires.</description>
-<param name="pressureTelltale" type="Common.WarningLightStatus" mandatory="false">
-  <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
-</param>
+  <description>The status and pressure of the tires.</description>
+  <param name="pressureTelltale" type="Common.WarningLightStatus" mandatory="false">
+    <description>Status of the Tire Pressure Telltale. See WarningLightStatus.</description>
+  </param>
   <param name="leftFront" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the left front tire.</description>
-</param>
+  </param>
   <param name="rightFront" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the right front tire.</description>
-</param>
+  </param>
   <param name="leftRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the left rear tire.</description>
-</param>
+  </param>
   <param name="rightRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the right rear tire.</description>
-</param>
+  </param>
   <param name="innerLeftRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the inner left rear.</description>
-</param>
+  </param>
   <param name="innerRightRear" type="Common.SingleTireStatus" mandatory="false">
     <description>The status of the inner right rear.</description>
-</param>
+  </param>
 </struct>
 
 <struct name="BeltStatus">
   <param name="driverBeltDeployed" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="passengerBeltDeployed" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="passengerBuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="driverBuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="leftRow2BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="passengerChildDetected" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="rightRow2BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="middleRow2BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="middleRow3BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="leftRow3BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="rightRow3BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="leftRearInflatableBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="rightRearInflatableBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="middleRow1BeltDeployed" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
   <param name="middleRow1BuckleBelted" type="Common.VehicleDataEventStatus" mandatory="false">
     <description>See VehicleDataEventStatus.</description>
-</param>
+  </param>
 </struct>
 
 <struct name="BodyInformation">
@@ -1895,7 +1903,6 @@
         <description>Must be true if allowed</description>
       </param>
     </function>
-
     <function name="OnSystemRequest" messagetype="notification" >
 	<description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
@@ -1919,7 +1926,9 @@
       <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
       </param>
     </function>
-
+    <function name="OnSDLClose" messagetype="notification">
+      <description>SDL must notify HMI about finish working application</description>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -1939,7 +1948,7 @@
   </function>
   <function name="AddCommand" messagetype="request">
     <description>Request from SDL to add a command(string with associated id) to VR.</description>
-    <param name="cmdID" type="Integer" mandatory="true" minvalue="0">
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of a command (further to be used in OnCommand notification).</description>
     </param>
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
@@ -1953,7 +1962,7 @@
   </function>
   <function name="DeleteCommand" messagetype="request">
     <description>Request from SDL to delete a command from VR.</description>
-    <param name="cmdID" type="Integer" mandatory="true">
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>Id of a command (list of strings), previously sent by AddCommand.</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -1964,7 +1973,7 @@
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notifies SDL about command trigerred via VR</description>
-    <param name="cmdID" type="Integer" mandatory="true">
+    <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>ID of of the command (list of strings)</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
@@ -2152,7 +2161,7 @@
     </param>
   </function>
   <function name="Alert" messagetype="response">
-    <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="360000">
+    <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
       <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
     </param>
   </function>
@@ -2205,7 +2214,7 @@
   </function>
   <function name="AddCommand" messagetype="request">
     <description>Request from SDL to add a command to the application menu.</description>
-    <param name="cmdID" type="Integer" minvalue="0" mandatory="true">
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>ID of the command to be added.</description>
     </param>
     <param name="menuParams" type="Common.MenuParams" mandatory="false">
@@ -2626,10 +2635,11 @@
     <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
     <param name="navigationTexts" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="5">
       <description>See TextFieldStruct. Uses:
-          navigationText1
-          navigationText2
-          ETA
-          totalDistance.
+        navigationText1
+        navigationText2
+        ETA
+        totalDistance
+        timeToDestination.
       </description>
     </param>
     <param name="turnIcon" type="Common.Image" mandatory="false">
@@ -2704,7 +2714,6 @@
   </function>
   <function name="StopStream" messagetype="response">
   </function>
-
   <function name="StartAudioStream" messagetype="request">
     <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
@@ -2793,14 +2802,14 @@
     </param>
     <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-        Array of bytes comprising CAN message.
+      	Array of bytes comprising CAN message.
       </description>
     </param>
   </function>
   <function name="DiagnosticMessage" messagetype="response">
     <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-        Array of bytes comprising CAN message result.
+      	Array of bytes comprising CAN message result.
       </description>
     </param>
   </function>
