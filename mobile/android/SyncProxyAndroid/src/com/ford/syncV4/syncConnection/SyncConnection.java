@@ -450,7 +450,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         // Unblock USB reader thread by this method
         FunctionID functionID = new FunctionID();
-        if (functionID.getFunctionName(msg.getFunctionID()).equals(Names.OnAppInterfaceUnregistered)) {
+        String functionName = functionID.getFunctionName(msg.getFunctionID());
+        if (functionName != null && functionName.equals(Names.OnAppInterfaceUnregistered)) {
             IJsonRPCMarshaller marshaller = new JsonRPCMarshaller();
             Hashtable<String, Object> hashtable = marshaller.unmarshall(msg.getData());
             if (hashtable.containsKey(Names.reason)) {
