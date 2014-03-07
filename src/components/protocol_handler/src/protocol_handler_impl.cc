@@ -243,7 +243,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
                                                 message->protocol_version(),
-                                                SERVICE_TYPE_RPC,
+                                                message->service_type(),
                                                 message->data_size(),
                                                 message->data(), false);
     if (result != RESULT_OK) {
