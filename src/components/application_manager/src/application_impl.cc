@@ -31,6 +31,7 @@
  */
 
 #include <string>
+#include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #include "application_manager/message_helper.h"
@@ -319,7 +320,8 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
 }
 
 uint32_t ApplicationImpl::nextHash() {
-  hash_val_ = time(NULL);
+  srand(time(NULL));
+  hash_val_ = rand();
   return hash_val_;
 }
 

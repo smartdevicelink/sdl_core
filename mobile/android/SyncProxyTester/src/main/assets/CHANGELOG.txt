@@ -1,4 +1,5 @@
 [CW10]
++ SyncProxyTester: added UI for System Request
 + Add systemFile, offset, and length parameters to PutFile UI.
 * SyncProxyAndroid SDK: Handle incoming messages with very big JSON size.
 * Fix SPT.SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure behaviour

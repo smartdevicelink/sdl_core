@@ -122,7 +122,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
                                      std::vector<uint8_t>(from, to));
     binaryData.clear();
   }
-#if !defined(EXTENDED_MEDIA)
+#if !defined(EXTENDED_MEDIA_MODE)
   // without recording stream restart reading 1-sec file
   offset_ = 0;
 #endif
