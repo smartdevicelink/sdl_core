@@ -2813,15 +2813,11 @@
       </description>
     </param>
   </function>
-  <function name="SubscribeVehicleData" messagetype="request">
-    <description>
-    	Subscribes for specific published data items.
-    	The data will be only sent if it has changed.
-    	The application will be notified by the onVehicleData notification whenever new data is available.
-    	To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
-    </description>
+
+<!--Qt HMI version of GetVehicleData-->
+  <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
+      <description>ID of application requested this RPC.</description>
     </param>
   </function>
   <function name="GetGpsData" messagetype="response">
