@@ -34,6 +34,7 @@
 #define SECURITY_MANAGER_MOCK_H
 #include <gmock/gmock.h>
 #include "security_manager/security_manager.h"
+#include "utils/byte_order.h"
 
 namespace test  {
 namespace components  {
@@ -136,12 +137,11 @@ namespace security_manager_test {
                        << " bytes less sizeof(QueryHeader)=" << header_size;
       return false;
       }
-    const uint32_t query_type =
-        arg->data()[1] << 16 |
-        arg->data()[2] <<  8 |
-        arg->data()[3];
+    const uint32_t query_type = arg->data()[1] << 16 |
+                                arg->data()[2] <<  8 |
+                                arg->data()[3];
     if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type) {
-      *result_listener << "RawMessage is not with InternalError";
+      *result_listener << "RawMessage is not InternalError";
       return false;
       }
     const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);

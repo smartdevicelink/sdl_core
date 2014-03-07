@@ -121,7 +121,7 @@ public:
 
   //Create new array for handling header + data
   void SendData(const int32_t connectionKey,
-                const SecuityQuery::QueryHeader& header,
+                SecuityQuery::QueryHeader header,
                 const uint8_t * const data,
                 const size_t data_size);
 

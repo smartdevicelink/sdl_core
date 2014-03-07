@@ -41,8 +41,9 @@
 #define BE_TO_LE32(x) ENDIAN_SWAP32((x));
 #define LE_TO_BE32(x) ENDIAN_SWAP32((x));
 #else
-#define BE_TO_LE32(x) __bswap_32(x)
-#define LE_TO_BE32(x) __bswap_32(x)
+#include <byteswap.h>
+#define BE_TO_LE32(x) bswap_32(x)
+#define LE_TO_BE32(x) bswap_32(x)
 #endif
 
 namespace utils

@@ -32,6 +32,7 @@
 
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "utils/byte_order.h"
 using namespace security_manager;
 
 log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
@@ -291,10 +292,13 @@ void SecurityManager::SendInternalError(const int32_t connectionKey,
 
 void SecurityManager::SendData(
     const int32_t connectionKey,
-    const SecuityQuery::QueryHeader& header,
+    SecuityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
   const size_t data_sending_size = sizeof(header) + data_size;
   uint8_t* data_sending = new uint8_t[data_sending_size];
+
+  //FIXEM(EZ): move to SecuityQuery class
+  header.query_id = LE_TO_BE32(header.query_id << 8);
 
   memcpy(data_sending, &header, sizeof(header));
   memcpy(data_sending + sizeof(header), data, data_size);

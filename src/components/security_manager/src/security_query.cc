@@ -33,6 +33,7 @@
 #include "security_manager/security_query.h"
 #include <cstring>
 #include "utils/macro.h"
+#include "utils/byte_order.h"
 
 using namespace security_manager;
 
@@ -88,7 +89,7 @@ bool SecuityQuery::Parse(const uint8_t * const binary_data,
       //TODO(EZ): check?
       break;
     }
-  const uint8_t query_id = getUInt24Value(binary_data+1);
+  const uint32_t query_id = BE_TO_LE32(getUInt24Value(binary_data+1));
   switch (query_id) {
     case PROTECT_SERVICE_REQUEST:
       header_.query_id = PROTECT_SERVICE_REQUEST;
