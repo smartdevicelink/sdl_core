@@ -1853,7 +1853,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * resumption.
      *
      * @param correlationId Unique identifier of the command
-     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     * @param buttonName    {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
      */
     public void commandSubscribeButtonResumable(ButtonName buttonName, int correlationId) {
         SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
@@ -1886,9 +1886,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
      * resumption.
      *
-     * @param commandId Id of the command
+     * @param commandId  Id of the command
      * @param vrCommands Vector of the VR Commands
-     * @param menuName Name of the Menu
+     * @param menuName   Name of the Menu
      */
     public void commandAddCommandResumable(Integer commandId, Vector<String> vrCommands,
                                            String menuName) {
@@ -1900,12 +1900,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     /**
      * Call a method from SDK to send <b>AddCommand</b> request
      *
-     * @param commandId Id of the command
+     * @param commandId  Id of the command
      * @param vrCommands Vector of the VR Commands
-     * @param menuName Name of the Menu
+     * @param menuName   Name of the Menu
      */
     public void commandAddCommandPredefined(Integer commandId, Vector<String> vrCommands,
-                                  String menuName) {
+                                            String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
                 getNextCorrelationID());
         syncProxySendRPCRequest(addCommand);
@@ -1945,9 +1945,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request which
      * will be used in application resumption.
      *
-     * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param choiceSet              Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
      * @param interactionChoiceSetID Id of the interaction Choice set
-     * @param correlationID correlation Id
+     * @param correlationID          correlation Id
      */
     public void commandCreateInteractionChoiceSetResumable(Vector<Choice> choiceSet,
                                                            Integer interactionChoiceSetID,
@@ -2055,8 +2055,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     *
-     *
      * @param putFile
      */
     public void syncProxySendPutFilesResumable(PutFile putFile) {
@@ -2074,7 +2072,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (mSyncProxy != null) {
             // TODO it's seems stupid in order to register send onTransportConnected
             mSyncProxy.updateRegisterAppInterfaceParameters(msg);
-            mSyncProxy.getSyncConnection().onTransportConnected();
+            if (mSyncProxy.getSyncConnection() != null) {
+                mSyncProxy.getSyncConnection().onTransportConnected();
+            }
         }
     }
 
