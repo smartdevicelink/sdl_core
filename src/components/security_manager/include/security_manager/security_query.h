@@ -64,9 +64,9 @@ public:
   };
 
   struct QueryHeader {
-    QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber);
+    QueryHeader(uint8_t queryType, uint16_t queryId, uint32_t seqNumber);
     uint32_t query_type:8;
-    uint32_t query_id:24;     // API function identifier
+    uint32_t query_id:24;  // API function identifier
     uint32_t seq_number;   // request sequential number
     uint32_t reserved;
   };

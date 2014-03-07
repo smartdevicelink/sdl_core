@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,113 +34,17 @@
 #define SECURITY_MANAGER_TEST_H
 
 #include <gtest/gtest.h>
-#include <gmock/gmock.h>
 #include "security_manager/security_manager.h"
+#include "security_manager/security_manager_mock.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_payload.h"
 
-using ::testing::_;
-using ::testing::NotNull;
-using ::testing::Pointee;
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
 
 namespace test  {
 namespace components  {
 namespace security_manager_test {
-
-  //MOCK implementation of SessionObserver interface
-  class SessionObserver: public protocol_handler::SessionObserver {
-  public:
-    MOCK_METHOD3(SetSSLContext,
-                 int( const uint32_t& key,
-                      protocol_handler::ServiceType service_type,
-                      security_manager::SSLContext* context));
-    MOCK_METHOD2(GetSSLContext,
-                 security_manager::SSLContext* (
-                   const uint32_t& key,
-                   protocol_handler::ServiceType service_type));
-    MOCK_METHOD3(OnSessionStartedCallback,
-                 int32_t(
-                   const transport_manager::ConnectionUID& connection_handle,
-                   const uint8_t& sessionId,
-                   const protocol_handler::ServiceType& service_type));
-    MOCK_METHOD4(OnSessionEndedCallback,
-                 uint32_t(
-                   const transport_manager::ConnectionUID& connection_handle,
-                   const uint8_t& sessionId,
-                   const uint32_t& hashCode,
-                   const protocol_handler::ServiceType& service_type));
-    MOCK_METHOD2(KeyFromPair,
-                 uint32_t(
-                   transport_manager::ConnectionUID connection_handle,
-                   uint8_t sessionId));
-    MOCK_METHOD3(PairFromKey,
-                 void(
-                   uint32_t key,
-                   transport_manager::ConnectionUID* connection_handle,
-                   uint8_t* sessionId));
-    MOCK_METHOD4(GetDataOnSessionKey,
-                 int32_t(uint32_t key,
-                         uint32_t* app_id,
-                         std::list<int32_t>* sessions_list,
-                         uint32_t* device_id));
-    MOCK_METHOD4(GetDataOnDeviceID,
-                 int32_t(
-                   uint32_t device_handle,
-                   std::string* device_name,
-                   std::list<uint32_t>* applications_list,
-                   std::string* mac_address));
-  };
-  //MOCK implementation of ProtocolObserver interface
-  class ProtocoloObserver: public protocol_handler::ProtocolHandler {
-  public:
-    MOCK_METHOD2(SendMessageToMobileApp,
-                 void(const RawMessagePtr& message, bool final_message));
-    MOCK_METHOD1(AddProtocolObserver,
-                 void(protocol_handler::ProtocolObserver* observer));
-    MOCK_METHOD1(RemoveProtocolObserver,
-                 void(protocol_handler::ProtocolObserver* observer));
-    MOCK_METHOD2(SendFramesNumber,
-                 void(int32_t connection_key, int32_t number_of_frames));
-  };
-
-  //Mock matcher for check equal RawMessages
-  MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
-             std::string(negation ? "is not" : "is") + " equal ") {
-    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
-    const size_t arg_data_size = arg->data_size();
-    if(arg_data_size != exp_data_size) {
-//      result_listener << std::string("Got ") << arg_data_size << " bytes"
-//                      << "expected " << exp_data_size << " bytes";
-      return false;
-      }
-    const uint8_t * arg_data = arg->data();
-    for (int i = 0; i < arg_data_size; ++i) {
-      if(arg_data[i] != exp_data[i]) {
-//        result_listener << std::string("Fail in ") << i << "byte";
-        return false;
-        }
-      }
-    return true;
-  }
-
-  //Mock matcher for check RawMessage as InternalError message with substring
-  MATCHER_P(InternalErrorHasSubstr, expected,
-             std::string(negation ? "is not" : "is") + " equal " + expected) {
-    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
-    if(arg->data_size() < header_size)
-      return false;
-    const uint32_t query_type =
-        arg->data()[0] << 16 | arg->data()[1] <<  8 | arg->data()[2];
-    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type)
-      return false;
-    const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);
-    const std::string string(string_data, arg->data_size() - header_size);
-    return std::string::npos != string.find(expected);
-  }
-
-  ///////////////////
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
@@ -160,8 +64,8 @@ namespace security_manager_test {
 
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
-    testing::StrictMock<SessionObserver>   mock_session_observer;
-    testing::StrictMock<ProtocoloObserver> mock_protocol_observer;
+    testing::StrictMock<SessionObserverMock>   mock_session_observer;
+    testing::StrictMock<ProtocoloObserverMock> mock_protocol_observer;
     // constants
     const int32_t key = 0;
     const protocol_handler::ServiceType secureServiceType = protocol_handler::kSecure;
@@ -199,8 +103,8 @@ namespace security_manager_test {
 
   TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
     const security_manager::SecuityQuery::QueryHeader header(
-          security_manager::SecuityQuery::INVALID_QUERY_ID,
           security_manager::SecuityQuery::INVALID_QUERY_TYPE,
+          security_manager::SecuityQuery::INVALID_QUERY_ID,
           seq_number);
     const void* data = &header;
     uint32_t data_size = sizeof(header);

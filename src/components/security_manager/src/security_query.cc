@@ -50,7 +50,7 @@ inline uint32_t getUInt24Value(const uint8_t* const data){
 }
 
 SecuityQuery::QueryHeader::QueryHeader(
-    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
+    uint8_t queryType, uint16_t queryId, uint32_t seqNumber) :
   query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
 }
 
