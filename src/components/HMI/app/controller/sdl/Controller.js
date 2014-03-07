@@ -52,8 +52,7 @@ SDL.SDLController = Em.Object
                 || SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.AudioPassThruPopUp.activate
-                || SDL.VRHelpListView.active) {
+                || SDL.AudioPassThruPopUp.activate) {
 
                 return 'HMI_OBSCURED';
             }
@@ -560,14 +559,14 @@ SDL.SDLController = Em.Object
                 if (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
                     switch (SDL.SDLAppController.model.globalProperties.keyboardProperties.keypressMode) {
                         case 'SINGLE_KEYPRESS':{
-                            FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ));
+                            FFW.UI.OnKeyboardInput(str.charAt( str.length-1 ), "KEYPRESS");
                             break;
                         }
                         case 'QUEUE_KEYPRESS':{
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
-                            FFW.UI.OnKeyboardInput(str);
+                            FFW.UI.OnKeyboardInput(str, "KEYPRESS");
                             break;
                         }
                     }

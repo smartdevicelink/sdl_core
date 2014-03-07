@@ -262,6 +262,16 @@
     <string name="diagnosticmessage_messageData">Message Data (comma-separated)</string>
     <string name="diagnosticmessage_messageDataDefault">128,64,32,16,8,4,2,1</string>
 
+    <string name="putfile_fileName">Local File Name</string>
+    <string name="putfile_fileNameSelect">…</string>
+    <string name="putfile_syncFileName">Sync File Name</string>
+    <string name="putfile_syncFileNameDefault">syncFileName</string>
+    <string name="putfile_fileType">File Type</string>
+    <string name="putfile_persistentFile">Persistent File</string>
+    <string name="putfile_systemFile">System File</string>
+    <string name="putfile_offset">Offset</string>
+    <string name="putfile_length">Length</string>
+
     <string name="exit_dialog_title">Exit Application</string>
     <string name="app_setup_dialog_title">Please set up application properties</string>
     <string name="nsd_use_label">Network Service Discovery:</string>
@@ -273,5 +283,6 @@
     <string name="ellipsis">…</string>
     <string name="send_policy_table_update_label">Send Policy Table Update file</string>
     <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
+    <string name="use_request_type">Use request type</string>
 
 </resources>

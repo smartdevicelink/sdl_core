@@ -31,6 +31,7 @@
  */
 
 #include <string>
+#include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
 #include "application_manager/message_helper.h"
@@ -59,6 +60,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0) {
+    srand(time(NULL));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -319,7 +321,7 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
 }
 
 uint32_t ApplicationImpl::nextHash() {
-  hash_val_ = time(NULL);
+  hash_val_ = rand();
   return hash_val_;
 }
 

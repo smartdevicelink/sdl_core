@@ -138,6 +138,22 @@ std::string file_system::CreateDirectory(const std::string& name) {
   return name;
 }
 
+bool file_system::CreateDirectoryRecursively(const std::string& path) {
+  size_t pos = 0;
+  bool ret_val = true;
+
+  while (ret_val == true && pos <= path.length()) {
+    pos = path.find('/', pos + 1);
+    if (!DirectoryExists(path.substr(0, pos))) {
+      if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
+        ret_val = false;
+      }
+    }
+  }
+
+  return ret_val;
+}
+
 bool file_system::IsDirectory(const std::string& name) {
   struct stat status;
   memset(&status, 0, sizeof(status));

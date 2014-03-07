@@ -321,9 +321,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           std::max(ui_result_, tts_result_));
     }
 
+    ApplicationSharedPtr application =
+        ApplicationManagerImpl::instance()->application(connection_key());
     SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
                  return_info, &(message[strings::msg_params]));
-    app->UpdateHash();
+    application->UpdateHash();
   }
 }
 

@@ -58,8 +58,6 @@ class ApplicationManagerImpl;
 class Application;
 class ResumeCtrl: public event_engine::EventObserver {
 
-  mutable sync_primitives::Lock queue_lock_;
-
   public:
 
   /**
@@ -146,6 +144,8 @@ class ResumeCtrl: public event_engine::EventObserver {
     void onTimer();
 
   private:
+
+    mutable sync_primitives::Lock queue_lock_;
 
     timer::TimerThread<ResumeCtrl> timer_;
     /**

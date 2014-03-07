@@ -25,6 +25,7 @@ include_directories (
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
+  ../src/components/resumption/include
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
@@ -49,10 +50,11 @@ include_directories (
 set(LIBRARIES
     
     test_App_Manager
+
     ApplicationManager
     MediaManager
 
-    
+    Resumption
     gtest
     gtest_main
     gmock
@@ -94,6 +96,7 @@ set(LIBRARIES
     MessageBroker
     MessageBrokerClient
     MessageBrokerServer
+    
     encryption
     bluetooth
     pthread

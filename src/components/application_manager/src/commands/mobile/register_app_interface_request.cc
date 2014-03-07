@@ -335,15 +335,16 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
-  uint32_t hash_id = 0;
-  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
-    hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-  }
-
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
-  if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
-                                    hash_id)) {
-    result = mobile_apis::Result::RESUME_FAILED;
+  uint32_t hash_id = 0;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+
+    hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
+    if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
+                                      hash_id)) {
+      result = mobile_apis::Result::RESUME_FAILED;
+    }
   }
 
   SendResponse(true, result, "", params);

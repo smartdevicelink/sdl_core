@@ -961,7 +961,6 @@ public class ModuleTest {
                             customMarshaller.setStubbedValue(customJSON);
                         }
 
-                        mLogAdapter.logMessage(rpc, true);
                         IJsonRPCMarshaller currentMarshaller =
                                 (customJSON != null) ? customMarshaller :
                                         (generateInvalidJSON ?

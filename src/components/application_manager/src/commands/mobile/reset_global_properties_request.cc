@@ -156,7 +156,6 @@ void ResetGlobalPropertiesRequest::Run() {
       (hmi_apis::Common_Language::EN_US);
       key_board_properties[hmi_request::keyboard_layout] = static_cast<int32_t>
       (hmi_apis::Common_KeyboardLayout::QWERTY);
-      key_board_properties[hmi_request::send_dynamic_entry] = false;
 
       // Look for APPLINK-4432 for details.
       /*smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(
@@ -322,16 +321,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           std::max(ui_result_, tts_result_));
     }
 
+    ApplicationSharedPtr application =
+        ApplicationManagerImpl::instance()->application(connection_key());
     SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
                      return_info, &(message[strings::msg_params]));
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        CommandRequestImpl::connection_key());
-
-    if (!app) {
-      LOG4CXX_ERROR_EXT(logger_, "Null pointer");
-      return;
-    }
-    app->UpdateHash();
+    application->UpdateHash();
   }
 }
 

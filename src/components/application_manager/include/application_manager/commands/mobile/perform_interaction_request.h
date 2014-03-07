@@ -207,6 +207,12 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckVrHelpItemPositions(application_manager::ApplicationSharedPtr const app);
 
+  /*
+   * @brief Disable PerformInteraction state in application and
+   * delete VR commands from HMI
+   */
+  void DisablePerformInteraction();
+
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;
 

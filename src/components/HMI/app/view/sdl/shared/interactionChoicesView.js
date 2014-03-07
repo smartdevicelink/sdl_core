@@ -68,6 +68,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
             SDL.SDLModel.uiShowKeyboard(this);
         },
         search: function(){
+            FFW.UI.OnKeyboardInput(SDL.SDLModel.keyboardInputValue, "ENTRY_SUBMITTED");
             this.get('parentView').deactivate("SUCCESS");
         }
     }),

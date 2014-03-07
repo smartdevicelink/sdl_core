@@ -1,6 +1,11 @@
 [CW10]
+* File Explorer: changed project structure
+* SyncProxyAndroid SDK: changed project structure
++ SyncProxyTester: added UI for System Request
++ Add systemFile, offset, and length parameters to PutFile UI.
 * SyncProxyAndroid SDK: Handle incoming messages with very big JSON size.
 * Fix SPT.SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure behaviour
+* SyncProxyAndroid SDK: changed send message logic
 * Log messages of the PutFile request when resume application
 
 [CW9]
