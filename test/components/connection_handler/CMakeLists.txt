@@ -7,6 +7,7 @@ include_directories (
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../src/components/security_manager/include
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (LIBRARIES
