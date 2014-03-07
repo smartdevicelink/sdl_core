@@ -220,6 +220,7 @@
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
+#include "application_manager/commands/hmi/on_sdl_close_notification.h"
 
 namespace application_manager {
 
@@ -1855,6 +1856,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::UiSetDisplayLayoutRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSdlClose: {
+      command.reset(new commands::OnSdlCloseNotification(message));
       break;
     }
   }

@@ -1924,6 +1924,9 @@
       <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
       </param>
     </function>
+    <function name="OnSdlClose" messagetype="notification">
+      <description>SDL must notify HMI about finish working application</description>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
