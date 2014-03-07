@@ -106,6 +106,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncPData;
+import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
@@ -327,6 +328,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String SYSTEM_REQST_DIALOG_TAG = "SystemRequestDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
     private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
     private final static String SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG = "SubscriptionVehicleDataDialogTag";
@@ -1183,6 +1185,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             addToFunctionsAdapter(adapter, Names.DiagnosticMessage);
             addToFunctionsAdapter(adapter, Names.RegisterAppInterface);
             addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
+            addToFunctionsAdapter(adapter, Names.SystemRequest);
             addToFunctionsAdapter(adapter, GenericRequest.NAME);
 
             adapter.sort(new Comparator<String>() {
@@ -1307,6 +1310,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 dlg.show();
                             } else if (adapter.getItem(which).equals(Names.AddCommand)) {
                                 sendAddCommand();
+                            } else if (adapter.getItem(which).equals(Names.SystemRequest)) {
+                                sendSystemRequest();
                             } else if (adapter.getItem(which).equals(Names.DeleteCommand)) {
                                 sendDeleteCommand();
                             } else if (adapter.getItem(which).equals(Names.AddSubMenu)) {
@@ -1940,6 +1945,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         private void sendAddSubmenu() {
                             DialogFragment addSubMenuDialogFragment = AddSubMenuDialog.newInstance();
                             addSubMenuDialogFragment.show(getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
+                        }
+
+                        private void sendSystemRequest(){
+                            DialogFragment fragment = SystemRequestDialog.newInstance();
+                            fragment.show(getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
                         }
 
                         /**
@@ -3904,5 +3914,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 builder.create().show();
             }
         });
+    }
+
+    public void onSystemRequestDialogResult(SystemRequest systemRequest) {
+        systemRequest.setCorrelationID(getCorrelationid());
+        if (mBoundProxyService != null) {
+            mBoundProxyService.syncProxySendRPCRequest(systemRequest);
+        }
     }
 }

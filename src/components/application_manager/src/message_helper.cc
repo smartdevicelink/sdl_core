@@ -1358,9 +1358,10 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
 
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
-  if (!hmi_capabilities.VerifyImageType(
+  mobile_apis::ImageType::eType image_type =
       static_cast<mobile_apis::ImageType::eType>(image[strings::image_type]
-          .asInt()))) {
+      .asInt());
+  if (!hmi_capabilities.VerifyImageType(image_type)) {
     return mobile_apis::Result::UNSUPPORTED_RESOURCE;
   }
 
