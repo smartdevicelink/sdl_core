@@ -8,7 +8,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
-    instrumentTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
 }
 
 def isReleaseSigningSetup = false
@@ -20,8 +20,8 @@ android {
 
 
     sourceSets {
-        instrumentTest {
-            java.srcDirs = ['instrumentTest/java']
+        androidTest {
+            java.srcDirs = ['androidTest/java']
         }
     }
 
