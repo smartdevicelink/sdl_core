@@ -53,8 +53,9 @@ namespace security_manager_test {
       security_manager_->set_session_observer(&mock_session_observer);
       security_manager_->set_protocol_handler(&mock_protocol_observer);
     }
-
-    // SecurityManager::OnMessageReceived Wrapper
+    /*
+    * Wrapper for fast send SecurityManager::OnMessageReceived
+    */
     void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
                                 const protocol_handler::ServiceType serviceType) {
       const RawMessagePtr rawMessagePtr(
@@ -74,11 +75,18 @@ namespace security_manager_test {
     const uint32_t seq_number = 1;
   };
 
+  /*
+   * Security QueryHeader shall be the same size as RPC header
+   * for correct working on Mobile side
+   */
   TEST_F(SecurityManagerTest, SecurityHeader_eq_RPCHeader) {
     ASSERT_EQ(sizeof(security_manager::SecuityQuery::QueryHeader)*8,
               protocol_handler::ProtocolPayloadV2SizeBits());
   }
 
+  /*
+   * SecurityManger shall skip all not-Secure messages
+   */
   TEST_F(SecurityManagerTest, OnMessageReceived_WrongService) {
     // Call with wrong Service type
     call_OnMessageReceived(NULL, 0, protocol_handler::kZero);
@@ -91,6 +99,9 @@ namespace security_manager_test {
     sleep(1);
   }
 
+  /*
+   * SecurityManger shall send InternallError on null data recieved
+   */
   TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(InternalErrorHasSubstr("Incorrect message"),
@@ -101,9 +112,12 @@ namespace security_manager_test {
     sleep(1);
   }
 
+  /*
+   * SecurityManger shall send InternallError on INVALID_QUERY_ID
+   */
   TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
     const security_manager::SecuityQuery::QueryHeader header(
-          security_manager::SecuityQuery::INVALID_QUERY_TYPE,
+          security_manager::SecuityQuery::REQUEST,
           security_manager::SecuityQuery::INVALID_QUERY_ID,
           seq_number);
     const void* data = &header;
