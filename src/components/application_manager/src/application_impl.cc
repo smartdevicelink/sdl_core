@@ -60,6 +60,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0) {
+  srand(time(NULL));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -320,7 +321,6 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
 }
 
 uint32_t ApplicationImpl::nextHash() {
-  srand(time(NULL));
   hash_val_ = rand();
   return hash_val_;
 }
