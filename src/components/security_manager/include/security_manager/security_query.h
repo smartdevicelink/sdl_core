@@ -54,7 +54,6 @@ public:
     SEND_INTERNAL_ERROR      = 0xFF,
     INVALID_QUERY_ID         = 0x100
   };
-
   enum ProtectServiceResult {
     SUCCESS = 0x1,
     PENDING = 0x2,     //Handshake in progress
@@ -62,6 +61,15 @@ public:
     SERVICE_NOT_FOUND = 0x4,
     INTERNAL_ERROR = 0xFF
   };
+  enum InternalErrors {
+    ERROR_INVALID_QUERY_SIZE = 0x1, //low size of message
+    ERROR_INVALID_QUERY_ID = 0x2,   //unknown query id
+    ERROR_NULL_DATA = 0x3,          //Received query with null data
+    ERROR_INVALID_SERVICE_TYPE = 0x4,//For unknown or forbidden for encryption service
+    ERROR_PROTECTION_NOT_REQUESTED = 0x5, //Got handshake without ProtectServiceRequest
+    ERROR_SSL_INVALID_DATA = 0xF0,
+    ERROR_OTHER_INTERNAL_ERROR = 0xFF
+    };
 
   struct QueryHeader {
     QueryHeader(uint8_t queryType, uint16_t queryId, uint32_t seqNumber);

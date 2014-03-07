@@ -39,12 +39,13 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_payload.h"
 
-using ::protocol_handler::RawMessage;
-using ::protocol_handler::RawMessagePtr;
-
 namespace test  {
 namespace components  {
 namespace security_manager_test {
+
+  using ::protocol_handler::RawMessage;
+  using ::protocol_handler::RawMessagePtr;
+  using ::security_manager::SecuityQuery;
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
@@ -97,6 +98,7 @@ namespace security_manager_test {
     call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
     // Wait call methods in thread
     sleep(1);
+    //Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
 
   /*
@@ -104,8 +106,9 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
     EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(InternalErrorHasSubstr("Incorrect message"),
-                                       is_final)).Times(1);
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecuityQuery::ERROR_NULL_DATA), is_final)).Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
     // Wait call methods in thread
@@ -125,8 +128,9 @@ namespace security_manager_test {
 
     // Expect error message with string
     EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(InternalErrorHasSubstr("Unknown query"),
-                                       is_final)) .Times(1);
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecuityQuery::ERROR_INVALID_QUERY_ID),is_final)) .Times(1);
 
     call_OnMessageReceived(static_cast<const uint8_t*>(data),
                            data_size, secureServiceType);
@@ -134,8 +138,7 @@ namespace security_manager_test {
     sleep(1);
   }
 
-  /*
-  TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest) {
+  TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest_NULLData) {
 
     const security_manager::SecuityQuery::QueryHeader header(
           security_manager::SecuityQuery::REQUEST,
@@ -154,7 +157,6 @@ namespace security_manager_test {
     //Wait call methods in thread
     sleep(1);
   }
-  */
 
 } // connection_handle
 } // namespace components

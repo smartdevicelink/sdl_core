@@ -115,9 +115,10 @@ public:
                                    const SecuityQuery::ProtectServiceResult result);
 
   //Create new array for handling header + data
-  void SendInternalError(const int32_t connectionKey,
+  void SendInternalError(const int32_t connection_key,
                          const uint32_t seq_number,
-                         const std::string& error);
+                         const SecuityQuery::InternalErrors& error_id,
+                         const std::string& error_str);
 
   //Create new array for handling header + data
   void SendData(const int32_t connectionKey,

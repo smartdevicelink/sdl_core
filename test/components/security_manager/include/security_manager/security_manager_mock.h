@@ -104,7 +104,7 @@ namespace security_manager_test {
    * Matcher for RawMessages
    * Check binary data of RawMessages
    */
-  MATCHER_P2(RawMessageMathcer, exp_data, exp_data_size,
+  MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
              std::string(negation ? "is not" : "is") + " equal ") {
     const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
     const size_t arg_data_size = arg->data_size();
@@ -128,25 +128,37 @@ namespace security_manager_test {
    * Check binary data as send string
    */
   //Mock matcher for check RawMessage as InternalError message with substring
-  MATCHER_P(InternalErrorHasSubstr, expectedSubString,
+  MATCHER_P(InternalErrorWithErrId, expectedErrorId,
             std::string(negation ? "is not" : "is")
-            + " InternalError with \"" + expectedSubString + "\"") {
+            + " InternalError Notification with selected error" ) {
     const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
     if(arg->data_size() < header_size) {
       *result_listener << "Size " << arg->data_size()
                        << " bytes less sizeof(QueryHeader)=" << header_size;
       return false;
       }
-    const uint32_t query_type = arg->data()[1] << 16 |
-                                arg->data()[2] <<  8 |
-                                arg->data()[3];
-    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type) {
-      *result_listener << "RawMessage is not InternalError";
+    const uint8_t query_type = arg->data()[0];
+    if(security_manager::SecuityQuery::NOTIFICATION != query_type) {
+      *result_listener << "RawMessage is not Notification";
       return false;
       }
-    const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);
-    const std::string string(string_data, arg->data_size() - header_size);
-    return std::string::npos != string.find(expectedSubString);
+    //Read Big-Endian number
+    const uint32_t query_id = arg->data()[1] << 16 |
+                              arg->data()[2] <<  8 |
+                              arg->data()[3];
+    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_id) {
+      *result_listener << "Notification is not InternalError";
+      return false;
+      }
+    const uint32_t err_id = arg->data()[header_size + 0] << 16 |
+                            arg->data()[header_size + 1] <<  8 |
+                            arg->data()[header_size + 2];
+    if(expectedErrorId != err_id) {
+      *result_listener << "InternalError is not with error "
+                       << expectedErrorId;
+      return false;
+      }
+    return true;
   }
 
 } // connection_handle
