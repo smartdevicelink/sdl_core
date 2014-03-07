@@ -7,13 +7,14 @@ package com.ford.syncV4.protocol.secure;
  * Time: 1:24 PM
  */
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
+import android.util.Log;
 
 /**
  * This class build a payload byte array for the Secure Service
  */
-public class SecureServicePayload {
+public class SecureServicePayloadParser {
+
+    private static final String TAG = "SecureServicePayloadParser";
 
     /**
      * API function identifier
@@ -30,40 +31,12 @@ public class SecureServicePayload {
      */
     private byte[] mData;
 
-    /**
-     * Constructor
-     *
-     * @param functionId   API function identifier
-     * @param reqSeqNumber Request sequential number
-     * @param data bytes array of the data to be sent with payload
-     */
-    public SecureServicePayload(byte functionId, int reqSeqNumber, byte[] data) {
+    public SecureServicePayloadParser() {
 
-        if (data == null) {
-            throw new IllegalArgumentException(SecureServicePayload.class.getSimpleName() +
-                    " data can't be null");
-        }
 
-        mFunctionId = functionId;
-        mReqSeqNumber = reqSeqNumber;
-        mData = data;
     }
 
-    /**
-     * Assemble payload to array of the bytes
-     *
-     * @return
-     */
-    public byte[] toBytes() {
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(mFunctionId);
-
-        byte[] reqSeqNumberBytes = ByteBuffer.allocate(4).putInt(mReqSeqNumber).array();
-        byteArrayOutputStream.write(reqSeqNumberBytes, 0, 4);
-
-        byteArrayOutputStream.write(mData, 0, mData.length);
-
-        return byteArrayOutputStream.toByteArray();
+    public void parse(byte[] data) {
+        Log.d(TAG, "Parse API function Id:" + data[0]);
     }
 }

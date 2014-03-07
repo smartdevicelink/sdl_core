@@ -11,6 +11,9 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.SecureServicePayload;
+import com.ford.syncV4.protocol.secure.SecureServicePayloadParser;
+import com.ford.syncV4.util.BitConverter;
 
 /**
  * This class provides main functionality to manage (process, etc ...) SecureService messages
@@ -49,6 +52,10 @@ public class SecureServiceMessageManager {
         // TODO : To be implement
 
         Log.d(TAG, "Process Secure msg:" + protocolMessage);
+
+        SecureServicePayloadParser secureServicePayloadParser = new SecureServicePayloadParser();
+        SecureServicePayload secureServicePayload = secureServicePayloadParser
+                .parse(protocolMessage.getBulkData());
 
         // ServiceType could be obtained from ProtocolMessage
         ServiceType serviceType = protocolMessage.getServiceType();
