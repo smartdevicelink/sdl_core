@@ -32,132 +32,247 @@
 #include "gtest/gtest.h"
 #include "gtest/gtest-spi.h"
 
+#include "rpc_base/rpc_base.h"
+#include "rpc_base/rpc_base_dbus_inl.h"
 #include "rpc_base/dbus_message.h"
 
 namespace test {
+using namespace rpc;
 
-TEST(DbusMessageConstructionTest, DbusMessageConstruction) {
-  DBusMessage* rawmsg = dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL);
-  dbus::MessageRef msgref(rawmsg);
+enum TestEnum {
+  kValue0,
+  kValue1,
+  kInvalidValue
+};
+
+bool IsValidEnum(TestEnum val) {
+  return val == kValue0 || val == kValue1;
 }
 
-class DbusTest: public testing::Test {
-public:
+bool EnumFromJsonString(const std::string& value, TestEnum* enm) {
+  if (value == "kValue0") {
+    *enm = kValue0;
+    return true;
+  } else if (value == "kValue1") {
+    *enm = kValue1;
+    return true;
+  } else {
+    return false;
+  }
+}
+
+const char* EnumToJsonString(TestEnum enm) {
+  switch(enm) {
+    case kValue0: return "kValue0";
+    case kValue1: return "kValue1";
+    default: return "UNKNOWN";
+  }
+}
+
+struct DbusDeserialization: public testing::Test {
   dbus::MessageRef msgref;
-  DbusTest():
-    msgref(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
+  DbusDeserialization()
+    : msgref(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
   }
 };
 
-TEST_F(DbusTest, DbusWriterConstructionTest) {
- dbus::MessageWriter writer(msgref);
-}
-
-TEST_F(DbusTest, DbusEmptyMessageReaderTest) {
-  dbus::MessageReader reader(msgref);
-  ASSERT_TRUE(reader.has_failed());
-}
-
-TEST_F(DbusTest, DbusMessageWriterBoolWriteRead) {
-  dbus::MessageWriter writer(msgref);
-  writer.WriteBool(true);
-  dbus::MessageReader reader(msgref);
-  bool redback_value = reader.ReadBool();
-  ASSERT_FALSE(reader.has_failed());
-  ASSERT_TRUE(redback_value);
-}
-
-TEST_F(DbusTest, DbusMessageWriterInt32WriteRead) {
-  dbus::MessageWriter writer(msgref);
-  writer.WriteInt32(42);
-  dbus::MessageReader reader(msgref);
-  int32_t readback_value = reader.ReadInt32();
-  ASSERT_FALSE(reader.has_failed());
-  ASSERT_EQ(readback_value, 42);
-}
-
-TEST_F(DbusTest, DbusMessageWriterStringWriteRead) {
-  dbus::MessageWriter writer(msgref);
-  writer.WriteString("Hello DBus!");
-  dbus::MessageReader reader(msgref);
-  std::string readback_value = reader.ReadString();
-  ASSERT_FALSE(reader.has_failed());
-  ASSERT_EQ(readback_value, "Hello DBus!");
-}
-
-TEST_F(DbusTest, DbusMultipleParamsReadWrite) {
+TEST_F(DbusDeserialization, DeserializeBool) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteString("Hello DBus!");
-    writer.WriteInt16(42);
-    writer.WriteDouble(3.14);
+    writer.WriteBool(true);
   }
   {
     dbus::MessageReader reader(msgref);
-    std::string readback_string = reader.ReadString();
+    Boolean booln(&reader);
+    ASSERT_TRUE(booln);
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeByte) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteByte(200);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Integer<uint8_t, 1, 220> byte(&reader);
+    ASSERT_TRUE(byte.is_initialized());
+    ASSERT_TRUE(byte.is_valid());
+    ASSERT_EQ(byte, 200);
     ASSERT_FALSE(reader.has_failed());
-    ASSERT_EQ(readback_string, "Hello DBus!");
-    int16_t readback_int = reader.ReadInt16();
-    ASSERT_FALSE(reader.has_failed());
-    ASSERT_EQ(readback_int, 42);
-    double readback_double = reader.ReadDouble();
-    ASSERT_FALSE(reader.has_failed());
-    ASSERT_DOUBLE_EQ(readback_double, 3.14);
     ASSERT_FALSE(reader.HasNext());
   }
 }
 
-TEST_F(DbusTest, DbusArrayTest) {
+TEST_F(DbusDeserialization, DeserializeInt64) {
   {
     dbus::MessageWriter writer(msgref);
-    dbus::MessageWriter array_writer(&writer, dbus::kArray,
-                                     DBUS_TYPE_INT16_AS_STRING);
-    array_writer.WriteInt16(3);
-    array_writer.WriteInt16(4);
-    array_writer.WriteInt16(5);
+    writer.WriteInt64(-1);
   }
   {
     dbus::MessageReader reader(msgref);
-    dbus::MessageReader array_reader = reader.GetArrayReader();
-    int16_t readback_val = array_reader.ReadInt16();
+    Integer<int64_t, -5, 220> int64(&reader);
+    ASSERT_TRUE(int64.is_initialized());
+    ASSERT_TRUE(int64.is_valid());
+    ASSERT_EQ(int64, -1);
     ASSERT_FALSE(reader.has_failed());
-    ASSERT_EQ(readback_val, 3);
-    readback_val = array_reader.ReadInt16();
-    ASSERT_FALSE(reader.has_failed());
-    ASSERT_EQ(readback_val, 4);
-    readback_val = array_reader.ReadInt16();
-    ASSERT_FALSE(reader.has_failed());
-    ASSERT_EQ(readback_val, 5);
-    ASSERT_FALSE(array_reader.HasNext());
+    ASSERT_FALSE(reader.HasNext());
   }
 }
 
-class DbusFailuresTest: public testing::Test {
-public:
-  dbus::MessageRef int_msg;
-  DbusFailuresTest()
-    : int_msg(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
-    dbus::MessageWriter writer(int_msg);
-    writer.WriteInt64(42);
+TEST_F(DbusDeserialization, DeserializeFloat) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteDouble(3.14);
   }
-};
-
-TEST_F(DbusFailuresTest, DbusInconsistentTypeReadFailureTest) {
-  dbus::MessageReader reader(int_msg);
-  std::string str = reader.ReadString();
-  ASSERT_EQ(str, std::string(""));
-  ASSERT_TRUE(reader.has_failed());
+  {
+    dbus::MessageReader reader(msgref);
+    Float<3, 4> pi(&reader);
+    ASSERT_TRUE(pi.is_initialized());
+    ASSERT_TRUE(pi.is_valid());
+    ASSERT_DOUBLE_EQ(pi, 3.14);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
 }
 
-TEST_F(DbusFailuresTest, DbusNonExistentArrayReadTest) {
-  dbus::MessageReader reader(int_msg);
-  ASSERT_FALSE(reader.has_failed());
-  dbus::MessageReader array_reader = reader.GetArrayReader();
-  ASSERT_TRUE(array_reader.has_failed());
-  ASSERT_TRUE(reader.has_failed());
-  int64_t val = array_reader.ReadInt64();
-  ASSERT_TRUE(array_reader.has_failed());
-  ASSERT_EQ(val, 0);
+TEST_F(DbusDeserialization, DeserializeString) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteString("Hello");
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    String<3, 10> hello(&reader);
+    ASSERT_TRUE(hello.is_initialized());
+    ASSERT_TRUE(hello.is_valid());
+    ASSERT_EQ(std::string(hello), "Hello");
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeEnum) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteInt32(kValue1);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Enum<TestEnum> enm(&reader);
+    ASSERT_TRUE(enm.is_initialized());
+    ASSERT_TRUE(enm.is_valid());
+    ASSERT_EQ(enm, kValue1);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeArray) {
+  {
+    dbus::MessageWriter writer(msgref);
+    std::string array_signature;
+    rpc::DbusSignature<Integer<int32_t, 1, 50> >(&array_signature);
+    dbus::MessageWriter array_writer(&writer,
+                                     dbus::kArray,
+                                     array_signature.c_str());
+    array_writer.WriteInt32(5);
+    array_writer.WriteInt32(33);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Array< Integer<int32_t, 1, 50>, 1, 100 > array(&reader);
+    ASSERT_TRUE(array.is_initialized());
+    ASSERT_TRUE(array.is_valid());
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+    ASSERT_EQ(array.size(), 2);
+    ASSERT_EQ(array[0], 5);
+    ASSERT_EQ(array[1], 33);
+
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeArrayOfArrays) {
+  {
+    dbus::MessageWriter writer(msgref);
+    std::string array_signature;
+    rpc::DbusSignature<Array<Integer<int32_t, 1, 50>, 1, 5> >(&array_signature);
+    dbus::MessageWriter array_writer(&writer,
+                                     dbus::kArray,
+                                     array_signature.c_str());
+    int val = 5;
+    for (int i = 0; i < 2; ++i) {
+      std::string subarray_signature;
+      rpc::DbusSignature<Integer<int32_t, 1, 50> >(&subarray_signature);
+      dbus::MessageWriter subarray_wirter(&array_writer, dbus::kArray,
+                                          subarray_signature.c_str());
+
+      subarray_wirter.WriteInt32(val++);
+      subarray_wirter.WriteInt32(val++);
+    }
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Array<Array<Integer<int32_t, 1, 50>, 1, 5>, 1, 5>  array(&reader);
+    ASSERT_TRUE(array.is_initialized());
+    ASSERT_TRUE(array.is_valid());
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+    ASSERT_EQ(array.size(), 2);
+    ASSERT_EQ(array[0].size(), 2);
+    ASSERT_EQ(array[1].size(), 2);
+    ASSERT_EQ(array[0][0], 5);
+    ASSERT_EQ(array[0][1], 6);
+    ASSERT_EQ(array[1][0], 7);
+    ASSERT_EQ(array[1][1], 8);
+
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeMap) {
+  {
+    dbus::MessageWriter writer(msgref);
+    std::string dict_signature;
+    rpc::DbusSignature<Map<Enum<TestEnum>, 1, 5 >::value_type>(&dict_signature);
+    dbus::MessageWriter array_writer(&writer,
+                                     dbus::kArray,
+                                     dict_signature.c_str());
+    const char* keys[] = { "Hello", "World" };
+    int val = 0;
+    for (int i = 0; i < 2; ++i) {
+      dbus::MessageWriter dictval_wirter(&array_writer, dbus::kDictEntry, NULL);
+      dictval_wirter.WriteString(keys[val]);
+      dictval_wirter.WriteInt32(val++);
+    }
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Map<Enum<TestEnum>, 1, 5 > amap(&reader);
+    ASSERT_TRUE(amap.is_initialized());
+    ASSERT_TRUE(amap.is_valid());
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+    ASSERT_EQ(amap.size(), 2);
+    ASSERT_EQ(amap["Hello"], kValue0);
+    ASSERT_EQ(amap["World"], kValue1);
+
+  }
+}
+
+TEST_F(DbusDeserialization, InconsistentTypesTest) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteString("Hello");
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Boolean badbool(&reader);
+    ASSERT_TRUE(badbool.is_initialized());
+    ASSERT_FALSE(badbool.is_valid());
+    ASSERT_TRUE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
 }
 
 }  // namespace test

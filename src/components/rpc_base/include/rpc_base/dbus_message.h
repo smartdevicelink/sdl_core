@@ -76,34 +76,20 @@ class MessageReader {
   // Main constructor
   MessageReader(const MessageRef& message);
   bool has_failed() const;
+  bool IsAtLastElement() const;
   bool HasNext() const;
-  void Next();
   // Type checkers
   bool NextIsInvalid() const;
-  bool NextIsBool() const;
-  bool NextIsByte() const;
-  bool NextIsInt16() const;
-  bool NextIsUint16() const;
-  bool NextIsInt32() const;
-  bool NextIsUint32() const;
-  bool NextIsInt64() const;
-  bool NextIsUint64() const;
-  bool NextIsDouble() const;
-  bool NextIsString() const;
+
+  template<typename T>
+  bool NextIs() const;
+
   bool NextIsArray() const;
   bool NextIsStruct() const;
   bool NextIsDictEntry() const;
   // Readers
-  bool     ReadBool();
-  uint8_t  ReadByte();
-  int16_t  ReadInt16();
-  uint16_t ReadUin16();
-  int32_t  ReadInt32();
-  uint32_t ReadUint32();
-  int64_t  ReadInt64();
-  uint64_t ReadUint64();
-  double   ReadDouble();
-  std::string ReadString();
+  template<typename T>
+  T Read();
   MessageReader GetArrayReader();
   MessageReader GetStructReader();
   MessageReader GetDictEntryReader();
@@ -112,6 +98,7 @@ class MessageReader {
   // Container reader constructor
   MessageReader(MessageReader* reader,
                 DataType container_data_type);
+  void MoveToNext();
   void MarkFailed();
   DataType NextValueType() const;
   void ReadNextValue(DataType type, void* value);
@@ -165,5 +152,7 @@ MessageRef Signal(const char  *path,
                   const char  *interface,
                   const char  *name);
 } // namespace dbus
+
+#include "rpc_base/dbus_message_inl.h"
 
 #endif // DBUS_DBUS_MESSAGE_H

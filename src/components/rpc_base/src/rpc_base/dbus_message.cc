@@ -117,6 +117,7 @@ MessageReader::MessageReader(MessageReader* reader,
       MarkFailed();
     } else {
       dbus_message_iter_recurse(&reader->iterator_, &iterator_);
+      reader->MoveToNext();
     }
   }
 }
@@ -125,59 +126,17 @@ bool MessageReader::has_failed() const {
   return failed_;
 }
 
-bool MessageReader::HasNext() const {
+bool MessageReader::IsAtLastElement() const {
   DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
-  return !failed_ && dbus_message_iter_has_next(iter) != 0;
+  return dbus_message_iter_has_next(iter) == 0;
 }
 
-void MessageReader::Next() {
-  if (dbus_message_iter_next(&iterator_) == 0) {
-    MarkFailed();
-  }
+bool MessageReader::HasNext() const {
+  return !failed_ && NextValueType() != DBUS_TYPE_INVALID;
 }
 
 bool MessageReader::NextIsInvalid() const {
   return NextValueType() == DBUS_TYPE_INVALID;
-}
-
-bool MessageReader::NextIsBool() const {
-  return NextValueType() == DBUS_TYPE_BOOLEAN;
-}
-
-bool MessageReader::NextIsByte() const {
-  return NextValueType() == DBUS_TYPE_BYTE;
-}
-
-bool MessageReader::NextIsInt16() const {
-  return NextValueType() == DBUS_TYPE_INT16;
-}
-
-bool MessageReader::NextIsUint16() const {
-  return NextValueType() == DBUS_TYPE_UINT16;
-}
-
-bool MessageReader::NextIsInt32() const {
-  return NextValueType() == DBUS_TYPE_INT32;
-}
-
-bool MessageReader::NextIsUint32() const{
-  return NextValueType() == DBUS_TYPE_UINT32;
-}
-
-bool MessageReader::NextIsInt64() const {
-  return NextValueType() == DBUS_TYPE_INT64;
-}
-
-bool MessageReader::NextIsUint64() const {
-  return NextValueType() == DBUS_TYPE_UINT64;
-}
-
-bool MessageReader::NextIsDouble() const {
-  return NextValueType() == DBUS_TYPE_DOUBLE;
-}
-
-bool MessageReader::NextIsString() const {
-  return NextValueType() == DBUS_TYPE_STRING;
 }
 
 bool MessageReader::NextIsArray() const {
@@ -192,66 +151,6 @@ bool MessageReader::NextIsDictEntry() const {
   return NextValueType() == DBUS_TYPE_DICT_ENTRY;
 }
 
-bool MessageReader::ReadBool() {
-  dbus_bool_t value = 0;
-  ReadNextValue(DBUS_TYPE_BOOLEAN, &value);
-  return value != 0;
-}
-
-uint8_t MessageReader::ReadByte() {
-  uint8_t value = 0;
-  ReadNextValue(DBUS_TYPE_BYTE, &value);
-  return value;
-}
-
-int16_t MessageReader::ReadInt16() {
-  int16_t value = 0;
-  ReadNextValue(DBUS_TYPE_INT16, &value);
-  return value;
-}
-
-uint16_t MessageReader::ReadUin16() {
-  uint16_t value = 0;
-  ReadNextValue(DBUS_TYPE_UINT16, &value);
-  return value;
-}
-
-int32_t MessageReader::ReadInt32() {
-  int32_t value = 0;
-  ReadNextValue(DBUS_TYPE_INT32, &value);
-  return value;
-}
-
-uint32_t MessageReader::ReadUint32() {
-  uint32_t value = 0;
-  ReadNextValue(DBUS_TYPE_UINT32, &value);
-  return value;
-}
-
-int64_t MessageReader::ReadInt64() {
-  int64_t value = 0;
-  ReadNextValue(DBUS_TYPE_INT64, &value);
-  return value;
-}
-
-uint64_t MessageReader::ReadUint64() {
-  uint64_t value = 0;
-  ReadNextValue(DBUS_TYPE_UINT64, &value);
-  return value;
-}
-
-double MessageReader::ReadDouble() {
-  double value = 0.;
-  ReadNextValue(DBUS_TYPE_DOUBLE, &value);
-  return value;
-}
-
-std::string MessageReader::ReadString() {
-  const char* value = "";
-  ReadNextValue(DBUS_TYPE_STRING, &value);
-  return value;
-}
-
 MessageReader MessageReader::GetArrayReader() {
   return MessageReader(this, DBUS_TYPE_ARRAY);
 }
@@ -262,6 +161,18 @@ MessageReader MessageReader::GetStructReader() {
 
 MessageReader MessageReader::GetDictEntryReader() {
   return MessageReader(this, DBUS_TYPE_DICT_ENTRY);
+}
+
+void MessageReader::MoveToNext() {
+  if (!HasNext()) {
+    MarkFailed();
+  }
+  dbus_bool_t moved = dbus_message_iter_next(&iterator_);
+  // Ignore return value because when moving after last element
+  // 'moved' is false. But it is okay to move after the last element
+  // because only when moved there NextValueType becomes
+  // DBUS_TYPE_INVALID.
+  moved;
 }
 
 void MessageReader::MarkFailed() {
@@ -285,9 +196,7 @@ void MessageReader::ReadNextValue(MessageReader::DataType type,
     MarkFailed();
   } else if (!failed_) {
     dbus_message_iter_get_basic(&iterator_, value);
-    if (HasNext()) {
-      Next();
-    }
+    MoveToNext();
   }
 }
 

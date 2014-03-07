@@ -300,6 +300,8 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
   ASSERT_FALSE(val.is_valid());
 }
 
+
+// DBus support
 TEST(ValidatedTypes, TestBooleanDbusSignature) {
   std::string sign;
   DbusSignature<Boolean>(&sign);
@@ -365,5 +367,130 @@ TEST(ValidatedTypes, TestOptionalFloatArrayDbusSignature) {
   DbusSignature< Optional< Array<Float<1,2>, 3, 4> > >(&sign);
   ASSERT_EQ(sign, "(bad)");
 }
+
+TEST(DbusMessageConstructionTest, DbusMessageConstruction) {
+  DBusMessage* rawmsg = dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL);
+  dbus::MessageRef msgref(rawmsg);
+}
+
+class DbusTest: public testing::Test {
+public:
+  dbus::MessageRef msgref;
+  DbusTest():
+    msgref(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
+  }
+};
+
+TEST_F(DbusTest, DbusWriterConstructionTest) {
+ dbus::MessageWriter writer(msgref);
+}
+
+TEST_F(DbusTest, DbusEmptyMessageReaderTest) {
+  dbus::MessageReader reader(msgref);
+  ASSERT_TRUE(reader.has_failed());
+}
+
+TEST_F(DbusTest, DbusMessageWriterBoolWriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.WriteBool(true);
+  dbus::MessageReader reader(msgref);
+  bool redback_value = reader.Read<bool>();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_TRUE(redback_value);
+}
+
+TEST_F(DbusTest, DbusMessageWriterInt32WriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.WriteInt32(42);
+  dbus::MessageReader reader(msgref);
+  int32_t readback_value = reader.Read<int32_t>();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_EQ(readback_value, 42);
+}
+
+TEST_F(DbusTest, DbusMessageWriterStringWriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.WriteString("Hello DBus!");
+  dbus::MessageReader reader(msgref);
+  std::string readback_value = reader.Read<std::string>();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_EQ(readback_value, "Hello DBus!");
+}
+
+TEST_F(DbusTest, DbusMultipleParamsReadWrite) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.WriteString("Hello DBus!");
+    writer.WriteInt16(42);
+    writer.WriteDouble(3.14);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    std::string readback_string = reader.Read<std::string>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_string, "Hello DBus!");
+    int16_t readback_int = reader.Read<int16_t>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_int, 42);
+    double readback_double = reader.Read<double>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_DOUBLE_EQ(readback_double, 3.14);
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusTest, DbusArrayTest) {
+  {
+    dbus::MessageWriter writer(msgref);
+    dbus::MessageWriter array_writer(&writer, dbus::kArray,
+                                     DBUS_TYPE_INT16_AS_STRING);
+    array_writer.WriteInt16(3);
+    array_writer.WriteInt16(4);
+    array_writer.WriteInt16(5);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    dbus::MessageReader array_reader = reader.GetArrayReader();
+    int16_t readback_val = array_reader.Read<int16_t>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 3);
+    readback_val = array_reader.Read<int16_t>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 4);
+    readback_val = array_reader.Read<int16_t>();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 5);
+    ASSERT_FALSE(array_reader.HasNext());
+  }
+}
+
+class DbusFailuresTest: public testing::Test {
+public:
+  dbus::MessageRef int_msg;
+  DbusFailuresTest()
+    : int_msg(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
+    dbus::MessageWriter writer(int_msg);
+    writer.WriteInt64(42);
+  }
+};
+
+TEST_F(DbusFailuresTest, DbusInconsistentTypeReadFailureTest) {
+  dbus::MessageReader reader(int_msg);
+  std::string str = reader.Read<std::string>();
+  ASSERT_EQ(str, std::string(""));
+  ASSERT_TRUE(reader.has_failed());
+}
+
+TEST_F(DbusFailuresTest, DbusNonExistentArrayReadTest) {
+  dbus::MessageReader reader(int_msg);
+  ASSERT_FALSE(reader.has_failed());
+  dbus::MessageReader array_reader = reader.GetArrayReader();
+  ASSERT_TRUE(array_reader.has_failed());
+  ASSERT_TRUE(reader.has_failed());
+  int64_t val = array_reader.Read<int64_t>();
+  ASSERT_TRUE(array_reader.has_failed());
+  ASSERT_EQ(val, 0);
+}
+
 
 }  // namespace codegen

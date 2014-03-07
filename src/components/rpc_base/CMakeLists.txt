@@ -14,6 +14,7 @@ set (SOURCES
 
 set (HEADERS
   include/rpc_base/dbus_message.h
+  include/rpc_base/dbus_message_inl.h
   include/rpc_base/rpc_base_dbus_inl.h
   include/rpc_base/rpc_base.h
   include/rpc_base/rpc_base_inl.h
