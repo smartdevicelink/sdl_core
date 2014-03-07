@@ -150,7 +150,7 @@ namespace security_manager_test {
       security_manager_->set_protocol_handler(&mock_protocol_observer);
     }
 
-    //SecurityManager::OnMessageReceived Wrapper
+    // SecurityManager::OnMessageReceived Wrapper
     void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
                                 const protocol_handler::ServiceType serviceType) {
       const RawMessagePtr rawMessagePtr(
@@ -159,10 +159,10 @@ namespace security_manager_test {
     }
 
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
-    //Strict mocks (same as all methods EXPECT_CALL().Times(0))
+    // Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<SessionObserver>   mock_session_observer;
     testing::StrictMock<ProtocoloObserver> mock_protocol_observer;
-    //const values
+    // constants
     const int32_t key = 0;
     const protocol_handler::ServiceType secureServiceType = protocol_handler::kSecure;
     const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
@@ -176,14 +176,14 @@ namespace security_manager_test {
   }
 
   TEST_F(SecurityManagerTest, OnMessageReceived_WrongService) {
-    //Call with wrong Service type
+    // Call with wrong Service type
     call_OnMessageReceived(NULL, 0, protocol_handler::kZero);
     call_OnMessageReceived(NULL, 0, protocol_handler::kRpc);
     call_OnMessageReceived(NULL, 0, protocol_handler::kAudio);
     call_OnMessageReceived(NULL, 0, protocol_handler::kMobileNav);
     call_OnMessageReceived(NULL, 0, protocol_handler::kBulk);
     call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
-    //Wait call methods in thread
+    // Wait call methods in thread
     sleep(1);
   }
 
@@ -191,9 +191,9 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(InternalErrorHasSubstr("Incorrect message"),
                                        is_final)).Times(1);
-    //Call with NULL data
+    // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
-    //Wait call methods in thread
+    // Wait call methods in thread
     sleep(1);
   }
 
@@ -205,35 +205,38 @@ namespace security_manager_test {
     const void* data = &header;
     uint32_t data_size = sizeof(header);
 
-    //Expect eror message with string
+    // Expect error message with string
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(InternalErrorHasSubstr("Unknown query"),
                                        is_final)) .Times(1);
 
     call_OnMessageReceived(static_cast<const uint8_t*>(data),
                            data_size, secureServiceType);
-    //Wait call methods in thread
+    // Wait call methods in thread
     sleep(1);
   }
 
+  /*
   TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest) {
-//    const security_manager::SecuityQuery::QueryHeader header(
-//          security_manager::SecuityQuery::REQUEST,
-//          security_manager::SecuityQuery::PROTECT_SERVICE_REQUEST,
-//          seq_number);
-//    const void* data = &header;
-//    uint32_t data_size = sizeof(header);
-//    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);
 
-//    EXPECT_CALL(mock_protocol_observer,
-//                SendMessageToMobileApp(RawMessageEq(uint8_data, data_size), is_final))
-//        .Times(1);
+    const security_manager::SecuityQuery::QueryHeader header(
+          security_manager::SecuityQuery::REQUEST,
+          security_manager::SecuityQuery::PROTECT_SERVICE_REQUEST,
+          seq_number);
+    const void* data = &header;
+    uint32_t data_size = sizeof(header);
+    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);
 
-//    call_OnMessageReceived(static_cast<const uint8_t*>(data),
-//                           data_size, secureServiceType);
-//    //Wait call methods in thread
-//    sleep(1);
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(RawMessageEq(uint8_data, data_size), is_final))
+        .Times(1);
+
+    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+                           data_size, secureServiceType);
+    //Wait call methods in thread
+    sleep(1);
   }
+  */
 
 } // connection_handle
 } // namespace components

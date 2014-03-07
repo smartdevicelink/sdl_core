@@ -1,8 +1,4 @@
-/**
- * \file ProtocolPacket.cpp
- * \brief ProtocolPacket class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +28,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * \file ProtocolPacket.cpp
+ * \brief ProtocolPacket class source file.
+ */
+
 #include <stdint.h>
 #include <memory.h>
 #include "protocol_handler/protocol_packet.h"
