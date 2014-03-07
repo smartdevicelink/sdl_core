@@ -33,8 +33,7 @@ public abstract class AbstractProtocol {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
         _protocolListener = protocolListener;
-    }// end-ctor
-
+    }
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
@@ -76,15 +75,17 @@ public abstract class AbstractProtocol {
      * Start a procedure to register a Service to be secured
      *
      * @param serviceType a type of the service
+     * @param sessionId Id of the current active session
      */
-    public abstract void startSecuringService(ServiceType serviceType);
+    public abstract void startSecuringService(byte sessionId, ServiceType serviceType);
 
     /**
      * Start a handshake procedure with selected Service
      *
      * @param serviceType a type of the service
+     * @param sessionId Id of the current active session
      */
-    public abstract void startSecureHandshake(ServiceType serviceType);
+    public abstract void startSecureHandshake(byte sessionId, ServiceType serviceType);
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -96,7 +97,8 @@ public abstract class AbstractProtocol {
     public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
 
     // This method is called whenever the protocol receives a complete frame
-    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data, MessageFrameAssembler assembler) {
+    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
+                                               MessageFrameAssembler assembler) {
         SyncTrace.logProtocolEvent(InterfaceActivityDirection.Receive, header, data,
                 0, data.length, SYNC_LIB_TRACE_KEY);
 
@@ -104,7 +106,8 @@ public abstract class AbstractProtocol {
     }
 
     // This method is called whenever a protocol has an entire frame to send
-    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
+                                             int length) {
         SyncTrace.logProtocolEvent(InterfaceActivityDirection.Transmit, header, data,
                 offset, length, SYNC_LIB_TRACE_KEY);
         resetHeartbeat();
@@ -146,7 +149,8 @@ public abstract class AbstractProtocol {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             Log.d("AUDIO SERVCIE", "ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
-                Log.d("AUDIO SERVCIE", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
+                Log.d("AUDIO SERVCIE", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0,
+                        data.length));
             }
         }
     }
@@ -276,4 +280,4 @@ public abstract class AbstractProtocol {
     protected void handleProtocolHeartbeatACK() {
         _protocolListener.onProtocolHeartbeatACK();
     }
-} // end-class
+}

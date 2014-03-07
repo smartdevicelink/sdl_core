@@ -1,8 +1,13 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import com.ford.syncV4.util.BitConverter;
 
 public class BinaryFrameHeader {
+
+    private static final String TAG = "BinaryFrameHeader";
+
     private static final int WIPRO_PROTOCOL_HEADER_LENGTH = 12;
     private byte _rpcType;
 	private int _functionID;
@@ -30,6 +35,9 @@ public class BinaryFrameHeader {
 		msg.setJsonSize(_jsonSize);
 
         if (_jsonSize > 0) {
+
+            Log.d(TAG, "JSON size:" + _jsonSize + ", header:" + binHeader.length);
+
             byte[] _jsonData = new byte[_jsonSize];
             System.arraycopy(binHeader, WIPRO_PROTOCOL_HEADER_LENGTH, _jsonData,
                     0, _jsonSize);

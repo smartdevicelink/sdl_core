@@ -84,21 +84,22 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void startSecuringService(ServiceType serviceType) {
+    public void startSecuringService(byte sessionId, ServiceType serviceType) {
         DebugTool.logInfo("Start Secure Service:" + serviceType);
+        Log.d(TAG, "Start Secure Service:" + serviceType);
 
         ProtocolMessage protocolMessage =
-                SecureServiceMessageFactory.buildProtectServiceRequest(serviceType);
+                SecureServiceMessageFactory.buildProtectServiceRequest(sessionId, serviceType);
 
         SendMessage(protocolMessage);
     }
 
     @Override
-    public void startSecureHandshake(ServiceType serviceType) {
+    public void startSecureHandshake(byte sessionId, ServiceType serviceType) {
         DebugTool.logInfo("Start Secure Handshake:" + serviceType);
 
         ProtocolMessage protocolMessage =
-                SecureServiceMessageFactory.buildHandshakeRequest(serviceType);
+                SecureServiceMessageFactory.buildHandshakeRequest(sessionId, serviceType);
 
         SendMessage(protocolMessage);
     }
@@ -466,8 +467,7 @@ public class WiProProtocol extends AbstractProtocol {
             message.setSessionID(header.getSessionID());
             //If it is WiPro 2.0 it must have binary header
             if (_version == 2) {
-                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
-                        parseBinaryHeader(data);
+                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
                 message.setVersion(_version);
                 message.setRPCType(binFrameHeader.getRPCType());
                 message.setFunctionID(binFrameHeader.getFunctionID());

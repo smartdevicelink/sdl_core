@@ -359,17 +359,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onTransportBytesReceived(byte[] receivedBytes,
-                                         int receivedBytesLength) {
+    public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 try {
-                    _protocol.HandleReceivedBytes(receivedBytes,
-                            receivedBytesLength);
+                    _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
                 } catch (OutOfMemoryError e) {
-                    final String info =
-                            "Out of memory while handling incoming message";
+                    final String info = "Out of memory while handling incoming message";
                     if (_connectionListener != null) {
                         _connectionListener.onProtocolError(info, e);
                     } else {
@@ -538,10 +535,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                          String correlationID) {
         _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
-
-        /*if (serviceType == ServiceType.Audio_Service || serviceType == ServiceType.Mobile_Nav) {
-            _protocol.startSecuringService(serviceType);
-        }*/
     }
 
     @Override

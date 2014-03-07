@@ -7,6 +7,8 @@ package com.ford.syncV4.service.secure;
  * Time: 4:49 PM
  */
 
+import android.util.Log;
+
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 
@@ -14,6 +16,8 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  * This class provides main functionality to manage (process, etc ...) SecureService messages
  */
 public class SecureServiceMessageManager {
+
+    private static final String TAG = "SecureServiceMessageManager";
 
     /**
      * Callback handler
@@ -44,9 +48,11 @@ public class SecureServiceMessageManager {
 
         // TODO : To be implement
 
+        Log.d(TAG, "Process Secure msg:" + protocolMessage);
+
         // ServiceType could be obtained from ProtocolMessage
         ServiceType serviceType = protocolMessage.getServiceType();
 
-        mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
+        //mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }
 }

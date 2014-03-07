@@ -17,7 +17,7 @@ public interface ISecureServiceMessageCallback {
 
     /**
      * Call this callback when response for the
-     * {@link com.ford.syncV4.proxy.RPCRequestFactory#buildProtectServiceRequest(com.ford.syncV4.protocol.enums.ServiceType)}
+     * {@link com.ford.syncV4.service.secure.SecureServiceMessageFactory#buildProtectServiceRequest(byte, com.ford.syncV4.protocol.enums.ServiceType)}
      * is received
      *
      * @param result {@link ProtectServiceResponse}
@@ -27,7 +27,7 @@ public interface ISecureServiceMessageCallback {
 
     /**
      * Call this callback when response for the
-     * {@link com.ford.syncV4.proxy.RPCRequestFactory#buildHandshakeRequest(com.ford.syncV4.protocol.enums.ServiceType)}
+     * {@link com.ford.syncV4.service.secure.SecureServiceMessageFactory#buildHandshakeRequest(byte, com.ford.syncV4.protocol.enums.ServiceType)}
      * is received
      *
      * @param data handshake server to client data

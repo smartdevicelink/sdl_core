@@ -1947,7 +1947,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startMobileNaviService(byte sessionID, String correlationID) {
+    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav);
         if (_callbackToUIThread) {
@@ -1963,7 +1963,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void startAudioService(byte sessionID, String correlationID) {
+    protected void onAudioServiceStarted(byte sessionID, String correlationID) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service);
         if (_callbackToUIThread) {
@@ -3148,10 +3148,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                              String correlationID) {
             if (_wiproVersion == 2) {
                 if (serviceType == ServiceType.Mobile_Nav) {
-                    startMobileNaviService(sessionID, correlationID);
+                    onMobileNaviServiceStarted(sessionID, correlationID);
                 } else if (serviceType == ServiceType.Audio_Service) {
-                    startAudioService(sessionID, correlationID);
+                    onAudioServiceStarted(sessionID, correlationID);
                 }
+
+                if (getSyncConnection() == null) {
+                    return;
+                }
+                if (getSyncConnection().getWiProProtocol() == null) {
+                    return;
+                }
+                getSyncConnection().getWiProProtocol().startSecuringService(sessionID, serviceType);
             }
         }
     }

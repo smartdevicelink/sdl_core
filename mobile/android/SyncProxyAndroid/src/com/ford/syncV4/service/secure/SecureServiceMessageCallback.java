@@ -19,6 +19,7 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
 
     private static final String TAG = "SecureServiceMessageCallback";
     private SyncConnection mSyncConnection;
+    private byte mSessionId = 0;
 
     /**
      * Set an instance of the {@link com.ford.syncV4.syncConnection.SyncConnection} object
@@ -27,6 +28,15 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
      */
     public void setSyncConnection(SyncConnection mSyncConnection) {
         this.mSyncConnection = mSyncConnection;
+    }
+
+    /**
+     * Set current session Id
+     *
+     * @param mSessionId {@link java.lang.Byte}
+     */
+    public void setSessionId(byte mSessionId) {
+        this.mSessionId = mSessionId;
     }
 
     @Override
@@ -47,7 +57,7 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
 
         switch (result) {
             case SUCCESS:
-                mSyncConnection.getWiProProtocol().startSecureHandshake(serviceType);
+                mSyncConnection.getWiProProtocol().startSecureHandshake(mSessionId, serviceType);
                 break;
         }
     }
