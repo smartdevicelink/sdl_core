@@ -943,7 +943,7 @@ void MessageHelper::SendOnSdlCloseNotificationToHMI() {
     }
     smart_objects::SmartObject& message = *notification;
     message[strings::params][strings::function_id] =
-        hmi_apis::FunctionID::BasicCommunication_OnSdlClose;
+        hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
     message[strings::params][strings::message_type] = MessageType::kNotification;
 
     ApplicationManagerImpl::instance()->ManageHMICommand(&message);
