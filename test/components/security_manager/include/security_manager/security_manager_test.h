@@ -45,7 +45,7 @@ namespace security_manager_test {
 
   using ::protocol_handler::RawMessage;
   using ::protocol_handler::RawMessagePtr;
-  using ::security_manager::SecuityQuery;
+  using ::security_manager::SecurityQuery;
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
@@ -81,7 +81,7 @@ namespace security_manager_test {
    * for correct working on Mobile side
    */
   TEST_F(SecurityManagerTest, SecurityHeader_eq_RPCHeader) {
-    ASSERT_EQ(sizeof(security_manager::SecuityQuery::QueryHeader)*8,
+    ASSERT_EQ(sizeof(security_manager::SecurityQuery::QueryHeader)*8,
               protocol_handler::ProtocolPayloadV2SizeBits());
   }
 
@@ -108,7 +108,7 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecuityQuery::ERROR_NULL_DATA), is_final)).Times(1);
+                    SecurityQuery::ERROR_NULL_DATA), is_final)).Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
     // Wait call methods in thread
@@ -119,9 +119,9 @@ namespace security_manager_test {
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
    */
   TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
-    const security_manager::SecuityQuery::QueryHeader header(
-          security_manager::SecuityQuery::REQUEST,
-          security_manager::SecuityQuery::INVALID_QUERY_ID,
+    const security_manager::SecurityQuery::QueryHeader header(
+          security_manager::SecurityQuery::REQUEST,
+          security_manager::SecurityQuery::INVALID_QUERY_ID,
           seq_number);
     const void* data = &header;
     uint32_t data_size = sizeof(header);
@@ -130,7 +130,7 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecuityQuery::ERROR_INVALID_QUERY_ID),is_final)) .Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)) .Times(1);
 
     call_OnMessageReceived(static_cast<const uint8_t*>(data),
                            data_size, secureServiceType);
@@ -140,9 +140,9 @@ namespace security_manager_test {
 
   TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest_NULLData) {
 
-    const security_manager::SecuityQuery::QueryHeader header(
-          security_manager::SecuityQuery::REQUEST,
-          security_manager::SecuityQuery::PROTECT_SERVICE_REQUEST,
+    const security_manager::SecurityQuery::QueryHeader header(
+          security_manager::SecurityQuery::REQUEST,
+          security_manager::SecurityQuery::PROTECT_SERVICE_REQUEST,
           seq_number);
     const void* data = &header;
     uint32_t data_size = sizeof(header);

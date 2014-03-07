@@ -106,7 +106,7 @@ namespace security_manager_test {
    */
   MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
              std::string(negation ? "is not" : "is") + " equal ") {
-    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
+    const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
     const size_t arg_data_size = arg->data_size();
     if(arg_data_size != exp_data_size) {
       *result_listener << "Got " << arg_data_size << " bytes"
@@ -131,14 +131,14 @@ namespace security_manager_test {
   MATCHER_P(InternalErrorWithErrId, expectedErrorId,
             std::string(negation ? "is not" : "is")
             + " InternalError Notification with selected error" ) {
-    const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
+    const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
     if(arg->data_size() < header_size) {
       *result_listener << "Size " << arg->data_size()
                        << " bytes less sizeof(QueryHeader)=" << header_size;
       return false;
       }
     const uint8_t query_type = arg->data()[0];
-    if(security_manager::SecuityQuery::NOTIFICATION != query_type) {
+    if(security_manager::SecurityQuery::NOTIFICATION != query_type) {
       *result_listener << "RawMessage is not Notification";
       return false;
       }
@@ -146,7 +146,7 @@ namespace security_manager_test {
     const uint32_t query_id = arg->data()[1] << 16 |
                               arg->data()[2] <<  8 |
                               arg->data()[3];
-    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_id) {
+    if(security_manager::SecurityQuery::SEND_INTERNAL_ERROR != query_id) {
       *result_listener << "Notification is not InternalError";
       return false;
       }

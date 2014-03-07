@@ -50,25 +50,25 @@ inline uint32_t getUInt24Value(const uint8_t* const data){
       data[0] << 16 | data[1] <<  8 | data[2];
 }
 
-SecuityQuery::QueryHeader::QueryHeader(
+SecurityQuery::QueryHeader::QueryHeader(
     uint8_t queryType, uint16_t queryId, uint32_t seqNumber) :
   query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
 }
 
-SecuityQuery::SecuityQuery() :
+SecurityQuery::SecurityQuery() :
   header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0), data_(NULL) {
   }
 
-SecuityQuery::SecuityQuery(
-    const SecuityQuery::QueryHeader &header,
+SecurityQuery::SecurityQuery(
+    const SecurityQuery::QueryHeader &header,
     const uint32_t connection_key) :
   header_(header), connection_key_(connection_key), data_(NULL) {
   }
 
-SecuityQuery::~SecuityQuery() {
+SecurityQuery::~SecurityQuery() {
   delete data_;
 }
-bool SecuityQuery::Parse(const uint8_t * const binary_data,
+bool SecurityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
   if(bin_data_size < sizeof(QueryHeader)) {
       return false;
@@ -120,7 +120,7 @@ bool SecuityQuery::Parse(const uint8_t * const binary_data,
   return true;
   }
 
-void SecuityQuery::setData(const uint8_t * const binary_data,
+void SecurityQuery::setData(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
     DCHECK(binary_data); DCHECK(bin_data_size);
     delete data_;
@@ -129,26 +129,26 @@ void SecuityQuery::setData(const uint8_t * const binary_data,
     memcpy(data_, binary_data, data_size_);
   }
 
-void SecuityQuery::setConnectionKey(const uint32_t connection_key) {
+void SecurityQuery::setConnectionKey(const uint32_t connection_key) {
     connection_key_ = connection_key;
   }
 
-void SecuityQuery::setHeader(const SecuityQuery::QueryHeader &header) {
+void SecurityQuery::setHeader(const SecurityQuery::QueryHeader &header) {
   header_ = header;
 }
 
-const SecuityQuery::QueryHeader &SecuityQuery::getHeader() const {
+const SecurityQuery::QueryHeader &SecurityQuery::getHeader() const {
   return header_;
 }
 
-const uint8_t * const SecuityQuery::getData() const {
+const uint8_t * const SecurityQuery::getData() const {
   return data_;
 }
 
-const size_t SecuityQuery::getDataSize() const {
+const size_t SecurityQuery::getDataSize() const {
   return data_size_;
 }
 
-int32_t SecuityQuery::getConnectionKey() const {
+int32_t SecurityQuery::getConnectionKey() const {
   return connection_key_;
 }

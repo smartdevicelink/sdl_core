@@ -159,17 +159,17 @@ int Connection::SetSSLContext( uint8_t session,
   if (sit == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
     //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
-    return security_manager::SecuityQuery::INTERNAL_ERROR;
+    return security_manager::SecurityQuery::INTERNAL_ERROR;
   }
   ServiceList& list = sit->second;
   ServiceList::iterator it = std::find(list.begin(), list.end(), service_type);
   if (it != list.end()) {
     if(it->ssl_context)
-      return security_manager::SecuityQuery::SERVICE_ALREADY_PROTECTED;
+      return security_manager::SecurityQuery::SERVICE_ALREADY_PROTECTED;
     it->ssl_context = context;
-    return security_manager::SecuityQuery::SUCCESS;
+    return security_manager::SecurityQuery::SUCCESS;
   }
-  return security_manager::SecuityQuery::SERVICE_NOT_FOUND;
+  return security_manager::SecurityQuery::SERVICE_NOT_FOUND;
 }
 
 security_manager::SSLContext* Connection::GetSSLContext(

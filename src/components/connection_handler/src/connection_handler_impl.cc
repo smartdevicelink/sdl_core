@@ -470,7 +470,7 @@ int ConnectionHandlerImpl::SetSSLContext(
   if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Unknown connection!");
       //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
-      return security_manager::SecuityQuery::INTERNAL_ERROR;
+      return security_manager::SecurityQuery::INTERNAL_ERROR;
     }
   Connection& connection = *it->second;
   return connection.SetSSLContext(session_id, service_type, context);

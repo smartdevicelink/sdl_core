@@ -58,9 +58,9 @@ namespace security_manager {
  * TODO(ik): replace these with globally defined message types
  * when we have them.
  */
-struct SecurityMessage: public SecuityQueryPtr {
-  explicit SecurityMessage(const SecuityQueryPtr& message)
-    : SecuityQueryPtr(message) {}
+struct SecurityMessage: public SecurityQueryPtr {
+  explicit SecurityMessage(const SecurityQueryPtr& message)
+    : SecurityQueryPtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return 0; }
 };
@@ -112,17 +112,17 @@ public:
   bool ParseHandshakeData(const SecurityMessage &inMessage);
 
   void SendProtectServiceResponse( const SecurityMessage &message,
-                                   const SecuityQuery::ProtectServiceResult result);
+                                   const SecurityQuery::ProtectServiceResult result);
 
   //Create new array for handling header + data
   void SendInternalError(const int32_t connection_key,
                          const uint32_t seq_number,
-                         const SecuityQuery::InternalErrors& error_id,
+                         const SecurityQuery::InternalErrors& error_id,
                          const std::string& error_str);
 
   //Create new array for handling header + data
   void SendData(const int32_t connectionKey,
-                SecuityQuery::QueryHeader header,
+                SecurityQuery::QueryHeader header,
                 const uint8_t * const data,
                 const size_t data_size);
 

@@ -39,7 +39,7 @@
 
 namespace security_manager {
 
-class SecuityQuery {
+class SecurityQuery {
 public:
   enum QueryType {
     REQUEST      = 0x00,
@@ -79,10 +79,10 @@ public:
     uint32_t reserved;
   };
 
-  SecuityQuery();
-  explicit SecuityQuery(const QueryHeader& header,
+  SecurityQuery();
+  explicit SecurityQuery(const QueryHeader& header,
                               const uint32_t connection_key);
-  ~SecuityQuery();
+  ~SecurityQuery();
   bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
   void setData(const uint8_t * const binary_data, const size_t bin_data_size);
   void setConnectionKey(const uint32_t connection_key);
@@ -98,6 +98,6 @@ private:
   uint8_t* data_;
   size_t data_size_;
 };
-typedef utils::SharedPtr<SecuityQuery> SecuityQueryPtr;
+typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
 }
 #endif // security_query_H
