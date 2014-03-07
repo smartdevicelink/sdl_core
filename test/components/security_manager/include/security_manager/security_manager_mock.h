@@ -115,7 +115,7 @@ namespace security_manager_test {
     const uint8_t * arg_data = arg->data();
     for (int i = 0; i < arg_data_size; ++i) {
       if(arg_data[i] != exp_data[i]) {
-        *result_listener << std::string("Fail in ") << i << "byte";
+        *result_listener << "Fail in " << i << "byte";
         return false;
         }
       }
@@ -129,14 +129,21 @@ namespace security_manager_test {
   //Mock matcher for check RawMessage as InternalError message with substring
   MATCHER_P(InternalErrorHasSubstr, expectedSubString,
             std::string(negation ? "is not" : "is")
-            + " InternalError with " + expectedSubString) {
+            + " InternalError with \"" + expectedSubString + "\"") {
     const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
-    if(arg->data_size() < header_size)
+    if(arg->data_size() < header_size) {
+      *result_listener << "Size " << arg->data_size()
+                       << " bytes less sizeof(QueryHeader)=" << header_size;
       return false;
+      }
     const uint32_t query_type =
-        arg->data()[0] << 16 | arg->data()[1] <<  8 | arg->data()[2];
-    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type)
+        arg->data()[1] << 16 |
+        arg->data()[2] <<  8 |
+        arg->data()[3];
+    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type) {
+      *result_listener << "RawMessage is not with InternalError";
       return false;
+      }
     const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);
     const std::string string(string_data, arg->data_size() - header_size);
     return std::string::npos != string.find(expectedSubString);
