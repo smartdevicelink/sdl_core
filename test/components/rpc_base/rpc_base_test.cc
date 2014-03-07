@@ -301,93 +301,69 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
 }
 
 TEST(ValidatedTypes, TestBooleanDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size = Boolean::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "b");
+  std::string sign;
+  DbusSignature<Boolean>(&sign);
+  ASSERT_EQ(sign, "b");
 }
 
 TEST(ValidatedTypes, TestIntDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size = Integer<int32_t, 1, 5>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "i");
+  std::string sign;
+  DbusSignature<Integer<int32_t, 1, 2> >(&sign);
+  ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestFloatDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size = Float<1, 2>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "d");
+  std::string sign;
+  DbusSignature<Float<1, 2> >(&sign);
+  ASSERT_EQ(sign, "d");
 }
 
 TEST(ValidatedTypes, TestStringDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size = String<1, 2>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "s");
+  std::string sign;
+  DbusSignature<String<1, 2> >(&sign);
+  ASSERT_EQ(sign, "s");
 }
 
 TEST(ValidatedTypes, TestEnumDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size = Enum<TestEnum>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "i");
+  std::string sign;
+  DbusSignature<Enum<TestEnum> >(&sign);
+  ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestIntArrayDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Array<Integer<int32_t, 1, 2>, 1, 3>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 2);
-  ASSERT_STREQ(sign, "ai");
+  std::string sign;
+  DbusSignature< Array<Integer<int32_t, 1, 2>, 1, 3> >(&sign);
+  ASSERT_EQ(sign, "ai");
 }
 
 TEST(ValidatedTypes, TestIntArrayArrayDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 3);
-  ASSERT_STREQ(sign, "aai");
+  std::string sign;
+  DbusSignature< Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5> >(&sign);
+  ASSERT_EQ(sign, "aai");
 }
 
 TEST(ValidatedTypes, TestMapDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Map<Integer<int32_t, 1, 2>, 3, 4>::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 5);
-  ASSERT_STREQ(sign, "a{si}");
-}
-
-TEST(ValidatedTypes, TestShortBufferDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Map<Integer<int32_t, 1, 2>, 3, 4>::DbusSignature(sign, 2);
-  ASSERT_EQ(sign_size, 0);
+  std::string sign;
+  DbusSignature< Map<Integer<int32_t, 1, 2>, 3, 4> >(&sign);
+  ASSERT_EQ(sign, "a{si}");
 }
 
 TEST(ValidatedTypes, TestMandatoryEnumDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Mandatory<Enum<TestEnum> >::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 1);
-  ASSERT_STREQ(sign, "i");
+  std::string sign;
+  DbusSignature< Mandatory<Enum<TestEnum> > >(&sign);
+  ASSERT_EQ(sign, "i");
 }
 
 TEST(ValidatedTypes, TestOptionalEnumDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Optional<Enum<TestEnum> >::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 4);
-  ASSERT_STREQ(sign, "(bi)");
+  std::string sign;
+  DbusSignature< Optional<Enum<TestEnum> > >(&sign);
+  ASSERT_EQ(sign, "(bi)");
 }
 
 TEST(ValidatedTypes, TestOptionalFloatArrayDbusSignature) {
-  char sign[42] = {};
-  size_t sign_size =
-      Optional< Array<Float<1,2>, 3, 4> >::DbusSignature(sign, 42);
-  ASSERT_EQ(sign_size, 5);
-  ASSERT_STREQ(sign, "(bad)");
+  std::string sign;
+  DbusSignature< Optional< Array<Float<1,2>, 3, 4> > >(&sign);
+  ASSERT_EQ(sign, "(bad)");
 }
 
 }  // namespace codegen

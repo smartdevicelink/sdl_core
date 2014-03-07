@@ -38,110 +38,116 @@
 #include "json/value.h"
 
 namespace rpc {
+namespace impl {
 
-inline size_t Boolean::DbusSignature(char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_BOOLEAN;
-    return 1;
+// Type to DBus type id mappers
+template<typename T> char DbusTypeCode();
+template<> char DbusTypeCode<bool>() { return DBUS_TYPE_BOOLEAN; }
+// There is no dbus type for signed byte, map to unsigned
+template<> char DbusTypeCode<int8_t>() { return DBUS_TYPE_BYTE; }
+template<> char DbusTypeCode<uint8_t>() { return DBUS_TYPE_BYTE; }
+template<> char DbusTypeCode<int16_t>() { return DBUS_TYPE_INT16; }
+template<> char DbusTypeCode<uint16_t>() { return DBUS_TYPE_UINT16; }
+template<> char DbusTypeCode<int32_t>() { return DBUS_TYPE_INT32; }
+template<> char DbusTypeCode<uint32_t>() { return DBUS_TYPE_UINT32; }
+template<> char DbusTypeCode<int64_t>() { return DBUS_TYPE_INT64; }
+template<> char DbusTypeCode<uint64_t>() { return DBUS_TYPE_UINT64; }
+template<> char DbusTypeCode<double>() { return DBUS_TYPE_DOUBLE; }
+template<> char DbusTypeCode<std::string>() { return DBUS_TYPE_STRING; }
+
+// Non-specialized template supposes there is static
+// void GetDbusSignature(std::string*) method in T
+template<typename T>
+struct DbusSignatureHelper {
+  static void DbusSignature(std::string* signature) {
+    T::GetDbusSignature(signature);
   }
-  return 0;
-}
+};
+
+template<>
+struct DbusSignatureHelper<Boolean> {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += rpc::impl::DbusTypeCode<bool>();
+  }
+};
 
 template<typename T, T minval, T maxval>
-size_t Integer<T, minval, maxval>::DbusSignature(char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_INT32;
-    return 1;
+struct DbusSignatureHelper<Integer<T, minval, maxval> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += rpc::impl::DbusTypeCode<T>();
   }
-  return 0;
-}
+};
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
-size_t Float<minnum, maxnum, minden, maxden>::DbusSignature(
-    char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_DOUBLE;
-    return 1;
+struct DbusSignatureHelper<Float<minnum, maxnum, minden, maxden> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += rpc::impl::DbusTypeCode<double>();
   }
-  return 0;
-}
+};
+
+template<typename T>
+struct DbusSignatureHelper<Enum<T> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += rpc::impl::DbusTypeCode<int32_t>();
+  }
+};
 
 template<size_t minlen, size_t maxlen>
-size_t String<minlen, maxlen>::DbusSignature(
-    char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_STRING;
-    return 1;
+struct DbusSignatureHelper<String<minlen, maxlen> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += rpc::impl::DbusTypeCode<std::string>();
   }
-  return 0;
-}
-
-template<typename T>
-size_t Enum<T>::DbusSignature(
-    char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_INT32;
-    return 1;
-  }
-  return 0;
-}
+};
 
 template<typename T, size_t minsize, size_t maxsize>
-size_t Array<T, minsize, maxsize>::DbusSignature(
-    char *buff, size_t buff_len) {
-  if (buff_len != 0) {
-    *buff = DBUS_TYPE_ARRAY;
-    size_t array_sign_len = T::DbusSignature(buff + 1, buff_len - 1);
-    if (array_sign_len != 0) {
-      return 1 + array_sign_len;
-    }
+struct DbusSignatureHelper<Array<T, minsize, maxsize> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += DBUS_TYPE_ARRAY;
+    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
   }
-  return 0;
-}
+};
 
 template<typename T, size_t minsize, size_t maxsize>
-size_t Map<T, minsize, maxsize>::DbusSignature(
-    char *buff, size_t buff_len) {
-  if (buff_len > 3) {
-    buff[0] = DBUS_TYPE_ARRAY;
-    buff[1] = DBUS_DICT_ENTRY_BEGIN_CHAR;
-    buff[2] = DBUS_TYPE_STRING;
-    size_t sign_len = 3;
-    size_t value_sign_len =
-        T::DbusSignature(buff + sign_len, buff_len - sign_len);
-    if (value_sign_len != 0) {
-      sign_len += value_sign_len;
-      if (buff_len > sign_len) {
-        buff[sign_len] = DBUS_DICT_ENTRY_END_CHAR;
-        return sign_len + 1;
-      }
-    }
+struct DbusSignatureHelper<Map<T, minsize, maxsize> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += DBUS_TYPE_ARRAY;
+    (*signature) += DBUS_DICT_ENTRY_BEGIN_CHAR;
+    (*signature) +=
+        rpc::impl::DbusTypeCode<typename Map<T, minsize, maxsize>::key_type>();
+    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
+    (*signature) += DBUS_DICT_ENTRY_END_CHAR;
   }
-  return 0;
+};
+
+template<typename T>
+struct DbusSignatureHelper<Mandatory<T> > {
+  static void DbusSignature(std::string* signature) {
+    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
+  }
+};
+
+template<typename T>
+struct DbusSignatureHelper<Optional<T> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += DBUS_STRUCT_BEGIN_CHAR;
+    (*signature) += rpc::impl::DbusTypeCode<bool>();
+    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
+    (*signature) += DBUS_STRUCT_END_CHAR;
+  }
+};
+
+}  // namespace impl
+
+
+// Helper function that outputs dbus signature for type T
+template<typename T>
+void DbusSignature(std::string* signature) {
+  impl::DbusSignatureHelper<T>::DbusSignature(signature);
 }
 
 template<typename T>
-size_t Mandatory<T>::DbusSignature(char *buff, size_t buff_len) {
-  return T::DbusSignature(buff, buff_len);
-}
-
-template<typename T>
-size_t Optional<T>::DbusSignature(char *buff, size_t buff_len) {
-  if (buff_len > 1) {
-    buff[0] = DBUS_STRUCT_BEGIN_CHAR;
-    buff[1] = DBUS_TYPE_BOOLEAN;
-    size_t sign_len = 2;
-    size_t value_sign_len = T::DbusSignature(buff + sign_len,
-                                             buff_len - sign_len);
-    if (value_sign_len != 0) {
-      sign_len += value_sign_len;
-      if (buff_len > sign_len) {
-        buff[sign_len] = DBUS_STRUCT_END_CHAR;
-        return sign_len + 1;
-      }
-    }
-  }
-  return 0;
+void DbusSignature(std::string* signature, const T& dummy) {
+  impl::DbusSignatureHelper<T>::DbusSignature(signature);
 }
 
 }  // namespace rpc
