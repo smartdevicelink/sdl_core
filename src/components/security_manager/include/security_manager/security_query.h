@@ -41,12 +41,18 @@ namespace security_manager {
 
 class SecuityQuery {
 public:
-  enum SecuityQueryId {
-    ProtectServiceRequest  = 0x1,
-    ProtectServiceResponse = 0x2,
-    SendHandshakeData = 0x3,
-    InternalError = 0xFF,
-    InvalidQuery = 0x100
+  enum QueryType {
+    REQUEST      = 0x00,
+    RESPONSE     = 0x10,
+    NOTIFICATION = 0x20,
+    INVALID_QUERY_TYPE = 0xFF
+    };
+  enum QueryId {
+    PROTECT_SERVICE_REQUEST  = 0x1,
+    PROTECT_SERVICE_RESPONSE = 0x2,
+    SEND_HANDSHAKE_DATA      = 0x3,
+    SEND_INTERNAL_ERROR      = 0xFF,
+    INVALID_QUERY_ID         = 0x100
   };
 
   enum ProtectServiceResult {
@@ -58,16 +64,11 @@ public:
   };
 
   struct QueryHeader {
-    QueryHeader(const SecuityQueryId id,
-                const uint32_t seq_umber);
-    /* FIXME(EZ): Add
-     * RpcType  rpc_type;
-     * uint32_t rpc_function_id;
-     * uint32_t corellation_id;
-     * uint32_t json_size;
-     */
-    SecuityQueryId  query_id_;    // API function identifier
-    uint32_t seq_number_;  // request sequential number
+    QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber);
+    uint32_t query_type:8;
+    uint32_t query_id:24;     // API function identifier
+    uint32_t seq_number;   // request sequential number
+    uint32_t reserved;
   };
 
   SecuityQuery();

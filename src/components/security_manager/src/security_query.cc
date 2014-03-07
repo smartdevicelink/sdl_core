@@ -43,14 +43,19 @@ inline uint32_t getUInt32Value(const uint8_t* const data){
       data[0] << 24 | data[1] << 16 |
       data[2] <<  8 | data[3];
 }
+inline uint32_t getUInt24Value(const uint8_t* const data){
+  DCHECK(data);
+  return
+      data[0] << 16 | data[1] <<  8 | data[2];
+}
 
-SecuityQuery::QueryHeader::QueryHeader(const SecuityQueryId id,
-                                             uint32_t seq_umber) :
-  query_id_(id), seq_number_(0){
+SecuityQuery::QueryHeader::QueryHeader(
+    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
+  query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
 }
 
 SecuityQuery::SecuityQuery() :
-  header_(InvalidQuery, 0), connection_key_(0), data_(NULL) {
+  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0), data_(NULL) {
   }
 
 SecuityQuery::SecuityQuery(
@@ -61,37 +66,55 @@ SecuityQuery::SecuityQuery(
 
 SecuityQuery::~SecuityQuery() {
   delete data_;
-  data_ = NULL;
 }
 bool SecuityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
-  const size_t header_size = sizeof(QueryHeader);
-  if(bin_data_size < header_size) {
+  if(bin_data_size < sizeof(QueryHeader)) {
       return false;
     }
-  switch (binary_data[0]) {
-    case ProtectServiceRequest:
-      header_.query_id_ = ProtectServiceRequest;
+  const uint8_t guery_type = binary_data[0];
+  switch (guery_type) {
+    case REQUEST:
+        header_.query_type = REQUEST;
       break;
-    case ProtectServiceResponse:
-      header_.query_id_ = ProtectServiceResponse;
+    case RESPONSE:
+        header_.query_type = RESPONSE;
       break;
-    case SendHandshakeData:
-      header_.query_id_ = SendHandshakeData;
+    case NOTIFICATION:
+        header_.query_type = NOTIFICATION;
       break;
-    case InternalError:
-      header_.query_id_ = InternalError;
+    default:
+      header_.query_type = INVALID_QUERY_TYPE;
+      //TODO(EZ): check?
+      break;
+    }
+  const uint8_t query_id = getUInt24Value(binary_data+1);
+  switch (query_id) {
+    case PROTECT_SERVICE_REQUEST:
+      header_.query_id = PROTECT_SERVICE_REQUEST;
+      break;
+    case PROTECT_SERVICE_RESPONSE:
+      header_.query_id = PROTECT_SERVICE_RESPONSE;
+      break;
+    case SEND_HANDSHAKE_DATA:
+      header_.query_id = SEND_HANDSHAKE_DATA;
+      break;
+    case SEND_INTERNAL_ERROR:
+      header_.query_id = SEND_INTERNAL_ERROR;
       break;
     default: // On wrong query id
-      header_.query_id_ = InvalidQuery;
+      header_.query_id = INVALID_QUERY_ID;
+      //TODO(EZ): check?
+      break;
     }
-  header_.seq_number_ = getUInt32Value(binary_data + 1);
-  const int data_size = bin_data_size - header_size;
+  header_.seq_number = getUInt32Value(binary_data + 4);
+  //skip data
+  const int data_size = bin_data_size - sizeof(QueryHeader);
   if(data_size > 0) {
       delete data_;
       data_size_ = data_size;
       data_ = new uint8_t[data_size_];
-      memcpy(data_, binary_data + header_size, data_size_);
+      memcpy(data_, binary_data + sizeof(QueryHeader), data_size_);
     }
   return true;
   }

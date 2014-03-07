@@ -116,7 +116,7 @@ public:
 
   //Create new array for handling header + data
   void SendInternalError(const int32_t connectionKey,
-                         const uint32_t seq_umber,
+                         const uint32_t seq_number,
                          const std::string& error);
 
   //Create new array for handling header + data
