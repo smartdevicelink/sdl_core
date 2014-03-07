@@ -1858,8 +1858,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnSdlClose: {
-      command.reset(new commands::OnSdlCloseNotification(message));
+    case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
+      command.reset(new commands::OnSDLCloseNotification(message));
       break;
     }
   }

@@ -705,9 +705,6 @@ SDL.SDLModel = Em.Object.create({
                 if (params[i].keyboardLayout) {
                     SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keyboardLayout', params[i].keyboardLayout);
                 }
-                if (params[i].sendDynamicEntry) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.sendDynamicEntry', params[i].sendDynamicEntry)
-                }
                 if (params[i].keypressMode) {
                     SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keypressMode', params[i].keypressMode)
                 }

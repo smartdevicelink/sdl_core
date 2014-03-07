@@ -40,21 +40,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnSdlCloseNotification command class
+ * @brief OnSDLCloseNotification command class
  **/
-class OnSdlCloseNotification : public NotificationToHMI {
+class OnSDLCloseNotification : public NotificationToHMI {
  public:
   /**
-   * @brief OnSdlCloseNotification class constructor
+   * @brief OnSDLCloseNotification class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSdlCloseNotification(const MessageSharedPtr& message);
+  explicit OnSDLCloseNotification(const MessageSharedPtr& message);
 
   /**
    * @brief OnSdlCloseNotification class destructor
    **/
-  virtual ~OnSdlCloseNotification();
+  virtual ~OnSDLCloseNotification();
 
   /**
    * @brief Execute command
@@ -62,7 +62,7 @@ class OnSdlCloseNotification : public NotificationToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnSdlCloseNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnSDLCloseNotification);
 };
 
 }  // namespace commands

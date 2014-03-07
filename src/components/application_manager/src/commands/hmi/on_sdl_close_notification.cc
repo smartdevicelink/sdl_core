@@ -36,14 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-OnSdlCloseNotification::OnSdlCloseNotification(
+OnSDLCloseNotification::OnSDLCloseNotification(
     const MessageSharedPtr& message) : NotificationToHMI(message) {
 }
 
-OnSdlCloseNotification::~OnSdlCloseNotification() {
+OnSDLCloseNotification::~OnSDLCloseNotification() {
 }
 
-void OnSdlCloseNotification::Run() {
+void OnSDLCloseNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSdlCloseNotification::Run");
 
   SendNotification();

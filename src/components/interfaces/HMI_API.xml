@@ -1367,11 +1367,6 @@
   <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="false" >
     <description>Desired keyboard layout.</description>
   </param>
-  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-    <description>In this mode, all keypresses will be sent as they occur.</description>
-    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-    <description>If omitted, this value will be set to FALSE.</description>
-  </param>
   <param name="keypressMode" type="Common.KeypressMode" mandatory="false" >
     <description>
     	Desired keypress mode.
@@ -1924,7 +1919,7 @@
       <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
       </param>
     </function>
-    <function name="OnSdlClose" messagetype="notification">
+    <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
     </function>
 </interface>
