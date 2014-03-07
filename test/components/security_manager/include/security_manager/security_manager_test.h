@@ -37,7 +37,7 @@
 #include <gmock/gmock.h>
 #include "security_manager/security_manager.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "protocol_handler/protocol_payload.h"
 
 using ::testing::_;
 using ::testing::NotNull;
@@ -131,7 +131,9 @@ namespace security_manager_test {
     const size_t header_size = sizeof(security_manager::SecuityQuery::QueryHeader);
     if(arg->data_size() < header_size)
       return false;
-    if(security_manager::SecuityQuery::InternalError != arg->data()[0])
+    const uint32_t query_type =
+        arg->data()[0] << 16 | arg->data()[1] <<  8 | arg->data()[2];
+    if(security_manager::SecuityQuery::SEND_INTERNAL_ERROR != query_type)
       return false;
     const char* const string_data = reinterpret_cast<char*>(arg->data() + header_size);
     const std::string string(string_data, arg->data_size() - header_size);
@@ -168,6 +170,11 @@ namespace security_manager_test {
     const uint32_t seq_number = 1;
   };
 
+  TEST_F(SecurityManagerTest, SecurityHeader_eq_RPCHeader) {
+    ASSERT_EQ(sizeof(security_manager::SecuityQuery::QueryHeader)*8,
+              protocol_handler::ProtocolPayloadV2SizeBits());
+  }
+
   TEST_F(SecurityManagerTest, OnMessageReceived_WrongService) {
     //Call with wrong Service type
     call_OnMessageReceived(NULL, 0, protocol_handler::kZero);
@@ -192,7 +199,9 @@ namespace security_manager_test {
 
   TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
     const security_manager::SecuityQuery::QueryHeader header(
-          security_manager::SecuityQuery::InvalidQuery, seq_number);
+          security_manager::SecuityQuery::INVALID_QUERY_ID,
+          security_manager::SecuityQuery::INVALID_QUERY_TYPE,
+          seq_number);
     const void* data = &header;
     uint32_t data_size = sizeof(header);
 
@@ -209,7 +218,9 @@ namespace security_manager_test {
 
   TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest) {
 //    const security_manager::SecuityQuery::QueryHeader header(
-//          security_manager::SecuityQuery::ProtectServiceRequest, seq_number);
+//          security_manager::SecuityQuery::REQUEST,
+//          security_manager::SecuityQuery::PROTECT_SERVICE_REQUEST,
+//          seq_number);
 //    const void* data = &header;
 //    uint32_t data_size = sizeof(header);
 //    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);

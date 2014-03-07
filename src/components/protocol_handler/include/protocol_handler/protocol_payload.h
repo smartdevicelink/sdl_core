@@ -72,6 +72,8 @@ void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload, size_t payload_si
 std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header);
 std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload);
 
+//Add for tests
+size_t ProtocolPayloadV2SizeBits();
 } // namespace protocol_handler
 
 #endif /* SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PAYLOAD_H_ */

@@ -90,7 +90,11 @@ std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload) {
            <<"  header: "<<payload.header
            <<", json (bytes): "<<payload.json.size()
            <<", data (bytes): "<<payload.data.size()
-           <<")";
+          <<")";
+}
+
+size_t ProtocolPayloadV2SizeBits() {
+  return PayloadHeaderBits;
 }
 
 } // namespace protocol_handler
