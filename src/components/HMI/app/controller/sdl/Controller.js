@@ -52,8 +52,7 @@ SDL.SDLController = Em.Object
                 || SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.AudioPassThruPopUp.activate
-                || SDL.VRHelpListView.active) {
+                || SDL.AudioPassThruPopUp.activate) {
 
                 return 'HMI_OBSCURED';
             }
