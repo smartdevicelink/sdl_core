@@ -28,7 +28,14 @@
                      "LIMITED"
                   ]
               },
-              "ShowConstantTBT":{
+			        "AlertManeuver":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },
+               "ShowConstantTBT":{
                   "hmi_levels":[
                      "BACKGROUND",
                      "FULL",
