@@ -80,7 +80,7 @@ void OnVRLanguageChangeNotification::Run() {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-      ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
+      ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id(), true);
     }
   }
 }

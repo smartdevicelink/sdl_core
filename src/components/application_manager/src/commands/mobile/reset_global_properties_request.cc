@@ -156,7 +156,6 @@ void ResetGlobalPropertiesRequest::Run() {
       (hmi_apis::Common_Language::EN_US);
       key_board_properties[hmi_request::keyboard_layout] = static_cast<int32_t>
       (hmi_apis::Common_KeyboardLayout::QWERTY);
-      key_board_properties[hmi_request::send_dynamic_entry] = false;
 
       // Look for APPLINK-4432 for details.
       /*smart_objects::SmartObject limited_character_list = smart_objects::SmartObject(

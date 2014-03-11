@@ -84,9 +84,7 @@ void SyncPDataRequest::Run() {
 
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(
-          application->name(),
-          file_data,
-          relative_file_path);
+          file_data, file_system::FullPath(relative_file_path), 0);
 
   switch(save_result) {
     case mobile_apis::Result::SUCCESS:

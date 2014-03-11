@@ -98,10 +98,6 @@ set(LIBRARIES
     MessageBrokerServer
     
     encryption
-    bluetooth
-    pthread
-    avahi-client
-    avahi-common
 #   rt
    # ${GSTREAMER_gstreamer_LIBRARY}
 )
@@ -110,6 +106,18 @@ if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
+endif()
+
+if (BUILD_BT_SUPPORT)
+  list(APPEND LIBRARIES bluetooth)
+endif()
+
+if (BUILD_AVAHI_SUPPORT)
+  list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
 endif()
 
 add_executable("test_suit" "./test_suit.cc")

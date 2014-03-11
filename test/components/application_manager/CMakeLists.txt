@@ -26,6 +26,8 @@ set(LIBRARIES
     MOBILE_API
     HMI_API
     SmartObjects
+    apr-1
+    aprutil-1
 )
 
 #create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")

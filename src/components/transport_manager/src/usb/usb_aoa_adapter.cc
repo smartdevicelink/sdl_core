@@ -72,5 +72,9 @@ TransportAdapter::Error UsbAoaAdapter::Init() {
   return TransportAdapter::OK;
 }
 
+bool UsbAoaAdapter::ToBeAutoConnected(DeviceSptr device) const {
+  return true;
+}
+
 }  // namespace transport_adapter
 }  // namespace transport_manager

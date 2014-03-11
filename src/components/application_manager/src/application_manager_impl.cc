@@ -135,7 +135,7 @@ bool ApplicationManagerImpl::Stop() {
     LOG4CXX_ERROR(logger_,
                   "An error occured during unregistering applications.");
   }
-
+  MessageHelper::SendOnSdlCloseNotificationToHMI();
   return true;
 }
 
@@ -1062,17 +1062,17 @@ void ApplicationManagerImpl::SendMessageToHMI(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-#endif  // WEB_HMI
+#endif  // HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
   message_to_send->set_smart_object(*message);
-#endif  // QT_HMI
+#endif  // HMI_DBUS_API
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
 }
@@ -1368,16 +1368,16 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
     return;
   }
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
-#endif  // WEB_HMI
+#endif  // HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
   *smart_object = message->smart_object();
-#endif  // QT_HMI
+#endif  // HMI_DBUS_API
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");
   if (!ManageHMICommand(smart_object)) {
@@ -1595,32 +1595,38 @@ void ApplicationManagerImpl::Unmute() {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
-    const std::string& app_name, const std::vector<uint8_t>& binary_data,
-    const std::string& save_path, const uint32_t offset) {
-  if (binary_data.size() > file_system::GetAvailableSpaceForApp(app_name)) {
+    const std::vector<uint8_t>& binary_data, const std::string& file_path,
+    const uint32_t offset) {
+  LOG4CXX_INFO(
+      logger_,
+      "SaveBinaryWithOffset  binary_size = " << binary_data.size()
+          << " offset = " << offset);
+
+  if (binary_data.size() > file_system::GetAvailableDiskSpace()) {
+    LOG4CXX_ERROR(logger_, "Out of free disc space.");
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
 
-  LOG4CXX_INFO(logger_, "SaveBinaryWithOffset  binary_size = "
-               << binary_data.size() << " offset = " << offset);
-
-  uint32_t file_size = file_system::FileSize(file_system::FullPath(save_path));
+  uint32_t file_size = file_system::FileSize(file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
     if (file_size != offset) {
-      LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+      LOG4CXX_INFO(
+          logger_,
+          "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
       return mobile_apis::Result::INVALID_DATA;
     }
-    file_stream = file_system::Open(file_system::FullPath(save_path),
-                                    std::ios_base::app);
+    file_stream = file_system::Open(file_path, std::ios_base::app);
   } else {
-    LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
+    LOG4CXX_INFO(
+        logger_,
+        "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
     // if offset == 0: rewrite file
-    file_stream = file_system::Open(file_system::FullPath(save_path),
-                                    std::ios_base::out);
+    file_stream = file_system::Open(file_path, std::ios_base::out);
   }
 
-  if (!file_system::Write(file_stream,binary_data.data(), binary_data.size())) {
+  if (!file_system::Write(file_stream, binary_data.data(),
+                          binary_data.size())) {
     file_system::Close(file_stream);
     return mobile_apis::Result::GENERIC_ERROR;
   }
@@ -1628,5 +1634,6 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }
+
 
 }  // namespace application_manager
