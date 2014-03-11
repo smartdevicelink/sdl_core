@@ -96,7 +96,7 @@ SDL.SDLController = Em.Object
          * @type object
          */
         activateTBT: function(){
-            if (SDL.SDLAppController.model.tbtActivate) {
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.tbtActivate) {
                 SDL.TurnByTurnView.activate(SDL.SDLAppController.model.appID);
             }
         },
