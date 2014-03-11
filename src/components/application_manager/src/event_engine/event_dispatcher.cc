@@ -46,24 +46,24 @@ EventDispatcher::~EventDispatcher() {
 }
 
 void EventDispatcher::raise_event(const Event& event) {
-  AutoLock auto_lock(state_lock_);
-
   // create local list
   ObserverList list;
+  {
+    AutoLock auto_lock(state_lock_);
+    // check if event is notification
+    if (hmi_apis::messageType::notification == event.smart_object_type()) {
 
-  // check if event is notification
-  if (hmi_apis::messageType::notification == event.smart_object_type()) {
-
-    //ObserversMap iterator
-    ObserversMap::iterator it = observers_[event.id()].begin();
-    for (; observers_[event.id()].end() != it; ++it) {
-      list = it->second;
+      //ObserversMap iterator
+      ObserversMap::iterator it = observers_[event.id()].begin();
+      for (; observers_[event.id()].end() != it; ++it) {
+        list = it->second;
+      }
     }
-  }
 
-  if (hmi_apis::messageType::response == event.smart_object_type()
-      || hmi_apis::messageType::error_response == event.smart_object_type()) {
-    list = observers_[event.id()][event.smart_object_correlation_id()];
+    if (hmi_apis::messageType::response == event.smart_object_type()
+        || hmi_apis::messageType::error_response == event.smart_object_type()) {
+      list = observers_[event.id()][event.smart_object_correlation_id()];
+    }
   }
 
   // Call observers
