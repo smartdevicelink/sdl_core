@@ -112,14 +112,14 @@ namespace security_manager_test {
       *result_listener << "Got " << arg_data_size << " bytes"
                       << "expected " << exp_data_size << " bytes";
       return false;
-      }
+    }
     const uint8_t * arg_data = arg->data();
     for (int i = 0; i < arg_data_size; ++i) {
       if(arg_data[i] != exp_data[i]) {
         *result_listener << "Fail in " << i << "byte";
         return false;
-        }
       }
+    }
     return true;
   }
 
@@ -132,16 +132,17 @@ namespace security_manager_test {
             std::string(negation ? "is not" : "is")
             + " InternalError Notification with selected error" ) {
     const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
-    if(arg->data_size() < header_size) {
+    if(arg->data_size() <= header_size) {
       *result_listener << "Size " << arg->data_size()
-                       << " bytes less sizeof(QueryHeader)=" << header_size;
+                       << " bytes less or equal sizeof(QueryHeader)="
+                       << header_size;
       return false;
-      }
+    }
     const uint8_t query_type = arg->data()[0];
     if(security_manager::SecurityQuery::NOTIFICATION != query_type) {
       *result_listener << "RawMessage is not Notification";
       return false;
-      }
+    }
     //Read Big-Endian number
     const uint32_t query_id = arg->data()[1] << 16 |
                               arg->data()[2] <<  8 |
@@ -149,15 +150,15 @@ namespace security_manager_test {
     if(security_manager::SecurityQuery::SEND_INTERNAL_ERROR != query_id) {
       *result_listener << "Notification is not InternalError";
       return false;
-      }
-    const uint32_t err_id = arg->data()[header_size + 0] << 16 |
-                            arg->data()[header_size + 1] <<  8 |
-                            arg->data()[header_size + 2];
-    if(expectedErrorId != err_id) {
+    }
+    //Read err_id as bin data number
+    const uint8_t* err_id =
+        reinterpret_cast<uint8_t*>(arg->data() + header_size);
+    if(expectedErrorId != *err_id) {
       *result_listener << "InternalError is not with error "
                        << expectedErrorId;
       return false;
-      }
+    }
     return true;
   }
 

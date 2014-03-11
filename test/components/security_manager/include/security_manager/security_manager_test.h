@@ -88,7 +88,7 @@ namespace security_manager_test {
   /*
    * SecurityManger shall skip all not-Secure messages
    */
-  TEST_F(SecurityManagerTest, OnMessageReceived_WrongService) {
+  TEST_F(SecurityManagerTest, GetWrongServiceType) {
     // Call with wrong Service type
     call_OnMessageReceived(NULL, 0, protocol_handler::kZero);
     call_OnMessageReceived(NULL, 0, protocol_handler::kRpc);
@@ -104,11 +104,11 @@ namespace security_manager_test {
   /*
    * SecurityManger shall send InternallError on null data recieved
    */
-  TEST_F(SecurityManagerTest, OnMessageReceived_NullData) {
+  TEST_F(SecurityManagerTest, GetEmptyQuery) {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_NULL_DATA), is_final)).Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
     // Wait call methods in thread
@@ -118,7 +118,7 @@ namespace security_manager_test {
   /*
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
    */
-  TEST_F(SecurityManagerTest, OnMessageReceived_InvalidQuery) {
+  TEST_F(SecurityManagerTest, GetInvalidQueryId) {
     const security_manager::SecurityQuery::QueryHeader header(
           security_manager::SecurityQuery::REQUEST,
           security_manager::SecurityQuery::INVALID_QUERY_ID,
@@ -126,7 +126,7 @@ namespace security_manager_test {
     const void* data = &header;
     uint32_t data_size = sizeof(header);
 
-    // Expect error message with string
+    // Expect error message with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
@@ -138,8 +138,77 @@ namespace security_manager_test {
     sleep(1);
   }
 
-  TEST_F(SecurityManagerTest, OnMessageReceived_ProtectServiceRequest_NULLData) {
+  /*
+   * SecurityManger shall send InternallError on
+   * getting PROTECT_SERVICE_RESPONSE from mobile side
+   */
+  TEST_F(SecurityManagerTest, GetProtectServiceResponse) {
+    const security_manager::SecurityQuery::QueryHeader header(
+          security_manager::SecurityQuery::REQUEST,
+          security_manager::SecurityQuery::PROTECT_SERVICE_RESPONSE,
+          seq_number);
+    const void* data = &header;
+    uint32_t data_size = sizeof(header);
 
+    // Expect error message with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)) .Times(1);
+
+    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+                           data_size, secureServiceType);
+    // Wait call methods in thread
+    sleep(1);
+  }
+
+  /*
+   * SecurityManger shall send InternallError on
+   * getting SEND_HANDSHAKE_DATA from mobile side before
+   * PROTECT_SERVICE_RESPONSE
+   */
+  TEST_F(SecurityManagerTest, GetSendHandshakeData) {
+    const security_manager::SecurityQuery::QueryHeader header(
+          security_manager::SecurityQuery::REQUEST,
+          security_manager::SecurityQuery::SEND_HANDSHAKE_DATA,
+          seq_number);
+    const void* data = &header;
+    uint32_t data_size = sizeof(header);
+
+    // Expect error message with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecurityQuery::ERROR_PROTECTION_NOT_REQUESTED),is_final)) .Times(1);
+
+    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+                           data_size, secureServiceType);
+    // Wait call methods in thread
+    sleep(1);
+  }
+
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest_WrongDataSize) {
+    const security_manager::SecurityQuery::QueryHeader header(
+          security_manager::SecurityQuery::REQUEST,
+          security_manager::SecurityQuery::PROTECT_SERVICE_REQUEST,
+          seq_number);
+    const void* data = &header;
+    uint32_t data_size = sizeof(header);
+    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);
+
+    // Expect error message with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecurityQuery::ERROR_NULL_DATA),is_final)) .Times(1);
+
+    call_OnMessageReceived(static_cast<const uint8_t*>(data),
+                           data_size, secureServiceType);
+    //Wait call methods in thread
+    sleep(1);
+  }
+
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest) {
     const security_manager::SecurityQuery::QueryHeader header(
           security_manager::SecurityQuery::REQUEST,
           security_manager::SecurityQuery::PROTECT_SERVICE_REQUEST,

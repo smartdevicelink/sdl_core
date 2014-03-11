@@ -41,12 +41,14 @@ namespace security_manager {
 
 class SecurityQuery {
 public:
+  //size 1 byte
   enum QueryType {
     REQUEST      = 0x00,
     RESPONSE     = 0x10,
     NOTIFICATION = 0x20,
     INVALID_QUERY_TYPE = 0xFF
     };
+  //size 3 bytes
   enum QueryId {
     PROTECT_SERVICE_REQUEST  = 0x1,
     PROTECT_SERVICE_RESPONSE = 0x2,
@@ -54,6 +56,7 @@ public:
     SEND_INTERNAL_ERROR      = 0xFF,
     INVALID_QUERY_ID         = 0x100
   };
+  //size 1 byte
   enum ProtectServiceResult {
     SUCCESS = 0x1,
     PENDING = 0x2,     //Handshake in progress
@@ -61,6 +64,7 @@ public:
     SERVICE_NOT_FOUND = 0x4,
     INTERNAL_ERROR = 0xFF
   };
+  //size 1 byte
   enum InternalErrors {
     ERROR_INVALID_QUERY_SIZE = 0x1, //low size of message
     ERROR_INVALID_QUERY_ID = 0x2,   //unknown query id
