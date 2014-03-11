@@ -165,9 +165,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "targetID": 100,
-                        "messageLength": 2000,
-                        "messageData": 200,
+                        "messageDataResult": 200,
                         "code": SDL.SDLModel.resultCode["SUCCESS"],
                         "method": "VehicleInfo.DiagnosticMessage"
                     }

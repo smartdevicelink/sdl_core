@@ -213,7 +213,7 @@ FFW.TTS = FFW.RPCObserver.create( {
             var request = request;
 
             setTimeout(function(){
-                if (SDL.InteractionChoicesView.active) {
+                if (SDL.SDLAppController.model.activeRequests.uiPerformInteraction) {
                     //FFW.TTS.requestId = request.id;
                     SDL.SDLModel.onPrompt(request.params.timeoutPrompt);
                     SDL.SDLModel.interactionData.helpPrompt = null;
