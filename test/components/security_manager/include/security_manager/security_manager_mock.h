@@ -99,6 +99,22 @@ namespace security_manager_test {
     MOCK_METHOD2(SendFramesNumber,
                  void(int32_t connection_key, int32_t number_of_frames));
   };
+  /*
+   * MOCK implementation of security_manager::SSLContext interface
+   */
+  class SSLContextMock: public security_manager::SSLContext {
+  public:
+    MOCK_METHOD3(DoHandshakeStep,
+                 void* (const void* client_data,  size_t client_data_size,
+                        size_t* server_data_size));
+    MOCK_METHOD3(Encrypt,
+                 void* (const void* data,  size_t data_size,
+                        size_t* encrypted_data_size));
+    MOCK_METHOD3(Decrypt,
+                 void* (const void* encrypted_data,  size_t encrypted_data_size,
+                        size_t* data_size));
+    MOCK_CONST_METHOD0(IsInitCompleted, bool());
+  };
 
   /*
    * Matcher for RawMessages
@@ -109,8 +125,8 @@ namespace security_manager_test {
     const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
     const size_t arg_data_size = arg->data_size();
     if(arg_data_size != exp_data_size) {
-      *result_listener << "Got " << arg_data_size << " bytes"
-                      << "expected " << exp_data_size << " bytes";
+      *result_listener << "Got " << arg_data_size << " bytes "
+                      << " expected " << exp_data_size << " bytes";
       return false;
     }
     const uint8_t * arg_data = arg->data();
@@ -125,12 +141,11 @@ namespace security_manager_test {
 
   /*
    * Matcher for checking RawMessage with InternalError Query
-   * Check binary data as send string
+   * Check error id
    */
-  //Mock matcher for check RawMessage as InternalError message with substring
   MATCHER_P(InternalErrorWithErrId, expectedErrorId,
             std::string(negation ? "is not" : "is")
-            + " InternalError Notification with selected error" ) {
+            + " InternalError with selected error" ) {
     const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
     if(arg->data_size() <= header_size) {
       *result_listener << "Size " << arg->data_size()
@@ -140,7 +155,7 @@ namespace security_manager_test {
     }
     const uint8_t query_type = arg->data()[0];
     if(security_manager::SecurityQuery::NOTIFICATION != query_type) {
-      *result_listener << "RawMessage is not Notification";
+      *result_listener << "RawMessage is not notification";
       return false;
     }
     //Read Big-Endian number
@@ -155,8 +170,46 @@ namespace security_manager_test {
     const uint8_t* err_id =
         reinterpret_cast<uint8_t*>(arg->data() + header_size);
     if(expectedErrorId != *err_id) {
-      *result_listener << "InternalError " << int(*err_id)
-                       << " is not equal error " << expectedErrorId;
+      *result_listener << "InternalError id " << int(*err_id)
+                       << " and not equal error " << expectedErrorId;
+      return false;
+    }
+    return true;
+  }
+
+  /*
+   * Matcher for checking RawMessage with ProtectServiceResponse Query
+   * Check error id
+   */
+  MATCHER_P(ProtectServiceResponseWithId, expectedResponseId,
+            std::string(negation ? "is not" : "is")
+            + " ProtectServiceResponse with selected esponseId" ) {
+    const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
+    if(arg->data_size() <= header_size) {
+      *result_listener << "Size " << arg->data_size()
+                       << " bytes less or equal sizeof(QueryHeader)="
+                       << header_size;
+      return false;
+    }
+    const uint8_t query_type = arg->data()[0];
+    if(security_manager::SecurityQuery::RESPONSE != query_type) {
+      *result_listener << "RawMessage is not RESPONSE";
+      return false;
+    }
+    //Read Big-Endian number
+    const uint32_t query_id = arg->data()[1] << 16 |
+                              arg->data()[2] <<  8 |
+                              arg->data()[3];
+    if(security_manager::SecurityQuery::PROTECT_SERVICE_RESPONSE != query_id) {
+      *result_listener << "Notification is not ProtectServiceResponse";
+      return false;
+    }
+    //Read err_id as bin data number
+    const uint8_t* err_id =
+        reinterpret_cast<uint8_t*>(arg->data() + header_size);
+    if(expectedResponseId != *err_id) {
+      *result_listener << "ProtectServiceResult is " << int(*err_id)
+                       << " and not equal " << expectedResponseId;
       return false;
     }
     return true;

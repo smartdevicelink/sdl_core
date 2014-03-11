@@ -59,6 +59,7 @@ void SecurityManager::OnMessageReceived(
   SecurityMessage securityMessagePtr(new SecurityQuery());
   const bool result = securityMessagePtr->Parse(message->data(),
                                              message->data_size());
+  //TODO (EZ): move to ::Handle
   if(!result) {
     //result will be false only if data less then query header
     const std::string error("Incorrect message received");
@@ -69,13 +70,6 @@ void SecurityManager::OnMessageReceived(
   }
   securityMessagePtr->setConnectionKey(message->connection_key());
 
-  const SecurityQuery::QueryHeader &header = securityMessagePtr->getHeader();
-  if(header.query_id  == SecurityQuery::INVALID_QUERY_ID) {
-    const std::string error("Unknown query identifier.");
-    LOG4CXX_ERROR(logger_, error);
-    SendInternalError(message->connection_key(), header.seq_number,
-                       SecurityQuery::ERROR_INVALID_QUERY_ID, error);
-    }
   // Post message to message query for next processing in thread
   security_messages_.PostMessage(securityMessagePtr);
 }
@@ -118,25 +112,30 @@ void SecurityManager::Handle(const SecurityMessage &message) {
           LOG4CXX_ERROR(logger_, "SendHandshakeData failed");
         }
       return;
-    case SecurityQuery::PROTECT_SERVICE_RESPONSE:
-      {
-      const std::string error("ProtectServiceResponse couldn't be received from mobile side.");
+    case SecurityQuery::PROTECT_SERVICE_RESPONSE: {
+      //get response from mobile side
+      const std::string error(
+            "ProtectServiceResponse couldn't be received from mobile side.");
       LOG4CXX_ERROR(logger_, error);
       SendInternalError(message->getConnectionKey(),
                         message->getHeader().seq_number,
-                        //FIXME(EZ): ERROR_OTHER_INTERNAL_ERROR or ERROR_INVALID_QUERY_ID
                         SecurityQuery::ERROR_OTHER_INTERNAL_ERROR, error);
       }
       return;
-    case SecurityQuery::SEND_INTERNAL_ERROR:
-      {
+    case SecurityQuery::SEND_INTERNAL_ERROR: {
+      //get internall error from mobile side
       const char* const error_str = reinterpret_cast<const char*>(message->getData());
       const std::string error(error_str, message->getDataSize());
       LOG4CXX_ERROR(logger_, "InternalError error received" << error);
       }
       return;
-    default: // SecurityQuery::InvalidQuery
-      LOG4CXX_ERROR(logger_, "Security message: unknown query");
+    default: { // SecurityQuery::InvalidQuery
+      const std::string error("Unknown query identifier.");
+      LOG4CXX_ERROR(logger_, error);
+      SendInternalError(message->getConnectionKey(),
+                        message->getHeader().seq_number,
+                        SecurityQuery::ERROR_INVALID_QUERY_ID, error);
+      }
     }
 }
 
@@ -155,7 +154,8 @@ bool SecurityManager::ParseProtectServiceRequest(
   const uint8_t service_id = *requestMessage->getData();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
-  if(service_type == protocol_handler::kInvalidServiceType) {
+  if(service_type == protocol_handler::kInvalidServiceType ||
+     service_type == protocol_handler::kSecure ) {
       LOG4CXX_ERROR(logger_, "Invalid Service type.");
       SendProtectServiceResponse(requestMessage,
                                  SecurityQuery::SERVICE_NOT_FOUND);
@@ -175,10 +175,9 @@ bool SecurityManager::ParseProtectServiceRequest(
   const int result = session_observer_->SetSSLContext(
         requestMessage->getConnectionKey(), service_type, newSSLContext);
   //delete SSLContex on any error
-  if(SecurityQuery::SUCCESS != result)
-  //FIXME(EZ): return DeleteSSLContext
-//        crypto_manager_->DeleteSSLContext(newSSLContext);
-    ;
+  if(SecurityQuery::SUCCESS != result) {
+        crypto_manager_->ReleaseSSLContext(newSSLContext);
+  }
   switch (result) {
     case SecurityQuery::SUCCESS:
       //Generate response query and post to secure_service_messages_

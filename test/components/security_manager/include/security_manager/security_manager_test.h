@@ -39,6 +39,8 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_payload.h"
 
+//TODO: add test on get correct/wrong InternalError
+//TODO: check connection_key the same and seq_number
 namespace test  {
 namespace components  {
 namespace security_manager_test {
@@ -46,6 +48,8 @@ namespace security_manager_test {
   using ::protocol_handler::RawMessage;
   using ::protocol_handler::RawMessagePtr;
   using ::security_manager::SecurityQuery;
+  using ::testing::_;
+  using ::testing::Return;
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
@@ -86,6 +90,7 @@ namespace security_manager_test {
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<SessionObserverMock>   mock_session_observer;
     testing::StrictMock<ProtocoloObserverMock> mock_protocol_observer;
+    testing::StrictMock<SSLContextMock>        mock_ssl_context;
     // constants
     const int32_t key = 0;
     const protocol_handler::ServiceType secureServiceType = protocol_handler::kSecure;
@@ -137,11 +142,11 @@ namespace security_manager_test {
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
    */
   TEST_F(SecurityManagerTest, GetInvalidQueryId) {
-    // Expect error message with ERROR_ID
+    // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)) .Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)).Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::INVALID_QUERY_ID, seq_number);
@@ -155,11 +160,12 @@ namespace security_manager_test {
    * getting PROTECT_SERVICE_RESPONSE from mobile side
    */
   TEST_F(SecurityManagerTest, GetProtectServiceResponse) {
-    // Expect error message with ERROR_ID
+    // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_OTHER_INTERNAL_ERROR),is_final)) .Times(1);
+                    SecurityQuery::ERROR_OTHER_INTERNAL_ERROR), is_final)).
+        Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_RESPONSE, seq_number);
@@ -168,41 +174,172 @@ namespace security_manager_test {
     sleep(1);
   }
 
+  /*
+   * SecurityManger shall send ProtectServiceResponse with INTERNAL_ERROR
+   * on getting PROTECT_SERVICE_RESPONSE with wrong data size
+   */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_WrongDataSize) {
-    // Expect error message with ERROR_ID
+    // Expect ProtectServiceResponse with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_NULL_DATA),is_final)) .Times(1);
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::INTERNAL_ERROR),is_final)).Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    //Wait call methods in thread
+    // Wait call methods in thread
     sleep(1);
   }
 
-  TEST_F(SecurityManagerTest, GetProtectServiceRequest) {
+  /*
+   * SecurityManger shall send ProtectServiceResponse with SERVICE_NOT_FOUND
+   * on getting PROTECT_SERVICE_RESPONSE with invalid service type
+   * Check few service types: kInvalidServiceType, ... , kInvalidServiceType+N
+   */
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest_InvalidServiceType) {
+    const int invalid_requests = 10;
+    DCHECK(protocol_handler::kInvalidServiceType + invalid_requests <= UCHAR_MAX);
+
+    // Expect ProtectServiceResponse with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::SERVICE_NOT_FOUND),is_final)).
+        //invalid_requests + kSecure
+        Times(invalid_requests + 1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
-          SecurityQuery::PROTECT_SERVICE_REQUEST,
-          seq_number);
-    const void* data = &header;
-    uint32_t data_size = sizeof(header);
-    const uint8_t* uint8_data = static_cast<const uint8_t*>(data);
-
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(RawMessageEq(uint8_data, data_size), is_final))
-        .Times(1);
-
-    call_OnMessageReceived(static_cast<const uint8_t*>(data),
-                           data_size, secureServiceType);
-    //Wait call methods in thread
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    for (uint8_t i = protocol_handler::kInvalidServiceType;
+         i < protocol_handler::kInvalidServiceType + invalid_requests; ++i) {
+      EmulateMobileMessage(header, &i, 1);
+    }
+    //Secure service shall not be encrypted
+    const uint8_t service_type = ::protocol_handler::kSecure;
+    EmulateMobileMessage(header, &service_type, 1);
+    // Wait call methods in thread
     sleep(1);
   }
-  //TODO: add test on get correct/wrong InternalError
-  //TODO: check connection_key the same and seq_number
 
+  /*
+   * SecurityManger shall send ProtectServiceResponse with INTERNAL_ERROR
+   * on error create SSLContext
+   */
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest_ErrorCreateSSLContext) {
+    //FIXME(EZ): "move CryptoManager as extended ot remove test")
+  }
+
+  /*
+   * SecurityManger shall send ProtectServiceResponse with SERVICE_NOT_FOUND
+   * on getting PROTECT_SERVICE_RESPONSE for not start service
+   */
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest_ServiceNotFound) {
+    // Expect ProtectServiceResponse with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::SERVICE_NOT_FOUND),is_final)).Times(1);
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+    // Expect SessionObserver::SetSSLContext
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext( key, encryption_service_type,_)).
+        WillOnce(Return(SecurityQuery::SERVICE_NOT_FOUND));
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = encryption_service_type;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
+    // Wait call methods in thread
+    sleep(1);
+  }
+
+  /*
+   * SecurityManger shall send ProtectServiceResponse with SERVICE_ALREADY_PROTECTED
+   * on getting PROTECT_SERVICE_RESPONSE for already protected service
+   */
+  TEST_F(SecurityManagerTest,
+         GetProtectServiceRequest_ServiceAlreadyProtected) {
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::SERVICE_ALREADY_PROTECTED),is_final)).Times(1);
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext(key, encryption_service_type,_)).
+        WillOnce(Return(SecurityQuery::SERVICE_ALREADY_PROTECTED));
+    EXPECT_CALL(mock_session_observer,
+                GetSSLContext(key, encryption_service_type)).
+        WillOnce(Return(&mock_ssl_context));
+    EXPECT_CALL(mock_ssl_context,
+                IsInitCompleted()).
+        WillOnce(Return(true));
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = encryption_service_type;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
+    // Wait call methods in thread
+    sleep(1);
+  }
+
+  /*
+   * SecurityManger shall send ProtectServiceResponse with PENDING
+   * on getting PROTECT_SERVICE_RESPONSE for already protecting service
+   */
+  TEST_F(SecurityManagerTest,
+         GetProtectServiceRequest_ServiceProtectionPending) {
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::PENDING),is_final)).Times(1);
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext(key, encryption_service_type,_)).
+        WillOnce(Return(SecurityQuery::SERVICE_ALREADY_PROTECTED));
+    EXPECT_CALL(mock_session_observer,
+                GetSSLContext(key, encryption_service_type)).
+        WillOnce(Return(&mock_ssl_context));
+    EXPECT_CALL(mock_ssl_context,
+                IsInitCompleted()).
+        WillOnce(Return(false));
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = encryption_service_type;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
+    // Wait call methods in thread
+    sleep(1);
+  }
+
+  /*
+   * SecurityManger shall send ProtectServiceResponse with SUCCESS
+   * on getting correct PROTECT_SERVICE_RESPONSE
+   */
+  TEST_F(SecurityManagerTest, GetProtectServiceRequest_Success) {
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::SUCCESS),is_final)).Times(1);
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext(key, encryption_service_type,_)).
+        WillOnce(Return(SecurityQuery::SUCCESS));
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = encryption_service_type;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
+    // Wait call methods in thread
+    sleep(1);
+  }
 
   /*
    * SecurityManger shall send InternallError on
@@ -210,7 +347,7 @@ namespace security_manager_test {
    * PROTECT_SERVICE_RESPONSE
    */
   TEST_F(SecurityManagerTest, SendHandshakeData_WrongDataSize) {
-    // Expect error message with ERROR_ID
+    // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(

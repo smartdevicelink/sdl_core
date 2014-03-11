@@ -11,7 +11,7 @@ include_directories (
 )
 
 set (SOURCES
-#  ./src/crypto_manager_impl_test.cc
+  ./src/crypto_manager_impl_test.cc
   ./src/security_manager_test.cc
 )
 

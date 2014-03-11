@@ -54,7 +54,7 @@ public:
     PROTECT_SERVICE_RESPONSE = 0x2,
     SEND_HANDSHAKE_DATA      = 0x3,
     SEND_INTERNAL_ERROR      = 0xFF,
-    INVALID_QUERY_ID         = 0x100
+    INVALID_QUERY_ID         = 0xFFFFFF
   };
   //size 1 byte
   enum ProtectServiceResult {
@@ -76,7 +76,7 @@ public:
     };
 
   struct QueryHeader {
-    QueryHeader(uint8_t queryType, uint16_t queryId, uint32_t seqNumber);
+    QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber);
     uint32_t query_type:8;
     uint32_t query_id:24;  // API function identifier
     uint32_t seq_number;   // request sequential number

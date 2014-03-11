@@ -38,7 +38,7 @@
 using namespace security_manager;
 
 SecurityQuery::QueryHeader::QueryHeader(
-    uint8_t queryType, uint16_t queryId, uint32_t seqNumber) :
+    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
   query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
 }
 
@@ -58,8 +58,8 @@ SecurityQuery::~SecurityQuery() {
 bool SecurityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
   if(bin_data_size < sizeof(QueryHeader)) {
-      return false;
-    }
+    return false;
+  }
   const uint8_t guery_type = binary_data[0];
   switch (guery_type) {
     case REQUEST:
@@ -75,9 +75,9 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       header_.query_type = INVALID_QUERY_TYPE;
       //TODO(EZ): check?
       break;
-    }
-  const uint32_t query_id = BE_TO_LE32(
-        *reinterpret_cast<const uint32_t*>(binary_data)) >> 8;
+  }
+  const uint32_t query_id =
+      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data));
   switch (query_id) {
     case PROTECT_SERVICE_REQUEST:
       header_.query_id = PROTECT_SERVICE_REQUEST;
@@ -95,7 +95,7 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       header_.query_id = INVALID_QUERY_ID;
       //TODO(EZ): check?
       break;
-    }
+  }
   header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
   //skip data
   const int data_size = bin_data_size - sizeof(QueryHeader);
@@ -106,7 +106,7 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       memcpy(data_, binary_data + sizeof(QueryHeader), data_size_);
     }
   return true;
-  }
+}
 
 void SecurityQuery::setData(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
@@ -115,11 +115,11 @@ void SecurityQuery::setData(const uint8_t * const binary_data,
     data_size_ = bin_data_size;
     data_ = new uint8_t[data_size_];
     memcpy(data_, binary_data, data_size_);
-  }
+}
 
 void SecurityQuery::setConnectionKey(const uint32_t connection_key) {
-    connection_key_ = connection_key;
-  }
+  connection_key_ = connection_key;
+}
 
 void SecurityQuery::setHeader(const SecurityQuery::QueryHeader &header) {
   header_ = header;
