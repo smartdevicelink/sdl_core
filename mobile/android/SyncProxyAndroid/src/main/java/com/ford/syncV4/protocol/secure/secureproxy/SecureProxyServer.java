@@ -34,7 +34,7 @@ public class SecureProxyServer {
     }
 
     private void startServer() throws IOException {
-        serverSocket = new ServerSocket(8091);
+        serverSocket = new ServerSocket(8090);
         transportListener.onTransportConnected();
 
     }

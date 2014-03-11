@@ -62,7 +62,7 @@ public class SecureProxyManager {
     }
 
     private void startTCPConnection() throws SyncException {
-        TCPTransportConfig config = new TCPTransportConfig(443, "gmail.com");
+        TCPTransportConfig config = new TCPTransportConfig(8091, "172.30.222.74");
         config.setIsNSD(false);
         config.setApplicationContext(this.context);
         transport = new TCPTransport(config, transportListener);
@@ -144,11 +144,11 @@ public class SecureProxyManager {
     }
 
     private void writeTestData(SSLClient sslClient) throws IOException {
-        byte[] data = new byte[100];
+        byte[] data = new byte[1000];
         for (int i = 0; i< 100; i++){
             data[i] = (byte) i;
         }
-       // sslClient.writeData(data);
+       sslClient.writeData(data);
     }
 
 }
