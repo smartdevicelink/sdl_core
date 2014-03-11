@@ -2,7 +2,11 @@ package com.ford.syncV4.protocol.secure.secureproxy;
 
 import android.util.Log;
 
+import com.ford.syncV4.transport.ITransportListener;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -11,20 +15,36 @@ import java.net.Socket;
  */
 public class SecureProxyServer {
 
+    ITransportListener transportListener;
+
+    private Socket socket;
+    private InputStream inputStream;
+    private OutputStream outputStream;
+    private OutputStream sourceStream;
+    private ServerSocket serverSocket;
+
+    public SecureProxyServer(OutputStream outputStream, ITransportListener listener) {
+        sourceStream = outputStream;
+        transportListener = listener;
+    }
+
     public void setupServer() throws IOException {
         SecureProxyServerReader secureProxyServerReader = new SecureProxyServerReader();
         secureProxyServerReader.start();
     }
 
     private void startServer() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(8081);
-        Socket socket = serverSocket.accept();
-        socket.getOutputStream();
-        socket.getInputStream();
+        serverSocket = new ServerSocket(8091);
+        transportListener.onTransportConnected();
+
     }
 
-    public void writeData(byte[] data) {
-
+    public synchronized void writeData(byte[] data) {
+        try {
+            outputStream.write(data);
+        } catch (IOException e) {
+            Log.e("SecureProxyServer", "error", e);
+        }
     }
 
     public class SecureProxyServerReader extends Thread {
@@ -42,17 +62,31 @@ public class SecureProxyServer {
 
         @Override
         public void run() {
-            if (!isConnected()){
+            if (!isConnected()) {
                 try {
                     startServer();
+                    readData();
                 } catch (IOException e) {
                     Log.e("SecureProxyServer", "error", e);
                 }
             }
-            readData();
         }
 
-        private void readData() {
+        private void readData() throws IOException {
+            socket = serverSocket.accept();
+            inputStream = socket.getInputStream();
+            outputStream = socket.getOutputStream();
+            byte[] buffer = new byte[1024];
+            try {
+                int i;
+                while ((i = inputStream.read(buffer)) != -1) {
+
+                    sourceStream.write(buffer, 0, i);
+
+                }
+            } catch (IOException e) {
+                Log.e("SecureProxyServer", "error", e);
+            }
 
         }
     }
