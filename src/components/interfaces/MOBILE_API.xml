@@ -1652,14 +1652,14 @@
     <param name="compassDirection" type="CompassDirection">
     	<description>See CompassDirection.</description>
     </param>
-    <param name="pdop" type="Float" minvalue="0" maxvalue="10">
-    	<description>PDOP.</description>
+    <param name="pdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    	<description>PDOP.  If undefined or unavailable, then value shall be set to 0.</description>
     </param>
-    <param name="hdop" type="Float" minvalue="0" maxvalue="10">
-    	<description>HDOP.</description>
+    <param name="hdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    	<description>HDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
-    <param name="vdop" type="Float" minvalue="0" maxvalue="10">
-    	<description>VDOP.</description>
+    <param name="vdop" type="Float" minvalue="0" maxvalue="10" defvalue="0">
+    	<description>VDOP.  If value is unknown, value shall be set to 0.</description>
     </param>
     <param name="actual" type="Boolean">
     	<description>
@@ -1875,7 +1875,7 @@
     <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" scope="partner">
       <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
     </param>
-    <param name="screenParams" type="ScreenParams" mandatory="false">
+    <param name="screenParams" type="ScreenParams" mandatory="false" scope="partner">
       <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
     </param>
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
@@ -2045,12 +2045,6 @@
       	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
       </description>
     </param> 
-    
-    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-      <description>In this mode, all keypresses will be sent as they occur.</description>
-      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-      <description>If omitted, this value will be set to FALSE.</description>      
-    </param>
 
     <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Array of keyboard characters to enable.</description>
@@ -2637,7 +2631,7 @@
   <function name="DeleteSubMenu" functionID="DeleteSubMenuID" messagetype="request">
     <description>Deletes a submenu from the in-application menu.</description>
 
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000">
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
       <description>The "menuID" of the submenu to delete. (See addSubMenu.menuID)</description>
     </param>
 
@@ -2709,7 +2703,7 @@
       <description>Text to be displayed first.</description>
     </param>
 
-    <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true">
+    <param name="initialPrompt" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	This is the intial prompt spoken to the user at the start of an interaction.
       	An array of text chunks of type TTSChunk. See TTSChunk.
@@ -3016,7 +3010,7 @@
       </description>
     </param>
 
-    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App labeled on-screen presets (i.e. GEN2).
       	If omitted on supported displays, the presets will be shown as not defined.
@@ -4264,7 +4258,19 @@
       	If omitted, the value will be set to false.
       </description>
     </param>
-
+  
+   <param name="systemFile" type="Boolean" defvalue="false" mandatory="false" scope="internal">
+     <description>Indicates if the file is meant to be passed thru core to elsewhere on the system. If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area 	 outside of core. If omitted, the value will be set to false.</description> 
+   </param>
+ 
+  <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+    <description>Optional offset in bytes for resuming partial data chunks</description> 
+  </param>
+ 
+  <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+    <description>Optional length in bytes for resuming partial data chunks</description> 
+  </param>
+    
   </function>
 
   <function name="PutFile" functionID="PutFileID" messagetype="response">

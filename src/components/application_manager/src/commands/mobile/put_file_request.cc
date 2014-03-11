@@ -121,29 +121,50 @@ void PutFileRequest::Run() {
         (*message_)[strings::msg_params][strings::system_file].asBool();
   }
 
-  if (is_system_file & (file_type != mobile_apis::FileType::BINARY)) {
-    LOG4CXX_INFO(logger_, "File is System but not binary");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-  }
-  std::string relative_file_path =
-      file_system::CreateDirectory(application->name());
-  relative_file_path += "/";
-  relative_file_path += sync_file_name;
+  std::string full_file_path;
 
-  mobile_apis::Result::eType save_result =
-      ApplicationManagerImpl::instance()->SaveBinary(
-          application->name(),
-          binary_data,
-          relative_file_path,
-          offset);
+  if (is_system_file) {
+    if (file_type != mobile_apis::FileType::BINARY) {
+      LOG4CXX_INFO(logger_, "File is System but not binary");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+
+    full_file_path = profile::Profile::instance()->system_files_path();
+
+    if (!file_system::CreateDirectoryRecursively(full_file_path)) {
+      LOG4CXX_ERROR(logger_, "Cann't create folder.");
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      return;
+    }
+  } else {
+    full_file_path = file_system::CreateDirectory(application->name());
+    full_file_path = file_system::FullPath(full_file_path);
+
+    if (binary_data.size()
+        > file_system::GetAvailableSpaceForApp(application->name())) {
+      LOG4CXX_ERROR(logger_, "Out of free app memory.");
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      return;
+    }
+  }
+
+  full_file_path += "/";
+  full_file_path += sync_file_name;
+
+  mobile_apis::Result::eType save_result = ApplicationManagerImpl::instance()
+      ->SaveBinary(binary_data, full_file_path, offset);
 
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      AppFile file(sync_file_name, is_persistent_file, is_download_compleate, file_type);
+      AppFile file(sync_file_name, is_persistent_file, is_download_compleate,
+                   file_type);
       if (offset == 0) {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(file)) {
-          LOG4CXX_INFO(logger_, "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
+          LOG4CXX_INFO(
+              logger_,
+              "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
           // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
           if (!application->UpdateFile(file)) {
             LOG4CXX_INFO(logger_, "Couldn't update file");
@@ -172,11 +193,6 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      if (mobile_apis::Result::OUT_OF_MEMORY == save_result) {
-        if (file_system::FileExists(relative_file_path)) {
-          DCHECK(file_system::DeleteFile(relative_file_path));
-        }
-      }
       LOG4CXX_INFO(logger_, "Save in unsuccesfull result = " << save_result);
       SendResponse(false, save_result);
       break;

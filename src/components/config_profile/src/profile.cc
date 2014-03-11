@@ -79,7 +79,8 @@ Profile::Profile()
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
       transport_manager_disconnect_timeout_(0),
       use_last_state_(false),
-      supported_diag_modes_() {
+      supported_diag_modes_(),
+      system_files_path_("/tmp/fs/mp/images/ivsu_cache"){
   UpdateValues();
 }
 
@@ -240,6 +241,10 @@ uint32_t Profile::transport_manager_disconnect_timeout() const {
 
 bool Profile::use_last_state() const {
   return use_last_state_;
+}
+
+const std::string& Profile::system_files_path() const {
+  return system_files_path_;
 }
 
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
@@ -598,6 +603,14 @@ void Profile::UpdateValues() {
       supported_diag_modes_.push_back(strtol(str, NULL, 16));
       str = strtok(NULL, ",");
     }
+  }
+
+  *value = '\0';
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "MAIN",
+                        "SystemFilesPath", value)) && ('\0' != *value)) {
+    system_files_path_ = value;
+    LOG4CXX_INFO(logger_, "Set system files path to " << system_files_path_);
   }
 
   (void) ReadIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout,

@@ -98,7 +98,7 @@ ENDIF(CMAKE_C_FLAGS_DEBUG)
 
 
 if (EXTENDED_MEDIA_MODE)
-add_definitions(-DEXTENDED_MEDIA)
+add_definitions(-DEXTENDED_MEDIA_MODE)
 # required to find 'glibconfig.h'
 find_package(PkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)

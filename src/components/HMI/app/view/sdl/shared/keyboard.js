@@ -67,6 +67,7 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
         action: function() {
 
             if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.uiPerformInteraction && !SDL.InteractionChoicesView.active) {
+                FFW.UI.OnKeyboardInput("", "ENTRY_CANCELLED");
                 SDL.InteractionChoicesView.deactivate("ABORTED");
             }
             SDL.Keyboard.deactivate();

@@ -1770,8 +1770,31 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * @param doSetPersistent
      * @param putFile         PurFile to be send
      */
-    public void commandPutFile(FileType fileType, String syncFileName, byte[] bulkData,
-                               int correlationId, Boolean doSetPersistent, PutFile putFile) {
+    public void commandPutFile(FileType fileType, String syncFileName,
+                               byte[] bulkData, int correlationId,
+                               Boolean doSetPersistent, PutFile putFile) {
+        commandPutFile(fileType, syncFileName, bulkData, correlationId,
+                doSetPersistent, null, null, null, putFile);
+    }
+
+    /**
+     * Create and send PutFile command
+     *
+     * @param fileType        Type of the File
+     * @param syncFileName    Name of the File
+     * @param bulkData        Data of the File
+     * @param correlationId   Unique identifier of the command
+     * @param doSetPersistent
+     * @param isSystemFile
+     * @param length
+     * @param offset
+     * @param putFile         PurFile to be send
+     */
+    public void commandPutFile(FileType fileType, String syncFileName,
+                               byte[] bulkData, int correlationId,
+                               Boolean doSetPersistent, Boolean isSystemFile,
+                               Integer length, Integer offset,
+                               PutFile putFile) {
         int mCorrelationId = correlationId;
         if (correlationId == -1) {
             mCorrelationId = getNextCorrelationID();
@@ -1785,6 +1808,19 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (doSetPersistent != null) {
                 newPutFile.setPersistentFile(doSetPersistent);
             }
+
+            if (isSystemFile != null) {
+                newPutFile.setSystemFile(isSystemFile);
+            }
+
+            if (length != null) {
+                newPutFile.setLength(length);
+            }
+
+            if (offset != null) {
+                newPutFile.setOffset(offset);
+            }
+
             newPutFile.setBulkData(bulkData);
         } else {
             newPutFile = putFile;
@@ -1817,7 +1853,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * resumption.
      *
      * @param correlationId Unique identifier of the command
-     * @param buttonName {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
+     * @param buttonName    {@link com.ford.syncV4.proxy.rpc.enums.ButtonName}
      */
     public void commandSubscribeButtonResumable(ButtonName buttonName, int correlationId) {
         SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
@@ -1850,9 +1886,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Call a method from SDK to send <b>AddCommand</b> request which will be used in application
      * resumption.
      *
-     * @param commandId Id of the command
+     * @param commandId  Id of the command
      * @param vrCommands Vector of the VR Commands
-     * @param menuName Name of the Menu
+     * @param menuName   Name of the Menu
      */
     public void commandAddCommandResumable(Integer commandId, Vector<String> vrCommands,
                                            String menuName) {
@@ -1864,12 +1900,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     /**
      * Call a method from SDK to send <b>AddCommand</b> request
      *
-     * @param commandId Id of the command
+     * @param commandId  Id of the command
      * @param vrCommands Vector of the VR Commands
-     * @param menuName Name of the Menu
+     * @param menuName   Name of the Menu
      */
     public void commandAddCommandPredefined(Integer commandId, Vector<String> vrCommands,
-                                  String menuName) {
+                                            String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
                 getNextCorrelationID());
         syncProxySendRPCRequest(addCommand);
@@ -1909,9 +1945,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Call a method from SDK to create and send <b>CreateInteractionChoiceSet</b> request which
      * will be used in application resumption.
      *
-     * @param choiceSet Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param choiceSet              Set of the {@link com.ford.syncV4.proxy.rpc.Choice} objects
      * @param interactionChoiceSetID Id of the interaction Choice set
-     * @param correlationID correlation Id
+     * @param correlationID          correlation Id
      */
     public void commandCreateInteractionChoiceSetResumable(Vector<Choice> choiceSet,
                                                            Integer interactionChoiceSetID,
@@ -2019,8 +2055,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     *
-     *
      * @param putFile
      */
     public void syncProxySendPutFilesResumable(PutFile putFile) {
@@ -2038,7 +2072,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (mSyncProxy != null) {
             // TODO it's seems stupid in order to register send onTransportConnected
             mSyncProxy.updateRegisterAppInterfaceParameters(msg);
-            mSyncProxy.getSyncConnection().onTransportConnected();
+            if (mSyncProxy.getSyncConnection() != null) {
+                mSyncProxy.getSyncConnection().onTransportConnected();
+            }
         }
     }
 
