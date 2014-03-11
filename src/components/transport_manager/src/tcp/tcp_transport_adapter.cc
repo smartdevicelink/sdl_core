@@ -56,12 +56,12 @@ namespace transport_adapter {
 TcpTransportAdapter::TcpTransportAdapter()
     : TransportAdapterImpl(
 #ifdef AVAHI_SUPPORT
-    new DnssdServiceBrowser(this)
+          new DnssdServiceBrowser(this),
 #else
-    NULL
+          NULL,
 #endif
-    , new TcpConnectionFactory(this)
-    , new TcpClientListener(this, default_port)) {
+          new TcpConnectionFactory(this),
+          new TcpClientListener(this, default_port, false)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {

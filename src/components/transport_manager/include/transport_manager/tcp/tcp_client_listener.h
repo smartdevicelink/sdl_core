@@ -48,14 +48,16 @@ class TransportAdapterController;
  */
 class TcpClientListener : public ClientConnectionListener {
  public:
-
   /**
    * @breaf Constructor.
    *
    * @param controller Pointer to the device adapter controller.
    * @param port Port No.
+   * @param enable_keepalive If true enables TCP keepalive on accepted
+   *connections
    */
-  TcpClientListener(TransportAdapterController* controller, const uint16_t port);
+  TcpClientListener(TransportAdapterController* controller, uint16_t port,
+                    bool enable_keepalive);
 
   /**
    * @brief Start TCP client listener thread.
@@ -101,6 +103,7 @@ class TcpClientListener : public ClientConnectionListener {
   virtual TransportAdapter::Error StopListening();
  private:
   const uint16_t port_;
+  const bool enable_keepalive_;
   TransportAdapterController* controller_;
   pthread_t thread_;
   int socket_;
