@@ -122,44 +122,21 @@ MessageReader::MessageReader(MessageReader* reader,
   }
 }
 
-bool MessageReader::has_failed() const {
-  return failed_;
-}
-
-bool MessageReader::IsAtLastElement() const {
-  DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
-  return dbus_message_iter_has_next(iter) == 0;
-}
-
-bool MessageReader::HasNext() const {
-  return !failed_ && NextValueType() != DBUS_TYPE_INVALID;
-}
-
-bool MessageReader::NextIsInvalid() const {
-  return NextValueType() == DBUS_TYPE_INVALID;
-}
-
-bool MessageReader::NextIsArray() const {
-  return NextValueType() == DBUS_TYPE_ARRAY;
-}
-
-bool MessageReader::NextIsStruct() const {
-  return NextValueType() == DBUS_TYPE_STRUCT;
-}
 
 bool MessageReader::NextIsDictEntry() const {
   return NextValueType() == DBUS_TYPE_DICT_ENTRY;
 }
 
-MessageReader MessageReader::GetArrayReader() {
+
+MessageReader MessageReader::TakeArrayReader() {
   return MessageReader(this, DBUS_TYPE_ARRAY);
 }
 
-MessageReader MessageReader::GetStructReader() {
+MessageReader MessageReader::TakeStructReader() {
   return MessageReader(this, DBUS_TYPE_STRUCT);
 }
 
-MessageReader MessageReader::GetDictEntryReader() {
+MessageReader MessageReader::TakeDictEntryReader() {
   return MessageReader(this, DBUS_TYPE_DICT_ENTRY);
 }
 
@@ -182,11 +159,6 @@ void MessageReader::MarkFailed() {
       parent_reader_->MarkFailed();
     }
   }
-}
-
-MessageReader::DataType MessageReader::NextValueType() const {
-  DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
-  return failed_ ? DBUS_TYPE_INVALID : dbus_message_iter_get_arg_type(iter);
 }
 
 void MessageReader::ReadNextValue(MessageReader::DataType type,
@@ -215,6 +187,9 @@ MessageWriter::MessageWriter(
   : has_opened_subcontainer_(false),
     parent_writer_(parent) {
   assert(parent_writer_);
+  // Only array writers require array_signature
+  assert((container_type == kArray && array_signature != NULL)
+         || (container_type != kArray && array_signature == NULL));
   assert(!parent_writer_->has_opened_subcontainer_);
   bool enough_memory =
       dbus_message_iter_open_container(&parent_writer_->iterator_,
@@ -230,48 +205,6 @@ MessageWriter::~MessageWriter() {
   if (parent_writer_ != NULL) {
     CloseWriter();
   }
-}
-
-void MessageWriter::WriteBool(bool value) {
-  dbus_bool_t dbus_value = value;
-  WriteAndCheck(DBUS_TYPE_BOOLEAN, &dbus_value);
-}
-
-void MessageWriter::WriteByte(uint8_t value) {
-  WriteAndCheck(DBUS_TYPE_BYTE, &value);
-}
-
-void MessageWriter::WriteInt16(int16_t value) {
-  WriteAndCheck(DBUS_TYPE_INT16, &value);
-}
-
-void MessageWriter::WriteUint16(uint16_t value) {
-  WriteAndCheck(DBUS_TYPE_UINT16, &value);
-}
-
-void MessageWriter::WriteInt32(int32_t value) {
-  WriteAndCheck(DBUS_TYPE_INT32, &value);
-}
-
-void MessageWriter::WriteUint32(uint32_t value) {
-  WriteAndCheck(DBUS_TYPE_UINT32, &value);
-}
-
-void MessageWriter::WriteInt64(int64_t value) {
-  WriteAndCheck(DBUS_TYPE_INT64, &value);
-}
-
-void MessageWriter::WriteUint64(uint64_t value) {
-  WriteAndCheck(DBUS_TYPE_UINT64, &value);
-}
-
-void MessageWriter::WriteDouble(double value) {
-  WriteAndCheck(DBUS_TYPE_DOUBLE, &value);
-}
-
-void MessageWriter::WriteString(const std::string& value) {
-  const char* pointer = value.c_str();
-  WriteAndCheck(DBUS_TYPE_STRING, &pointer);
 }
 
 void MessageWriter::WriteAndCheck(

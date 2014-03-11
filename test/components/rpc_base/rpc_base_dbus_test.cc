@@ -79,7 +79,7 @@ struct DbusDeserialization: public testing::Test {
 TEST_F(DbusDeserialization, DeserializeBool) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteBool(true);
+    writer.PutBool(true);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -91,7 +91,7 @@ TEST_F(DbusDeserialization, DeserializeBool) {
 TEST_F(DbusDeserialization, DeserializeByte) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteByte(200);
+    writer.PutByte(200);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -107,7 +107,7 @@ TEST_F(DbusDeserialization, DeserializeByte) {
 TEST_F(DbusDeserialization, DeserializeInt64) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteInt64(-1);
+    writer.PutInt64(-1);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -123,7 +123,7 @@ TEST_F(DbusDeserialization, DeserializeInt64) {
 TEST_F(DbusDeserialization, DeserializeFloat) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteDouble(3.14);
+    writer.PutDouble(3.14);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -139,7 +139,7 @@ TEST_F(DbusDeserialization, DeserializeFloat) {
 TEST_F(DbusDeserialization, DeserializeString) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteString("Hello");
+    writer.PutString("Hello");
   }
   {
     dbus::MessageReader reader(msgref);
@@ -155,7 +155,7 @@ TEST_F(DbusDeserialization, DeserializeString) {
 TEST_F(DbusDeserialization, DeserializeEnum) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteInt32(kValue1);
+    writer.PutInt32(kValue1);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -176,8 +176,8 @@ TEST_F(DbusDeserialization, DeserializeArray) {
     dbus::MessageWriter array_writer(&writer,
                                      dbus::kArray,
                                      array_signature.c_str());
-    array_writer.WriteInt32(5);
-    array_writer.WriteInt32(33);
+    array_writer.PutInt32(5);
+    array_writer.PutInt32(33);
   }
   {
     dbus::MessageReader reader(msgref);
@@ -208,8 +208,8 @@ TEST_F(DbusDeserialization, DeserializeArrayOfArrays) {
       dbus::MessageWriter subarray_wirter(&array_writer, dbus::kArray,
                                           subarray_signature.c_str());
 
-      subarray_wirter.WriteInt32(val++);
-      subarray_wirter.WriteInt32(val++);
+      subarray_wirter.PutInt32(val++);
+      subarray_wirter.PutInt32(val++);
     }
   }
   {
@@ -242,8 +242,8 @@ TEST_F(DbusDeserialization, DeserializeMap) {
     int val = 0;
     for (int i = 0; i < 2; ++i) {
       dbus::MessageWriter dictval_wirter(&array_writer, dbus::kDictEntry, NULL);
-      dictval_wirter.WriteString(keys[val]);
-      dictval_wirter.WriteInt32(val++);
+      dictval_wirter.PutString(keys[val]);
+      dictval_wirter.PutInt32(val++);
     }
   }
   {
@@ -263,7 +263,7 @@ TEST_F(DbusDeserialization, DeserializeMap) {
 TEST_F(DbusDeserialization, InconsistentTypesTest) {
   {
     dbus::MessageWriter writer(msgref);
-    writer.WriteString("Hello");
+    writer.PutString("Hello");
   }
   {
     dbus::MessageReader reader(msgref);
@@ -271,6 +271,226 @@ TEST_F(DbusDeserialization, InconsistentTypesTest) {
     ASSERT_TRUE(badbool.is_initialized());
     ASSERT_FALSE(badbool.is_valid());
     ASSERT_TRUE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeOptionalString) {
+  {
+    dbus::MessageWriter writer(msgref);
+    dbus::MessageWriter optwriter(&writer, dbus::kStruct, NULL);
+    optwriter.PutBool(true);
+    optwriter.PutString("Hello dear");
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Optional<String<1, 100> > readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(std::string(*readback), "Hello dear");
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, DeserializeOptionalInt) {
+  {
+    dbus::MessageWriter writer(msgref);
+    dbus::MessageWriter optwriter(&writer, dbus::kStruct, NULL);
+    optwriter.PutBool(false);
+    optwriter.PutInt32(42);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Optional<Integer<int32_t, 1, 90> > readback(&reader);
+    ASSERT_FALSE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeBool) {
+  {
+    Boolean true_bool(true);
+    dbus::MessageWriter writer(msgref);
+    true_bool.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Boolean readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback, true);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeInt8t) {
+  {
+    Integer<int8_t, 1, 100> int8(42);
+    dbus::MessageWriter writer(msgref);
+    int8.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Integer<int8_t, 1, 100> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback, 42);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, BadSerializeDeserializeInt8t) {
+  {
+    Integer<int8_t, 1, 12> int8(42);
+    dbus::MessageWriter writer(msgref);
+    int8.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Integer<int8_t, 1, 12> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_FALSE(readback.is_valid());
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeInt64t) {
+  {
+    Integer<int64_t, 1, 0xFFFFFFFFFF> int64(0xFFFFFFFFF1);
+    dbus::MessageWriter writer(msgref);
+    int64.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Integer<int64_t, 1, 0xFFFFFFFFFF> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback, 0xFFFFFFFFF1);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeDouble) {
+  {
+    Float<1, 5> flt(3.14);
+    dbus::MessageWriter writer(msgref);
+    flt.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Float<1, 5> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_DOUBLE_EQ(readback, 3.14);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeString) {
+  {
+    String<1, 12> hello("Hello");
+    dbus::MessageWriter writer(msgref);
+    hello.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    String<1, 12> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(std::string(readback), "Hello");
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeEnum) {
+  {
+    Enum<TestEnum> te(kValue1);
+    dbus::MessageWriter writer(msgref);
+    te.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Enum<TestEnum> readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback, kValue1);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeArray) {
+  {
+    Array<Integer<int32_t, 1, 100>, 1, 90 > ints;
+    ints.push_back(42);
+    ints.push_back(17);
+    dbus::MessageWriter writer(msgref);
+    ints.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Array<Integer<int32_t, 1, 100>, 1, 90 > readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback[0], 42);
+    ASSERT_EQ(readback[1], 17);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeMap) {
+  {
+    Map<Integer<int32_t, 1, 100>, 1, 90 > ints;
+    ints["first"] = 42;
+    ints["second"] = 17;
+    dbus::MessageWriter writer(msgref);
+    ints.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Map<Integer<int32_t, 1, 100>, 1, 90 > readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback["first"], 42);
+    ASSERT_EQ(readback["second"], 17);
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusDeserialization, SerializeDeserializeMapOfArrays) {
+  {
+    Map<Array<Integer<int32_t, 1, 100>, 1, 5>,1, 90 > ints;
+    ints["first"].push_back(1);
+    ints["first"].push_back(42);
+    ints["second"].push_back(17);
+    ints["second"].push_back(3);
+    dbus::MessageWriter writer(msgref);
+    ints.ToDbusWriter(&writer);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    Map<Array<Integer<int32_t, 1, 100>, 1, 5>,1, 90 > readback(&reader);
+    ASSERT_TRUE(readback.is_initialized());
+    ASSERT_TRUE(readback.is_valid());
+    ASSERT_EQ(readback.size(), 2);
+    ASSERT_EQ(readback["first"].size(), 2);
+    ASSERT_EQ(readback["second"].size(), 2);
+    ASSERT_EQ(readback["first"][0], 1);
+    ASSERT_EQ(readback["first"][1], 42);
+    ASSERT_EQ(readback["second"][0], 17);
+    ASSERT_EQ(readback["second"][1], 3);
+    ASSERT_FALSE(reader.has_failed());
     ASSERT_FALSE(reader.HasNext());
   }
 }

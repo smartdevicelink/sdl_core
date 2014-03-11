@@ -40,6 +40,121 @@
 namespace rpc {
 namespace impl {
 
+
+// Helper functions to statically map int types to appropriate
+// MessageReader functions
+
+// Non-specialized versions doesn't have implementation
+
+// Tells if next element of reader is of type T
+template<typename T> inline bool NextIs(const dbus::MessageReader& reader);
+// Takes next element of type T from reader
+template<typename T> inline T Take(dbus::MessageReader* reader);
+
+template<> inline bool NextIs<int8_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsByte();
+}
+
+template<> inline int8_t Take<int8_t>(dbus::MessageReader* reader) {
+  return static_cast<int8_t>(reader->TakeByte());
+}
+
+inline void Put(int8_t val, dbus::MessageWriter* writer) {
+  writer->PutByte(static_cast<uint8_t>(val));
+}
+
+template<> inline bool NextIs<uint8_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsByte();
+}
+
+template<> inline uint8_t Take<uint8_t>(dbus::MessageReader* reader) {
+  return reader->TakeByte();
+}
+
+inline void Put(uint8_t val, dbus::MessageWriter* writer) {
+  writer->PutByte(val);
+}
+
+template<> inline bool NextIs<int16_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsInt16();
+}
+
+template<> inline int16_t Take<int16_t>(dbus::MessageReader* reader) {
+  return reader->TakeInt16();
+}
+
+inline void Put(int16_t val, dbus::MessageWriter* writer) {
+  writer->PutInt16(val);
+}
+
+template<> inline bool NextIs<uint16_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsUint16();
+}
+
+template<> inline uint16_t Take<uint16_t>(dbus::MessageReader* reader) {
+  return reader->TakeUint16();
+}
+
+inline void Put(uint16_t val, dbus::MessageWriter* writer) {
+  writer->PutUint16(val);
+}
+
+template<> inline bool NextIs<int32_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsInt32();
+}
+
+template<> inline int32_t Take<int32_t>(dbus::MessageReader* reader) {
+  return reader->TakeInt32();
+}
+
+inline void Put(int32_t val, dbus::MessageWriter* writer) {
+  writer->PutInt32(val);
+}
+
+template<> inline bool NextIs<uint32_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsUint32();
+}
+
+template<> inline uint32_t Take<uint32_t>(dbus::MessageReader* reader) {
+  return reader->TakeUint32();
+}
+
+inline void Put(uint32_t val, dbus::MessageWriter* writer) {
+  writer->PutUint32(val);
+}
+
+template<> inline bool NextIs<int64_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsInt64();
+}
+
+template<> inline int64_t Take<int64_t>(dbus::MessageReader* reader) {
+  return reader->TakeInt64();
+}
+
+inline void Put(int64_t val, dbus::MessageWriter* writer) {
+  writer->PutInt64(val);
+}
+
+template<> inline bool NextIs<uint64_t>(const dbus::MessageReader& reader) {
+  return reader.NextIsUint64();
+}
+
+template<> inline uint64_t Take<uint64_t>(dbus::MessageReader* reader) {
+  return reader->TakeUint64();
+}
+
+inline void Put(uint64_t val, dbus::MessageWriter* writer) {
+  writer->PutUint64(val);
+}
+
+template<> inline std::string Take<std::string>(dbus::MessageReader* reader) {
+  return reader->TakeString();
+}
+
+inline void Put(const std::string val, dbus::MessageWriter* writer) {
+  writer->PutString(val);
+}
+
 // Type to DBus type id mappers
 template<typename T> char DbusTypeCode();
 template<> inline char DbusTypeCode<bool>() { return DBUS_TYPE_BOOLEAN; }
@@ -144,6 +259,15 @@ struct DbusSignatureHelper<Optional<T> > {
   }
 };
 
+// Helper Optional type initialization functipon
+template<typename T>
+T TakeOptional(dbus::MessageReader* reader) {
+  dbus::MessageReader struct_reader = reader->TakeStructReader();
+  bool available = struct_reader.TakeBool();
+  T value(&struct_reader);
+  return available ? value : T();
+}
+
 }  // namespace impl
 
 
@@ -160,14 +284,14 @@ void DbusSignature(std::string* signature, const T& dummy) {
 
 // Type constructors
 inline Boolean::Boolean(dbus::MessageReader* reader)
-  : PrimitiveType(true, reader->NextIs<bool>()),
-    value_(reader->Read<bool>()) {
+  : PrimitiveType(true, reader->NextIsBool()),
+    value_(reader->TakeBool()) {
 }
 
 template<typename T, T minval, T maxval>
 inline Integer<T, minval, maxval>::Integer(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIs<IntType>()),
-      value_(reader->Read<IntType>()) {
+    : PrimitiveType(true, impl::NextIs<IntType>(*reader)),
+      value_(impl::Take<IntType>(reader)) {
   if (valid_) {
     valid_ = range_.Includes(value_);
   }
@@ -175,8 +299,8 @@ inline Integer<T, minval, maxval>::Integer(dbus::MessageReader* reader)
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 inline Float<minnum, maxnum, minden, maxden>::Float(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIs<double>()),
-      value_(reader->Read<double>()) {
+    : PrimitiveType(true, reader->NextIsDouble()),
+      value_(reader->TakeDouble()) {
   if (valid_) {
     valid_ = range_.Includes(value_);
   }
@@ -184,8 +308,8 @@ inline Float<minnum, maxnum, minden, maxden>::Float(dbus::MessageReader* reader)
 
 template<size_t minlen, size_t maxlen>
 inline String<minlen, maxlen>::String(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIs<std::string>()),
-      value_(reader->Read<std::string>()) {
+    : PrimitiveType(true, reader->NextIsString()),
+      value_(reader->TakeString()) {
   if (valid_) {
     valid_ = length_range_.Includes(value_.length());
   }
@@ -193,8 +317,8 @@ inline String<minlen, maxlen>::String(dbus::MessageReader* reader)
 
 template<typename T>
 inline Enum<T>::Enum(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIs<int32_t>()),
-      value_(EnumType(reader->Read<int32_t>())) {
+    : PrimitiveType(true, reader->NextIsInt32()),
+      value_(EnumType(reader->TakeInt32())) {
   if (valid_) {
     valid_ = IsValidEnum(value_);
   }
@@ -202,7 +326,7 @@ inline Enum<T>::Enum(dbus::MessageReader* reader)
 
 template<typename T, size_t minsize, size_t maxsize>
 inline Array<T, minsize, maxsize>::Array(dbus::MessageReader* reader) {
-  dbus::MessageReader array_reader = reader->GetArrayReader();
+  dbus::MessageReader array_reader = reader->TakeArrayReader();
   if (array_reader.has_failed()) {
     push_back(T());
   } else {
@@ -215,17 +339,84 @@ inline Array<T, minsize, maxsize>::Array(dbus::MessageReader* reader) {
 template<typename T, size_t minsize, size_t maxsize>
 inline Map<T, minsize, maxsize>::Map(dbus::MessageReader* reader) {
   // Map key-value pairs are serialized into array
-  dbus::MessageReader array_reader = reader->GetArrayReader();
+  dbus::MessageReader array_reader = reader->TakeArrayReader();
   if (array_reader.has_failed()) {
     this->insert(typename MapType::value_type("", T()));
   } else {
     while(array_reader.HasNext()) {
-      dbus::MessageReader dictvalue_reader = array_reader.GetDictEntryReader();
+      dbus::MessageReader dictvalue_reader = array_reader.TakeDictEntryReader();
       typename MapType::key_type key =
-          dictvalue_reader.Read<typename MapType::key_type>();
+          impl::Take<typename MapType::key_type>(&dictvalue_reader);
       this->insert(typename MapType::value_type(key, T(&dictvalue_reader)));
     }
   }
+}
+
+template<typename T>
+inline Optional<T>::Optional(dbus::MessageReader* reader)
+  : value_(impl::TakeOptional<T>(reader)){
+}
+
+// MessageWriter serializers
+inline void Boolean::ToDbusWriter(dbus::MessageWriter* writer) const {
+  writer->PutBool(value_);
+}
+
+template<typename T, T minval, T maxval>
+inline void Integer<T, minval, maxval>::ToDbusWriter(
+    dbus::MessageWriter* writer) const {
+  impl::Put(value_, writer);
+}
+
+template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+inline void Float<minnum, maxnum, minden, maxden>::ToDbusWriter(
+    dbus::MessageWriter* writer) const {
+  writer->PutDouble(value_);
+}
+
+template<size_t minlen, size_t maxlen>
+inline void String<minlen, maxlen>::ToDbusWriter(
+    dbus::MessageWriter* writer) const {
+  writer->PutString(value_);
+}
+
+template<typename T>
+inline void Enum<T>::ToDbusWriter(dbus::MessageWriter* writer) const {
+  writer->PutInt32(static_cast<int32_t>(value_));
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+inline void Array<T, minsize, maxsize>::ToDbusWriter(
+    dbus::MessageWriter* writer) const {
+  std::string array_signature;
+  DbusSignature<typename ArrayType::value_type>(&array_signature);
+  dbus::MessageWriter array_writer(writer, dbus::kArray,
+                                   array_signature.c_str());
+  for (typename ArrayType::const_iterator i = this->begin(); i != this->end(); ++i) {
+    i->ToDbusWriter(&array_writer);
+  }
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+inline void Map<T, minsize, maxsize>::ToDbusWriter(
+    dbus::MessageWriter* writer) const {
+  std::string array_signature;
+  DbusSignature<typename MapType::value_type>(&array_signature);
+  dbus::MessageWriter array_writer(writer, dbus::kArray,
+                                   array_signature.c_str());
+  for (typename MapType::const_iterator i = this->begin(); i != this->end();
+       ++i) {
+    dbus::MessageWriter dictentry_writer(&array_writer, dbus::kDictEntry, NULL);
+    impl::Put(i->first, &dictentry_writer);
+    i->second.ToDbusWriter(&dictentry_writer);
+  }
+}
+
+template<typename T>
+inline void Optional<T>::ToDbusWriter(dbus::MessageWriter* writer) const {
+  dbus::MessageWriter struct_writer(writer, dbus::kStruct, NULL);
+  struct_writer.PutBool(value_.is_initialized());
+  value_.ToDbusWriter(&struct_writer);
 }
 
 }  // namespace rpc

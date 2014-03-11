@@ -35,140 +35,182 @@
 #include "rpc_base/dbus_message.h"
 
 namespace dbus {
+// MessageReader
+inline bool MessageReader::has_failed() const {
+  return failed_;
+}
 
-template<>
-inline bool MessageReader::NextIs<bool>() const {
+inline bool MessageReader::IsAtLastElement() const {
+  DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
+  return dbus_message_iter_has_next(iter) == 0;
+}
+
+inline bool MessageReader::HasNext() const {
+  return !failed_ && NextValueType() != DBUS_TYPE_INVALID;
+}
+
+inline bool MessageReader::NextIsInvalid() const {
+  return NextValueType() == DBUS_TYPE_INVALID;
+}
+
+inline bool MessageReader::NextIsBool() const {
   return NextValueType() == DBUS_TYPE_BOOLEAN;
 }
 
-template<>
-inline bool MessageReader::NextIs<int8_t>() const {
+inline bool MessageReader::NextIsByte() const {
   return NextValueType() == DBUS_TYPE_BYTE;
 }
 
-template<>
-inline bool MessageReader::NextIs<uint8_t>() const {
-  return NextValueType() == DBUS_TYPE_BYTE;
-}
-
-template<>
-inline bool MessageReader::NextIs<int16_t>() const {
+inline bool MessageReader::NextIsInt16() const {
   return NextValueType() == DBUS_TYPE_INT16;
 }
 
-template<>
-inline bool MessageReader::NextIs<uint16_t>() const {
+inline bool MessageReader::NextIsUint16() const {
   return NextValueType() == DBUS_TYPE_UINT16;
 }
 
-template<>
-inline bool MessageReader::NextIs<int32_t>() const {
+inline bool MessageReader::NextIsInt32() const {
   return NextValueType() == DBUS_TYPE_INT32;
 }
 
-template<>
-inline bool MessageReader::NextIs<uint32_t>() const {
+inline bool MessageReader::NextIsUint32() const {
   return NextValueType() == DBUS_TYPE_UINT32;
 }
 
-template<>
-inline bool MessageReader::NextIs<int64_t>() const {
+inline bool MessageReader::NextIsInt64() const {
   return NextValueType() == DBUS_TYPE_INT64;
 }
 
-template<>
-inline bool MessageReader::NextIs<uint64_t>() const {
+inline bool MessageReader::NextIsUint64() const {
   return NextValueType() == DBUS_TYPE_UINT64;
 }
 
-template<>
-inline bool MessageReader::NextIs<double>() const {
+inline bool MessageReader::NextIsDouble() const {
   return NextValueType() == DBUS_TYPE_DOUBLE;
 }
 
-template<>
-inline bool MessageReader::NextIs<std::string>() const {
+inline bool MessageReader::NextIsString() const {
   return NextValueType() == DBUS_TYPE_STRING;
 }
 
-// Reader functions
-template<>
-inline bool MessageReader::Read<bool>() {
+inline bool MessageReader::NextIsArray() const {
+  return NextValueType() == DBUS_TYPE_ARRAY;
+}
+
+inline bool MessageReader::NextIsStruct() const {
+  return NextValueType() == DBUS_TYPE_STRUCT;
+}
+
+inline bool MessageReader::TakeBool() {
   dbus_bool_t value = 0;
   ReadNextValue(DBUS_TYPE_BOOLEAN, &value);
   return value != 0;
 }
 
-template<>
-inline uint8_t MessageReader::Read<uint8_t>() {
+inline uint8_t MessageReader::TakeByte() {
   uint8_t value = 0;
   ReadNextValue(DBUS_TYPE_BYTE, &value);
   return value;
 }
 
-template<>
-inline int8_t MessageReader::Read<int8_t>() {
-  int8_t value = 0;
-  ReadNextValue(DBUS_TYPE_BYTE, &value);
-  return value;
-}
-
-template<>
-inline int16_t MessageReader::Read<int16_t>() {
+inline int16_t MessageReader::TakeInt16() {
   int16_t value = 0;
   ReadNextValue(DBUS_TYPE_INT16, &value);
   return value;
 }
 
-template<>
-inline uint16_t MessageReader::Read<uint16_t>() {
+inline uint16_t MessageReader::TakeUint16() {
   uint16_t value = 0;
   ReadNextValue(DBUS_TYPE_UINT16, &value);
   return value;
 }
 
-template<>
-inline int32_t MessageReader::Read<int32_t>() {
+inline int32_t MessageReader::TakeInt32() {
   int32_t value = 0;
   ReadNextValue(DBUS_TYPE_INT32, &value);
   return value;
 }
 
-template<>
-inline uint32_t MessageReader::Read<uint32_t>() {
+inline uint32_t MessageReader::TakeUint32() {
   uint32_t value = 0;
   ReadNextValue(DBUS_TYPE_UINT32, &value);
   return value;
 }
 
-template<>
-inline int64_t MessageReader::Read<int64_t>() {
+inline int64_t MessageReader::TakeInt64() {
   int64_t value = 0;
   ReadNextValue(DBUS_TYPE_INT64, &value);
   return value;
 }
 
-template<>
-inline uint64_t MessageReader::Read<uint64_t>() {
+inline uint64_t MessageReader::TakeUint64() {
   uint64_t value = 0;
   ReadNextValue(DBUS_TYPE_UINT64, &value);
   return value;
 }
 
-template<>
-inline double MessageReader::Read<double>() {
+inline double MessageReader::TakeDouble() {
   double value = 0.;
   ReadNextValue(DBUS_TYPE_DOUBLE, &value);
   return value;
 }
 
-template<>
-inline std::string MessageReader::Read<std::string>() {
+inline std::string MessageReader::TakeString() {
   const char* value = "";
   ReadNextValue(DBUS_TYPE_STRING, &value);
   return value;
 }
 
+
+inline MessageReader::DataType MessageReader::NextValueType() const {
+  DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
+  return failed_ ? DBUS_TYPE_INVALID : dbus_message_iter_get_arg_type(iter);
+}
+
+
+
+// Message writer methods
+inline void MessageWriter::PutBool(bool value) {
+  dbus_bool_t dbus_value = value;
+  WriteAndCheck(DBUS_TYPE_BOOLEAN, &dbus_value);
+}
+
+inline void MessageWriter::PutByte(uint8_t value) {
+  WriteAndCheck(DBUS_TYPE_BYTE, &value);
+}
+
+inline void MessageWriter::PutInt16(int16_t value) {
+  WriteAndCheck(DBUS_TYPE_INT16, &value);
+}
+
+inline void MessageWriter::PutUint16(uint16_t value) {
+  WriteAndCheck(DBUS_TYPE_UINT16, &value);
+}
+
+inline void MessageWriter::PutInt32(int32_t value) {
+  WriteAndCheck(DBUS_TYPE_INT32, &value);
+}
+
+inline void MessageWriter::PutUint32(uint32_t value) {
+  WriteAndCheck(DBUS_TYPE_UINT32, &value);
+}
+
+inline void MessageWriter::PutInt64(int64_t value) {
+  WriteAndCheck(DBUS_TYPE_INT64, &value);
+}
+
+inline void MessageWriter::PutUint64(uint64_t value) {
+  WriteAndCheck(DBUS_TYPE_UINT64, &value);
+}
+
+inline void MessageWriter::PutDouble(double value) {
+  WriteAndCheck(DBUS_TYPE_DOUBLE, &value);
+}
+
+inline void MessageWriter::PutString(const std::string& value) {
+  const char* pointer = value.c_str();
+  WriteAndCheck(DBUS_TYPE_STRING, &pointer);
+}
 
 
 }  // namespace dbus

@@ -78,21 +78,38 @@ class MessageReader {
   bool has_failed() const;
   bool IsAtLastElement() const;
   bool HasNext() const;
+
   // Type checkers
   bool NextIsInvalid() const;
-
-  template<typename T>
-  bool NextIs() const;
-
+  bool NextIsBool() const;
+  bool NextIsByte() const;
+  bool NextIsInt16() const;
+  bool NextIsUint16() const;
+  bool NextIsInt32() const;
+  bool NextIsUint32() const;
+  bool NextIsInt64() const;
+  bool NextIsUint64() const;
+  bool NextIsDouble() const;
+  bool NextIsString() const;
   bool NextIsArray() const;
   bool NextIsStruct() const;
   bool NextIsDictEntry() const;
+
   // Readers
-  template<typename T>
-  T Read();
-  MessageReader GetArrayReader();
-  MessageReader GetStructReader();
-  MessageReader GetDictEntryReader();
+  bool     TakeBool();
+  uint8_t  TakeByte();
+  int16_t  TakeInt16();
+  uint16_t TakeUint16();
+  int32_t  TakeInt32();
+  uint32_t TakeUint32();
+  int64_t  TakeInt64();
+  uint64_t TakeUint64();
+  double   TakeDouble();
+  std::string TakeString();
+
+  MessageReader TakeArrayReader();
+  MessageReader TakeStructReader();
+  MessageReader TakeDictEntryReader();
  private:
   typedef int DataType;
   // Container reader constructor
@@ -112,22 +129,23 @@ class MessageReader {
 class MessageWriter {
  public:
   // Methods
-  // Container writer constructor
+  // Main appending constructor
   MessageWriter(const MessageRef& message);
+  // Container writer constructor
   MessageWriter(MessageWriter* parent,
                 ContainerType type,
                 const char* array_signature);
   ~MessageWriter();
-  void WriteBool(bool value);
-  void WriteByte(uint8_t value);
-  void WriteInt16(int16_t value);
-  void WriteUint16(uint16_t value);
-  void WriteInt32(int32_t value);
-  void WriteUint32(uint32_t value);
-  void WriteInt64(int64_t value);
-  void WriteUint64(uint64_t value);
-  void WriteDouble(double value);
-  void WriteString(const std::string& value);
+  void PutBool(bool value);
+  void PutByte(uint8_t value);
+  void PutInt16(int16_t value);
+  void PutUint16(uint16_t value);
+  void PutInt32(int32_t value);
+  void PutUint32(uint32_t value);
+  void PutInt64(int64_t value);
+  void PutUint64(uint64_t value);
+  void PutDouble(double value);
+  void PutString(const std::string& value);
  private:
   typedef int DataType;
   // Main constructor

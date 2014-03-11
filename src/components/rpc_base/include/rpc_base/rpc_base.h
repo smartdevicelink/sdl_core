@@ -288,10 +288,13 @@ class Optional {
  public:
   // Methods
   Optional();
+  explicit Optional(dbus::MessageReader* reader);
   template<typename U>
   explicit Optional(const U& value);
   template<typename U>
   Optional(const Json::Value& value,const U& def_value);
+
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
   // Pointer semantics
   T& operator*();
