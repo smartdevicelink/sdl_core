@@ -43,10 +43,12 @@ public class SecureServicePayloadTest extends TestCase {
         SecureServicePayload secureServicePayload = new SecureServicePayload(
                 mProtectServiceRequestId, mReqSeqNumber, payloadData);
 
-        // 1 byte is mProtectServiceRequestId
-        // 4 bytes is mReqSeqNumber
-        // 1 byte is payloadData itself
-        int bytesNumber = 6;
+        // 1 byte query_type
+        // 2 - 4 bytes are API function identifier
+        // 5 - 8 bytes are request sequential number
+        // 9 - 12 bytes are reserved
+        // 13 byte is data
+        int bytesNumber = 13;
 
         assertEquals(bytesNumber, secureServicePayload.toBytes().length);
     }
@@ -57,10 +59,11 @@ public class SecureServicePayloadTest extends TestCase {
         SecureServicePayload secureServicePayload = new SecureServicePayload(
                 mProtectServiceRequestId, mReqSeqNumber, payloadData);
 
-        // 1 byte is mProtectServiceRequestId
-        // 4 bytes is mReqSeqNumber
-        // 0 byte is payloadData itself
-        int bytesNumber = 5;
+        // 1 byte query_type
+        // 2 - 4 bytes are API function identifier
+        // 5 - 8 bytes are request sequential number
+        // 9 - 12 bytes are reserved
+        int bytesNumber = 12;
 
         assertEquals(bytesNumber, secureServicePayload.toBytes().length);
     }

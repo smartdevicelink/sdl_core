@@ -47,12 +47,10 @@ public class SecureServiceMessageManager {
                     " message");
         }
 
-        Log.d(TAG, "Process Secure msg:" + protocolMessage);
+        Log.d(TAG, "Process Secure msg:" + protocolMessage.getFunctionID());
 
         SecureServicePayloadParser secureServicePayloadParser = new SecureServicePayloadParser();
-        // TODO : some shit where there with types
-        secureServicePayloadParser
-                .parse(protocolMessage.getBulkData());
+        secureServicePayloadParser.parse(protocolMessage.getBulkData());
 
         // ServiceType could be obtained from ProtocolMessage
         ServiceType serviceType = protocolMessage.getServiceType();

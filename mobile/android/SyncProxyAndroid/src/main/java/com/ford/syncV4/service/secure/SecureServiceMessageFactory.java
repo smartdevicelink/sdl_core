@@ -16,8 +16,8 @@ public class SecureServiceMessageFactory {
 
     private static final String TAG = "SecureServiceMessageFactory";
 
-    private static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 1;
-    private static final int REQ_SEQ_NUMBER_FAKE = 123;
+    private static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 0x01;
+    private static final int REQ_SEQ_NUMBER_FAKE = 0x00000123;
 
     /**
      * Build a {@link com.ford.syncV4.protocol.ProtocolMessage} for the start securing of the
@@ -48,7 +48,8 @@ public class SecureServiceMessageFactory {
         Log.d(TAG, "BuildProtectServiceRequest, secure service payload data length:" +
                 secureServicePayload.toBytes().length);
 
-        protocolMessage.setData(secureServicePayload.toBytes());
+        protocolMessage.setData(new byte[0]);
+        protocolMessage.setBulkData(secureServicePayload.toBytes());
 
         return protocolMessage;
     }
