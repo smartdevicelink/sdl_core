@@ -228,7 +228,7 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
   DCHECK(inMessage->getHeader().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
   DCHECK(inMessage);
   const uint32_t seqNumber = inMessage->getHeader().seq_number;
-  const uint32_t connectionKey = inMessage->getHeader().seq_number;
+  const uint32_t connectionKey = inMessage->getConnectionKey();
 
   if(inMessage->getDataSize() > 0) {
     const std::string error("SendHandshakeData: null arguments size.");
@@ -311,12 +311,11 @@ void SecurityManager::SendData(
     const int32_t connectionKey,
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
-  const size_t data_sending_size = sizeof(header) + data_size;
-  uint8_t* data_sending = new uint8_t[data_sending_size];
-
-  //FIXEM(EZ): move to SecurityQuery class
+  //FIXME(EZ): move to SecurityQuery class
   header.query_id = LE_TO_BE32(header.query_id << 8);
 
+  const size_t data_sending_size = sizeof(header) + data_size;
+  uint8_t* data_sending = new uint8_t[data_sending_size];
   memcpy(data_sending, &header, sizeof(header));
   memcpy(data_sending + sizeof(header), data, data_size);
 

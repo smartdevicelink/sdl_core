@@ -37,19 +37,6 @@
 
 using namespace security_manager;
 
-//TODO add info
-inline uint32_t getUInt32Value(const uint8_t* const data){
-  DCHECK(data);
-  return
-      data[0] << 24 | data[1] << 16 |
-      data[2] <<  8 | data[3];
-}
-inline uint32_t getUInt24Value(const uint8_t* const data){
-  DCHECK(data);
-  return
-      data[0] << 16 | data[1] <<  8 | data[2];
-}
-
 SecurityQuery::QueryHeader::QueryHeader(
     uint8_t queryType, uint16_t queryId, uint32_t seqNumber) :
   query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
@@ -89,7 +76,8 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       //TODO(EZ): check?
       break;
     }
-  const uint32_t query_id = BE_TO_LE32(getUInt24Value(binary_data+1));
+  const uint32_t query_id = BE_TO_LE32(
+        *reinterpret_cast<const uint32_t*>(binary_data)) >> 8;
   switch (query_id) {
     case PROTECT_SERVICE_REQUEST:
       header_.query_id = PROTECT_SERVICE_REQUEST;
@@ -108,7 +96,7 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       //TODO(EZ): check?
       break;
     }
-  header_.seq_number = getUInt32Value(binary_data + 4);
+  header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
   //skip data
   const int data_size = bin_data_size - sizeof(QueryHeader);
   if(data_size > 0) {
