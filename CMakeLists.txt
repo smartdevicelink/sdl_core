@@ -78,7 +78,6 @@ if (DEBUG_OPTION)
   endif()
 endif()
 
-message(STATUS "Jenkins integration: ${HMI}")
 #Jenkins integration section end
 
 
