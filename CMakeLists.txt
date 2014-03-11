@@ -30,6 +30,7 @@
 
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
+set (HMI "web" CACHE STRING "HMI type")
 option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GSteamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
@@ -59,6 +60,7 @@ if (HMI_TYPE_OPTION)
   if (NOT ${HMI_TYPE_OPTION} STREQUAL "HTML5")
     message(STATUS "Jenkins integration: select QML HMI")
     set (HMI "qt")
+  else ()
   endif()
 endif()
 
@@ -76,6 +78,7 @@ if (DEBUG_OPTION)
   endif()
 endif()
 
+message(STATUS "Jenkins integration: ${HMI}")
 #Jenkins integration section end
 
 
@@ -83,8 +86,6 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
-
-set(HMI "web" CACHE STRING "HMI type")
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
