@@ -19,7 +19,6 @@ set (LIBRARIES
     connectionHandler
     TransportManager
     Utils
-    bluetooth    
 )
 
 set (SOURCES

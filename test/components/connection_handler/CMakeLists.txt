@@ -19,8 +19,7 @@ set (LIBRARIES
     connectionHandler
     TransportManager
     Utils
-    bluetooth
-    ConfigProfile
+    ConfigProfile   
 )
 
 set (SOURCES

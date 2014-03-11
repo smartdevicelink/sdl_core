@@ -93,8 +93,9 @@ void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::RemoveHMIMessageAdapter()");
-  DCHECK(adapter != NULL);
-  message_adapters_.erase(adapter);
+  if (adapter != NULL) {
+    message_adapters_.erase(adapter);
+  }
 }
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi& message) {

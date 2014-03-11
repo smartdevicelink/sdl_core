@@ -153,6 +153,13 @@ class TransportAdapter {
                         const ApplicationHandle& app_handle) = 0;
 
   /**
+   * @brief Connect to all applications discovered on device
+   * @param device_handle Handle of device
+   * @return Error information about connecting applications on device
+   */
+  virtual Error ConnectDevice(const DeviceUID& device_handle) = 0;
+
+  /**
    * @brief Notify that listener of client connection is available.
    *
    * @return true - available, false - not available.

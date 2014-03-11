@@ -132,7 +132,7 @@
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
@@ -140,9 +140,9 @@
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_response.h"
 #include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_request.h"
 #include "application_manager/commands/hmi/vi_unsubscribe_vehicle_data_response.h"
-#endif // #ifdef WEB_HMI
+#endif // #ifdef HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response_template.h"
 #include "application_manager/commands/hmi/vi_subscribe_vehicle_data_request_template.h"
@@ -170,7 +170,7 @@
 #include "application_manager/commands/hmi/on_vi_acc_pedal_position_notification.h"
 #include "application_manager/commands/hmi/on_vi_steering_wheel_angle_notification.h"
 #include "application_manager/commands/hmi/on_vi_my_key_notification.h"
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 #include "application_manager/commands/hmi/vi_get_dtcs_request.h"
 #include "application_manager/commands/hmi/vi_get_dtcs_response.h"
@@ -611,7 +611,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
       case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
         if (is_response) {
           command.reset(new commands::VIGetVehicleDataResponse(message));
@@ -620,8 +620,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         }
         break;
       }
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // #ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
       if (is_response)
         command.reset(
@@ -907,7 +907,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
                 hmi_apis::FunctionID::VehicleInfo_GetMyKey>(message));
       break;
     }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetDTCs: {
       if (is_response) {
         command.reset(new commands::VIGetDTCsResponse(message));
@@ -1049,7 +1049,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnButtonPressNotification(message));
       break;
     }
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
       case hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData: {
         if (is_response) {
           command.reset(new commands::VISubscribeVehicleDataResponse(message));
@@ -1058,8 +1058,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         }
         break;
       }
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // #ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {
       if (is_response)
         command.reset(
@@ -1367,8 +1367,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
                 hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey>(message));
       break;
     }
-#endif // #ifdef QT_HMI
-#ifdef WEB_HMI
+#endif // #ifdef HMI_DBUS_API
+#ifdef HMI_JSON_API
       case hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData: {
         if (is_response) {
           command.reset(new commands::VIUnsubscribeVehicleDataResponse(message));
@@ -1377,8 +1377,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         }
         break;
       }
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // #ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_UnsubscribeGps: {
       if (is_response)
         command.reset(
@@ -1692,14 +1692,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
                 hmi_apis::FunctionID::VehicleInfo_UnsubscribeMyKey>(message));
       break;
     }
-#endif // #ifdef QT_HMI
-#ifdef WEB_HMI
+#endif // #ifdef HMI_DBUS_API
+#ifdef HMI_JSON_API
       case hmi_apis::FunctionID::VehicleInfo_OnVehicleData: {
         command.reset(new commands::OnVIVehicleDataNotification(message));
         break;
       }
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // #ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_OnGpsData: {
       command.reset(new commands::OnVIGpsDataNotification(message));
       break;
@@ -1785,7 +1785,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnVIMyKeyNotification(message));
       break;
     }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::UI_ShowNotification: {
       command.reset(new commands::OnShowNotification(message));
       break;

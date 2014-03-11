@@ -1,9 +1,9 @@
-IF (${WEB_HMI})
+IF (HMIADAPTER STREQUAL "messagebroker")
 set (BROKER_LIBRARIES
   MessageBrokerClient
   MessageBrokerServer
 )
-ENDIF (${WEB_HMI})
+ENDIF ()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir

@@ -76,9 +76,11 @@ add_subdirectory(./security_manager)
 # --- Policies
 add_subdirectory(./policies)
 
-if (${QT_HMI})
+if (${HMI_DBUS_API})
 # --- DBus
     add_subdirectory(./dbus)
+endif ()
+if (${QT_HMI})
 # --- Qt HMI
     add_subdirectory(./qt_hmi)
 endif ()

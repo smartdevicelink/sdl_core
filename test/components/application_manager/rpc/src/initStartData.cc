@@ -39,10 +39,10 @@ void initStartData()
 	protocol_handler::ProtocolHandlerImpl* protocol_handler_;
 	connection_handler::ConnectionHandlerImpl* connection_handler_;
 	application_manager::ApplicationManagerImpl* app_manager_;
-#ifdef WEB_HMI
+#ifdef MESSAGEBROKER_HMIADAPTER
 	hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
 #endif
-#ifdef QT_HMI
+#ifdef DBUS_HMIADAPTER
 	hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
 #endif
 

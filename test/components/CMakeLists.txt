@@ -19,6 +19,8 @@ add_subdirectory(./protocol_handler)
 # --- ProtocolHandler
 add_subdirectory(./connection_handler)
 
+add_subdirectory(./hmi_message_handler)
+
 # --- Utils
 add_subdirectory(./utils)
 

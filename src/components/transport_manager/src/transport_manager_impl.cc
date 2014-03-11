@@ -189,43 +189,9 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
     LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
     return E_INVALID_HANDLE;
   }
-  transport_adapter::DeviceList dl = ta->GetDeviceList();
-  transport_adapter::DeviceList::iterator it =
-      std::find(dl.begin(), dl.end(), device_id);
-  if (it == dl.end()) {
-    LOG4CXX_INFO(logger_, "Device with handle " << device_handle << " and id "
-                                                << device_id
-                                                << " is not found");
-    return E_INVALID_HANDLE;
-  }
 
-  ApplicationList app_list = ta->GetApplicationList(device_id);
-  LOG4CXX_INFO(logger_, "app_list.size() = " << app_list.size());
-  for (ApplicationList::iterator it = app_list.begin(); it != app_list.end();
-       ++it) {
-    const ApplicationHandle& app_handle = *it;
-    LOG4CXX_INFO(logger_, "Attempt to connect device "
-                              << device_id << ", channel " << app_handle);
-    const TransportAdapter::Error ta_error = ta->Connect(device_id, app_handle);
-    switch (ta_error) {
-      case TransportAdapter::OK: {
-        LOG4CXX_INFO(logger_, "OK");
-        break;
-      }
-      case TransportAdapter::ALREADY_EXISTS: {
-        LOG4CXX_INFO(logger_, "Already connected");
-        break;
-      }
-      default: {
-        LOG4CXX_ERROR(logger_, "Connect to device "
-                                   << device_id << ", channel " << app_handle
-                                   << " failed with error " << ta_error);
-        return E_INTERNAL_ERROR;
-      }
-    }
-  }
-  LOG4CXX_INFO(logger_, "Connect device exit");
-  return E_SUCCESS;
+  TransportAdapter::Error ta_error = ta->ConnectDevice(device_id);
+  return (TransportAdapter::OK == ta_error) ? E_SUCCESS : E_INTERNAL_ERROR;
 }
 
 int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {

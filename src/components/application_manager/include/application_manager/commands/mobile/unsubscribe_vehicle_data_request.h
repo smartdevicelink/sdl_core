@@ -70,7 +70,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
  private:
   struct HmiRequest {
     hmi_apis::Common_Result::eType status;
@@ -82,7 +82,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
 
   typedef std::vector<HmiRequest> HmiRequests;
   HmiRequests hmi_requests_;
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
  private:
   bool IsAnythingAlreadyUnsubscribed();

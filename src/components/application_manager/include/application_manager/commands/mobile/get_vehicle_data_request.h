@@ -69,7 +69,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
  protected:
   virtual void on_event(const event_engine::Event& event);
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
  private:
   void SendRequestsToHmi(const int32_t app_id);
 
@@ -83,7 +83,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
 
   typedef std::vector<HmiRequest> HmiRequests;
   HmiRequests hmi_requests_;
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
   DISALLOW_COPY_AND_ASSIGN(GetVehicleDataRequest);
 };
