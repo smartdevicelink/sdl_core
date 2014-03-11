@@ -47,6 +47,20 @@
                "DialNumberID" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
                },
+               "DiagnosticMessageID":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },
+               "SystemRequestID":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },	
                "EncodedSyncPDataID" : {
                   "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
                },

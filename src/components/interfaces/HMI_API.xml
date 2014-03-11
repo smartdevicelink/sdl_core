@@ -2425,6 +2425,9 @@
       	Currently only predefined screen layouts are defined.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -2571,6 +2574,9 @@
   <function name="ScrollableMessage" messagetype="response">
   </function>
   <function name="PerformAudioPassThru" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
     <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
       <description>Uses
             audioPassThruDisplayText1: First line of text displayed during audio capture.
