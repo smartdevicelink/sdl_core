@@ -155,8 +155,8 @@ namespace security_manager_test {
     const uint8_t* err_id =
         reinterpret_cast<uint8_t*>(arg->data() + header_size);
     if(expectedErrorId != *err_id) {
-      *result_listener << "InternalError is not with error "
-                       << expectedErrorId;
+      *result_listener << "InternalError " << int(*err_id)
+                       << " is not equal error " << expectedErrorId;
       return false;
     }
     return true;
