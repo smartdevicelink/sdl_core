@@ -9,8 +9,8 @@ add_definitions(${GLIB2_CFLAGS})
 
 include_directories (
   ./include
-  ../../../../src/thirdPartyLibs/gmock-1.6.0/include
-  ../../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ../../../../src/thirdPartyLibs/gmock-1.7.0/include
+  ../../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ../../../../src/thirdPartyLibs/MessageBroker/include
   ../../../../src/thirdPartyLibs/jsoncpp/include
   ../../../../src/components/application_manager/include

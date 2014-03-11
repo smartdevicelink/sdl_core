@@ -242,7 +242,7 @@ if(BUILD_TESTS)
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
-    add_subdirectory(./src/thirdPartyLibs/gmock-1.6.0)
+    add_subdirectory(./src/thirdPartyLibs/gmock-1.7.0)
     add_subdirectory(./test)
 endif()
 
