@@ -58,7 +58,7 @@ endif()
 if (HMI_TYPE_OPTION)
   if (NOT ${HMI_TYPE_OPTION} STREQUAL "HTML5")
     message(STATUS "Jenkins integration: select QML HMI")
-    set (HMI2 ON)
+    set (HMI "qt")
   endif()
 endif()
 
