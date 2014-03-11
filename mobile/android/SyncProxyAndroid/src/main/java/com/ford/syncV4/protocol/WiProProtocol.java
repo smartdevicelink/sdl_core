@@ -35,10 +35,8 @@ public class WiProProtocol extends AbstractProtocol {
     int _dataBufWritePos = 0;
     int hashID = 0;
     int messageID = 0;
-    Hashtable<Integer, MessageFrameAssembler> _assemblerForMessageID =
-            new Hashtable<Integer, MessageFrameAssembler>();
-    Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> _assemblerForSessionID =
-            new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
+    Hashtable<Integer, MessageFrameAssembler> _assemblerForMessageID = new Hashtable<Integer, MessageFrameAssembler>();
+    Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> _assemblerForSessionID = new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
     protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatSendInterval_ms = 0;
@@ -104,25 +102,21 @@ public class WiProProtocol extends AbstractProtocol {
         SendMessage(protocolMessage);
     }
 
-    @Override
-    public void StartProtocolService(ServiceType serviceType, Session session)
-            throws IllegalArgumentException {
+    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
         byte sessionId = session.getSessionId();
         DebugTool.logInfo("Protocol service should start: " + serviceType);
         if (sessionId == 0) {
             throw new IllegalArgumentException("currentSession id 0 should be used to start " +
                     "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType,
-                sessionId, _version);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, _version);
         sendFrameToTransport(header);
-    }
+    } // end-method
 
     private void sendStartProtocolSessionACK(ServiceType serviceType, byte sessionID) {
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(serviceType,
-                sessionID, 0x00, _version);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(serviceType, sessionID, 0x00, _version);
         sendFrameToTransport(header);
-    }
+    } // end-method
 
     public void SetHeartbeatSendInterval(int heartbeatSendInterval_ms) {
         _heartbeatSendInterval_ms = heartbeatSendInterval_ms;
@@ -403,8 +397,8 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     handleSingleFrameMessageFrame(header, data);
                 }
-            }
-        }
+            } // end-if
+        } // end-method
 
         private void handleProtocolHeartbeatACK(ProtocolFrameHeader header,
                                                 byte[] data) {

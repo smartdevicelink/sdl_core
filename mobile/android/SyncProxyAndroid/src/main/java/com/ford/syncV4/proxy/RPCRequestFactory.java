@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy;
 
+import java.util.Hashtable;
 import java.util.Vector;
 
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -44,9 +45,9 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
  */
 public class RPCRequestFactory {
 
-	private static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
-    private static final int SYNC_MSG_MAJOR_VERSION = 1;
-    private static final int SYNC_MSG_MINOR_VERSION = 0;
+	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
+	public static final int SYNC_MSG_MAJOR_VERSION = 1;
+	public static final int SYNC_MSG_MINOR_VERSION = 0;
 
 	public static EncodedSyncPData buildEncodedSyncPData(
 			Vector<String> data, Integer correlationID) {

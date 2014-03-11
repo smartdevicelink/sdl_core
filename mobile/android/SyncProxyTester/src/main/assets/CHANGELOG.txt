@@ -1,4 +1,6 @@
 [CW10]
+* File Explorer: changed project structure.
+* SyncProxyAndroid SDK: changed project structure
 + SyncProxyTester: added UI for System Request
 + Add systemFile, offset, and length parameters to PutFile UI.
 * SyncProxyAndroid SDK: Handle incoming messages with very big JSON size.

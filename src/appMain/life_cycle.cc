@@ -57,20 +57,22 @@ LifeCycle::LifeCycle()
   , connection_handler_(NULL)
   , app_manager_(NULL)
   , hmi_handler_(NULL)
+  , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
   , policy_manager_(NULL)
-#ifdef QT_HMI
+#ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
-  , dbus_adapter_thread_(NULL) {
-#endif  // QT_HMI
-#ifdef WEB_HMI
+  , dbus_adapter_thread_(NULL)
+#endif  // DBUS_HMIADAPTER
+#ifdef MESSAGEBROKER_HMIADAPTER
   , mb_adapter_(NULL)
   , message_broker_(NULL)
   , message_broker_server_(NULL)
   , mb_thread_(NULL)
   , mb_server_thread_(NULL)
-  , mb_adapter_thread_(NULL) {
-#endif  // WEB_HMI
+  , mb_adapter_thread_(NULL)
+#endif  // MESSAGEBROKER_HMIADAPTER
+{
 }
 
 bool LifeCycle::StartComponents() {
@@ -129,7 +131,7 @@ bool LifeCycle::StartComponents() {
   return true;
 }
 
-#ifdef WEB_HMI
+#ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
@@ -209,9 +211,9 @@ bool LifeCycle::InitMessageSystem() {
 
   return true;
 }
-#endif  // WEB_HMI
+#endif  // MESSAGEBROKER_HMIADAPTER
 
-#ifdef QT_HMI
+#ifdef DBUS_HMIADAPTER
 /**
  * Initialize DBus component
  * @return true if success otherwise false.
@@ -242,7 +244,17 @@ bool LifeCycle::InitMessageSystem() {
 
   return true;
 }
-#endif  // QT_HMI
+#endif  // DBUS_HMIADAPTER
+
+#ifdef MQUEUE_HMIADAPTER
+bool LifeCycle::InitMessageSystem() {
+  hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(
+      hmi_message_handler::HMIMessageHandlerImpl::instance());
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+      hmi_message_adapter_);
+  return true;
+}
+#endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);
@@ -273,7 +285,7 @@ void LifeCycle::StopComponents() {
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
-#ifdef QT_HMI
+#ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
     if (hmi_handler_) {
       hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
@@ -286,8 +298,8 @@ void LifeCycle::StopComponents() {
     }
     delete dbus_adapter_;
   }
-#endif  // QT_HMI
-#ifdef WEB_HMI
+#endif  // DBUS_HMIADAPTER
+#ifdef MESSAGEBROKER_HMIADAPTER
   hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
   mb_adapter_->unregisterController();
@@ -296,9 +308,9 @@ void LifeCycle::StopComponents() {
   delete mb_adapter_thread_;
   mb_adapter_->Close();
   delete mb_adapter_;
-#endif  // WEB_HMI
+#endif  // MESSAGEBROKER_HMIADAPTER
 
-#ifdef WEB_HMI
+#ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   mb_server_thread_->Stop();
   mb_server_thread_->Join();
@@ -309,7 +321,10 @@ void LifeCycle::StopComponents() {
   delete mb_server_thread_;
 
   networking::cleanup();
-#endif  // WEB_HMI
+#endif  // MESSAGEBROKER_HMIADAPTER
+
+  delete hmi_message_adapter_;
+  hmi_message_adapter_ = NULL;
 }
 
 void LifeCycle::StopComponentsOnSignal(int32_t params) {
