@@ -545,6 +545,7 @@ div {
 .inactive_state {
     -webkit-transform: translateX(-2000px);
     -moz-transform: translateX(-2000px);
+    overflow: hidden;
 }
 
 .active_state {

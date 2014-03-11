@@ -61,9 +61,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
      */
     alertRequestId: null,
 
-    content1: 'Title',
+    content1: '',
 
-    content2: 'Text',
+    content2: '',
+
+    content3: '',
 
     active: false,
 
@@ -133,6 +135,10 @@ SDL.AlertPopUp = Em.ContainerView.create({
     deactivate: function() {
         this.set('active', false);
         clearTimeout(this.timer);
+
+        this.set('content1', '');
+        this.set('content2', '');
+        this.set('content3', '');
 
         SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
 

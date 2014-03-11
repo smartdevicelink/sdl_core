@@ -1367,11 +1367,6 @@
   <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="false" >
     <description>Desired keyboard layout.</description>
   </param>
-  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-    <description>In this mode, all keypresses will be sent as they occur.</description>
-    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-    <description>If omitted, this value will be set to FALSE.</description>
-  </param>
   <param name="keypressMode" type="Common.KeypressMode" mandatory="false" >
     <description>
     	Desired keypress mode.
@@ -1924,6 +1919,9 @@
       <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
       </param>
     </function>
+    <function name="OnSDLClose" messagetype="notification">
+      <description>SDL must notify HMI about finish working application</description>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2427,6 +2425,9 @@
       	Currently only predefined screen layouts are defined.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -2573,6 +2574,9 @@
   <function name="ScrollableMessage" messagetype="response">
   </function>
   <function name="PerformAudioPassThru" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
     <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
       <description>Uses
             audioPassThruDisplayText1: First line of text displayed during audio capture.
@@ -2662,6 +2666,14 @@
     </param>
   </function>
   <function name="ShowConstantTBT" messagetype="response">
+  </function>
+  <function name="AlertManeuver" messagetype="request">
+    <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
+    </param>
+  </function>
+  <function name="AlertManeuver" messagetype="response">
   </function>
   <function name="UpdateTurnList" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>

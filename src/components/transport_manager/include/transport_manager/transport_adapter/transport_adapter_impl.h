@@ -127,6 +127,13 @@ class TransportAdapterImpl : public TransportAdapter,
                                           const ApplicationHandle& app_handle);
 
   /**
+   * @brief Connect to all applications discovered on device
+   * @param device_handle Handle of device
+   * @return Error information about connecting applications on device
+   */
+  virtual TransportAdapter::Error ConnectDevice(const DeviceUID& device_handle);
+
+  /**
    * @brief Disconnect from specified session.
    *
    * @param devcie_handle Device unique identifier.
@@ -381,6 +388,11 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool Restore();
 
+  /**
+   * @brief Returns true if \a device is to be connected automatically
+   */
+  virtual bool ToBeAutoConnected(DeviceSptr device) const;
+
  private:
   /**
    * @brief Find connection that has state - ESTABLISHED.
@@ -392,6 +404,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ConnectionSptr FindEstablishedConnection(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle);
+  /**
+   * @brief Connect to all applications discovered on device
+   * @param device Pointer to device
+   * @return Error information about connecting applications on device
+   */
+  TransportAdapter::Error ConnectDevice(DeviceSptr device);
 
   /**
    * @brief Listener for device adapter notifications.

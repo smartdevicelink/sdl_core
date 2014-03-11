@@ -51,6 +51,7 @@ class UsbAoaAdapter : public TransportAdapterImpl {
   virtual DeviceType GetDeviceType() const;
   virtual bool IsInitialised() const;
   virtual TransportAdapter::Error Init();
+  virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
  private:
   bool is_initialised_;

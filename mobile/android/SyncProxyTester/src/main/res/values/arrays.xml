@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="request_type">
+        <item>HTTP</item>
+        <item>FILE_RESUME</item>
+        <item>AUTH_REQUEST</item>
+        <item>AUTH_CHALLENGE</item>
+        <item>AUTH_ACK</item>
+    </string-array>
+</resources>

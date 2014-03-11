@@ -53,7 +53,6 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
         this._super();
 
         SDL.SDLController.VRMove();
-        SDL.SDLController.onSystemContextChange();
     },
 
     /**
@@ -99,6 +98,5 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
         }
 
         this.helpList.list.refresh();
-        SDL.SDLController.onSystemContextChange();
     }
 });

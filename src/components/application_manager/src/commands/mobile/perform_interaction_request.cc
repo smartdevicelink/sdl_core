@@ -90,8 +90,8 @@ void PerformInteractionRequest::Run() {
 
   // timer_.start(2);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -238,20 +238,14 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 
 void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key].asUInt());
-  if (app) {
 
-    // Unsubscribe from event on UIPerformInteractionResponse to
-    // avoid of double execution of SendVrDeleteCommand()
-    unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
-    SendVrDeleteCommand(app);
-    app->set_perform_interaction_active(0);
-    app->set_perform_interaction_mode(-1);
-    app->DeletePerformInteractionChoiceSetMap();
-  }
+  // Unsubscribe from event on UIPerformInteractionResponse to
+  // avoid of double execution of SendVrDeleteCommand()
+  unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+  DisablePerformInteraction();
   CommandRequestImpl::onTimeOut();
 }
+
 
 void PerformInteractionRequest::ProcessVRNotification(
     const smart_objects::SmartObject& message) {
@@ -286,10 +280,7 @@ void PerformInteractionRequest::ProcessVRNotification(
         smart_objects::SmartType_Map);
     c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
     SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-    SendVrDeleteCommand(app);
-    app->set_perform_interaction_mode(-1);
-    app->DeletePerformInteractionChoiceSetMap();
-    app->set_perform_interaction_active(0);
+    DisablePerformInteraction();
 
     (*message_)[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
@@ -324,23 +315,9 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
   (const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessAppUnregisteredNotification");
-  const uint32_t app_id = (*message_)[strings::params]
-                                          [strings::connection_key].asUInt();
+  const uint32_t app_id = connection_key();
   if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
-    }
-    if (app->is_perform_interaction_active()) {
-      if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY) !=
-          app->perform_interaction_mode()) {
-        SendVrDeleteCommand(app);
-      }
-      app->set_perform_interaction_mode(-1);
-      app->DeletePerformInteractionChoiceSetMap();
-      app->set_perform_interaction_active(0);
-    }
+    DisablePerformInteraction();
   } else {
     LOG4CXX_INFO(logger_, "Notification was sent from another application");
   }
@@ -349,8 +326,10 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
 void PerformInteractionRequest::SendVrDeleteCommand(
     application_manager::ApplicationSharedPtr const app) {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
-  const PerformChoiceSetMap& choice_set_map = app
-      ->performinteraction_choice_set_map();
+
+  const PerformChoiceSetMap& choice_set_map =
+      app->performinteraction_choice_set_map();
+
   PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
   for (; choice_set_map.end() != it; ++it) {
     const smart_objects::SmartObject& choice_set = (*it->second).getElement(
@@ -370,55 +349,39 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key].asUInt());
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-      return;
+
+  DisablePerformInteraction();
+
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  msg_params = message[strings::msg_params];
+
+  bool result = false;
+  int32_t hmi_response_code =
+      message[strings::params][hmi_response::code].asInt();
+  if (hmi_apis::Common_Result::SUCCESS ==
+      hmi_apis::Common_Result::eType(hmi_response_code)) {
+    if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
+      msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
+    } else {
+      msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
     }
-    if (app->is_perform_interaction_active()) {
-      if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY)
-          != app->perform_interaction_mode()) {
-        SendVrDeleteCommand(app);
-      }
-      app->set_perform_interaction_mode(-1);
-      app->DeletePerformInteractionChoiceSetMap();
-      app->set_perform_interaction_active(0);
-    }
-    (*message_)[strings::params][strings::function_id] =
-            static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params = message[strings::msg_params];
-    bool result = false;
-    int32_t hmi_response_code =
-        message[strings::params][hmi_response::code].asInt();
-    if (hmi_apis::Common_Result::SUCCESS ==
+    result = true;
+  }
+
+  const char* return_info = NULL;
+  mobile_apis::Result::eType result_code =
+      static_cast<mobile_apis::Result::eType>(hmi_response_code);
+  if (result) {
+    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
         hmi_apis::Common_Result::eType(hmi_response_code)) {
-      if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
-        msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
-      } else {
-        msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
-      }
-      result = true;
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info = std::string(
+          "Unsupported phoneme type sent in any item").c_str();
     }
+  }
 
-    const char* return_info = NULL;
-     mobile_apis::Result::eType result_code =
-        static_cast<mobile_apis::Result::eType>(hmi_response_code);
-    if (result) {
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-          hmi_apis::Common_Result::eType(hmi_response_code)) {
-        result_code = mobile_apis::Result::WARNINGS;
-        return_info = std::string(
-            "Unsupported phoneme type sent in any item").c_str();
-      }
-    }
-
-    SendResponse(result,
-                 result_code,
-                 return_info,
-                 &(msg_params));
+  SendResponse(result, result_code, return_info, &(msg_params));
 }
 
 void PerformInteractionRequest::SendVRAddCommandRequest(
@@ -756,6 +719,27 @@ bool PerformInteractionRequest::CheckVrHelpItemPositions(
     ++position;
   }
   return true;
+}
+
+void PerformInteractionRequest::DisablePerformInteraction() {
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
+
+  if (app->is_perform_interaction_active()) {
+    app->set_perform_interaction_active(0);
+
+    if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY)
+        != app->perform_interaction_mode()) {
+      SendVrDeleteCommand(app);
+    }
+
+    app->set_perform_interaction_mode(-1);
+    app->DeletePerformInteractionChoiceSetMap();
+  }
 }
 
 }  // namespace commands

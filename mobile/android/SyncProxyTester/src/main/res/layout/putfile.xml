@@ -1,65 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/itemRoot"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginLeft="10dip"
-    android:layout_marginRight="10dip"
-    android:minWidth="300px"
-    android:orientation="vertical"
-    android:paddingLeft="20dip"
-    android:paddingRight="20dip" >
+              android:id="@+id/itemRoot"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="10dip"
+              android:layout_marginRight="10dip"
+              android:minWidth="300dp"
+              android:orientation="vertical"
+              android:paddingLeft="20dip"
+              android:paddingRight="20dip">
 
     <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="Local File Name"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1" >
-
-        <EditText
-            android:id="@+id/putfile_localFileName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="4"
-            android:ems="10"
-            android:freezesText="true"
-            android:visibility="visible" >
-
-            <requestFocus />
-        </EditText>
-
-        <Button
-            android:id="@+id/putfile_selectFileButton"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="…" />
+            android:text="@string/putfile_fileName"
+            android:textStyle="bold"/>
+
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+        <EditText
+                android:id="@+id/putfile_localFileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:freezesText="true"
+                android:visibility="visible"
+                android:inputType="text"/>
+
+        <Button
+                android:id="@+id/putfile_selectFileButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/putfile_fileNameSelect"/>
 
     </LinearLayout>
-    
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="File Name">
-    </TextView>
-    <EditText android:text="syncFileName" android:id="@+id/syncFileName"
-        android:layout_width="fill_parent" android:layout_height="wrap_content"
-        android:visibility="visible" android:freezesText="true">
-    </EditText>
-    <TextView android:layout_width="fill_parent"
-        android:layout_height="wrap_content" android:layout_weight="1"
-        android:textStyle="bold" android:text="File Type">
-    </TextView>
-    <Spinner android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/spnFileType">
-    </Spinner>
-    <CheckBox android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:id="@+id/chkPersistentFile"
-        android:text="Persistent File?" android:checked="false">
-    </CheckBox>
+
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="@string/putfile_syncFileName"/>
+
+    <EditText
+            android:text="@string/putfile_syncFileNameDefault"
+            android:id="@+id/syncFileName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            android:freezesText="true"
+            android:inputType="text"/>
+
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:text="@string/putfile_fileType"/>
+
+    <Spinner
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/spnFileType"/>
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chkPersistentFile"
+            android:text="@string/putfile_persistentFile"
+            android:checked="false"/>
+
+    <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/putfile_chkSystemFile"
+            android:text="@string/putfile_systemFile"
+            android:checked="false"/>
+
+    <CheckBox
+            android:id="@+id/putfile_useOffset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/putfile_offset"/>
+
+    <EditText
+            android:id="@+id/putfile_offset"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:maxLength="12"/>
+
+    <CheckBox
+            android:id="@+id/putfile_useLength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="@string/putfile_length"/>
+
+    <EditText
+            android:id="@+id/putfile_length"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:inputType="number"
+            android:maxLength="12"/>
 </LinearLayout>
