@@ -200,10 +200,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             }
         }
         if (!keepConnection) {
-            if (_heartbeatMonitor != null) {
-                _heartbeatMonitor.stop();
-                _heartbeatMonitor = null;
-            }
+            stopHeartbeatMonitor();
         }
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
@@ -222,6 +219,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
                 _transport = null;
             }
+        }
+    }
+
+    public void stopHeartbeatMonitor() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.stop();
         }
     }
 
@@ -385,6 +388,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
+        }else {
+
         }
 
         startProtocolSession();

@@ -56,6 +56,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -2220,6 +2221,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         if (mainActivity != null) {
             mainActivity.onUSBNoSuchDeviceException();
+        }
+    }
+
+    @Override
+    public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse) {
+        createDebugMessageForAdapter(diagnosticMessageResponse);
+        if (isModuleTesting()) {
+            ModuleTest.responses.add(new Pair<Integer, Result>(diagnosticMessageResponse.getCorrelationID(), diagnosticMessageResponse.getResultCode()));
+            synchronized (mTesterMain.getThreadContext()) {
+                mTesterMain.getThreadContext().notify();
+            }
         }
     }
 }

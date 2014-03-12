@@ -11,6 +11,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -349,4 +350,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * https://code.google.com/p/android/issues/detail?id=20545
      */
     public void onUSBNoSuchDeviceException();
+
+    public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
 }

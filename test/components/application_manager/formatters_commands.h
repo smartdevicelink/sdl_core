@@ -75,7 +75,7 @@ TEST(add_command, general) {
     258);
 
   mobile_apis::MOBILE_API factory;
-  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
+/*  std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
 
@@ -95,6 +95,7 @@ TEST(add_command, general) {
   std::string str;
   formatters::CFormatterJsonSDLRPCv2::toString(incoming_message, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, notification) {
@@ -106,6 +107,7 @@ TEST(json2_command, notification) {
     incoming_message);
 
   hmi_apis::HMI_API factory;
+/*
   std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
@@ -132,6 +134,7 @@ TEST(json2_command, notification) {
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, request_no_params) {
@@ -144,6 +147,7 @@ TEST(json2_command, request_no_params) {
     incoming_message);
 
   hmi_apis::HMI_API factory;
+/*
   std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
@@ -170,6 +174,7 @@ TEST(json2_command, request_no_params) {
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, response_params) {
@@ -202,6 +207,7 @@ TEST(json2_command, response_params) {
     incoming_message);
 
   hmi_apis::HMI_API factory;
+/*
   std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
@@ -234,6 +240,7 @@ TEST(json2_command, response_params) {
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, response_error_params) {
@@ -258,6 +265,7 @@ TEST(json2_command, response_error_params) {
     incoming_message);
 
   hmi_apis::HMI_API factory;
+/*
   std::cout << "Attach schema: " << factory.attachSchema(incoming_message) << std::endl;
 
   std::cout << "Is message valid? " << incoming_message.isValid() << std::endl;
@@ -280,6 +288,7 @@ TEST(json2_command, response_error_params) {
   std::string str;
   formatters::FormatterJsonRpc::ToString(incoming_message, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, create_object) {
@@ -289,11 +298,12 @@ TEST(json2_command, create_object) {
                               hmi_apis::messageType::request);
 
   ASSERT_EQ(smart_objects::SmartType_Map, is_vr_ready.getType());
-  std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
+  /*std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
             << "; message type " << is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
             << "; protocol version " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
             << "; protocol type " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
             << "; correlation id " << is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
+	    */
 
   is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID] =
     hmi_apis::FunctionID::VR_IsReady;
@@ -303,7 +313,7 @@ TEST(json2_command, create_object) {
   is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_TYPE] = 1;
   is_vr_ready[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
   is_vr_ready[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+/*
   std::cout << "FunctionID " << is_vr_ready[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
             << "; message type " << is_vr_ready[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
             << "; protocol version " << is_vr_ready[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
@@ -315,6 +325,7 @@ TEST(json2_command, create_object) {
   std::string str;
   formatters::FormatterJsonRpc::ToString(is_vr_ready, str);
   std::cout << str << std::endl;
+*/
 }
 
 TEST(json2_command, without_factory_create) {
@@ -328,19 +339,21 @@ TEST(json2_command, without_factory_create) {
   so_to_send[sos::S_PARAMS][sos::S_CORRELATION_ID] = 4444;
   so_to_send[sos::S_MSG_PARAMS] = smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-  std::cout << "FunctionID " << so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
+  /*std::cout << "FunctionID " << so_to_send[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt()
             << "; message type " << so_to_send[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()
             << "; protocol version " << so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_VERSION].asInt()
             << "; protocol type " << so_to_send[sos::S_PARAMS][sos::S_PROTOCOL_TYPE].asInt()
             << "; correlation id " << so_to_send[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt() << std::endl;
+	    */
 
   hmi_apis::HMI_API factory;
   factory.attachSchema(so_to_send);
   ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::OK, so_to_send.validate());
-
+/*
   std::string str;
   formatters::FormatterJsonRpc::ToString(so_to_send, str);
   std::cout << str << std::endl;
+*/
 }
 
 #endif  // TEST_COMPONENTS_APPLICATION_MANAGER_FORMATTERS_COMMANDS_H_

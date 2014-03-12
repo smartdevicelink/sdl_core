@@ -17,6 +17,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
@@ -140,7 +141,9 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     new SyncException(
                                             "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " +
                                                     msg.getResultCode(),
-                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR));
+                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR
+                                    )
+                            );
                         }
 
                         syncProxyBase.processRegisterAppInterfaceResponse(msg);
@@ -211,7 +214,9 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     new SyncException(
                                             "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " +
                                                     msg.getResultCode(),
-                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR));
+                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR
+                                    )
+                            );
                         }
                     }
                     syncProxyBase.processRegisterAppInterfaceResponse(msg);
@@ -260,6 +265,20 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         });
                     } else {
                         getProxyListener().onShowResponse((ShowResponse) msg);
+                    }
+                } else if (functionName.equals(Names.DiagnosticMessage)) {
+                    // AddCommand
+                    final DiagnosticMessageResponse msg = new DiagnosticMessageResponse(hash);
+                    if (getCallbackToUIThread()) {
+                        // Run in UI thread
+                        getMainUIHandler().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                getProxyListener().onDiagnosticMessageResponse(msg);
+                            }
+                        });
+                    } else {
+                        getProxyListener().onDiagnosticMessageResponse(msg);
                     }
                 } else if (functionName.equals(Names.AddCommand)) {
                     // AddCommand

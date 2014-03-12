@@ -1,36 +1,30 @@
 package com.ford.syncV4.proxy;
 
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.ISyncALMLifeCycleListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAddSubMenuResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncAlertResponseListener;
+import com.ford.syncV4.proxy.interfaces.ISyncButtonListener;
+import com.ford.syncV4.proxy.interfaces.ISyncChoiceListener;
+import com.ford.syncV4.proxy.interfaces.ISyncCommandListener;
 import com.ford.syncV4.proxy.interfaces.ISyncCreateInteractionChoiceSetResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncDeleteCommandResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncDeleteInteractionChoiceSetResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncDeleteSubMenuResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncDriverDistractionListener;
 import com.ford.syncV4.proxy.interfaces.ISyncEncodedSyncPDataListener;
-import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataListener;
 import com.ford.syncV4.proxy.interfaces.ISyncEncodedSyncPDataResponseListener;
-import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataResponseListener;
-import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
-import com.ford.syncV4.proxy.interfaces.ISyncChoiceListener;
 import com.ford.syncV4.proxy.interfaces.ISyncPerformInteractionResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncResetGlobalPropertiesListener;
 import com.ford.syncV4.proxy.interfaces.ISyncSetGlobalPropertiesResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncSetMediaClockTimerResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncShowResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncSpeakResponseListener;
-import com.ford.syncV4.proxy.interfaces.ISyncButtonListener;
-import com.ford.syncV4.proxy.interfaces.ISyncCommandListener;
+import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataListener;
+import com.ford.syncV4.proxy.interfaces.ISyncSyncPDataResponseListener;
 import com.ford.syncV4.proxy.interfaces.ISyncTBTClientStateListener;
 import com.ford.syncV4.proxy.interfaces.ISyncUnsubscribeButtonResponseListener;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -44,35 +38,35 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
-import com.ford.syncV4.proxy.rpc.OnHashChange;
-import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
-import com.ford.syncV4.proxy.rpc.OnSystemRequest;
-import com.ford.syncV4.proxy.rpc.OnTouchEvent;
-import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
-import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
+import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
-import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
-import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
 import com.ford.syncV4.proxy.rpc.OnCommand;
 import com.ford.syncV4.proxy.rpc.OnDriverDistraction;
 import com.ford.syncV4.proxy.rpc.OnEncodedSyncPData;
-import com.ford.syncV4.proxy.rpc.OnSyncPData;
 import com.ford.syncV4.proxy.rpc.OnHMIStatus;
+import com.ford.syncV4.proxy.rpc.OnHashChange;
+import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.OnPermissionsChange;
 import com.ford.syncV4.proxy.rpc.OnSyncChoiceChosen;
+import com.ford.syncV4.proxy.rpc.OnSyncPData;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.OnTBTClientState;
+import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
-import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
+import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
+import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
@@ -86,6 +80,7 @@ import com.ford.syncV4.proxy.rpc.SpeakResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
+import com.ford.syncV4.proxy.rpc.SyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
@@ -100,6 +95,12 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.TestConfig;
+
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class SyncProxyALMManager {
 	
@@ -2612,6 +2613,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onUSBNoSuchDeviceException() {
+
+        }
+
+        @Override
+        public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse) {
 
         }
 
