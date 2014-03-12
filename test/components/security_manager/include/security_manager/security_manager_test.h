@@ -48,7 +48,6 @@ namespace security_manager_test {
   using ::protocol_handler::RawMessage;
   using ::protocol_handler::RawMessagePtr;
   using ::security_manager::SecurityQuery;
-  using ::testing::_;
   using ::testing::Return;
 
   class SecurityManagerTest: public ::testing::Test {
@@ -495,7 +494,7 @@ namespace security_manager_test {
     EmulateMobileMessage(header, NULL, 0);
   }
 
-} // connection_handle
+} // security_manager_test
 } // namespace components
 } // namespace test
 #endif // SECURITY_MANAGER_TEST_H

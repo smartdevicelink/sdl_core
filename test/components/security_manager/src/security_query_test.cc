@@ -29,7 +29,5 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SECURITY_QUERY_H
-#define SECURITY_QUERY_H
 
-#endif // SECURITY_QUERY_H
+#include "security_manager/security_query_test.h"

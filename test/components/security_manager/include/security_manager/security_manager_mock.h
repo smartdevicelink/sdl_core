@@ -229,7 +229,7 @@ namespace security_manager_test {
     return true;
   }
 
-} // connection_handle
+} // security_manager_test
 } // namespace components
 } // namespace test
 #endif // SECURITY_MANAGER_MOCK_H
