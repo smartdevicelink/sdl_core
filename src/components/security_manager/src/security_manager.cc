@@ -269,12 +269,12 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
                       SecurityQuery::ERROR_PROTECTION_NOT_REQUESTED, error);
     return false;
   }
-  const uint8_t * data = inMessage->getData();
-  const size_t data_size = inMessage->getDataSize();
+  const uint8_t * data = inMessage->getData() + 1;
+  const size_t data_size = inMessage->getDataSize() - 1;
   size_t out_data_size;
   const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
-  if(!out_data){
+  if(!out_data || out_data_size){
     const std::string error("SendHandshakeData: Handshake failed.");
     LOG4CXX_WARN(logger_, error + LastError());
     SendInternalError(connectionKey, seqNumber,
