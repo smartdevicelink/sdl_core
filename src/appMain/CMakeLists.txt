@@ -1,9 +1,9 @@
-IF (${WEB_HMI})
+IF (HMIADAPTER STREQUAL "messagebroker")
 set (BROKER_LIBRARIES
   MessageBrokerClient
   MessageBrokerServer
 )
-ENDIF (${WEB_HMI})
+ENDIF ()
 
 cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
@@ -12,11 +12,11 @@ cmake_policy(SET CMP0015 NEW)
 link_directories(../thirdPartyLibs/libusbx)
 cmake_policy(POP)
 
-if (DEFAULT_MEDIA_FLAG)
+if (EXTENDED_MEDIA_MODE)
 set(default_media_inc
 ${GSTREAMER_gst_INCLUDE_DIR}
 )
-else(DEFAULT_MEDIA_FLAG)
+else(EXTENDED_MEDIA_MODE)
 set(default_media_inc
 )
 endif()
@@ -40,6 +40,7 @@ set(LIBRARIES
   ConfigProfile
   RequestWatchdog
   MediaManager
+  Resumption	
   policies
   apr-1
   aprutil-1

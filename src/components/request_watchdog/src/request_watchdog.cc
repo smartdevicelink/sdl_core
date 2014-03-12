@@ -335,7 +335,9 @@ void RequestWatchdog::QueueDispatcherThreadDelegate::threadMain() {
                      << "\n CustomTimeOut : " << (*it).first->customTimeout_
                      << "\n");*/
 
-        if ((*it).first->customTimeout_ <
+        // hmi timeout delay
+        int32_t const khmi_delay = 1000;
+        if ((*it).first->customTimeout_ + khmi_delay <
             date_time::DateTime::calculateTimeSpan((*it).second)) {
           // Request is expired - notify all subscribers and remove request
 

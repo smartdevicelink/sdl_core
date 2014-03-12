@@ -6,11 +6,11 @@ include_directories (
 GenerateInterface("v4_protocol_v1_2_no_extra.xml" "NsSmartDeviceLinkRPC::V1" "sdlrpcv1")
 GenerateInterface("MOBILE_API.xml" "mobile_apis" "sdlrpcv2")
 
-IF (${WEB_HMI})
+IF (${HMI_JSON_API})
   GenerateInterface("HMI_API.xml" "hmi_apis" "jsonrpc")
-ENDIF (${WEB_HMI})
+ENDIF (${HMI_JSON_API})
 
-IF (${QT_HMI})
+IF (${HMI_DBUS_API})
     set(hpp_file
       "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h"
       "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h"
@@ -46,5 +46,5 @@ IF (${QT_HMI})
 	  COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
 	  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h")
   add_library(HMI_API "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc")
-ENDIF (${QT_HMI})
+ENDIF (${HMI_DBUS_API})
 

@@ -1,4 +1,29 @@
+[CW11]
+* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
+* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
++ SyncProxyTester: Add AlertManeuver UI.
+
+[CW10]
+* File Explorer: changed project structure.
+* SyncProxyAndroid SDK: changed project structure
++ SyncProxyTester: added UI for System Request
++ Add systemFile, offset, and length parameters to PutFile UI.
+* SyncProxyAndroid SDK: Handle incoming messages with very big JSON size.
+* Fix SPT.SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure behaviour
+* SyncProxyAndroid SDK: changed send message logic
+* Log messages of the PutFile request when resume application
+
+[CW9]
++ SYncProxyAndroid SDK: update heartbeat logic
++ 'HashId' management dialog
++ App resumption: save RPC requests (re-send them), save and re-use hashId
++ Add possibility to send Policy Table Update manually from Dialog
+* Fix request / response notification messages
+- Remove AlertManeuver UI.
+
 [CW8]
++ SyncProxyAndroid SDK: heartbeat service type 0 added
++ SyncProxyAndroid SDK: heartbeat is back
 * SyncProxyAndroid SDK: App resumption (USB) - SPT doesn't appear at HMI's App List
 + Process Start non RPC Service Nack
 + SyncProxyAndroid SDK: Add PredefinedLayout enum.

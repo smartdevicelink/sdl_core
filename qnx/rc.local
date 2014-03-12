@@ -1,0 +1,2 @@
+#!/bin/sh
+chmod 0666 /dev/io-usb/io-usb

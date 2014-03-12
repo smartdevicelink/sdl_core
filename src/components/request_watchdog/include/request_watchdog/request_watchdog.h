@@ -211,7 +211,7 @@ class RequestWatchdog : public Watchdog {
       int32_t hmi_level_;
     };
 
-    static const int32_t                      DEFAULT_CYCLE_TIMEOUT = 250000;
+    static const int32_t                  DEFAULT_CYCLE_TIMEOUT = 250000;
     static log4cxx::LoggerPtr             logger_;
     std::list<WatchdogSubscriber*>        subscribers_;
     sync_primitives::Lock                 subscribersLock_;

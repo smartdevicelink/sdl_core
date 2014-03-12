@@ -50,7 +50,7 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
 #endif
 
@@ -67,6 +67,7 @@ const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
+const char kApplicationVersion[] = "Develop";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
@@ -188,6 +189,7 @@ bool InitHmi() {
   return Execute(kStartHmi, NULL);
 }
 #endif  // QT_HMI
+
 }
 
 /**
@@ -205,11 +207,13 @@ int32_t main(int32_t argc, char** argv) {
                                 log4cxx::Logger::getLogger("appMain"));
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-  LOG4CXX_INFO(logger, " Application started!");
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
+  LOG4CXX_INFO(logger, "Application started!");
+  LOG4CXX_INFO(logger, "Application version " << kApplicationVersion);
+
   // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(DEFAULT_MEDIA)
+#if defined(EXTENDED_MEDIA_MODE)
   gst_init(&argc, &argv);
 #endif
 
@@ -236,6 +240,7 @@ int32_t main(int32_t argc, char** argv) {
         std::string(kLocalHostAddress)) {
       LOG4CXX_INFO(logger, "Start HMI on localhost");
 
+#ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
 // without this line log4cxx threads continue using some instances destroyed by exit()
@@ -243,6 +248,7 @@ int32_t main(int32_t argc, char** argv) {
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");
+#endif // #ifndef NO_HMI
     }
   }
   // --------------------------------------------------------------------------

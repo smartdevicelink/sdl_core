@@ -262,311 +262,351 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.SetDisplayLayout":
                 {
 
-                    Em.Logger.log("FFW." + request.method + "Response");
-                    // send repsonse
-                    var JSONMessage = {
-                        "jsonrpc": "2.0",
-                        "id": request.id,
-                        "result": {
-                            "displayCapabilities": {
-                                "displayType": "GEN2_8_DMA",
-                                "textFields": [
-                                    "mainField1",
-                                    "mainField2",
-                                    "mainField3",
-                                    "mainField4",
-                                    "statusBar",
-                                    "mediaClock",
-                                    "mediaTrack",
-                                    "alertText1",
-                                    "alertText2",
-                                    "alertText3",
-                                    "scrollableMessageBody",
-                                    "initialInteractionText",
-                                    "navigationText1",
-                                    "navigationText2",
-                                    "ETA",
-                                    "totalDistance",
-                                    "navigationText",
-                                    "audioPassThruDisplayText1",
-                                    "audioPassThruDisplayText2",
-                                    "sliderHeader",
-                                    "sliderFooter",
-                                    "notificationText",
-                                    "menuName",
-                                    "secondaryText",
-                                    "tertiaryText",
-                                    "timeToDestination",
-                                    "turnText"
-                                ],
-                                "imageFields": [
-                                    {
-                                        "name": "softButtonImage",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "choiceImage",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "choiceSecondaryImage",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "vrHelpItem",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "turnIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "menuIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "cmdIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "graphic",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "showConstantTBTIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "showConstantTBTNextTurnIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    },
-                                    {
-                                        "name": "showConstantTBTNextTurnIcon",
-                                        "imageTypeSupported":
-                                            [
-                                                "GRAPHIC_BMP",
-                                                "GRAPHIC_JPEG",
-                                                "GRAPHIC_PNG"
-                                            ],
-                                        "imageResolution":
-                                        {
-                                            "resolutionWidth": 64,
-                                            "resolutionHeight": 64
-                                        }
-                                    }
-                                ],
-                                "mediaClockFormats": [
-                                    "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
-                                ],
-                                "graphicSupported": true,
-                                "imageCapabilities": ["DYNAMIC"],
-                                "templatesAvailable": ["TEMPLATE"],
-                                "screenParams": {
-                                    "resolution": {
-                                        "resolutionWidth": 800,
-                                        "resolutionHeight": 480
-                                    },
-                                    "touchEventAvailable": {
-                                        "pressAvailable": true,
-                                        "multiTouchAvailable": true,
-                                        "doublePressAvailable": false
-                                    }
-                                },
-                                "numCustomPresetsAvailable": 6
-                            },
-                            "buttonCapabilities": [
-                                {
-                                    "name": "PRESET_0",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_1",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_2",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_3",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_4",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_5",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_6",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_7",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_8",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "PRESET_9",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "OK",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "SEEKLEFT",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "SEEKRIGHT",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "TUNEUP",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }, {
-                                    "name": "TUNEDOWN",
-                                    "shortPressAvailable": true,
-                                    "longPressAvailable": true,
-                                    "upDownAvailable": true
-                                }
-                            ],
-                            "softButtonCapabilities": [{
-                                "shortPressAvailable": true,
-                                "longPressAvailable": true,
-                                "upDownAvailable": true,
-                                "imageSupported": true
-                            }],
-                            "presetBankCapabilities": {
-                                "onScreenPresetsAvailable": true
-                            },
-                            "code": SDL.SDLModel.resultCode["SUCCESS"],
-                            "method": "UI.SetDisplayLayout"
-                        }
-                    };
+                    var senResponseFlag = false;
 
-                    this.client.send(JSONMessage);
+                    switch (request.params.displayLayout){
+                        case "MEDIA": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "NON-MEDIA": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "DEFAULT": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "ONSCREEN_PRESETS": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "NAV_FULLSCREEN_MAP": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "NAV_KEYBOARD": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                        case "NAV_LIST": {
+                            senResponseFlag = true;
+                            break;
+                        }
+                    }
+
+                    if (senResponseFlag) {
+
+                        Em.Logger.log("FFW." + request.method + "Response");
+
+                        // send repsonse
+                        var JSONMessage = {
+                            "jsonrpc": "2.0",
+                            "id": request.id,
+                            "result": {
+                                "displayCapabilities": {
+                                    "displayType": "GEN2_8_DMA",
+                                    "textFields": [
+                                        "mainField1",
+                                        "mainField2",
+                                        "mainField3",
+                                        "mainField4",
+                                        "statusBar",
+                                        "mediaClock",
+                                        "mediaTrack",
+                                        "alertText1",
+                                        "alertText2",
+                                        "alertText3",
+                                        "scrollableMessageBody",
+                                        "initialInteractionText",
+                                        "navigationText1",
+                                        "navigationText2",
+                                        "ETA",
+                                        "totalDistance",
+                                        "navigationText",
+                                        "audioPassThruDisplayText1",
+                                        "audioPassThruDisplayText2",
+                                        "sliderHeader",
+                                        "sliderFooter",
+                                        "notificationText",
+                                        "menuName",
+                                        "secondaryText",
+                                        "tertiaryText",
+                                        "timeToDestination",
+                                        "turnText"
+                                    ],
+                                    "imageFields": [
+                                        {
+                                            "name": "softButtonImage",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "choiceImage",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "choiceSecondaryImage",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "vrHelpItem",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "turnIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "menuIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "cmdIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "graphic",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "showConstantTBTIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "showConstantTBTNextTurnIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        },
+                                        {
+                                            "name": "showConstantTBTNextTurnIcon",
+                                            "imageTypeSupported":
+                                                [
+                                                    "GRAPHIC_BMP",
+                                                    "GRAPHIC_JPEG",
+                                                    "GRAPHIC_PNG"
+                                                ],
+                                            "imageResolution":
+                                            {
+                                                "resolutionWidth": 64,
+                                                "resolutionHeight": 64
+                                            }
+                                        }
+                                    ],
+                                    "mediaClockFormats": [
+                                        "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
+                                    ],
+                                    "graphicSupported": true,
+                                    "imageCapabilities": ["DYNAMIC"],
+                                    "templatesAvailable": ["TEMPLATE"],
+                                    "screenParams": {
+                                        "resolution": {
+                                            "resolutionWidth": 800,
+                                            "resolutionHeight": 480
+                                        },
+                                        "touchEventAvailable": {
+                                            "pressAvailable": true,
+                                            "multiTouchAvailable": true,
+                                            "doublePressAvailable": false
+                                        }
+                                    },
+                                    "numCustomPresetsAvailable": 8
+                                },
+                                "buttonCapabilities": [
+                                    {
+                                        "name": "PRESET_0",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_1",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_2",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_3",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_4",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_5",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_6",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_7",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_8",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "PRESET_9",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "OK",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "SEEKLEFT",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "SEEKRIGHT",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "TUNEUP",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }, {
+                                        "name": "TUNEDOWN",
+                                        "shortPressAvailable": true,
+                                        "longPressAvailable": true,
+                                        "upDownAvailable": true
+                                    }
+                                ],
+                                "softButtonCapabilities": [{
+                                    "shortPressAvailable": true,
+                                    "longPressAvailable": true,
+                                    "upDownAvailable": true,
+                                    "imageSupported": true
+                                }],
+                                "presetBankCapabilities": {
+                                    "onScreenPresetsAvailable": true
+                                },
+                                "code": SDL.SDLModel.resultCode["SUCCESS"],
+                                "method": "UI.SetDisplayLayout"
+                            }
+                        };
+
+                        this.client.send(JSONMessage);
+
+                    } else {
+                        this.sendError(SDL.SDLModel.resultCode["UNSUPPORTED_RESOURCE"], request.id, request.method, "Unsupported display layout!")
+                    }
 
                     break;
                 }
@@ -849,7 +889,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "doublePressAvailable": false
                                     }
                                 },
-                                "numCustomPresetsAvailable": 6
+                                "numCustomPresetsAvailable": 8
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",
@@ -1287,7 +1327,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {String}
      *
      */
-    OnKeyboardInput: function (value) {
+    OnKeyboardInput: function (value, event) {
 
         Em.Logger.log("FFW.UI.OnKeyboardInput");
 
@@ -1297,7 +1337,7 @@ FFW.UI = FFW.RPCObserver.create({
             "method": "UI.OnKeyboardInput",
             "params": {
                 "data": value,
-                "event": "KEYPRESS"
+                "event": event
             }
         };
         this.client.send(JSONMessage);

@@ -25,6 +25,7 @@ include_directories (
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
+  ../src/components/resumption/include
   ../src/components/utils/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
@@ -49,10 +50,11 @@ include_directories (
 set(LIBRARIES
     
     test_App_Manager
+
     ApplicationManager
     MediaManager
 
-    
+    Resumption
     gtest
     gtest_main
     gmock
@@ -94,11 +96,8 @@ set(LIBRARIES
     MessageBroker
     MessageBrokerClient
     MessageBrokerServer
+    
     encryption
-    bluetooth
-    pthread
-    avahi-client
-    avahi-common
 #   rt
    # ${GSTREAMER_gstreamer_LIBRARY}
 )
@@ -107,6 +106,18 @@ if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
+endif()
+
+if (BUILD_BT_SUPPORT)
+  list(APPEND LIBRARIES bluetooth)
+endif()
+
+if (BUILD_AVAHI_SUPPORT)
+  list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
 endif()
 
 add_executable("test_suit" "./test_suit.cc")

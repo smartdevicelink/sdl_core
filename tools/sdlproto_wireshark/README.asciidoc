@@ -1,0 +1,149 @@
+:imagesdir: ./images
+:source-highlighter: pygments
+
+= SDL Protocol dissector for Wireshark
+
+== Used software
+
+* Ubuntu 12.04.4 LTS i686 (http://mirror.yandex.ru/ubuntu-releases/12.04.4/ubuntu-12.04.4-desktop-i386.iso)
+
+* Wireshark 1.10.5 (SVN Rev 54262) with compiled-in Lua 5.2 (from <<_latest_wireshark, the repositories>>)
+
+== How to setup
+
+=== Latest Wireshark
+
+Wireshark 1.10.0+ is recommended. In Ubuntu 12.04 the latest version is 1.6.7, so you can run these commands to get the latest binary Wireshark packages:
+
+[source,bash]
+sudo add-apt-repository ppa:whoopie79/ppa
+sudo apt-get update && sudo apt-get install wireshark tshark
+
+On OS X, you can install Wireshark with http://brew.sh/[Homebrew]:
+
+[source,bash]
+brew install wireshark --with-lua --with-pcre --with-x
+
+=== Lua dissector
+
+. Create the directory:
++
+[source,bash]
+mkdir -p ~/.wireshark/plugins
+
+. Copy (or link) the dissector file:
++
+[source,bash]
+cp tools/sdlproto_wireshark/sdlproto.lua ~/.wireshark/plugins
+
+. Run Wireshark as *a regular user* (not using +sudo+). Select menu +Analyze+ > +Enabled Protocols…+ (+Ctrl+Shift+E+). You should see +SDLPROTO+ and +SDLPROTO.RPC+ in the list:
++
+image::00.enabled.protocols.png[]
+
+=== Testing
+
+Open any captured file with SDL data in Wireshark and you should see the results like this:
+
+image::01.wireshark.png[]
+
+=== Filtering on USB
+
+To filter packets on USB, you need to know the Bus and Device ID. Run
+
+[source,bash]
+lsusb | grep -i '18d1:2d0'
+
+You'll see info like
+
+[listing]
+Bus 001 Device 013: ID 18d1:2d01 Google Inc.
+
+In Wireshark, start monitoring on +usbmonX+ interface, where +X+ is the bus number. Use a filter similar to
+
+[listing]
+(usb.device_address == 13) and (usb.data_flag == "present (0)")
+
+=== Running as root
+
+CAUTION: When run as root, Wireshark disables scripting to improve security. You should NOT run Wireshark as root: http://wiki.wireshark.org/Security
+
+You would be better off setting up Wireshark to have necessary privileges for a regular user: http://wiki.wireshark.org/CaptureSetup/CapturePrivileges
+
+== Etc.
+
+The setup has been tested in Ubuntu 12.04 for TCP and USB transports, and OS X 10.9.1 for TCP transport.
+
+=== Filters
+
+You can use the dissected (extracted) values in filters. For example, displaying only Control frames of RPC Service:
+
+[listing]
+(sdlproto.service_type == 0x07) and (sdlproto.frame_type == 0x00)
+
+=== Command-line tshark
+
+There is non-interactive command-line version of Wireshark called +tshark+. It allows you to analyze packet dumps and display the results. Sample command:
+
+[source,bash]
+tshark -2 -n -O sdlproto -R "tcp.len > 0" -r tcp.dump
+
+Here, +"tcp.len > 0"+ is a filter that reads only TCP packets with data. +tcp.dump+ is a name of file with packet data. Sample output:
+
+[listing]
+----
+Frame 1: 78 bytes on wire (624 bits), 78 bytes captured (624 bits)
+Ethernet II, Src: 00:00:00:00:00:00 (00:00:00:00:00:00), Dst: 00:00:00:00:00:00 (00:00:00:00:00:00)
+Internet Protocol Version 4, Src: 127.0.0.1 (127.0.0.1), Dst: 127.0.0.1 (127.0.0.1)
+Transmission Control Protocol, Src Port: 12345 (12345), Dst Port: 43049 (43049), Seq: 1, Ack: 13, Len: 12
+Ford's Smart Device Link Protocol
+    0010 .... = Protocol Version: 2
+    .... 0... = Compression Flag: False
+    .... .000 = Frame Type: Control Frame (0x00)
+    Service Type: Remote Procedure Call [RPC Service] (0x07)
+    Frame Info: Start Service ACK (0x02)
+    Session ID: 0x01
+    Data Size: 0
+    Message ID: 0x00010001 -- Identifier of a message sent using SDL layer
+
+Frame 2: 78 bytes on wire (624 bits), 78 bytes captured (624 bits)
+Ethernet II, Src: 00:00:00:00:00:00 (00:00:00:00:00:00), Dst: 00:00:00:00:00:00 (00:00:00:00:00:00)
+Internet Protocol Version 4, Src: 127.0.0.1 (127.0.0.1), Dst: 127.0.0.1 (127.0.0.1)
+Transmission Control Protocol, Src Port: 43049 (43049), Dst Port: 12345 (12345), Seq: 13, Ack: 13, Len: 12
+
+Frame 3: 331 bytes on wire (2648 bits), 331 bytes captured (2648 bits)
+Ethernet II, Src: 00:00:00:00:00:00 (00:00:00:00:00:00), Dst: 00:00:00:00:00:00 (00:00:00:00:00:00)
+Internet Protocol Version 4, Src: 127.0.0.1 (127.0.0.1), Dst: 127.0.0.1 (127.0.0.1)
+Transmission Control Protocol, Src Port: 43049 (43049), Dst Port: 12345 (12345), Seq: 25, Ack: 13, Len: 265
+[2 Reassembled TCP Segments (277 bytes): #2(12), #3(265)]
+Ford's Smart Device Link Protocol
+    0010 .... = Protocol Version: 2
+    .... 0... = Compression Flag: False
+    .... .001 = Frame Type: Single Frame (0x01)
+    Service Type: Remote Procedure Call [RPC Service] (0x07)
+    Frame Info: 0x00
+    Session ID: 0x01
+    Data Size: 265 -- Total data bytes in this frame
+    Message ID: 0x00000001 -- Identifier of a message sent using SDL layer
+    SDL RPC Service
+        0000 .... = RPC Type: Request (0x00)
+        .... 0000 0000 0000 0000 0000 0000 0001 = RPC Function ID: RegisterAppInterface (0x00000001)
+        RPC Correlation ID: 0x0000fff9
+        JSON Size: 253
+        JSON [truncated]: {"ngnMediaScreenAppName":"SyncP","appName":"SyncProxyTester","vrSynonyms":["SyncProxyTester"],"hmiDisplayLanguageDesired":"EN-US","isMediaApplication":true,"syncMsgVersion":{"minorVersion":2,"majorVersion":2},"languageDes
+----
+
+You may also colorize the output for easier scanning and reading. Install http://korpus.juls.savba.sk/~garabik/software/grc.html[grc] and use this command:
+
+[source,bash]
+tshark -2 -n -O sdlproto -R "tcp.len > 0" -r tcp.dump 2>&1 | grcat conf.tshark
+
+=== Useful Links
+
+* Wireshark Lua API Wiki: http://wiki.wireshark.org/LuaAPI
+* Wireshark Lua API Reference Manual: http://www.wireshark.org/docs/wsug_html_chunked/wsluarm.html
+* Lua 5.2 Reference Manual: http://www.lua.org/manual/5.2/
+* Lua Tutorial scripts: http://wiki.wireshark.org/Lua/Examples
+* Using Lua in Wireshark: https://delog.wordpress.com/category/wireshark-software/
+* "Create a Wireshark dissector with Lua": http://blog.roisu.org/english-create-a-wireshark-dissector-with-lua/
+* "Decoding Vendor Specific USB protocols with Wireshark lua plugins": http://false.ekta.is/2013/11/decoding-vendor-specific-usb-protocols-with-wireshark-lua-plugins/
+

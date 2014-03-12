@@ -207,12 +207,16 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckVrHelpItemPositions(application_manager::ApplicationSharedPtr const app);
 
+  /*
+   * @brief Disable PerformInteraction state in application and
+   * delete VR commands from HMI
+   */
+  void DisablePerformInteraction();
+
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
-  bool is_keyboard_trigger_source_;
-  mobile_apis::TriggerSource::eType trigger_source_;
   mobile_apis::Result::eType tts_perform_interaction_code_;
 };
 

@@ -160,8 +160,8 @@ void InitialApplicationDataImpl::set_ui_language(
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
-    : help_promt_(NULL),
-      timeout_promt_(NULL),
+    : help_prompt_(NULL),
+      timeout_prompt_(NULL),
       vr_help_title_(NULL),
       vr_help_(NULL),
       tbt_state_(mobile_api::TBTState::INVALID_ENUM),
@@ -178,14 +178,14 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
 }
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
-  if (help_promt_) {
-    delete help_promt_;
-    help_promt_ = NULL;
+  if (help_prompt_) {
+    delete help_prompt_;
+    help_prompt_ = NULL;
   }
 
-  if (timeout_promt_) {
-    delete timeout_promt_;
-    timeout_promt_ = NULL;
+  if (timeout_prompt_) {
+    delete timeout_prompt_;
+    timeout_prompt_ = NULL;
   }
 
   if (vr_help_title_) {
@@ -228,13 +228,13 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
 }
 
 const smart_objects::SmartObject*
-DynamicApplicationDataImpl::help_promt() const {
-  return help_promt_;
+DynamicApplicationDataImpl::help_prompt() const {
+  return help_prompt_;
 }
 
 const smart_objects::SmartObject*
-DynamicApplicationDataImpl::timeout_promt() const {
-  return timeout_promt_;
+DynamicApplicationDataImpl::timeout_prompt() const {
+  return timeout_prompt_;
 }
 
 const smart_objects::SmartObject*
@@ -262,20 +262,24 @@ DynamicApplicationDataImpl::tbt_show_command() const {
   return tbt_show_command_;
 }
 
+const NsSmartDeviceLink::NsSmartObjects::SmartObject *DynamicApplicationDataImpl::keyboard_props() const {
+  return keyboard_props_;
+}
+
 void DynamicApplicationDataImpl::set_help_prompt(
-    const smart_objects::SmartObject& help_promt) {
-  if (help_promt_) {
-    delete help_promt_;
+    const smart_objects::SmartObject& help_prompt) {
+  if (help_prompt_) {
+    delete help_prompt_;
   }
-  help_promt_ = new smart_objects::SmartObject(help_promt);
+  help_prompt_ = new smart_objects::SmartObject(help_prompt);
 }
 
 void DynamicApplicationDataImpl::set_timeout_prompt(
-    const smart_objects::SmartObject& timeout_promt) {
-  if (timeout_promt_) {
-    delete timeout_promt_;
+    const smart_objects::SmartObject& timeout_prompt) {
+  if (timeout_prompt_) {
+    delete timeout_prompt_;
   }
-  timeout_promt_ = new smart_objects::SmartObject(timeout_promt);
+  timeout_prompt_ = new smart_objects::SmartObject(timeout_prompt);
 }
 
 void DynamicApplicationDataImpl::set_vr_help_title(
@@ -328,6 +332,15 @@ void DynamicApplicationDataImpl::set_tbt_show_command(
   }
   tbt_show_command_ = new smart_objects::SmartObject(tbt_show);
 }
+
+void DynamicApplicationDataImpl::set_keyboard_props(
+    const smart_objects::SmartObject &keyboard_props) {
+  if (keyboard_props_) {
+    delete keyboard_props_;
+  }
+  keyboard_props_ = new smart_objects::SmartObject(keyboard_props);
+}
+
 
 void DynamicApplicationDataImpl::AddCommand(
   uint32_t cmd_id, const smart_objects::SmartObject& command) {

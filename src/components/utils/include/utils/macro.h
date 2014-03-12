@@ -42,9 +42,9 @@
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
-// A macro to allow utils::Singleton::instance() call derivative constructor
-#define FRIEND_BASE_SINGLETON_CLASS_INSTANCE(TypeName) \
-  friend TypeName* utils::Singleton<TypeName>::instance()
+// A macro to allow utils::Singleton call derivative constructor and destructor
+#define FRIEND_BASE_SINGLETON_CLASS(TypeName) \
+  friend class utils::Singleton<TypeName>
 
 // A macro to allow utils::deleters::Deleter::~Deleter() call class destructor
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \

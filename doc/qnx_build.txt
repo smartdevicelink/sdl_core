@@ -6,9 +6,9 @@ cmake -DCMAKE_TOOLCHAIN_FILE=../applink/qnx_6.5.0_linux_x86.cmake -G "Eclipse CD
 Building with support D-Bus and Qt 4.8
 Install D-Bus (see https://adc.luxoft.com/confluence/x/0AHJDw)
 Install Qt 4.8 (see https://adc.luxoft.com/confluence/x/UwfJDw)
-cmake -DHMI2=ON -DCMAKE_TOOLCHAIN_FILE=../applink/qnx_6.5.0_linux_x86.cmake ../applink
+cmake -DHMI=qt -DCMAKE_TOOLCHAIN_FILE=../applink/qnx_6.5.0_linux_x86.cmake ../applink
 or for Momentics project:
-cmake -DHMI2=ON -DCMAKE_TOOLCHAIN_FILE=../applink/qnx_6.5.0_linux_x86.cmake -G "Eclipse CDT4 - Unix Makefiles" ../applink
+cmake -DHMI=qt -DCMAKE_TOOLCHAIN_FILE=../applink/qnx_6.5.0_linux_x86.cmake -G "Eclipse CDT4 - Unix Makefiles" ../applink
 
 make
 make install

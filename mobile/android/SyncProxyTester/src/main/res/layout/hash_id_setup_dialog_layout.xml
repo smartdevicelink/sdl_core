@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp">
+
+    <CheckBox
+        android:id="@+id/hash_id_set_up_use_hash_id_view"
+        android:text="Use HashId in RegisterAppInterface"
+        android:checked="true"
+        android:textSize="18sp"
+        android:layout_marginBottom="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <CheckBox
+        android:id="@+id/hash_id_set_up_use_custom_hash_id_view"
+        android:text="Use Custom HashId in RegisterAppInterface"
+        android:checked="false"
+        android:textSize="18sp"
+        android:layout_marginBottom="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/hash_id_set_up_custom_id_label_view"
+        android:text="Custom HashId:"
+        android:textSize="18sp"
+        android:layout_marginBottom="5sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/hash_id_set_up_custom_id_view"
+        android:layout_marginBottom="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/hash_id_set_up_last_ids_label_view"
+        android:text="Last used HashId's:"
+        android:textSize="18sp"
+        android:layout_marginBottom="5sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <Spinner
+        android:id="@+id/hash_id_set_up_ids_spinner_view"
+        android:layout_marginBottom="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/hash_id_set_up_info_view"
+        android:text="You need to Exit Application / Unregister - Register Application for the changes to take effect"
+        android:textSize="18sp"
+        android:textColor="#ff8800"
+        android:layout_marginBottom="5sp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

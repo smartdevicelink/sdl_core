@@ -224,15 +224,15 @@ bool ShowRequest::CheckMenuFieldsNames() {
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     const std::string& str = (*message_)[strings::msg_params]
                                          [strings::main_field_4].asString();
-    if (std::string::npos != str.find_first_of("\t\n")) {
+    if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "main_field_4 syntax check failed");
-      return false;
+      return  false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     const std::string& str = (*message_)[strings::msg_params]
                                          [strings::main_field_3].asString();
-    if (std::string::npos != str.find_first_of("\t\n")) {
+    if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "main_field_3 syntax check failed");
       return false;
     }
@@ -240,7 +240,7 @@ bool ShowRequest::CheckMenuFieldsNames() {
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     const std::string& str = (*message_)[strings::msg_params]
                                          [strings::main_field_2].asString();
-    if (std::string::npos != str.find_first_of("\t\n")) {
+    if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "main_field_2 syntax check failed");
       return false;
     }
@@ -248,7 +248,7 @@ bool ShowRequest::CheckMenuFieldsNames() {
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     const std::string& str = (*message_)[strings::msg_params]
                                          [strings::main_field_1].asString();
-    if (std::string::npos != str.find_first_of("\t\n")) {
+    if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "main_field_1 syntax check failed");
       return false;
     }

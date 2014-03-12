@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/command_notification_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -61,6 +62,10 @@ void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+  LOG4CXX_INFO(logger_, "SendNotification");
+  MessageHelper::PrintSmartObject(*message_);
+
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

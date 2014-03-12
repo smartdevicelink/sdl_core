@@ -133,8 +133,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
 bool AddSubMenuRequest::CheckSubMenuName() {
   const std::string& str =
       (*message_)[strings::msg_params][strings::menu_name].asString();
-  if ((std::string::npos != str.find_first_of("\t\n")) ||
-      (std::string::npos == str.find_first_not_of(' '))) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_INFO(logger_, "Invalid subMenu name.");
     return false;
   }

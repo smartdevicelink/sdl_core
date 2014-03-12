@@ -34,6 +34,9 @@ add_subdirectory(./interfaces)
 # --- TransportManager
 add_subdirectory(./transport_manager)
 
+# --- Policies
+add_subdirectory(./resumption)
+
 # --- formatters
 add_subdirectory(./formatters)
 
@@ -70,9 +73,11 @@ add_subdirectory(./media_manager)
 # --- Policies
 add_subdirectory(./policies)
 
-if (${QT_HMI})
+if (${HMI_DBUS_API})
 # --- DBus
     add_subdirectory(./dbus)
+endif ()
+if (${QT_HMI})
 # --- Qt HMI
     add_subdirectory(./qt_hmi)
 endif ()

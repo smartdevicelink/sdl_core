@@ -241,8 +241,7 @@ bool AddCommandRequest::CheckVRCommandsNames() {
     const std::string& str =
         (*message_)[strings::msg_params][strings::vr_commands][i].asString();
 
-    if ((std::string::npos != str.find_first_of("\t\n")) ||
-        (std::string::npos == str.find_first_not_of(' '))) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_INFO(logger_, "Invalid command name.");
       return false;
     }
@@ -253,8 +252,7 @@ bool AddCommandRequest::CheckVRCommandsNames() {
 bool AddCommandRequest::CheckMenuName() {
     const std::string& str = (*message_)[strings::msg_params][strings::menu_params]
                              [strings::menu_name].asString();
-    if ((std::string::npos != str.find_first_of("\t\n")) ||
-        (std::string::npos == str.find_first_not_of(' '))) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_INFO(logger_, "Invalid menu name.");
       return false;
     }
@@ -349,7 +347,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
             std::max(ui_result_, vr_result_));
       }
 
+      ApplicationSharedPtr application =
+          ApplicationManagerImpl::instance()->application(connection_key());
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      application->UpdateHash();
     }
   }
 }

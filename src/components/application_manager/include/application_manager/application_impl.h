@@ -62,6 +62,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void MakeNotAudible();
   bool allowed_support_navigation() const;
   void set_allowed_support_navigation(bool allow);
+  bool hmi_supports_navi_streaming() const ;
+  void set_hmi_supports_navi_streaming(const bool& supports);
   inline bool app_allowed() const;
   bool has_been_activated() const;
 
@@ -108,10 +110,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
 
+  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
+  virtual const  std::set<uint32_t>& SubscribesIVI() const;
+
+  virtual uint32_t nextHash();
+  virtual uint32_t curHash() const;
+
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
+  virtual uint32_t UpdateHash();
+
+
  protected:
   void CleanupFiles();
 
  private:
+
+  uint32_t hash_val_;
+
   smart_objects::SmartObject* active_message_;
 
   Version version_;
@@ -122,6 +141,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool is_app_allowed_;
   bool has_been_activated_;
   bool tts_speak_state_;
+  bool hmi_supports_navi_streaming_;
 
   mobile_api::HMILevel::eType hmi_level_;
   uint32_t put_file_in_none_count_;

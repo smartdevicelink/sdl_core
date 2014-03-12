@@ -104,7 +104,7 @@ class Profile : public utils::Singleton<Profile> {
     /**
      * @brief Returns help promt vector
      */
-    const std::vector<std::string>& help_promt() const;
+    const std::vector<std::string>& help_prompt() const;
 
     /**
      * @brief Returns help promt vector
@@ -259,6 +259,11 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::vector<uint32_t>& supported_diag_modes() const;
 
+    /**
+      * @brief Returns system files folder path
+      */
+    const std::string& system_files_path() const;
+
     // Members section
 
   protected:
@@ -352,7 +357,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        audio_streaming_port_;
     std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
-    std::vector<std::string>        help_promt_;
+    std::vector<std::string>        help_prompt_;
     std::vector<std::string>        time_out_promt_;
     std::vector<std::string>        vr_commands_;
     uint64_t                        min_tread_stack_size_;
@@ -382,10 +387,11 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
+    std::string                     system_files_path_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(Profile);
+    FRIEND_BASE_SINGLETON_CLASS(Profile);
 };
 
 }  //  namespace profile

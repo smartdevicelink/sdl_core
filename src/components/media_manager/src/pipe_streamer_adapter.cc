@@ -47,11 +47,8 @@ log4cxx::LoggerPtr logger =
 PipeStreamerAdapter::PipeStreamerAdapter()
   : is_ready_(false),
     messages_(),
-    thread_("PipeStreamerAdapter", new Streamer(this)) {
+    thread_(NULL){
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::PipeStreamerAdapter");
-
-  thread_.startWithOptions(
-    threads::ThreadOptions(threads::Thread::kMinStackSize));
 }
 
 PipeStreamerAdapter::~PipeStreamerAdapter() {
@@ -61,7 +58,8 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
     StopActivity(current_application_);
   }
 
-  thread_.stop();
+  thread_->stop();
+  delete thread_;
 }
 
 void PipeStreamerAdapter::SendData(
@@ -122,6 +120,15 @@ bool PipeStreamerAdapter::is_app_performing_activity(
   return (application_key == current_application_);
 }
 
+void PipeStreamerAdapter::Init() {
+  if (!thread_) {
+    LOG4CXX_INFO(logger, "Create and start sending thread");
+    thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
+    const size_t kStackSize = 16384;
+    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+  }
+}
+
 PipeStreamerAdapter::Streamer::Streamer(
   PipeStreamerAdapter* server)
   : server_(server),
@@ -148,6 +155,7 @@ void PipeStreamerAdapter::Streamer::threadMain() {
 
       ssize_t ret = write(pipe_fd_, msg.get()->data(),
                           msg.get()->data_size());
+
       if (ret == -1) {
         LOG4CXX_ERROR(logger, "Failed writing data to pipe "
                       << server_->named_pipe_path_);
@@ -188,6 +196,9 @@ bool PipeStreamerAdapter::Streamer::exitThreadMain() {
 }
 
 void PipeStreamerAdapter::Streamer::open() {
+
+  LOG4CXX_INFO(logger, "Streamer::open()" << server_->named_pipe_path_.c_str());
+
   if ((mkfifo(server_->named_pipe_path_.c_str(),
               S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
       && (errno != EEXIST)) {

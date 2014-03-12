@@ -60,6 +60,14 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
             }
         });
 
+        Button sendPolicyUpdateView = (Button) layout.findViewById(R.id.send_policy_table_update_btn_view);
+        sendPolicyUpdateView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate();
+            }
+        });
+
         return new AlertDialog.Builder(mContext)
                 .setTitle(getString(R.string.policy_files_setup_dialog_title))
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {

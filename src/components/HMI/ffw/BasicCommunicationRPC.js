@@ -43,15 +43,18 @@ FFW.BasicCommunication = FFW.RPCObserver
         onAppRegisteredSubscribeRequestID: -1,
         onAppUnregisteredSubscribeRequestID: -1,
         onPlayToneSubscribeRequestID: -1,
+        onSDLCloseSubscribeRequestID: -1,
 
         onAppRegisteredUnsubscribeRequestID: -1,
         onAppUnregisteredUnsubscribeRequestID: -1,
         onPlayToneUnsubscribeRequestID: -1,
+        onSDLCloseUnsubscribeRequestID: -1,
 
         // const
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
+        onSDLCloseNotification: "BasicCommunication.OnSDLClose",
 
         /**
          * init object
@@ -91,8 +94,10 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .subscribeToNotification(this.onAppRegisteredNotification);
             this.onAppUnregisteredSubscribeRequestID = this.client
                 .subscribeToNotification(this.onAppUnregisteredNotification);
-            this.onPlayToneNotificationID = this.client
+            this.onPlayToneSubscribeRequestID = this.client
                 .subscribeToNotification(this.onPlayToneNotification);
+            this.onSDLCloseSubscribeRequestID = this.client
+                .subscribeToNotification(this.onSDLCloseNotification);
 
         },
 
@@ -105,12 +110,14 @@ FFW.BasicCommunication = FFW.RPCObserver
             this._super();
 
             // unsubscribe from notifications
-            this.onAppRegusteredUnsubscribeRequestID = this.client
+            this.onAppRegisteredUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppRegisteredNotification);
-            this.onAppUnregusteredUnsubscribeRequestID = this.client
+            this.onAppUnregisteredUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppUnregisteredNotification);
-            this.onPlayToneUpdatedNotificationID = this.client
+            this.onPlayToneUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
+            this.onSDLCloseUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onSDLCloseNotification);
         },
 
         /**
@@ -153,7 +160,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             this._super();
 
             if (notification.method == this.onAppRegisteredNotification) {
-                SDL.SDLModel.onAppRegistered(notification.params.application);
+                SDL.SDLModel.onAppRegistered(notification.params);
                 this.OnFindApplications();
             }
 
@@ -164,6 +171,10 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             if (notification.method == this.onPlayToneNotification) {
                 SDL.SDLModel.onPlayTone();
+            }
+
+            if (notification.method == this.onSDLCloseNotification) {
+                //notification handler method
             }
         },
 
@@ -206,7 +217,12 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.method);
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
-                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL();
+
+                    if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
+                        SDL.States.goToStates('info.apps');
+                    }
+
+                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
             }
@@ -556,6 +572,29 @@ FFW.BasicCommunication = FFW.RPCObserver
                 };
                 this.client.send(JSONMessage);
             }
+        },
+
+        /**
+         * Initiated by HMI.
+         */
+        OnSystemRequest: function() {
+
+            Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
+
+            // send request
+
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "BasicCommunication.OnStartDeviceDiscovery",
+                "params":{
+                    "requestType": "HTTP",
+                    "url": "http://127.0.0.1",
+                    "fileType": "BINARY",
+                    "offset": 1000,
+                    "length": 10000
+                }
+            };
+            this.client.send(JSONMessage);
         }
 
     })

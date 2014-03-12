@@ -118,7 +118,7 @@ class PolicyManagerImpl : public PolicyManager,
 
     DISALLOW_COPY_AND_ASSIGN(PolicyManagerImpl);
 
-    FRIEND_BASE_SINGLETON_CLASS_INSTANCE(PolicyManagerImpl);
+    FRIEND_BASE_SINGLETON_CLASS(PolicyManagerImpl);
 };
 
 }  // namespace policies

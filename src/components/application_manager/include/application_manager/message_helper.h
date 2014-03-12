@@ -123,6 +123,9 @@ typedef std::map<const char*, VehicleDataType> VehicleData;
  **/
 class MessageHelper {
   public:
+
+    typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
+
     /**
      * @brief Sends HMI status notification to mobile
      *
@@ -138,12 +141,22 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl, bool is_resumption = false);
+      const Application& application_impl);
 
     /**
      * @brief Sendss Vr Command 'Help'
      */
     static void SendHelpVrCommand();
+
+    /**
+     * @brief Create mobile HashUpdateNotification
+     */
+    static smart_objects::SmartObject* GetHashUpdateNotification(const uint32_t app_id);
+
+    /**
+     * @brief Sends to mobile HashUpdateNotification
+     */
+    static void SendHashUpdateNotification(const uint32_t app_id);
 
     /**
      * @brief Removes Vr Synonyms of application name from HMI
@@ -191,21 +204,42 @@ class MessageHelper {
     static smart_objects::SmartObject* CreateSetAppIcon(
       const std::string& path_to_icon, uint32_t app_id);
 
+    /**
+     * @brief Sends IVI subscriptions
+     */
+    static bool SendIVISubscribtions(const uint32_t app_id);
+
+    /**
+     * @brief Sends IVI subscriptions
+     */
+    static SmartObjectList GetIVISubscribtionRequests(const uint32_t app_id);
+
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
+    static SmartObjectList CreateGlobalPropertiesRequestsToHMI(ApplicationConstSharedPtr app);
 
     static smart_objects::SmartObject* CreateAppVrHelp(ApplicationConstSharedPtr app);
 
     static void SendShowRequestToHMI(ApplicationConstSharedPtr app);
     static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
+    static SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
+
     static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddVRCommandToHMI(
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
+
+    static smart_objects::SmartObject* CreateAddVRCommandToHMI(
+      uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
+      uint32_t app_id);
+
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
+    static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
+
     static void RemoveAppDataFromHMI(ApplicationSharedPtr app);
-    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app, bool is_resuming = false);
+    static void SendOnSdlCloseNotificationToHMI();
+    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app);
     static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);

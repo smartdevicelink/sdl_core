@@ -54,6 +54,11 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
   protected:
     std::string named_pipe_path_;
 
+    /*
+     * @brief Start streamer thread
+     */
+    virtual void Init();
+
   private:
     class Streamer : public threads::ThreadDelegate {
       public:
@@ -98,7 +103,7 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
     };
 
     bool                                          is_ready_;
-    threads::Thread                               thread_;
+    threads::Thread*                              thread_;
     MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);

@@ -1367,11 +1367,6 @@
   <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="false" >
     <description>Desired keyboard layout.</description>
   </param>
-  <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-    <description>In this mode, all keypresses will be sent as they occur.</description>
-    <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-    <description>If omitted, this value will be set to FALSE.</description>
-  </param>
   <param name="keypressMode" type="Common.KeypressMode" mandatory="false" >
     <description>
     	Desired keypress mode.
@@ -1598,16 +1593,16 @@
   <param name="ignitionStatus" type="Common.IgnitionStatus" mandatory="true">
     <description>The status of the ignition. See IgnitionStatus.</description>
   </param>
-  <param name="driverDoorAjar" type="Boolean">
+  <param name="driverDoorAjar" type="Boolean" mandatory="false">
     <description>References signal "DrStatDrv_B_Actl".</description>
   </param>
-  <param name="passengerDoorAjar" type="Boolean">
+  <param name="passengerDoorAjar" type="Boolean" mandatory="false">
     <description>References signal "DrStatPsngr_B_Actl".</description>
   </param>
-  <param name="rearLeftDoorAjar" type="Boolean">
+  <param name="rearLeftDoorAjar" type="Boolean" mandatory="false">
     <description>References signal "DrStatRl_B_Actl".</description>
   </param>
-  <param name="rearRightDoorAjar" type="Boolean">
+  <param name="rearRightDoorAjar" type="Boolean" mandatory="false">
     <description>References signal "DrStatRr_B_Actl".</description>
   </param>
 </struct>
@@ -1833,33 +1828,25 @@
       <param name="application" type="Common.HMIApplication" mandatory="true">
         <description>The information about application registered. See HMIApplication. </description>
       </param>
-      <!-- TO DO to be removed -->
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>Flag to indicate if application may be resumed in future</description>
+      <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description> TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+          Needs to be unique over all applications.
+          May not be empty.
+          May not start with a new line character.
+          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+        </description>
+      </param>
+      <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>
+          Defines additional voice recognition commands.
+          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+        </description>
       </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the application unregistered</description>
-      </param>
-      <!-- TO DO to be removed -->
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>Flag to indicate if application may be resumed in future</description>
-      </param>
-    </function>
-    <!-- TO DO to be removed -->
-    <function name="GetResumeResult" messagetype="request">
-      <description>Issued by SDL to request HMI resumption check.</description>
-      <param name="appID" type="Integer" mandatory="true">
-        <description>ID of the registered application that will be resumed</description>
-      </param>
-    </function>
-    <!-- TO DO to be removed -->
-    <function name="GetResumeResult" messagetype="response">
-      <description>Issued by HMI to notify SDL about application resumption check.</description>
-      <param name="result" type="Boolean" mandatory="true">
-        <description>Flag to indicate if applications data check was successfull</description>
       </param>
     </function>
     <function name="OnExitApplication" messagetype="notification">
@@ -1928,9 +1915,13 @@
       </param>
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
-      </param>    
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
+      </param>
     </function>
-
+    <function name="OnSDLClose" messagetype="notification">
+      <description>SDL must notify HMI about finish working application</description>
+    </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2055,7 +2046,7 @@
     <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
     </param>
-    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true">
+    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	This is the intial prompt spoken to the user at the start of an interaction.
       	An array of text chunks of type TTSChunk. See TTSChunk.
@@ -2204,7 +2195,7 @@
       <description>App defined SoftButtons.</description>
       <description>If omitted, the currently displayed SoftButton values should not change.</description>
     </param>
-    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="6" array="true" mandatory="false">
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>App labeled on-screen presets (i.e. GEN3 media presets or dynamic search suggestions).</description>
       <description>If omitted on supported displays, the presets will be shown as not defined.</description>
     </param>
@@ -2259,7 +2250,7 @@
   </function>
   <function name="DeleteSubMenu" messagetype="request">
     <description>Request from SDL to delete a submenu from the in-application menu.</description>
-    <param name="menuID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true" >
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000" mandatory="true" >
       <description>The "menuID" of the sub-menu to be deleted. (See addSubMenu.menuID)</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -2434,6 +2425,9 @@
       	Currently only predefined screen layouts are defined.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
@@ -2580,6 +2574,9 @@
   <function name="ScrollableMessage" messagetype="response">
   </function>
   <function name="PerformAudioPassThru" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
     <param name="audioPassThruDisplayTexts" type="Common.TextFieldStruct" mandatory="true" minsize="0" maxsize="2" array="true">
       <description>Uses
             audioPassThruDisplayText1: First line of text displayed during audio capture.
@@ -2669,6 +2666,14 @@
     </param>
   </function>
   <function name="ShowConstantTBT" messagetype="response">
+  </function>
+  <function name="AlertManeuver" messagetype="request">
+    <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
+    <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
+      <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
+    </param>
+  </function>
+  <function name="AlertManeuver" messagetype="response">
   </function>
   <function name="UpdateTurnList" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>

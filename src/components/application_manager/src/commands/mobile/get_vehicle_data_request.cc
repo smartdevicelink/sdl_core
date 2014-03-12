@@ -45,7 +45,7 @@ namespace commands {
 
 namespace str = strings;
 
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
 }
@@ -93,7 +93,7 @@ void GetVehicleDataRequest::Run() {
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
-  const smart_objects::SmartObject& message = event.smart_object();
+  smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
@@ -109,6 +109,10 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
       const char *info = NULL;
       std::string error_message;
+      if (true ==
+          message[strings::msg_params].keyExists(hmi_response::method)) {
+        message[strings::msg_params].erase(hmi_response::method);
+      }
       if (true == message[strings::params].keyExists(strings::error_msg)) {
         error_message = message[strings::params][strings::error_msg].asString();
         info = error_message.c_str();
@@ -123,8 +127,9 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-#endif // #ifdef WEB_HMI
-#ifdef QT_HMI
+#endif // HMI_JSON_API
+
+#ifdef HMI_DBUS_API
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
 }
@@ -283,7 +288,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     SendResponse( any_arg_success, status, info, &response_params);
   }
 }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 } // namespace commands
 

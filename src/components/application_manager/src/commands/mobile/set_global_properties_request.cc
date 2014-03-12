@@ -121,6 +121,15 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+  if ((is_vr_help_title_present && is_vr_help_present) ||
+      (!is_vr_help_title_present && !is_vr_help_present)) {
+    is_ui_send_ = true;
+  }
+
+  if (is_help_prompt_present || is_timeout_prompt_present) {
+    is_tts_send_ = true;
+  }
+
   if (is_vr_help_title_present && is_vr_help_present) {
     // check vrhelpitem position index
     if (!CheckVrHelpItemsOrder()) {
@@ -216,14 +225,14 @@ void SetGlobalPropertiesRequest::Run() {
 
     if (is_help_prompt_present) {
       app->set_help_prompt(
-          msg_params.getElement(strings::help_promt));
-      params[strings::help_prompt] = (*app->help_promt());
+          msg_params.getElement(strings::help_prompt));
+      params[strings::help_prompt] = (*app->help_prompt());
     }
 
     if (is_timeout_prompt_present) {
       app->set_timeout_prompt(
-          msg_params.getElement(strings::timeout_promt));
-      params[strings::timeout_prompt] = (*app->timeout_promt());
+          msg_params.getElement(strings::timeout_prompt));
+      params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
 
     params[strings::app_id] = app->app_id();
@@ -263,6 +272,8 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(CommandRequestImpl::connection_key());
+
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
@@ -284,34 +295,38 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-        && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-            hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-        || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-            && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-        || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
-            && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+  if (!IsPendingResponseExist()) {
+    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
-  mobile_apis::Result::eType result_code;
-  const char* return_info = NULL;
+    mobile_apis::Result::eType result_code;
+    const char* return_info = NULL;
 
-  if (result) {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
-      result_code = mobile_apis::Result::WARNINGS;
-      return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
+    if (result) {
+      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
+        result_code = mobile_apis::Result::WARNINGS;
+        return_info =
+            std::string("Unsupported phoneme type sent in a prompt").c_str();
+      } else {
+        result_code = static_cast<mobile_apis::Result::eType>(
+        std::max(ui_result_, tts_result_));
+      }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-      std::max(ui_result_, tts_result_));
+          std::max(ui_result_, tts_result_));
     }
-  } else {
-    result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
+
+    ApplicationSharedPtr application =
+        ApplicationManagerImpl::instance()->application(connection_key());
+    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                 return_info, &(message[strings::msg_params]));
+    application->UpdateHash();
   }
-
-
-  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-               return_info, &(message[strings::msg_params]));
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {

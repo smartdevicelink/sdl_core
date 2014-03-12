@@ -20,7 +20,6 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import java.util.Arrays;
 import java.util.Vector;
 
-
 public class KeyboardPropertiesActivity extends Activity {
     //
     private KeyboardProperties kbdProp;
@@ -31,8 +30,8 @@ public class KeyboardPropertiesActivity extends Activity {
     private Spinner kbdLayoutSpinner;
     private CheckBox keypressModeCheck;
     private Spinner keypressModeSpinner;
-    private CheckBox sendDEntryCheck;
-    private CheckBox sendDEntry;
+    //private CheckBox sendDEntryCheck;
+    //private CheckBox sendDEntry;
     private CheckBox charListCheck;
     private EditText charList;
     private CheckBox autocompleteTextCheck;
@@ -49,22 +48,19 @@ public class KeyboardPropertiesActivity extends Activity {
 
         setupUI();
 
-        languageAdapter = new ArrayAdapter<Language>(this,
-                android.R.layout.simple_spinner_item, Language.values());
-        languageAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
+        languageAdapter = new ArrayAdapter<Language>(this, android.R.layout.simple_spinner_item,
+                Language.values());
+        languageAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         languageSpinner.setAdapter(languageAdapter);
 
         kbdLayoutAdapter = new ArrayAdapter<KeyboardLayout>(this,
                 android.R.layout.simple_spinner_item, KeyboardLayout.values());
-        kbdLayoutAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
+        kbdLayoutAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         kbdLayoutSpinner.setAdapter(kbdLayoutAdapter);
 
         keypressModeAdapter = new ArrayAdapter<KeypressMode>(this,
                 android.R.layout.simple_spinner_item, KeypressMode.values());
-        keypressModeAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item);
+        keypressModeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         keypressModeSpinner.setAdapter(keypressModeAdapter);
 
         kbdProp = (KeyboardProperties) IntentHelper
@@ -88,15 +84,13 @@ public class KeyboardPropertiesActivity extends Activity {
         KeyboardLayout kbdLayout = kbdProperties.getKeyboardLayout();
         kbdLayoutCheck.setChecked(kbdLayout != null);
         if (kbdLayout != null) {
-            kbdLayoutSpinner
-                    .setSelection(kbdLayoutAdapter.getPosition(kbdLayout));
+            kbdLayoutSpinner.setSelection(kbdLayoutAdapter.getPosition(kbdLayout));
         }
 
         KeypressMode keypressMode = kbdProperties.getKeypressMode();
         keypressModeCheck.setChecked(keypressMode != null);
         if (keypressMode != null) {
-            keypressModeSpinner.setSelection(
-                    keypressModeAdapter.getPosition(keypressMode));
+            keypressModeSpinner.setSelection(keypressModeAdapter.getPosition(keypressMode));
         }
 
         Vector<String> charListValue = kbdProperties.getLimitedCharacterList();
@@ -113,43 +107,35 @@ public class KeyboardPropertiesActivity extends Activity {
     }
 
     private void setupUI() {
-        languageCheck =
-                (CheckBox) findViewById(R.id.keyboardproperties_useLanguage);
-        languageSpinner =
-                (Spinner) findViewById(R.id.keyboardproperties_language);
-        kbdLayoutCheck =
-                (CheckBox) findViewById(R.id.keyboardproperties_useKbdLayout);
-        kbdLayoutSpinner =
-                (Spinner) findViewById(R.id.keyboardproperties_kbdLayout);
-        keypressModeCheck = (CheckBox) findViewById(
-                R.id.keyboardproperties_useKeypressMode);
-        keypressModeSpinner =
-                (Spinner) findViewById(R.id.keyboardproperties_keypressMode);
-        charListCheck = (CheckBox) findViewById(
-                R.id.keyboardproperties_useLimitedCharacterList);
-        charList = (EditText) findViewById(
-                R.id.keyboardproperties_limitedCharacterList);
+        languageCheck = (CheckBox) findViewById(R.id.keyboardproperties_useLanguage);
+        languageSpinner = (Spinner) findViewById(R.id.keyboardproperties_language);
+        kbdLayoutCheck = (CheckBox) findViewById(R.id.keyboardproperties_useKbdLayout);
+        kbdLayoutSpinner = (Spinner) findViewById(R.id.keyboardproperties_kbdLayout);
+        keypressModeCheck = (CheckBox) findViewById(R.id.keyboardproperties_useKeypressMode);
+        keypressModeSpinner = (Spinner) findViewById(R.id.keyboardproperties_keypressMode);
+        charListCheck = (CheckBox) findViewById(R.id.keyboardproperties_useLimitedCharacterList);
+        charList = (EditText) findViewById(R.id.keyboardproperties_limitedCharacterList);
         autocompleteTextCheck = (CheckBox) findViewById(
                 R.id.keyboardproperties_useAutoCompleteText);
-        autocompleteText = (EditText) findViewById(
-                R.id.keyboardproperties_autoCompleteText);
+        autocompleteText = (EditText) findViewById(R.id.keyboardproperties_autoCompleteText);
 
         Button btnOk = ((Button) findViewById(R.id.keyboardproperties_ok));
         btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                KeyboardProperties result = new KeyboardProperties();
-                fillKbdProperties(result);
-
-                IntentHelper.addObjectForKey(result,
-                        Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
+                String key = Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES;
+                KeyboardProperties keyboardProperties = getKbdProperties();
+                if (keyboardProperties == null) {
+                    keyboardProperties = new KeyboardProperties();
+                    key = Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY;
+                }
+                IntentHelper.addObjectForKey(keyboardProperties, key);
                 setResult(RESULT_OK);
                 finish();
             }
         });
 
-        Button btnCancel =
-                ((Button) findViewById(R.id.keyboardproperties_cancel));
+        Button btnCancel = ((Button) findViewById(R.id.keyboardproperties_cancel));
         btnCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -159,38 +145,53 @@ public class KeyboardPropertiesActivity extends Activity {
         });
     }
 
-    private void fillKbdProperties(KeyboardProperties kbdProperties) {
-        assert kbdProperties != null;
+    /**
+     * @return {@link com.ford.syncV4.proxy.rpc.KeyboardProperties} object filled with selected
+     * values, or <b>null</b> if none of the properties selected
+     */
+    private KeyboardProperties getKbdProperties() {
 
-        if (languageCheck.isChecked()) {
-            Language language = languageAdapter
-                    .getItem(languageSpinner.getSelectedItemPosition());
-            kbdProperties.setLanguage(language);
+        boolean isLanguageCheck = languageCheck.isChecked();
+        boolean isKbdLayoutCheck = kbdLayoutCheck.isChecked();
+        boolean isKeyPressModeCheck = keypressModeCheck.isChecked();
+        boolean isCharListCheck = charListCheck.isChecked();
+        boolean isAutoCompleteTextCheck = autocompleteTextCheck.isChecked();
+
+        if (!isLanguageCheck && !isKbdLayoutCheck && !isKeyPressModeCheck && !isCharListCheck &&
+                !isAutoCompleteTextCheck) {
+            return null;
         }
 
-        if (kbdLayoutCheck.isChecked()) {
+        KeyboardProperties keyboardProperties = new KeyboardProperties();
+
+        if (isLanguageCheck) {
+            Language language = languageAdapter.getItem(languageSpinner.getSelectedItemPosition());
+            keyboardProperties.setLanguage(language);
+        }
+
+        if (isKbdLayoutCheck) {
             KeyboardLayout kbdLayout = kbdLayoutAdapter
                     .getItem(kbdLayoutSpinner.getSelectedItemPosition());
-            kbdProperties.setKeyboardLayout(kbdLayout);
+            keyboardProperties.setKeyboardLayout(kbdLayout);
         }
 
-        if (keypressModeCheck.isChecked()) {
+        if (isKeyPressModeCheck) {
             KeypressMode keypressMode = keypressModeAdapter
                     .getItem(keypressModeSpinner.getSelectedItemPosition());
-            kbdProperties.setKeypressMode(keypressMode);
+            keyboardProperties.setKeypressMode(keypressMode);
         }
 
-        if (charListCheck.isChecked()) {
+        if (isCharListCheck) {
             Vector<String> charListValue = new Vector<String>(Arrays.asList(
                     charList.getText().toString().split(StringUtils.DEFAULT_JOIN_STRING)));
-            kbdProperties.setLimitedCharacterList(charListValue);
+            keyboardProperties.setLimitedCharacterList(charListValue);
         }
 
-        if (autocompleteTextCheck.isChecked()) {
-            String autocompleteTextValue =
-                    autocompleteText.getText().toString();
-            kbdProperties.setAutoCompleteText(autocompleteTextValue);
+        if (isAutoCompleteTextCheck) {
+            String autocompleteTextValue = autocompleteText.getText().toString();
+            keyboardProperties.setAutoCompleteText(autocompleteTextValue);
         }
+
+        return keyboardProperties;
     }
-
 }
