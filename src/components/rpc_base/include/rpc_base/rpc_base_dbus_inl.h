@@ -277,11 +277,6 @@ void DbusSignature(std::string* signature) {
   impl::DbusSignatureHelper<T>::DbusSignature(signature);
 }
 
-template<typename T>
-void DbusSignature(std::string* signature, const T& dummy) {
-  impl::DbusSignatureHelper<T>::DbusSignature(signature);
-}
-
 // Type constructors
 inline Boolean::Boolean(dbus::MessageReader* reader)
   : PrimitiveType(true, reader->NextIsBool()),

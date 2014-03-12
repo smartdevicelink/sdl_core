@@ -28,6 +28,7 @@ set (LIBRARIES
     gmock
     gmock_main
     test_rpc_interface
+    dbus-1
 )
 
 set (SOURCES

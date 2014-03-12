@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,39 +29,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef STRUCT_TYPE_FROM_JSON_METHOD_H_
-#define STRUCT_TYPE_FROM_JSON_METHOD_H_
+#ifndef CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H
+#define CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H
 
 #include "cppgen/cpp_function.h"
 
 namespace codegen {
+class Interface;
 class Struct;
 
-/*
- * Generates struct constructor that assigns fields values taking them from
- * parsed json tree
- */
-class StructTypeFromJsonConstructor : public CppStructConstructor {
+class StructTypeDbusMessageSignatureMethod: public CppFunction {
  public:
-  StructTypeFromJsonConstructor(const Struct* strct);
-  ~StructTypeFromJsonConstructor();
+  StructTypeDbusMessageSignatureMethod(const Struct* strct, bool substructure);
+  ~StructTypeDbusMessageSignatureMethod();
  private:
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
+  bool substructure_;
   const Struct* strct_;
 };
 
-/*
- * Generates struct method that serializes the struct fields into json tree.
- */
-class StructTypeToJsonMethod : public CppFunction {
+class StructTypeFromDbusReaderConstructor : public CppStructConstructor {
  public:
-  StructTypeToJsonMethod(const Struct* strct);
-  ~StructTypeToJsonMethod();
+  StructTypeFromDbusReaderConstructor(const Struct* strct, bool substructure);
+  ~StructTypeFromDbusReaderConstructor();
  private:
-  // CppFunction pure virtual methods implementation
-  virtual void DefineBody(std::ostream* os) const;
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
  private:
+  bool substructure_;
   const Struct* strct_;
 };
-}  // namespace codegen
 
-#endif /* STRUCT_TYPE_FROM_JSON_METHOD_H_ */
+class StructTypeToDbusWriterMethod : public CppFunction {
+ public:
+  StructTypeToDbusWriterMethod(const Struct* strct, bool substructure);
+  ~StructTypeToDbusWriterMethod();
+ private:
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
+  bool substructure_;
+  const Struct* strct_;
+};
+
+} // namespace codegen
+
+#endif // CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H
