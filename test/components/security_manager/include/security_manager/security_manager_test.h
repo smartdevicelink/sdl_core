@@ -58,6 +58,11 @@ namespace security_manager_test {
       security_manager_->set_session_observer(&mock_session_observer);
       security_manager_->set_protocol_handler(&mock_protocol_observer);
     }
+    void TearDown() OVERRIDE {
+      // Wait call methods in thread
+      sleep(2);
+      //Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
+    }
 
     void SetMockCryptoManger() {
       security_manager_->set_crypto_manager(&mock_crypto_manager);
@@ -114,6 +119,16 @@ namespace security_manager_test {
               protocol_handler::ProtocolPayloadV2SizeBits());
   }
   /*
+   * Security QueryHeader shall not set NULL interfaces
+   * and shall not call any methodes
+   */
+  TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
+    security_manager_.reset(new security_manager::SecurityManager());
+    security_manager_->set_session_observer(NULL);
+    security_manager_->set_protocol_handler(NULL);
+    security_manager_->set_crypto_manager(NULL);
+  }
+  /*
    * Security QueryHeader with NULL CryptoManager shall send
    * InternallError (ERROR_NOT_SUPPORTED) on any Query
    */
@@ -128,9 +143,17 @@ namespace security_manager_test {
           //It could be any query id
           SecurityQuery::INVALID_QUERY_ID, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    sleep(1);
   }
 
+  /*
+   * SecurityManger shall skip all OnMobileMessageSent
+   */
+  TEST_F(SecurityManagerTest, OnMobileMessageSent) {
+    const RawMessagePtr rawMessagePtr(
+          new RawMessage( key, protocolVersion, NULL, 0));
+    security_manager_->OnMobileMessageSent(rawMessagePtr);
+    //Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
+  }
   /*
    * SecurityManger shall skip all not-Secure messages
    */
@@ -142,8 +165,6 @@ namespace security_manager_test {
     call_OnMessageReceived(NULL, 0, protocol_handler::kMobileNav);
     call_OnMessageReceived(NULL, 0, protocol_handler::kBulk);
     call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
-    // Wait call methods in thread
-    sleep(1);
     //Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
 
@@ -157,8 +178,6 @@ namespace security_manager_test {
                     SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -175,8 +194,6 @@ namespace security_manager_test {
           SecurityQuery::REQUEST,
           SecurityQuery::INVALID_QUERY_ID, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -196,8 +213,6 @@ namespace security_manager_test {
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_RESPONSE, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -215,8 +230,6 @@ namespace security_manager_test {
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -246,8 +259,6 @@ namespace security_manager_test {
     //Secure service shall not be encrypted
     const uint8_t service_type = ::protocol_handler::kSecure;
     EmulateMobileMessage(header, &service_type, 1);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -271,8 +282,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     const uint8_t service_type_uint8 = ::protocol_handler::kMobileNav;
     EmulateMobileMessage(header, &service_type_uint8, 1);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -307,8 +316,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -351,8 +358,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -395,8 +400,39 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
-    // Wait call methods in thread
-    sleep(1);
+  }
+  /*
+   * SecurityManger shall send ProtectServiceResponse with NTERNAL_ERROR
+   * on internall error from SessionObserver::SetSSLContext
+   */
+  TEST_F(SecurityManagerTest,
+         GetProtectServiceRequest_ServiceProtectionInternalError) {
+    SetMockCryptoManger();
+    //Try to protecte kMobileNav service
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::INTERNAL_ERROR),is_final)).Times(1);
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).Times(1).
+        WillOnce(Return(&mock_ssl_context_new));
+    // Expect SessionObserver::SetSSLContext
+    EXPECT_CALL(mock_session_observer,
+                SetSSLContext(key, encryption_service_type,&mock_ssl_context_new)).
+        WillOnce(Return(SecurityQuery::INTERNAL_ERROR));
+    // Expect CryptoManager::ReleaseSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                ReleaseSSLContext(&mock_ssl_context_new)).Times(1);
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = encryption_service_type;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
   }
 
   /*
@@ -427,8 +463,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
-    // Wait call methods in thread
-    sleep(1);
   }
 
   /*
@@ -447,8 +481,18 @@ namespace security_manager_test {
           SecurityQuery::REQUEST,
           SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
     EmulateMobileMessage(header, NULL, 0);
-    // Wait call methods in thread
-    sleep(1);
+  }
+
+  /*
+   * SecurityManger shall not send any query on getting SEND_INTERNAL_ERROR
+   */
+  TEST_F(SecurityManagerTest, GetInternalError) {
+    SetMockCryptoManger();
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::NOTIFICATION,
+          SecurityQuery::SEND_INTERNAL_ERROR, seq_number);
+    EmulateMobileMessage(header, NULL, 0);
   }
 
 } // connection_handle

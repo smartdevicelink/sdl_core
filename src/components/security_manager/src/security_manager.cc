@@ -339,10 +339,7 @@ void SecurityManager::SendBinaryData(const int32_t connectionKey,
                                      const uint8_t * const data,
                                      size_t data_size) {
   LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
-  if(!protocol_handler_) {
-    LOG4CXX_ERROR(logger_, "No ProtocolHandler for usage.");
-    return;
-  }
+  DCHECK(protocol_handler_)
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage( connectionKey,
                                           protocol_handler::PROTOCOL_VERSION_2,
