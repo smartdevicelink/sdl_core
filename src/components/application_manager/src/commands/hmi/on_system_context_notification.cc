@@ -34,24 +34,34 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
+namespace commands {
+using namespace mobile_apis::SystemContext;
+using namespace mobile_apis::AudioStreamingState;
 
-namespace {
-using namespace mobile_api::AudioStreamingState;
+void OnSystemContextNotification::
+MuteAudioStream(ApplicationManagerImpl* app_mgr, ApplicationSharedPtr app) {
+  const HMICapabilities& hmi_capabilities = app_mgr->hmi_capabilities();
+  if (hmi_capabilities.attenuated_supported()) {
+    app->set_audio_streaming_state(ATTENUATED);
+  } else {
+    app->set_audio_streaming_state(NOT_AUDIBLE);
+  }
+}
 
-void UpdateVRState(ApplicationManagerImpl* app_mgr,
+void OnSystemContextNotification::UnmuteAudioStream(ApplicationSharedPtr app) {
+  app->set_audio_streaming_state(AUDIBLE);
+}
+
+void OnSystemContextNotification::UpdateVRState(ApplicationManagerImpl* app_mgr,
                    bool vr_session_is_active_on_hmi) {
   // If VR session state is now different (has changed) on HMI
   if (app_mgr->vr_session_started() != vr_session_is_active_on_hmi) {
     app_mgr->set_vr_session_started(vr_session_is_active_on_hmi);
   }
 }
-
-}
-
-namespace commands {
-using namespace mobile_api::SystemContext;
 
 OnSystemContextNotification::OnSystemContextNotification(
     const MessageSharedPtr& message)
@@ -71,7 +81,7 @@ void OnSystemContextNotification::Run() {
   mobile_api::SystemContext::eType system_context =
     static_cast<mobile_api::SystemContext::eType>(
     (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
-
+  bool state_vr_session = app_mgr->vr_session_started();
   UpdateVRState(app_mgr, SYSCTXT_VRSESSION == system_context);
 
   // SDLAQ-CRS-833 implementation
@@ -83,7 +93,13 @@ void OnSystemContextNotification::Run() {
       if (system_context != (*it)->system_context()) {
         (*it)->set_system_context(system_context);
       }
-
+      if ((*it)->is_media_application()) {
+        if (SYSCTXT_VRSESSION == system_context) {
+          MuteAudioStream(app_mgr, *it);
+        } else if (state_vr_session) {
+          UnmuteAudioStream(*it);
+        }
+      }
       MessageHelper::SendHMIStatusNotification((*(*it)));
     }
   }

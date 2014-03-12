@@ -89,7 +89,7 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolMessage protocolMessage =
                 SecureServiceMessageFactory.buildProtectServiceRequest(sessionId, serviceType);
 
-        SendMessage(protocolMessage);
+        SendMessage(protocolMessage, serviceType);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolMessage protocolMessage =
                 SecureServiceMessageFactory.buildHandshakeRequest(sessionId, serviceType);
 
-        SendMessage(protocolMessage);
+        //SendMessage(protocolMessage);
     }
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
@@ -133,12 +133,22 @@ public class WiProProtocol extends AbstractProtocol {
         handleProtocolFrameToSend(header, data, 0, data.length);
     } // end-method
 
-    public void SendMessage(ProtocolMessage protocolMsg) {
+    /**
+     *
+     * @param protocolMsg
+     * @param serviceTypeToBeSecured
+     */
+    public void SendMessage(ProtocolMessage protocolMsg, ServiceType serviceTypeToBeSecured) {
         protocolMsg.setRPCType((byte) 0x00); //always sending a request
         ServiceType serviceType = protocolMsg.getServiceType();
         byte sessionID = protocolMsg.getSessionID();
 
-        ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(protocolMsg, _version).generate();
+        ProtocolMessageConverter protocolMessageConverter;
+        if (serviceTypeToBeSecured == null) {
+            protocolMessageConverter = new ProtocolMessageConverter(protocolMsg, _version).generate();
+        } else {
+            protocolMessageConverter = new ProtocolMessageConverter(protocolMsg, _version).generate(serviceTypeToBeSecured);
+        }
         byte[] data = protocolMessageConverter.getData();
         serviceType = protocolMessageConverter.getSessionType();
 
@@ -203,6 +213,10 @@ public class WiProProtocol extends AbstractProtocol {
 
             }
         }
+    }
+
+    public void SendMessage(ProtocolMessage protocolMsg) {
+        SendMessage(protocolMsg, null);
     }
 
     private void sendFrameToTransport(ProtocolFrameHeader header) {

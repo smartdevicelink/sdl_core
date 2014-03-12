@@ -1,6 +1,7 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.service.secure.SecureServiceRequestResponseSeqNumberHolder;
 
 /**
  * Created by Andrew Batutin on 8/21/13
@@ -27,7 +28,12 @@ public class ProtocolMessageConverter {
         return mServiceType;
     }
 
-    public ProtocolMessageConverter generate() {
+    /**
+     *
+     * @param serviceTypeToBeSecured
+     * @return
+     */
+    public ProtocolMessageConverter generate(ServiceType serviceTypeToBeSecured) {
         mData = null;
         mServiceType = mProtocolMsg.getServiceType();
 
@@ -38,11 +44,15 @@ public class ProtocolMessageConverter {
                 byte[] secureData = mProtocolMsg.getData().clone();
                 mData = new byte[FRAME_HEADER_LENGTH + secureData.length];
 
-                int tmpCorId = 123;
+                SecureServiceRequestResponseSeqNumberHolder holder =
+                        SecureServiceRequestResponseSeqNumberHolder.getInstance();
+                int seqNumber = holder.getNextSeqNumber();
+
+                holder.addServiceWithKey(seqNumber, serviceTypeToBeSecured.getName());
 
                 BinaryFrameHeader binFrameHeader =
                         ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
-                                mProtocolMsg.getFunctionID(), tmpCorId, 0);
+                                mProtocolMsg.getFunctionID(), seqNumber, 0);
                 System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
                         FRAME_HEADER_LENGTH);
                 System.arraycopy(secureData, 0, mData, FRAME_HEADER_LENGTH, secureData.length);
@@ -80,5 +90,9 @@ public class ProtocolMessageConverter {
             mData = mProtocolMsg.getData();
         }
         return this;
+    }
+
+    public ProtocolMessageConverter generate() {
+        return generate(null);
     }
 }

@@ -114,7 +114,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -682,7 +682,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {
   LOG4CXX_INFO(logger_,
-               "ProtocolHandlerImpl::HandleControlMessageStartSession");
+               "ProtocolHandlerImpl::HandleControlMessageStartSession" 
+				<< (int) packet.protocol_version() );
   LOG4CXX_INFO_EXT(logger_,
                    "Version 2 " << (packet.protocol_version() == PROTOCOL_VERSION_2));
 

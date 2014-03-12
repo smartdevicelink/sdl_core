@@ -9,6 +9,7 @@ package com.ford.syncV4.service.secure;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.ProtocolConst;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.SecureServicePayload;
@@ -54,9 +55,28 @@ public class SecureServiceMessageManager {
         SecureServicePayload secureServicePayload =
                 secureServicePayloadParser.parse(protocolMessage.getData());
 
-        // ServiceType could be obtained from ProtocolMessage
-        ServiceType serviceType = protocolMessage.getServiceType();
+        int secureServiceFunctionId = secureServicePayload.getFunctionId();
 
+        Log.d(TAG, "Process Secure, fun id:" + secureServiceFunctionId);
+
+        if (secureServiceFunctionId == ProtocolConst.PROTECT_SERVICE_RESPONSE_ID) {
+
+            ProtectServiceResponse protectServiceResponse = secureServicePayload.getStartServiceResponse();
+            Log.d(TAG, "Process Secure, response:" + protectServiceResponse);
+
+            if (protectServiceResponse == ProtectServiceResponse.SUCCESS) {
+                SecureServiceRequestResponseSeqNumberHolder holder =
+                        SecureServiceRequestResponseSeqNumberHolder.getInstance();
+
+                ServiceType serviceType = holder.getServiceTypeBySeqNumber(secureServicePayload.getSeqNumber());
+
+                Log.d(TAG, "Process Secure. Service type:" + serviceType);
+
+                if (serviceType != null) {
+                    mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
+                }
+            }
+        }
         //mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }
 }

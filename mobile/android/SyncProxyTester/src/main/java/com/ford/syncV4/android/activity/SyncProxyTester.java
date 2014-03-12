@@ -73,6 +73,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
+import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
 import com.ford.syncV4.proxy.rpc.Choice;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
@@ -179,6 +180,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int ALERT_MAXSOFTBUTTONS = 4;
     private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
     private static final int SHOW_MAXSOFTBUTTONS = 8;
+    private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
     private static final int SHOWCONSTANTTBT_MAXSOFTBUTTONS = 3;
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
     private static final int CREATECHOICESET_MAXCHOICES = 100;
@@ -1180,6 +1182,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             addToFunctionsAdapter(adapter, Names.ReadDID);
             addToFunctionsAdapter(adapter, Names.GetDTCs);
             addToFunctionsAdapter(adapter, Names.ShowConstantTBT);
+            addToFunctionsAdapter(adapter, Names.AlertManeuver);
             addToFunctionsAdapter(adapter, Names.UpdateTurnList);
             addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
             addToFunctionsAdapter(adapter, Names.DiagnosticMessage);
@@ -1587,6 +1590,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 sendGetDTCs();
                             } else if (adapter.getItem(which).equals(Names.ShowConstantTBT)) {
                                 sendShowConstantTBT();
+                            } else if (adapter.getItem(which).equals(Names.AlertManeuver)) {
+                                sendAlertManeuver();
                             } else if (adapter.getItem(which).equals(Names.UpdateTurnList)) {
                                 sendUpdateTurnList();
                             } else if (adapter.getItem(which).equals(Names.SetDisplayLayout)) {
@@ -1607,6 +1612,88 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 curCount = 0;
                             }
                             messageSelectCount.put(function, curCount + 1);
+                        }
+
+                        private void sendAlertManeuver() {
+                            final Context mContext = adapter.getContext();
+                            LayoutInflater inflater = (LayoutInflater) mContext
+                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
+                            View layout = inflater.inflate(R.layout.alertmaneuver, null);
+
+                            final EditText txtTtsChunks = (EditText) layout.findViewById(R.id.txtTtsChunks);
+                            final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.alertManeuver_chkIncludeSBs);
+
+                            SoftButton sb1 = new SoftButton();
+                            sb1.setSoftButtonID(
+                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setText("Reply");
+                            sb1.setType(SoftButtonType.SBT_TEXT);
+                            sb1.setIsHighlighted(false);
+                            sb1.setSystemAction(SystemAction.STEAL_FOCUS);
+                            SoftButton sb2 = new SoftButton();
+                            sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
+                            sb2.setText("Close");
+                            sb2.setType(SoftButtonType.SBT_TEXT);
+                            sb2.setIsHighlighted(false);
+                            sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
+                            currentSoftButtons = new Vector<SoftButton>();
+                            currentSoftButtons.add(sb1);
+                            currentSoftButtons.add(sb2);
+
+                            Button btnSoftButtons = (Button) layout.findViewById(R.id.alertManeuver_btnSoftButtons);
+                            btnSoftButtons.setOnClickListener(new OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    IntentHelper.addObjectForKey(
+                                            currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
+                                    intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
+                                            ALERTMANEUVER_MAXSOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
+                                }
+                            });
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Vector<TTSChunk> ttsChunks = new Vector<TTSChunk>();
+                                    String ttsChunksString = txtTtsChunks.getText().toString();
+                                    for (String ttsChunk : ttsChunksString.split(JOIN_STRING)) {
+                                        TTSChunk chunk = TTSChunkFactory.createChunk(
+                                                SpeechCapabilities.TEXT,
+                                                ttsChunk);
+                                        ttsChunks.add(chunk);
+                                    }
+
+                                    if (!ttsChunks.isEmpty()) {
+                                        AlertManeuver msg = new AlertManeuver();
+                                        msg.setTtsChunks(ttsChunks);
+                                        msg.setCorrelationID(getCorrelationid());
+                                        if (useSoftButtons.isChecked()) {
+                                            if (currentSoftButtons != null) {
+                                                msg.setSoftButtons(currentSoftButtons);
+                                            } else {
+                                                msg.setSoftButtons(new Vector<SoftButton>());
+                                            }
+                                        }
+                                        currentSoftButtons = null;
+                                        if (mBoundProxyService != null) {
+                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        }
+                                    } else {
+                                        SafeToast.showToastAnyThread("No TTS Chunks entered");
+                                    }
+                                }
+                            });
+                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    currentSoftButtons = null;
+                                    dialog.cancel();
+                                }
+                            });
+                            builder.setView(layout);
+                            builder.show();
                         }
 
                         /**
