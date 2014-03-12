@@ -1132,24 +1132,6 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
 
   switch (message.protocol_version()) {
     case ProtocolVersion::kV2: {
-      if (message.function_id() == 0 || message.type() == kUnknownType) {
-        LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
-        int32_t conversation_result =
-          formatters::CFormatterJsonSDLRPCv1::fromString <
-          NsSmartDeviceLinkRPC::V1::FunctionID::eType,
-          NsSmartDeviceLinkRPC::V1::messageType::eType > (
-            message.json_message(), output);
-        if (formatters::CFormatterJsonSDLRPCv1::kSuccess
-            == conversation_result) {
-          utils::SharedPtr<smart_objects::SmartObject> response(
-            MessageHelper::CreateNegativeResponse(
-              message.connection_key(), message.function_id(),
-              message.correlation_id(),
-              mobile_apis::Result::UNSUPPORTED_VERSION));
-          ManageMobileCommand(response);
-          return false;
-        }
-      }
 
       if (!formatters::CFormatterJsonSDLRPCv2::fromString(
             message.json_message(),
@@ -1206,12 +1188,48 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       break;
     }
+    case ProtocolVersion::kV1: {
+        static NsSmartDeviceLinkRPC::V1::v4_protocol_v1_2_no_extra v1_shema;
+
+        if (message.function_id() == 0 || message.type() == kUnknownType) {
+          LOG4CXX_ERROR(logger_, "Message received: UNSUPPORTED_VERSION");
+
+          int32_t conversation_result =
+            formatters::CFormatterJsonSDLRPCv1::fromString <
+            NsSmartDeviceLinkRPC::V1::FunctionID::eType,
+            NsSmartDeviceLinkRPC::V1::messageType::eType > (
+              message.json_message(), output);
+
+          if (formatters::CFormatterJsonSDLRPCv1::kSuccess
+              == conversation_result) {
+
+            smart_objects::SmartObject params = smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
+
+            output[strings::params][strings::message_type] =
+                NsSmartDeviceLinkRPC::V1::messageType::response;
+            output[strings::params][strings::connection_key] = message.connection_key();
+
+            output[strings::msg_params] =
+                smart_objects::SmartObject(smart_objects::SmartType::SmartType_Map);
+            output[strings::msg_params][strings::success] = false;
+            output[strings::msg_params][strings::result_code] =
+                NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
+
+            smart_objects::SmartObject* msg_to_send = new smart_objects::SmartObject(output);
+            v1_shema.attachSchema(*msg_to_send);
+            SendMessageToMobile(msg_to_send);
+            return false;
+          }
+        }
+
+        break;
+    }
     default:
       // TODO(PV):
       //  removed NOTREACHED() because some app can still have vesion 1.
       LOG4CXX_WARN(
         logger_,
-        "Application used unsupported protocol " << message.protocol_version()
+        "Application used unsupported protocol :" << message.protocol_version()
         << ".");
       return false;
   }
@@ -1239,13 +1257,24 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   std::string output_string;
   switch (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE)
           .asInt()) {
-    case 0: {
-      if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-          output_string)) {
-        LOG4CXX_WARN(logger_, "Failed to serialize smart object");
-        return false;
-      }
-      output.set_protocol_version(application_manager::kV2);
+    case 0:
+      {
+        if (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt() == 1) {
+          if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
+              output_string)) {
+            LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+            return false;
+          }
+          output.set_protocol_version(application_manager::kV1);
+        } else {
+          if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
+              output_string)) {
+            LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+            return false;
+          }
+          output.set_protocol_version(application_manager::kV2);
+        }
+
       break;
     }
     case 1: {
