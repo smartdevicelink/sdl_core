@@ -55,7 +55,8 @@ int TransportManagerDefault::Init() {
 #ifdef BLUETOOTH_SUPPORT
   AddTransportAdapter(new transport_adapter::BluetoothTransportAdapter);
 #endif
-  AddTransportAdapter(new transport_adapter::TcpTransportAdapter);
+  const uint16_t kTcpAdapterPort = 12345;
+  AddTransportAdapter(new transport_adapter::TcpTransportAdapter(kTcpAdapterPort));
 #ifdef USB_SUPPORT
   AddTransportAdapter(new transport_adapter::UsbAoaAdapter);
 #endif
