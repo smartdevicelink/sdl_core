@@ -1,5 +1,6 @@
 [CW11]
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
+* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
 
 [CW10]
 * File Explorer: changed project structure.

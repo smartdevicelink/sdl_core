@@ -1694,6 +1694,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onUnregisterAppInterfaceResponse(Hashtable hash) {
+        getSyncConnection().stopHeartbeatMonitor();
         stopAllServices();
         closeSyncConnection(true);
         stopSession();
