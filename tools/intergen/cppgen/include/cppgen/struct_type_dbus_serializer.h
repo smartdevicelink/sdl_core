@@ -37,34 +37,42 @@
 namespace codegen {
 class Interface;
 class Struct;
+class TypePreferences;
 
 class StructTypeDbusMessageSignatureMethod: public CppFunction {
  public:
-  StructTypeDbusMessageSignatureMethod(const Struct* strct, bool substructure);
+  StructTypeDbusMessageSignatureMethod(const TypePreferences* preferences,
+                                       const Struct* strct,
+                                       bool substructure);
   ~StructTypeDbusMessageSignatureMethod();
  private:
   // CppFunction interface
   void DefineBody(std::ostream* os) const;
  private:
+  const TypePreferences* preferences_;
   bool substructure_;
   const Struct* strct_;
 };
 
 class StructTypeFromDbusReaderConstructor : public CppStructConstructor {
  public:
-  StructTypeFromDbusReaderConstructor(const Struct* strct, bool substructure);
+  StructTypeFromDbusReaderConstructor(const TypePreferences* preferences,
+                                      const Struct* strct,
+                                      bool substructure);
   ~StructTypeFromDbusReaderConstructor();
  private:
   // CppFunction interface
   void DefineBody(std::ostream* os) const;
  private:
+  const TypePreferences* preferences_;
   bool substructure_;
   const Struct* strct_;
 };
 
 class StructTypeToDbusWriterMethod : public CppFunction {
  public:
-  StructTypeToDbusWriterMethod(const Struct* strct, bool substructure);
+  StructTypeToDbusWriterMethod(const Struct* strct,
+                               bool substructure);
   ~StructTypeToDbusWriterMethod();
  private:
   // CppFunction interface

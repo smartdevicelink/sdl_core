@@ -52,8 +52,10 @@ using typesafe_format::format;
 
 namespace codegen {
 
-DefinitionGenerator::DefinitionGenerator(ModuleManager* module_manager)
-    : module_manager_(module_manager) {
+DefinitionGenerator::DefinitionGenerator(const TypePreferences* preferences,
+                                         ModuleManager* module_manager)
+    : preferences_(preferences),
+      module_manager_(module_manager) {
 }
 
 DefinitionGenerator::~DefinitionGenerator() {
@@ -73,7 +75,7 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   ostream& o = source_file.types_ns().os();
   o << Comment(format("{0} methods", strct->name())) << endl;
   StructTypeDefaultConstructor(strct).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(strct);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_, strct);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
@@ -81,10 +83,12 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   StructTypeIsValidMethod(strct).Define(&o, false);
   StructTypeIsInitializedMethod(strct).Define(&o, false);
   StructTypeFromJsonConstructor(strct).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(strct, true).Define(&o , false);
+  StructTypeFromDbusReaderConstructor(preferences_,
+                                      strct, true).Define(&o , false);
   StructTypeToJsonMethod(strct).Define(&o , false);
   StructTypeToDbusWriterMethod(strct, true).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(strct, true).Define(&o, false);
+  StructTypeDbusMessageSignatureMethod(preferences_,
+                                       strct, true).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().types_ns();
@@ -102,7 +106,7 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   ostream& o = source_file.responses_ns().os();
   o << Comment(format("{0} response methods", response.name())) << endl;
   StructTypeDefaultConstructor(&response).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(&response);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &response);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
@@ -110,10 +114,12 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   StructTypeIsValidMethod(&response).Define(&o, false);
   StructTypeIsInitializedMethod(&response).Define(&o, false);
   StructTypeFromJsonConstructor(&response).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(&response, false).Define(&o , false);
+  StructTypeFromDbusReaderConstructor(preferences_,
+                                      &response, false).Define(&o , false);
   StructTypeToJsonMethod(&response).Define(&o , false);
   StructTypeToDbusWriterMethod(&response, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(&response, false).Define(&o, false);
+  StructTypeDbusMessageSignatureMethod(preferences_,
+                                       &response, false).Define(&o, false);
   MessageHandleWithMethod(response.name()).Define(&o, false);
   o << endl;
 
@@ -127,7 +133,7 @@ void DefinitionGenerator::GenerateCodeForNotification(
   ostream& o = source_file.notifications_ns().os();
   o << Comment(format("{0} notification methods", notification.name())) << endl;
   StructTypeDefaultConstructor(&notification).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(&notification);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &notification);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
@@ -135,10 +141,12 @@ void DefinitionGenerator::GenerateCodeForNotification(
   StructTypeIsValidMethod(&notification).Define(&o, false);
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
   StructTypeFromJsonConstructor(&notification).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(&notification, false).Define(&o , false);
+  StructTypeFromDbusReaderConstructor(preferences_,
+                                      &notification, false).Define(&o , false);
   StructTypeToJsonMethod(&notification).Define(&o , false);
   StructTypeToDbusWriterMethod(&notification, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(&notification, false).Define(&o, false);
+  StructTypeDbusMessageSignatureMethod(preferences_,
+                                       &notification, false).Define(&o, false);
   MessageHandleWithMethod(notification.name()).Define(&o, false);
   o << endl;
 
@@ -152,7 +160,7 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   ostream& o = source_file->requests_ns().os();
   o << Comment(format("{0} request methods", request.name())) << endl;
   StructTypeDefaultConstructor(&request).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(&request);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &request);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
@@ -160,10 +168,12 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   StructTypeIsValidMethod(&request).Define(&o, false);
   StructTypeIsInitializedMethod(&request).Define(&o, false);
   StructTypeFromJsonConstructor(&request).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(&request, false).Define(&o , false);
+  StructTypeFromDbusReaderConstructor(preferences_,
+                                      &request, false).Define(&o , false);
   StructTypeToJsonMethod(&request).Define(&o , false);
   StructTypeToDbusWriterMethod(&request, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(&request, false).Define(&o, false);
+  StructTypeDbusMessageSignatureMethod(preferences_,
+                                       &request, false).Define(&o, false);
   MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;
 

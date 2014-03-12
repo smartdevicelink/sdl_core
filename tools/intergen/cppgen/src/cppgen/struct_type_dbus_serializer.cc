@@ -40,9 +40,11 @@ using typesafe_format::strmfmt;
 namespace codegen {
 
 StructTypeDbusMessageSignatureMethod::StructTypeDbusMessageSignatureMethod(
+    const TypePreferences* preferences,
     const Struct* strct,
     bool substructure)
     : CppFunction(strct->name(), "GetDbusSignature", "void", kStatic),
+      preferences_(preferences),
       substructure_(substructure),
       strct_(strct) {
   Add(Parameter("signature", "std::string*"));
@@ -63,6 +65,7 @@ void StructTypeDbusMessageSignatureMethod::DefineBody(std::ostream* os) const {
           i->default_value() || i->is_mandatory() ?
               RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
       std::string field_type = RpcTypeNameGenerator(&strct_->interface(),
+                                                    preferences_,
                                                     i->type(),
                                                     availability).result();
       strmfmt(*os, "rpc::DbusSignature< {0} >({1});\n",
@@ -76,9 +79,11 @@ void StructTypeDbusMessageSignatureMethod::DefineBody(std::ostream* os) const {
 }
 
 StructTypeFromDbusReaderConstructor::StructTypeFromDbusReaderConstructor(
+    const TypePreferences* preferences,
     const Struct* strct,
     bool substructure)
     : CppStructConstructor(strct->name()),
+      preferences_(preferences),
       strct_(strct),
       substructure_(substructure) {
   Add(Parameter("reader__", "dbus::MessageReader*"));
@@ -109,6 +114,7 @@ void StructTypeFromDbusReaderConstructor::DefineBody(std::ostream* os) const {
           i->default_value() || i->is_mandatory() ?
               RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
       std::string field_type = RpcTypeNameGenerator(&strct_->interface(),
+                                                    preferences_,
                                                     i->type(),
                                                     availability).result();
       strmfmt(*os, "{0} = {1}(&subreader__);\n", i->name(), field_type);
@@ -116,8 +122,9 @@ void StructTypeFromDbusReaderConstructor::DefineBody(std::ostream* os) const {
   }
 }
 
-StructTypeToDbusWriterMethod::StructTypeToDbusWriterMethod(const Struct* strct,
-                                                           bool substructure)
+StructTypeToDbusWriterMethod::StructTypeToDbusWriterMethod(
+    const Struct* strct,
+    bool substructure)
     : CppFunction(strct->name(), "ToDbusWriter", "void", kConst),
       substructure_(substructure),
       strct_(strct) {

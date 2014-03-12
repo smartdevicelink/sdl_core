@@ -40,6 +40,7 @@
 namespace codegen {
 class Interface;
 class Type;
+class TypePreferences;
 
 /*
  * These visitor classes are used to generate C++ type name for given
@@ -58,6 +59,7 @@ class TypeNameGenerator: public TypeCodeGenerator {
   // type names are generated.
   // Generates type name can be accessed with result() method.
   TypeNameGenerator(const Interface* interface,
+                    const TypePreferences* preferences,
                     const Type* type);
   ~TypeNameGenerator();
   // Generated type name
@@ -74,6 +76,7 @@ class TypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
   const Interface* interface_;
+  const TypePreferences* preferences_;
   bool prefer_reference_type_;
   std::stringstream os_;
 };
@@ -99,6 +102,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   // Depending on |availability| option optionally wraps declaration into
   // Mandatory or Optional template
   RpcTypeNameGenerator(const Interface* interface,
+                       const TypePreferences* preferences,
                        const Type* type,
                        Availability availability);
   ~RpcTypeNameGenerator();
@@ -121,6 +125,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   bool MaybeWrapWithAvailabilitySpecifier(const Type* type);
 private:
   const Interface* interface_;
+  const TypePreferences* preferences_;
   bool skip_availaiblity_specifier_;
   bool mandatory_;
   std::stringstream os_;

@@ -39,7 +39,7 @@
 namespace codegen {
 class Interface;
 class ModuleManager;
-class GeneratorPreferences;
+class TypePreferences;
 
 /*
  * Generates code for all the entities of single interface
@@ -49,6 +49,7 @@ class CppInterfaceCodeGenerator {
   // Creates code generator for |interface|, using
   // |module_manager| to find where to output the code
   CppInterfaceCodeGenerator(const Interface* interface,
+                            const TypePreferences* preferences,
                             ModuleManager* module_manager);
   ~CppInterfaceCodeGenerator();
   // Generate all the interface code
