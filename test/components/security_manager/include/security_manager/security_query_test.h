@@ -36,6 +36,7 @@
 #include <gtest/gtest.h>
 #include "security_manager/security_query.h"
 #include "protocol_handler/protocol_payload.h"
+#include "utils/byte_order.h"
 
 namespace test  {
 namespace components  {
@@ -62,9 +63,9 @@ namespace security_manager_test {
    * Security QueryHeader shall construct with NULL fields
    */
   TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
-    uint8_t query_type = 0xA;
-    uint32_t query_id = 0xB;
-    uint32_t seq_number = 0xC;
+    const  uint8_t query_type = 0xA;
+    const  uint32_t query_id = 0xB;
+    const  uint32_t seq_number = 0xC;
     SecurityQuery::QueryHeader header (query_type, query_id, seq_number);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.query_type, query_type);
@@ -80,31 +81,191 @@ namespace security_manager_test {
     ASSERT_EQ(query.getDataSize(), 0);
     ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
     const SecurityQuery::QueryHeader& header = query.getHeader();
-    ASSERT_EQ(header.query_id, SecurityQuery::INVALID_QUERY_ID);
     ASSERT_EQ(header.query_type, SecurityQuery::INVALID_QUERY_TYPE);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.query_id, SecurityQuery::INVALID_QUERY_ID);
     ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.reserved, 0x0);
   }
   /*
    * Security QueryHeader shall construct with specified fields
    */
   TEST_F(SecurityQueryTest, QueryConstructor2) {
-    uint8_t query_type = 0xA;
-    uint32_t query_id = 0xB;
-    uint32_t seq_number = 0xC;
-    uint32_t connection_key = 0xD;
+    const  uint8_t query_type = 0xA;
+    const  uint32_t query_id = 0xB;
+    const  uint32_t seq_number = 0xC;
+    const  uint32_t connection_key = 0xD;
     SecurityQuery::QueryHeader init_header (query_type, query_id, seq_number);
+
     SecurityQuery query(init_header, connection_key);
+
     ASSERT_EQ(query.getConnectionKey(), connection_key);
     ASSERT_EQ(query.getDataSize(), 0);
     ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
     const SecurityQuery::QueryHeader& header = query.getHeader();
-    ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.query_type, query_type);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
   }
 
+  /*
+   * Security QueryHeader setters
+   */
+  TEST_F(SecurityQueryTest, Setters) {
+    const  uint8_t query_type = 0xA;
+    const  uint32_t query_id = 0xB;
+    const  uint32_t seq_number = 0xC;
+    const  uint32_t connection_key = 0xD;
+    SecurityQuery::QueryHeader init_header (query_type, query_id, seq_number);
+    const size_t data_size = sizeof(SecurityQuery::QueryHeader);
+    const uint8_t* data = new uint8_t[data_size];
+
+    SecurityQuery query;
+    query.setConnectionKey(connection_key);
+    query.setData(data, data_size);
+    query.setHeader(init_header);
+
+    ASSERT_EQ(query.getConnectionKey(), connection_key);
+    ASSERT_EQ(query.getDataSize(), data_size);
+    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    for (int i = 0; i < data_size; ++i) {
+      ASSERT_EQ(query.getData()[i], data[i]);
+      }
+    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
+
+    delete []data;
+  }
+  /*
+   * Security QueryHeader Parse data contains only header
+   * with PROTECT_SERVICE_REQUEST
+   */
+  TEST_F(SecurityQueryTest, Parse_NullBinDataRequest) {
+    const uint8_t query_type = SecurityQuery::REQUEST;
+    const uint32_t query_id = SecurityQuery::PROTECT_SERVICE_REQUEST;
+    const uint32_t seq_number = 0x0A0B0C0D;
+    const size_t data_size = sizeof(SecurityQuery::QueryHeader);
+    uint8_t* data = new uint8_t[data_size];
+    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
+    data[0] = query_type;
+    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
+
+    SecurityQuery query;
+    const bool result_parse = query.Parse(data, data_size);
+
+    ASSERT_TRUE(result_parse);
+    ASSERT_EQ(query.getConnectionKey(), 0);
+    ASSERT_EQ(query.getDataSize(), 0);
+    ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
+
+    delete []data;
+  }
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with PROTECT_SERVICE_RESPONSE
+   */
+  TEST_F(SecurityQueryTest, Parse_Response) {
+    const  uint8_t query_type = SecurityQuery::RESPONSE;
+    const  uint32_t query_id = SecurityQuery::PROTECT_SERVICE_RESPONSE;
+    const  uint32_t seq_number = 0x0A0B0C0D;
+    const size_t add_size = 1;
+    const size_t data_size = sizeof(SecurityQuery::QueryHeader) + add_size;
+    uint8_t* data = new uint8_t[data_size];
+    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
+    data[0] = query_type;
+    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
+
+    SecurityQuery query;
+    const bool result_parse = query.Parse(data, data_size);
+
+    ASSERT_TRUE(result_parse);
+    ASSERT_EQ(query.getConnectionKey(), 0);
+    ASSERT_EQ(query.getDataSize(), add_size);
+    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
+
+    delete []data;
+  }
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with SEND_HANDSHAKE_DATA
+   */
+  TEST_F(SecurityQueryTest, Parse_Handshake) {
+    const  uint8_t query_type = SecurityQuery::NOTIFICATION;
+    const  uint32_t query_id = SecurityQuery::SEND_HANDSHAKE_DATA;
+    const  uint32_t seq_number = 0x0A0B0C0D;
+    const size_t header_size = sizeof(SecurityQuery::QueryHeader);
+    const size_t add_size = 100;
+    const size_t data_size = header_size + add_size;
+    uint8_t* data = new uint8_t[data_size];
+    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
+    data[0] = query_type;
+    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
+
+    SecurityQuery query;
+    const bool result_parse = query.Parse(data, data_size);
+
+    ASSERT_TRUE(result_parse);
+    ASSERT_EQ(query.getConnectionKey(), 0);
+    ASSERT_EQ(query.getDataSize(), add_size);
+    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    for (int i = 0; i < add_size; ++i) {
+      ASSERT_EQ(query.getData()[i], data[header_size + i]);
+      }
+    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
+
+    delete []data;
+  }
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with SEND_HANDSHAKE_DATA
+   */
+  TEST_F(SecurityQueryTest, Parse_InvalideQuery) {
+    const  uint8_t query_type = SecurityQuery::INVALID_QUERY_TYPE;
+    const  uint32_t query_id = SecurityQuery::INVALID_QUERY_ID;
+    const  uint32_t seq_number = 0x0A0B0C0D;
+    const size_t header_size = sizeof(SecurityQuery::QueryHeader);
+    const size_t add_size = 100;
+    const size_t data_size = header_size + add_size;
+    uint8_t* data = new uint8_t[data_size];
+    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
+    data[0] = query_type;
+    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
+
+    SecurityQuery query;
+    const bool result_parse = query.Parse(data, data_size);
+
+    ASSERT_TRUE(result_parse);
+    ASSERT_EQ(query.getConnectionKey(), 0);
+    ASSERT_EQ(query.getDataSize(), add_size);
+    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    for (int i = 0; i < add_size; ++i) {
+      ASSERT_EQ(query.getData()[i], data[header_size + i]);
+      }
+    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.reserved, 0x0);
+
+    delete []data;
+  }
 } // security_manager_test
 } // namespace components
 } // namespace test

@@ -40,6 +40,7 @@
 
 //TODO: add test on get correct/wrong InternalError
 //TODO: check connection_key the same and seq_number
+//TODO: check ::SendData with correct query_id and query_type
 namespace test  {
 namespace components  {
 namespace security_manager_test {
