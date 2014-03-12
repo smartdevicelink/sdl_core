@@ -58,7 +58,6 @@ namespace security_manager {
       bool  IsInitCompleted() const;
       virtual ~SSLContextImpl();
      private:
-      void EnsureBufferSize(size_t size);
       SSL *connection_;
       BIO *bioIn_;
       BIO *bioOut_;
