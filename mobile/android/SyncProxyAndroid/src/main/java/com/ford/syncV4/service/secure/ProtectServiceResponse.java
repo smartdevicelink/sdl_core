@@ -15,5 +15,6 @@ public enum ProtectServiceResponse {
     PENDING,
     SERVICE_ALREADY_PROTECTED,
     SERVICE_NOT_FOUND,
-    INTERNAL_ERROR
+    INTERNAL_ERROR,
+    UNKNOWN
 }

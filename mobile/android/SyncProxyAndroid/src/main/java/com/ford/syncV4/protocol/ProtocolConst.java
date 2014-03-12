@@ -13,4 +13,7 @@ package com.ford.syncV4.protocol;
 public class ProtocolConst {
 
     public static final int PROTOCOL_V2_HEADER_SIZE = 12;
+
+    public static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 0x01;
+    public static final byte PROTECT_SERVICE_RESPONSE_ID = (byte) 0x02;
 }

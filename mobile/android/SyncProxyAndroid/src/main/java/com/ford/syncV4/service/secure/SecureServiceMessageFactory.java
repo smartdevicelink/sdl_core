@@ -2,6 +2,7 @@ package com.ford.syncV4.service.secure;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.ProtocolConst;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 
@@ -15,7 +16,6 @@ public class SecureServiceMessageFactory {
 
     private static final String TAG = "SecureServiceMessageFactory";
 
-    private static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 0x01;
     private static final int REQ_SEQ_NUMBER_FAKE = 0x00000123;
 
     /**
@@ -33,7 +33,7 @@ public class SecureServiceMessageFactory {
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);
         protocolMessage.setSessionType(ServiceType.Secure_Service);
-        protocolMessage.setFunctionID(1);
+        protocolMessage.setFunctionID(ProtocolConst.PROTECT_SERVICE_REQUEST_ID);
 
         byte[] payloadData = new byte[1];
         payloadData[0] = serviceType.getValue();

@@ -13,6 +13,13 @@ public class ServiceType extends ByteEnumer {
     public static final byte AUDIO_SERVICE_ID = (byte) 0xA;
     public static final byte SECURE_SERVICE_ID = (byte) 0x10;
 
+    public static final String HEARTBEAT_SERVICE_NAME = "Heartbeat_Service";
+    public static final String RPC_NAME = "RPC";
+    public static final String BULK_DATA_NAME = "Bulk_Data";
+    public static final String MOBILE_NAV_NAME = "Mobile_Nav";
+    public static final String AUDIO_SERVICE_NAME = "Audio_Service";
+    public static final String SECURE_SERVICE_NAME = "Secure_Service";
+
     private static Vector sVector = new Vector();
 
     protected ServiceType(byte value, String name) {
@@ -20,17 +27,17 @@ public class ServiceType extends ByteEnumer {
     }
 
     public final static ServiceType Heartbeat = new ServiceType(HEARTBEAT_SERVICE_ID,
-            "Heartbeat_Service");
+            HEARTBEAT_SERVICE_NAME);
     public final static ServiceType RPC = new ServiceType(RPC_SERVICE_ID,
-            "RPC");
+            RPC_NAME);
     public final static ServiceType Bulk_Data = new ServiceType(BULK_DATA_SERVICE_ID,
-            "Bulk_Data");
+            BULK_DATA_NAME);
     public final static ServiceType Mobile_Nav = new ServiceType(MOBILE_NAV_SERVICE_ID,
-            "Mobile_Nav");
+            MOBILE_NAV_NAME);
     public final static ServiceType Audio_Service = new ServiceType(AUDIO_SERVICE_ID,
-            "Audio_Service");
+            AUDIO_SERVICE_NAME);
     public final static ServiceType Secure_Service = new ServiceType(SECURE_SERVICE_ID,
-            "Secure_Service");
+            SECURE_SERVICE_NAME);
 
     static {
         sVector.addElement(RPC);
