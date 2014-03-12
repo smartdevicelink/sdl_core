@@ -76,7 +76,8 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       //TODO(EZ): check?
       break;
   }
-  const uint32_t query_id =
+  //Conver to Little-Endian and clean high byte
+  const uint32_t query_id = 0x00FFFFFF &
       BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data));
   switch (query_id) {
     case PROTECT_SERVICE_REQUEST:

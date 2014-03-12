@@ -82,7 +82,7 @@ namespace security_manager_test {
     */
     void EmulateMobileMessage(SecurityQuery::QueryHeader header,
                               const uint8_t* const data, const uint32_t data_size ){
-      //convert to Little-Endian (network) order
+      //convert to Big-Endian (network) order
       header.query_id = LE_TO_BE32(header.query_id << 8);
 
       const size_t data_sending_size = sizeof(header) + data_size;

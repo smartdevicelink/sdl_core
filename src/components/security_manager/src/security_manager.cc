@@ -137,8 +137,10 @@ void SecurityManager::Handle(const SecurityMessage &message) {
     case SecurityQuery::SEND_INTERNAL_ERROR: {
       //get internall error from mobile side
       const char* const error_str = reinterpret_cast<const char*>(message->getData());
-      const std::string error(error_str, message->getDataSize());
-      LOG4CXX_ERROR(logger_, "InternalError error received" << error);
+      std::string error("InternalError error received ");
+      if(message->getDataSize() && error_str)
+        error += std::string(error_str, message->getDataSize());
+      LOG4CXX_ERROR(logger_, error);
       }
       return;
     default: { // SecurityQuery::InvalidQuery
