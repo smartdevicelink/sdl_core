@@ -64,6 +64,7 @@ void CommandRequestImpl::Run() {
 void CommandRequestImpl::onTimeOut() {
   LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
+  unsubscribe_from_all_events();
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kCompleted == current_state_) {

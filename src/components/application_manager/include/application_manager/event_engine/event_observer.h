@@ -93,15 +93,15 @@ class EventObserver
    */
   void unsubscribe_from_event(const Event::EventID& event_id);
 
- private:
-
-  ObserverID id_;
-
   /*
    * @brief Unsubscribes the observer from all events
    *
    */
   void unsubscribe_from_all_events();
+
+ private:
+
+  ObserverID id_;
 
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
 };
