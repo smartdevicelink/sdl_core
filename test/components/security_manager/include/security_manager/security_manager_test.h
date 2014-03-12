@@ -37,7 +37,6 @@
 #include "security_manager/security_manager.h"
 #include "security_manager/security_manager_mock.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_payload.h"
 
 //TODO: add test on get correct/wrong InternalError
 //TODO: check connection_key the same and seq_number
@@ -111,17 +110,8 @@ namespace security_manager_test {
     const bool is_final = false;
     const uint32_t seq_number = 1;
   };
-
   /*
-   * Security QueryHeader shall be the same size as RPC header
-   * for correct working on Mobile side
-   */
-  TEST_F(SecurityManagerTest, SecurityHeader_eq_RPCHeader) {
-    ASSERT_EQ(sizeof(SecurityQuery::QueryHeader)*8,
-              protocol_handler::ProtocolPayloadV2SizeBits());
-  }
-  /*
-   * Security QueryHeader shall not set NULL interfaces
+   * SecurityManager shall not set NULL interfaces
    * and shall not call any methodes
    */
   TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
@@ -131,7 +121,7 @@ namespace security_manager_test {
     security_manager_->set_crypto_manager(NULL);
   }
   /*
-   * Security QueryHeader with NULL CryptoManager shall send
+   * SecurityManager with NULL CryptoManager shall send
    * InternallError (ERROR_NOT_SUPPORTED) on any Query
    */
   TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
@@ -146,7 +136,6 @@ namespace security_manager_test {
           SecurityQuery::INVALID_QUERY_ID, seq_number);
     EmulateMobileMessage(header, NULL, 0);
   }
-
   /*
    * SecurityManger shall skip all OnMobileMessageSent
    */
@@ -169,7 +158,6 @@ namespace security_manager_test {
     call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
     //Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
-
   /*
    * SecurityManger shall send InternallError on null data recieved
    */
@@ -181,7 +169,6 @@ namespace security_manager_test {
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
   }
-
   /*
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
    */
@@ -197,7 +184,6 @@ namespace security_manager_test {
           SecurityQuery::INVALID_QUERY_ID, seq_number);
     EmulateMobileMessage(header, NULL, 0);
   }
-
   /*
    * SecurityManger shall send InternallError on
    * getting PROTECT_SERVICE_RESPONSE from mobile side
@@ -216,7 +202,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_RESPONSE, seq_number);
     EmulateMobileMessage(header, NULL, 0);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with INTERNAL_ERROR
    * on getting PROTECT_SERVICE_RESPONSE with wrong data size
@@ -233,7 +218,6 @@ namespace security_manager_test {
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
     EmulateMobileMessage(header, NULL, 0);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with SERVICE_NOT_FOUND
    * on getting PROTECT_SERVICE_RESPONSE with invalid service type
@@ -262,7 +246,6 @@ namespace security_manager_test {
     const uint8_t service_type = ::protocol_handler::kSecure;
     EmulateMobileMessage(header, &service_type, 1);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with INTERNAL_ERROR
    * on error create SSLContext
@@ -277,7 +260,7 @@ namespace security_manager_test {
     // Expect CryptoManager::CreateSSLContext
     EXPECT_CALL(mock_crypto_manager,
                 CreateSSLContext()).
-        WillOnce(Return((security_manager::SSLContext*)NULL));
+        WillOnce(Return(reinterpret_cast< ::security_manager::SSLContext*>(NULL)));
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -285,7 +268,6 @@ namespace security_manager_test {
     const uint8_t service_type_uint8 = ::protocol_handler::kMobileNav;
     EmulateMobileMessage(header, &service_type_uint8, 1);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with SERVICE_NOT_FOUND
    * on getting PROTECT_SERVICE_RESPONSE for not start service
@@ -319,7 +301,6 @@ namespace security_manager_test {
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with SERVICE_ALREADY_PROTECTED
    * on getting PROTECT_SERVICE_RESPONSE for already protected service
@@ -361,7 +342,6 @@ namespace security_manager_test {
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with PENDING
    * on getting PROTECT_SERVICE_RESPONSE for already protecting service
@@ -436,7 +416,6 @@ namespace security_manager_test {
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
   }
-
   /*
    * SecurityManger shall send ProtectServiceResponse with SUCCESS
    * on getting correct PROTECT_SERVICE_RESPONSE
@@ -466,7 +445,6 @@ namespace security_manager_test {
     const uint8_t service_type_uint8 = encryption_service_type;
     EmulateMobileMessage(header, &service_type_uint8, 1);
   }
-
   /*
    * SecurityManger shall send InternallError on
    * getting SEND_HANDSHAKE_DATA from mobile side before
@@ -523,7 +501,7 @@ namespace security_manager_test {
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return((::security_manager::SSLContext*)NULL));
+        WillOnce(Return(reinterpret_cast< ::security_manager::SSLContext*>(NULL)));
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -560,7 +538,7 @@ namespace security_manager_test {
                 DoHandshakeStep(
                   //FIXME(EZ):add matcher for compare handshale data
                   _, handshake_data_size, _)).
-        WillOnce(Return((void*)NULL));
+        WillOnce(Return(reinterpret_cast<void*>(NULL)));
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -637,7 +615,6 @@ namespace security_manager_test {
                          reinterpret_cast<const uint8_t*>(error.c_str()),
                          error.size());
   }
-
 } // security_manager_test
 } // namespace components
 } // namespace test

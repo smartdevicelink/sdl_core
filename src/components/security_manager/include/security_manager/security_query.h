@@ -85,8 +85,7 @@ public:
   };
 
   SecurityQuery();
-  explicit SecurityQuery(const QueryHeader& header,
-                         const uint32_t connection_key);
+  SecurityQuery(const QueryHeader& header, const uint32_t connection_key);
   ~SecurityQuery();
   bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
   void setData(const uint8_t * const binary_data, const size_t bin_data_size);
