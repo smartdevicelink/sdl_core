@@ -39,7 +39,7 @@
 namespace test  {
 namespace components  {
 namespace security_manager_test {
-  class SecurityManagerTest: public ::testing::Test {
+  class SecurityQueryTest: public ::testing::Test {
    protected:
     void SetUp() OVERRIDE {
     }
