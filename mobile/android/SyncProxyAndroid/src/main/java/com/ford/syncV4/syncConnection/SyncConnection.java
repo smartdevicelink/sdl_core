@@ -50,6 +50,11 @@ import java.util.Hashtable;
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
     private static final String TAG = "SyncConnection";
+
+    public SyncTransport getTransport() {
+        return _transport;
+    }
+
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;

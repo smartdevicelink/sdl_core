@@ -23,8 +23,7 @@ public class SecureServiceMessageFactory {
      * provided service
      *
      * @param serviceType a type of the service to be secured
-     * @param sessionId Id of the session
-     *
+     * @param sessionId   Id of the session
      * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
      */
     public static ProtocolMessage buildProtectServiceRequest(byte sessionId,
@@ -50,26 +49,13 @@ public class SecureServiceMessageFactory {
         return protocolMessage;
     }
 
-    /**
-     * Build a {@link com.ford.syncV4.protocol.ProtocolMessage} for the handshake procedure
-     *
-     * @param serviceType a type of the service to be secured
-     * @param sessionId Id of the session
-     *
-     * @return {@link com.ford.syncV4.protocol.ProtocolMessage}
-     */
-    public static ProtocolMessage buildHandshakeRequest(byte sessionId,
-                                                        ServiceType serviceType) {
-
-        // TODO : To be implemented
+    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData) {
 
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);
         protocolMessage.setSessionType(ServiceType.Secure_Service);
-        protocolMessage.setFunctionID(0);
-        protocolMessage.setCorrID(0);
-        protocolMessage.setData(new byte[0]);
-
+        protocolMessage.setFunctionID(ProtocolConst.SEND_HANDSHAKE_ID);
+        protocolMessage.setData(payloadData);
         return protocolMessage;
     }
 }

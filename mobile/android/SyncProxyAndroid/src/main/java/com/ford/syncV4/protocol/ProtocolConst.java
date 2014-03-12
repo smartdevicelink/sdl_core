@@ -16,4 +16,5 @@ public class ProtocolConst {
 
     public static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 0x01;
     public static final byte PROTECT_SERVICE_RESPONSE_ID = (byte) 0x02;
+    public static final byte SEND_HANDSHAKE_ID = (byte) 0x03;
 }

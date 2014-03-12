@@ -206,6 +206,16 @@ public class USBTransport extends SyncTransport {
         }
     }
 
+    @Override
+    public synchronized InputStream getInputStream() {
+        return mInputStream;
+    }
+
+    @Override
+    public synchronized OutputStream getOutputStream() {
+        return mOutputStream;
+    }
+
     /**
      * Sends the array of bytes over USB.
      *

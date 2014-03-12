@@ -70,7 +70,12 @@ public class SecureProxyManager {
     }
 
     private void startSecureProxy() {
-        secureProxyServer = new SecureProxyServer(transport.getOutputStream(), new ITransportListener() {
+        secureProxyServer = new SecureProxyServer(new ISecureProxyServer() {
+            @Override
+            public void onDataReceived(byte[] data) {
+
+            }
+        }, new ITransportListener() {
             @Override
             public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
 

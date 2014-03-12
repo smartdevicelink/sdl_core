@@ -96,8 +96,6 @@ public class WiProProtocol extends AbstractProtocol {
     public void startSecureHandshake(byte sessionId, ServiceType serviceType) {
         DebugTool.logInfo("Start Secure Handshake:" + serviceType);
 
-        ProtocolMessage protocolMessage =
-                SecureServiceMessageFactory.buildHandshakeRequest(sessionId, serviceType);
 
         //SendMessage(protocolMessage);
     }

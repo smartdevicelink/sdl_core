@@ -19,6 +19,9 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
+import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
+import com.ford.syncV4.protocol.secure.secureproxy.ISecureProxyServer;
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -85,9 +88,10 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
-import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
-import com.ford.syncV4.service.secure.SecureServiceMessageManager;
 import com.ford.syncV4.service.Service;
+import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
+import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
+import com.ford.syncV4.service.secure.SecureServiceMessageManager;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
@@ -475,6 +479,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private SecureServiceMessageCallback mSecureServiceMessageCallback;
 
+    private ProtocolSecureManager protocolSecureManager;
+
     /**
      * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
      *
@@ -489,7 +495,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (mSecureServiceMessageCallback == null) {
             return;
         }
-        mSecureServiceMessageCallback.setSyncConnection(mSyncConnection);
+        mSecureServiceMessageCallback.setSyncConnection(new IProtectServiceListener() {
+            @Override
+            public void onProtectServiceStarted(byte sessionId, ServiceType serviceType) {
+                protocolSecureManager.startHandShake();
+            }
+
+            @Override
+            public void onHandshakeResponse(byte[] data) {
+                protocolSecureManager.writeDataToProxyServer(data);
+            }
+        });
     }
 
     /**
@@ -696,7 +712,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         public void handleQueueingError(String info, Exception ex) {
                             handleErrorsFromOutgoingMessageDispatcher(info, ex);
                         }
-                    });
+                    }
+            );
         }
     }
 
@@ -727,7 +744,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         public void handleQueueingError(String info, Exception ex) {
                             handleErrorsFromInternalMessageDispatcher(info, ex);
                         }
-                    });
+                    }
+            );
         }
     }
 
@@ -799,7 +817,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         public void handleQueueingError(String info, Exception ex) {
                             handleErrorsFromIncomingMessageDispatcher(info, ex);
                         }
-                    });
+                    }
+            );
         }
     }
 
@@ -1608,7 +1627,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return contains;
     }
 
-    private void handleRPCMessage(Hashtable hash){
+    private void handleRPCMessage(Hashtable hash) {
         getRPCMessageHandler().handleRPCMessage(hash);
     }
 
@@ -1862,7 +1881,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         restartRPCProtocolSession();
 
+        setupSecureProxy();
         getSyncConnection().startSecureService();
+    }
+
+    ISecureProxyServer secureProxyServerListener = new ISecureProxyServer() {
+        @Override
+        public void onDataReceived(byte[] data) {
+
+            ProtocolMessage protocolMessage =
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
+
+            dispatchOutgoingMessage(protocolMessage);
+
+        }
+    };
+
+    private void setupSecureProxy() {
+        protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
+        protocolSecureManager.setupSecureEnvironment();
     }
 
     private void addIfNotExsistRpcServiceToSession() {
@@ -2072,11 +2109,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
-     * @param menuText menu text
-     * @param parentID parent Id
-     * @param position position
-     * @param vrCommands VR Commands vector
+     * @param commandID     command Id
+     * @param menuText      menu text
+     * @param parentID      parent Id
+     * @param position      position
+     * @param vrCommands    VR Commands vector
      * @param correlationID correlation Id
      * @throws SyncException
      */
@@ -2093,7 +2130,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
+     * @param commandID     command Id
      * @param menuText
      * @param position
      * @param vrCommands
@@ -2110,7 +2147,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
+     * @param commandID     command Id
      * @param menuText
      * @param position
      * @param correlationID
@@ -2126,7 +2163,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
+     * @param commandID     command Id
      * @param menuText
      * @param correlationID
      * @throws SyncException
@@ -2140,9 +2177,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
-     * @param menuText menu text
-     * @param vrCommands VR Commands vector
+     * @param commandID     command Id
+     * @param menuText      menu text
+     * @param vrCommands    VR Commands vector
      * @param correlationID correlation Id
      * @throws SyncException
      */
@@ -2155,7 +2192,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends an AddCommand RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param commandID command Id
+     * @param commandID     command Id
      * @param vrCommands
      * @param correlationID
      * @throws SyncException
@@ -2213,7 +2250,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Send a SetAppIcon RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param fileName a name of the file
+     * @param fileName      a name of the file
      * @param correlationID correlation Id
      * @throws SyncException
      */
@@ -2357,9 +2394,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Sends a CreateInteractionChoiceSet RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
      *
-     * @param choiceSet Set of {@link com.ford.syncV4.proxy.rpc.Choice} objects
+     * @param choiceSet              Set of {@link com.ford.syncV4.proxy.rpc.Choice} objects
      * @param interactionChoiceSetID Id of the interaction Choice set
-     * @param correlationID correlation Id
+     * @param correlationID          correlation Id
      * @throws SyncException
      */
     public void createInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
@@ -3038,7 +3075,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             DebugTool.logError("Transport failure: " + info, e);
 
             if (_transportConfig != null &&
-                    _transportConfig.getTransportType() ==  TransportType.USB) {
+                    _transportConfig.getTransportType() == TransportType.USB) {
                 if (CommonUtils.isUSBNoSuchDeviceError(e.toString())) {
 
                     if (_callbackToUIThread) {

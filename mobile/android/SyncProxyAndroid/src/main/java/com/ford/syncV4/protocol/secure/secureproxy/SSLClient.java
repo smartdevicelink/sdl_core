@@ -23,14 +23,19 @@ public class SSLClient {
 
     private SSLSocket socket;
     ITransportListener transportListener;
+    private SSLClientReader sslClientReader;
 
     public SSLClient(ITransportListener transportListener) {
         this.transportListener = transportListener;
     }
 
     public void setupClient() throws IOException {
-        SSLClientReader sslClientReader = new SSLClientReader();
+        sslClientReader = new SSLClientReader();
         sslClientReader.start();
+    }
+
+    public void startHandshake(){
+        socket.getSession();
     }
 
     private void startSocket() throws IOException, NoSuchAlgorithmException, KeyManagementException {
@@ -81,6 +86,14 @@ public class SSLClient {
     }
 
     public class SSLClientReader extends Thread {
+
+        public synchronized boolean isConnected() {
+            return isConnected;
+        }
+
+        public synchronized void setConnected(boolean isConnected) {
+            this.isConnected = isConnected;
+        }
 
         private boolean isConnected;
 

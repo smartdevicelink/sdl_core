@@ -77,6 +77,9 @@ public class SecureServiceMessageManager {
                 }
             }
         }
+        else{
+            mMessageCallback.onHandshakeResponse(protocolMessage.getData());
+        }
         //mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }
 }

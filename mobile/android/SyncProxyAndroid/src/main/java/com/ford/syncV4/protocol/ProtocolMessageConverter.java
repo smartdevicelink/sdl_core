@@ -34,6 +34,9 @@ public class ProtocolMessageConverter {
      * @return
      */
     public ProtocolMessageConverter generate(ServiceType serviceTypeToBeSecured) {
+        if (serviceTypeToBeSecured == null){
+            serviceTypeToBeSecured = ServiceType.Audio_Service;
+        }
         mData = null;
         mServiceType = mProtocolMsg.getServiceType();
 

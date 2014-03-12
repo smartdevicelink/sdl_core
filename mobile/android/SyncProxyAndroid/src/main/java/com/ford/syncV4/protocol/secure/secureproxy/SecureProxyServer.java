@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * Created by Andrew Batutin on 3/11/14.
@@ -20,11 +21,11 @@ public class SecureProxyServer {
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
-    private OutputStream sourceStream;
+    private ISecureProxyServer sourceStream;
     private ServerSocket serverSocket;
 
-    public SecureProxyServer(OutputStream outputStream, ITransportListener listener) {
-        sourceStream = outputStream;
+    public SecureProxyServer(ISecureProxyServer sourceListener, ITransportListener listener) {
+        sourceStream = sourceListener;
         transportListener = listener;
     }
 
@@ -80,9 +81,9 @@ public class SecureProxyServer {
             try {
                 int i;
                 while ((i = inputStream.read(buffer)) != -1) {
-
-                    sourceStream.write(buffer, 0, i);
-
+                    if (sourceStream != null) {
+                        sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
+                    }
                 }
             } catch (IOException e) {
                 Log.e("SecureProxyServer", "error", e);
