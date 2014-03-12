@@ -493,6 +493,21 @@ namespace security_manager_test {
           SecurityQuery::SEND_INTERNAL_ERROR, seq_number);
     EmulateMobileMessage(header, NULL, 0);
   }
+  /*
+   * SecurityManger shall not send any query on getting
+   * SEND_INTERNAL_ERROR with error string
+   */
+  TEST_F(SecurityManagerTest, GetInternalError_WithErrText) {
+    SetMockCryptoManger();
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::NOTIFICATION,
+          SecurityQuery::SEND_INTERNAL_ERROR, seq_number);
+    std::string error("some error");
+    EmulateMobileMessage(header,
+                         reinterpret_cast<const uint8_t*>(error.c_str()),
+                         error.size());
+  }
 
 } // security_manager_test
 } // namespace components
