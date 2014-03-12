@@ -53,7 +53,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-TcpTransportAdapter::TcpTransportAdapter()
+TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
     : TransportAdapterImpl(
 #ifdef AVAHI_SUPPORT
           new DnssdServiceBrowser(this),
@@ -61,7 +61,7 @@ TcpTransportAdapter::TcpTransportAdapter()
           NULL,
 #endif
           new TcpConnectionFactory(this),
-          new TcpClientListener(this, default_port, false)) {
+          new TcpClientListener(this, port, false)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {
