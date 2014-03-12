@@ -90,15 +90,21 @@ public:
 
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
-   * \param observer Pointer to object of the class implementing
+   * \param session observer Pointer to object of the class implementing
    */
   void set_session_observer(protocol_handler::SessionObserver* observer);
 
   /**
    * \brief Sets pointer for Protocol Handler layer for sending
-   * \param Secure Service Requests and Handshake data.
+   * \param protocol handler pointer to object of the class implementing
    */
   void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
+
+  /**
+   * \brief Sets pointer for CryptoManager for handling SSLContext
+   * \param crypto manager pointer to object of the class implementing
+   */
+  void set_crypto_manager(CryptoManager* crypto_manager);
 
   /**
    * \brief Handle SecurityMessage from mobile for processing
@@ -134,17 +140,18 @@ public:
   // Thread that pumps handshake data
   SecurityMessageLoop security_messages_;
 
-  utils::SharedPtr<security_manager::CryptoManager> crypto_manager_;
+  /**
+   *\brief Pointer on instance of class implementing CryptoManager
+   */
+  security_manager::CryptoManager* crypto_manager_;
 
   /**
    *\brief Pointer on instance of class implementing SessionObserver
-   *\brief (Connection Handler)
    */
   protocol_handler::SessionObserver* session_observer_;
 
   /**
    *\brief Pointer on instance of class implementing ProtocolHandler
-   *\brief (Protocol Handler)
    */
   protocol_handler::ProtocolHandler* protocol_handler_;
 

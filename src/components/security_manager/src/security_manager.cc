@@ -40,11 +40,7 @@ log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
 
 SecurityManager::SecurityManager() :
   security_messages_("SecurityManager::security_messages_", this),
-  crypto_manager_(new security_manager::CryptoManagerImpl()),
-  session_observer_(NULL), protocol_handler_(NULL) {
-  if(!crypto_manager_->Init()) {
-      LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
-    }
+  crypto_manager_(NULL), session_observer_(NULL), protocol_handler_(NULL) {
 }
 
 void SecurityManager::OnMessageReceived(
@@ -98,9 +94,25 @@ void SecurityManager::set_protocol_handler(
   protocol_handler_ = handler;
 }
 
+void SecurityManager::set_crypto_manager(CryptoManager *crypto_manager) {
+  if (!crypto_manager) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to CryptoManager.");
+    return;
+  }
+  crypto_manager_ = crypto_manager;
+}
+
 void SecurityManager::Handle(const SecurityMessage &message) {
   DCHECK(message);DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
+  if(!crypto_manager_)  {
+    const std::string error("Invalid (NULL) CryptoManager.");
+    LOG4CXX_ERROR(logger_, error);
+    SendInternalError(message->getConnectionKey(),
+                      message->getHeader().seq_number,
+                      SecurityQuery::ERROR_NOT_SUPPORTED, error);
+    return;
+  }
   switch (message->getHeader().query_id) {
     case SecurityQuery::PROTECT_SERVICE_REQUEST:
       if(!ParseProtectServiceRequest(message)) {

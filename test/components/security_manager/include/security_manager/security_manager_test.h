@@ -58,6 +58,10 @@ namespace security_manager_test {
       security_manager_->set_session_observer(&mock_session_observer);
       security_manager_->set_protocol_handler(&mock_protocol_observer);
     }
+
+    void SetMockCryptoManger() {
+      security_manager_->set_crypto_manager(&mock_crypto_manager);
+    }
     /*
     * Wrapper for fast send SecurityManager::OnMessageReceived
     */
@@ -90,7 +94,9 @@ namespace security_manager_test {
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<SessionObserverMock>   mock_session_observer;
     testing::StrictMock<ProtocoloObserverMock> mock_protocol_observer;
-    testing::StrictMock<SSLContextMock>        mock_ssl_context;
+    testing::StrictMock<CryptoManagerMock>     mock_crypto_manager;
+    testing::StrictMock<SSLContextMock>        mock_ssl_context_new;
+    testing::StrictMock<SSLContextMock>        mock_ssl_context_exists;
     // constants
     const int32_t key = 0;
     const protocol_handler::ServiceType secureServiceType = protocol_handler::kSecure;
@@ -106,6 +112,23 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, SecurityHeader_eq_RPCHeader) {
     ASSERT_EQ(sizeof(SecurityQuery::QueryHeader)*8,
               protocol_handler::ProtocolPayloadV2SizeBits());
+  }
+  /*
+   * Security QueryHeader with NULL CryptoManager shall send
+   * InternallError (ERROR_NOT_SUPPORTED) on any Query
+   */
+  TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
+    // Expect InternalError with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecurityQuery::ERROR_NOT_SUPPORTED),is_final)).Times(1);
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          //It could be any query id
+          SecurityQuery::INVALID_QUERY_ID, seq_number);
+    EmulateMobileMessage(header, NULL, 0);
+    sleep(1);
   }
 
   /*
@@ -142,6 +165,7 @@ namespace security_manager_test {
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
    */
   TEST_F(SecurityManagerTest, GetInvalidQueryId) {
+    SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
@@ -160,12 +184,14 @@ namespace security_manager_test {
    * getting PROTECT_SERVICE_RESPONSE from mobile side
    */
   TEST_F(SecurityManagerTest, GetProtectServiceResponse) {
+    SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityQuery::ERROR_OTHER_INTERNAL_ERROR), is_final)).
         Times(1);
+    security_manager_->set_crypto_manager(&mock_crypto_manager);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_RESPONSE, seq_number);
@@ -179,6 +205,7 @@ namespace security_manager_test {
    * on getting PROTECT_SERVICE_RESPONSE with wrong data size
    */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_WrongDataSize) {
+    SetMockCryptoManger();
     // Expect ProtectServiceResponse with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
@@ -198,6 +225,7 @@ namespace security_manager_test {
    * Check few service types: kInvalidServiceType, ... , kInvalidServiceType+N
    */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_InvalidServiceType) {
+    SetMockCryptoManger();
     const int invalid_requests = 10;
     DCHECK(protocol_handler::kInvalidServiceType + invalid_requests <= UCHAR_MAX);
 
@@ -227,7 +255,24 @@ namespace security_manager_test {
    * on error create SSLContext
    */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_ErrorCreateSSLContext) {
-    //FIXME(EZ): "move CryptoManager as extended ot remove test")
+    SetMockCryptoManger();
+    // Expect ProtectServiceResponse with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  ProtectServiceResponseWithId(
+                    SecurityQuery::INTERNAL_ERROR),is_final)).Times(1);
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).
+        WillOnce(Return((security_manager::SSLContext*)NULL));
+
+    const SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
+    const uint8_t service_type_uint8 = ::protocol_handler::kMobileNav;
+    EmulateMobileMessage(header, &service_type_uint8, 1);
+    // Wait call methods in thread
+    sleep(1);
   }
 
   /*
@@ -235,17 +280,28 @@ namespace security_manager_test {
    * on getting PROTECT_SERVICE_RESPONSE for not start service
    */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_ServiceNotFound) {
+    SetMockCryptoManger();
+    //Try to protecte kMobileNav service
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+
     // Expect ProtectServiceResponse with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   ProtectServiceResponseWithId(
                     SecurityQuery::SERVICE_NOT_FOUND),is_final)).Times(1);
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).Times(1).
+        WillOnce(Return(&mock_ssl_context_new));
     // Expect SessionObserver::SetSSLContext
     EXPECT_CALL(mock_session_observer,
-                SetSSLContext( key, encryption_service_type,_)).
+                SetSSLContext( key, encryption_service_type, &mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::SERVICE_NOT_FOUND));
+    // Expect CryptoManager::ReleaseSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                ReleaseSSLContext(&mock_ssl_context_new)).Times(1);
+
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::PROTECT_SERVICE_REQUEST, seq_number);
@@ -261,21 +317,34 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest,
          GetProtectServiceRequest_ServiceAlreadyProtected) {
+    SetMockCryptoManger();
+    //Try to protecte kMobileNav service
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   ProtectServiceResponseWithId(
                     SecurityQuery::SERVICE_ALREADY_PROTECTED),is_final)).Times(1);
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).Times(1).
+        WillOnce(Return(&mock_ssl_context_new));
+    // Expect SessionObserver::SetSSLContext
     EXPECT_CALL(mock_session_observer,
-                SetSSLContext(key, encryption_service_type,_)).
+                SetSSLContext(key, encryption_service_type, &mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::SERVICE_ALREADY_PROTECTED));
+    // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return(&mock_ssl_context));
-    EXPECT_CALL(mock_ssl_context,
+        WillOnce(Return(&mock_ssl_context_exists));
+    // Expect SSLContext::IsInitCompleted
+    EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
         WillOnce(Return(true));
+    // Expect CryptoManager::ReleaseSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                ReleaseSSLContext(&mock_ssl_context_new)).Times(1);
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -292,21 +361,34 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest,
          GetProtectServiceRequest_ServiceProtectionPending) {
+    SetMockCryptoManger();
+    //Try to protecte kMobileNav service
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   ProtectServiceResponseWithId(
                     SecurityQuery::PENDING),is_final)).Times(1);
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).Times(1).
+        WillOnce(Return(&mock_ssl_context_new));
+    // Expect SessionObserver::SetSSLContext
     EXPECT_CALL(mock_session_observer,
-                SetSSLContext(key, encryption_service_type,_)).
+                SetSSLContext(key, encryption_service_type,&mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::SERVICE_ALREADY_PROTECTED));
+    // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return(&mock_ssl_context));
-    EXPECT_CALL(mock_ssl_context,
+        WillOnce(Return(&mock_ssl_context_exists));
+    // Expect SSLContext::IsInitCompleted
+    EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
         WillOnce(Return(false));
+    // Expect CryptoManager::ReleaseSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                ReleaseSSLContext(&mock_ssl_context_new)).Times(1);
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -322,14 +404,22 @@ namespace security_manager_test {
    * on getting correct PROTECT_SERVICE_RESPONSE
    */
   TEST_F(SecurityManagerTest, GetProtectServiceRequest_Success) {
+    SetMockCryptoManger();
+    //Try to protecte kMobileNav service
+    const ::protocol_handler::ServiceType encryption_service_type =
+        ::protocol_handler::kMobileNav;
+
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   ProtectServiceResponseWithId(
                     SecurityQuery::SUCCESS),is_final)).Times(1);
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
+    // Expect CryptoManager::CreateSSLContext
+    EXPECT_CALL(mock_crypto_manager,
+                CreateSSLContext()).Times(1).
+        WillOnce(Return(&mock_ssl_context_new));
+    // Expect SessionObserver::SetSSLContext
     EXPECT_CALL(mock_session_observer,
-                SetSSLContext(key, encryption_service_type,_)).
+                SetSSLContext(key, encryption_service_type,&mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::SUCCESS));
 
     const SecurityQuery::QueryHeader header(
@@ -347,6 +437,7 @@ namespace security_manager_test {
    * PROTECT_SERVICE_RESPONSE
    */
   TEST_F(SecurityManagerTest, SendHandshakeData_WrongDataSize) {
+    SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(

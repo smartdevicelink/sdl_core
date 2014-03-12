@@ -102,6 +102,20 @@ namespace security_manager_test {
   /*
    * MOCK implementation of security_manager::SSLContext interface
    */
+  class CryptoManagerMock: public security_manager::CryptoManager {
+  public:
+    MOCK_METHOD0(Init,
+                 bool ());
+    MOCK_METHOD0(Finish,
+                 void ());
+    MOCK_METHOD0(CreateSSLContext,
+                 security_manager::SSLContext* ());
+    MOCK_METHOD1(ReleaseSSLContext,
+                 void(security_manager::SSLContext*));
+  };
+  /*
+   * MOCK implementation of security_manager::SSLContext interface
+   */
   class SSLContextMock: public security_manager::SSLContext {
   public:
     MOCK_METHOD3(DoHandshakeStep,

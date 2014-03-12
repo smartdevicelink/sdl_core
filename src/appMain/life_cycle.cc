@@ -35,7 +35,7 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
-#include "security_manager/security_manager.h"
+#include "security_manager/crypto_manager_impl.h"
 
 using threads::Thread;
 
@@ -57,6 +57,8 @@ LifeCycle::LifeCycle()
   , protocol_handler_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
+  , crypto_manager_(NULL)
+  , security_manager_(NULL)
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
@@ -98,9 +100,12 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
 
-  //TODO: add delete
-  security_manager::SecurityManager*security_manager =
-      new security_manager::SecurityManager();
+  security_manager_ = new security_manager::SecurityManager();
+
+  crypto_manager_ = new security_manager::CryptoManagerImpl();
+  if(!crypto_manager_->Init()) {
+    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+  }
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -112,14 +117,15 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-  protocol_handler_->AddProtocolObserver(security_manager);
+  protocol_handler_->AddProtocolObserver(security_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-  security_manager->set_session_observer(connection_handler_);
-  security_manager->set_protocol_handler(protocol_handler_);
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
 
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
@@ -293,6 +299,15 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  delete crypto_manager_;
+
+  LOG4CXX_INFO(logger_, "Destroying Security Manager");
+  delete security_manager_;
+
+  crypto_manager_->Finish();
+  delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER

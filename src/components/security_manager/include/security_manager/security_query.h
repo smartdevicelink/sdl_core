@@ -71,6 +71,7 @@ public:
     ERROR_NULL_DATA = 0x3,          //Received query with null data
     ERROR_INVALID_SERVICE_TYPE = 0x4,//For unknown or forbidden for encryption service
     ERROR_PROTECTION_NOT_REQUESTED = 0x5, //Got handshake without ProtectServiceRequest
+    ERROR_NOT_SUPPORTED = 0x6,
     ERROR_SSL_INVALID_DATA = 0xF0,
     ERROR_OTHER_INTERNAL_ERROR = 0xFF
     };

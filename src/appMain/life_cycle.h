@@ -52,6 +52,8 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "policies/policy_manager_impl.h"
+#include "security_manager/security_manager.h"
+#include "security_manager/crypto_manager.h"
 #include "utils/singleton.h"
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -80,6 +82,8 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    security_manager::CryptoManager* crypto_manager_;
+    security_manager::SecurityManager* security_manager_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
