@@ -31,49 +31,25 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/diagnostic_message_request.h"
+#include "application_manager/commands/mobile/alert_maneuver_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+AlertManeuverResponse::AlertManeuverResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
 }
 
-DiagnosticMessageRequest::~DiagnosticMessageRequest() {
+AlertManeuverResponse::~AlertManeuverResponse() {
 }
 
-void DiagnosticMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
+void AlertManeuverResponse::Run() {
+  LOG4CXX_INFO(logger_, "AlertManeuverResponse::Run");
 
-  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_), true);
-}
-
-void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::on_event");
-  const smart_objects::SmartObject& message = event.smart_object();
-
-  switch (event.id()) {
-    case hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
-      return;
-    }
-  }
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands

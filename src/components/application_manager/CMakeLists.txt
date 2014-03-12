@@ -53,6 +53,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/add_sub_menu_response.cc
 ./src/commands/mobile/alert_request.cc
 ./src/commands/mobile/alert_response.cc
+./src/commands/mobile/alert_maneuver_request.cc
+./src/commands/mobile/alert_maneuver_response.cc
 ./src/commands/mobile/change_registration_request.cc
 ./src/commands/mobile/change_registration_response.cc
 ./src/commands/mobile/create_interaction_choice_set_request.cc
@@ -254,6 +256,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
+./src/commands/hmi/navi_alert_maneuver_request.cc
+./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_update_turn_list_request.cc
 ./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/navi_show_constant_tbt_request.cc

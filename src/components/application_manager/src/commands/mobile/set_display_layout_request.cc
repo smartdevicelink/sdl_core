@@ -60,6 +60,8 @@ void SetDisplayLayoutRequest::Run() {
     return;
   }
 
+  (*message_)[strings::msg_params][strings::app_id] = app->app_id();
+
   SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
                  &((*message_)[strings::msg_params]), true);
 
