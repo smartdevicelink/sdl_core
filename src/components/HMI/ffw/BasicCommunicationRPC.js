@@ -217,7 +217,12 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.method);
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
-                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL();
+
+                    if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
+                        SDL.States.goToStates('info.apps');
+                    }
+
+                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
             }

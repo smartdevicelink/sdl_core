@@ -60,15 +60,16 @@ namespace transport_manager {
 namespace transport_adapter {
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
-                                     const uint16_t port)
+                                     const uint16_t port,
+                                     const bool enable_keepalive)
     : port_(port),
+      enable_keepalive_(enable_keepalive),
       controller_(controller),
       thread_(),
       socket_(-1),
       thread_started_(false),
       shutdown_requested_(false),
-      thread_stop_requested_(false) {
-}
+      thread_stop_requested_(false) {}
 
 void* tcpClientListenerThread(void* data) {
   TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
@@ -96,14 +97,57 @@ TcpClientListener::~TcpClientListener() {
   LOG4CXX_INFO(logger_, "destructor");
 }
 
+void SetKeepaliveOptions(const int fd) {
+  int yes = 1;
+  int keepidle = 3;  // 3 seconds to disconnection detecting
+  int keepcnt = 5;
+  int keepintvl = 1;
+  int user_timeout = 7000;  // milliseconds
+#ifdef __linux__
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
+  setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
+  setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
+  setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+  setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
+             sizeof(user_timeout));
+#elif __QNX__  // __linux__
+  // TODO (KKolodiy): Out of order!
+  const int kMidLength = 4;
+  int mib[kMidLength];
+  timeval tval;
+
+  mib[0] = CTL_NET;
+  mib[1] = AF_INET;
+  mib[2] = IPPROTO_TCP;
+  mib[3] = TCPCTL_KEEPIDLE;
+  sysctl(mib, kMidLength, NULL, NULL, &keepidle, sizeof(keepidle));
+
+  mib[0] = CTL_NET;
+  mib[1] = AF_INET;
+  mib[2] = IPPROTO_TCP;
+  mib[3] = TCPCTL_KEEPCNT;
+  sysctl(mib, kMidLength, NULL, NULL, &keepcnt, sizeof(keepcnt));
+
+  mib[0] = CTL_NET;
+  mib[1] = AF_INET;
+  mib[2] = IPPROTO_TCP;
+  mib[3] = TCPCTL_KEEPINTVL;
+  sysctl(mib, kMidLength, NULL, NULL, &keepintvl, sizeof(keepintvl));
+
+  memset(&tval, sizeof(tval), 0);
+  tval.tv_sec = keepidle;
+  setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
+  setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
+#endif  // __QNX__
+}
+
 void TcpClientListener::Thread() {
   LOG4CXX_INFO(logger_, "Tcp client listener thread started");
 
   while (false == thread_stop_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
-    const int connection_fd = accept(socket_,
-                                     (struct sockaddr*) &client_address,
+    const int connection_fd = accept(socket_, (struct sockaddr*)&client_address,
                                      &client_address_size);
     if (thread_stop_requested_) break;
 
@@ -122,46 +166,7 @@ void TcpClientListener::Thread() {
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
-    int yes = 1;
-    int keepidle = 3;  // 3 seconds to disconnection detecting
-    int keepcnt = 5;
-    int keepintvl = 1;
-    int user_timeout = 7000;  // milliseconds
-#ifdef __linux__
-    setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
-    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
-    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
-    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
-    setsockopt(connection_fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout, sizeof(user_timeout));
-#elif __QNX__  // __linux__
-    // TODO (KKolodiy): Out of order!
-    const int kMidLength = 4;
-    int mib[kMidLength];
-    timeval tval;
-
-    mib[0] = CTL_NET;
-    mib[1] = AF_INET;
-    mib[2] = IPPROTO_TCP;
-    mib[3] = TCPCTL_KEEPIDLE;
-    sysctl(mib, kMidLength, NULL, NULL, &keepidle, sizeof(keepidle));
-
-    mib[0] = CTL_NET;
-    mib[1] = AF_INET;
-    mib[2] = IPPROTO_TCP;
-    mib[3] = TCPCTL_KEEPCNT;
-    sysctl(mib, kMidLength, NULL, NULL, &keepcnt, sizeof(keepcnt));
-
-    mib[0] = CTL_NET;
-    mib[1] = AF_INET;
-    mib[2] = IPPROTO_TCP;
-    mib[3] = TCPCTL_KEEPINTVL;
-    sysctl(mib, kMidLength, NULL, NULL, &keepintvl, sizeof(keepintvl));
-
-    memset(&tval, sizeof(tval), 0);
-    tval.tv_sec = keepidle;
-    setsockopt(connection_fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
-    setsockopt(connection_fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
-#endif  // __QNX__
+    if (enable_keepalive_) SetKeepaliveOptions(connection_fd);
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);

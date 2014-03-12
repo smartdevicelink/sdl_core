@@ -62,7 +62,7 @@ public class SecureProxyManager {
     }
 
     private void startTCPConnection() throws SyncException {
-        TCPTransportConfig config = new TCPTransportConfig(8091, "172.30.222.74");
+        TCPTransportConfig config = new TCPTransportConfig(8091, "172.30.222.86");
         config.setIsNSD(false);
         config.setApplicationContext(this.context);
         transport = new TCPTransport(config, transportListener);

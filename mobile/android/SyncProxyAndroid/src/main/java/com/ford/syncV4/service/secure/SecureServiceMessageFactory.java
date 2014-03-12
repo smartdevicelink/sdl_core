@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.secure.SecureServicePayload;
 
 /**
  * Created with Android Studio.
@@ -16,8 +15,8 @@ public class SecureServiceMessageFactory {
 
     private static final String TAG = "SecureServiceMessageFactory";
 
-    private static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 1;
-    private static final int REQ_SEQ_NUMBER_FAKE = 123;
+    private static final byte PROTECT_SERVICE_REQUEST_ID = (byte) 0x01;
+    private static final int REQ_SEQ_NUMBER_FAKE = 0x00000123;
 
     /**
      * Build a {@link com.ford.syncV4.protocol.ProtocolMessage} for the start securing of the
@@ -31,24 +30,22 @@ public class SecureServiceMessageFactory {
     public static ProtocolMessage buildProtectServiceRequest(byte sessionId,
                                                              ServiceType serviceType) {
 
-        // TODO : To be implemented
-
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);
         protocolMessage.setSessionType(ServiceType.Secure_Service);
-        protocolMessage.setFunctionID(0);
-        protocolMessage.setCorrID(0);
+        protocolMessage.setFunctionID(1);
 
         byte[] payloadData = new byte[1];
         payloadData[0] = serviceType.getValue();
 
-        SecureServicePayload secureServicePayload = new SecureServicePayload(
-                PROTECT_SERVICE_REQUEST_ID, REQ_SEQ_NUMBER_FAKE, payloadData);
+        //SecureServicePayload secureServicePayload = new SecureServicePayload(
+        //        SecureServiceQueryType.QueryType.REQUEST,
+        //        PROTECT_SERVICE_REQUEST_ID, REQ_SEQ_NUMBER_FAKE, payloadData);
 
         Log.d(TAG, "BuildProtectServiceRequest, secure service payload data length:" +
-                secureServicePayload.toBytes().length);
+                payloadData.length);
 
-        protocolMessage.setData(secureServicePayload.toBytes());
+        protocolMessage.setData(payloadData);
 
         return protocolMessage;
     }

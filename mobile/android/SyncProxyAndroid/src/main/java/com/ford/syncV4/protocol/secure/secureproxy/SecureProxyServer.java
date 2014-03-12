@@ -62,13 +62,13 @@ public class SecureProxyServer {
 
         @Override
         public void run() {
-            if (!isConnected()) {
-                try {
+            try {
+                if (!isConnected()) {
                     startServer();
-                    readData();
-                } catch (IOException e) {
-                    Log.e("SecureProxyServer", "error", e);
                 }
+                readData();
+            } catch (IOException e) {
+                Log.e("SecureProxyServer", "error", e);
             }
         }
 
@@ -87,7 +87,6 @@ public class SecureProxyServer {
             } catch (IOException e) {
                 Log.e("SecureProxyServer", "error", e);
             }
-
         }
     }
 

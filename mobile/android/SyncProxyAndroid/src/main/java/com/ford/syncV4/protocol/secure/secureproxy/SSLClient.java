@@ -5,6 +5,7 @@ import android.util.Log;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -33,8 +34,33 @@ public class SSLClient {
     }
 
     private void startSocket() throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        TrustManager[] trustAllCerts = createTrustManagers();
+        SSLContext sc = SSLContext.getInstance("TLS");
+        sc.init(null, trustAllCerts, new java.security.SecureRandom());
+        SocketFactory sf = sc.getSocketFactory();
+        InetAddress addr = InetAddress.getByName("127.0.0.1");
+        socket = (SSLSocket) sf.createSocket(addr, 8090);
+        socket.getSession();
+        transportListener.onTransportConnected();
+    }
+
+    private void readData() throws IOException {
+        InputStream inputStream = socket.getInputStream();
+
+        byte[] buffer = new byte[1024];
+        try {
+            int i;
+            while ((i = inputStream.read(buffer)) != -1) {
+                transportListener.onTransportBytesReceived(buffer, i);
+            }
+        } catch (IOException e) {
+            Log.e("SSLClient", "error", e);
+        }
+    }
+
+    private TrustManager[] createTrustManagers() {
         // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+        return new TrustManager[]{new X509TrustManager() {
             @Override
             public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
             }
@@ -45,18 +71,9 @@ public class SSLClient {
 
             @Override
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return new java.security.cert.X509Certificate[] {};
+                return new java.security.cert.X509Certificate[]{};
             }
-        } };
-
-        SSLContext sc = SSLContext.getInstance("TLS");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        SocketFactory sf = sc.getSocketFactory();
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
-        socket = (SSLSocket) sf.createSocket(addr, 8090);
-        socket.getSession();
-        transportListener.onTransportConnected();
-
+        }};
     }
 
     public synchronized void writeData(byte[] data) throws IOException {
@@ -65,10 +82,15 @@ public class SSLClient {
 
     public class SSLClientReader extends Thread {
 
+        private boolean isConnected;
+
         @Override
         public void run() {
             try {
-                startSocket();
+                if (!isConnected) {
+                    startSocket();
+                }
+                readData();
 
             } catch (IOException e) {
                 Log.e("SecureProxyServer", "error", e);

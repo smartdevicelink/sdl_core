@@ -9,34 +9,48 @@ package com.ford.syncV4.protocol.secure;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.BinaryFrameHeader;
+import com.ford.syncV4.protocol.ProtocolConst;
+
 /**
- * This class build a payload byte array for the Secure Service
+ * This class helps to parse raw data of the Secure Service response
  */
 public class SecureServicePayloadParser {
 
     private static final String TAG = "SecureServicePayloadParser";
 
-    /**
-     * API function identifier
-     */
-    private byte mFunctionId;
-
-    /**
-     * Request sequential number
-     */
-    private int mReqSeqNumber;
-
-    /**
-     * Data to be sent with payload
-     */
-    private byte[] mData;
-
     public SecureServicePayloadParser() {
-
 
     }
 
-    public void parse(byte[] data) {
-        Log.d(TAG, "Parse API function Id:" + data[0]);
+    /**
+     * Parse raw data of the Secure Service response into
+     * {@link com.ford.syncV4.protocol.secure.SecureServicePayload} object
+     *
+     * @param data bytes array data
+     *
+     * @return {@link com.ford.syncV4.protocol.secure.SecureServicePayload}
+     */
+    public SecureServicePayload parse(byte[] data) {
+        SecureServicePayload secureServicePayload = new SecureServicePayload();
+
+        if (data == null) {
+            Log.w(TAG, SecureServicePayloadParser.class.getSimpleName() + " parse(), data is NULL");
+            return secureServicePayload;
+        }
+        if (data.length == 0) {
+            Log.w(TAG, SecureServicePayloadParser.class.getSimpleName() + " parse(), data is empty");
+            return secureServicePayload;
+        }
+        if (data.length < ProtocolConst.PROTOCOL_V2_HEADER_SIZE) {
+            Log.w(TAG, SecureServicePayloadParser.class.getSimpleName() + " parse(), data size " +
+                    "is wrong");
+            return secureServicePayload;
+        }
+
+        secureServicePayload.setBinaryFrameHeader(BinaryFrameHeader.parseBinaryHeader(data));
+        secureServicePayload.setData(BinaryFrameHeader.parseSecureServiceBinaryHeaderData(data));
+
+        return secureServicePayload;
     }
 }

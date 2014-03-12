@@ -291,10 +291,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testHeartbeatMonitorStoppedIfConnectionClosedWithoutKeepConnection() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.setHeartbeatMonitor(mock(IHeartbeatMonitor.class));
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor());
         connection.closeConnection((byte) 0, false, true);
-        assertNull("heartbeat monitor should be stopped and null", connection.getHeartbeatMonitor());
+        //assertNull("heartbeat monitor should be stopped and null", connection.getHeartbeatMonitor());
+        verify(heartbeatMonitor, times(1)).stop();
     }
 
     public void testHeartbeatMonitorNotStoppedIfConnectionClosedWithKeepConnection() throws Exception {

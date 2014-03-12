@@ -7,8 +7,7 @@ package com.ford.syncV4.protocol.secure;
  * Time: 1:24 PM
  */
 
-import java.io.ByteArrayOutputStream;
-import java.nio.ByteBuffer;
+import com.ford.syncV4.protocol.BinaryFrameHeader;
 
 /**
  * This class build a payload byte array for the Secure Service
@@ -16,54 +15,42 @@ import java.nio.ByteBuffer;
 public class SecureServicePayload {
 
     /**
-     * API function identifier
+     * Binary header of the Secure Service protocol
      */
-    private byte mFunctionId;
+    private BinaryFrameHeader mBinaryFrameHeader;
 
     /**
-     * Request sequential number
-     */
-    private int mReqSeqNumber;
-
-    /**
-     * Data to be sent with payload
+     * Data of the Secure Service
      */
     private byte[] mData;
 
     /**
-     * Constructor
-     *
-     * @param functionId   API function identifier
-     * @param reqSeqNumber Request sequential number
-     * @param data bytes array of the data to be sent with payload
+     * @return Binary header of the Secure Service protocol
      */
-    public SecureServicePayload(byte functionId, int reqSeqNumber, byte[] data) {
-
-        if (data == null) {
-            throw new IllegalArgumentException(SecureServicePayload.class.getSimpleName() +
-                    " data can't be null");
-        }
-
-        mFunctionId = functionId;
-        mReqSeqNumber = reqSeqNumber;
-        mData = data;
+    public BinaryFrameHeader getBinaryFrameHeader() {
+        return mBinaryFrameHeader;
     }
 
     /**
-     * Assemble payload to array of the bytes
-     *
-     * @return
+     * Set Binary header of the Secure Service protocol
+     * @param mBinaryFrameHeader {@link com.ford.syncV4.protocol.BinaryFrameHeader}
      */
-    public byte[] toBytes() {
+    public void setBinaryFrameHeader(BinaryFrameHeader mBinaryFrameHeader) {
+        this.mBinaryFrameHeader = mBinaryFrameHeader;
+    }
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(mFunctionId);
+    /**
+     * @return Data of the Secure Service
+     */
+    public byte[] getData() {
+        return mData;
+    }
 
-        byte[] reqSeqNumberBytes = ByteBuffer.allocate(4).putInt(mReqSeqNumber).array();
-        byteArrayOutputStream.write(reqSeqNumberBytes, 0, 4);
-
-        byteArrayOutputStream.write(mData, 0, mData.length);
-
-        return byteArrayOutputStream.toByteArray();
+    /**
+     * Set Data of the Secure Service
+     * @param mData array of the bytes
+     */
+    public void setData(byte[] mData) {
+        this.mData = mData;
     }
 }

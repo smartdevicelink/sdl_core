@@ -451,6 +451,7 @@ public class WiProProtocol extends AbstractProtocol {
         }
 
         private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
+            //Log.d(TAG, "SingleFrameMessageFrame:" + header.getDataSize() + ", data size:" + data.length);
             ProtocolMessage message = new ProtocolMessage();
             if (header.getServiceType() == ServiceType.RPC) {
                 message.setMessageType(MessageType.RPC);
@@ -466,10 +467,21 @@ public class WiProProtocol extends AbstractProtocol {
                 message.setRPCType(binFrameHeader.getRPCType());
                 message.setFunctionID(binFrameHeader.getFunctionID());
                 message.setCorrID(binFrameHeader.getCorrID());
-                if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
-                if (binFrameHeader.getBulkData() != null)
+                if (binFrameHeader.getJsonSize() > 0) {
+                    message.setData(binFrameHeader.getJsonData());
+                }
+                if (binFrameHeader.getBulkData() != null) {
                     message.setBulkData(binFrameHeader.getBulkData());
-            } else message.setData(data);
+                }
+
+                // Set Secure Service payload data
+                if (message.getServiceType() == ServiceType.Secure_Service) {
+                    message.setData(data);
+                }
+
+            } else {
+                message.setData(data);
+            }
 
             _assemblerForMessageID.remove(header.getMessageID());
 

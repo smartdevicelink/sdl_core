@@ -158,7 +158,6 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
             case "VehicleInfo.DiagnosticMessage": {
 
-
                 Em.Logger.log("FFW." + request.method + "Response");
 
                 // send repsonse
@@ -166,9 +165,9 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                     "jsonrpc": "2.0",
                     "id": request.id,
                     "result": {
-                        "messageDataResult": 200,
+                        "messageDataResult": [200],
                         "code": SDL.SDLModel.resultCode["SUCCESS"],
-                        "method": "VehicleInfo.IsReady"
+                        "method": "VehicleInfo.DiagnosticMessage"
                     }
                 };
 
