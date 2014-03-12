@@ -11,6 +11,7 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.SecureServicePayload;
 import com.ford.syncV4.protocol.secure.SecureServicePayloadParser;
 
 /**
@@ -47,10 +48,11 @@ public class SecureServiceMessageManager {
                     " message");
         }
 
-        Log.d(TAG, "Process Secure msg:" + protocolMessage.getFunctionID());
+        Log.d(TAG, "Process Secure msg");
 
         SecureServicePayloadParser secureServicePayloadParser = new SecureServicePayloadParser();
-        secureServicePayloadParser.parse(protocolMessage.getBulkData());
+        SecureServicePayload secureServicePayload =
+                secureServicePayloadParser.parse(protocolMessage.getData());
 
         // ServiceType could be obtained from ProtocolMessage
         ServiceType serviceType = protocolMessage.getServiceType();

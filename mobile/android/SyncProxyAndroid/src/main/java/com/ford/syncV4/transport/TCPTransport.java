@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.util.BitConverter;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -118,7 +119,7 @@ public class TCPTransport extends SyncTransport {
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        logInfo("TCPTransport.sendBytesOverTransport: successfully send data");
+                        logInfo("TCPTransport.sendBytesOverTransport: successfully send data:" + BitConverter.bytesToHex(msgBytes));
                     } catch (IOException e) {
                         logWarning("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;
