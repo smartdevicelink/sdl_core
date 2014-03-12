@@ -193,6 +193,7 @@
     <element name="OnAppInterfaceUnregisteredID" value="32769" hexvalue="8001" />
     <element name="OnTBTClientStateID" value="32774" hexvalue="8006" />
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
+    <element name="DummyNotificationID" value="42" />
   </enum>
 
   <enum name="messageType">
@@ -350,5 +351,9 @@
       Test typedef over struct
     </description>
   </typedef>
+
+  <function name="DummyNotification" functionID="DummyNotificationID" messagetype="notification">
+    <param name="tds" type="TdStructBasedTdef" />
+  </function>
 
   </interface>

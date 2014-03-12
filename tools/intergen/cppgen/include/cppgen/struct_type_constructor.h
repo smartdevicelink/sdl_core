@@ -37,6 +37,7 @@
 
 namespace codegen {
 class Struct;
+class TypePreferences;
 
 /*
  * Generates code of struct default constructor without parameters
@@ -55,7 +56,8 @@ class StructTypeDefaultConstructor : public CppStructConstructor {
  */
 class StructTypeMandatoryConstructor : public CppStructConstructor {
  public:
-  StructTypeMandatoryConstructor(const Struct* strct);
+  StructTypeMandatoryConstructor(const TypePreferences* preferences,
+                                 const Struct* strct);
   ~StructTypeMandatoryConstructor();
  private:
   // CppFunction pure virtual methods implementation
