@@ -43,13 +43,15 @@ SecurityQuery::QueryHeader::QueryHeader(
 }
 
 SecurityQuery::SecurityQuery() :
-  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0), data_(NULL) {
+  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0),
+  connection_key_(0), data_(NULL), data_size_(0) {
   }
 
 SecurityQuery::SecurityQuery(
     const SecurityQuery::QueryHeader &header,
     const uint32_t connection_key) :
-  header_(header), connection_key_(connection_key), data_(NULL) {
+  header_(header), connection_key_(connection_key),
+  data_(NULL), data_size_(0) {
   }
 
 SecurityQuery::~SecurityQuery() {

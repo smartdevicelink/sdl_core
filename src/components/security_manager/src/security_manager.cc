@@ -243,7 +243,7 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
   const uint32_t seqNumber = inMessage->getHeader().seq_number;
   const uint32_t connectionKey = inMessage->getConnectionKey();
 
-  if(inMessage->getDataSize() > 0) {
+  if(!inMessage->getDataSize()) {
     const std::string error("SendHandshakeData: null arguments size.");
     LOG4CXX_ERROR(logger_, error);
     SendInternalError(connectionKey, seqNumber,
