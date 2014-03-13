@@ -1,4 +1,4 @@
-find_package(DBus)
+# find_package(DBus)
 
 include_directories(
   include
@@ -7,9 +7,7 @@ include_directories(
 )
 
 set (SOURCES
- src/rpc_base/dbus_message.cc
- src/rpc_base/rpc_base.cc
- src/rpc_base/rpc_message.cc
+ #src/rpc_base/dbus_message.cc
 )
 
 set (HEADERS
@@ -23,4 +21,4 @@ set (HEADERS
 )
 
 add_library(rpc_base ${HEADERS} ${SOURCES})
-target_link_libraries(rpc_base jsoncpp dbus-1)
+target_link_libraries(rpc_base jsoncpp) # dbus-1)
