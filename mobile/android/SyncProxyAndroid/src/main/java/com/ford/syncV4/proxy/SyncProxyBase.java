@@ -1891,7 +1891,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             ProtocolMessage protocolMessage =
                     SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
-
             dispatchOutgoingMessage(protocolMessage);
 
         }

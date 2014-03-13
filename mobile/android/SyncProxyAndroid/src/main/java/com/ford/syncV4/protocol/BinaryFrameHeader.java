@@ -143,4 +143,16 @@ public class BinaryFrameHeader {
     public void setBulkData(byte[] bulkData) {
         this.mBulkData = bulkData;
     }
+
+    @Override
+    public String toString() {
+        return "BinaryFrameHeader{" +
+                "mRpcType=" + mRpcType +
+                ", mFunctionID=" + mFunctionID +
+                ", mCorrelationID=" + mCorrelationID +
+                ", mJsonSize=" + mJsonSize +
+                ", mJsonData=" + BitConverter.bytesToHex(mJsonData) +
+                ", mBulkData=" + BitConverter.bytesToHex(mBulkData) +
+                '}';
+    }
 }

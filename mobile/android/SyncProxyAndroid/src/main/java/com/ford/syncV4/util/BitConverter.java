@@ -2,6 +2,9 @@ package com.ford.syncV4.util;
 
 public class BitConverter {
 	public static String bytesToHex(byte [] bytes) {
+        if (bytes == null){
+            return "null";
+        }
 		return bytesToHex(bytes, 0, bytes.length);
 	} // end-method
 
