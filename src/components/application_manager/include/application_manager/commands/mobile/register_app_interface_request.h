@@ -88,22 +88,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
 
  private:
   /*
-   * @brief Send addVRcommand request to HMI
-   *
-   * @param application_impl application
-   */
-  void SendVrCommandsOnRegisterAppToHMI(
-      const application_manager::Application& application_impl);
-
-  /*
-   * @brief Send ttsSpeak request to HMI
-   *
-   * @param application_impl application
-   */
-  void SendTTSChunksToHMI(
-      const application_manager::Application& application_impl);
-
-  /*
    * @brief Check new ID along with known mobile application ID
    *
    * return TRUE if ID is known already, otherwise - FALSE

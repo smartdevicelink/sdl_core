@@ -66,10 +66,6 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
-  // delete sub menu items from SDL and HMI
-  DeleteSubMenuVRCommands(app);
-  DeleteSubMenuUICommands(app);
-
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
@@ -158,6 +154,9 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
       }
 
       if (result) {
+        // delete sub menu items from SDL and HMI
+        DeleteSubMenuVRCommands(application);
+        DeleteSubMenuUICommands(application);
         application->RemoveSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt());
        }
