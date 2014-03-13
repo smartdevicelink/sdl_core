@@ -469,7 +469,6 @@ int ConnectionHandlerImpl::SetSSLContext(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
       LOG4CXX_ERROR(logger_, "Unknown connection!");
-      //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
       return security_manager::SecurityQuery::INTERNAL_ERROR;
     }
   Connection& connection = *it->second;

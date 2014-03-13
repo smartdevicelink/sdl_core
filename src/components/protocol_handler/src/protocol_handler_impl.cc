@@ -395,8 +395,6 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
         connection_key, ServiceTypeFromByte(service_type));
   if(context) {
     size_t new_data_size;
-    //FIXME: EZamakhov
-    assert(!"Not implemented Encrypt logics");
     const uint8_t * new_data = static_cast<uint8_t*>
         (context->Decrypt(data, data_size, &new_data_size));
     if(!new_data) {

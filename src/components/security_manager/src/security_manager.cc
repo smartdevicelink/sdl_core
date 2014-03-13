@@ -275,12 +275,13 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
   size_t out_data_size;
   const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
-  if(!out_data || out_data_size){
-    const std::string error("SendHandshakeData: Handshake failed.");
-    LOG4CXX_WARN(logger_, error + LastError());
+  if(!out_data || !out_data_size){
+    std::string error("SendHandshakeData: Handshake failed.");
+    error += LastError();
+    LOG4CXX_WARN(logger_, error);
     SendInternalError(connectionKey, seqNumber,
                       SecurityQuery::ERROR_SSL_INVALID_DATA,
-                      error + LastError());
+                      error);
     return false;
   }
   //answer with the same header as income message

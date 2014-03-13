@@ -158,7 +158,6 @@ int Connection::SetSSLContext( uint8_t session,
   SessionMap::iterator sit = session_map_.find(session);
   if (sit == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    //WARNING(EZ): return INTERNAL_ERROR or SERVICE_NOT_FOUND ?
     return security_manager::SecurityQuery::INTERNAL_ERROR;
   }
   ServiceList& list = sit->second;

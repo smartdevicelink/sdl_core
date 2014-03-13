@@ -50,6 +50,7 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn)
 }
 
 std::string LastError() {
+  // TODO (DChmerev): add error on no key files
   long error = ERR_get_error();
   const char * reason = ERR_reason_error_string(error);
   if (reason) {

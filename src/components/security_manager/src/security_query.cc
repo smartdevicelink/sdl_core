@@ -71,7 +71,6 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       break;
     default:
       header_.query_type = INVALID_QUERY_TYPE;
-      //TODO(EZ): check?
       break;
   }
   //Conver to Little-Endian and clean high byte
@@ -92,7 +91,6 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       break;
     default: // On wrong query id
       header_.query_id = INVALID_QUERY_ID;
-      //TODO(EZ): check?
       break;
   }
   header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
