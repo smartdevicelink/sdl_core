@@ -11,6 +11,9 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
+
 /**
  * Created by Andrew Batutin on 3/11/14.
  */
@@ -137,6 +140,11 @@ public class SecureProxyManager {
 
             @Override
             public void onServerSocketInit(int serverSocketPort) {
+
+            }
+        }, new HandshakeCompletedListener() {
+            @Override
+            public void handshakeCompleted(HandshakeCompletedEvent event) {
 
             }
         });

@@ -1888,10 +1888,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     ISecureProxyServer secureProxyServerListener = new ISecureProxyServer() {
         @Override
         public void onDataReceived(byte[] data) {
-
-            ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
-            dispatchOutgoingMessage(protocolMessage);
+            if (protocolSecureManager.isHandshakeFinished()) {
+                ProtocolMessage pm = new ProtocolMessage();
+                pm.setSessionID(currentSession.getSessionId());
+                pm.setSessionType(ServiceType.Audio_Service);
+                pm.setFunctionID(0);
+                pm.setCorrID(0);
+                pm.setData(data, data.length);
+                getSyncConnection().sendMessage(pm);
+                Log.i(TAG,"Coded data " + pm);
+            } else {
+                ProtocolMessage protocolMessage =
+                        SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
+                dispatchOutgoingMessage(protocolMessage);
+            }
 
         }
     };
@@ -3179,6 +3189,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onStartServiceNackReceived(ServiceType serviceType) {
             handleStartServiceNack(serviceType);
+        }
+
+        @Override
+        public void onPacketCreated(ProtocolMessage message) {
+            try {
+                protocolSecureManager.writeDataToSSLSocket(message.getData());
+            } catch (IOException e) {
+                Log.e(TAG, "onPacketCreated", e);
+            }
         }
 
         @Override

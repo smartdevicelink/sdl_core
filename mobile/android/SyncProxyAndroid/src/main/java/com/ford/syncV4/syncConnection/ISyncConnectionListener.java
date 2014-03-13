@@ -33,4 +33,6 @@ public interface ISyncConnectionListener {
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
 
     public void onStartServiceNackReceived(ServiceType serviceType);
+
+    public void onPacketCreated(ProtocolMessage message);
 }

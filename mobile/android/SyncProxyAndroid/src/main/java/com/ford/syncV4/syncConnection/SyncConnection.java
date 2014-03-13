@@ -575,7 +575,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void sendH264(ProtocolMessage pm) {
         if (pm != null) {
-            sendMessage(pm);
+            _connectionListener.onPacketCreated(pm);
+            //sendMessage(pm);
         }
     }
 
