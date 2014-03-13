@@ -1,4 +1,5 @@
 [CW11]
++ SyncProxyAndroid SDK: added secure audio encryption service
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
 
 [CW10]
