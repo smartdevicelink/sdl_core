@@ -15,6 +15,8 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.SecureServicePayload;
 import com.ford.syncV4.protocol.secure.SecureServicePayloadParser;
 
+import java.util.Arrays;
+
 /**
  * This class provides main functionality to manage (process, etc ...) SecureService messages
  */
@@ -78,7 +80,10 @@ public class SecureServiceMessageManager {
             }
         }
         else{
-            mMessageCallback.onHandshakeResponse(protocolMessage.getData());
+            if (protocolMessage.getFunctionID() == 3){
+                byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
+                mMessageCallback.onHandshakeResponse(data);
+            }
         }
         //mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }

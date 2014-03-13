@@ -11,6 +11,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.HandshakeCompletedEvent;
+import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
@@ -45,6 +47,12 @@ public class SSLClient {
         SocketFactory sf = sc.getSocketFactory();
         InetAddress addr = InetAddress.getByName("127.0.0.1");
         socket = (SSLSocket) sf.createSocket(addr, 8090);
+        socket.addHandshakeCompletedListener(new HandshakeCompletedListener() {
+            @Override
+            public void handshakeCompleted(HandshakeCompletedEvent event) {
+                Log.i("SSLClient", "GREAT SUCCESS" + event.toString());
+            }
+        });
         socket.getSession();
         transportListener.onTransportConnected();
     }
