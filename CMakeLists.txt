@@ -107,9 +107,6 @@ project (${PROJECT})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# --- Check libavahi-common, libavahi-client availability
-find_package(Libavahi)
-
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
@@ -137,6 +134,8 @@ endif()
 
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
+# --- Check libavahi-common, libavahi-client availability
+  find_package(Libavahi)
 endif()
 
 if (BUILD_RWLOCK_SUPPORT)
