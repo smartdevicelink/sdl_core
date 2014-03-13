@@ -662,24 +662,39 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
-                    if (outputStream != null) {
-                        AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
-                                getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                        fragment.setAudioServiceStateOn(outputStream);
-                    }
+                    Handler myHandler = new Handler();
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
+                            if (outputStream != null) {
+                                AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
+                                        getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+                                fragment.setAudioServiceStateOn(outputStream);
+                            }
+                        }
+                    }, 3000);
                 }
             });
         } else if (serviceType == ServiceType.Mobile_Nav) {
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
-                    if (outputStream != null) {
-                        MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
-                                getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                        fragment.setMobileNaviStateOn(outputStream);
-                    }
+
+                    Handler myHandler = new Handler();
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
+                            if (outputStream != null) {
+                                MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
+                                        getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+                                fragment.setMobileNaviStateOn(outputStream);
+                            }
+                        }
+                    }, 3000);
+
+
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
@@ -1715,7 +1730,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     if (_latestDeleteCommandCmdID != null) {
                                         Log.w(LOG_TAG,
                                                 "Latest deleteCommand should be null, but it is " +
-                                                        _latestDeleteCommandCmdID);
+                                                        _latestDeleteCommandCmdID
+                                        );
                                     }
                                     _latestDeleteCommandCmdID = cmdID;
                                 }
@@ -1854,11 +1870,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             if (_latestDeleteSubmenu != null) {
                                                 Log.w(LOG_TAG,
                                                         "Latest deleteSubmenu should be null, but equals to " +
-                                                                _latestDeleteSubmenu);
+                                                                _latestDeleteSubmenu
+                                                );
                                             }
                                             _latestDeleteSubmenu = menu;
                                         }
-                                    });
+                                    }
+                            );
                             builder.show();
                         }
 
@@ -2034,7 +2052,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             addSubMenuDialogFragment.show(getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
                         }
 
-                        private void sendSystemRequest(){
+                        private void sendSystemRequest() {
                             DialogFragment fragment = SystemRequestDialog.newInstance();
                             fragment.show(getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
                         }
@@ -2561,7 +2579,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setInteractionMode(
                                             interactionModeAdapter.getItem(
                                                     interactionModeSpinner
-                                                            .getSelectedItemPosition()));
+                                                            .getSelectedItemPosition()
+                                            )
+                                    );
                                     msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                     if (helpPromptCheck.isChecked()) {
@@ -3059,7 +3079,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -3132,7 +3153,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -3277,7 +3299,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         if (mLatestAddCommand != null) {
             Log.w(LOG_TAG,
                     "Latest addCommand should be null, but it is " + mLatestAddCommand.first +
-                            " / " + mLatestAddCommand.second);
+                            " / " + mLatestAddCommand.second
+            );
         }
         Integer parentID = null;
         if (addCommand.getMenuParams() != null) {
@@ -3517,7 +3540,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     "Output file "
                             + (outFile != null ? outFile.toString()
                             : "'unknown'")
-                            + " can't be opened for writing", e);
+                            + " can't be opened for writing", e
+            );
         } catch (IOException e) {
             logToConsoleAndUI("Can't write to output file", e);
         }
