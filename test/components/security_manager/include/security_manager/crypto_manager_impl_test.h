@@ -110,10 +110,16 @@ class SSLTest : public testing::Test {
 SSL_CTX *SSLTest::ctx;
 security_manager::CryptoManager* SSLTest::crypto_manager;
 
-TEST_F(SSLTest, BrokenHandshake) {
+TEST(CryptoManagerTest, ReleaseNull) {
   using security_manager::CryptoManager;
   using security_manager::CryptoManagerImpl;
-  using security_manager::SSLContext;
+
+  CryptoManager *cm = new CryptoManagerImpl();
+  EXPECT_NO_THROW(cm->ReleaseSSLContext(NULL));
+}
+
+TEST_F(SSLTest, BrokenHandshake) {
+  using security_manager::LastError;
 
   int res = 0;
 
@@ -146,10 +152,12 @@ TEST_F(SSLTest, BrokenHandshake) {
     }
   }
 
+  EXPECT_GT(LastError().length(), 0);
   EXPECT_EQ(res, 0);
 }
 
 TEST_F(SSLTest, BadData) {
+  using security_manager::LastError;
   int res = 0;
 
   char *outBuf = new char[1024 * 1024];
@@ -202,9 +210,11 @@ TEST_F(SSLTest, BadData) {
   delete[] encryptedText;
 
   EXPECT_TRUE(decryptedText == NULL);
+  EXPECT_GT(LastError().length(), 0);
 }
 
 TEST_F(SSLTest, Positive) {
+  using security_manager::LastError;
   int res = 0;
 
   char *outBuf = new char[1024 * 1024];
@@ -263,6 +273,7 @@ TEST_F(SSLTest, Positive) {
   BIO_write(bioIn, encryptedText, text_len);
   text_len = BIO_read(bioF, decryptedText, 1024);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
+  EXPECT_EQ(LastError().length(), 0);
 }
 
 }  // namespace crypto_manager_test
