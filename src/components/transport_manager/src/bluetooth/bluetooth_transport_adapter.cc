@@ -66,7 +66,8 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 
 void BluetoothTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
-  resumption::LastState::Dictionary bluetooth_adapter_dictionary;
+  Json::Value bluetooth_adapter_dictionary;
+  Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
     DeviceUID device_id = *i;
@@ -76,49 +77,52 @@ void BluetoothTransportAdapter::Store() const {
     }
     utils::SharedPtr<BluetoothDevice> bluetooth_device =
       DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
-    resumption::LastState::Dictionary device_dictionary;
+    Json::Value device_dictionary;
+    device_dictionary["name"] = bluetooth_device->name();
     char address[18];
     ba2str(&bluetooth_device->address(), address);
-    device_dictionary.AddItem("address", std::string(address));
-    resumption::LastState::Dictionary applications_dictionary;
+    device_dictionary["address"] = std::string(address);
+    Json::Value applications_dictionary;
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
       uint8_t rfcomm_channel;
       bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
-      resumption::LastState::Dictionary application_dictionary;
-      application_dictionary.AddItem("rfcomm_channel", std::to_string(rfcomm_channel));
-      applications_dictionary.AddSubitem(std::to_string(rfcomm_channel), application_dictionary);
+      Json::Value application_dictionary;
+      char rfcomm_channel_record[4];
+      sprintf(rfcomm_channel_record, "%ud", rfcomm_channel);
+      application_dictionary["rfcomm_channel"] = std::string(rfcomm_channel_record);
+      applications_dictionary.append(application_dictionary);
     }
-    device_dictionary.AddSubitem("applications", applications_dictionary);
-    bluetooth_adapter_dictionary.AddSubitem(bluetooth_device->name(), device_dictionary);
+    device_dictionary["applications"] = applications_dictionary;
+    devices_dictionary.append(device_dictionary);
   }
-  resumption::LastState::instance()->dictionary.AddSubitem(
-    "BluetoothAdapter", bluetooth_adapter_dictionary
-  );
+  bluetooth_adapter_dictionary["devices"] = devices_dictionary;
+  resumption::LastState::instance()->dictionary["BluetoothAdapter"] =
+    bluetooth_adapter_dictionary;
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
-  resumption::LastState::Dictionary bluetooth_adapter_dictionary =
-    resumption::LastState::instance()->dictionary.SubitemAt("BluetoothAdapter");
-  for (resumption::LastState::Dictionary::const_iterator i =
-    bluetooth_adapter_dictionary.begin(); i != bluetooth_adapter_dictionary.end(); ++i) {
-    std::string name = i->first;
-    resumption::LastState::Dictionary device_dictionary = i->second;
-    std::string address_record = device_dictionary.ItemAt("address");
+  const Json::Value bluetooth_adapter_dictionary =
+    resumption::LastState::instance()->dictionary["BluetoothAdapter"];
+  const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
+  for (Json::Value::const_iterator i = devices_dictionary.begin();
+    i != devices_dictionary.end(); ++i) {
+    const Json::Value device_dictionary = *i;
+    std::string name = device_dictionary["name"].asString();
+    std::string address_record = device_dictionary["address"].asString();
     bdaddr_t address;
     str2ba(address_record.c_str(), &address);
     RfcommChannelVector rfcomm_channels;
-    resumption::LastState::Dictionary applications_dictionary =
-      device_dictionary.SubitemAt("applications");
-    for (resumption::LastState::Dictionary::const_iterator j =
-      applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
-      resumption::LastState::Dictionary application_dictionary = j->second;
+    const Json::Value applications_dictionary = device_dictionary["applications"];
+    for (Json::Value::const_iterator j = applications_dictionary.begin();
+      j != applications_dictionary.end(); ++j) {
+      const Json::Value application_dictionary = *j;
       std::string rfcomm_channel_record =
-        application_dictionary.ItemAt("rfcomm_channel");
+        application_dictionary["rfcomm_channel"].asString();
       uint8_t rfcomm_channel =
         static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
       rfcomm_channels.push_back(rfcomm_channel);
