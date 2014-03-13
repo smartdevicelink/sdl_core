@@ -77,10 +77,10 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, QueryConstructor) {
     SecurityQuery query;
-    ASSERT_EQ(query.getConnectionKey(), 0);
-    ASSERT_EQ(query.getDataSize(), 0);
-    ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, SecurityQuery::INVALID_QUERY_TYPE);
     ASSERT_EQ(header.query_id, SecurityQuery::INVALID_QUERY_ID);
     ASSERT_EQ(header.seq_number, 0x0);
@@ -98,10 +98,10 @@ namespace security_manager_test {
 
     SecurityQuery query(init_header, connection_key);
 
-    ASSERT_EQ(query.getConnectionKey(), connection_key);
-    ASSERT_EQ(query.getDataSize(), 0);
-    ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(query.get_connection_key(), connection_key);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
@@ -121,17 +121,17 @@ namespace security_manager_test {
     const uint8_t* data = new uint8_t[data_size];
 
     SecurityQuery query;
-    query.setConnectionKey(connection_key);
-    query.setData(data, data_size);
-    query.setHeader(init_header);
+    query.set_connection_key(connection_key);
+    query.set_data(data, data_size);
+    query.set_header(init_header);
 
-    ASSERT_EQ(query.getConnectionKey(), connection_key);
-    ASSERT_EQ(query.getDataSize(), data_size);
-    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), connection_key);
+    ASSERT_EQ(query.get_data_size(), data_size);
+    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < data_size; ++i) {
-      ASSERT_EQ(query.getData()[i], data[i]);
+      ASSERT_EQ(query.get_data()[i], data[i]);
       }
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
@@ -157,10 +157,10 @@ namespace security_manager_test {
     const bool result_parse = query.Parse(data, data_size);
 
     ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.getConnectionKey(), 0);
-    ASSERT_EQ(query.getDataSize(), 0);
-    ASSERT_EQ(query.getData(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
@@ -187,10 +187,10 @@ namespace security_manager_test {
     const bool result_parse = query.Parse(data, data_size);
 
     ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.getConnectionKey(), 0);
-    ASSERT_EQ(query.getDataSize(), add_size);
-    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), add_size);
+    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
@@ -218,13 +218,13 @@ namespace security_manager_test {
     const bool result_parse = query.Parse(data, data_size);
 
     ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.getConnectionKey(), 0);
-    ASSERT_EQ(query.getDataSize(), add_size);
-    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), add_size);
+    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < add_size; ++i) {
-      ASSERT_EQ(query.getData()[i], data[header_size + i]);
+      ASSERT_EQ(query.get_data()[i], data[header_size + i]);
       }
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);
@@ -252,13 +252,13 @@ namespace security_manager_test {
     const bool result_parse = query.Parse(data, data_size);
 
     ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.getConnectionKey(), 0);
-    ASSERT_EQ(query.getDataSize(), add_size);
-    ASSERT_NE(query.getData(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), add_size);
+    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < add_size; ++i) {
-      ASSERT_EQ(query.getData()[i], data[header_size + i]);
+      ASSERT_EQ(query.get_data()[i], data[header_size + i]);
       }
-    const SecurityQuery::QueryHeader& header = query.getHeader();
+    const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.seq_number, seq_number);

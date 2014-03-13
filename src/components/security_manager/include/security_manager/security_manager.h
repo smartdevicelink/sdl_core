@@ -48,15 +48,10 @@
 #include "security_manager/security_query.h"
 
 namespace security_manager {
-
-/*
- * These dummy classes are here to locally impose strong typing on different
- * kinds of messages
- * Currently there is no type difference between incoming and outgoing messages
- * And due to ApplicationManagerImpl works as message router it has to distinguish
- * messages passed from it's different connection points
- * TODO(ik): replace these with globally defined message types
- * when we have them.
+/**
+ * \brief SecurityMessage is wrapper for SecurityQuery with priority
+ * \brief SecurityMessageQueue and SecurityMessageLoop are support typedefs
+ * for thread working
  */
 struct SecurityMessage: public SecurityQueryPtr {
   explicit SecurityMessage(const SecurityQueryPtr& message)
@@ -64,12 +59,13 @@ struct SecurityMessage: public SecurityQueryPtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return 0; }
 };
-
 typedef utils::PrioritizedQueue<SecurityMessage> SecurityMessageQueue;
-
 typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
 
-//TODO(EZ): add brief
+/**
+ * \brief SecurityManager class implements protocol_handler::ProtocolObserver
+ * for handling Security queries from mobiel side
+ */
 class SecurityManager :
     public protocol_handler::ProtocolObserver,
     public SecurityMessageLoop::Handler {
@@ -78,60 +74,83 @@ public:
    * \brief Constructor
    */
   SecurityManager();
-
   /**
-   * \brief Add message from mobile to
-   * when new message is received from Mobile Application.
+   * \brief Add received from Mobile Application message
    * Overriden ProtocolObserver::OnMessageReceived method
    * \param message Message with supporting params received
    */
   void OnMessageReceived(const protocol_handler::RawMessagePtr& message) OVERRIDE;
+  /**
+   * \brief Post message to Mobile Application
+   * Empty* overriden ProtocolObserver::OnMessageReceived method
+   * \param message Message with supporting params received
+   */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr& message) OVERRIDE;
 
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
-   * \param session observer Pointer to object of the class implementing
+   * \param session_observer pointer to object of the class implementing
    */
   void set_session_observer(protocol_handler::SessionObserver* observer);
-
   /**
    * \brief Sets pointer for Protocol Handler layer for sending
-   * \param protocol handler pointer to object of the class implementing
+   * \param protocol_handler pointer to object of the class implementing
    */
   void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
-
   /**
    * \brief Sets pointer for CryptoManager for handling SSLContext
-   * \param crypto manager pointer to object of the class implementing
+   * \param crypto_manager pointer to object of the class implementing
    */
   void set_crypto_manager(CryptoManager* crypto_manager);
 
   /**
    * \brief Handle SecurityMessage from mobile for processing
    * threads::MessageLoopThread<*>::Handler implementations
-   * CALLED ON secure_service_messages_ thread
+   * CALLED in SecurityMessageLoop thread
    */
   void Handle(const SecurityMessage& message) OVERRIDE;
 
  private:
   bool ParseProtectServiceRequest(const SecurityMessage &requestMessage);
+  /**
+   * \brief Parse SecurityMessage as HandshakeData request
+   * \param inMessage SecurityMessage with binary data of handshake
+   */
   bool ParseHandshakeData(const SecurityMessage &inMessage);
 
   void SendProtectServiceResponse( const SecurityMessage &message,
                                    const SecurityQuery::ProtectServiceResult result);
 
-  //Create new array for handling header + data
+  /**
+   * \brief Send InternallError with text message to Mobiel Application
+   * \param connection_key Unique key used by other components as session identifier
+   * \param seq_number resieved from Mobile Application
+   * \param error_id  unique error identifier
+   * \param error_str internal error trin representation
+   */
   void SendInternalError(const int32_t connection_key,
                          const uint32_t seq_number,
                          const SecurityQuery::InternalErrors& error_id,
                          const std::string& error_str);
 
-  //Create new array for handling header + data
+  /**
+   * \brief Send binary data answer with QueryHeader
+   * Create new array as concatenation of header and binary data
+   * \param connection_key Unique key used by other components as session identifier
+   * \param header QueryHeader (equal RPC header format)
+   * \param data pointer to binary data array
+   * \param data_size size of binary data array
+   */
   void SendData(const int32_t connectionKey,
                 SecurityQuery::QueryHeader header,
                 const uint8_t * const data,
                 const size_t data_size);
-
+  /**
+   * \brief Send binary data answer
+   * \param connection_key Unique key used by other components as session identifier
+   * \param data pointer to binary data array
+   * \param data_size size of binary data array
+   */
   //post income array as park of RawMessage
   void SendBinaryData(const int32_t connectionKey,
                       const uint8_t * const data,
@@ -144,12 +163,10 @@ public:
    *\brief Pointer on instance of class implementing CryptoManager
    */
   security_manager::CryptoManager* crypto_manager_;
-
   /**
    *\brief Pointer on instance of class implementing SessionObserver
    */
   protocol_handler::SessionObserver* session_observer_;
-
   /**
    *\brief Pointer on instance of class implementing ProtocolHandler
    */

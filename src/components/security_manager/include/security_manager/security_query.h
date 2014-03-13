@@ -35,20 +35,30 @@
 
 #include <cstddef>
 #include <stdint.h>
+#include <vector>
 #include "utils/shared_ptr.h"
 
 namespace security_manager {
-
+/**
+ * \brief SecurityQuery is wrapper for handling Mobile messages
+ * as security queries
+ */
 class SecurityQuery {
 public:
-  //size 1 byte
+  /**
+   * \brief QueryType is 1 byte type of income query
+   * Equal RPC Type (Ford Binary Header Definition)
+   */
   enum QueryType {
     REQUEST      = 0x00,
     RESPONSE     = 0x10,
     NOTIFICATION = 0x20,
     INVALID_QUERY_TYPE = 0xFF
     };
-  //size 3 bytes
+  /**
+   * \brief QueryId is 3 byte identifier of income query
+   * Equal RPC Function ID (Ford Binary Header Definition)
+   */
   enum QueryId {
     PROTECT_SERVICE_REQUEST  = 0x1,
     PROTECT_SERVICE_RESPONSE = 0x2,
@@ -64,7 +74,10 @@ public:
     SERVICE_NOT_FOUND = 0x4,
     INTERNAL_ERROR = 0xFF
   };
-  //size 1 byte
+  /**
+   * \brief InternalErrors is 1 byte identifier of internal error
+   * Handle as binary data in Ford Protocol
+   */
   enum InternalErrors {
     ERROR_INVALID_QUERY_SIZE = 0x1, //low size of message
     ERROR_INVALID_QUERY_ID = 0x2,   //unknown query id
@@ -75,7 +88,10 @@ public:
     ERROR_SSL_INVALID_DATA = 0xF0,
     ERROR_OTHER_INTERNAL_ERROR = 0xFF
     };
-
+  /**
+   * \brief InternalErrors is 12 byte header of security query
+   * Equal Ford Binary Header Definition
+   */
   struct QueryHeader {
     QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber);
     uint32_t query_type:8;
@@ -84,23 +100,63 @@ public:
     uint32_t reserved;
   };
 
+  /**
+   * \brief Constructor
+   */
   SecurityQuery();
+  /**
+   * \brief Constructor with header and connection_key
+   * \param connection_key Unique key used by other components as session identifier
+   * \param header QueryHeader
+   */
   SecurityQuery(const QueryHeader& header, const uint32_t connection_key);
-  ~SecurityQuery();
+  /**
+   * \brief Parse income from Mobile Application data
+   * as query header with binary data
+   * \param binary_data pointer to binary data array
+   * \param bin_data_size size of binary data array
+   */
   bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
-  void setData(const uint8_t * const binary_data, const size_t bin_data_size);
-  void setConnectionKey(const uint32_t connection_key);
-
-  void setHeader(const QueryHeader& header);
-  const QueryHeader& getHeader() const;
-  const uint8_t* const getData() const;
-  size_t const getDataSize() const;
-  int32_t getConnectionKey() const;
+  /**
+   * \brief Set binary data. (No header modification)
+   * \param binary_data pointer to binary data array
+   * \param bin_data_size size of binary data array
+   */
+  void set_data(const uint8_t * const binary_data, const size_t bin_data_size);
+  /**
+   * \brief Set connection key
+   * \param connection_key Unique key used by other components as session identifier
+   */
+  void set_connection_key(const uint32_t connection_key);
+  /**
+   * \brief Set query header
+   * \param header of query
+   */
+  void set_header(const QueryHeader& header);
+  /**
+   * \brief Get query header
+   * \return header of query
+   */
+  const QueryHeader& get_header() const;
+  /**
+   * \brief Get query binary data (withoout header data)
+   * \return const pointer to const binary data
+   */
+  const uint8_t* const get_data() const;
+  /**
+   * \brief Get query binary data size
+   * \return size of binary data
+   */
+  size_t const get_data_size() const;
+  /**
+   * \brief Get connection key
+   * \return Unique key used by other components as session identifier
+   */
+  int32_t get_connection_key() const;
 private:
   QueryHeader header_;
   int32_t connection_key_;
-  uint8_t* data_;
-  size_t data_size_;
+  std::vector<uint8_t> data_;
 };
 typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
 }

@@ -64,7 +64,7 @@ void SecurityManager::OnMessageReceived(
                       SecurityQuery::ERROR_INVALID_QUERY_SIZE, error);
     return;
   }
-  securityMessagePtr->setConnectionKey(message->connection_key());
+  securityMessagePtr->set_connection_key(message->connection_key());
 
   // Post message to message query for next processing in thread
   security_messages_.PostMessage(securityMessagePtr);
@@ -108,48 +108,49 @@ void SecurityManager::Handle(const SecurityMessage &message) {
   if(!crypto_manager_)  {
     const std::string error("Invalid (NULL) CryptoManager.");
     LOG4CXX_ERROR(logger_, error);
-    SendInternalError(message->getConnectionKey(),
-                      message->getHeader().seq_number,
+    SendInternalError(message->get_connection_key(),
+                      message->get_header().seq_number,
                       SecurityQuery::ERROR_NOT_SUPPORTED, error);
     return;
   }
-  switch (message->getHeader().query_id) {
+  switch (message->get_header().query_id) {
     case SecurityQuery::PROTECT_SERVICE_REQUEST:
       if(!ParseProtectServiceRequest(message)) {
-          LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
-        }
-      return;
+        LOG4CXX_ERROR(logger_, "ProtectServiceRequest failed");
+      }
+      break;
     case SecurityQuery::SEND_HANDSHAKE_DATA:
       if(!ParseHandshakeData(message)) {
-          LOG4CXX_ERROR(logger_, "SendHandshakeData failed");
-        }
-      return;
+        LOG4CXX_ERROR(logger_, "SendHandshakeData failed");
+      }
+      break;
     case SecurityQuery::PROTECT_SERVICE_RESPONSE: {
       //get response from mobile side
       const std::string error(
             "ProtectServiceResponse couldn't be received from mobile side.");
       LOG4CXX_ERROR(logger_, error);
-      SendInternalError(message->getConnectionKey(),
-                        message->getHeader().seq_number,
+      SendInternalError(message->get_connection_key(),
+                        message->get_header().seq_number,
                         SecurityQuery::ERROR_OTHER_INTERNAL_ERROR, error);
       }
-      return;
+      break;
     case SecurityQuery::SEND_INTERNAL_ERROR: {
       //get internall error from mobile side
-      const char* const error_str = reinterpret_cast<const char*>(message->getData());
+      const char* const error_str = reinterpret_cast<const char*>(message->get_data());
       std::string error("InternalError error received ");
-      if(message->getDataSize() && error_str)
-        error += std::string(error_str, message->getDataSize());
+      if(message->get_data_size() && error_str)
+        error += std::string(error_str, message->get_data_size());
       LOG4CXX_ERROR(logger_, error);
       }
       return;
     default: { // SecurityQuery::InvalidQuery
       const std::string error("Unknown query identifier.");
       LOG4CXX_ERROR(logger_, error);
-      SendInternalError(message->getConnectionKey(),
-                        message->getHeader().seq_number,
+      SendInternalError(message->get_connection_key(),
+                        message->get_header().seq_number,
                         SecurityQuery::ERROR_INVALID_QUERY_ID, error);
       }
+      break;
     }
 }
 
@@ -157,15 +158,15 @@ bool SecurityManager::ParseProtectServiceRequest(
     const SecurityMessage &requestMessage) {
   LOG4CXX_INFO(logger_, "ProtectServiceRequest processing");
   DCHECK(requestMessage); DCHECK(session_observer_);
-  DCHECK(requestMessage->getHeader().query_id ==
+  DCHECK(requestMessage->get_header().query_id ==
          SecurityQuery::PROTECT_SERVICE_REQUEST);
-  if(requestMessage->getDataSize() != 1) {
+  if(requestMessage->get_data_size() != 1) {
     LOG4CXX_ERROR(logger_, "ProtectServiceRequest wrong arguments size.");
     SendProtectServiceResponse(requestMessage,
                                SecurityQuery::INTERNAL_ERROR);
     return false;
   }
-  const uint8_t service_id = *requestMessage->getData();
+  const uint8_t service_id = *requestMessage->get_data();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
   if(service_type == protocol_handler::kInvalidServiceType ||
@@ -174,7 +175,7 @@ bool SecurityManager::ParseProtectServiceRequest(
       SendProtectServiceResponse(requestMessage,
                                  SecurityQuery::SERVICE_NOT_FOUND);
       return false;
-    }
+  }
 
   DCHECK(crypto_manager_);
   security_manager::SSLContext * const newSSLContext =
@@ -187,7 +188,7 @@ bool SecurityManager::ParseProtectServiceRequest(
       return false;
   }
   const int result = session_observer_->SetSSLContext(
-        requestMessage->getConnectionKey(), service_type, newSSLContext);
+        requestMessage->get_connection_key(), service_type, newSSLContext);
   //delete SSLContex on any error
   if(SecurityQuery::SUCCESS != result) {
         crypto_manager_->ReleaseSSLContext(newSSLContext);
@@ -201,7 +202,7 @@ bool SecurityManager::ParseProtectServiceRequest(
       {
       const security_manager::SSLContext * const currentSSLContext =
           session_observer_->GetSSLContext(
-            requestMessage->getConnectionKey(), service_type);
+            requestMessage->get_connection_key(), service_type);
       if(currentSSLContext) {
         if(currentSSLContext->IsInitCompleted()) {
           LOG4CXX_WARN(logger_, "Service is already protected, service_id"
@@ -238,19 +239,19 @@ bool SecurityManager::ParseProtectServiceRequest(
 
 bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
-  DCHECK(inMessage->getHeader().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
+  DCHECK(inMessage->get_header().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
   DCHECK(inMessage);
-  const uint32_t seqNumber = inMessage->getHeader().seq_number;
-  const uint32_t connectionKey = inMessage->getConnectionKey();
+  const uint32_t seqNumber = inMessage->get_header().seq_number;
+  const uint32_t connectionKey = inMessage->get_connection_key();
 
-  if(!inMessage->getDataSize()) {
+  if(!inMessage->get_data_size()) {
     const std::string error("SendHandshakeData: null arguments size.");
     LOG4CXX_ERROR(logger_, error);
     SendInternalError(connectionKey, seqNumber,
                       SecurityQuery::ERROR_INVALID_QUERY_SIZE, error);
     return false;
   }
-  const uint8_t service_id = *inMessage->getData();
+  const uint8_t service_id = *inMessage->get_data();
   const protocol_handler::ServiceType service_type =
       protocol_handler::ServiceTypeFromByte(service_id);
   if(service_type == protocol_handler::kInvalidServiceType) {
@@ -269,8 +270,8 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
                       SecurityQuery::ERROR_PROTECTION_NOT_REQUESTED, error);
     return false;
   }
-  const uint8_t * data = inMessage->getData() + 1;
-  const size_t data_size = inMessage->getDataSize() - 1;
+  const uint8_t * data = inMessage->get_data() + 1;
+  const size_t data_size = inMessage->get_data_size() - 1;
   size_t out_data_size;
   const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(data, data_size, &out_data_size));
@@ -283,7 +284,7 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
     return false;
   }
   //answer with the same header as income message
-  SendData(connectionKey, inMessage->getHeader(), out_data, out_data_size);
+  SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
   return true;
 }
 
@@ -291,16 +292,16 @@ void SecurityManager::SendProtectServiceResponse(
     const SecurityMessage &requestMessage,
     const SecurityQuery::ProtectServiceResult result){
   LOG4CXX_INFO(logger_, "SecurityManager::SendProtectServiceResponse");
-  DCHECK(requestMessage->getHeader().query_id==
+  DCHECK(requestMessage->get_header().query_id==
          SecurityQuery::PROTECT_SERVICE_REQUEST);
 
   const SecurityQuery::QueryHeader header(
         SecurityQuery::RESPONSE,
         SecurityQuery::PROTECT_SERVICE_RESPONSE,
-        requestMessage->getHeader().seq_number);
+        requestMessage->get_header().seq_number);
 
   const uint8_t data_result = result;
-  SendData(requestMessage->getConnectionKey(), header, &data_result, 1);
+  SendData(requestMessage->get_connection_key(), header, &data_result, 1);
 }
 
 void SecurityManager::SendInternalError(

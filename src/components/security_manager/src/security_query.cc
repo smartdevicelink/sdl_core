@@ -39,27 +39,23 @@ using namespace security_manager;
 
 SecurityQuery::QueryHeader::QueryHeader(
     uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
-  query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0)  {
+  query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0) {
 }
 
 SecurityQuery::SecurityQuery() :
-  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0),
-  connection_key_(0), data_(NULL), data_size_(0) {
-  }
+  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
+}
 
 SecurityQuery::SecurityQuery(
     const SecurityQuery::QueryHeader &header,
     const uint32_t connection_key) :
-  header_(header), connection_key_(connection_key),
-  data_(NULL), data_size_(0) {
-  }
-
-SecurityQuery::~SecurityQuery() {
-  delete data_;
+  header_(header), connection_key_(connection_key) {
 }
+
 bool SecurityQuery::Parse(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
-  if(bin_data_size < sizeof(QueryHeader)) {
+  const size_t header_size = sizeof(QueryHeader);
+  if(bin_data_size < header_size) {
     return false;
   }
   const uint8_t guery_type = binary_data[0];
@@ -100,46 +96,39 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       break;
   }
   header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
-  //skip data
-  const int data_size = bin_data_size - sizeof(QueryHeader);
-  if(data_size > 0) {
-      delete data_;
-      data_size_ = data_size;
-      data_ = new uint8_t[data_size_];
-      memcpy(data_, binary_data + sizeof(QueryHeader), data_size_);
-    }
+  if(bin_data_size > header_size) {
+    //copy from end of header to end of binary data
+    data_.assign(binary_data + header_size, binary_data + bin_data_size);
+  }
   return true;
 }
 
-void SecurityQuery::setData(const uint8_t * const binary_data,
+void SecurityQuery::set_data(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
     DCHECK(binary_data); DCHECK(bin_data_size);
-    delete data_;
-    data_size_ = bin_data_size;
-    data_ = new uint8_t[data_size_];
-    memcpy(data_, binary_data, data_size_);
+    data_.assign(binary_data, binary_data + bin_data_size);
 }
 
-void SecurityQuery::setConnectionKey(const uint32_t connection_key) {
+void SecurityQuery::set_connection_key(const uint32_t connection_key) {
   connection_key_ = connection_key;
 }
 
-void SecurityQuery::setHeader(const SecurityQuery::QueryHeader &header) {
+void SecurityQuery::set_header(const SecurityQuery::QueryHeader &header) {
   header_ = header;
 }
 
-const SecurityQuery::QueryHeader &SecurityQuery::getHeader() const {
+const SecurityQuery::QueryHeader &SecurityQuery::get_header() const {
   return header_;
 }
 
-const uint8_t * const SecurityQuery::getData() const {
-  return data_;
+const uint8_t * const SecurityQuery::get_data() const {
+  return data_.data();
 }
 
-const size_t SecurityQuery::getDataSize() const {
-  return data_size_;
+const size_t SecurityQuery::get_data_size() const {
+  return data_.size();
 }
 
-int32_t SecurityQuery::getConnectionKey() const {
+int32_t SecurityQuery::get_connection_key() const {
   return connection_key_;
 }
