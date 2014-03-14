@@ -9,6 +9,7 @@ import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.secureproxy.IRCCodedDataListener;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.session.Session;
@@ -16,6 +17,7 @@ import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
@@ -42,6 +44,8 @@ public class WiProProtocol extends AbstractProtocol {
     private int _heartbeatSendInterval_ms = 0;
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatReceiveInterval_ms = 0;
+
+
 
     // Hide no-arg ctor
     private WiProProtocol() {
@@ -139,7 +143,7 @@ public class WiProProtocol extends AbstractProtocol {
     public void SendMessage(ProtocolMessage protocolMsg, ServiceType serviceTypeToBeSecured) {
         protocolMsg.setRPCType((byte) 0x00); //always sending a request
         ServiceType serviceType = protocolMsg.getServiceType();
-        byte sessionID = protocolMsg.getSessionID();
+        final byte sessionID = protocolMsg.getSessionID();
 
         ProtocolMessageConverter protocolMessageConverter;
         if (serviceTypeToBeSecured == null) {
@@ -147,10 +151,37 @@ public class WiProProtocol extends AbstractProtocol {
         } else {
             protocolMessageConverter = new ProtocolMessageConverter(protocolMsg, _version).generate(serviceTypeToBeSecured);
         }
-        byte[] data = protocolMessageConverter.getData();
+        final byte[] data = protocolMessageConverter.getData();
         serviceType = protocolMessageConverter.getSessionType();
 
+        if (protocolMsg.getServiceType().equals(ServiceType.RPC)) {
 
+            if (getProtocolSecureManager()!=null) {
+
+                try {
+                    final ServiceType finalServiceType = serviceType;
+                    getProtocolSecureManager().writeDataToSSLSocket(data, new IRCCodedDataListener() {
+                        @Override
+                        public void onRPCPayloadCoded(byte[] bytes) {
+                            if (getProtocolSecureManager().isHandshakeFinished()) {
+                                processFrameToSend(finalServiceType, sessionID, bytes);
+                            }
+                        }
+                    });
+
+                } catch (IOException e) {
+                    Log.i(TAG, "RPC code error", e);
+                }
+            }else{
+                processFrameToSend(serviceType, sessionID, data);
+            }
+        }else{
+            processFrameToSend(serviceType, sessionID, data);
+        }
+
+    }
+
+    private void processFrameToSend(ServiceType serviceType, byte sessionID, byte[] data) {
         // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {

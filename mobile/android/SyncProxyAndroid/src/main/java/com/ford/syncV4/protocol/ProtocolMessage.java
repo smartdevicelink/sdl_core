@@ -67,9 +67,11 @@ public class ProtocolMessage {
     }
 
     public void setData(byte[] data) {
+
         this._data = new byte[data.length];
         System.arraycopy(data, 0, this._data, 0, _data.length);
         this._dataSize = data.length;
+
     }
 
     public void setData(byte[] data, int length) {

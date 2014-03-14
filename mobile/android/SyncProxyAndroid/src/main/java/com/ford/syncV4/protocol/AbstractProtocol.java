@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
@@ -26,6 +27,16 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
+
+    public synchronized ProtocolSecureManager getProtocolSecureManager() {
+        return protocolSecureManager;
+    }
+
+    public synchronized void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
+        this.protocolSecureManager = protocolSecureManager;
+    }
+
+    private ProtocolSecureManager protocolSecureManager;
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {

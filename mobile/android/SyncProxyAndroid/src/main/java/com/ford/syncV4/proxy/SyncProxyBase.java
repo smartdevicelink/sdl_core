@@ -1114,6 +1114,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 setSyncConnection(new SyncConnection(_interfaceBroker));
 
                 mSyncConnection = getSyncConnection();
+
                 final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
@@ -1441,34 +1442,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void dispatchOutgoingMessage(final ProtocolMessage message) {
         if (mSyncConnection.getIsConnected()) {
-
-            if(message.getServiceType().equals(ServiceType.RPC)){
-                try {
-                    protocolSecureManager.writeDataToSSLSocket(message.getData(), new IRCCodedDataListener() {
-                        @Override
-                        public void onRPCPayloadCoded(byte[] bytes) {
-                            if (protocolSecureManager.isHandshakeFinished()) {
-                                message.setData(bytes);
-                                mSyncConnection.sendMessage(message);
-                            }
-                        }
-                    });
-
-
-
-                } catch (IOException e) {
-                    Log.i(TAG, "RPC code error", e);
-                }
-            }
-            else {
-                mSyncConnection.sendMessage(message);
-            }
+            mSyncConnection.sendMessage(message);
         }
-        /*synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (mSyncConnection != null) {
 
-            }
-        }*/
         SyncTrace.logProxyEvent("SyncProxy sending Protocol Message: " + message.toString(), SYNC_LIB_TRACE_KEY);
     }
 
@@ -1891,8 +1867,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
 
 
-
-
         setupSecureProxy();
         getSyncConnection().startSecureService();
     }
@@ -1934,6 +1908,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
         protocolSecureManager.setupSecureEnvironment();
+        mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
     }
 
     private void addIfNotExsistRpcServiceToSession() {
