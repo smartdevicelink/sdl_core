@@ -31,6 +31,9 @@
  */
 
 #include "rpc_base/rpc_message.h"
+#include "rpc_base/rpc_base_json_inl.h"
+#include "rpc_base/rpc_base_dbus_inl.h"
+
 
 #include "json/value.h"
 

@@ -2,8 +2,6 @@ package com.ford.syncV4.syncConnection;
 
 import android.test.InstrumentationTestCase;
 
-import com.ford.syncV4.protocol.AbstractProtocol;
-import com.ford.syncV4.protocol.BinaryFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
@@ -16,8 +14,6 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
 
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
@@ -293,10 +289,11 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testHeartbeatMonitorStoppedIfConnectionClosedWithoutKeepConnection() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.setHeartbeatMonitor(mock(IHeartbeatMonitor.class));
+        IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
+        connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor());
         connection.closeConnection((byte) 0, false, true);
-        assertNull("heartbeat monitor should be stopped and null",connection.getHeartbeatMonitor());
+        verify(heartbeatMonitor, times(1)).stop();
     }
 
     public void testHeartbeatMonitorNotStoppedIfConnectionClosedWithKeepConnection() throws Exception {

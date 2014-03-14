@@ -163,6 +163,14 @@ FFW.Navigation = FFW.RPCObserver.create( {
 
                     break;
                 }
+                case "Navigation.AlertManeuver": {
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
                 case "Navigation.ShowConstantTBT": {
 
                     SDL.SDLModel.tbtActivate(request.params);
@@ -280,33 +288,6 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 "result": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "method": method
-                }
-            };
-            this.client.send(JSONMessage);
-        }
-    },
-
-    /**
-     * send response from onRPCRequest
-     * 
-     * @param {Number}
-     *            resultCode
-     * @param {Number}
-     *            id
-     */
-    alertResponse: function(resultCode, id) {
-
-        Em.Logger.log("FFW.Navigation.AlertResponse");
-
-        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
-
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "code": resultCode, // type (enum) from SDL protocol
-                    "method": 'Navigation.Alert'
                 }
             };
             this.client.send(JSONMessage);

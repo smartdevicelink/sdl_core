@@ -34,6 +34,7 @@
 #include "json/writer.h"
 #include "rpc_base/rpc_base.h"
 #include "rpc_base/rpc_base_json_inl.h"
+#include "rpc_base/rpc_base_dbus_inl.h"
 
 
 namespace test {
@@ -298,5 +299,198 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
   ASSERT_TRUE(val.is_initialized());
   ASSERT_FALSE(val.is_valid());
 }
+
+
+// DBus support
+TEST(ValidatedTypes, TestBooleanDbusSignature) {
+  std::string sign;
+  DbusSignature<Boolean>(&sign);
+  ASSERT_EQ(sign, "b");
+}
+
+TEST(ValidatedTypes, TestIntDbusSignature) {
+  std::string sign;
+  DbusSignature<Integer<int32_t, 1, 2> >(&sign);
+  ASSERT_EQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestFloatDbusSignature) {
+  std::string sign;
+  DbusSignature<Float<1, 2> >(&sign);
+  ASSERT_EQ(sign, "d");
+}
+
+TEST(ValidatedTypes, TestStringDbusSignature) {
+  std::string sign;
+  DbusSignature<String<1, 2> >(&sign);
+  ASSERT_EQ(sign, "s");
+}
+
+TEST(ValidatedTypes, TestEnumDbusSignature) {
+  std::string sign;
+  DbusSignature<Enum<TestEnum> >(&sign);
+  ASSERT_EQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestIntArrayDbusSignature) {
+  std::string sign;
+  DbusSignature< Array<Integer<int32_t, 1, 2>, 1, 3> >(&sign);
+  ASSERT_EQ(sign, "ai");
+}
+
+TEST(ValidatedTypes, TestIntArrayArrayDbusSignature) {
+  std::string sign;
+  DbusSignature< Array<Array<Integer<int32_t, 1, 2>, 1, 3>, 4, 5> >(&sign);
+  ASSERT_EQ(sign, "aai");
+}
+
+TEST(ValidatedTypes, TestMapDbusSignature) {
+  std::string sign;
+  DbusSignature< Map<Integer<int32_t, 1, 2>, 3, 4> >(&sign);
+  ASSERT_EQ(sign, "a{si}");
+}
+
+TEST(ValidatedTypes, TestMandatoryEnumDbusSignature) {
+  std::string sign;
+  DbusSignature< Mandatory<Enum<TestEnum> > >(&sign);
+  ASSERT_EQ(sign, "i");
+}
+
+TEST(ValidatedTypes, TestOptionalEnumDbusSignature) {
+  std::string sign;
+  DbusSignature< Optional<Enum<TestEnum> > >(&sign);
+  ASSERT_EQ(sign, "(bi)");
+}
+
+TEST(ValidatedTypes, TestOptionalFloatArrayDbusSignature) {
+  std::string sign;
+  DbusSignature< Optional< Array<Float<1,2>, 3, 4> > >(&sign);
+  ASSERT_EQ(sign, "(bad)");
+}
+
+TEST(DbusMessageConstructionTest, DbusMessageConstruction) {
+  DBusMessage* rawmsg = dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL);
+  dbus::MessageRef msgref(rawmsg);
+}
+
+class DbusTest: public testing::Test {
+public:
+  dbus::MessageRef msgref;
+  DbusTest():
+    msgref(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
+  }
+};
+
+TEST_F(DbusTest, DbusWriterConstructionTest) {
+ dbus::MessageWriter writer(msgref);
+}
+
+TEST_F(DbusTest, DbusEmptyMessageReaderTest) {
+  dbus::MessageReader reader(msgref);
+  ASSERT_TRUE(reader.has_failed());
+}
+
+TEST_F(DbusTest, DbusMessageWriterBoolWriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.PutBool(true);
+  dbus::MessageReader reader(msgref);
+  bool redback_value = reader.TakeBool();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_TRUE(redback_value);
+}
+
+TEST_F(DbusTest, DbusMessageWriterInt32WriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.PutInt32(42);
+  dbus::MessageReader reader(msgref);
+  int32_t readback_value = reader.TakeInt32();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_EQ(readback_value, 42);
+}
+
+TEST_F(DbusTest, DbusMessageWriterStringWriteRead) {
+  dbus::MessageWriter writer(msgref);
+  writer.PutString("Hello DBus!");
+  dbus::MessageReader reader(msgref);
+  std::string readback_value = reader.TakeString();
+  ASSERT_FALSE(reader.has_failed());
+  ASSERT_EQ(readback_value, "Hello DBus!");
+}
+
+TEST_F(DbusTest, DbusMultipleParamsReadWrite) {
+  {
+    dbus::MessageWriter writer(msgref);
+    writer.PutString("Hello DBus!");
+    writer.PutInt16(42);
+    writer.PutDouble(3.14);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    std::string readback_string = reader.TakeString();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_string, "Hello DBus!");
+    int16_t readback_int = reader.TakeInt16();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_int, 42);
+    double readback_double = reader.TakeDouble();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_DOUBLE_EQ(readback_double, 3.14);
+    ASSERT_FALSE(reader.HasNext());
+  }
+}
+
+TEST_F(DbusTest, DbusArrayTest) {
+  {
+    dbus::MessageWriter writer(msgref);
+    dbus::MessageWriter array_writer(&writer, dbus::kArray,
+                                     DBUS_TYPE_INT16_AS_STRING);
+    array_writer.PutInt16(3);
+    array_writer.PutInt16(4);
+    array_writer.PutInt16(5);
+  }
+  {
+    dbus::MessageReader reader(msgref);
+    dbus::MessageReader array_reader = reader.TakeArrayReader();
+    int16_t readback_val = array_reader.TakeInt16();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 3);
+    readback_val = array_reader.TakeInt16();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 4);
+    readback_val = array_reader.TakeInt16();
+    ASSERT_FALSE(reader.has_failed());
+    ASSERT_EQ(readback_val, 5);
+    ASSERT_FALSE(array_reader.HasNext());
+  }
+}
+
+class DbusFailuresTest: public testing::Test {
+public:
+  dbus::MessageRef int_msg;
+  DbusFailuresTest()
+    : int_msg(dbus_message_new(DBUS_MESSAGE_TYPE_METHOD_CALL)) {
+    dbus::MessageWriter writer(int_msg);
+    writer.PutInt64(42);
+  }
+};
+
+TEST_F(DbusFailuresTest, DbusInconsistentTypeReadFailureTest) {
+  dbus::MessageReader reader(int_msg);
+  std::string str = reader.TakeString();
+  ASSERT_EQ(str, std::string(""));
+  ASSERT_TRUE(reader.has_failed());
+}
+
+TEST_F(DbusFailuresTest, DbusNonExistentArrayReadTest) {
+  dbus::MessageReader reader(int_msg);
+  ASSERT_FALSE(reader.has_failed());
+  dbus::MessageReader array_reader = reader.TakeArrayReader();
+  ASSERT_TRUE(array_reader.has_failed());
+  ASSERT_TRUE(reader.has_failed());
+  int64_t val = array_reader.TakeInt64();
+  ASSERT_TRUE(array_reader.has_failed());
+  ASSERT_EQ(val, 0);
+}
+
 
 }  // namespace codegen

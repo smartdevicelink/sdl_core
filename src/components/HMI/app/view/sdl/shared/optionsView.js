@@ -109,6 +109,9 @@ SDL.OptionsView = SDL.SDLAbstractView.create({
     activate: function(text) {
         this._super();
 
+        SDL.SDLAppController.buttonsSort('top', SDL.SDLAppController.model.appID);
+        SDL.OptionsView.commands.refreshItems();
+
         SDL.SDLController.onSystemContextChange();
     },
 

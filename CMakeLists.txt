@@ -28,25 +28,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.0)
-
-set (PROJECT smartDeviceLinkCore)
-project (${PROJECT})
-
-set(HMI "web" CACHE STRING "HMI type")
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-# --- Check libavahi-common, libavahi-client availability
-find_package(Libavahi)
-
-# Please do not change compiler/linker flags if You do not know how particular
-# flag is handled by CMake
-set(CMAKE_INSTALL_PREFIX .)
-set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
-set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
-
+#Jenkins integration section
+#dont modify this section if you dont know details about integration with Jenkins!!!
+set (HMI "web" CACHE STRING "HMI type")
+option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GSteamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
@@ -54,6 +39,80 @@ option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
+option(BUILD_TESTS "Possibility to build and run tests" OFF)
+
+set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
+set(DEBUG_OPTION 	"$ENV{DEBUG}")
+set(HMI_TYPE_OPTION 	"$ENV{HMI_TYPE}")
+set(TARGET_OPTION 	"$ENV{TARGET}")
+set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
+set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
+
+if (OS_TYPE_OPTION)
+  if (${OS_TYPE_OPTION} STREQUAL "QNX")
+    message(STATUS "Jenkins integration: set build process for QNX")
+    INCLUDE("./qnx_6.5.0_linux_x86.cmake")
+    #tests are not supported yet for QNX build 
+    set (BUILD_TESTS OFF)
+  endif()
+endif()
+
+if (HMI_TYPE_OPTION)
+  if (${HMI_TYPE_OPTION} STREQUAL "HTML5")
+    message(STATUS "Jenkins integration: select HTML5 HMI")
+    set (HMI "web")
+  elseif (${HMI_TYPE_OPTION} STREQUAL "NONE")
+    message(STATUS "Jenkins integration: select HMI none")
+    set (HMI "no")
+  else ()
+    message(STATUS "Jenkins integration: select QML HMI none")
+    set (HMI "qt")
+  endif()
+endif()
+
+if (MEDIA_MODE_OPTION)
+  if (${MEDIA_MODE_OPTION} STREQUAL "EXTENDED_MEDIA")
+    message(STATUS "Jenkins integration: select extended media mode")
+    set (EXTENDED_MEDIA_MODE ON)
+  endif()
+endif()
+
+if (DEBUG_OPTION)
+  if (${DEBUG_OPTION} STREQUAL "DBG_OFF")
+    message(STATUS "Jenkins integration: build release version")
+    set (CMAKE_BUILD_TYPE Release)
+  endif()
+endif()
+
+if (HMI_ADAPTER_OPTION)
+  if (${HMI_ADAPTER_OPTION} STREQUAL "MESSAGEBROKER")
+    message(STATUS "Jenkins integration: selected HMI adapter MESSAGEBROKER")
+    set (HMIADAPTER "messagebroker")
+  elseif (${HMI_ADAPTER_OPTION} STREQUAL "DBUS")
+    message(STATUS "Jenkins integration: selected HMI adapter DBUS")
+    set (HMIADAPTER "dbus")
+  elseif (${HMI_ADAPTER_OPTION} STREQUAL "MQUEUE")
+    message(STATUS "Jenkins integration: selected HMI adapter MQUEUE")
+    set (HMIADAPTER "mqueue")
+  endif()
+endif()
+
+#Jenkins integration section end
+
+
+cmake_minimum_required(VERSION 2.8.0)
+
+set (PROJECT smartDeviceLinkCore)
+project (${PROJECT})
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+# Please do not change compiler/linker flags if You do not know how particular
+# flag is handled by CMake
+set(CMAKE_INSTALL_PREFIX .)
+set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
+set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
+set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -75,6 +134,8 @@ endif()
 
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
+# --- Check libavahi-common, libavahi-client availability
+  find_package(Libavahi)
 endif()
 
 if (BUILD_RWLOCK_SUPPORT)
@@ -236,7 +297,6 @@ add_subdirectory(./src/components)
 add_subdirectory(./src/appMain)
 
 # Building tests
-option(BUILD_TESTS "Possibility to build and run tests" OFF)
 if(BUILD_TESTS)
     enable_testing()
     include(Dart)

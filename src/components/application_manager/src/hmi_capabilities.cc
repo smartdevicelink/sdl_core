@@ -307,8 +307,6 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
     utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities));
     app_mngr_->ManageHMICommand(get_capabilities);
-
-    MessageHelper::SendHelpVrCommand();
   }
 }
 

@@ -75,6 +75,7 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
       GetApplicationSubscriptions(connection_key);
   (*json_app)[strings::application_files] = GetApplicationFiles(connection_key);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
+  (*json_app)[strings::audio_streaming_state] = application->audio_streaming_state();
 }
 
 void ResumeCtrl::LoadApplications() {
@@ -123,6 +124,10 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       mobile_apis::HMILevel::eType saved_hmi_level;
       mobile_apis::HMILevel::eType restored_hmi_level;
 
+      mobile_apis::AudioStreamingState::eType audio_streaming_state =
+          static_cast<mobile_apis::AudioStreamingState::eType>
+      ((*it)[strings::audio_streaming_state].asInt());
+        application->set_audio_streaming_state(audio_streaming_state);
       saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
                             (*it)[strings::hmi_level].asInt());
 

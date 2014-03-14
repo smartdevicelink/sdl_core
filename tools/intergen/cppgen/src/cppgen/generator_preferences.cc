@@ -42,6 +42,19 @@ using typesafe_format::format;
 
 namespace codegen {
 
+TypePreferences::TypePreferences(int minimum_interger_size,
+                                 bool avoid_unsigned)
+    : minimum_interger_size(minimum_interger_size),
+      avoid_unsigned(avoid_unsigned) {
+}
+
+Preferences::Preferences(int minimum_interger_size,
+                         bool avoid_unsigned,
+                         const std::set<std::string>& requested_interfaces)
+    : type_preferences(minimum_interger_size, avoid_unsigned),
+      requested_interfaces(requested_interfaces) {
+}
+
 namespace func_names {
 const char* kAdditionalValidation = "Validate";
 }

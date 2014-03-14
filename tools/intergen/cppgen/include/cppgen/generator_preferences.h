@@ -33,11 +33,26 @@
 #ifndef GENERATOR_PREFERENCES_H_
 #define GENERATOR_PREFERENCES_H_
 
+#include <set>
 #include <string>
 
-#include "model/constant.h"
 
 namespace codegen {
+
+struct TypePreferences {
+  TypePreferences(int minimum_interger_size,
+                  bool avoid_unsigned);
+  int minimum_interger_size;
+  bool avoid_unsigned;
+};
+
+struct Preferences {
+  Preferences(int minimum_interger_size,
+              bool avoid_unsigned,
+              const std::set<std::string>& requested_interfaces);
+  TypePreferences type_preferences;
+  std::set<std::string> requested_interfaces;
+};
 
 /*
  * Text entity names to be used in generated code
