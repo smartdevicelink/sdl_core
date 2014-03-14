@@ -1,4 +1,5 @@
 [CW11]
+* SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
 * SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
 * SyncProxyAndroid SDK: Eliminate EndService request with session ID = 0
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
