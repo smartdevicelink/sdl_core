@@ -20,6 +20,7 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
+import com.ford.syncV4.protocol.secure.secureproxy.IRCCodedDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.ISecureProxyServer;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
@@ -1438,9 +1439,30 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         passErrorToProxyListener(info, e);
     }
 
-    private void dispatchOutgoingMessage(ProtocolMessage message) {
+    private void dispatchOutgoingMessage(final ProtocolMessage message) {
         if (mSyncConnection.getIsConnected()) {
-            mSyncConnection.sendMessage(message);
+
+            if(message.getServiceType().equals(ServiceType.RPC)){
+                try {
+                    protocolSecureManager.writeDataToSSLSocket(message.getData(), new IRCCodedDataListener() {
+                        @Override
+                        public void onRPCPayloadCoded(byte[] bytes) {
+                            if (protocolSecureManager.isHandshakeFinished()) {
+                                message.setData(bytes);
+                                mSyncConnection.sendMessage(message);
+                            }
+                        }
+                    });
+
+
+
+                } catch (IOException e) {
+                    Log.i(TAG, "RPC code error", e);
+                }
+            }
+            else {
+                mSyncConnection.sendMessage(message);
+            }
         }
         /*synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection != null) {
@@ -1893,14 +1915,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onDataReceived(byte[] data) {
             if (protocolSecureManager.isHandshakeFinished()) {
-                ProtocolMessage pm = new ProtocolMessage();
-                pm.setSessionID(currentSession.getSessionId());
-                pm.setSessionType(ServiceType.Audio_Service);
-                pm.setFunctionID(0);
-                pm.setCorrID(0);
-                pm.setData(data, data.length);
-                getSyncConnection().sendMessage(pm);
-                Log.i(TAG,"Coded data " + pm);
+
             } else {
                 ProtocolMessage protocolMessage =
                         SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
@@ -3205,7 +3220,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onPacketCreated(ProtocolMessage message) {
             try {
-                protocolSecureManager.writeDataToSSLSocket(message.getData());
+                protocolSecureManager.writeDataToSSLSocket(message.getData(), new IRCCodedDataListener() {
+                    @Override
+                    public void onRPCPayloadCoded(byte[] bytes) {
+                    }
+                });
             } catch (IOException e) {
                 Log.e(TAG, "onPacketCreated", e);
             }

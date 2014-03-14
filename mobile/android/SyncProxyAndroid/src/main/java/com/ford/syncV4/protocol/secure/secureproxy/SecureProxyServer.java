@@ -23,6 +23,7 @@ public class SecureProxyServer {
     private OutputStream outputStream;
     private ISecureProxyServer sourceStream;
     private ServerSocket serverSocket;
+    private IRCCodedDataListener RPCPacketListener;
 
     public SecureProxyServer(ISecureProxyServer sourceListener, ITransportListener listener) {
         sourceStream = sourceListener;
@@ -46,6 +47,14 @@ public class SecureProxyServer {
         } catch (IOException e) {
             Log.e("SecureProxyServer", "error", e);
         }
+    }
+
+    public synchronized void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
+        this.RPCPacketListener = RPCPacketListener;
+    }
+
+    public synchronized IRCCodedDataListener getRPCPacketListener() {
+        return RPCPacketListener;
     }
 
     public class SecureProxyServerReader extends Thread {
@@ -83,6 +92,9 @@ public class SecureProxyServer {
                 while ((i = inputStream.read(buffer)) != -1) {
                     if (sourceStream != null) {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
+                    }
+                    if (getRPCPacketListener() != null){
+                        getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
                     }
                 }
             } catch (IOException e) {

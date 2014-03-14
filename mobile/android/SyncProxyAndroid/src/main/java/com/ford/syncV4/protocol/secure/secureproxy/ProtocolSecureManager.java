@@ -114,7 +114,8 @@ public class ProtocolSecureManager {
         secureProxyServer.writeData(data);
     }
 
-    public synchronized void writeDataToSSLSocket(byte[] data) throws IOException {
+    public synchronized void writeDataToSSLSocket(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
+        secureProxyServer.setRPCPacketListener(ircCodedDataListener);
         sslClient.writeData(data);
     }
 
