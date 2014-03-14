@@ -2025,9 +2025,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
                 syncProxySendRegisterRequest((RegisterAppInterface) request);
             } else {
+                createDebugMessageForAdapter(request);
                 mSyncProxy.sendRPCRequest(request);
             }
-            createDebugMessageForAdapter(request);
         } catch (SyncException e) {
             createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
                     " send error");

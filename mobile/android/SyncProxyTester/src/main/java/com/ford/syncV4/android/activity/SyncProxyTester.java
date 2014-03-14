@@ -217,7 +217,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_WAKELOCK = 17;
     private final int MNU_SET_UP_POLICY_FILES = 18;
     private final int MNU_HASH_ID_SETUP = 19;
-    private ModuleTest _testerMain;
+    private ModuleTest mTesterMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
@@ -1015,13 +1015,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void xmlTestContinue(String filePath) {
-        if (_testerMain != null) {
-            _testerMain.restart(filePath);
-            Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
+        if (mTesterMain != null) {
+            mTesterMain.restart(filePath);
+            SafeToast.showToastAnyThread("start your engines");
         } else {
             mBoundProxyService.startModuleTest();
-            _testerMain.restart(filePath);
-            Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
+            mTesterMain.restart(filePath);
+            SafeToast.showToastAnyThread("Start the app on SYNC first");
         }
     }
 
@@ -3352,7 +3352,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }*/
 
     public void setTesterMain(ModuleTest _instance) {
-        this._testerMain = _instance;
+        this.mTesterMain = _instance;
     }
 
     @Override
