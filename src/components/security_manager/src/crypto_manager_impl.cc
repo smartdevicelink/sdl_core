@@ -68,14 +68,16 @@ void CryptoManagerImpl::Finish() {
 }
 
 SSLContext * CryptoManagerImpl::CreateSSLContext() {
+  if (context_ == NULL) {
+    return NULL;
+  }
+
   SSL* conn = SSL_new(context_);
   if (conn == NULL)
     return NULL;
 
   SSL_set_accept_state(conn);
   int ret = SSL_accept(conn);
-  long error = ERR_get_error();
-  const char *errstr = ERR_reason_error_string(error);
   return new SSLContextImpl(conn);
 }
 

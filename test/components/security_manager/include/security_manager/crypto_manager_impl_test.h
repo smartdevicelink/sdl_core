@@ -110,6 +110,13 @@ class SSLTest : public testing::Test {
 SSL_CTX *SSLTest::ctx;
 security_manager::CryptoManager* SSLTest::crypto_manager;
 
+TEST(CryptoManagerTest, UsingBeforeInit) {
+  security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
+  security_manager::SSLContext* ctx = crypto_manager->CreateSSLContext();
+
+  EXPECT_TRUE(ctx == NULL);
+}
+
 TEST(CryptoManagerTest, ReleaseNull) {
   using security_manager::CryptoManager;
   using security_manager::CryptoManagerImpl;
