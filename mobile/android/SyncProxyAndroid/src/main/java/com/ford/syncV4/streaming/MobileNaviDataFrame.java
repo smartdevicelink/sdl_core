@@ -7,7 +7,7 @@ import java.util.Arrays;
  */
 public class MobileNaviDataFrame {
 
-    public final static int MOBILE_NAVI_DATA_SIZE = 1000 - 21;
+    public final static int MOBILE_NAVI_DATA_SIZE = 1000;
     private byte[] data;
     private MobileNaviDataFrameType type;
 
