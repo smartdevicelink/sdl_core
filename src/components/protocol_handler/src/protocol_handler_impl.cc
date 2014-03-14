@@ -115,7 +115,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
    * @brief Returns size of frame to be formed from raw bytes.
    * expects first bytes of message which will be treated as frame header.
    */
-  unsigned int GetPacketSize(unsigned char* received_bytes) {
+  uint32_t GetPacketSize(unsigned char* received_bytes) {
     DCHECK(received_bytes);
     unsigned char offset = sizeof(uint32_t);
     unsigned char version = received_bytes[0] >> 4u;
@@ -124,7 +124,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
     frame_body_size |= received_bytes[offset++] << 8u;
     frame_body_size |= received_bytes[offset++];
 
-    unsigned int required_size = frame_body_size;
+    uint32_t required_size = frame_body_size;
     switch (version) {
       case PROTOCOL_VERSION_1:
         required_size += PROTOCOL_HEADER_V1_SIZE;
