@@ -97,6 +97,8 @@ public class ProtocolSecureManager {
             public void handshakeCompleted(HandshakeCompletedEvent event) {
                 setHandshakeFinished(true);
                 Log.i("SSLClient", "GREAT SUCCESS" + event.toString());
+                listener.onHandShakeCompleted();
+
             }
         });
         try {

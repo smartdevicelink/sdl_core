@@ -1867,6 +1867,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
+
+
+
+
+        setupSecureProxy();
+        getSyncConnection().startSecureService();
+    }
+
+    private void notifySessionStarted(final byte sessionID, final String correlationID) {
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1878,11 +1887,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } else {
             _proxyListener.onSessionStarted(sessionID, correlationID);
         }
-
-        restartRPCProtocolSession();
-
-        setupSecureProxy();
-        getSyncConnection().startSecureService();
     }
 
     ISecureProxyServer secureProxyServerListener = new ISecureProxyServer() {
@@ -1903,6 +1907,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 dispatchOutgoingMessage(protocolMessage);
             }
 
+        }
+
+        @Override
+        public void onHandShakeCompleted() {
+            restartRPCProtocolSession();
+            notifySessionStarted(currentSession.getSessionId(), "");
         }
     };
 
@@ -3168,6 +3178,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 _proxyListener.onSecureServiceStart();
             }
+            getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
         }
 
         @Override
@@ -3216,7 +3227,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 if (getSyncConnection().getWiProProtocol() == null) {
                     return;
                 }
-                getSyncConnection().getWiProProtocol().startSecuringService(sessionID, serviceType);
+
             }
         }
     }

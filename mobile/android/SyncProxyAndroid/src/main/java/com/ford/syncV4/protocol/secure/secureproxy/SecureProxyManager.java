@@ -78,6 +78,11 @@ public class SecureProxyManager {
             public void onDataReceived(byte[] data) {
 
             }
+
+            @Override
+            public void onHandShakeCompleted() {
+
+            }
         }, new ITransportListener() {
             @Override
             public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {

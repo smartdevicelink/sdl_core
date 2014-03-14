@@ -491,7 +491,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onSecureServiceStarted(byte version) {
         _connectionListener.onSecureServiceStarted(version);
 
-        // TODO : Secure Service started
+
     }
 
     @Override

@@ -61,7 +61,7 @@ public class SecureServiceMessageFactory {
 
         // TODO dirty trick
         byte [] extPayload = new byte[payloadData.length + 1];
-        extPayload[0] = ServiceType.AUDIO_SERVICE_ID;
+        extPayload[0] = ServiceType.RPC_SERVICE_ID;
         System.arraycopy(payloadData, 0, extPayload, 1, payloadData.length);
 
         protocolMessage.setData(extPayload);
