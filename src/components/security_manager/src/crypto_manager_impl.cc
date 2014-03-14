@@ -80,6 +80,7 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
 
   SSL_set_accept_state(conn);
   int ret = SSL_accept(conn);
+  // FIXME (DChmerev): Unused ret value
   return new SSLContextImpl(conn);
 }
 
