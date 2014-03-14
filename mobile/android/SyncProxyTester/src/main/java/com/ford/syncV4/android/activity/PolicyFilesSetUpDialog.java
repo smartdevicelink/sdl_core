@@ -89,10 +89,11 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Const.REQUEST_POLICY_UPDATE_FILE_OPEN) {
-                String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+                String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
                 if (mSelectedPolicyUpdateFileNameView != null) {
-                    mSelectedPolicyUpdateFileNameView.setText(fileName);
+                    mSelectedPolicyUpdateFileNameView.setText(filePath);
                 }
+                AppPreferencesManager.setPolicyTableUpdateFilePath(filePath);
             }
         }
     }
