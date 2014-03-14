@@ -214,6 +214,7 @@ const char supported_diag_modes[] = "supportedDiagModes";
 
 //resuming
 const char application_commands[] = "applicationCommands";
+const char application_submenus[] = "applicationSubMenus";
 const char application_choise_sets[] = "applicationChoiceSets";
 const char application_global_properties[] = "globalProperties";
 const char application_vehicle_info[] = "vehicleInfo";
