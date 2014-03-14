@@ -2,6 +2,7 @@ package com.ford.syncV4.protocol.secure.secureproxy;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.net.InetAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -26,6 +28,7 @@ public class SSLClient {
     private SSLSocket socket;
     ITransportListener transportListener;
     private SSLClientReader sslClientReader;
+    private IRCCodedDataListener RPCPacketListener;
 
     public SSLClient(ITransportListener transportListener, HandshakeCompletedListener handshakeCompletedListener) {
         this.transportListener = transportListener;
@@ -56,11 +59,15 @@ public class SSLClient {
     private void readData() throws IOException {
         InputStream inputStream = socket.getInputStream();
 
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[WiProProtocol.MTU_SIZE];
         try {
             int i;
             while ((i = inputStream.read(buffer)) != -1) {
                 transportListener.onTransportBytesReceived(buffer, i);
+
+                if (getRPCPacketListener() != null) {
+                    getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
+                }
             }
         } catch (IOException e) {
             Log.e("SSLClient", "error", e);
@@ -87,6 +94,14 @@ public class SSLClient {
 
     public synchronized void writeData(byte[] data) throws IOException {
         socket.getOutputStream().write(data);
+    }
+
+    public void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
+        this.RPCPacketListener = RPCPacketListener;
+    }
+
+    public IRCCodedDataListener getRPCPacketListener() {
+        return RPCPacketListener;
     }
 
     public class SSLClientReader extends Thread {

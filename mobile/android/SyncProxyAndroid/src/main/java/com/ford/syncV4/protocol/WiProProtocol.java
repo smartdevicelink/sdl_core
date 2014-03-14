@@ -46,7 +46,6 @@ public class WiProProtocol extends AbstractProtocol {
     private int _heartbeatReceiveInterval_ms = 0;
 
 
-
     // Hide no-arg ctor
     private WiProProtocol() {
         super(null);
@@ -136,7 +135,6 @@ public class WiProProtocol extends AbstractProtocol {
     } // end-method
 
     /**
-     *
      * @param protocolMsg
      * @param serviceTypeToBeSecured
      */
@@ -156,7 +154,7 @@ public class WiProProtocol extends AbstractProtocol {
 
         if (protocolMsg.getServiceType().equals(ServiceType.RPC)) {
 
-            if (getProtocolSecureManager()!=null) {
+            if (getProtocolSecureManager() != null) {
 
                 try {
                     final ServiceType finalServiceType = serviceType;
@@ -172,10 +170,10 @@ public class WiProProtocol extends AbstractProtocol {
                 } catch (IOException e) {
                     Log.i(TAG, "RPC code error", e);
                 }
-            }else{
+            } else {
                 processFrameToSend(serviceType, sessionID, data);
             }
-        }else{
+        } else {
             processFrameToSend(serviceType, sessionID, data);
         }
 
@@ -291,7 +289,7 @@ public class WiProProtocol extends AbstractProtocol {
                 _currentHeader = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
                 try {
                     _dataBuf = new byte[_currentHeader.getDataSize()];
-                }catch (OutOfMemoryError e){
+                } catch (OutOfMemoryError e) {
                     // TODO - some terrible things is going on. _currentHeader.getDataSize() returns awfully big number during unregister - register cycle
                     DebugTool.logError(e.toString() + " No memory - no regrets.");
                 }
@@ -374,39 +372,66 @@ public class WiProProtocol extends AbstractProtocol {
             notifyIfFinished(header);
         }
 
-        protected void notifyIfFinished(ProtocolFrameHeader header) {
+        protected void notifyIfFinished(final ProtocolFrameHeader header) {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
-                ProtocolMessage message = new ProtocolMessage();
-                message.setSessionType(header.getServiceType());
-                message.setSessionID(header.getSessionID());
-                //If it is WiPro 2.0 it must have binary header
-                if (_version == 2) {
-                    BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
-                            parseBinaryHeader(accumulator.toByteArray());
-                    message.setVersion(_version);
-                    message.setRPCType(binFrameHeader.getRPCType());
-                    message.setFunctionID(binFrameHeader.getFunctionID());
-                    message.setCorrID(binFrameHeader.getCorrID());
-                    if (binFrameHeader.getJsonSize() > 0)
-                        message.setData(binFrameHeader.getJsonData());
-                    if (binFrameHeader.getBulkData() != null)
-                        message.setBulkData(binFrameHeader.getBulkData());
-                } else message.setData(accumulator.toByteArray());
 
-                _assemblerForMessageID.remove(header.getMessageID());
+                final byte [] data = accumulator.toByteArray();
 
-                try {
-                    handleProtocolMessageReceived(message);
-                } catch (Exception excp) {
-                    DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + excp.toString(), excp);
-                } // end-catch
+                if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
+
+                    try {
+
+                        getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
+                            @Override
+                            public void onRPCPayloadCoded(byte[] bytes) {
+                                if (getProtocolSecureManager().isHandshakeFinished()) {
+                                    createBigFrame(header, bytes);
+                                }
+                            }
+                        });
+
+                    } catch (IOException e) {
+                        Log.i(TAG, "RPC code error", e);
+                    }
+                } else {
+                    createBigFrame(header, data);
+                }
+
+
 
                 hasFirstFrame = false;
                 hasSecondFrame = false;
                 accumulator = null;
             } // end-if
         } // end-method
+
+        private void createBigFrame(ProtocolFrameHeader header, byte[] data) {
+            ProtocolMessage message = new ProtocolMessage();
+            message.setSessionType(header.getServiceType());
+            message.setSessionID(header.getSessionID());
+            //If it is WiPro 2.0 it must have binary header
+            if (_version == 2) {
+                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+                        parseBinaryHeader(data);
+                message.setVersion(_version);
+                message.setRPCType(binFrameHeader.getRPCType());
+                message.setFunctionID(binFrameHeader.getFunctionID());
+                message.setCorrID(binFrameHeader.getCorrID());
+                if (binFrameHeader.getJsonSize() > 0)
+                    message.setData(binFrameHeader.getJsonData());
+                if (binFrameHeader.getBulkData() != null)
+                    message.setBulkData(binFrameHeader.getBulkData());
+            } else message.setData(data);
+
+            _assemblerForMessageID.remove(header.getMessageID());
+
+            try {
+                handleProtocolMessageReceived(message);
+            } catch (Exception excp) {
+                DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + excp.toString(), excp);
+            } // end-catch
+        }
 
         protected void handleMultiFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
             //if (!hasFirstFrame) {
@@ -428,7 +453,14 @@ public class WiProProtocol extends AbstractProtocol {
             //}
         } // end-method
 
-        protected void handleFrame(ProtocolFrameHeader header, byte[] data) {
+        protected void handleFrame(final ProtocolFrameHeader header, byte[] data) {
+            processFrame(header, data);
+
+
+
+        } // end-method
+
+        private void processFrame(final ProtocolFrameHeader header, final byte[] data) {
             if (header.getFrameType().equals(FrameType.Control)) {
                 handleControlFrame(header, data);
             } else {
@@ -438,10 +470,31 @@ public class WiProProtocol extends AbstractProtocol {
                         ) {
                     handleMultiFrameMessageFrame(header, data);
                 } else {
-                    handleSingleFrameMessageFrame(header, data);
+
+
+                    if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
+
+                        try {
+
+                            getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
+                                @Override
+                                public void onRPCPayloadCoded(byte[] bytes) {
+                                    if (getProtocolSecureManager().isHandshakeFinished()) {
+                                        handleSingleFrameMessageFrame(header, bytes);
+                                    }
+                                }
+                            });
+
+                        } catch (IOException e) {
+                            Log.i(TAG, "RPC code error", e);
+                        }
+                    } else {
+                        handleSingleFrameMessageFrame(header, data);
+                    }
+
                 }
             } // end-if
-        } // end-method
+        }
 
         private void handleProtocolHeartbeatACK(ProtocolFrameHeader header,
                                                 byte[] data) {

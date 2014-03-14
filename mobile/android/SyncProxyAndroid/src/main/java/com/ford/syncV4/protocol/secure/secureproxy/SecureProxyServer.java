@@ -2,6 +2,7 @@ package com.ford.syncV4.protocol.secure.secureproxy;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
@@ -41,12 +42,9 @@ public class SecureProxyServer {
 
     }
 
-    public synchronized void writeData(byte[] data) {
-        try {
-            outputStream.write(data);
-        } catch (IOException e) {
-            Log.e("SecureProxyServer", "error", e);
-        }
+    public synchronized void writeData(byte[] data) throws IOException {
+
+        outputStream.write(data);
     }
 
     public synchronized void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
@@ -86,14 +84,14 @@ public class SecureProxyServer {
             socket = serverSocket.accept();
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[WiProProtocol.MTU_SIZE];
             try {
                 int i;
                 while ((i = inputStream.read(buffer)) != -1) {
                     if (sourceStream != null) {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
                     }
-                    if (getRPCPacketListener() != null){
+                    if (getRPCPacketListener() != null) {
                         getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
                     }
                 }

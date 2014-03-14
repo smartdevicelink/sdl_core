@@ -110,7 +110,8 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized void writeDataToProxyServer(byte[] data){
+    public synchronized void writeDataToProxyServer(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
+        sslClient.setRPCPacketListener(ircCodedDataListener);
         secureProxyServer.writeData(data);
     }
 

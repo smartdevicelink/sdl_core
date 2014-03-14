@@ -504,7 +504,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             @Override
             public void onHandshakeResponse(byte[] data) {
-                protocolSecureManager.writeDataToProxyServer(data);
+                try {
+                    protocolSecureManager.writeDataToProxyServer(data, new IRCCodedDataListener() {
+                        @Override
+                        public void onRPCPayloadCoded(byte[] bytes) {
+
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

@@ -23,7 +23,11 @@ public class SecureProxyManager {
         @Override
         public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
             byte[] data = Arrays.copyOf(receivedBytes, receivedBytesLength);
-            secureProxyServer.writeData(data);
+            try {
+                secureProxyServer.writeData(data);
+            } catch (IOException e) {
+                Log.e("SecureProxyManager", "error", e);
+            }
         }
 
         @Override
