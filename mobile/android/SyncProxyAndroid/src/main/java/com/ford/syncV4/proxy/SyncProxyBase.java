@@ -1086,8 +1086,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
+
+            //Log.d(TAG, "Close Sync connection:" + currentSession.getSessionId() + ", " +
+            //        "N:" + currentSession.getServicesNumber() + ", keep:" + keepConnection);
+
             mSyncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
-            mSyncConnection.setSessionId((byte) 0);
+            if (mSyncConnection.getSessionId() != 0) {
+                mSyncConnection.setSessionId((byte) 0);
+            }
+
             if (!keepConnection) {
                 setSyncConnection(null);
             }

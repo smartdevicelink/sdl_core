@@ -1,6 +1,7 @@
 [CW11]
+* SyncProxyAndroid SDK: Eliminate EndService request with session ID = 0
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
-* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
++ SyncProxyTester: Add AlertManeuver UI.
 
 [CW10]
 * File Explorer: changed project structure.

@@ -60,9 +60,6 @@ StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(const Struct* strct
 StructTypeFromJsonConstructor::~StructTypeFromJsonConstructor() {
 }
 
-void StructTypeFromJsonConstructor::DefineBody(std::ostream* os) const {
-}
-
 StructTypeToJsonMethod::StructTypeToJsonMethod(const Struct* strct)
     : CppFunction(strct->name(), "ToJsonValue", "Json::Value", kConst),
       strct_(strct) {

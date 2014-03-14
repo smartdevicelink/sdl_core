@@ -48,7 +48,6 @@
 #include <map>
 #include <list>
 #include <algorithm>
-#include <memory>
 
 #include "utils/logger.h"
 #include "utils/timer_thread.h"
@@ -403,14 +402,6 @@ class TransportManagerImpl : public TransportManager {
 
  private:
   /**
-   * @brief Returns size of frame to be formed from raw bytes.
-   * expects first bytes of message which will be treated as frame header.
-   */
-  // TODO this function should be moved outside of TM to protocol handler or
-  // somewhere else
-  unsigned int GetPacketSize(unsigned int size, unsigned char* data);
-
-  /**
    * @brief Structure that contains conversion functions (Device ID -> Device
    * Handle; Device Handle -> Device ID)
    */
@@ -463,9 +454,6 @@ class TransportManagerImpl : public TransportManager {
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceList;
   DeviceList device_list_;
-
-  class IncomingDataHandler;
-  std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
 
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);

@@ -49,7 +49,7 @@ class TcpTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  TcpTransportAdapter(uint16_t port);
+  explicit TcpTransportAdapter(uint16_t port);
 
   /**
    * @brief Destructor.

@@ -51,6 +51,7 @@ StructTypeDefaultConstructor::~StructTypeDefaultConstructor() {
 }
 
 StructTypeMandatoryConstructor::StructTypeMandatoryConstructor(
+    const TypePreferences* preferences,
     const Struct* strct)
     : CppStructConstructor(strct->name()) {
   const Struct::FieldsList& fields = strct->fields();
@@ -61,6 +62,7 @@ StructTypeMandatoryConstructor::StructTypeMandatoryConstructor(
       Add(Parameter(field.name(),
                     TypeNameGenerator(
                       &strct->interface(),
+                      preferences,
                       field.type()).result()));
       Add(Initializer(field.name(), field.name()));
     }

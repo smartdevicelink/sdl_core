@@ -38,9 +38,9 @@
 
 namespace codegen {
 class CppFile;
-class Namespace;
-class GeneratorPreferences;
 class ModuleManager;
+class Namespace;
+class TypePreferences;
 
 /*
  * Generates definition code of different entities that is to be
@@ -49,7 +49,8 @@ class ModuleManager;
 
 class DefinitionGenerator {
  public:
-  DefinitionGenerator(ModuleManager* module_manager);
+  DefinitionGenerator(const TypePreferences* preferences,
+                      ModuleManager* module_manager);
   ~DefinitionGenerator();
 
   void GenerateCodeForEnum(const Enum* enm);
@@ -62,6 +63,7 @@ class DefinitionGenerator {
   void GenerateCodeForRequest(const Request& request, CppFile* source_file);
 private:
   // Fields
+  const TypePreferences* preferences_;
   ModuleManager* module_manager_;
 };
 

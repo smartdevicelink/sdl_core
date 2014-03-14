@@ -100,6 +100,13 @@ class TransportManager {
   virtual int Disconnect(const ConnectionUID &connection_id) = 0;
 
   /**
+   * @brief Disconnect and clear all unreceived data.
+   *
+   * @param connection Connection unique identifier.
+   */
+  virtual int DisconnectForce(const ConnectionUID &connection_id) = 0;
+
+  /**
    * @brief Post new message in queue for massages destined to device.
    *
    * @param message Smart pointer to the raw massage.

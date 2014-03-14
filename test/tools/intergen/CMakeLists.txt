@@ -16,8 +16,8 @@ GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -27,6 +27,7 @@ set (LIBRARIES
     gtest_main
     gmock
     gmock_main
+    rpc_base
     test_rpc_interface
 )
 

@@ -256,30 +256,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
-smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
-  smart_objects::SmartObject* vr_help_command = new smart_objects::SmartObject(
-    smart_objects::SmartType_Array);
-  if (!vr_help_command) {
-    return NULL;
-  }
-  smart_objects::SmartObject& help_object = *vr_help_command;
-  const std::vector<std::string>& vr_general_cmds = profile::Profile::instance()
-      ->vr_commands();
-  for (uint32_t i = 0; i < vr_general_cmds.size(); ++i) {
-    help_object[i] = vr_general_cmds[i];
-  }
-  return vr_help_command;
-}
-
-void MessageHelper::SendHelpVrCommand() {
-  smart_objects::SmartObject* vr_help_command = CreateGeneralVrCommand();
-  if (!vr_help_command) {
-    return;
-  }
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
-}
-
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(const uint32_t app_id) {
 
   LOG4CXX_INFO(g_logger, "GetHashUpdateNotification" << app_id);
