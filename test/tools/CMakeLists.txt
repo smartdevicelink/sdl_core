@@ -1,1 +1,1 @@
-#add_subdirectory(intergen)
+add_subdirectory(intergen)

@@ -90,6 +90,22 @@ void DeclareStructureBegin(ostream& o, const string& name,
           base_type.empty() ? "" : " : " + base_type) << endl;
 }
 
+void DeclareExternalTypes(const TypePreferences& prefs, Namespace* ns) {
+  if (prefs.generate_json) {
+    ns->nested("Json").ForwardDeclare(
+        Namespace::ForwardDeclaration(
+            Namespace::ForwardDeclaration::kClass, "Value"));
+  }
+  if (prefs.generate_dbus) {
+    ns->nested("dbus").ForwardDeclare(
+        Namespace::ForwardDeclaration(
+            Namespace::ForwardDeclaration::kClass, "MessageReader"));
+    ns->nested("dbus").ForwardDeclare(
+        Namespace::ForwardDeclaration(
+            Namespace::ForwardDeclaration::kClass, "MessageWriter"));
+  }
+}
+
 }
 
 DeclarationGenerator::DeclarationGenerator(const TypePreferences* preferences,
@@ -118,18 +134,13 @@ void DeclarationGenerator::GenerateCodeForEnum(const Enum* enm) {
   o << "};" << endl;
   IsValidEnumFunction(enm).Declare(&o, false);
   EnumToJsonValueFunction(enm).Declare(&o, false);
-  EnumFromJsonValueFunction(enm).Declare(&o, false);
+  EnumFromJsonStringFunction(enm).Declare(&o, false);
   o << endl;
 }
 
 void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& header_file = module_manager_->HeaderForStruct(*strct);
-  header_file.global_namespace().nested("Json").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageReader"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageWriter"));
+  DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   ostream& o = header_file.types_ns().os();
   DeclareStructureBegin(o, strct->name(), "",
                         Comment(strct->description()));
@@ -141,19 +152,23 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     Section pub("public", &o);
     StructTypeDefaultConstructor(strct).Declare(&o, true);
     StructTypeMandatoryConstructor mandatory_constructor(preferences_, strct);
-    StructTypeFromJsonConstructor(strct).Declare(&o , true);
-    StructTypeFromDbusReaderConstructor(
-          preferences_, strct, true).Declare(&o, true);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(strct->name()).Declare(&o, true);
+    if (preferences_->generate_json) {
+      StructTypeFromJsonConstructor(strct).Declare(&o , true);
+      StructTypeToJsonMethod(strct).Declare(&o , true);
+    }
+    if (preferences_->generate_dbus) {
+      StructTypeFromDbusReaderConstructor(
+            preferences_, strct, true).Declare(&o, true);
+      StructTypeToDbusWriterMethod(strct, true).Declare(&o , true);
+      StructTypeDbusMessageSignatureMethod(preferences_,
+                                           strct, true).Declare(&o, true);
+    }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
-    StructTypeToJsonMethod(strct).Declare(&o , true);
-    StructTypeToDbusWriterMethod(strct, true).Declare(&o , true);
-    StructTypeDbusMessageSignatureMethod(preferences_,
-                                         strct, true).Declare(&o, true);
   }
   {
     Section priv("private", &o);
@@ -220,12 +235,7 @@ void DeclarationGenerator::GenerateCodeForFunction(const Function& function) {
 
 void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
                                                   CppFile* header_file) {
-  header_file->global_namespace().nested("Json").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  header_file->global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageReader"));
-  header_file->global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageWriter"));
+  DeclareExternalTypes(*preferences_, &header_file->global_namespace());
   Namespace& requests_ns = header_file->requests_ns();
   ostream& o = requests_ns.os();
   DeclareStructureBegin(o, request.name(), "Request",
@@ -242,19 +252,24 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     Section pub("public", &o);
     StructTypeDefaultConstructor(&request).Declare(&o, true);
     StructTypeMandatoryConstructor mandatory_constructor(preferences_, &request);
-    StructTypeFromJsonConstructor(&request).Declare(&o , true);
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &request, false).Declare(&o, true);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(request.name()).Declare(&o, true);
+
+    if (preferences_->generate_json) {
+      StructTypeFromJsonConstructor(&request).Declare(&o , true);
+      StructTypeToJsonMethod(&request).Declare(&o , true);
+    }
+    if (preferences_->generate_dbus) {
+      StructTypeFromDbusReaderConstructor(preferences_,
+                                          &request, false).Declare(&o, true);
+      StructTypeToDbusWriterMethod(&request, false).Declare(&o , true);
+      StructTypeDbusMessageSignatureMethod(preferences_,
+                                           &request, false).Declare(&o, true);
+    }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
-    StructTypeToJsonMethod(&request).Declare(&o , true);
-    StructTypeToDbusWriterMethod(&request, false).Declare(&o , true);
-    StructTypeDbusMessageSignatureMethod(preferences_,
-                                         &request, false).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
     FunctionStringIdMethod(&request).Define(&o, true);
@@ -269,12 +284,7 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
 
 void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
   CppFile& header_file = module_manager_->HeaderForResponse(response);
-  header_file.global_namespace().nested("Json").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageReader"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageWriter"));
+  DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   Namespace& responses_ns = header_file.responses_ns();
   ostream& o = responses_ns.os();
   DeclareStructureBegin(o, response.name(), "Response",
@@ -289,19 +299,25 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     Section pub("public", &o);
     StructTypeDefaultConstructor(&response).Declare(&o, true);
     StructTypeMandatoryConstructor mandatory_constructor(preferences_, &response);
-    StructTypeFromJsonConstructor(&response).Declare(&o, true);
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &response, false).Declare(&o, true);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(response.name()).Declare(&o, true);
+    if (preferences_->generate_json) {
+      StructTypeFromJsonConstructor(&response).Declare(&o, true);
+      StructTypeToJsonMethod(&response).Declare(&o , true);
+
+    }
+    if (preferences_->generate_dbus) {
+      StructTypeFromDbusReaderConstructor(preferences_,
+                                          &response, false).Declare(&o, true);
+      StructTypeToDbusWriterMethod(&response, false).Declare(&o , true);
+
+      StructTypeDbusMessageSignatureMethod(preferences_,
+                                           &response, false).Declare(&o, true);
+    }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
-    StructTypeToJsonMethod(&response).Declare(&o , true);
-    StructTypeToDbusWriterMethod(&response, false).Declare(&o , true);
-    StructTypeDbusMessageSignatureMethod(preferences_,
-                                         &response, false).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
     FunctionStringIdMethod(&response).Define(&o, true);
@@ -317,12 +333,7 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
 void DeclarationGenerator::GenerateCodeForNotification(
     const Notification& notification) {
   CppFile& header_file = module_manager_->HeaderForNotification(notification);
-  header_file.global_namespace().nested("Json").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "Value"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageReader"));
-  header_file.global_namespace().nested("dbus").ForwardDeclare(
-      Namespace::ForwardDeclaration(Namespace::ForwardDeclaration::kClass, "MessageWriter"));
+  DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   Namespace& notifications_ns = header_file.notifications_ns();
   ostream& o = notifications_ns.os();
   DeclareStructureBegin(o, notification.name(), "Notification",
@@ -337,19 +348,23 @@ void DeclarationGenerator::GenerateCodeForNotification(
     Section pub("public", &o);
     StructTypeDefaultConstructor(&notification).Declare(&o, true);
     StructTypeMandatoryConstructor mandatory_constructor(preferences_, &notification);
-    StructTypeFromJsonConstructor(&notification).Declare(&o , true);
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &notification, false).Declare(&o , true);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(notification.name()).Declare(&o, true);
+    if (preferences_->generate_json) {
+      StructTypeFromJsonConstructor(&notification).Declare(&o , true);
+      StructTypeToJsonMethod(&notification).Declare(&o , true);
+    }
+    if (preferences_->generate_dbus) {
+      StructTypeFromDbusReaderConstructor(preferences_,
+                                          &notification, false).Declare(&o , true);
+      StructTypeToDbusWriterMethod(&notification, false).Declare(&o , true);
+      StructTypeDbusMessageSignatureMethod(preferences_,
+                                           &notification, false).Declare(&o, true);
+    }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
-    StructTypeToJsonMethod(&notification).Declare(&o , true);
-    StructTypeToDbusWriterMethod(&notification, false).Declare(&o , true);
-    StructTypeDbusMessageSignatureMethod(preferences_,
-                                         &notification, false).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);
     FunctionStringIdMethod(&notification).Define(&o, true);

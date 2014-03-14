@@ -32,7 +32,7 @@
 #ifndef DBUS_MESSAGE_INL_H
 #define DBUS_MESSAGE_INL_H
 
-#include "rpc_base/dbus_message.h"
+#include "dbus/dbus_message.h"
 
 namespace dbus {
 // MessageReader

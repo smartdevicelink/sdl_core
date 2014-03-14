@@ -171,6 +171,6 @@ MessageRef Signal(const char  *path,
                   const char  *name);
 } // namespace dbus
 
-#include "rpc_base/dbus_message_inl.h"
+#include "dbus/dbus_message_inl.h"
 
 #endif // DBUS_DBUS_MESSAGE_H

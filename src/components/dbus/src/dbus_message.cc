@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rpc_base/dbus_message.h"
+#include "dbus/dbus_message.h"
 
 #include <algorithm>
 #include <cassert>

@@ -11,11 +11,12 @@ include_directories (
 )
 
 set (SOURCES
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
-  ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
   ${CMAKE_CURRENT_BINARY_DIR}/introspection_xml.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message_controller.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_adapter.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message_controller.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
 )
 
 set (LIBRARIES dbus-1)
