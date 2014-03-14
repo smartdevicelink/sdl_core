@@ -178,17 +178,29 @@ void CppInterfaceCodeGenerator::GenerateMessageFactories() {
   CppFile& factories_header = module_manager_->HeaderForInterface();
   CppFile& factories_source = module_manager_->SourceForInterface();
 
+  MessageFactoryFunction::SerializationType ser_types[2];
+  size_t ser_types_count = 0;
   if (preferences_->generate_json) {
+    ser_types[ser_types_count++] = MessageFactoryFunction::kJson;
+  }
+  if (preferences_->generate_dbus) {
+    ser_types[ser_types_count++] = MessageFactoryFunction::kDbus;
+  }
+
+  for (size_t i = 0; i < ser_types_count; ++i) {
     MessageFactoryFunction request_factory(interface_,
+                                           ser_types[i],
                                            FunctionMessage::kRequest);
     request_factory.Declare(&factories_header.requests_ns().os(), true);
     request_factory.Define(&factories_source.requests_ns().os(), true);
     MessageFactoryFunction response_factory(interface_,
+                                            ser_types[i],
                                             FunctionMessage::kResponse);
     response_factory.Declare(&factories_header.responses_ns().os(), true);
     response_factory.Define(&factories_source.responses_ns().os(), true);
     MessageFactoryFunction notification_factory(
           interface_,
+          ser_types[i],
           FunctionMessage::kNotification);
     notification_factory.Declare(&factories_header.notifications_ns().os(),
                                  true);
