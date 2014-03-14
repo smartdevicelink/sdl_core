@@ -342,14 +342,14 @@ void SecurityManager::SendData(
 void SecurityManager::SendBinaryData(const int32_t connectionKey,
                                      const uint8_t * const data,
                                      size_t data_size) {
-  LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
+  // LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
   DCHECK(protocol_handler_)
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage( connectionKey,
                                           protocol_handler::PROTOCOL_VERSION_2,
                                           data, data_size,
                                           protocol_handler::kSecure));
-  //Add RawMessage to ProtocolHandler messsage query
+  //Add RawMessage to ProtocolHandler message query
   //FIXME(EZ): final_message - false?
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
 }

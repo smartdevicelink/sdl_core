@@ -396,9 +396,9 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   if(context) {
     size_t new_data_size;
     const uint8_t * new_data = static_cast<uint8_t*>
-        (context->Decrypt(data, data_size, &new_data_size));
+        (context->Encrypt(data, data_size, &new_data_size));
     if(!new_data) {
-      LOG4CXX_WARN(logger_, "Decryption fail: " <<
+      LOG4CXX_WARN(logger_, "Encryption fail: " <<
                    security_manager::LastError());
       return RESULT_FAIL;
       }
@@ -540,9 +540,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
           size_t data_size = packet->data_size();
           size_t new_data_size;
           const uint8_t *new_data = static_cast<uint8_t *>
-              (context->Encrypt(data, data_size, &new_data_size));
+              (context->Decrypt(data, data_size, &new_data_size));
           if(!new_data){
-              LOG4CXX_WARN(logger_, "Encrypttion fail: " <<
+              LOG4CXX_WARN(logger_, "Decryption fail: " <<
                            security_manager::LastError());
               return RESULT_FAIL;
             }
@@ -722,7 +722,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {
   LOG4CXX_INFO(logger_,
-               "ProtocolHandlerImpl::HandleControlMessageStartSession" 
+               "ProtocolHandlerImpl::HandleControlMessageStartSession"
 				<< (int) packet.protocol_version() );
   LOG4CXX_INFO_EXT(logger_,
                    "Version 2 " << (packet.protocol_version() == PROTOCOL_VERSION_2));

@@ -59,7 +59,7 @@ bool CryptoManagerImpl::Init() {
   }
   SSL_CTX_set_cipher_list(context_, "ALL");
   SSL_CTX_set_verify(context_, SSL_VERIFY_NONE, NULL);
-  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+  //SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
   return true;
 }
