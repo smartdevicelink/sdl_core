@@ -65,6 +65,8 @@ bool CryptoManagerImpl::Init() {
 }
 
 void CryptoManagerImpl::Finish() {
+  EVP_cleanup();
+  ERR_free_strings();
 }
 
 SSLContext * CryptoManagerImpl::CreateSSLContext() {
