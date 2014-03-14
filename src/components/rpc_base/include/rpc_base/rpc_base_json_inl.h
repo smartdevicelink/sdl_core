@@ -107,10 +107,9 @@ Integer<T, minval, maxval>::Integer(const Json::Value& value, IntType def_value)
       value_(value.isInt() ? value.asInt64() : def_value) {
 }
 
-// TODO: int64_t support
 template<typename T, T minval, T maxval>
 Json::Value Integer<T, minval, maxval>::ToJsonValue() const {
-  return Json::Value(int32_t(value_));
+  return Json::Value(Json::Int64(value_));
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>

@@ -43,11 +43,12 @@ namespace codegen {
 
 CppInterfaceCodeGenerator::CppInterfaceCodeGenerator(
     const Interface* interface,
+    const TypePreferences* preferences,
     ModuleManager* module_manager)
     : interface_(interface),
       module_manager_(module_manager),
-      declaration_generator_(module_manager_),
-      definition_generator_(module_manager_) {
+      declaration_generator_(preferences, module_manager_),
+      definition_generator_(preferences, module_manager_) {
 }
 
 CppInterfaceCodeGenerator::~CppInterfaceCodeGenerator() {

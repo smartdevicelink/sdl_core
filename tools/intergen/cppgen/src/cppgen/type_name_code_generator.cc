@@ -36,6 +36,7 @@
 #include <cassert>
 #include <limits>
 
+#include "cppgen/generator_preferences.h"
 #include "cppgen/naming_convention.h"
 #include "model/builtin_type.h"
 #include "model/composite_type.h"
@@ -59,27 +60,35 @@ std::string TypeNamespacePrefix(const Interface* current_interface,
 }
 
 namespace {
-const char* StdIntTypeFromRagne(const Integer::Range& range) {
-  if (range.min() < 0) {
+const char* StdIntTypeFromRagne(
+    const TypePreferences& preferences,
+    const Integer::Range& range) {
+  if (preferences.avoid_unsigned || range.min() < 0) {
     Integer::Range int8_t_range(-128, 127);
     Integer::Range int16_t_range(-32768, 32767);
     Integer::Range int32_t_range(-2147483648, 2147483647);
-    if (int8_t_range.Includes(range)) {
+    if (int8_t_range.Includes(range)
+        && preferences.minimum_interger_size <= 8) {
       return "int8_t";
-    } else if (int16_t_range.Includes(range)) {
+    } else if (int16_t_range.Includes(range)
+               && preferences.minimum_interger_size <= 16) {
       return "int16_t";
-    } else if (int32_t_range.Includes(range)) {
+    } else if (int32_t_range.Includes(range)
+               && preferences.minimum_interger_size <= 32) {
       return "int32_t";
     }
   } else {
     Integer::Range uint8_t_range(0, 255);
     Integer::Range uint16_t_range(0, 65535);
     Integer::Range uint32_t_range(0, 4294967295);
-    if (uint8_t_range.Includes(range)) {
+    if (uint8_t_range.Includes(range)
+        && preferences.minimum_interger_size <= 8) {
       return "uint8_t";
-    } else if (uint16_t_range.Includes(range)) {
+    } else if (uint16_t_range.Includes(range)
+               && preferences.minimum_interger_size <= 16) {
       return "uint16_t";
-    } else if (uint32_t_range.Includes(range)) {
+    } else if (uint32_t_range.Includes(range)
+               && preferences.minimum_interger_size <= 32) {
       return "uint32_t";
     }
   }
@@ -88,8 +97,10 @@ const char* StdIntTypeFromRagne(const Integer::Range& range) {
 }  // namespace
 
 TypeNameGenerator::TypeNameGenerator(const Interface* interface,
+                                     const TypePreferences* preferences,
                                      const Type* type)
     : interface_(interface),
+      preferences_(preferences),
       prefer_reference_type_(true) {
   type->Apply(this);
 }
@@ -106,7 +117,7 @@ void TypeNameGenerator::GenerateCodeForBoolean(const Boolean* boolean) {
 }
 
 void TypeNameGenerator::GenerateCodeForInteger(const Integer* integer) {
-  os_ << StdIntTypeFromRagne(integer->range());
+  os_ << StdIntTypeFromRagne(*preferences_, integer->range());
 }
 
 void TypeNameGenerator::GenerateCodeForFloat(const Float* flt) {
@@ -161,9 +172,11 @@ void TypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
 }
 
 RpcTypeNameGenerator::RpcTypeNameGenerator(const Interface* interface,
+                                           const TypePreferences* preferences,
                                            const Type* type,
                                            Availability availability)
     : interface_(interface),
+      preferences_(preferences),
       skip_availaiblity_specifier_(availability == kUnspecified),
       mandatory_(availability == kMandatory) {
   if (!skip_availaiblity_specifier_) {
@@ -191,7 +204,7 @@ void RpcTypeNameGenerator::GenerateCodeForBoolean(const Boolean* boolean) {
 
 void RpcTypeNameGenerator::GenerateCodeForInteger(const Integer* integer) {
   if (!MaybeWrapWithAvailabilitySpecifier(integer)) {
-    const char* int_type = StdIntTypeFromRagne(integer->range());
+    const char* int_type = StdIntTypeFromRagne(*preferences_, integer->range());
     strmfmt(os_, "Integer<{0}, {1}, {2}>", int_type, integer->range().min(),
             integer->range().max());
   }

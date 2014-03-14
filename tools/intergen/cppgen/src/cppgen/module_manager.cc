@@ -87,10 +87,14 @@ ModuleManager::ModuleManager(const std::string& name)
   structs_source_.Include(CppFile::Header(structs_header_.file_name(), true));
   structs_source_.Include(
       CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
+  structs_source_.Include(
+      CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
   functions_source_.Include(CppFile::Header(functions_header_.file_name(),
                                             true));
   functions_source_.Include(
       CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
+  functions_source_.Include(
+      CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
 
   interface_source_.Include((CppFile::Header(interface_header_.file_name(),
                                              true)));

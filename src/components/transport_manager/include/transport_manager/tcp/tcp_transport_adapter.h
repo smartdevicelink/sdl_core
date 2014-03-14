@@ -49,17 +49,12 @@ class TcpTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  TcpTransportAdapter();
+  explicit TcpTransportAdapter(uint16_t port);
 
   /**
    * @brief Destructor.
    */
   virtual ~TcpTransportAdapter();
-
-  /**
-   * @brief Default port.
-   */
-  static const uint16_t default_port = 12345;
  protected:
 
   /**

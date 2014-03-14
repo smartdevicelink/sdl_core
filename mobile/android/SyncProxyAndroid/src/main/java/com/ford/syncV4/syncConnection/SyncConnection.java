@@ -32,6 +32,7 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
+import com.ford.syncV4.util.BitConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -169,16 +170,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void closeConnection(byte rpcSessionID, boolean keepConnection,
                                 boolean sendFinishMessages) {
-        synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                // If transport is still connected, sent EndProtocolSessionMessage
-                if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
-                    _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
+        if (rpcSessionID != 0) {
+            synchronized (PROTOCOL_REFERENCE_LOCK) {
+                if (_protocol != null) {
+                    // If transport is still connected, sent EndProtocolSessionMessage
+                    if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
+                        _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
+                    }
                 }
             }
-        }
 
-        waitForRpcEndServiceACK();
+            waitForRpcEndServiceACK();
+        }
 
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!keepConnection) {
@@ -186,10 +189,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             }
         }
         if (!keepConnection) {
-            if (_heartbeatMonitor != null) {
-                _heartbeatMonitor.stop();
-                _heartbeatMonitor = null;
-            }
+            stopHeartbeatMonitor();
         }
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
@@ -208,6 +208,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
                 _transport = null;
             }
+        }
+    }
+
+    public void stopHeartbeatMonitor() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.stop();
         }
     }
 
@@ -374,6 +380,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
+        }else {
+
         }
         startProtocolSession();
     }
@@ -418,6 +426,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
+                //Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 _transport.sendBytes(msgBytes, offset, length);
             }
         }

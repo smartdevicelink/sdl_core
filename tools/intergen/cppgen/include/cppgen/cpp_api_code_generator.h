@@ -52,11 +52,11 @@ class CppApiCodeGenerator {
   ~CppApiCodeGenerator();
   // Generate code for requested interfaces. Interface name id taken from
   // Interface::name field converting it to a lower_case_identifier
-  std::set<std::string> Generate(const std::set<std::string>&
-                                 required_interfaces);
+  std::set<std::string> Generate(const Preferences& preferences);
  private:
   // Produces code for single interface
-  bool GenerateInterface(const Interface* interface);
+  bool GenerateInterface(const Interface* interface,
+                         const TypePreferences& preferences);
  private:
   const API* api_;
 };

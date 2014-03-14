@@ -68,6 +68,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
     return NULL;
   }
 
+  outgoing_message->set_connection_key(message->connection_key());
+  outgoing_message->set_protocol_version(
+    static_cast<application_manager::ProtocolVersion>(message
+        ->protocol_version()));
   outgoing_message->set_json_message(
     std::string(reinterpret_cast<const char*>(message->data()),
                 message->data_size()));

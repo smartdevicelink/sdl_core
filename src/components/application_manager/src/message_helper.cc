@@ -132,7 +132,7 @@ const VehicleData MessageHelper::vehicle_data_(kVehicleDataInitializer,
                                                ARRAYSIZE(kVehicleDataInitializer));
 
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
 namespace {
   struct VehicleInfo_Requests {
     hmi_apis::FunctionID::eType func_id;
@@ -166,7 +166,7 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
   };
 }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 
 void MessageHelper::SendHMIStatusNotification(
@@ -254,30 +254,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     message[strings::msg_params][strings::tts_name] = *(application_impl.tts_name());
   }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
-}
-
-smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
-  smart_objects::SmartObject* vr_help_command = new smart_objects::SmartObject(
-    smart_objects::SmartType_Array);
-  if (!vr_help_command) {
-    return NULL;
-  }
-  smart_objects::SmartObject& help_object = *vr_help_command;
-  const std::vector<std::string>& vr_general_cmds = profile::Profile::instance()
-      ->vr_commands();
-  for (uint32_t i = 0; i < vr_general_cmds.size(); ++i) {
-    help_object[i] = vr_general_cmds[i];
-  }
-  return vr_help_command;
-}
-
-void MessageHelper::SendHelpVrCommand() {
-  smart_objects::SmartObject* vr_help_command = CreateGeneralVrCommand();
-  if (!vr_help_command) {
-    return;
-  }
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
 }
 
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(const uint32_t app_id) {
@@ -464,14 +440,14 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(const u
   }
 
   SmartObjectList hmi_requests;
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   (*request)[strings::msg_params] = msg_params;
   hmi_requests.push_back(request);
-#endif // #ifdef WEB_HMI
+#endif // #ifdef HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
   //Generate list of ivi_subrequests
   for (int i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
     const VehicleInfo_Requests& sr = ivi_subrequests[i];
@@ -483,7 +459,7 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(const u
       hmi_requests.push_back(request);
     }
   }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
  return hmi_requests;
 }
 
