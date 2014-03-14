@@ -401,18 +401,18 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
       LOG4CXX_WARN(logger_, "Encryption fail: " <<
                    security_manager::LastError());
       return RESULT_FAIL;
-      }
+    }
     ptr.reset(
           new protocol_handler::ProtocolPacket(
             connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
             session_id, new_data_size, message_counters_[session_id]++, new_data));
-    }
+  }
   else {
     ptr.reset(
           new protocol_handler::ProtocolPacket(
             connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
             session_id, data_size, message_counters_[session_id]++, data));
-    }
+  }
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -424,7 +424,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    const uint32_t data_size, const uint8_t* data, const bool compress,
+    uint32_t data_size, const uint8_t* data, const bool compress,
     const uint32_t maxdata_size) {
   LOG4CXX_TRACE_ENTER(logger_);
   RESULT_CODE retVal = RESULT_OK;
@@ -440,6 +440,29 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   int32_t numOfFrames = 0;
   int32_t lastdata_size = 0;
 
+  const int32_t connection_key =
+      session_observer_->KeyFromPair(connection_id, session_id);
+
+
+  // Encrypt data
+
+  security_manager::SSLContext* context =
+      session_observer_->GetSSLContext(
+        connection_key, ServiceTypeFromByte(service_type));
+
+  if(context) {
+    size_t new_data_size;
+    data = static_cast<uint8_t*>
+        (context->Encrypt(data, data_size, &new_data_size));
+    data_size = new_data_size;
+    if(!data) {
+      LOG4CXX_WARN(logger_, "Encryption fail: " <<
+                   security_manager::LastError());
+      return RESULT_FAIL;
+    }
+  }
+
+  // Send data
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;
     lastdata_size = data_size % maxdata_size;

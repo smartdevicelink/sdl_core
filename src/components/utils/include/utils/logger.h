@@ -42,6 +42,14 @@
 
 namespace log4cxx
 {
+
+    #undef LOG4CXX_INFO
+    #define LOG4CXX_INFO(x,y)
+    #undef LOG4CXX_WARN
+    #define LOG4CXX_WARN(x,y)
+    #undef LOG4CXX_ERROR
+    #define LOG4CXX_ERROR(x,y)
+
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
