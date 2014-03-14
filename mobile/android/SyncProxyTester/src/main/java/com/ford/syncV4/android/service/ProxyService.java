@@ -126,9 +126,6 @@ import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.TestConfig;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -1516,7 +1513,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (encodedSyncPDataHeader.getServiceType() == 3 && encodedSyncPDataHeader.getCommandType() == 1) {
-            writeToFile(encodedSyncPDataHeader.getPayload());
+            saveEncodedSyncPData(encodedSyncPDataHeader.getPayload());
 
             Log.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
             Log.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
@@ -1538,14 +1535,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             try {
                 Log.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());
             } catch (Exception e) {
+
             }
             try {
                 Log.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());
             } catch (Exception e) {
+
             }
             try {
                 Log.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());
             } catch (Exception e) {
+
             }
 
             //create header for syncp packet
@@ -1594,34 +1594,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (encodedSyncPDataHeader.getServiceType() == 7) {
-            writeToFile(encodedSyncPDataHeader.getPayload());
+            saveEncodedSyncPData(encodedSyncPDataHeader.getPayload());
         }
     }
 
-    public void writeToFile(Object writeME) {
-        //FileInputStream fin;
-        try {
-            //fin = new FileInputStream("/sdcard/" + "policiesResults.txt");
-            //InputStreamReader isr = new InputStreamReader(fin);
-            //String outFile = "/sdcard/" + mChosenFile.substring(0, mChosenFile.length() - 4) + ".csv";
-            //String outFile = "/sdcard/" + "policiesResults.txt";
-            String outFile = Environment.getExternalStorageDirectory().getPath() + "/policiesResults.txt";
-            File out = new File(outFile);
-            FileWriter writer = new FileWriter(out);
-            writer.flush();
-
-            //writer.write("yay" + "\n");
-            writer.write(writeME.toString());
-            //writer.write("double yay" + "\n");
-
-            writer.close();
-        } catch (FileNotFoundException e) {
-            Log.i("syncp", "FileNotFoundException: " + e);
-            Log.e(TAG, e.toString());
-        } catch (IOException e) {
-            Log.i("syncp", "IOException: " + e);
-            Log.e(TAG, e.toString());
-        }
+    private void saveEncodedSyncPData(byte[] data) {
+        String filePath = Environment.getExternalStorageDirectory().getPath() + "/policiesResults.txt";
+        AppUtils.saveDataToFile(data, filePath);
     }
 
     @Override
