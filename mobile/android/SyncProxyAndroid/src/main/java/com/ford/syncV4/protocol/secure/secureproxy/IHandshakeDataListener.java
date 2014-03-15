@@ -9,4 +9,6 @@ public interface IHandshakeDataListener {
 
     public void onHandShakeCompleted();
 
+    public void onError(Exception e);
+
 }

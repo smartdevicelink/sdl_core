@@ -157,8 +157,10 @@ public class WiProProtocol extends AbstractProtocol {
                 byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.getServiceType(), data);
                 processFrameToSend(serviceType, sessionID, result);
             } catch (IOException e) {
+                getProtocolSecureManager().reportAnError(e);
                 DebugTool.logError("Error data coding", e);
             } catch (InterruptedException e) {
+                getProtocolSecureManager().reportAnError(e);
                 DebugTool.logError("Error data coding", e);
             }
         } else {
@@ -370,15 +372,15 @@ public class WiProProtocol extends AbstractProtocol {
                         byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
                         createBigFrame(header, decipheredData);
                     } catch (IOException e) {
-                        Log.i(TAG, "Decipher error", e);
+                        DebugTool.logError("Decipher error", e);
+                        getProtocolSecureManager().reportAnError(e);
                     } catch (InterruptedException e) {
-                        Log.i(TAG, "Decipher error", e);
+                        DebugTool.logError("Decipher error", e);
+                        getProtocolSecureManager().reportAnError(e);
                     }
                 } else {
                     createBigFrame(header, data);
                 }
-
-
                 hasFirstFrame = false;
                 hasSecondFrame = false;
                 accumulator = null;

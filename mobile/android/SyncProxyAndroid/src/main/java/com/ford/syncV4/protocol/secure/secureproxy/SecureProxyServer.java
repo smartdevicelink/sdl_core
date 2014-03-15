@@ -77,6 +77,7 @@ public class SecureProxyServer {
                 readData();
             } catch (IOException e) {
                 DebugTool.logError("SecureProxyServerReader fail", e);
+                transportListener.onTransportError("SecureProxyServer", e);
             }
         }
 
@@ -92,12 +93,13 @@ public class SecureProxyServer {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
                     }
                     if (getRPCPacketListener() != null) {
-                        Log.i("cypheredData.length < 1000","source bytes "+ i);
+                        Log.i("cypheredData.length < 1000", "source bytes " + i);
                         getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
                     }
                 }
             } catch (IOException e) {
                 DebugTool.logError("SecureProxyServerReader fail", e);
+                transportListener.onTransportError("SecureProxyServer", e);
             }
         }
     }

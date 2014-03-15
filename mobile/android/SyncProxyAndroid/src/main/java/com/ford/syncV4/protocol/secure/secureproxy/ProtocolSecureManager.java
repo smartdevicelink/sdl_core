@@ -82,7 +82,7 @@ public class ProtocolSecureManager {
 
                     @Override
                     public void onTransportError(String info, Exception e) {
-
+                        reportAnError(e);
                     }
 
                     @Override
@@ -116,7 +116,7 @@ public class ProtocolSecureManager {
 
             @Override
             public void onTransportError(String info, Exception e) {
-
+                reportAnError(e);
             }
 
             @Override
@@ -199,5 +199,9 @@ public class ProtocolSecureManager {
         } else {
             return data;
         }
+    }
+
+    public void reportAnError(Exception e) {
+        handshakeDataListener.onError(e);
     }
 }

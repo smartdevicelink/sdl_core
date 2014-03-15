@@ -70,6 +70,7 @@ public class SSLClient {
             }
         } catch (IOException e) {
             DebugTool.logError("sslClient read data failed ", e);
+            transportListener.onTransportError("SSLClient", e);
         }
     }
 
@@ -125,10 +126,13 @@ public class SSLClient {
 
             } catch (IOException e) {
                 DebugTool.logError("SSLClientReader  fail", e);
+                transportListener.onTransportError("SSLClient", e);
             } catch (NoSuchAlgorithmException e) {
                 DebugTool.logError("SSLClientReader  fail", e);
+                transportListener.onTransportError("SSLClient", e);
             } catch (KeyManagementException e) {
                 DebugTool.logError("SSLClientReader  fail", e);
+                transportListener.onTransportError("SSLClient", e);
             }
         }
     }

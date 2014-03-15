@@ -1917,6 +1917,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 onMobileNaviServiceStarted(currentSession.getSessionId(), "");
             }
         }
+
+        @Override
+        public void onError(Exception e) {
+            String errorMsg = "Secure Connection Error ";
+            if( e.getMessage() != null){
+                errorMsg = e.getMessage();
+            }
+            InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
+            dispatchInternalMessage(proxyMessage);
+        }
     };
 
     private void registerAppInterface() {
