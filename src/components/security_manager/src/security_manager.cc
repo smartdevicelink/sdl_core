@@ -45,7 +45,7 @@ SecurityManager::SecurityManager() :
 
 void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
-  LOG4CXX_INFO(logger_, "SecurityManager::OnMessageReceived");
+  LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kSecure) {
     LOG4CXX_WARN(logger_, "Incorrect message service type of income message"
                  << message->service_type());
@@ -72,8 +72,7 @@ void SecurityManager::OnMessageReceived(
 
 void SecurityManager::OnMobileMessageSent(
     const protocol_handler::RawMessagePtr &message) {
-  LOG4CXX_INFO(logger_, "SecurityManager::OnMobileMessageSent");
-  LOG4CXX_ERROR(logger_, "OnMobileMessageSent not supported in SecurityManager.");
+  LOG4CXX_INFO(logger_, "OnMobileMessageSent");
 }
 
 void SecurityManager::set_session_observer(
@@ -120,7 +119,7 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       break;
     case SecurityQuery::SEND_HANDSHAKE_DATA:
-      if(!ParseHandshakeData(message)) {
+      if(!ProccessHandshakeData(message)) {
         LOG4CXX_ERROR(logger_, "SendHandshakeData failed");
       }
       break;
@@ -237,7 +236,7 @@ bool SecurityManager::ParseProtectServiceRequest(
   return true;
 }
 
-bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
+bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage->get_header().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
   DCHECK(inMessage);
@@ -292,7 +291,7 @@ bool SecurityManager::ParseHandshakeData(const SecurityMessage &inMessage) {
 void SecurityManager::SendProtectServiceResponse(
     const SecurityMessage &requestMessage,
     const SecurityQuery::ProtectServiceResult result){
-  LOG4CXX_INFO(logger_, "SecurityManager::SendProtectServiceResponse");
+  LOG4CXX_INFO(logger_, "SendProtectServiceResponse");
   DCHECK(requestMessage->get_header().query_id==
          SecurityQuery::PROTECT_SERVICE_REQUEST);
 
@@ -342,7 +341,7 @@ void SecurityManager::SendData(
 void SecurityManager::SendBinaryData(const int32_t connectionKey,
                                      const uint8_t * const data,
                                      size_t data_size) {
-  // LOG4CXX_INFO(logger_, "SecurityManager::SendBinaryDataData");
+//   LOG4CXX_INFO(logger_, "SendBinaryDataData");
   DCHECK(protocol_handler_)
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage( connectionKey,

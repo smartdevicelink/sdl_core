@@ -802,7 +802,7 @@ void ProtocolHandlerImpl::Handle(
 void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
   LOG4CXX_INFO_EXT(
       logger_,
-      "Message to mobile app: connection " << message->connection_key() << ";"
+      "Message to mobile app: connection " << int(message->connection_key()) << ";"
       " dataSize: " << message->data_size() << " ;"
       " protocolVersion " << message->protocol_version());
 

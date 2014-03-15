@@ -116,7 +116,7 @@ public:
    * \brief Parse SecurityMessage as HandshakeData request
    * \param inMessage SecurityMessage with binary data of handshake
    */
-  bool ParseHandshakeData(const SecurityMessage &inMessage);
+  bool ProccessHandshakeData(const SecurityMessage &inMessage);
 
   void SendProtectServiceResponse( const SecurityMessage &message,
                                    const SecurityQuery::ProtectServiceResult result);
