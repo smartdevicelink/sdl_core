@@ -9,6 +9,9 @@ import com.ford.syncV4.transport.TransportType;
 
 import junit.framework.TestCase;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static org.mockito.Mockito.mock;
 
 /**
@@ -47,7 +50,17 @@ public class SyncConnectionUSBTest extends TestCase {
 
         final SyncTransport fakeTransport = new SyncTransport(transportListener) {
 
-                    @Override
+            @Override
+            public InputStream getInputStream() {
+                return null;
+            }
+
+            @Override
+            public OutputStream getOutputStream() {
+                return null;
+            }
+
+            @Override
                     protected boolean sendBytesOverTransport(byte[] msgBytes,
                                                              int offset,
                                                              int length) {

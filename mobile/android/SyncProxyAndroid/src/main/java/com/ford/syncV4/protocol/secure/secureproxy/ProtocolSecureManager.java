@@ -5,6 +5,8 @@ import android.util.Log;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
 
 import javax.net.ssl.HandshakeCompletedEvent;
 import javax.net.ssl.HandshakeCompletedListener;
@@ -15,15 +17,17 @@ import javax.net.ssl.HandshakeCompletedListener;
 public class ProtocolSecureManager {
 
     private ISecureProxyServer listener;
-    private SecureProxyServer secureProxyServer;
-    private SSLClient sslClient;
+    SecureProxyServer secureProxyServer;
+    SSLClient sslClient;
     private boolean handshakeFinished;
+    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+    private byte[] cypheredData = null;
 
     public ProtocolSecureManager(ISecureProxyServer listener) {
         this.listener = listener;
     }
 
-    public void startHandShake(){
+    public void startHandShake() {
         startSSLClient();
     }
 
@@ -120,11 +124,30 @@ public class ProtocolSecureManager {
         sslClient.writeData(data);
     }
 
-    public synchronized boolean isHandshakeFinished() {
+    public boolean isHandshakeFinished() {
         return handshakeFinished;
     }
 
     private synchronized void setHandshakeFinished(boolean handshakeFinished) {
-        this.handshakeFinished =handshakeFinished;
+        this.handshakeFinished = handshakeFinished;
+    }
+
+
+    public synchronized byte[] sendDataTOSSLClient(byte[] data) throws IOException, InterruptedException {
+
+        writeDataToSSLSocket(data, new IRCCodedDataListener() {
+            @Override
+            public void onRPCPayloadCoded(byte[] bytes) {
+                if (isHandshakeFinished()) {
+
+                    cypheredData = Arrays.copyOf(bytes, bytes.length);
+                    countDownLatch.countDown();
+                }
+            }
+        });
+
+        countDownLatch.await();
+
+        return cypheredData;
     }
 }

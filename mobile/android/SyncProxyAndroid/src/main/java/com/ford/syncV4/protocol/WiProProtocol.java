@@ -155,20 +155,14 @@ public class WiProProtocol extends AbstractProtocol {
         if (protocolMsg.getServiceType().equals(ServiceType.RPC)) {
 
             if (getProtocolSecureManager() != null) {
-
                 try {
-                    final ServiceType finalServiceType = serviceType;
-                    getProtocolSecureManager().writeDataToSSLSocket(data, new IRCCodedDataListener() {
-                        @Override
-                        public void onRPCPayloadCoded(byte[] bytes) {
-                            if (getProtocolSecureManager().isHandshakeFinished()) {
-                                processFrameToSend(finalServiceType, sessionID, bytes);
-                            }
-                        }
-                    });
-
+                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(data);
+                    protocolMsg.setData(result);
+                    processFrameToSend(serviceType, sessionID, result);
                 } catch (IOException e) {
-                    Log.i(TAG, "RPC code error", e);
+                    DebugTool.logError("Error data coding", e);
+                } catch (InterruptedException e) {
+                    DebugTool.logError("Error data coding", e);
                 }
             } else {
                 processFrameToSend(serviceType, sessionID, data);
@@ -376,7 +370,7 @@ public class WiProProtocol extends AbstractProtocol {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
 
-                final byte [] data = accumulator.toByteArray();
+                final byte[] data = accumulator.toByteArray();
 
                 if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
 
@@ -397,7 +391,6 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     createBigFrame(header, data);
                 }
-
 
 
                 hasFirstFrame = false;
@@ -455,7 +448,6 @@ public class WiProProtocol extends AbstractProtocol {
 
         protected void handleFrame(final ProtocolFrameHeader header, byte[] data) {
             processFrame(header, data);
-
 
 
         } // end-method
