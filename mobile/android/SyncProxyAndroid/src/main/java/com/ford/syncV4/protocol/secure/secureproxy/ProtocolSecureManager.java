@@ -21,8 +21,10 @@ public class ProtocolSecureManager {
     SecureProxyServer secureProxyServer;
     SSLClient sslClient;
     private boolean handshakeFinished;
-    private final CountDownLatch countDownLatch = new CountDownLatch(1);
+    private final CountDownLatch countDownLatchInput = new CountDownLatch(1);
+    private final CountDownLatch countDownLatchOutput = new CountDownLatch(1);
     private byte[] cypheredData = null;
+    private byte[] deCypheredData = null;
 
     public ProtocolSecureManager(IHandshakeDataListener listener) {
         this.handshakeDataListener = listener;
@@ -40,7 +42,7 @@ public class ProtocolSecureManager {
         secureProxyServer = new SecureProxyServer(new ISecureProxyServer() {
             @Override
             public void onDataReceived(byte[] data) {
-                if (!handshakeFinished){
+                if (!handshakeFinished) {
                     handshakeDataListener.onHandshakeDataReceived(data);
                 }
             }
@@ -121,6 +123,20 @@ public class ProtocolSecureManager {
     }
 
 
+    public synchronized byte[] sendDataToProxyServer(byte[] data) throws IOException, InterruptedException {
+        writeDataToProxyServer(data, new IRCCodedDataListener() {
+            @Override
+            public void onRPCPayloadCoded(byte[] bytes) {
+                if (handshakeFinished) {
+                    deCypheredData = Arrays.copyOf(bytes, bytes.length);
+                    countDownLatchOutput.countDown();
+                }
+            }
+        });
+        countDownLatchOutput.await();
+        return deCypheredData;
+    }
+
     public synchronized void writeDataToProxyServer(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
         sslClient.setRPCPacketListener(ircCodedDataListener);
         secureProxyServer.writeData(data);
@@ -143,11 +159,11 @@ public class ProtocolSecureManager {
             public void onRPCPayloadCoded(byte[] bytes) {
                 if (handshakeFinished) {
                     cypheredData = Arrays.copyOf(bytes, bytes.length);
-                    countDownLatch.countDown();
+                    countDownLatchInput.countDown();
                 }
             }
         });
-        countDownLatch.await();
+        countDownLatchInput.await();
         return cypheredData;
     }
 }

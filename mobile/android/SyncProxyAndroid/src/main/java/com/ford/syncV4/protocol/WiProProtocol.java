@@ -9,7 +9,6 @@ import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.secure.secureproxy.IRCCodedDataListener;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.session.Session;
@@ -369,24 +368,15 @@ public class WiProProtocol extends AbstractProtocol {
         protected void notifyIfFinished(final ProtocolFrameHeader header) {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
-
                 final byte[] data = accumulator.toByteArray();
-
                 if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
-
                     try {
-
-                        getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
-                            @Override
-                            public void onRPCPayloadCoded(byte[] bytes) {
-
-                                    createBigFrame(header, bytes);
-
-                            }
-                        });
-
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(data);
+                        createBigFrame(header, decipheredData);
                     } catch (IOException e) {
-                        Log.i(TAG, "RPC code error", e);
+                        Log.i(TAG, "Decipher error", e);
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Decipher error", e);
                     }
                 } else {
                     createBigFrame(header, data);
@@ -462,24 +452,16 @@ public class WiProProtocol extends AbstractProtocol {
                         ) {
                     handleMultiFrameMessageFrame(header, data);
                 } else {
-
-
                     if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
-
                         try {
-
-                            getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
-                                @Override
-                                public void onRPCPayloadCoded(byte[] bytes) {
-
-                                        handleSingleFrameMessageFrame(header, bytes);
-                                    
-                                }
-                            });
-
+                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(data);
+                            handleSingleFrameMessageFrame(header, decipheredData);
                         } catch (IOException e) {
-                            Log.i(TAG, "RPC code error", e);
+                            Log.i(TAG, "Decipher error", e);
+                        } catch (InterruptedException e) {
+                            Log.i(TAG, "Decipher error", e);
                         }
+
                     } else {
                         handleSingleFrameMessageFrame(header, data);
                     }
