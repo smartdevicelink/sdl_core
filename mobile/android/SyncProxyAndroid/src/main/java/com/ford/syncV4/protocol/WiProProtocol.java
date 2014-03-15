@@ -151,24 +151,21 @@ public class WiProProtocol extends AbstractProtocol {
         final byte[] data = protocolMessageConverter.getData();
         serviceType = protocolMessageConverter.getSessionType();
 
-        if (protocolMsg.getServiceType().equals(ServiceType.RPC)) {
 
-            if (getProtocolSecureManager() != null) {
-                try {
-                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(data);
-                    protocolMsg.setData(result);
-                    processFrameToSend(serviceType, sessionID, result);
-                } catch (IOException e) {
-                    DebugTool.logError("Error data coding", e);
-                } catch (InterruptedException e) {
-                    DebugTool.logError("Error data coding", e);
-                }
-            } else {
-                processFrameToSend(serviceType, sessionID, data);
+        if (getProtocolSecureManager() != null) {
+            try {
+                byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.getServiceType(), data);
+                protocolMsg.setData(result);
+                processFrameToSend(serviceType, sessionID, result);
+            } catch (IOException e) {
+                DebugTool.logError("Error data coding", e);
+            } catch (InterruptedException e) {
+                DebugTool.logError("Error data coding", e);
             }
         } else {
             processFrameToSend(serviceType, sessionID, data);
         }
+
 
     }
 
@@ -369,9 +366,9 @@ public class WiProProtocol extends AbstractProtocol {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
                 final byte[] data = accumulator.toByteArray();
-                if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
+                if (getProtocolSecureManager() != null) {
                     try {
-                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(data);
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
                         createBigFrame(header, decipheredData);
                     } catch (IOException e) {
                         Log.i(TAG, "Decipher error", e);
@@ -452,9 +449,9 @@ public class WiProProtocol extends AbstractProtocol {
                         ) {
                     handleMultiFrameMessageFrame(header, data);
                 } else {
-                    if (getProtocolSecureManager() != null && header.getServiceType().equals(ServiceType.RPC)) {
+                    if (getProtocolSecureManager() != null) {
                         try {
-                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(data);
+                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
                             handleSingleFrameMessageFrame(header, decipheredData);
                         } catch (IOException e) {
                             Log.i(TAG, "Decipher error", e);

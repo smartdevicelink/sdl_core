@@ -2,10 +2,13 @@ package com.ford.syncV4.protocol.secure.secureproxy;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import javax.net.ssl.HandshakeCompletedEvent;
@@ -25,6 +28,15 @@ public class ProtocolSecureManager {
     private final CountDownLatch countDownLatchOutput = new CountDownLatch(1);
     private byte[] cypheredData = null;
     private byte[] deCypheredData = null;
+    List<ServiceType> serviceTypesToEncrypt = new ArrayList<ServiceType>();
+
+    public void addServiceToEncrypt(ServiceType serviceType) {
+        serviceTypesToEncrypt.add(serviceType);
+    }
+
+    public void removeServiceTypeToEncrypt(ServiceType serviceType) {
+        serviceTypesToEncrypt.remove(serviceType);
+    }
 
     public ProtocolSecureManager(IHandshakeDataListener listener) {
         this.handshakeDataListener = listener;
@@ -123,18 +135,22 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized byte[] sendDataToProxyServer(byte[] data) throws IOException, InterruptedException {
-        writeDataToProxyServer(data, new IRCCodedDataListener() {
-            @Override
-            public void onRPCPayloadCoded(byte[] bytes) {
-                if (handshakeFinished) {
-                    deCypheredData = Arrays.copyOf(bytes, bytes.length);
-                    countDownLatchOutput.countDown();
+    public synchronized byte[] sendDataToProxyServer(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
+        if (serviceTypesToEncrypt.contains(serviceType)) {
+            writeDataToProxyServer(data, new IRCCodedDataListener() {
+                @Override
+                public void onRPCPayloadCoded(byte[] bytes) {
+                    if (handshakeFinished) {
+                        deCypheredData = Arrays.copyOf(bytes, bytes.length);
+                        countDownLatchOutput.countDown();
+                    }
                 }
-            }
-        });
-        countDownLatchOutput.await();
-        return deCypheredData;
+            });
+            countDownLatchOutput.await();
+            return deCypheredData;
+        } else {
+            return data;
+        }
     }
 
     public synchronized void writeDataToProxyServer(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
@@ -153,17 +169,21 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized byte[] sendDataTOSSLClient(byte[] data) throws IOException, InterruptedException {
-        writeDataToSSLSocket(data, new IRCCodedDataListener() {
-            @Override
-            public void onRPCPayloadCoded(byte[] bytes) {
-                if (handshakeFinished) {
-                    cypheredData = Arrays.copyOf(bytes, bytes.length);
-                    countDownLatchInput.countDown();
+    public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
+        if (serviceTypesToEncrypt.contains(serviceType)) {
+            writeDataToSSLSocket(data, new IRCCodedDataListener() {
+                @Override
+                public void onRPCPayloadCoded(byte[] bytes) {
+                    if (handshakeFinished) {
+                        cypheredData = Arrays.copyOf(bytes, bytes.length);
+                        countDownLatchInput.countDown();
+                    }
                 }
-            }
-        });
-        countDownLatchInput.await();
-        return cypheredData;
+            });
+            countDownLatchInput.await();
+            return cypheredData;
+        } else {
+            return data;
+        }
     }
 }

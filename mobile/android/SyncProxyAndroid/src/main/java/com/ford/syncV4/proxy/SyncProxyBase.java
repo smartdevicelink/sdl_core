@@ -1905,6 +1905,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onHandShakeCompleted() {
+            protocolSecureManager.addServiceToEncrypt(ServiceType.RPC);
             restartRPCProtocolSession();
             notifySessionStarted(currentSession.getSessionId(), "");
         }
