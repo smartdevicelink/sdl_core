@@ -91,6 +91,7 @@ DoHandshakeStep(const void* client_data,  size_t client_data_size,
   if (!pen) {
     return NULL;
   }
+  EnsureBufferSizeEnough(pen);
 
   ret = BIO_read(bioOut_, static_cast<char*>(buffer_), pen);
   // FIXME (EZamakhov): What if handshake data bigget than buffer?

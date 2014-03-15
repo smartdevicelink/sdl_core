@@ -329,10 +329,11 @@ void SecurityManager::SendData(
   // FIXME(EZ): move to SecurityQuery class
   header.query_id = LE_TO_BE32(header.query_id << 8);
 
-  const size_t data_sending_size = sizeof(header) + data_size;
+  const size_t header_size = sizeof(header);
+  const size_t data_sending_size = header_size + data_size;
   uint8_t* data_sending = new uint8_t[data_sending_size];
-  memcpy(data_sending, &header, sizeof(header));
-  memcpy(data_sending + sizeof(header), data, data_size);
+  memcpy(data_sending, &header, header_size);
+  memcpy(data_sending + header_size, data, data_size);
 
   SendBinaryData(connectionKey, data_sending, data_sending_size);
 

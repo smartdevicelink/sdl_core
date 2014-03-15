@@ -86,7 +86,7 @@ ProtocolPacket::~ProtocolPacket() {
   total_packet_size_ = 0;
   packet_id_ = 0;
   if (packet_data_.data) {
-    delete packet_data_.data;
+    delete[] packet_data_.data;
     packet_data_.data = 0;
   }
 }
