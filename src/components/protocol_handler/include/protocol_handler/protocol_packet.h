@@ -301,7 +301,7 @@ class ProtocolPacket {
     ProtocolPacket();
 
     /**
-     * \brief Cconstructor
+     * \brief Constructor
      *
      * \param connectionKey Identifier of connection within wich message
      * is transferred

@@ -49,6 +49,8 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn)
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
+
+
 std::string LastError() {
   // TODO (DChmerev): add error on no key files
   long error = ERR_get_error();
@@ -113,10 +115,13 @@ Encrypt(const void* data,  size_t data_size,
   }
   BIO_write(bioFilter_, data, data_size);
   int len = BIO_ctrl_pending(bioOut_);
+
+  EnsureBufferSizeEnough(len);
   len = BIO_read(bioOut_, buffer_, len);
   if (len < 0)
     return NULL;
   *encrypted_data_size = len;
+
   return buffer_;
 }
 
@@ -133,10 +138,18 @@ Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
   }
   BIO_write(bioIn_, encrypted_data, encrypted_data_size);
   int len = BIO_ctrl_pending(bioFilter_);
-  len = BIO_read(bioFilter_, buffer_, len);
-  if (len < 0)
-    return NULL;
-  *data_size = len;
+  ptrdiff_t offset = 0;
+
+  *data_size = 0;
+  while (len) {
+    EnsureBufferSizeEnough(len + offset);
+    len = BIO_read(bioFilter_, buffer_ + offset, len);
+    if (len < 0)
+      return NULL;
+    *data_size += len;
+    offset += len;
+    len = BIO_ctrl_pending(bioFilter_);
+  }
   return buffer_;
 }
 
@@ -145,6 +158,14 @@ CryptoManagerImpl::SSLContextImpl::
   SSL_shutdown(connection_);
   SSL_free(connection_);
   delete[] buffer_;
+}
+
+void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
+  if (buffer_size_ < size) {
+    delete[] buffer_;
+    buffer_ = new char[size];
+    buffer_size_ = size;
+  }
 }
 
 }  // namespace security_manager

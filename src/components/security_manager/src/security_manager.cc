@@ -134,7 +134,7 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR: {
-      //get internall error from mobile side
+      //get internal error from mobile side
       const char* const error_str = reinterpret_cast<const char*>(message->get_data());
       std::string error("InternalError error received ");
       if(message->get_data_size() && error_str)
@@ -326,7 +326,7 @@ void SecurityManager::SendData(
     const int32_t connectionKey,
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
-  //FIXME(EZ): move to SecurityQuery class
+  // FIXME(EZ): move to SecurityQuery class
   header.query_id = LE_TO_BE32(header.query_id << 8);
 
   const size_t data_sending_size = sizeof(header) + data_size;
@@ -349,7 +349,7 @@ void SecurityManager::SendBinaryData(const int32_t connectionKey,
                                           protocol_handler::PROTOCOL_VERSION_2,
                                           data, data_size,
                                           protocol_handler::kSecure));
-  //Add RawMessage to ProtocolHandler message query
-  //FIXME(EZ): final_message - false?
+  // Add RawMessage to ProtocolHandler message query
+  // FIXME(EZ): final_message - false?
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
 }
