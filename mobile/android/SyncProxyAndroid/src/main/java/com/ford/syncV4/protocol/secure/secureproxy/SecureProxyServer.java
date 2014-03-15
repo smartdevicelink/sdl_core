@@ -88,6 +88,7 @@ public class SecureProxyServer {
             byte[] buffer = new byte[WiProProtocol.MTU_SIZE];
             try {
                 int i;
+
                 while ((i = inputStream.read(buffer)) != -1) {
                     if (sourceStream != null) {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
