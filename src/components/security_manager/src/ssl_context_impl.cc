@@ -93,7 +93,7 @@ DoHandshakeStep(const void* client_data,  size_t client_data_size,
   }
 
   ret = BIO_read(bioOut_, static_cast<char*>(buffer_), pen);
-  // FIXME (DChmerev): What if handshake data bigget than buffer?
+  // FIXME (EZamakhov): What if handshake data bigget than buffer?
   if (ret > 0) {
     *server_data_size = ret;
     return buffer_;
@@ -114,13 +114,15 @@ Encrypt(const void* data,  size_t data_size,
     return NULL;
   }
   BIO_write(bioFilter_, data, data_size);
-  int len = BIO_ctrl_pending(bioOut_);
+  const int len = BIO_ctrl_pending(bioOut_);
 
   EnsureBufferSizeEnough(len);
-  len = BIO_read(bioOut_, buffer_, len);
-  if (len < 0)
+  const int read_size = BIO_read(bioOut_, buffer_, len);
+  //TODO (EZamakhov) : replace to DCHECK
+  assert(len == read_size);
+  if (read_size < 0)
     return NULL;
-  *encrypted_data_size = len;
+  *encrypted_data_size = read_size;
 
   return buffer_;
 }
