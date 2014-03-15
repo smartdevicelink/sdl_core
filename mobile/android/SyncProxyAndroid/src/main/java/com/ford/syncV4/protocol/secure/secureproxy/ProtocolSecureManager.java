@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
+import com.ford.syncV4.util.DebugTool;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -93,7 +94,7 @@ public class ProtocolSecureManager {
         try {
             secureProxyServer.setupServer();
         } catch (IOException e) {
-            Log.e("ProtocolSecureManager", "error", e);
+            DebugTool.logError("Failed to setup secureProxyServer", e);
         }
     }
 
@@ -127,14 +128,13 @@ public class ProtocolSecureManager {
             public void handshakeCompleted(HandshakeCompletedEvent event) {
                 setHandshakeFinished(true);
                 handshakeDataListener.onHandShakeCompleted();
-                Log.i("SSLClient", "GREAT SUCCESS" + event.toString());
+                DebugTool.logInfo("GREAT SUCCESS" + event.toString());
             }
         });
         try {
             sslClient.setupClient();
-
         } catch (IOException e) {
-            Log.e("ProtocolSecureManager", "error", e);
+            DebugTool.logError("Failed to setup sslClient", e);
         }
     }
 
@@ -172,19 +172,29 @@ public class ProtocolSecureManager {
         this.handshakeFinished = handshakeFinished;
     }
 
+    IRCCodedDataListener listenerOFCodedData = new IRCCodedDataListener() {
+        @Override
+        public void onRPCPayloadCoded(byte[] bytes) {
+            if (handshakeFinished) {
+                Log.i("cypheredData.length < 1000","real bytes "+ bytes.length);
+                cypheredData = bytes;
+                Log.i("cypheredData.length < 1000","countDownLatchInput.countDown();");
+                countDownLatchInput.countDown();
+            }
+        }
+    };
 
     public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
         if (serviceTypesToEncrypt.contains(serviceType)) {
-            writeDataToSSLSocket(data, new IRCCodedDataListener() {
-                @Override
-                public void onRPCPayloadCoded(byte[] bytes) {
-                    if (handshakeFinished) {
-                        cypheredData = Arrays.copyOf(bytes, bytes.length);
-                        countDownLatchInput.countDown();
-                    }
-                }
-            });
+            Log.i("cypheredData.length < 1000"," writeDataToSSLSocket(data,listenerOFCodedData);");
+            writeDataToSSLSocket(data,listenerOFCodedData);
+            Log.i("cypheredData.length < 1000","countDownLatchInput.await();");
             countDownLatchInput.await();
+
+            if ( cypheredData.length < 1000 ){
+                Log.i("cypheredData.length < 1000","real data "+ data.length);
+            }
+
             return cypheredData;
         } else {
             return data;

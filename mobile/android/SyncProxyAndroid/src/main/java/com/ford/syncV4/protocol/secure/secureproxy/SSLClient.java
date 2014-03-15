@@ -1,9 +1,8 @@
 package com.ford.syncV4.protocol.secure.secureproxy;
 
-import android.util.Log;
-
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
+import com.ford.syncV4.util.DebugTool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +69,7 @@ public class SSLClient {
                 }
             }
         } catch (IOException e) {
-            Log.e("SSLClient", "error", e);
+            DebugTool.logError("sslClient read data failed ", e);
         }
     }
 
@@ -125,11 +124,11 @@ public class SSLClient {
                 readData();
 
             } catch (IOException e) {
-                Log.e("SecureProxyServer", "error", e);
+                DebugTool.logError("SSLClientReader  fail", e);
             } catch (NoSuchAlgorithmException e) {
-                Log.e("SecureProxyServer", "error", e);
+                DebugTool.logError("SSLClientReader  fail", e);
             } catch (KeyManagementException e) {
-                Log.e("SecureProxyServer", "error", e);
+                DebugTool.logError("SSLClientReader  fail", e);
             }
         }
     }

@@ -490,8 +490,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onSecureServiceStarted(byte version) {
         _connectionListener.onSecureServiceStarted(version);
-
-
     }
 
     @Override

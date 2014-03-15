@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
+import com.ford.syncV4.util.DebugTool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +44,6 @@ public class SecureProxyServer {
     }
 
     public synchronized void writeData(byte[] data) throws IOException {
-
         outputStream.write(data);
     }
 
@@ -76,7 +76,7 @@ public class SecureProxyServer {
                 }
                 readData();
             } catch (IOException e) {
-                Log.e("SecureProxyServer", "error", e);
+                DebugTool.logError("SecureProxyServerReader fail", e);
             }
         }
 
@@ -92,11 +92,12 @@ public class SecureProxyServer {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
                     }
                     if (getRPCPacketListener() != null) {
+                        Log.i("cypheredData.length < 1000","source bytes "+ i);
                         getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
                     }
                 }
             } catch (IOException e) {
-                Log.e("SecureProxyServer", "error", e);
+                DebugTool.logError("SecureProxyServerReader fail", e);
             }
         }
     }

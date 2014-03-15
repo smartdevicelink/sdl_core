@@ -1878,7 +1878,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mSyncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         getSyncConnection().startSecureService();
-
     }
 
 
@@ -1907,6 +1906,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onHandShakeCompleted() {
+            InternalProxyMessage proxyMessage = new OnError("Handshake Completed for service ", new Exception("Handshake Completed"));
+            dispatchInternalMessage(proxyMessage);
+
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 registerAppInterface();
             } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
@@ -2596,6 +2598,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         sendRPCRequestPrivate(msg);
 
         logOnRegisterAppRequest(msg);
+
     }
 
     private void logOnRegisterAppRequest(final RegisterAppInterface msg) {
@@ -3171,6 +3174,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     setWiProVersion(version);
                 }
             }
+
+            InternalProxyMessage proxyMessage = new OnError("Session started", new Exception("Session started"));
+            dispatchInternalMessage(proxyMessage);
+
             if (session.hasService(ServiceType.RPC)) {
                 onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
             }
@@ -3190,6 +3197,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 _proxyListener.onSecureServiceStart();
             }
+
 
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
@@ -3219,18 +3227,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             handleStartServiceNack(serviceType);
         }
 
-        @Override
-        public void onPacketCreated(ProtocolMessage message) {
-            try {
-                protocolSecureManager.writeDataToSSLSocket(message.getData(), new IRCCodedDataListener() {
-                    @Override
-                    public void onRPCPayloadCoded(byte[] bytes) {
-                    }
-                });
-            } catch (IOException e) {
-                Log.e(TAG, "onPacketCreated", e);
-            }
-        }
+
 
         @Override
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,

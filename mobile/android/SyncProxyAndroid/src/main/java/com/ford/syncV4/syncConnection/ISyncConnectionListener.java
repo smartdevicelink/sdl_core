@@ -34,5 +34,5 @@ public interface ISyncConnectionListener {
 
     public void onStartServiceNackReceived(ServiceType serviceType);
 
-    public void onPacketCreated(ProtocolMessage message);
+
 }
