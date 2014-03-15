@@ -1900,14 +1900,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHandshakeDataReceived(byte[] data) {
             ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, ServiceType.Audio_Service);
             dispatchOutgoingMessage(protocolMessage);
         }
 
         @Override
         public void onHandShakeCompleted() {
-            protocolSecureManager.addServiceToEncrypt(ServiceType.RPC);
-            registerAppInterface();
+            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
+                registerAppInterface();
+            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
+                onAudioServiceStarted(currentSession.getSessionId(), "");
+            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
+                onMobileNaviServiceStarted(currentSession.getSessionId(), "");
+            }
         }
     };
 
@@ -1918,7 +1923,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
-        protocolSecureManager.addServiceToEncrypt(ServiceType.RPC);
+        protocolSecureManager.addServiceToEncrypt(ServiceType.Audio_Service);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
     }
@@ -3183,7 +3188,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
-            }else{
+            } else {
                 registerAppInterface();
             }
         }
@@ -3226,11 +3231,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
             if (_wiproVersion == 2) {
-                if (serviceType == ServiceType.Mobile_Nav) {
-                    onMobileNaviServiceStarted(sessionID, correlationID);
-                } else if (serviceType == ServiceType.Audio_Service) {
-                    onAudioServiceStarted(sessionID, correlationID);
-                }
+                handleServiceStarted(serviceType, sessionID, correlationID);
 
                 if (getSyncConnection() == null) {
                     return;
@@ -3239,6 +3240,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     return;
                 }
 
+            }
+        }
+
+        private void handleServiceStarted(ServiceType serviceType, byte sessionID, String correlationID) {
+            if (serviceType == ServiceType.Mobile_Nav) {
+                if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
+                    getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Mobile_Nav);
+                } else {
+                    onMobileNaviServiceStarted(sessionID, correlationID);
+                }
+            } else if (serviceType == ServiceType.Audio_Service) {
+                if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
+                    getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Audio_Service);
+                } else {
+                    onAudioServiceStarted(sessionID, correlationID);
+                }
             }
         }
     }

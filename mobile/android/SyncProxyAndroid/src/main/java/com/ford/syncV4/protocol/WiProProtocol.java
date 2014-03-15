@@ -155,7 +155,6 @@ public class WiProProtocol extends AbstractProtocol {
         if (getProtocolSecureManager() != null) {
             try {
                 byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.getServiceType(), data);
-                protocolMsg.setData(result);
                 processFrameToSend(serviceType, sessionID, result);
             } catch (IOException e) {
                 DebugTool.logError("Error data coding", e);

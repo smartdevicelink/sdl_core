@@ -50,7 +50,7 @@ public class SecureServiceMessageFactory {
         return protocolMessage;
     }
 
-    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData) {
+    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData, ServiceType serviceType) {
 
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);
@@ -61,7 +61,7 @@ public class SecureServiceMessageFactory {
 
         // TODO dirty trick
         byte [] extPayload = new byte[payloadData.length + 1];
-        extPayload[0] = ServiceType.RPC_SERVICE_ID;
+        extPayload[0] = serviceType.getValue();
         System.arraycopy(payloadData, 0, extPayload, 1, payloadData.length);
 
         protocolMessage.setData(extPayload);
