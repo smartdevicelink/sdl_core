@@ -158,14 +158,14 @@ Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
 
 CryptoManagerImpl::SSLContextImpl::
 ~SSLContextImpl() {
-  SSL_shutdown(connection_);
-  SSL_free(connection_);
-  delete[] buffer_;
+  //SSL_shutdown(connection_);
+  // SSL_free(connection_);
+  //delete[] buffer_;
 }
 
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
-    delete[] buffer_;
+    // delete[] buffer_;
     buffer_ = new char[size];
     buffer_size_ = size;
   }
