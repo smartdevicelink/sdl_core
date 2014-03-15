@@ -379,9 +379,9 @@ public class WiProProtocol extends AbstractProtocol {
                         getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
                             @Override
                             public void onRPCPayloadCoded(byte[] bytes) {
-                                if (getProtocolSecureManager().isHandshakeFinished()) {
+
                                     createBigFrame(header, bytes);
-                                }
+
                             }
                         });
 
@@ -471,9 +471,9 @@ public class WiProProtocol extends AbstractProtocol {
                             getProtocolSecureManager().writeDataToProxyServer(data, new IRCCodedDataListener() {
                                 @Override
                                 public void onRPCPayloadCoded(byte[] bytes) {
-                                    if (getProtocolSecureManager().isHandshakeFinished()) {
+
                                         handleSingleFrameMessageFrame(header, bytes);
-                                    }
+                                    
                                 }
                             });
 

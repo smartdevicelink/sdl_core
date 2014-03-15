@@ -16,6 +16,7 @@ import javax.net.ssl.HandshakeCompletedListener;
  */
 public class ProtocolSecureManager {
 
+    private IHandshakeDataListener handshakeDataListener;
     private ISecureProxyServer listener;
     SecureProxyServer secureProxyServer;
     SSLClient sslClient;
@@ -23,8 +24,8 @@ public class ProtocolSecureManager {
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
     private byte[] cypheredData = null;
 
-    public ProtocolSecureManager(ISecureProxyServer listener) {
-        this.listener = listener;
+    public ProtocolSecureManager(IHandshakeDataListener listener) {
+        this.handshakeDataListener = listener;
     }
 
     public void startHandShake() {
@@ -36,7 +37,14 @@ public class ProtocolSecureManager {
     }
 
     private void startSecureProxy() {
-        secureProxyServer = new SecureProxyServer(listener,
+        secureProxyServer = new SecureProxyServer(new ISecureProxyServer() {
+            @Override
+            public void onDataReceived(byte[] data) {
+                if (!handshakeFinished){
+                    handshakeDataListener.onHandshakeDataReceived(data);
+                }
+            }
+        },
                 new ITransportListener() {
                     @Override
                     public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
@@ -100,16 +108,15 @@ public class ProtocolSecureManager {
             @Override
             public void handshakeCompleted(HandshakeCompletedEvent event) {
                 setHandshakeFinished(true);
+                handshakeDataListener.onHandShakeCompleted();
                 Log.i("SSLClient", "GREAT SUCCESS" + event.toString());
-                listener.onHandShakeCompleted();
-
             }
         });
         try {
             sslClient.setupClient();
 
         } catch (IOException e) {
-            Log.e("SecureProxyManager", "error", e);
+            Log.e("ProtocolSecureManager", "error", e);
         }
     }
 
@@ -124,9 +131,6 @@ public class ProtocolSecureManager {
         sslClient.writeData(data);
     }
 
-    public boolean isHandshakeFinished() {
-        return handshakeFinished;
-    }
 
     private synchronized void setHandshakeFinished(boolean handshakeFinished) {
         this.handshakeFinished = handshakeFinished;
@@ -134,20 +138,16 @@ public class ProtocolSecureManager {
 
 
     public synchronized byte[] sendDataTOSSLClient(byte[] data) throws IOException, InterruptedException {
-
         writeDataToSSLSocket(data, new IRCCodedDataListener() {
             @Override
             public void onRPCPayloadCoded(byte[] bytes) {
-                if (isHandshakeFinished()) {
-
+                if (handshakeFinished) {
                     cypheredData = Arrays.copyOf(bytes, bytes.length);
                     countDownLatch.countDown();
                 }
             }
         });
-
         countDownLatch.await();
-
         return cypheredData;
     }
 }

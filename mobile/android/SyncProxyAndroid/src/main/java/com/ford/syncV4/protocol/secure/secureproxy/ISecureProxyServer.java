@@ -7,6 +7,6 @@ public interface ISecureProxyServer {
 
     public void onDataReceived(byte[] data);
 
-    public void onHandShakeCompleted();
+
 
 }

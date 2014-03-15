@@ -19,9 +19,9 @@ import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
+import com.ford.syncV4.protocol.secure.secureproxy.IHandshakeDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
 import com.ford.syncV4.protocol.secure.secureproxy.IRCCodedDataListener;
-import com.ford.syncV4.protocol.secure.secureproxy.ISecureProxyServer;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -1894,17 +1894,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    ISecureProxyServer secureProxyServerListener = new ISecureProxyServer() {
+    IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
+
         @Override
-        public void onDataReceived(byte[] data) {
-            if (protocolSecureManager.isHandshakeFinished()) {
-
-            } else {
-                ProtocolMessage protocolMessage =
-                        SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
-                dispatchOutgoingMessage(protocolMessage);
-            }
-
+        public void onHandshakeDataReceived(byte[] data) {
+            ProtocolMessage protocolMessage =
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
+            dispatchOutgoingMessage(protocolMessage);
         }
 
         @Override
