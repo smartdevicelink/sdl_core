@@ -6,9 +6,9 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
 import javax.net.ssl.HandshakeCompletedEvent;
@@ -28,7 +28,7 @@ public class ProtocolSecureManager {
     private final CountDownLatch countDownLatchOutput = new CountDownLatch(1);
     private byte[] cypheredData = null;
     private byte[] deCypheredData = null;
-    List<ServiceType> serviceTypesToEncrypt = new ArrayList<ServiceType>();
+    Set<ServiceType> serviceTypesToEncrypt = new HashSet<ServiceType>();
 
     public void addServiceToEncrypt(ServiceType serviceType) {
         serviceTypesToEncrypt.add(serviceType);
@@ -36,6 +36,10 @@ public class ProtocolSecureManager {
 
     public void removeServiceTypeToEncrypt(ServiceType serviceType) {
         serviceTypesToEncrypt.remove(serviceType);
+    }
+
+    public boolean containsServiceTypeToEncrypt(ServiceType serviceType) {
+        return serviceTypesToEncrypt.contains(serviceType);
     }
 
     public ProtocolSecureManager(IHandshakeDataListener listener) {

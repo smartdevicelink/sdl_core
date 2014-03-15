@@ -1140,6 +1140,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             protocol.setVersion(_wiproVersion);
 
             mSyncConnection.startTransport();
+
+            setupSecureProxy();
         }
     }
 
@@ -1874,11 +1876,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
-
-
-        setupSecureProxy();
         getSyncConnection().startSecureService();
+
     }
+
 
     private void notifySessionStarted(final byte sessionID, final String correlationID) {
         if (_callbackToUIThread) {
@@ -1906,13 +1907,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHandShakeCompleted() {
             protocolSecureManager.addServiceToEncrypt(ServiceType.RPC);
-            restartRPCProtocolSession();
-            notifySessionStarted(currentSession.getSessionId(), "");
+            registerAppInterface();
         }
     };
 
+    private void registerAppInterface() {
+        restartRPCProtocolSession();
+        notifySessionStarted(currentSession.getSessionId(), "");
+    }
+
     private void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
+        protocolSecureManager.addServiceToEncrypt(ServiceType.RPC);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
     }
@@ -3174,7 +3180,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 _proxyListener.onSecureServiceStart();
             }
-            getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
+
+            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
+                getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
+            }else{
+                registerAppInterface();
+            }
         }
 
         @Override
