@@ -255,8 +255,38 @@ TEST_F(SSLTest, Positive) {
   BIO *bioF = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
 
-  char text[] = "Hello, it's the text to be encrypted";
-  char *encryptedText = new char[1024];
+  char text[] = R"(/*
+     * Copyright (c) 2013, Ford Motor Company
+     * All rights reserved.
+     *
+     * Redistribution and use in source and binary forms, with or without
+     * modification, are permitted provided that the following conditions are met:
+     *
+     * Redistributions of source code must retain the above copyright notice, this
+     * list of conditions and the following disclaimer.
+     *
+     * Redistributions in binary form must reproduce the above copyright notice,
+     * this list of conditions and the following
+     * disclaimer in the documentation and/or other materials provided with the
+     * distribution.
+     *
+     * Neither the name of the Ford Motor Company nor the names of its contributors
+     * may be used to endorse or promote products derived from this software
+     * without specific prior written permission.
+     *
+     * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+     * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+     * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+     * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+     * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+     * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+     * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+     * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+     * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+     * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+     * POSSIBILITY OF SUCH DAMAGE.
+     */)";
+  char *encryptedText = new char[10240];
   char *decryptedText;
   size_t text_len;
 
@@ -268,7 +298,16 @@ TEST_F(SSLTest, Positive) {
   // Decrypt text on server
   decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
 
-  delete[] encryptedText;
+  EXPECT_TRUE(decryptedText != NULL);
+  EXPECT_EQ(strcmp(decryptedText, text), 0);
+
+  // Encrypt text on client side
+  BIO_write(bioF, text, sizeof(text));
+  text_len = BIO_ctrl_pending(bioOut);
+  len = BIO_read(bioOut, encryptedText, text_len);
+
+  // Decrypt text on server
+  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
 
   EXPECT_TRUE(decryptedText != NULL);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
@@ -278,7 +317,18 @@ TEST_F(SSLTest, Positive) {
 
   // Decrypt it on client
   BIO_write(bioIn, encryptedText, text_len);
-  text_len = BIO_read(bioF, decryptedText, 1024);
+  decryptedText = new char[BIO_ctrl_pending(bioF)];
+  text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
+  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  EXPECT_EQ(LastError().length(), 0);
+
+  // Encrypt text on server
+  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, sizeof(text), &text_len));
+
+  // Decrypt it on client
+  BIO_write(bioIn, encryptedText, text_len);
+  decryptedText = new char[BIO_ctrl_pending(bioF)];
+  text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
   EXPECT_EQ(strcmp(decryptedText, text), 0);
   EXPECT_EQ(LastError().length(), 0);
 }

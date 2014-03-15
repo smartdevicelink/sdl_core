@@ -49,14 +49,14 @@
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
- * \brief Class-wraper for information about message for interchanging
+ * \brief Class-wrapper for information about message for interchanging
  * between components.
  */
 class RawMessage {
   public:
     /**
      * \brief Constructor
-     * \param connectionKey Identifier of connection within wich message
+     * \param connectionKey Identifier of connection within which message
      * is transferred
      * \param protocolVersion Version of protocol of the message
      * \param data Message string
@@ -128,7 +128,7 @@ class RawMessage {
 
     /**
      * \brief Version of SmartDeviceLink protocol (currently 1,2)
-     * used for tranferring message.
+     * used for transferring message.
      */
     uint32_t protocol_version_;
 
@@ -143,12 +143,6 @@ class RawMessage {
      *
      */
     bool waiting_;
-
-    /**
-     * \brief Specifies if this is binary data
-     * (used by ProtocolObserver).
-     */
-    bool fully_binary_;
 
     /**
      * \brief Id of connection (for service messages like start/end session)

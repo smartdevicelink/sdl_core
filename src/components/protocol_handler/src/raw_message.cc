@@ -46,7 +46,6 @@ RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
     protocol_version_(protocolVersion),
     service_type_(ServiceTypeFromByte(type)),
     waiting_(false),
-    fully_binary_(false),
     data_size_(data_sz) {
   if (data_sz > 0) {
     data_ = new uint8_t[data_sz];

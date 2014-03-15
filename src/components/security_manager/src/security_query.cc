@@ -73,7 +73,7 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       header_.query_type = INVALID_QUERY_TYPE;
       break;
   }
-  //Conver to Little-Endian and clean high byte
+  // Convert to Little-Endian and clean high byte
   const uint32_t query_id = 0x00FFFFFF &
       BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data));
   switch (query_id) {
@@ -95,7 +95,7 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
   }
   header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
   if(bin_data_size > header_size) {
-    //copy from end of header to end of binary data
+    // copy from end of header to end of binary data
     data_.assign(binary_data + header_size, binary_data + bin_data_size);
   }
   return true;

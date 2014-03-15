@@ -55,9 +55,10 @@ namespace security_manager {
                             size_t* encrypted_data_size);
       virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                             size_t* data_size);
-      bool  IsInitCompleted() const;
+      virtual bool  IsInitCompleted() const;
       virtual ~SSLContextImpl();
      private:
+      void EnsureBufferSizeEnough(size_t size);
       SSL *connection_;
       BIO *bioIn_;
       BIO *bioOut_;
