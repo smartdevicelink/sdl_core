@@ -818,8 +818,8 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
   }
 
   return RawMessagePtr(
-      new RawMessage(connection_key, packet.protocol_version(), packet.data(),
-                     packet.data_size(), packet.service_type()));
+      new RawMessage(connection_key, packet.protocol_version(), packet.packet(),
+                     packet.packet_size(), packet.service_type()));
 }
 
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,

@@ -451,8 +451,8 @@ class ProtocolPacket {
     /**
      *\brief Setter for new data
      */
-    void set_data_bytes(const uint8_t* const  data,
-                        const uint32_t dataBytes);
+    void set_data_bytes(const uint8_t* const  new_data,
+                        const size_t new_data_size);
 
     /**
      *\brief Getter for size of multiframe message

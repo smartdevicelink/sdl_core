@@ -165,7 +165,7 @@ CryptoManagerImpl::SSLContextImpl::
 
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
-    // delete[] buffer_;
+    delete[] buffer_;
     buffer_ = new char[size];
     buffer_size_ = size;
   }

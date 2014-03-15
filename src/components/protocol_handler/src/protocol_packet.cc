@@ -294,17 +294,15 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
 }
 
 void ProtocolPacket::set_data_bytes(
-    const uint8_t * const data, const uint32_t dataBytes){
-  if (dataBytes) {
+    const uint8_t * const new_data, const size_t new_data_size){
+  if (new_data_size && new_data) {
+    packet_data_.totalDataBytes = new_data_size;
     if (packet_data_.data) {
       delete[] packet_data_.data;
-      packet_data_.data = 0;
     }
-    packet_data_.totalDataBytes = dataBytes;
-    packet_data_.data = new uint8_t[dataBytes];
-    if(data)
-      memcpy(packet_data_.data, data, packet_data_.totalDataBytes);
-    }
+    packet_data_.data = new uint8_t[packet_data_.totalDataBytes];
+    memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
+  }
 }
 
 uint32_t ProtocolPacket::total_data_bytes() const {
