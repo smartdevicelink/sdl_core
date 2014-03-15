@@ -563,7 +563,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
-  const RawMessagePtr rawMessage = DecrypteMessage(connection_id, *packet);
+  const RawMessagePtr rawMessage = DecryptMessage(connection_id, *packet);
   if(!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
@@ -635,7 +635,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
       ProtocolPacket* completePacket = it->second.get();
 
-      const RawMessagePtr rawMessage = DecrypteMessage(connection_id, *completePacket);
+      const RawMessagePtr rawMessage = DecryptMessage(connection_id, *completePacket);
       if(!rawMessage){
         LOG4CXX_TRACE_EXIT(logger_);
         return RESULT_FAIL;
@@ -786,7 +786,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
   SendFrame(message->connection_key(), (*message.get()));
 }
 
-RawMessagePtr ProtocolHandlerImpl::DecrypteMessage(
+RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
     const ConnectionID connection_id, ProtocolPacket &packet) {
   if (!session_observer_) {
     LOG4CXX_ERROR( logger_,

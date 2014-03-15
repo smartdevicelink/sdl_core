@@ -410,7 +410,7 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageToMobile& message);
 
     // FIXME (EZamakhov): add brief
-    RawMessagePtr DecrypteMessage(const ConnectionID connection_id,
+    RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
 
   private:
