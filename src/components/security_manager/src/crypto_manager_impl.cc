@@ -79,8 +79,7 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
     return NULL;
 
   SSL_set_accept_state(conn);
-  int ret = SSL_accept(conn);
-  // FIXME (DChmerev): Unused ret value
+  // TODO (EZamakhov) : add return NULL pointer on no keys
   return new SSLContextImpl(conn);
 }
 

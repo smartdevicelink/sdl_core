@@ -301,13 +301,11 @@ void LifeCycle::StopComponents() {
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
   delete security_manager_;
-
-  crypto_manager_->Finish();
-  delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER

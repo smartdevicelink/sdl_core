@@ -460,6 +460,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
                    security_manager::LastError());
       return RESULT_FAIL;
     }
+    LOG4CXX_INFO(logger_, "Encrypted " << data_size << " bytes.");
   }
 
   // Send data
@@ -569,6 +570,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                            security_manager::LastError());
               return RESULT_FAIL;
             }
+          LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes.");
           packet->set_data_bytes(new_data, new_data_size);
       }
 
