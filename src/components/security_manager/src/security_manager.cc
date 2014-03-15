@@ -283,6 +283,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
                       error);
     return false;
   }
+
   //answer with the same header as income message
   SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
   return true;

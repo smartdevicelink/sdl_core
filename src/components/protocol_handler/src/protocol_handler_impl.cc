@@ -378,41 +378,38 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    const uint32_t data_size, const uint8_t* data, const bool compress) {
+    uint32_t data_size, const uint8_t* data, const bool compress) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
     }
+
+  DCHECK(session_observer_);
   const int32_t connection_key =
       session_observer_->KeyFromPair(connection_id, session_id);
-
-  ProtocolFramePtr ptr;
 
   security_manager::SSLContext* context =
       session_observer_->GetSSLContext(
         connection_key, ServiceTypeFromByte(service_type));
   if(context) {
     size_t new_data_size;
-    const uint8_t * new_data = static_cast<uint8_t*>
+    data = static_cast<uint8_t*>
         (context->Encrypt(data, data_size, &new_data_size));
-    if(!new_data) {
-      LOG4CXX_WARN(logger_, "Encryption fail: " <<
+    data_size = new_data_size;
+    if(!data) {
+      LOG4CXX_WARN(logger_, "Encryption failed: " <<
                    security_manager::LastError());
       return RESULT_FAIL;
     }
-    ptr.reset(
-          new protocol_handler::ProtocolPacket(
-            connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
-            session_id, new_data_size, message_counters_[session_id]++, new_data));
+    LOG4CXX_INFO(logger_, "Encrypted " << data_size << " bytes.");
   }
-  else {
-    ptr.reset(
+
+  ProtocolFramePtr ptr (
           new protocol_handler::ProtocolPacket(
             connection_id, versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
             session_id, data_size, message_counters_[session_id]++, data));
-  }
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -538,48 +535,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       return HandleControlMessage(connection_id, packet);
     }
     case FRAME_TYPE_SINGLE: {
-      LOG4CXX_INFO(
-          logger_,
-            "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
-            << ConvertPacketDataToString(packet->data(), packet->data_size()));
-
-      if (!session_observer_) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Cannot handle message from Transport"
-            << " Manager: ISessionObserver doesn't exist.");
-
-        LOG4CXX_TRACE_EXIT(logger_);
-        return RESULT_FAIL;
-      }
-
-      const int32_t connection_key =
-          session_observer_->KeyFromPair(connection_id, packet->session_id());
-
-      security_manager::SSLContext* context =
-          session_observer_->GetSSLContext(
-            connection_key, ServiceTypeFromByte(packet->service_type()));
-      if(context) {
-          uint8_t* data = packet->data();
-          size_t data_size = packet->data_size();
-          size_t new_data_size;
-          const uint8_t *new_data = static_cast<uint8_t *>
-              (context->Decrypt(data, data_size, &new_data_size));
-          if(!new_data){
-              LOG4CXX_WARN(logger_, "Decryption fail: " <<
-                           security_manager::LastError());
-              return RESULT_FAIL;
-            }
-          LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes.");
-          packet->set_data_bytes(new_data, new_data_size);
-      }
-
-      RawMessagePtr raw_message(
-          new RawMessage(connection_key, packet->protocol_version(), packet->data(),
-                         packet->data_size(), packet->service_type()));
-
-      NotifySubscribers(raw_message);
-      break;
+      return HandleSingleFrameMessage(connection_id, packet);
     }
     case FRAME_TYPE_FIRST:
     case FRAME_TYPE_CONSECUTIVE: {
@@ -594,6 +550,25 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
     }
   }
 
+  LOG4CXX_TRACE_EXIT(logger_);
+  return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
+    ConnectionID connection_id, const ProtocolFramePtr &packet) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  LOG4CXX_INFO(
+      logger_,
+        "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
+        << ConvertPacketDataToString(packet->data(), packet->data_size()));
+
+  const RawMessagePtr rawMessage = DecrypteMessage(connection_id, *packet);
+  if(!rawMessage) {
+    LOG4CXX_TRACE_EXIT(logger_);
+    return RESULT_FAIL;
+    }
+  NotifySubscribers(rawMessage);
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
 }
@@ -659,10 +634,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       }
 
       ProtocolPacket* completePacket = it->second.get();
-      RawMessage* rawMessage = new RawMessage(
-          key, completePacket->protocol_version(), completePacket->data(),
-          completePacket->total_data_bytes(), completePacket->service_type());
 
+      const RawMessagePtr rawMessage = DecrypteMessage(connection_id, *completePacket);
+      if(!rawMessage){
+        LOG4CXX_TRACE_EXIT(logger_);
+        return RESULT_FAIL;
+        }
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -807,6 +784,42 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
       " protocolVersion " << message->protocol_version());
 
   SendFrame(message->connection_key(), (*message.get()));
+}
+
+RawMessagePtr ProtocolHandlerImpl::DecrypteMessage(
+    const ConnectionID connection_id, ProtocolPacket &packet) {
+  if (!session_observer_) {
+    LOG4CXX_ERROR( logger_,
+        "Cannot handle message from Transport"
+        << " Manager: ISessionObserver doesn't exist.");
+    //return empty Ptr on error
+    return RawMessagePtr();
+  }
+  const int32_t connection_key =
+      session_observer_->KeyFromPair(connection_id, packet.session_id());
+
+  security_manager::SSLContext* context =
+      session_observer_->GetSSLContext(
+        connection_key, ServiceTypeFromByte(packet.service_type()));
+  if(context) {
+      const uint8_t* data = packet.data();
+      const size_t data_size = packet.data_size();
+      size_t new_data_size;
+      const uint8_t *new_data = static_cast<uint8_t *>
+          (context->Decrypt(data, data_size, &new_data_size));
+      if(!new_data || !new_data_size){
+          LOG4CXX_WARN(logger_, "Decryption failed: " <<
+                       security_manager::LastError());
+          //return empty Ptr on error
+          return RawMessagePtr();
+        }
+      LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes.");
+      packet.set_data_bytes(new_data, new_data_size);
+  }
+
+  return RawMessagePtr(
+      new RawMessage(connection_key, packet.protocol_version(), packet.data(),
+                     packet.data_size(), packet.service_type()));
 }
 
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,

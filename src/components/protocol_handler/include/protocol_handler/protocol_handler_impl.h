@@ -298,12 +298,11 @@ class ProtocolHandlerImpl
      * \param compress Compression flag
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendSingleFrameMessage(
-      ConnectionID connection_id,
+    RESULT_CODE SendSingleFrameMessage(ConnectionID connection_id,
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      const uint32_t data_size,
+      uint32_t data_size,
       const uint8_t* data,
       const bool compress);
 
@@ -353,6 +352,16 @@ class ProtocolHandlerImpl
       const ProtocolFramePtr& packet);
 
     /**
+     * \brief Handles message received in single frame.
+     * \param connection_handle Identifier of connection through which message
+     * is received.
+     * \param packet Frame of message with protocol header.
+     * \return \saRESULT_CODE Status of operation
+     */
+    RESULT_CODE HandleSingleFrameMessage(
+        ConnectionID connection_id ,
+        const ProtocolFramePtr& packet);
+    /**
      * \brief Handles message received in multiple frames. Collects all frames
      * of message.
      * \param connection_handle Identifier of connection through which message
@@ -399,6 +408,11 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageFromMobile& message);
     // CALLED ON raw_ford_messages_to_mobile_ thread!
     void Handle(const impl::RawFordMessageToMobile& message);
+
+    // FIXME (EZamakhov): add brief
+    RawMessagePtr DecrypteMessage(const ConnectionID connection_id,
+        ProtocolPacket &packet);
+
   private:
     /**
      * \brief For logging.
