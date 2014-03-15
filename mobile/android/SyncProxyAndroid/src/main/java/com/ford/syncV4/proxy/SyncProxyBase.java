@@ -1906,8 +1906,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onHandShakeCompleted() {
-            InternalProxyMessage proxyMessage = new OnError("Handshake Completed for service ", new Exception("Handshake Completed"));
-            dispatchInternalMessage(proxyMessage);
 
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 registerAppInterface();
@@ -3184,9 +3182,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     setWiProVersion(version);
                 }
             }
-
-            InternalProxyMessage proxyMessage = new OnError("Session started", new Exception("Session started"));
-            dispatchInternalMessage(proxyMessage);
 
             if (session.hasService(ServiceType.RPC)) {
                 onRPCProtocolServiceStarted(session.getSessionId(), correlationID);

@@ -176,25 +176,31 @@ public class ProtocolSecureManager {
         @Override
         public void onRPCPayloadCoded(byte[] bytes) {
             if (handshakeFinished) {
-                Log.i("cypheredData.length < 1000","real bytes "+ bytes.length);
                 cypheredData = bytes;
-                Log.i("cypheredData.length < 1000","countDownLatchInput.countDown();");
+                if (cypheredData != null) {
+                    Log.i("cypheredData.length < 1000", " onRPCPayloadCoded " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
+                }
                 countDownLatchInput.countDown();
+                if (cypheredData != null) {
+                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown(); " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
+                }
             }
         }
     };
 
     public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
         if (serviceTypesToEncrypt.contains(serviceType)) {
-            Log.i("cypheredData.length < 1000"," writeDataToSSLSocket(data,listenerOFCodedData);");
-            writeDataToSSLSocket(data,listenerOFCodedData);
-            Log.i("cypheredData.length < 1000","countDownLatchInput.await();");
-            countDownLatchInput.await();
-
-            if ( cypheredData.length < 1000 ){
-                Log.i("cypheredData.length < 1000","real data "+ data.length);
+            String msg = "Start writeDataToSSLSocket with data " + data.length + " thread:" + Thread.currentThread().getName();
+            Log.i("cypheredData.length < 1000", msg);
+            writeDataToSSLSocket(data, listenerOFCodedData);
+            if (cypheredData != null) {
+                Log.i("cypheredData.length < 1000", "Stop writeDataToSSLSocket with data " + data.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
             }
-
+            Log.i("cypheredData.length < 1000", "countDownLatchInput.await();");
+            countDownLatchInput.await();
+            if (cypheredData != null) {
+                Log.i("cypheredData.length < 1000", " countDownLatchInput.await() " + data.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
+            }
             return cypheredData;
         } else {
             return data;
