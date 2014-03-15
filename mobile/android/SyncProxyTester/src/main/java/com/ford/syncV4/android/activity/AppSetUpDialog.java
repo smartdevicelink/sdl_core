@@ -26,6 +26,7 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
@@ -57,6 +58,10 @@ public class AppSetUpDialog extends DialogFragment {
                 getActivity().LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
+        String[] services = new String[]{ServiceType.RPC_NAME, ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
+        ArrayAdapter<String> cypherProtocolAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, services);
+        cypherProtocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
@@ -77,6 +82,7 @@ public class AppSetUpDialog extends DialogFragment {
         final RadioGroup videoSourceGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupVideoSource);
         final EditText appNameEditText = (EditText) view.findViewById(R.id.selectprotocol_appName);
+        final Spinner serviceSpinner = (Spinner) view.findViewById(R.id.selectprotocol_cypher_service);
         final Spinner langSpinner = (Spinner) view.findViewById(R.id.selectprotocol_lang);
         final Spinner hmiLangSpinner = (Spinner) view.findViewById(R.id.selectprotocol_hmiLang);
         final RadioGroup transportGroup = (RadioGroup) view.findViewById(
@@ -112,6 +118,7 @@ public class AppSetUpDialog extends DialogFragment {
 
         langSpinner.setAdapter(langAdapter);
         hmiLangSpinner.setAdapter(langAdapter);
+        serviceSpinner.setAdapter(cypherProtocolAdapter);
 
         // display current configs
         final SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
@@ -123,6 +130,8 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_DEFAULT_NAVI_VIDEOSOURCE);
         String appName = prefs.getString(Const.PREFS_KEY_APPNAME,
                 Const.PREFS_DEFAULT_APPNAME);
+        String cypherService = prefs.getString(Const.PREFS_KEY_CYPHER_SERVICE,
+                Const.PREFS_DEFAULT_CYPHER_SERVICE);
         Language lang = Language.valueOf(prefs.getString(Const.PREFS_KEY_LANG,
                 Const.PREFS_DEFAULT_LANG));
         Language hmiLang = Language.valueOf(prefs.getString(
@@ -145,6 +154,7 @@ public class AppSetUpDialog extends DialogFragment {
         appNameEditText.setText(appName);
         langSpinner.setSelection(langAdapter.getPosition(lang));
         hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
+        serviceSpinner.setSelection(cypherProtocolAdapter.getPosition(cypherService));
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
         mNSDUseToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
@@ -179,6 +189,7 @@ public class AppSetUpDialog extends DialogFragment {
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem()).name();
                         String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
+                        String cypherService = (String) serviceSpinner.getSelectedItem();
                         int transportType = Const.Transport.KEY_USB;
                         switch (transportGroup.getCheckedRadioButtonId()) {
                             case R.id.selectprotocol_radioWiFi:
@@ -203,6 +214,7 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putInt(Const.PREFS_KEY_NAVI_VIDEOSOURCE, videoSource)
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)
+                                .putString(Const.PREFS_KEY_CYPHER_SERVICE, cypherService)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE, transportType)
                                 .putString(

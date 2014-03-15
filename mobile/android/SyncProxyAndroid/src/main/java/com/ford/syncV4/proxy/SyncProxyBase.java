@@ -165,6 +165,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
     private IRPCMessageHandler rpcMessageHandler;
+    private static ServiceType serviceToCypher = ServiceType.RPC;
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -1900,7 +1901,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHandshakeDataReceived(byte[] data) {
             ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, ServiceType.Audio_Service);
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, serviceToCypher);
             dispatchOutgoingMessage(protocolMessage);
         }
 
@@ -1923,7 +1924,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
-        protocolSecureManager.addServiceToEncrypt(ServiceType.Audio_Service);
+        protocolSecureManager.addServiceToEncrypt(serviceToCypher);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
     }
@@ -3078,6 +3079,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void setRPCMessageHandler(IRPCMessageHandler RPCMessageHandler) {
         this.rpcMessageHandler = RPCMessageHandler;
+    }
+
+    public static void setServiceToCypher(ServiceType typeToCypher) {
+        serviceToCypher = typeToCypher;
     }
 
     // Private Class to Interface with SyncConnection

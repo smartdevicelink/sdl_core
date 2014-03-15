@@ -72,7 +72,7 @@
                 android:ems="10"
                 android:inputType="textCapSentences"
                 android:maxLength="25"
-                android:text="@string/selectprotocol_appNameDefault"></EditText>
+                android:text="@string/selectprotocol_appNameDefault" />
         </LinearLayout>
 
         <LinearLayout
@@ -117,6 +117,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:text="Select Service To Cypher"
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <Spinner
+                android:id="@+id/selectprotocol_cypher_service"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
 
         <RadioGroup
