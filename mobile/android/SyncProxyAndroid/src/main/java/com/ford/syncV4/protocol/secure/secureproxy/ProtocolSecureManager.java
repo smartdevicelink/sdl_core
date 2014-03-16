@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
+import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -157,9 +159,23 @@ public class ProtocolSecureManager {
         }
     }
 
+
+    public byte[] sendDataToProxyServerByteByByte(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
+        if (serviceTypesToEncrypt.contains(serviceType)) {
+            IRCCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
+            writeDataToProxyServer(data, listenerOfDeCodedData);
+            countDownLatchOutput.await();
+            return deCypheredData;
+        } else {
+            return data;
+        }
+    }
+
+
     public synchronized void writeDataToProxyServer(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
         sslClient.setRPCPacketListener(ircCodedDataListener);
         secureProxyServer.writeData(data);
+
     }
 
     public synchronized void writeDataToSSLSocket(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
@@ -209,5 +225,44 @@ public class ProtocolSecureManager {
 
     public void reportAnError(Exception e) {
         handshakeDataListener.onError(e);
+    }
+
+    private class RPCDeCodedDataListener implements IRCCodedDataListener {
+
+        ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
+
+        final int bytesToExpectForHeader = 32;
+        int bytesReceived = 0;
+        int jsonSize = 0;
+
+        @Override
+        public void onRPCPayloadCoded(byte[] bytes) {
+            if (handshakeFinished) {
+
+                try {
+                    bOutput.write(bytes);
+                    bytesReceived += bytes.length;
+                } catch (IOException e) {
+                    DebugTool.logError("Failed to parse frame", e);
+                } finally {
+                    countDownLatchOutput.countDown();
+                }
+                if (bytesReceived > bytesToExpectForHeader) {
+                    jsonSize = getJsonSizeFromHeader(Arrays.copyOfRange(bOutput.toByteArray(), 0, 32));
+                }
+
+                if (jsonSize != 0 && bOutput.size() - 12 == jsonSize) {
+                    deCypheredData = bOutput.toByteArray();
+                    countDownLatchOutput.countDown();
+                    bytesReceived = 0;
+                    jsonSize = 0;
+                }
+            }
+        }
+
+        private int getJsonSizeFromHeader(byte[] bytes) {
+            int jsonSize = BitConverter.intFromByteArray(bytes, 8);
+            return jsonSize;
+        }
     }
 }

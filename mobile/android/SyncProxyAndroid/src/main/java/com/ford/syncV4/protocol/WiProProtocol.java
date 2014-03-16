@@ -369,7 +369,7 @@ public class WiProProtocol extends AbstractProtocol {
                 final byte[] data = accumulator.toByteArray();
                 if (getProtocolSecureManager() != null) {
                     try {
-                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.getServiceType(), data);
                         createBigFrame(header, decipheredData);
                     } catch (IOException e) {
                         DebugTool.logError("Decipher error", e);
@@ -452,7 +452,8 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     if (getProtocolSecureManager() != null) {
                         try {
-                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
+                            //byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
+                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.getServiceType(), data);
                             handleSingleFrameMessageFrame(header, decipheredData);
                         } catch (IOException e) {
                             Log.i(TAG, "Decipher error", e);

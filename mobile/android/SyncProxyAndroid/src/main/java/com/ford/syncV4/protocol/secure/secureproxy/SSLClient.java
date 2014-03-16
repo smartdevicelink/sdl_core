@@ -29,6 +29,7 @@ public class SSLClient {
     private SSLClientReader sslClientReader;
     private IRCCodedDataListener RPCPacketListener;
 
+
     public SSLClient(ITransportListener transportListener, HandshakeCompletedListener handshakeCompletedListener) {
         this.transportListener = transportListener;
         this.handshakeCompletedListener = handshakeCompletedListener;
