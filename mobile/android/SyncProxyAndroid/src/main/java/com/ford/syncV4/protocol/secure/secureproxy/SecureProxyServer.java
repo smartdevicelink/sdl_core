@@ -1,7 +1,5 @@
 package com.ford.syncV4.protocol.secure.secureproxy;
 
-import android.util.Log;
-
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.util.DebugTool;
@@ -94,7 +92,6 @@ public class SecureProxyServer {
                         sourceStream.onDataReceived(Arrays.copyOf(buffer, i));
                     }
                     if (getRPCPacketListener() != null) {
-                        Log.i("cypheredData.length < 1000", "source bytes " + i);
                         getRPCPacketListener().onRPCPayloadCoded(Arrays.copyOf(buffer, i));
                     }
                 }

@@ -27,8 +27,25 @@ public class ProtocolSecureManager {
     SecureProxyServer secureProxyServer;
     SSLClient sslClient;
     private boolean handshakeFinished;
-    private final CountDownLatch countDownLatchInput = new CountDownLatch(1);
-    private final CountDownLatch countDownLatchOutput = new CountDownLatch(1);
+    private CountDownLatch countDownLatchInput = new CountDownLatch(1);
+
+    public synchronized CountDownLatch getCountDownLatchOutput() {
+        return countDownLatchOutput;
+    }
+
+    public synchronized void setCountDownLatchOutput(CountDownLatch countDownLatchOutput) {
+        this.countDownLatchOutput = countDownLatchOutput;
+    }
+
+    public synchronized CountDownLatch getCountDownLatchInput() {
+        return countDownLatchInput;
+    }
+
+    public synchronized void setCountDownLatchInput(CountDownLatch countDownLatchInput) {
+        this.countDownLatchInput = countDownLatchInput;
+    }
+
+    private CountDownLatch countDownLatchOutput = new CountDownLatch(1);
     private byte[] cypheredData = null;
     private byte[] deCypheredData = null;
     Set<ServiceType> serviceTypesToEncrypt = new HashSet<ServiceType>();
@@ -164,7 +181,7 @@ public class ProtocolSecureManager {
         if (serviceTypesToEncrypt.contains(serviceType)) {
             IRCCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
             writeDataToProxyServer(data, listenerOfDeCodedData);
-            countDownLatchOutput.await();
+            getCountDownLatchOutput().await();
             return deCypheredData;
         } else {
             return data;
@@ -188,35 +205,15 @@ public class ProtocolSecureManager {
         this.handshakeFinished = handshakeFinished;
     }
 
-    IRCCodedDataListener listenerOFCodedData = new IRCCodedDataListener() {
-        @Override
-        public void onRPCPayloadCoded(byte[] bytes) {
-            if (handshakeFinished) {
-                cypheredData = bytes;
-                if (cypheredData != null) {
-                    Log.i("cypheredData.length < 1000", " onRPCPayloadCoded " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-                }
-                countDownLatchInput.countDown();
-                if (cypheredData != null) {
-                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown(); " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-                }
-            }
-        }
-    };
 
     public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
         if (serviceTypesToEncrypt.contains(serviceType)) {
-            String msg = "Start writeDataToSSLSocket with data " + data.length + " thread:" + Thread.currentThread().getName();
-            Log.i("cypheredData.length < 1000", msg);
+            RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
+            Log.i("cypheredData.length < 1000", "data.length" + data.length);
+            listenerOFCodedData.setOriginalLength( data.length);
             writeDataToSSLSocket(data, listenerOFCodedData);
-            if (cypheredData != null) {
-                Log.i("cypheredData.length < 1000", "Stop writeDataToSSLSocket with data " + data.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-            }
-            Log.i("cypheredData.length < 1000", "countDownLatchInput.await();");
-            countDownLatchInput.await();
-            if (cypheredData != null) {
-                Log.i("cypheredData.length < 1000", " countDownLatchInput.await() " + data.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-            }
+            getCountDownLatchInput().await();
+            Log.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
             return cypheredData;
         } else {
             return data;
@@ -235,6 +232,10 @@ public class ProtocolSecureManager {
         int bytesReceived = 0;
         int jsonSize = 0;
 
+        private RPCDeCodedDataListener() {
+            setCountDownLatchOutput(new CountDownLatch(1));
+        }
+
         @Override
         public void onRPCPayloadCoded(byte[] bytes) {
             if (handshakeFinished) {
@@ -244,7 +245,6 @@ public class ProtocolSecureManager {
                     bytesReceived += bytes.length;
                 } catch (IOException e) {
                     DebugTool.logError("Failed to parse frame", e);
-                } finally {
                     countDownLatchOutput.countDown();
                 }
                 if (bytesReceived > bytesToExpectForHeader) {
@@ -256,6 +256,8 @@ public class ProtocolSecureManager {
                     countDownLatchOutput.countDown();
                     bytesReceived = 0;
                     jsonSize = 0;
+                    bOutput = new ByteArrayOutputStream();
+
                 }
             }
         }
@@ -263,6 +265,61 @@ public class ProtocolSecureManager {
         private int getJsonSizeFromHeader(byte[] bytes) {
             int jsonSize = BitConverter.intFromByteArray(bytes, 8);
             return jsonSize;
+        }
+    }
+
+    private class RPCCodedDataListener implements IRCCodedDataListener {
+
+        ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
+
+        public synchronized int getOriginalLength() {
+            return originalLength;
+        }
+
+        public synchronized void setOriginalLength(int originalLength) {
+            this.originalLength = originalLength;
+        }
+
+        int originalLength;
+        int bytesReceived;
+        int count = 0;
+
+        private RPCCodedDataListener() {
+
+            setCountDownLatchInput(new CountDownLatch(1));
+        }
+
+        @Override
+        public void onRPCPayloadCoded(byte[] bytes) {
+            if (handshakeFinished) {
+
+                try {
+                    bOutput.write(bytes);
+                    count++;
+                    bytesReceived += bytes.length;
+                } catch (IOException e) {
+                    DebugTool.logError("Failed to code frame", e);
+                    countDownLatchInput.countDown();
+                }
+                Log.i("cypheredData.length < 1000", " bytesReceived " + bytesReceived + " originalLength " + getOriginalLength() + " thread:" + Thread.currentThread().getName());
+                if (bytesReceived > getOriginalLength()) {
+                    cypheredData = bOutput.toByteArray();
+                    bOutput = new ByteArrayOutputStream();
+                    bytesReceived = 0;
+                    setOriginalLength(0);
+                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown()");
+                    countDownLatchInput.countDown();
+                }
+
+//                cypheredData = bytes;
+//                if (cypheredData != null) {
+//                    Log.i("cypheredData.length < 1000", " onRPCPayloadCoded " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
+//                }
+//                countDownLatchInput.countDown();
+//                if (cypheredData != null) {
+//                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown(); " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
+//                }
+            }
         }
     }
 }
