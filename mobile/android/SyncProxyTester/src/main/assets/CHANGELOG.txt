@@ -1,4 +1,5 @@
 [CW11]
+* SyncProxyAndroid SDK: change RPC coded frame decode procedure
 + SyncProxyTester: added ability to choose service to cypher
 + SyncProxyAndroid SDK: added secure RPC service
 - SyncProxyAndroid SDK: removed secure audio encryption service
