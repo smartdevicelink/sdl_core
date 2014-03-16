@@ -451,7 +451,7 @@ class ProtocolPacket {
     /**
      *\brief Setter for new data
      */
-    void set_data_bytes(const uint8_t* const  new_data,
+    void set_data(const uint8_t* const  new_data,
                         const size_t new_data_size);
 
     /**

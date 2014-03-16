@@ -814,12 +814,12 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
           return RawMessagePtr();
         }
       LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes.");
-      packet.set_data_bytes(new_data, new_data_size);
+      packet.set_data(new_data, new_data_size);
   }
 
   return RawMessagePtr(
-      new RawMessage(connection_key, packet.protocol_version(), packet.packet(),
-                     packet.packet_size(), packet.service_type()));
+      new RawMessage(connection_key, packet.protocol_version(), packet.data(),
+                     packet.total_data_bytes(), packet.service_type()));
 }
 
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,

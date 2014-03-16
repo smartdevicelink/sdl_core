@@ -293,7 +293,7 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
     }
 }
 
-void ProtocolPacket::set_data_bytes(
+void ProtocolPacket::set_data(
     const uint8_t * const new_data, const size_t new_data_size){
   if (new_data_size && new_data) {
     packet_data_.totalDataBytes = new_data_size;
