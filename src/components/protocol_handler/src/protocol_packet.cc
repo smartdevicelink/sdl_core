@@ -297,9 +297,7 @@ void ProtocolPacket::set_data(
     const uint8_t * const new_data, const size_t new_data_size){
   if (new_data_size && new_data) {
     packet_data_.totalDataBytes = new_data_size;
-    if (packet_data_.data) {
-      delete[] packet_data_.data;
-    }
+    delete[] packet_data_.data;
     packet_data_.data = new uint8_t[packet_data_.totalDataBytes];
     memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
   }

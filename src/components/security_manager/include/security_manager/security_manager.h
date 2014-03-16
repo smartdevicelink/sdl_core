@@ -85,7 +85,7 @@ public:
    * Empty* overriden ProtocolObserver::OnMessageReceived method
    * \param message Message with supporting params received
    */
-  void OnMobileMessageSent(const protocol_handler::RawMessagePtr& message) OVERRIDE;
+  void OnMobileMessageSent(const protocol_handler::RawMessagePtr&) OVERRIDE;
 
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions

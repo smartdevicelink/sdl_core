@@ -47,7 +47,7 @@ void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kSecure) {
-    LOG4CXX_WARN(logger_, "Incorrect message service type of income message"
+    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
                  << message->service_type());
     return;
   }
@@ -71,8 +71,8 @@ void SecurityManager::OnMessageReceived(
 }
 
 void SecurityManager::OnMobileMessageSent(
-    const protocol_handler::RawMessagePtr &message) {
-  LOG4CXX_INFO(logger_, "OnMobileMessageSent");
+    const protocol_handler::RawMessagePtr &) {
+//  LOG4CXX_INFO(logger_, "OnMobileMessageSent");
 }
 
 void SecurityManager::set_session_observer(
