@@ -35,11 +35,10 @@ then
 fi
 
 git config user.name $FIRST_NAME" "$LAST_NAME
-echo git config user.email $EMAIL
+git config user.email $EMAIL
 
 
-MESSAGE_DATA="Reason:\n\nNot a subject for review"
-MESSAGE_DATA="Reason:\n\nNot a subject for review"
+MESSAGE_DATA="Not a subject for review\n\n\tReason:"
 MESSGAGE_FILE_NAME="default_message"
 
 echo -e $MESSAGE_DATA > .git/$MESSGAGE_FILE_NAME 
