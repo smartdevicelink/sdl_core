@@ -207,17 +207,16 @@ public class ProtocolSecureManager {
 
 
     public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
-        if (serviceTypesToEncrypt.contains(serviceType)) {
-            RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
-            Log.i("cypheredData.length < 1000", "data.length" + data.length);
-            listenerOFCodedData.setOriginalLength( data.length);
-            writeDataToSSLSocket(data, listenerOFCodedData);
-            getCountDownLatchInput().await();
-            Log.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
-            return cypheredData;
-        } else {
+        if (!serviceTypesToEncrypt.contains(serviceType)) {
             return data;
         }
+        RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
+        Log.i("cypheredData.length < 1000", "data.length" + data.length);
+        listenerOFCodedData.setOriginalLength(data.length);
+        writeDataToSSLSocket(data, listenerOFCodedData);
+        getCountDownLatchInput().await();
+        Log.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
+        return cypheredData;
     }
 
     public void reportAnError(Exception e) {
