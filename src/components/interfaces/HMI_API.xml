@@ -2418,6 +2418,7 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
+  
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2429,6 +2430,7 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
+  
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>

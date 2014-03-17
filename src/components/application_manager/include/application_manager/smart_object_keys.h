@@ -293,6 +293,7 @@ const char display_type[] = "displayType";
 const char text_fields[] = "textFields";
 const char media_clock_formats[] = "mediaClockFormats";
 const char graphic_supported[] = "graphicSupported";
+const char image_fields[] = "imageFields";
 const char templates_available[] = "templatesAvailable";
 const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
