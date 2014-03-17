@@ -16,13 +16,19 @@ import com.ford.syncV4.transport.TransportType;
 public class AppIdManager {
 
     public static String getAppIdByTransport(TransportType transportType) {
+        if (transportType == null) {
+            throw new NullPointerException(AppIdManager.class.getSimpleName() +
+                    " getAppIdByTransport, transport can not be NULL");
+        }
         switch (transportType) {
             case USB:
                 return FlavorConst.APPID_USB;
             case BLUETOOTH:
                 return FlavorConst.APPID_BT;
-            default:
+            case TCP:
                 return FlavorConst.APPID_TCP;
         }
+        // Default AppId is an Id of the USB
+        return FlavorConst.APPID_USB;
     }
 }

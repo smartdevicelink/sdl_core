@@ -86,4 +86,7 @@ public class Const {
 
     public static final int REQUEST_FILE_OPEN = 50;
     public static final int REQUEST_POLICY_UPDATE_FILE_OPEN = 51;
+
+    public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
+    public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";
 }

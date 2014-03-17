@@ -1,3 +1,6 @@
+[CW12]
++ SyncProxyTester:Set AppId parameter at Application SetUp dialog
+
 [CW11]
 * SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
 * SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"

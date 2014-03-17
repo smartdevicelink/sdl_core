@@ -22,6 +22,7 @@ import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.FlavorConst;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
+import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
@@ -122,6 +123,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
+import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.TestConfig;
@@ -135,9 +137,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     static final String TAG = "SyncProxyTester";
 
-    private static final String APPID_BT = FlavorConst.APPID_BT;
-    private static final String APPID_TCP = FlavorConst.APPID_TCP;
-    private static final String APPID_USB = FlavorConst.APPID_USB;
     public static final int HEARTBEAT_INTERVAL = 5000;
     public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
     private Integer autoIncCorrId = 1;
@@ -337,9 +336,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 Language hmiLang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
                 Log.i(TAG, "Using protocol version " + versionNumber);
-                int transportType = settings.getInt(
-                        Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
-                        Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
                 String ipAddress = settings.getString(
                         Const.Transport.PREFS_KEY_TRANSPORT_IP,
                         Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
@@ -352,24 +348,28 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 syncMsgVersion.setMajorVersion(2);
                 syncMsgVersion.setMinorVersion(2);
                 Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
-                String appID = null;
                 BaseTransportConfig config = null;
+                TransportType transportType = AppPreferencesManager.getTransportType();
+                String appID = AppIdManager.getAppIdByTransport(transportType);
                 switch (transportType) {
-                    case Const.Transport.KEY_BLUETOOTH:
+                    case BLUETOOTH:
                         config = new BTTransportConfig();
-                        appID = APPID_BT;
                         break;
-                    case Const.Transport.KEY_TCP:
+                    case TCP:
                         config = new TCPTransportConfig(tcpPort, ipAddress);
                         ((TCPTransportConfig) config).setIsNSD(mIsNSD);
                         ((TCPTransportConfig) config).setApplicationContext(this);
-                        appID = APPID_TCP;
                         break;
-                    case Const.Transport.KEY_USB:
+                    case USB:
                         config = new USBTransportConfig(getApplicationContext());
-                        appID = APPID_USB;
                         break;
                 }
+
+                // Apply custom AppId in case of such possibility selected
+                if (AppPreferencesManager.getIsCustomAppId()) {
+                    appID = AppPreferencesManager.getCustomAppId();
+                }
+
 
                 mSyncProxy = new SyncProxyALM(this,
                         /*sync proxy configuration resources*/null,

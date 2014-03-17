@@ -129,6 +129,7 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
@@ -372,8 +373,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         _activity = this;
 
-        AppPreferencesManager.setAppContext(this);
-
         setContentView(R.layout.main);
 
         getProxyService();
@@ -509,7 +508,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             });
 
-            if (AppPreferencesManager.getTransportType() == Const.Transport.KEY_BLUETOOTH) {
+            if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                 intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
                 if (mBluetoothDeviceManager == null) {
                     mBluetoothDeviceManager = new BluetoothDeviceManager();
@@ -526,7 +525,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onBluetoothDeviceRestoreConnection() {
         Log.i(LOG_TAG, "Bluetooth connection restored");
-        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+        if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
         // TODO : Consider this case.
@@ -538,7 +537,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onBluetoothDeviceTurningOff() {
         Log.i(LOG_TAG, "Bluetooth turning off");
-        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+        if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
 
