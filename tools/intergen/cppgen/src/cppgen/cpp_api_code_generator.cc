@@ -53,21 +53,21 @@ CppApiCodeGenerator::~CppApiCodeGenerator() {
 }
 
 std::set<std::string> codegen::CppApiCodeGenerator::Generate(
-    const std::set<std::string>& required_interfaces) {
-  std::set<std::string> problematic_interafces = required_interfaces;
+    const codegen::Preferences& preferences) {
+  std::set<std::string> problematic_interafces = preferences.requested_interfaces;
   const std::vector<Interface*>& interfaces = api_->interfaces();
   for (std::vector<Interface*>::const_iterator i = interfaces.begin(), end =
       interfaces.end(); i != end; ++i) {
     const Interface* intf = *i;
     std::string interface_name = LowercaseIntefaceName(*intf);
-    if (!required_interfaces.empty()) {
+    if (!preferences.requested_interfaces.empty()) {
       // If interface list provided, skip unneeded interfaces
-      if (required_interfaces.count(interface_name) == 0) {
+      if (preferences.requested_interfaces.count(interface_name) == 0) {
         continue;
       }
     }
 
-    if (GenerateInterface(intf)) {
+    if (GenerateInterface(intf, preferences.type_preferences)) {
       // Mark this interface as sucessfully generated
       problematic_interafces.erase(interface_name);
     }
@@ -75,9 +75,12 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
   return problematic_interafces;
 }
 
-bool CppApiCodeGenerator::GenerateInterface(const Interface* interface) {
+bool CppApiCodeGenerator::GenerateInterface(const Interface* interface,
+                                            const TypePreferences& preferences) {
   ModuleManager mgr(LowercaseIntefaceName(*interface));
-  CppInterfaceCodeGenerator interface_generator(interface, &mgr);
+  CppInterfaceCodeGenerator interface_generator(interface,
+                                                &preferences,
+                                                &mgr);
   interface_generator.GenerateCode();
   return mgr.Write();
 }

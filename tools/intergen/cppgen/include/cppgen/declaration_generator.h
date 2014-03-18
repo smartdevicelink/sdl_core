@@ -39,9 +39,10 @@
 
 namespace codegen {
 class CppFile;
-class Namespace;
 class GeneratorPreferences;
 class ModuleManager;
+class Namespace;
+class TypePreferences;
 
 /*
  * Generates declaration code of different entities that is to be
@@ -50,7 +51,8 @@ class ModuleManager;
 class DeclarationGenerator {
  public:
   // Methods
-  DeclarationGenerator(ModuleManager* module_manager);
+  DeclarationGenerator(const TypePreferences* preferences,
+                       ModuleManager* module_manager);
   ~DeclarationGenerator();
 
   // Methods that generate code for different code model entities
@@ -75,6 +77,7 @@ class DeclarationGenerator {
                                    Namespace* name_space);
  private:
   // Fields
+  const TypePreferences* preferences_;
   ModuleManager* module_manager_;
 };
 

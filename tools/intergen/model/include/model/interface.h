@@ -34,7 +34,6 @@
 #define INTERFACE_H_
 
 #include <vector>
-#include <memory>
 
 #include "model/function.h"
 #include "model/composite_type.h"

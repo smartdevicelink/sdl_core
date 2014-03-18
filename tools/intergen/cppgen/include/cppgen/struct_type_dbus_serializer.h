@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +29,59 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DEFINITION_GENERATOR_H_
-#define DEFINITION_GENERATOR_H_
+#ifndef CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H
+#define CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H
 
-#include "model/builtin_type.h"
-#include "model/function.h"
+#include "cppgen/cpp_function.h"
 
 namespace codegen {
-class CppFile;
-class ModuleManager;
-class Namespace;
+class Interface;
+class Struct;
 class TypePreferences;
 
-/*
- * Generates definition code of different entities that is to be
- * put into implementation (.cc) file
- */
-
-class DefinitionGenerator {
+class StructTypeDbusMessageSignatureMethod: public CppFunction {
  public:
-  DefinitionGenerator(const TypePreferences* preferences,
-                      ModuleManager* module_manager);
-  ~DefinitionGenerator();
-
-  void GenerateCodeForEnum(const Enum* enm);
-  void GenerateCodeForStruct(const Struct* strct);
-  void GenerateCodeForFunction(const Function& function);
-  void GenerateCodeForResponse(const Response& response);
-  void GenerateCodeForNotification(const Notification& notification);
+  StructTypeDbusMessageSignatureMethod(const TypePreferences* preferences,
+                                       const Struct* strct,
+                                       bool substructure);
+  ~StructTypeDbusMessageSignatureMethod();
  private:
-  // Methods
-  void GenerateCodeForRequest(const Request& request, CppFile* source_file);
-private:
-  // Fields
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
   const TypePreferences* preferences_;
-  ModuleManager* module_manager_;
+  bool substructure_;
+  const Struct* strct_;
 };
 
-}  // namespace codegen
+class StructTypeFromDbusReaderConstructor : public CppStructConstructor {
+ public:
+  StructTypeFromDbusReaderConstructor(const TypePreferences* preferences,
+                                      const Struct* strct,
+                                      bool substructure);
+  ~StructTypeFromDbusReaderConstructor();
+ private:
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
+  const TypePreferences* preferences_;
+  bool substructure_;
+  const Struct* strct_;
+};
 
-#endif /* DEFINITION_GENERATOR_H_ */
+class StructTypeToDbusWriterMethod : public CppFunction {
+ public:
+  StructTypeToDbusWriterMethod(const Struct* strct,
+                               bool substructure);
+  ~StructTypeToDbusWriterMethod();
+ private:
+  // CppFunction interface
+  void DefineBody(std::ostream* os) const;
+ private:
+  bool substructure_;
+  const Struct* strct_;
+};
+
+} // namespace codegen
+
+#endif // CPPGEN_STRUCT_TYPE_DBUS_SERIALIZER_H

@@ -108,8 +108,10 @@ class TcpAdapterTest : public ::testing::Test {
     const TransportAdapter::Error error = transport_adapter_->Init();
     ASSERT_EQ(TransportAdapter::OK, error);
     transport_adapter_->AddListener(&mock_dal_);
-    while (!transport_adapter_->IsInitialised())
+    time_t end_time = time(NULL) + 5;
+    while (!transport_adapter_->IsInitialised() && time(NULL) < end_time)
       sleep(0);
+    ASSERT_TRUE(transport_adapter_->IsInitialised());
   }
 
   virtual ~TcpAdapterTest() {

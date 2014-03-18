@@ -149,29 +149,6 @@ void RegisterAppInterfaceRequest::Run() {
   }
 }
 
-void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
-(const application_manager::Application& application_impl) {
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  uint32_t app_id = application_impl.app_id();
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::cmd_id] = (max_cmd_id + app_id);
-  msg_params[strings::vr_commands] = *(application_impl.vr_synonyms());
-  if (0 < app_id) {
-    msg_params[strings::app_id] = app_id;
-  }
-  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
-}
-
-void RegisterAppInterfaceRequest::SendTTSChunksToHMI
-(const application_manager::Application& application_impl) {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = application_impl.app_id();
-  msg_params[strings::tts_chunks] = *(application_impl.tts_name());
-  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
-}
-
 void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::on_event");
   switch (event.id()) {

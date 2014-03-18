@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <set>
+#include <sstream>
 
 #include "getopt.h"
 
@@ -53,9 +55,13 @@ struct Options {
   bool  auto_generate_function_ids;
   std::set<std::string> requested_interfaces;
   std::set<std::string> excluded_scopes;
+  bool  avoid_unsigned;
+  int   minimum_word_size;
   Options()
       : interface_xml(NULL),
-        auto_generate_function_ids(false) {
+        auto_generate_function_ids(false),
+        avoid_unsigned(false),
+        minimum_word_size(8) {
   }
 };
 
@@ -70,7 +76,9 @@ void Usage() {
        << "                      multiple interfaces.\n"
        << "  -s <scope_name>     Excludes entities marked with given scope from\n"
        << "                      generated code. Can occur multiple times.\n"
-       << "  -a                  Automatically generates function ID enum.\n";
+       << "  -a                  Automatically generates function ID enum.\n"
+       << "  -U                  Avoid unsigned integers in generated types\n"
+       << "  -w <word_bits>      Minimal word size (integer size in bits) in generated types\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -79,7 +87,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
   Options options;
-  const char* opts = "af:i:s:";
+  const char* opts = "aUf:i:s:w:";
   for (int opt = getopt(argc, argv, opts); opt != -1;
       opt = getopt(argc, argv, opts)) {
     switch (opt) {
@@ -103,6 +111,23 @@ int main(int argc, char* argv[]) {
         options.auto_generate_function_ids = true;
         break;
       }
+      case 'U': {
+        options.avoid_unsigned = true;
+        break;
+      }
+      case 'w': {
+        static const int kValidWidths[] = {8, 16, 32, 64};
+        std::set<int> valid_widths(kValidWidths, kValidWidths + 4);
+
+        std::stringstream wordwidth(optarg);
+        if (!(wordwidth>>options.minimum_word_size)
+            || valid_widths.count(options.minimum_word_size) == 0) {
+          cerr << "Invalid word size provided, valid values are "
+                  "8, 16, 32 or 64" << '\n';
+          return EXIT_FAILURE;
+        }
+        break;
+      }
       default: {
         cerr << "Invalid option: '" << opt << "'" << '\n';
         return EXIT_FAILURE;
@@ -121,8 +146,11 @@ int main(int argc, char* argv[]) {
     codegen::API api(&model_filter, options.auto_generate_function_ids);
     if (api.init(doc)) {
       codegen::CppApiCodeGenerator cpp_code_generator(&api);
-      std::set<std::string> bad = cpp_code_generator.Generate(
-          options.requested_interfaces);
+      std::set<std::string> bad =
+          cpp_code_generator.Generate(
+            codegen::Preferences(options.minimum_word_size,
+                                 options.avoid_unsigned,
+                                 options.requested_interfaces));
       if (bad.empty()) {
         return EXIT_SUCCESS;
       } else {
