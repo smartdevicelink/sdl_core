@@ -71,7 +71,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
   const uint8_t sessionID = 0;
   //start new session with RPC service
   const int32_t result_fail =
-      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc, true);
   //Unknown connection error is '-1'
   EXPECT_EQ(result_fail, -1);
   EXPECT_TRUE(connection_handler_->getConnectionList().empty());
@@ -86,7 +86,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
 
   //start new session with RPC service
   const int32_t session_id_on_rpc_secure =
-      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc,
+                                                    false);
   EXPECT_NE(session_id_on_rpc_secure, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
@@ -95,13 +96,13 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
   const SessionMap sessionMap = connection->session_map();
   EXPECT_EQ(sessionMap.size(), 1);
   EXPECT_EQ(sessionMap.begin()->first, session_id_on_rpc_secure);
-  const ServiceList serviceList = sessionMap.begin()->second;
+  const ServiceList serviceList = sessionMap.begin()->second.service_list;
   const ServiceList::const_iterator it =
       std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
   EXPECT_NE(it, serviceList.end());
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_Secure) {
+TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   //null sessionId for start new session
   const uint8_t start_session_id = 0;
 
@@ -110,31 +111,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Secure) {
 
   //start new session with RPC service
   const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
-  EXPECT_NE(session_id, -1);
-  const ConnectionList& connection_list = connection_handler_->getConnectionList();
-  EXPECT_FALSE(connection_list.empty());
-  EXPECT_EQ(connection_list.begin()->first, 0);
-
-  //start new session with RPC service
-  const int32_t session_id_on_start_secure =
-      connection_handler_->OnSessionStartedCallback(uid, session_id, protocol_handler::kSecure);
-  EXPECT_EQ(session_id_on_start_secure, session_id);
-  ConnectionList& connection_list_new = connection_handler_->getConnectionList();
-  EXPECT_FALSE(connection_list_new.empty());
-  EXPECT_EQ(connection_list_new.begin()->first, 0);
-}
-
-TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
-  //null sessionId for start new session
-  const uint8_t start_session_id = 0;
-
-  //Add virtual device and connection
-  AddTestDeviceConenction();
-
-  //start new session with RPC service
-  const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id, protocol_handler::kRpc);
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+                                                    protocol_handler::kRpc,
+                                                    false);
   EXPECT_NE(session_id, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
@@ -143,7 +122,36 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
   //start new session with RPC service
   const int32_t session_id_on_start_secure =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
-                                                    protocol_handler::kSecure);
+                                                    protocol_handler::kAudio,
+                                                    false);
+  EXPECT_EQ(session_id_on_start_secure, session_id);
+  ConnectionList& connection_list_new = connection_handler_->getConnectionList();
+  EXPECT_FALSE(connection_list_new.empty());
+  EXPECT_EQ(connection_list_new.begin()->first, 0);
+}
+
+TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
+  //null sessionId for start new session
+  const uint8_t start_session_id = 0;
+
+  //Add virtual device and connection
+  AddTestDeviceConenction();
+
+  //start new session with RPC service
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+                                                    protocol_handler::kRpc,
+                                                    false);
+  EXPECT_NE(session_id, -1);
+  const ConnectionList& connection_list = connection_handler_->getConnectionList();
+  EXPECT_FALSE(connection_list.empty());
+  EXPECT_EQ(connection_list.begin()->first, 0);
+
+  //start new session with RPC service
+  const int32_t session_id_on_start_secure =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    false);
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_start_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_start_secure.empty());
@@ -152,12 +160,13 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Secure) {
   //start new session with RPC service
   const int32_t session_id_on_end_secure =
       connection_handler_->OnSessionEndedCallback(uid, session_id, 0,
-                                                  protocol_handler::kSecure);
+                                                  protocol_handler::kAudio);
   EXPECT_EQ(session_id_on_end_secure, session_id);
   ConnectionList& connection_list_on_end_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_on_end_secure.empty());
   EXPECT_EQ(connection_list_on_end_secure.begin()->first, 0);
 }
+// FIXME (EZamakhov) Add test with create secured services and create kContorl Service
 
 } // connection_handle_test
 } // namespace components

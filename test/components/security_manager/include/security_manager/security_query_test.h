@@ -65,12 +65,11 @@ namespace security_manager_test {
   TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
     const  uint8_t query_type = 0xA;
     const  uint32_t query_id = 0xB;
-    const  uint32_t seq_number = 0xC;
-    SecurityQuery::QueryHeader header (query_type, query_id, seq_number);
+    SecurityQuery::QueryHeader header (query_type, query_id);
     ASSERT_EQ(header.query_id, query_id);
     ASSERT_EQ(header.query_type, query_type);
-    ASSERT_EQ(header.reserved, 0x0);
-    ASSERT_EQ(header.seq_number, seq_number);
+    ASSERT_EQ(header.json_size, 0x0);
+    ASSERT_EQ(header.seq_number, 0x0);
   }
   /*
    * Security QueryHeader shall construct with NULL fields
@@ -80,11 +79,12 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), 0);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
     const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, SecurityQuery::INVALID_QUERY_TYPE);
     ASSERT_EQ(header.query_id, SecurityQuery::INVALID_QUERY_ID);
     ASSERT_EQ(header.seq_number, 0x0);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
   }
   /*
    * Security QueryHeader shall construct with specified fields
@@ -92,20 +92,20 @@ namespace security_manager_test {
   TEST_F(SecurityQueryTest, QueryConstructor2) {
     const  uint8_t query_type = 0xA;
     const  uint32_t query_id = 0xB;
-    const  uint32_t seq_number = 0xC;
     const  uint32_t connection_key = 0xD;
-    SecurityQuery::QueryHeader init_header (query_type, query_id, seq_number);
+    SecurityQuery::QueryHeader init_header (query_type, query_id);
 
     SecurityQuery query(init_header, connection_key);
 
     ASSERT_EQ(query.get_connection_key(), connection_key);
     ASSERT_EQ(query.get_data_size(), 0);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
     const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
   }
 
   /*
@@ -114,15 +114,16 @@ namespace security_manager_test {
   TEST_F(SecurityQueryTest, Setters) {
     const  uint8_t query_type = 0xA;
     const  uint32_t query_id = 0xB;
-    const  uint32_t seq_number = 0xC;
     const  uint32_t connection_key = 0xD;
-    SecurityQuery::QueryHeader init_header (query_type, query_id, seq_number);
+    const std::string str = "test example string";
+    SecurityQuery::QueryHeader init_header (query_type, query_id);
     const size_t data_size = sizeof(SecurityQuery::QueryHeader);
     const uint8_t* data = new uint8_t[data_size];
 
     SecurityQuery query;
     query.set_connection_key(connection_key);
     query.set_data(data, data_size);
+    query.set_json_message(str);
     query.set_header(init_header);
 
     ASSERT_EQ(query.get_connection_key(), connection_key);
@@ -131,70 +132,12 @@ namespace security_manager_test {
     for (int i = 0; i < data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], data[i]);
       }
+    ASSERT_EQ(query.get_json_message(), str);
     const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
-
-    delete []data;
-  }
-  /*
-   * Security QueryHeader Parse data contains only header
-   * with PROTECT_SERVICE_REQUEST
-   */
-  TEST_F(SecurityQueryTest, Parse_NullBinDataRequest) {
-    const uint8_t query_type = SecurityQuery::REQUEST;
-    const uint32_t query_id = SecurityQuery::PROTECT_SERVICE_REQUEST;
-    const uint32_t seq_number = 0x0A0B0C0D;
-    const size_t data_size = sizeof(SecurityQuery::QueryHeader);
-    uint8_t* data = new uint8_t[data_size];
-    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
-    data[0] = query_type;
-    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
-
-    SecurityQuery query;
-    const bool result_parse = query.Parse(data, data_size);
-
-    ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
-    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.get_header();
-    ASSERT_EQ(header.query_type, query_type);
-    ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
-
-    delete []data;
-  }
-  /*
-   * Security QueryHeader Parse data contains header and binary data
-   * with PROTECT_SERVICE_RESPONSE
-   */
-  TEST_F(SecurityQueryTest, Parse_Response) {
-    const  uint8_t query_type = SecurityQuery::RESPONSE;
-    const  uint32_t query_id = SecurityQuery::PROTECT_SERVICE_RESPONSE;
-    const  uint32_t seq_number = 0x0A0B0C0D;
-    const size_t add_size = 1;
-    const size_t data_size = sizeof(SecurityQuery::QueryHeader) + add_size;
-    uint8_t* data = new uint8_t[data_size];
-    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
-    data[0] = query_type;
-    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
-
-    SecurityQuery query;
-    const bool result_parse = query.Parse(data, data_size);
-
-    ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), add_size);
-    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    const SecurityQuery::QueryHeader& header = query.get_header();
-    ASSERT_EQ(header.query_type, query_type);
-    ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
 
     delete []data;
   }
@@ -203,19 +146,17 @@ namespace security_manager_test {
    * with SEND_HANDSHAKE_DATA
    */
   TEST_F(SecurityQueryTest, Parse_Handshake) {
-    const  uint8_t query_type = SecurityQuery::NOTIFICATION;
+    const  uint8_t query_type = 0xA;
     const  uint32_t query_id = SecurityQuery::SEND_HANDSHAKE_DATA;
-    const  uint32_t seq_number = 0x0A0B0C0D;
     const size_t header_size = sizeof(SecurityQuery::QueryHeader);
     const size_t add_size = 100;
     const size_t data_size = header_size + add_size;
     uint8_t* data = new uint8_t[data_size];
     *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
     data[0] = query_type;
-    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
 
     SecurityQuery query;
-    const bool result_parse = query.Parse(data, data_size);
+    const bool result_parse = query.ParseQuery(data, data_size);
 
     ASSERT_TRUE(result_parse);
     ASSERT_EQ(query.get_connection_key(), 0);
@@ -224,11 +165,12 @@ namespace security_manager_test {
     for (int i = 0; i < add_size; ++i) {
       ASSERT_EQ(query.get_data()[i], data[header_size + i]);
       }
+    ASSERT_TRUE(query.get_json_message().empty());
     const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
 
     delete []data;
   }
@@ -236,33 +178,63 @@ namespace security_manager_test {
    * Security QueryHeader Parse data contains header and binary data
    * with SEND_HANDSHAKE_DATA
    */
+  TEST_F(SecurityQueryTest, Parse_InternalError) {
+    const  uint8_t query_type = 0xA;
+    const  uint32_t query_id = SecurityQuery::SEND_INTERNAL_ERROR;
+    const size_t header_size = sizeof(SecurityQuery::QueryHeader);
+    const std::string error_str = "some error text";
+
+    const size_t data_size = header_size + error_str.size();
+    uint8_t* data = new uint8_t[data_size];
+    *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
+    data[0] = query_type;
+    *reinterpret_cast<uint32_t*>(data+8)=error_str.size();
+    memcpy(data + header_size, error_str.c_str(), error_str.size());
+
+    SecurityQuery query;
+    const bool result_parse = query.ParseQuery(data, data_size);
+
+    ASSERT_TRUE(result_parse);
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_json_message(), error_str);
+    const SecurityQuery::QueryHeader& header = query.get_header();
+    ASSERT_EQ(header.query_type, query_type);
+    ASSERT_EQ(header.query_id, query_id);
+    ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
+
+    delete []data;
+  }
+
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with SEND_HANDSHAKE_DATA
+   */
   TEST_F(SecurityQueryTest, Parse_InvalideQuery) {
     const  uint8_t query_type = SecurityQuery::INVALID_QUERY_TYPE;
     const  uint32_t query_id = SecurityQuery::INVALID_QUERY_ID;
-    const  uint32_t seq_number = 0x0A0B0C0D;
     const size_t header_size = sizeof(SecurityQuery::QueryHeader);
     const size_t add_size = 100;
     const size_t data_size = header_size + add_size;
     uint8_t* data = new uint8_t[data_size];
     *reinterpret_cast<uint32_t*>(data) = LE_TO_BE32(query_id);
     data[0] = query_type;
-    *reinterpret_cast<uint32_t*>(data+4)=seq_number;
 
     SecurityQuery query;
-    const bool result_parse = query.Parse(data, data_size);
+    const bool result_parse = query.ParseQuery(data, data_size);
 
     ASSERT_TRUE(result_parse);
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), add_size);
-    ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    for (int i = 0; i < add_size; ++i) {
-      ASSERT_EQ(query.get_data()[i], data[header_size + i]);
-      }
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
     const SecurityQuery::QueryHeader& header = query.get_header();
     ASSERT_EQ(header.query_type, query_type);
     ASSERT_EQ(header.query_id, query_id);
-    ASSERT_EQ(header.seq_number, seq_number);
-    ASSERT_EQ(header.reserved, 0x0);
+    ASSERT_EQ(header.seq_number, 0x0);
+    ASSERT_EQ(header.json_size, 0x0);
 
     delete []data;
   }

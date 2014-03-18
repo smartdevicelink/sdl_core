@@ -69,19 +69,19 @@ TEST_F(ConnectionTest, Session_AddNewSession) {
   EXPECT_NE(session_id, -1);
   const SessionMap sessionMap = connection_->session_map();
   EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.begin()->second;
+  const ServiceList serviceList = sessionMap.begin()->second.service_list;
   EXPECT_FALSE(serviceList.empty());
   const ServiceList::const_iterator it =
       std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
   EXPECT_NE(it, serviceList.end());
 }
 
-TEST_F(ConnectionTest, Session_SecureService) {
+TEST_F(ConnectionTest, Session_AudioService) {
   const int32_t session_id = connection_->AddNewSession();
   EXPECT_NE(session_id, -1);
   const SessionMap sessionMap = connection_->session_map();
   EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.begin()->second;
+  const ServiceList serviceList = sessionMap.begin()->second.service_list;
   EXPECT_FALSE(serviceList.empty());
   const ServiceList::const_iterator it =
       std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
@@ -89,26 +89,28 @@ TEST_F(ConnectionTest, Session_SecureService) {
 
   //TODO: check Secure plugin enable
 
-  const bool result = connection_->AddNewService(session_id, protocol_handler::kSecure);
+  const bool result = connection_->AddNewService(session_id, protocol_handler::kAudio,
+                                                 false);
   EXPECT_TRUE(result);
   const SessionMap newSessionMap = connection_->session_map();
   EXPECT_FALSE(newSessionMap.empty());
-  const ServiceList newServiceList = newSessionMap.begin()->second;
+  const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
   EXPECT_FALSE(newServiceList.empty());
   const ServiceList::const_iterator it1 =
-      std::find(newServiceList.begin(), newServiceList.end(), protocol_handler::kSecure);
+      std::find(newServiceList.begin(), newServiceList.end(), protocol_handler::kAudio);
   EXPECT_NE(it1, newServiceList.end());
 
-  const bool result2 = connection_->RemoveService(session_id, protocol_handler::kSecure);
+  const bool result2 = connection_->RemoveService(session_id, protocol_handler::kAudio);
   EXPECT_TRUE(result2);
   const SessionMap newSessionMap2 = connection_->session_map();
   EXPECT_FALSE(newSessionMap2.empty());
-  const ServiceList newServiceList2 = newSessionMap2.begin()->second;
+  const ServiceList newServiceList2 = newSessionMap2.begin()->second.service_list;
   EXPECT_FALSE(newServiceList2.empty());
   const ServiceList::const_iterator it2 =
-      std::find(newServiceList2.begin(), newServiceList2.end(), protocol_handler::kSecure);
+      std::find(newServiceList2.begin(), newServiceList2.end(), protocol_handler::kAudio);
   EXPECT_EQ(it2, newServiceList2.end());
 }
+// FIXME (EZamakhov) Add test with create secured services and create kContorl Service
 
 } // connection_handle
 } // namespace components

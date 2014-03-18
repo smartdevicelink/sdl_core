@@ -201,7 +201,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
       PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-      SERVICE_TYPE_ZERO, FRAME_DATA_HEART_BEAT_ACK, session_id,
+      SERVICE_TYPE_CONTROL, FRAME_DATA_HEART_BEAT_ACK, session_id,
       0, message_id));
 
   raw_ford_messages_to_mobile_.PostMessage(
@@ -391,8 +391,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
       session_observer_->KeyFromPair(connection_id, session_id);
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(
-        connection_key, ServiceTypeFromByte(service_type));
+      session_observer_->GetSSLContext(connection_key);
   if(context) {
     size_t new_data_size;
     data = static_cast<uint8_t*>
@@ -444,8 +443,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   // Encrypt data
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(
-        connection_key, ServiceTypeFromByte(service_type));
+      session_observer_->GetSSLContext(connection_key );
 
   if(context) {
     size_t new_data_size;
@@ -730,8 +728,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Version 2 " << (packet.protocol_version() == PROTOCOL_VERSION_2));
 
   int32_t session_id = session_observer_->OnSessionStartedCallback(
-      connection_id, packet.session_id(),
-      ServiceTypeFromByte(packet.service_type()));
+        connection_id, packet.session_id(),
+        ServiceTypeFromByte(packet.service_type()),
+        true
+        );
 
   if (-1 != session_id) {
     SendStartSessionAck(
@@ -799,8 +799,7 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
       session_observer_->KeyFromPair(connection_id, packet.session_id());
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(
-        connection_key, ServiceTypeFromByte(packet.service_type()));
+      session_observer_->GetSSLContext(connection_key);
   if(context) {
       const uint8_t* data = packet.data();
       const size_t data_size = packet.data_size();

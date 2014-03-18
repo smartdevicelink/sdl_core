@@ -36,6 +36,7 @@
 #include <cstddef>
 #include <stdint.h>
 #include <vector>
+#include <string>
 #include "utils/shared_ptr.h"
 
 namespace security_manager {
@@ -60,44 +61,39 @@ public:
    * Equal RPC Function ID (Ford Binary Header Definition)
    */
   enum QueryId {
-    PROTECT_SERVICE_REQUEST  = 0x1,
-    PROTECT_SERVICE_RESPONSE = 0x2,
-    SEND_HANDSHAKE_DATA      = 0x3,
-    SEND_INTERNAL_ERROR      = 0xFF,
+    SEND_HANDSHAKE_DATA      = 0x1,
+    SEND_INTERNAL_ERROR      = 0x2,
     INVALID_QUERY_ID         = 0xFFFFFF
-  };
-  //size 1 byte
-  enum ProtectServiceResult {
-    SUCCESS = 0x1,
-    PENDING = 0x2,     //Handshake in progress
-    SERVICE_ALREADY_PROTECTED = 0x3,
-    SERVICE_NOT_FOUND = 0x4,
-    INTERNAL_ERROR = 0xFF
   };
   /**
    * \brief InternalErrors is 1 byte identifier of internal error
    * Handle as binary data in Ford Protocol
    */
   enum InternalErrors {
+    ERROR_SUCCESS = 0x0,
     ERROR_INVALID_QUERY_SIZE = 0x1, //low size of message
     ERROR_INVALID_QUERY_ID = 0x2,   //unknown query id
     ERROR_NULL_DATA = 0x3,          //Received query with null data
-    ERROR_INVALID_SERVICE_TYPE = 0x4,//For unknown or forbidden for encryption service
-    ERROR_PROTECTION_NOT_REQUESTED = 0x5, //Got handshake without ProtectServiceRequest
     ERROR_NOT_SUPPORTED = 0x6,
+
+    ERROR_SERVICE_ALREADY_PROTECTED,
+    ERROR_CREATE_SLLSERVER,
+    ERROR_CONNECTION_NOT_FOUND,
+    ERROR_SESSION_NOT_FOUND,
+
     ERROR_SSL_INVALID_DATA = 0xF0,
     ERROR_OTHER_INTERNAL_ERROR = 0xFF
-    };
+  };
   /**
    * \brief InternalErrors is 12 byte header of security query
    * Equal Ford Binary Header Definition
    */
   struct QueryHeader {
-    QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber);
+    QueryHeader(uint8_t queryType, uint32_t queryId);
     uint32_t query_type:8;
     uint32_t query_id:24;  // API function identifier
     uint32_t seq_number;   // request sequential number
-    uint32_t reserved;
+    uint32_t json_size;
   };
 
   /**
@@ -112,17 +108,22 @@ public:
   SecurityQuery(const QueryHeader& header, const uint32_t connection_key);
   /**
    * \brief Parse income from Mobile Application data
-   * as query header with binary data
+   * as query with header and binary data or json message
    * \param binary_data pointer to binary data array
    * \param bin_data_size size of binary data array
    */
-  bool Parse(const uint8_t * const binary_data, const size_t bin_data_size);
+  bool ParseQuery(const uint8_t * const binary_data, const size_t bin_data_size);
   /**
    * \brief Set binary data. (No header modification)
    * \param binary_data pointer to binary data array
    * \param bin_data_size size of binary data array
    */
   void set_data(const uint8_t * const binary_data, const size_t bin_data_size);
+  /**
+   * \brief Set json data. (No header modification)
+   * \param json_message string with json error
+   */
+  void set_json_message(const std::string& json_message);
   /**
    * \brief Set connection key
    * \param connection_key Unique key used by other components as session identifier
@@ -139,7 +140,7 @@ public:
    */
   const QueryHeader& get_header() const;
   /**
-   * \brief Get query binary data (withoout header data)
+   * \brief Get query binary data (without header data)
    * \return const pointer to const binary data
    */
   const uint8_t* const get_data() const;
@@ -149,6 +150,11 @@ public:
    */
   size_t const get_data_size() const;
   /**
+   * \brief Get json string data (without header data)
+   * \return const pointer to const binary data
+   */
+  const std::string& get_json_message() const;
+  /**
    * \brief Get connection key
    * \return Unique key used by other components as session identifier
    */
@@ -157,6 +163,7 @@ private:
   QueryHeader header_;
   int32_t connection_key_;
   std::vector<uint8_t> data_;
+  std::string json_message_;
 };
 typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
 }

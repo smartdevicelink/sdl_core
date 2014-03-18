@@ -71,16 +71,18 @@ typedef std::map<int32_t, Connection*> ConnectionList;
  */
 typedef ConnectionList::iterator ConnectionListIterator;
 
+/**
+ * \brief ServiceType
+ */
 struct Service {
   protocol_handler::ServiceType service_type;
-  security_manager::SSLContext* ssl_context;
+  bool is_protected_;
   Service()
     : service_type(protocol_handler::kInvalidServiceType),
-      ssl_context(NULL) {
+      is_protected_(false) {
   }
-  Service(protocol_handler::ServiceType service_type)
-    : service_type(service_type),
-      ssl_context(NULL) {
+  Service(protocol_handler::ServiceType service_type, const bool is_protected = false)
+    : service_type(service_type), is_protected_(is_protected) {
   }
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
@@ -102,10 +104,23 @@ typedef ServiceList::iterator ServiceListIterator;
  */
 typedef ServiceList::const_iterator ServiceListConstIterator;
 
+
+struct Session {
+  ServiceList service_list;
+  security_manager::SSLContext* ssl_context;
+  Session()
+    : ssl_context(NULL) {
+  }
+  Session(const ServiceList& services)
+    : service_list(services),
+      ssl_context(NULL) {
+  }
+};
+
 /**
  * \brief Type for Services iterator
  */
-typedef std::map<uint8_t, ServiceList> SessionMap;
+typedef std::map<uint8_t, Session> SessionMap;
 
 /**
  * \brief Type for Services iterator
@@ -166,11 +181,12 @@ class Connection {
    * \return TRUE on success, otherwise FALSE
    */
   bool AddNewService(uint8_t session,
-                     protocol_handler::ServiceType service);
+                     protocol_handler::ServiceType service, const bool is_protected);
 
   /**
    * \brief Removes service from session
    * \param session session ID
+   * \param service_type Type of service
    * \return TRUE on success, otherwise FALSE
    */
   bool RemoveService(uint8_t session,
@@ -178,14 +194,11 @@ class Connection {
 
   /**
    * \brief Sets crypto context of service
-     * \param sessionId Identifier of the session
-   * \param service_type Type of service
+   * \param sessionId Identifier of the session
    * \return \c true in case of service is protected or \c false otherwise
    */
-  int SetSSLContext(
-    uint8_t session,
-    protocol_handler::ServiceType service_type,
-    security_manager::SSLContext* context);
+  int SetSSLContext(uint8_t sessionId,
+                    security_manager::SSLContext* context);
 
   /**
    * \brief Gets crypto context of service
@@ -194,8 +207,8 @@ class Connection {
    * \return \c true in case of service is protected or \c false otherwise
    */
   security_manager::SSLContext* GetSSLContext(
-      uint8_t session,
-      protocol_handler::ServiceType service_type) const;
+      uint8_t sessionId) const;
+
   /**
    * \brief Returns map of sessions which have been opened in
    *  current connection.

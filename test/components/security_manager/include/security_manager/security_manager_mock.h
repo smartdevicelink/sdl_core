@@ -44,19 +44,18 @@ namespace security_manager_test {
    */
   class SessionObserverMock: public protocol_handler::SessionObserver {
    public:
-    MOCK_METHOD3(SetSSLContext,
+    MOCK_METHOD2(SetSSLContext,
                  int( const uint32_t& key,
-                      protocol_handler::ServiceType service_type,
                       security_manager::SSLContext* context));
-    MOCK_METHOD2(GetSSLContext,
+    MOCK_METHOD1(GetSSLContext,
                  security_manager::SSLContext* (
-                   const uint32_t& key,
-                   protocol_handler::ServiceType service_type));
-    MOCK_METHOD3(OnSessionStartedCallback,
+                   const uint32_t& key));
+    MOCK_METHOD4(OnSessionStartedCallback,
                  int32_t(
                    const transport_manager::ConnectionUID& connection_handle,
                    const uint8_t& sessionId,
-                   const protocol_handler::ServiceType& service_type));
+                   const protocol_handler::ServiceType& service_type,
+                   const bool is_protected));
     MOCK_METHOD4(OnSessionEndedCallback,
                  uint32_t(
                    const transport_manager::ConnectionUID& connection_handle,
@@ -185,44 +184,6 @@ namespace security_manager_test {
     if(expectedErrorId != *err_id) {
       *result_listener << "InternalError id " << int(*err_id)
                        << " and not equal error " << expectedErrorId;
-      return false;
-    }
-    return true;
-  }
-
-  /*
-   * Matcher for checking RawMessage with ProtectServiceResponse Query
-   * Check error id
-   */
-  MATCHER_P(ProtectServiceResponseWithId, expectedResponseId,
-            std::string(negation ? "is not" : "is")
-            + " ProtectServiceResponse with selected esponseId" ) {
-    const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
-    if(arg->data_size() <= header_size) {
-      *result_listener << "Size " << arg->data_size()
-                       << " bytes less or equal sizeof(QueryHeader)="
-                       << header_size;
-      return false;
-    }
-    const uint8_t query_type = arg->data()[0];
-    if(security_manager::SecurityQuery::RESPONSE != query_type) {
-      *result_listener << "RawMessage is not RESPONSE";
-      return false;
-    }
-    //Read Big-Endian number
-    const uint32_t query_id = arg->data()[1] << 16 |
-                              arg->data()[2] <<  8 |
-                              arg->data()[3];
-    if(security_manager::SecurityQuery::PROTECT_SERVICE_RESPONSE != query_id) {
-      *result_listener << "Notification is not ProtectServiceResponse";
-      return false;
-    }
-    //Read err_id as bin data number
-    const uint8_t* err_id =
-        reinterpret_cast<uint8_t*>(arg->data() + header_size);
-    if(expectedResponseId != *err_id) {
-      *result_listener << "ProtectServiceResult is " << int(*err_id)
-                       << " and not equal " << expectedResponseId;
       return false;
     }
     return true;

@@ -152,13 +152,16 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier within which session has to be started.
-     * \param sessionId Identifier of the session to be started
+     * \param session_id Identifier of the session to be started
+     * \param service_type Type of service
+     * \param is_protected would be service protected
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t& session_id,
-      const protocol_handler::ServiceType& service_type);
+      const protocol_handler::ServiceType& service_type,
+      const bool is_protected);
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -225,22 +228,19 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Sets crypto context of service
      * \param key Unique key used by other components as session identifier
      * \param service_type Type of service
-     * \return \c true in case of service is protected or \c false otherwise
+     * \return \c SecurityQuery::ProtectSessionResult value
      */
     virtual int SetSSLContext(
       const uint32_t& key,
-      protocol_handler::ServiceType service_type,
       security_manager::SSLContext* context) OVERRIDE;
 
     /**
      * \brief Gets crypto context of service
      * \param key Unique key used by other components as session identifier
-     * \param service_type Type of service
-     * \return \c true in case of service is protected or \c false otherwise
+     * \return \c exists SSLContext
      */
     security_manager::SSLContext* GetSSLContext(
-        const uint32_t& key,
-        protocol_handler::ServiceType service_type) OVERRIDE;
+        const uint32_t& key) OVERRIDE;
 
     /**
      * \brief Method which should start devices discoveryng

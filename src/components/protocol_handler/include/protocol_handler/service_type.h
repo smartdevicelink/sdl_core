@@ -12,12 +12,11 @@ namespace protocol_handler {
     Navi for video streaming, bulk for PutFile.
   */
 enum ServiceType {
-  kZero =      SERVICE_TYPE_ZERO,
+  kControl =   SERVICE_TYPE_CONTROL,
   kRpc =       SERVICE_TYPE_RPC,
   kAudio =     SERVICE_TYPE_AUDIO,
   kMobileNav = SERVICE_TYPE_NAVI,
   kBulk =      SERVICE_TYPE_BULK,
-  kSecure =    SERVICE_TYPE_SECURE,
   kInvalidServiceType
 };
 

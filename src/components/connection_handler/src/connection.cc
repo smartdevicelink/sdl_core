@@ -81,8 +81,8 @@ int32_t Connection::AddNewSession() {
     /* whenever new session created RPC and Bulk services are
     established automatically */
       //TODO: Dmitriy Trunov + Klimenko
-    session_map_[size].push_back(protocol_handler::kRpc);
-    session_map_[size].push_back(protocol_handler::kBulk);
+    session_map_[size].service_list.push_back(protocol_handler::kRpc);
+    session_map_[size].service_list.push_back(protocol_handler::kBulk);
 
     result = size;
   }
@@ -105,7 +105,8 @@ int32_t Connection::RemoveSession(uint8_t session) {
 }
 
 bool Connection::AddNewService(uint8_t session,
-                               protocol_handler::ServiceType service) {
+                               protocol_handler::ServiceType serviceType,
+                               const bool is_protected) {
   sync_primitives::AutoLock lock(session_map_lock_);
   bool result = false;
 
@@ -115,13 +116,14 @@ bool Connection::AddNewService(uint8_t session,
     return result;
   }
 
-  ServiceListIterator service_it = find(session_it->second.begin(),
-                                        session_it->second.end(), service);
-  if (service_it != session_it->second.end()) {
+  ServiceList& service_list= session_it->second.service_list;
+  ServiceListIterator service_it = find(service_list.begin(),
+                                        service_list.end(), serviceType);
+  if (service_it != service_list.end()) {
     LOG4CXX_ERROR(logger_, "Session " << session << " already established"
-                  " service " << service);
+                  " service " << serviceType);
   } else {
-    session_it->second.push_back(service);
+    service_list.push_back(Service(serviceType, is_protected));
     result = true;
   }
 
@@ -138,10 +140,11 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
     return result;
   }
 
-  ServiceListIterator service_it = find(session_it->second.begin(),
-                                        session_it->second.end(), service_type);
-  if (service_it != session_it->second.end()) {
-    session_it->second.erase(service_it);
+  ServiceList& service_list= session_it->second.service_list;
+  ServiceListIterator service_it = find(service_list.begin(),
+                                        service_list.end(), service_type);
+  if (service_it != service_list.end()) {
+    service_list.erase(service_it);
     result = true;
   } else {
     LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
@@ -151,42 +154,26 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
   return result;
 }
 
-int Connection::SetSSLContext( uint8_t session,
-                                protocol_handler::ServiceType service_type,
-                                security_manager::SSLContext *context){
+int Connection::SetSSLContext( uint8_t sessionId,
+                               security_manager::SSLContext *context){
   sync_primitives::AutoLock lock(session_map_lock_);
-  SessionMap::iterator sit = session_map_.find(session);
-  if (sit == session_map_.end()) {
+  SessionMap::iterator session_it = session_map_.find(sessionId);
+  if (session_it == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return security_manager::SecurityQuery::INTERNAL_ERROR;
+    return security_manager::SecurityQuery::ERROR_SESSION_NOT_FOUND;
   }
-  ServiceList& list = sit->second;
-  ServiceList::iterator it = std::find(list.begin(), list.end(), service_type);
-  if (it != list.end()) {
-    if(it->ssl_context)
-      return security_manager::SecurityQuery::SERVICE_ALREADY_PROTECTED;
-    it->ssl_context = context;
-    return security_manager::SecurityQuery::SUCCESS;
-  }
-  return security_manager::SecurityQuery::SERVICE_NOT_FOUND;
+  return security_manager::SecurityQuery::ERROR_SUCCESS;
 }
 
-security_manager::SSLContext* Connection::GetSSLContext(
-    uint8_t session,
-    protocol_handler::ServiceType service_type) const {
+security_manager::SSLContext* Connection::GetSSLContext( uint8_t sessionId) const {
   sync_primitives::AutoLock lock(session_map_lock_);
-  SessionMap::const_iterator sit = session_map_.find(session);
-  if (sit == session_map_.end()) {
+  SessionMap::const_iterator session_it = session_map_.find(sessionId);
+  if (session_it == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
     return NULL;
   }
-  const ServiceList& list = sit->second;
-  ServiceList::const_iterator it = std::find(list.begin(), list.end(), service_type);
-  if (it != list.end()) {
-    return it->ssl_context;
-  }
-
-  return NULL;
+  const Session& session = session_it->second;
+  return session.ssl_context;
 }
 
 ConnectionHandle Connection::connection_handle() const {

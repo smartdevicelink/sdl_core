@@ -43,12 +43,12 @@
 namespace log4cxx
 {
 
-    #undef LOG4CXX_INFO
-    #define LOG4CXX_INFO(x,y)
-    #undef LOG4CXX_WARN
-    #define LOG4CXX_WARN(x,y)
-    #undef LOG4CXX_ERROR
-    #define LOG4CXX_ERROR(x,y)
+//    #undef LOG4CXX_INFO
+//    #define LOG4CXX_INFO(x,y)
+//    #undef LOG4CXX_WARN
+//    #define LOG4CXX_WARN(x,y)
+//    #undef LOG4CXX_ERROR
+//    #define LOG4CXX_ERROR(x,y)
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(x,y)
 

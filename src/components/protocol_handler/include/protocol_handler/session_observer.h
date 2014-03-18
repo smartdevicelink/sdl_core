@@ -66,12 +66,14 @@ public:
      * has to be started.
      * \param sessionId Identifier of the session to be ended
      * \param service_type Type of service
+     * \param is_protected would be service protected
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t& sessionId,
-      const ServiceType& service_type) = 0;
+      const ServiceType& service_type,
+      const bool is_protected) = 0;
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -144,23 +146,19 @@ public:
     /**
      * \brief Sets crypto context of service
      * \param key Unique key used by other components as session identifier
-     * \param service_type Type of service
-     * \return \c true in case of service is protected or \c false otherwise
+     * \return \c SecurityQuery::ProtectSessionResult value
      */
     virtual int SetSSLContext(
       const uint32_t& key,
-      protocol_handler::ServiceType service_type,
       security_manager::SSLContext* context) = 0;
 
     /**
      * \brief Gets crypto context of service
      * \param key Unique key used by other components as session identifier
-     * \param service_type Type of service
-     * \return \c true in case of service is protected or \c false otherwise
+     * \return \ref SSLContext
      */
     virtual security_manager::SSLContext* GetSSLContext(
-        const uint32_t& key,
-        protocol_handler::ServiceType service_type) = 0;
+        const uint32_t& key) = 0;
   protected:
     /**
      * \brief Destructor

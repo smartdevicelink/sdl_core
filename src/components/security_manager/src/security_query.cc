@@ -37,13 +37,12 @@
 
 using namespace security_manager;
 
-SecurityQuery::QueryHeader::QueryHeader(
-    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
-  query_type(queryType), query_id(queryId), seq_number(seqNumber), reserved(0) {
+SecurityQuery::QueryHeader::QueryHeader(uint8_t queryType, uint32_t queryId) :
+  query_type(queryType), query_id(queryId), seq_number(0), json_size(0) {
 }
 
 SecurityQuery::SecurityQuery() :
-  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
+  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID), connection_key_(0) {
 }
 
 SecurityQuery::SecurityQuery(
@@ -52,7 +51,7 @@ SecurityQuery::SecurityQuery(
   header_(header), connection_key_(connection_key) {
 }
 
-bool SecurityQuery::Parse(const uint8_t * const binary_data,
+bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
   const size_t header_size = sizeof(QueryHeader);
   if(bin_data_size < header_size) {
@@ -77,12 +76,6 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
   const uint32_t query_id = 0x00FFFFFF &
       BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data));
   switch (query_id) {
-    case PROTECT_SERVICE_REQUEST:
-      header_.query_id = PROTECT_SERVICE_REQUEST;
-      break;
-    case PROTECT_SERVICE_RESPONSE:
-      header_.query_id = PROTECT_SERVICE_RESPONSE;
-      break;
     case SEND_HANDSHAKE_DATA:
       header_.query_id = SEND_HANDSHAKE_DATA;
       break;
@@ -91,20 +84,41 @@ bool SecurityQuery::Parse(const uint8_t * const binary_data,
       break;
     default: // On wrong query id
       header_.query_id = INVALID_QUERY_ID;
-      break;
+      //return with error
+      return false;
   }
+  //All requests shall have binary or json data
+  if(bin_data_size > header_size)
+    return false;
+
   header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
-  if(bin_data_size > header_size) {
+  if(SEND_HANDSHAKE_DATA == header_.query_id) {
     // copy from end of header to end of binary data
     data_.assign(binary_data + header_size, binary_data + bin_data_size);
+    return true;
   }
-  return true;
+  if(SEND_INTERNAL_ERROR == header_.query_id) {
+    const uint32_t json_size =
+        BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data + 4));
+    if(json_size <= 0)
+      //Internal error shall have json data
+      return false;
+    const char* const error_data =
+        reinterpret_cast<const char*>(binary_data + header_size);
+    json_message_.assign(error_data, error_data + json_size);
+    return true;
+    }
+  return false;
 }
 
 void SecurityQuery::set_data(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
     DCHECK(binary_data); DCHECK(bin_data_size);
     data_.assign(binary_data, binary_data + bin_data_size);
+}
+
+void SecurityQuery::set_json_message(const std::string &json_message) {
+  json_message_ = json_message;
 }
 
 void SecurityQuery::set_connection_key(const uint32_t connection_key) {
@@ -125,6 +139,10 @@ const uint8_t * const SecurityQuery::get_data() const {
 
 const size_t SecurityQuery::get_data_size() const {
   return data_.size();
+}
+
+const std::string &SecurityQuery::get_json_message() const{
+  return json_message_;
 }
 
 int32_t SecurityQuery::get_connection_key() const {

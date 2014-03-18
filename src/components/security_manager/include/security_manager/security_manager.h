@@ -92,7 +92,7 @@ public:
    * \param session_observer pointer to object of the class implementing
    */
   void set_session_observer(protocol_handler::SessionObserver* observer);
-  /**
+/**
    * \brief Sets pointer for Protocol Handler layer for sending
    * \param protocol_handler pointer to object of the class implementing
    */
@@ -110,16 +110,18 @@ public:
    */
   void Handle(const SecurityMessage& message) OVERRIDE;
 
- private:
-  bool ParseProtectServiceRequest(const SecurityMessage &requestMessage);
+  /**
+   * \brief Start protection connection
+   * threads::MessageLoopThread<*>::Handler implementations
+   * CALLED in SecurityMessageLoop thread
+   */
+  bool ProtectConnection(const uint32_t &connection_key);
+private:
   /**
    * \brief Parse SecurityMessage as HandshakeData request
    * \param inMessage SecurityMessage with binary data of handshake
    */
   bool ProccessHandshakeData(const SecurityMessage &inMessage);
-
-  void SendProtectServiceResponse( const SecurityMessage &message,
-                                   const SecurityQuery::ProtectServiceResult result);
 
   /**
    * \brief Send InternallError with text message to Mobiel Application
@@ -129,9 +131,8 @@ public:
    * \param error_str internal error trin representation
    */
   void SendInternalError(const int32_t connection_key,
-                         const uint32_t seq_number,
-                         const SecurityQuery::InternalErrors& error_id,
-                         const std::string& error_str);
+                         const int &error_id,
+                         const std::string& error_str = "");
 
   /**
    * \brief Send binary data answer with QueryHeader
@@ -160,13 +161,13 @@ public:
   SecurityMessageLoop security_messages_;
 
   /**
-   *\brief Pointer on instance of class implementing CryptoManager
-   */
-  security_manager::CryptoManager* crypto_manager_;
-  /**
    *\brief Pointer on instance of class implementing SessionObserver
    */
   protocol_handler::SessionObserver* session_observer_;
+  /**
+   *\brief Pointer on instance of class implementing CryptoManager
+   */
+  security_manager::CryptoManager* crypto_manager_;
   /**
    *\brief Pointer on instance of class implementing ProtocolHandler
    */

@@ -93,7 +93,7 @@ const uint8_t FRAME_TYPE_CONSECUTIVE = 0x03;
 /**
  *\brief Constant: Frame type for HeartBeat
  */
-const uint8_t SERVICE_TYPE_ZERO = 0x00;
+const uint8_t SERVICE_TYPE_CONTROL = 0x00;
 
 /**
  *\brief Constant: RPC type of session
@@ -114,11 +114,6 @@ const uint8_t SERVICE_TYPE_NAVI = 0x0B;
  *\brief Constant: Bulk data type of session (hybrid)
  */
 const uint8_t SERVICE_TYPE_BULK = 0x0F;
-
-/**
- *\brief Constant: Secre Service type of session
- */
-const uint8_t SERVICE_TYPE_SECURE = 0x10;
 
 /**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
