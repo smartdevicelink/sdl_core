@@ -441,8 +441,6 @@ public class WiProProtocol extends AbstractProtocol {
 
         protected void handleFrame(final ProtocolFrameHeader header, byte[] data) {
             processFrame(header, data);
-
-
         } // end-method
 
         private void processFrame(final ProtocolFrameHeader header, final byte[] data) {

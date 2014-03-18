@@ -57,7 +57,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
     private static final byte PROTOCOL_VERSION = (byte) 2;
     private static final int PUTFILE_FUNCTIONID = 32;
     private static final int ONSYSTEMREQUEST_FUNCTIONID = 32781;
-    private static final int WAIT_TIMEOUT = 20;
+    private static final int WAIT_TIMEOUT = 30;
     private static final String OFFSET = "offset";
     private static final String LENGTH = "length";
     private static final String SYNC_FILENAME = "syncFileName";
