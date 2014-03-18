@@ -11,30 +11,32 @@ then
     exit
 fi
 cd $GIT_REPO
-echo "enter first name" 
+echo "Enter first name: " 
 read FIRST_NAME
-echo "enter last name" 
+echo "Enter last name: " 
 read LAST_NAME
 
 EMAIL=${FIRST_NAME:0:1}$LAST_NAME"@luxoft.com"
 echo "Your email is: "$EMAIL
 echo "Correct? [yes or no] "
 
-read answer
-
-while [[ $answer != yes && $answer != no ]]
+read ans
+while [[ ! $ans =~ (YES|Yes|yes|Y|y|NO|No|no|N|n) ]]
 do
-	echo you have entered an invalid response. Please try again
-	read answer
+	echo "You have entered an invalid response. Please try again"
+	read ans
 done
 
-if [ $answer != yes ] 
+if [[ $ans =~ (NO|No|no|N|n) ]]
 then	
-	echo "Enter your domain ";
+	echo "Enter your email: ";
 	read EMAIL
 fi
 
-git config user.name $FIRST_NAME" "$LAST_NAME
+echo "Your git name: " $FIRST_NAME" "$LAST_NAME
+echo "Your git email: " $EMAIL
+
+git config user.name "$FIRST_NAME $LAST_NAME"
 git config user.email $EMAIL
 
 
