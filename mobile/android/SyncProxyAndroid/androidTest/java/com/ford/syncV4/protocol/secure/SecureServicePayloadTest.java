@@ -1,7 +1,5 @@
 package com.ford.syncV4.protocol.secure;
 
-import com.ford.syncV4.protocol.enums.ServiceType;
-
 import junit.framework.TestCase;
 
 /**
@@ -9,6 +7,7 @@ import junit.framework.TestCase;
  * Author: Chernyshov Yuriy - Mobile Development
  * Date: 3/6/14
  * Time: 3:32 PM
+ * 
  */
 public class SecureServicePayloadTest extends TestCase {
 
