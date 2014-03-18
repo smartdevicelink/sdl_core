@@ -53,6 +53,8 @@ using std::cerr;
 struct Options {
   char* interface_xml;
   bool  auto_generate_function_ids;
+  bool  generate_json_code;
+  bool  generate_dbus_code;
   std::set<std::string> requested_interfaces;
   std::set<std::string> excluded_scopes;
   bool  avoid_unsigned;
@@ -60,6 +62,8 @@ struct Options {
   Options()
       : interface_xml(NULL),
         auto_generate_function_ids(false),
+        generate_json_code(false),
+        generate_dbus_code(false),
         avoid_unsigned(false),
         minimum_word_size(8) {
   }
@@ -78,7 +82,9 @@ void Usage() {
        << "                      generated code. Can occur multiple times.\n"
        << "  -a                  Automatically generates function ID enum.\n"
        << "  -U                  Avoid unsigned integers in generated types\n"
-       << "  -w <word_bits>      Minimal word size (integer size in bits) in generated types\n";
+       << "  -w <word_bits>      Minimal word size (integer size in bits) in generated types\n"
+       << "  -j                  Generate json serialization code\n"
+       << "  -d                  Generate d-bus serialization code\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -87,7 +93,7 @@ int main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
   Options options;
-  const char* opts = "aUf:i:s:w:";
+  const char* opts = "ajdUf:i:s:w:";
   for (int opt = getopt(argc, argv, opts); opt != -1;
       opt = getopt(argc, argv, opts)) {
     switch (opt) {
@@ -128,6 +134,14 @@ int main(int argc, char* argv[]) {
         }
         break;
       }
+      case 'j': {
+        options.generate_json_code = true;
+        break;
+      }
+      case 'd': {
+        options.generate_dbus_code = true;
+        break;
+      }
       default: {
         cerr << "Invalid option: '" << opt << "'" << '\n';
         return EXIT_FAILURE;
@@ -150,6 +164,8 @@ int main(int argc, char* argv[]) {
           cpp_code_generator.Generate(
             codegen::Preferences(options.minimum_word_size,
                                  options.avoid_unsigned,
+                                 options.generate_json_code,
+                                 options.generate_dbus_code,
                                  options.requested_interfaces));
       if (bad.empty()) {
         return EXIT_SUCCESS;

@@ -57,16 +57,19 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
     saved_applications_.push_back(Json::Value());
     json_app = &(saved_applications_.back());
   }
-
+  uint32_t hash = application->curHash();
+  LOG4CXX_INFO(logger_, " Hash = " << hash);
   uint32_t connection_key = application->app_id();
   (*json_app)[strings::app_id] = app_id;
   (*json_app)[strings::connection_key] = connection_key;
   (*json_app)[strings::hmi_level] =
       static_cast<int32_t> (application->hmi_level());
   (*json_app)[strings::ign_off_count] = 0;
-  (*json_app)[strings::hash_id] = application->curHash();
+  (*json_app)[strings::hash_id] = hash;
   (*json_app)[strings::application_commands] =
       GetApplicationCommands(connection_key);
+  (*json_app)[strings::application_submenus] =
+      GetApplicationSubMenus(connection_key);
   (*json_app)[strings::application_choise_sets] =
       GetApplicationInteractionChoiseSets(connection_key);
   (*json_app)[strings::application_global_properties] =
@@ -171,10 +174,27 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
 
   LOG4CXX_INFO(logger_, saved_app.toStyledString());
   Json::Value& app_commands = saved_app[strings::application_commands];
+  Json::Value& app_submenus = saved_app[strings::application_submenus];
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
   Json::Value& global_properties = saved_app[strings::application_global_properties];
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
 
+
+  //add submenus
+  for (Json::Value::iterator json_it = app_submenus.begin();
+      json_it != app_submenus.end(); ++json_it)  {
+    Json::Value& json_submenu = *json_it;
+    smart_objects::SmartObject message = smart_objects::SmartObject(
+                                         smart_objects::SmartType::SmartType_Map);
+    Formatters::CFormatterJsonBase::jsonValueToObj(json_submenu, message);
+    application->AddSubMenu(message[strings::menu_id].asUInt(), message);
+  }
+  requests = MessageHelper::CreateAddSubMenuRequestToHMI(application);
+
+  for (MessageHelper::SmartObjectList::iterator it = requests.begin();
+       it != requests.end(); ++it) {
+    ProcessHMIRequest(*it, true);
+  }
 
   //add commands
   for (Json::Value::iterator json_it = app_commands.begin();
@@ -309,8 +329,11 @@ void ResumeCtrl::SavetoFileSystem() {
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
 
-  LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption " << hash);
+  LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption");
   DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
+  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id());
+
   sync_primitives::AutoLock auto_lock(queue_lock_);
 
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
@@ -320,8 +343,11 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
 
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
+      LOG4CXX_INFO(logger_, "recived hash = " << hash);
+      LOG4CXX_INFO(logger_, "saved hash = " << saved_hash);
       if (hash == saved_hash) {
         RestoreApplicationData(application);
+        application->UpdateHash();
       }
 
       waiting_for_timer_.insert(std::make_pair(application->app_id(),
@@ -381,6 +407,26 @@ Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
   const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
   for (;it != commands.end(); ++it) {
+    smart_objects::SmartObject* so = it->second;
+    Json::Value curr;
+    Formatters::CFormatterJsonBase::objToJsonValue(*so, curr);
+    result.append(curr);
+    LOG4CXX_INFO(logger_, "Converted:" << curr.toStyledString());
+  }
+  return result;
+}
+
+Json::Value ResumeCtrl::GetApplicationSubMenus(const uint32_t app_id) {
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands" << app_id);
+
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+  DCHECK(app.get());
+
+  Json::Value result;
+  const SubMenuMap& sub_menus = app->sub_menu_map();
+  SubMenuMap::const_iterator it = sub_menus.begin();
+  for (;it != sub_menus.end(); ++it) {
     smart_objects::SmartObject* so = it->second;
     Json::Value curr;
     Formatters::CFormatterJsonBase::objToJsonValue(*so, curr);

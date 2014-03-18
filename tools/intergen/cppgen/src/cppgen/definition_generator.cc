@@ -35,6 +35,7 @@
 #include "cppgen/comment.h"
 #include "cppgen/enum_from_json_value_function.h"
 #include "cppgen/enum_to_json_value_function.h"
+#include "cppgen/generator_preferences.h"
 #include "cppgen/is_valid_enum_function.h"
 #include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
@@ -66,7 +67,7 @@ void DefinitionGenerator::GenerateCodeForEnum(const Enum* enm) {
   ostream& o = source_file.types_ns().os();
   IsValidEnumFunction(enm).Define(&o, false);
   EnumToJsonValueFunction(enm).Define(&o, false);
-  EnumFromJsonValueFunction(enm).Define(&o, false);
+  EnumFromJsonStringFunction(enm).Define(&o, false);
   o << endl;
 }
 
@@ -80,15 +81,19 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(strct->name()).Define(&o, false);
+  if (preferences_->generate_json) {
+    StructTypeFromJsonConstructor(strct).Define(&o , false);
+    StructTypeToJsonMethod(strct).Define(&o , false);
+  }
+  if (preferences_->generate_dbus) {
+    StructTypeFromDbusReaderConstructor(preferences_,
+                                        strct, true).Define(&o , false);
+    StructTypeToDbusWriterMethod(strct, true).Define(&o , false);
+    StructTypeDbusMessageSignatureMethod(preferences_,
+                                         strct, true).Define(&o, false);
+  }
   StructTypeIsValidMethod(strct).Define(&o, false);
   StructTypeIsInitializedMethod(strct).Define(&o, false);
-  StructTypeFromJsonConstructor(strct).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(preferences_,
-                                      strct, true).Define(&o , false);
-  StructTypeToJsonMethod(strct).Define(&o , false);
-  StructTypeToDbusWriterMethod(strct, true).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(preferences_,
-                                       strct, true).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().types_ns();
@@ -111,16 +116,20 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(response.name()).Define(&o, false);
+  if (preferences_->generate_json) {
+    StructTypeFromJsonConstructor(&response).Define(&o , false);
+    StructTypeToJsonMethod(&response).Define(&o , false);
+  }
+  if (preferences_->generate_dbus) {
+    StructTypeFromDbusReaderConstructor(preferences_,
+                                        &response, false).Define(&o , false);
+    StructTypeToDbusWriterMethod(&response, false).Define(&o , false);
+    StructTypeDbusMessageSignatureMethod(preferences_,
+                                         &response, false).Define(&o, false);
+  }
+  MessageHandleWithMethod(response.name()).Define(&o, false);
   StructTypeIsValidMethod(&response).Define(&o, false);
   StructTypeIsInitializedMethod(&response).Define(&o, false);
-  StructTypeFromJsonConstructor(&response).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(preferences_,
-                                      &response, false).Define(&o , false);
-  StructTypeToJsonMethod(&response).Define(&o , false);
-  StructTypeToDbusWriterMethod(&response, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(preferences_,
-                                       &response, false).Define(&o, false);
-  MessageHandleWithMethod(response.name()).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().responses_ns();
@@ -138,16 +147,20 @@ void DefinitionGenerator::GenerateCodeForNotification(
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(notification.name()).Define(&o, false);
+  if (preferences_->generate_json) {
+    StructTypeFromJsonConstructor(&notification).Define(&o , false);
+    StructTypeToJsonMethod(&notification).Define(&o , false);
+  }
+  if (preferences_->generate_dbus) {
+    StructTypeFromDbusReaderConstructor(preferences_,
+                                        &notification, false).Define(&o, false);
+    StructTypeToDbusWriterMethod(&notification, false).Define(&o , false);
+    StructTypeDbusMessageSignatureMethod(preferences_,
+                                         &notification, false).Define(&o, false);
+  }
+  MessageHandleWithMethod(notification.name()).Define(&o, false);
   StructTypeIsValidMethod(&notification).Define(&o, false);
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
-  StructTypeFromJsonConstructor(&notification).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(preferences_,
-                                      &notification, false).Define(&o , false);
-  StructTypeToJsonMethod(&notification).Define(&o , false);
-  StructTypeToDbusWriterMethod(&notification, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(preferences_,
-                                       &notification, false).Define(&o, false);
-  MessageHandleWithMethod(notification.name()).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().notifications_ns();
@@ -165,15 +178,19 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(request.name()).Define(&o, false);
+  if (preferences_->generate_json) {
+    StructTypeFromJsonConstructor(&request).Define(&o , false);
+    StructTypeToJsonMethod(&request).Define(&o , false);
+  }
+  if (preferences_->generate_dbus) {
+    StructTypeFromDbusReaderConstructor(preferences_,
+                                        &request, false).Define(&o , false);
+    StructTypeToDbusWriterMethod(&request, false).Define(&o , false);
+    StructTypeDbusMessageSignatureMethod(preferences_,
+                                         &request, false).Define(&o, false);
+  }
   StructTypeIsValidMethod(&request).Define(&o, false);
   StructTypeIsInitializedMethod(&request).Define(&o, false);
-  StructTypeFromJsonConstructor(&request).Define(&o , false);
-  StructTypeFromDbusReaderConstructor(preferences_,
-                                      &request, false).Define(&o , false);
-  StructTypeToJsonMethod(&request).Define(&o , false);
-  StructTypeToDbusWriterMethod(&request, false).Define(&o , false);
-  StructTypeDbusMessageSignatureMethod(preferences_,
-                                       &request, false).Define(&o, false);
   MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;
 

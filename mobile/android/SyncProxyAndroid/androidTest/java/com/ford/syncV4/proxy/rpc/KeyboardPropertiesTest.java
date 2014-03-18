@@ -30,7 +30,6 @@ public class KeyboardPropertiesTest extends TestCase {
         final Language lang = Language.AR_SA;
         final KeyboardLayout kbdLayout = KeyboardLayout.QWERTZ;
         final KeypressMode keypressMode = KeypressMode.SINGLE_KEYPRESS;
-        final boolean sendDynamicEntry = true;
         final Vector<String> charList = new Vector<String>() {{
             add("A");
             add("B");

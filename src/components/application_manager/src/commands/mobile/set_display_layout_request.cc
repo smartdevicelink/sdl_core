@@ -50,7 +50,6 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
-
   ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()
   ->application(connection_key());
 
@@ -61,7 +60,6 @@ void SetDisplayLayoutRequest::Run() {
   }
 
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
-
   SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
                  &((*message_)[strings::msg_params]), true);
 

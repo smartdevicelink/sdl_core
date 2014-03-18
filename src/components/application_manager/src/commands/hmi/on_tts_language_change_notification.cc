@@ -75,12 +75,10 @@ void OnTTSLanguageChangeNotification::Run() {
 
     if (static_cast<int>(app->language())
         != (*message_)[strings::msg_params][strings::language].asInt()) {
-      app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
-
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-      ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id());
+      ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id(), true);
     }
   }
 }

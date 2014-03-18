@@ -238,6 +238,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         hmi_capabilities.display_capabilities()->getElement(
         hmi_response::text_fields);
 
+    display_caps[hmi_response::image_fields] =
+        hmi_capabilities.display_capabilities()->getElement(
+        hmi_response::image_fields);
+
     display_caps[hmi_response::media_clock_formats] =
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::media_clock_formats);
@@ -262,6 +266,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
       display_caps[hmi_response::graphic_supported] = false;
     }
+
+    display_caps[hmi_response::templates_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::templates_available);
+
+    display_caps[hmi_response::screen_params] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::screen_params);
+
+    display_caps[hmi_response::num_custom_presets_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+                hmi_response::num_custom_presets_available);
   }
 
   if (hmi_capabilities.button_capabilities()) {

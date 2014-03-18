@@ -43,10 +43,10 @@ class Enum;
  * Enum constants are serialized/deserialized as strings having value from
  * predefined set.
  */
-class EnumFromJsonValueFunction : public CppFunction {
+class EnumFromJsonStringFunction : public CppFunction {
  public:
-  EnumFromJsonValueFunction(const Enum* enm);
-  ~EnumFromJsonValueFunction();
+  EnumFromJsonStringFunction(const Enum* enm);
+  ~EnumFromJsonStringFunction();
   virtual void DefineBody(std::ostream* os) const;
  private:
   const Enum* enm_;

@@ -68,6 +68,7 @@ class CppInterfaceCodeGenerator {
 private:
   // Fields
   const Interface* interface_;
+  const TypePreferences* preferences_;
   ModuleManager* module_manager_;
   DeclarationGenerator declaration_generator_;
   DefinitionGenerator definition_generator_;

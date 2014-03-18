@@ -16,8 +16,7 @@ namespace transport_manager {
 namespace transport_adapter {
 
 TEST(TcpAdapterBasicTest, Basic) {
-  TransportAdapter* transport_adapter =
-      static_cast<TransportAdapter*>(new TcpTransportAdapter(12345));
+  TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
 
   EXPECT_EQ("sdl-tcp", transport_adapter->GetDeviceType());
   EXPECT_TRUE(transport_adapter->IsServerOriginatedConnectSupported());
@@ -26,8 +25,7 @@ TEST(TcpAdapterBasicTest, Basic) {
 }
 
 TEST(TcpAdapterBasicTest, NotInitialised) {
-  TransportAdapter* transport_adapter =
-      static_cast<TransportAdapter*>(new TcpTransportAdapter(12345));
+  TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
 
   EXPECT_EQ(TransportAdapter::BAD_STATE, transport_adapter->SearchDevices());
   EXPECT_EQ(TransportAdapter::OK,
@@ -93,7 +91,7 @@ class TcpAdapterTest : public ::testing::Test {
  public:
   TcpAdapterTest()
       : port_(ChoosePort()),
-        transport_adapter_(static_cast<TransportAdapter*>(new TcpTransportAdapter(port_))),
+        transport_adapter_(new TcpTransportAdapter(port_)),
         suspended_(false),
         finished_(false) {
     pthread_mutex_init(&suspend_mutex_, 0);

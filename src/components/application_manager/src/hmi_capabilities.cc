@@ -171,7 +171,34 @@ std::map<std::string, hmi_apis::Common_HmiZoneCapabilities::eType> hmi_zone_enum
     {"BACK", hmi_apis::Common_HmiZoneCapabilities::BACK},
 };
 
+const std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
+image_field_name_enum =
+{
+    {"softButtonImage", hmi_apis::Common_ImageFieldName::softButtonImage},
+    {"choiceImage", hmi_apis::Common_ImageFieldName::choiceImage},
+    {"choiceSecondaryImage", hmi_apis::Common_ImageFieldName::choiceSecondaryImage},
+    {"vrHelpItem", hmi_apis::Common_ImageFieldName::vrHelpItem},
+    {"turnIcon", hmi_apis::Common_ImageFieldName::turnIcon},
+    {"menuIcon", hmi_apis::Common_ImageFieldName::menuIcon},
+    {"cmdIcon", hmi_apis::Common_ImageFieldName::cmdIcon},
+    {"graphic", hmi_apis::Common_ImageFieldName::graphic},
+    {"showConstantTBTIcon", hmi_apis::Common_ImageFieldName::showConstantTBTIcon},
+    {"showConstantTBTNextTurnIcon",
+        hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon},
+    {"nextTurnIcon", hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon}
+};
 
+const std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum =
+{
+    {"GRAPHIC_BMP", hmi_apis::Common_FileType::GRAPHIC_BMP},
+    {"GRAPHIC_JPEG", hmi_apis::Common_FileType::GRAPHIC_JPEG},
+    {"GRAPHIC_PNG", hmi_apis::Common_FileType::GRAPHIC_PNG},
+    {"AUDIO_WAVE", hmi_apis::Common_FileType::AUDIO_WAVE},
+    {"AUDIO_MP3", hmi_apis::Common_FileType::AUDIO_MP3},
+    {"AUDIO_AAC", hmi_apis::Common_FileType::AUDIO_AAC},
+    {"BINARY", hmi_apis::Common_FileType::BINARY},
+    {"JSON", hmi_apis::Common_FileType::JSON}
+};
 
 HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
   : is_vr_cooperating_(false),
@@ -307,8 +334,6 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
     utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities));
     app_mngr_->ManageHMICommand(get_capabilities);
-
-    MessageHelper::SendHelpVrCommand();
   }
 }
 
@@ -547,6 +572,31 @@ bool HMICapabilities::load_capabilities_from_file() {
           text_fields_enum_name.find(text_fields[i].asString())->first;
     }
 
+    display_capabilities_so["imageFields"] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+    Json::Value image_fields = display_capabilities.get("imageFields", "");
+    for (int32_t i = 0; i < image_fields.size(); ++i) {
+      smart_objects::SmartObject image_field =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
+      image_field["name"] = image_field_name_enum.find(
+          image_fields[i].get("name","").asString())->second;
+      image_field["imageTypeSupported"] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
+      Json::Value image_type_suported =
+          image_fields[i].get("imageTypeSupported", "");
+      for (int32_t j = 0; j < image_type_suported.size(); ++j) {
+        image_field["imageTypeSupported"][j] = (file_type_enum.find(
+            image_type_suported[j].asString()))->second;
+      }
+      image_field["imageResolution"]["resolutionWidth"] =
+          ((image_fields[i].get("imageResolution", "")).
+          get("resolutionWidth", "")).asInt();
+      image_field["imageResolution"]["resolutionHeight"] =
+          ((image_fields[i].get("imageResolution", "")).
+          get("resolutionHeight", "")).asInt();
+      display_capabilities_so["imageFields"][i] = image_field;
+    }
+
     display_capabilities_so["mediaClockFormats"] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
     Json::Value media_clock_format =
@@ -557,6 +607,35 @@ bool HMICapabilities::load_capabilities_from_file() {
     }
     display_capabilities_so["graphicSupported"] =
         display_capabilities.get("graphicSupported", "").asBool();
+
+    display_capabilities_so["templatesAvailable"] =
+            smart_objects::SmartObject(smart_objects::SmartType_Array);
+    Json::Value teplates_available =
+        display_capabilities.get("templatesAvailable", "");
+    for(int32_t i = 0; i < teplates_available.size(); ++i) {
+      display_capabilities_so["templatesAvailable"][i] =
+          teplates_available[i].asString();
+    }
+    Json::Value screen_params_resolution =
+        (display_capabilities.get("screenParams", "")).get("resolution", "");
+    Json::Value screen_params_touch_event_available =
+        (display_capabilities.get("screenParams", ""))
+        .get("touchEventAvailable", "");
+    display_capabilities_so["screenParams"]["resolution"]["resolutionWidth"] =
+        screen_params_resolution.get("resolutionWidth", "").asInt();
+    display_capabilities_so["screenParams"]["resolution"]["resolutionHeight"] =
+        screen_params_resolution.get("resolutionHeight", "").asInt();
+    display_capabilities_so["screenParams"]
+                           ["touchEventAvailable"]["pressAvailable"] =
+        screen_params_touch_event_available.get("pressAvailable", "").asBool();
+    display_capabilities_so["screenParams"]
+                               ["touchEventAvailable"]["multiTouchAvailable"] =
+    screen_params_touch_event_available.get("multiTouchAvailable", "").asBool();
+    display_capabilities_so["screenParams"]
+                           ["touchEventAvailable"]["doublePressAvailable"] =
+    screen_params_touch_event_available.get("doublePressAvailable", "").asBool();
+    display_capabilities_so["numCustomPresetsAvailable"] =
+        display_capabilities.get("numCustomPresetsAvailable", "").asInt();
 
     Json::Value image_capabilities =
         display_capabilities.get("imageCapabilities", "");
