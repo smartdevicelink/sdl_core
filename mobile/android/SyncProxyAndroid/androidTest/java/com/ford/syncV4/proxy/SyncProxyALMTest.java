@@ -46,6 +46,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
         sut = getSyncProxyALM();
+        sut.setServiceToCypher(null);
     }
 
     private SyncProxyALM getSyncProxyALM() throws SyncException {
