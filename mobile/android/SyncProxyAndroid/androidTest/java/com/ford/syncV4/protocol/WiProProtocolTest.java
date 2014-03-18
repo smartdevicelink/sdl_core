@@ -253,7 +253,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
         assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
         assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-        assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+        assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
         assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
         assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
         assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -267,7 +267,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -284,7 +284,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -307,7 +307,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -324,7 +324,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());

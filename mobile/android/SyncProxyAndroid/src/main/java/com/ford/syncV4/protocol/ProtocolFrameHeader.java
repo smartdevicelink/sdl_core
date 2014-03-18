@@ -6,7 +6,7 @@ import com.ford.syncV4.util.BitConverter;
 
 public class ProtocolFrameHeader {
 	private byte version = 1;
-	private boolean compressed = false;
+	private boolean isEncrypted = false;
 	private FrameType frameType = FrameType.Control;
 	private ServiceType serviceType = ServiceType.RPC;
 	private byte frameData = 0;
@@ -27,7 +27,7 @@ public class ProtocolFrameHeader {
 		msg.setVersion(version);
 		
 		boolean compressed = 1 == ((header[0] & 0x08) >>> 3);
-		msg.setCompressed(compressed);
+		msg.setEncrypted(compressed);
 		
 		byte frameType = (byte) (header[0] & 0x07);
 		msg.setFrameType(FrameType.valueOf(frameType));
@@ -60,7 +60,7 @@ public class ProtocolFrameHeader {
 		int header = 0;
 		header |= (version & 0x0F);
 		header <<= 1;
-		header |= (compressed ? 1 : 0);
+		header |= (isEncrypted ? 1 : 0);
 		header <<= 3;
 		header |= (frameType.value() & 0x07);
 		header <<= 8;
@@ -88,7 +88,7 @@ public class ProtocolFrameHeader {
 	
 	public String toString() {
 		String ret = "";
-		ret += "version " + version + ", " + (compressed ? "compressed" : "uncompressed") + "\n";
+		ret += "version " + version + ", " + (isEncrypted ? "encrypted" : "unencrypted") + "\n";
 		ret += "frameType " + frameType.getName() + ", serviceType " + serviceType.getName();
 		ret += "\nframeData " + frameData;
 		ret += ", sessionID " + sessionID;
@@ -105,12 +105,12 @@ public class ProtocolFrameHeader {
 		this.version = version;
 	}
 
-	public boolean isCompressed() {
-		return compressed;
+	public boolean isEncrypted() {
+		return isEncrypted;
 	}
 
-	public void setCompressed(boolean compressed) {
-		this.compressed = compressed;
+	public void setEncrypted(boolean encrypted) {
+		this.isEncrypted = encrypted;
 	}
 
 	public byte getFrameData() {

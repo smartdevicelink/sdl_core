@@ -15,7 +15,7 @@ public class ProtocolFrameHeaderFactory {
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(messageID);
         msg.setSessionID(sessionID);
-        msg.setCompressed(false);
+        msg.setEncrypted(false);
         msg.setDataSize(0);
         return msg;
     }
