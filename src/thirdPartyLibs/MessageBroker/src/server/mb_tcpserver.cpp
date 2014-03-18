@@ -66,11 +66,13 @@ namespace NsMessageBroker
       ssize_t nb = -1;
 
       std::string* pReceivingBuffer = getBufferFor(fd);
-      std::vector<char> buf(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
+      std::vector<char> buf;
+      buf.reserve(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
       DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n",
           pReceivingBuffer->size(), pReceivingBuffer->c_str()));
       buf.assign(pReceivingBuffer->c_str(),
                  pReceivingBuffer->c_str() + pReceivingBuffer->size());
+      buf.resize(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
       nb = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
       DBG_MSG(("Recieved %d from %d\n", nb, fd));
       nb += pReceivingBuffer->size();
