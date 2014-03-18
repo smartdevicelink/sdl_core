@@ -165,7 +165,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
     private IRPCMessageHandler rpcMessageHandler;
-    private static ServiceType serviceToCypher = ServiceType.RPC;
+    private static ServiceType serviceToCypher;
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -1877,7 +1877,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
-        getSyncConnection().startSecureService();
+        if ( serviceToCypher != null ) {
+            getSyncConnection().startSecureService();
+        }else{
+            restartRPCProtocolSession();
+            notifySessionStarted(currentSession.getSessionId(), correlationID);
+        }
     }
 
 
@@ -1919,7 +1924,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onError(Exception e) {
             String errorMsg = "Secure Connection Error ";
-            if( e.getMessage() != null){
+            if (e.getMessage() != null) {
                 errorMsg = e.getMessage();
             }
             InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
@@ -1933,10 +1938,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void setupSecureProxy() {
-        protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
-        protocolSecureManager.addServiceToEncrypt(serviceToCypher);
-        protocolSecureManager.setupSecureEnvironment();
-        mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
+        if ( serviceToCypher != null ) {
+            protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
+            protocolSecureManager.addServiceToEncrypt(serviceToCypher);
+            protocolSecureManager.setupSecureEnvironment();
+            mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
+        }
     }
 
     private void addIfNotExsistRpcServiceToSession() {
@@ -3203,7 +3210,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _proxyListener.onSecureServiceStart();
             }
 
-
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
             } else {
@@ -3233,7 +3239,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
 
-
         @Override
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
@@ -3252,18 +3257,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
-                if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
+                if (shouldEncryptService(ServiceType.Mobile_Nav)) {
                     getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Mobile_Nav);
                 } else {
                     onMobileNaviServiceStarted(sessionID, correlationID);
                 }
             } else if (serviceType == ServiceType.Audio_Service) {
-                if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
+                if (shouldEncryptService(ServiceType.Audio_Service)) {
                     getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Audio_Service);
                 } else {
                     onAudioServiceStarted(sessionID, correlationID);
                 }
             }
+        }
+
+        private boolean shouldEncryptService(ServiceType serviceType) {
+            if (protocolSecureManager == null) {
+                return false;
+            }
+            return protocolSecureManager.containsServiceTypeToEncrypt(serviceType);
         }
     }
 

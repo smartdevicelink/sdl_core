@@ -166,7 +166,7 @@ public class TransportConnect_StartSecurityServiceTest extends InstrumentationTe
         SyncProxyALM proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
                 null, connection, new TestConfig());
-
+        proxy.setServiceToCypher(ServiceType.RPC);
         emulateProtocolSessionStarted(proxy);
 
         countDownLatch.await(TIME_OUT, TimeUnit.MILLISECONDS);
