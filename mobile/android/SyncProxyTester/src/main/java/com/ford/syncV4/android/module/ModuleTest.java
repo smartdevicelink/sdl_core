@@ -9,10 +9,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -28,9 +27,11 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.marshaller.CustomJsonRPCMarshaller;
 import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
 import com.ford.syncV4.android.module.reader.BinaryDataReader;
@@ -76,114 +77,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
-	/**
-	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
-	 * the request; whether to generate invalid JSON; custom JSON to set in
-	 * request).
-	 */
-	class RPCRequestWrapper {
-		private RPCRequest request = null;
-		private long pause = 0;
-		private boolean generateInvalidJSON = false;
-		private String customJSON = null;
-		
-		public RPCRequestWrapper(RPCRequest request, long pause,
-				boolean generateInvalidJSON) {
-			this(request, pause, generateInvalidJSON, null);
-		}
-		
-		public RPCRequestWrapper(RPCRequest request, long pause,
-				boolean generateInvalidJSON, String customJSON) {
-			this.request = request;
-			this.pause = pause;
-			this.generateInvalidJSON = generateInvalidJSON;
-			this.customJSON = customJSON;
-		}
 
-		public long getPause() {
-			return pause;
-		}
-
-		public void setPause(long pause) {
-			this.pause = pause;
-		}
-
-		public RPCRequest getRequest() {
-			return request;
-		}
-
-		public boolean isGenerateInvalidJSON() {
-			return generateInvalidJSON;
-		}
-
-		public void setGenerateInvalidJSON(boolean generateInvalidJSON) {
-			this.generateInvalidJSON = generateInvalidJSON;
-		}
-
-		public String getCustomJSON() {
-			return customJSON;
-		}
-
-		public void setCustomJSON(String customJSON) {
-			this.customJSON = customJSON;
-		}
-	}
-	
-	/** Represents a test as read from the test file. */
-	class Test {
-		private String name = null;
-		private long pause = 0;
-		private List<RPCRequestWrapper> requests = null;
-		
-		public Test() {
-			super();
-		}
-
-		public Test(String name, long pause, List<RPCRequestWrapper> requests) {
-			this.name = name;
-			this.pause = pause;
-			this.requests = requests;
-		}
-		
-		/**
-		 * Adds the specified request to the list. If the list is null, it's
-		 * created first.
-		 * 
-		 * @param request request to add
-		 */
-		public void addRequest(RPCRequestWrapper request) {
-			if (requests == null) {
-				requests = new ArrayList<ModuleTest.RPCRequestWrapper>();
-			}
-			
-			requests.add(request);
-		}
-
-		public String getName() {
-			return name;
-		}
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public long getPause() {
-			return pause;
-		}
-		
-		public void setPause(long pause) {
-			this.pause = pause;
-		}
-		
-		public List<RPCRequestWrapper> getRequests() {
-			return requests;
-		}
-		
-		public void setRequests(List<RPCRequestWrapper> requests) {
-			this.requests = requests;
-		}
-	}
-	
 	/** Log tag for the class. */
 	private static final String TAG = ModuleTest.class.getSimpleName();
 	/** Specifies whether to display debug info from the XML parser. */
@@ -218,14 +112,12 @@ public class ModuleTest {
 	/** Attribute name of request's correlation ID. */
 	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
-	private static ModuleTest _instance;
+	private static ModuleTest sInstance;
 	private SyncProxyTester mActivityInstance;
 	private LogAdapter mLogAdapter;
-	private static Runnable threadContext;
-	private static ModuleTest DialogThreadContext;
+	private static Runnable sThreadContext;
 	private Thread mainThread;
 	
-	private boolean pass;
 	private boolean integration;
 	private String userPrompt;
 	
@@ -234,7 +126,7 @@ public class ModuleTest {
 	private ArrayList<Pair<Integer, Result>> expecting = new ArrayList<Pair<Integer, Result>>();
 	private Test currentTest = null;
 	
-	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
+	public static ArrayList<Pair<Integer, Result>> sResponses = new ArrayList<Pair<Integer, Result>>();
 	
 	/** Factory that is used to return a reader for the binary data in tests. */
 	private BinaryDataReaderFactory binaryDataReaderFactory = new BinaryDataReaderFactory();
@@ -254,8 +146,8 @@ public class ModuleTest {
 		mLogAdapter = logAdapter;
 		
 		// Set this's instance
-		_instance = this;
-		mActivityInstance.setTesterMain(_instance);
+		sInstance = this;
+		mActivityInstance.setTesterMain(sInstance);
 		
 		mainThread = makeThread();
 	}
@@ -366,11 +258,9 @@ public class ModuleTest {
 					final int numFilePaths = filePaths.size();
 
 					Intent email = new Intent(
-							numFilePaths > 1 ? Intent.ACTION_SEND_MULTIPLE
-									: Intent.ACTION_SEND);
+							numFilePaths > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
 					email.setType("text/plain");
-					email.putExtra(Intent.EXTRA_EMAIL,
-							new String[] { "youremail@ford.com" });
+					email.putExtra(Intent.EXTRA_EMAIL, new String[] { "youremail@ford.com" });
 					email.putExtra(Intent.EXTRA_SUBJECT, "Lua Unit Test Export");
 
 					switch (numFilePaths) {
@@ -379,8 +269,7 @@ public class ModuleTest {
 						break;
 
 					case 1:
-						email.putExtra(Intent.EXTRA_STREAM,
-								Uri.fromFile(new File(filePaths.get(0))));
+						email.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePaths.get(0))));
 						break;
 
 					default:
@@ -389,8 +278,7 @@ public class ModuleTest {
 						for (String filePath : filePaths) {
 							uris.add(Uri.fromFile(new File(filePath)));
 						}
-						email.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
-								uris);
+						email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 						break;
 					}
 
@@ -405,7 +293,7 @@ public class ModuleTest {
                 XmlPullParser parser = Xml.newPullParser();
                 RPCRequest rpc;
                 try {
-                    if (mActivityInstance.getDisableLockFlag()) {
+                    if (AppPreferencesManager.getDisableLockFlag()) {
                         acquireWakeLock();
                     }
 
@@ -427,8 +315,8 @@ public class ModuleTest {
                     parser.setInput(isr);
                     int eventType = parser.getEventType();
                     String name;
-                    boolean done = false;
-                    while (eventType != XmlPullParser.END_DOCUMENT && !done) {
+                    boolean isParsingDone = false;
+                    while (eventType != XmlPullParser.END_DOCUMENT && !isParsingDone) {
                         name = parser.getName();
 
                         switch (eventType) {
@@ -455,23 +343,20 @@ public class ModuleTest {
                                     currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
                                             pause, null);
                                     expecting.clear();
-                                    responses.clear();
+                                    sResponses.clear();
+                                    numIterations = 1;
                                     try {
                                         if (parser.getAttributeName(1) != null) {
                                             if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
                                                 try {
                                                     numIterations = Integer.parseInt(parser.getAttributeValue(1));
                                                 } catch (Exception e) {
-                                                    Log.e(TAG, "Unable to parse number of iterations");
+                                                    Log.w(TAG, "Unable to parse number of iterations");
                                                 }
-                                            } else {
-                                                numIterations = 1;
                                             }
-                                        } else {
-                                            numIterations = 1;
                                         }
                                     } catch (Exception e) {
-                                        numIterations = 1;
+                                        Log.w(TAG, "Unable to parse number of iterations");
                                     }
                                 } else if (name.equalsIgnoreCase("type")) {
                                     if (parser.getAttributeValue(0).equalsIgnoreCase("integration"))
@@ -649,9 +534,10 @@ public class ModuleTest {
                                         boolean localPass = true;
                                         int i = numIterations;
                                         int numPass = 0;
+                                        boolean doInterrupt = false;
                                         while (i > 0) {
-                                            xmlTest();
-                                            if (pass) {
+                                            TestResult testResult = xmlTest();
+                                            if (testResult.isTestComplete()) {
                                                 numPass++;
                                             } else {
                                                 localPass = false;
@@ -667,7 +553,7 @@ public class ModuleTest {
 
                                                 errorBuilder.append(currentTest.getName());
                                                 errorBuilder.append(" Actual");
-                                                for (Pair p : responses) {
+                                                for (Pair p : sResponses) {
                                                     errorBuilder.append(FIELD_SEPARATOR);
                                                     errorBuilder.append(p.first);
                                                     errorBuilder.append(" ");
@@ -679,6 +565,17 @@ public class ModuleTest {
                                                 errorWriter.write(errorLine);
                                             }
                                             i--;
+
+                                            if (testResult.isTestFlowInterrupted()) {
+                                                doInterrupt = true;
+                                                break;
+                                            }
+
+                                            doInterrupt = false;
+                                        }
+
+                                        if (doInterrupt) {
+                                            isParsingDone = true;
                                         }
 
                                         if (currentTest != null) {
@@ -944,67 +841,83 @@ public class ModuleTest {
 		return hash;
 	}
 	
-	private Boolean xmlTest() {
-		pass = false;
-		
+	private TestResult xmlTest() {
+
+        final TestResult testResult = new TestResult();
+
 		Thread newThread = new Thread(new Runnable() {
+
 			public void run () {
-                if (mProxyService != null && currentTest != null && currentTest.getRequests() != null) {
-                    threadContext = this;
 
-                    int numResponses = expecting.size();
-                    if (numResponses > 0) {
-                        mProxyService.waiting(true);
+                sThreadContext = this;
+
+                if (mProxyService == null && currentTest == null) {
+                    Log.e(TAG, "Current test is null");
+                    interruptThread();
+                    return;
+                }
+
+                if (currentTest.getRequests() == null) {
+                    Log.e(TAG, "Current test request is null");
+                    interruptThread();
+                    return;
+                }
+
+                if (!mProxyService.isSyncProxyConnected()) {
+                    Log.e(TAG, "Current test - connection - is null");
+
+                    showInterruptDialog("Warning",
+                            "Connection is lost, would You like to continue run tests?", true);
+
+                    if (testResult.isTestFlowInterrupted()) {
+                        interruptThread();
+                        return;
+                    }
+                }
+
+                if (mProxyService.getSessionId() == 0) {
+                    Log.e(TAG, "Current test session id 0");
+
+                    showInterruptDialog("Warning",
+                            "Current Session Id is 0, would You like to continue run tests?", true);
+
+                    if (testResult.isTestFlowInterrupted()) {
+                        interruptThread();
+                        return;
+                    }
+                }
+
+                int numResponses = expecting.size();
+                if (numResponses > 0) {
+                    mProxyService.waiting(true);
+                }
+
+                IJsonRPCMarshaller defaultMarshaller = mProxyService.syncProxyGetJsonRPCMarshaller();
+                IJsonRPCMarshaller invalidMarshaller =  new InvalidJsonRPCMarshaller();
+                CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
+
+                for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
+                    RPCRequest rpc = wrapper.getRequest();
+                    boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
+                    String customJSON = wrapper.getCustomJSON();
+                    if (customJSON != null) {
+                        customMarshaller.setStubbedValue(customJSON);
                     }
 
-                    IJsonRPCMarshaller defaultMarshaller =
-                            mProxyService.syncProxyGetJsonRPCMarshaller();
-                    IJsonRPCMarshaller invalidMarshaller =  new InvalidJsonRPCMarshaller();
-                    CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
+                    IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller :
+                                    (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
+                    mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
+                    mProxyService.syncProxySendRPCRequest(rpc);
 
-                    for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
-                        RPCRequest rpc = wrapper.getRequest();
-                        boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
-                        String customJSON = wrapper.getCustomJSON();
-                        if (customJSON != null) {
-                            customMarshaller.setStubbedValue(customJSON);
-                        }
+                    // restore the default marshaller
+                    mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
 
-                        IJsonRPCMarshaller currentMarshaller =
-                                (customJSON != null) ? customMarshaller :
-                                        (generateInvalidJSON ?
-                                                invalidMarshaller :
-                                                defaultMarshaller);
-                        mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
-                        mProxyService.syncProxySendRPCRequest(rpc);
-
-                        // restore the default marshaller
-                        mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
-
-                        long pause = wrapper.getPause();
-                        if (pause > 0) {
-                            Log.v(TAG, "Pause for " + pause + " ms. after " +
-                                    currentTest.getName() + "." + rpc.getFunctionName());
-                            try {
-                                // delay between requests of one test
-                                synchronized (this) {
-                                    this.wait(pause);
-                                }
-                            } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException", true);
-                            }
-                        } else {
-                            Log.i(TAG,
-                                    "No pause after " + currentTest.getName() +
-                                            "." + rpc.getFunctionName());
-                        }
-                    }
-
-                    long pause = currentTest.getPause();
+                    long pause = wrapper.getPause();
                     if (pause > 0) {
-                        Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
+                        Log.v(TAG, "Pause for " + pause + " ms. after " +
+                                currentTest.getName() + "." + rpc.getFunctionName());
                         try {
-                            // delay after the test
+                            // delay between requests of one test
                             synchronized (this) {
                                 this.wait(pause);
                             }
@@ -1012,99 +925,164 @@ public class ModuleTest {
                             mLogAdapter.logMessage("InterruptedException", true);
                         }
                     } else {
-                        Log.i(TAG, "No pause after " + currentTest.getName());
+                        Log.i(TAG, "No pause after " + currentTest.getName() +
+                                        "." + rpc.getFunctionName());
                     }
+                }
 
-                    // wait for incoming messages
+                long pause = currentTest.getPause();
+                if (pause > 0) {
+                    Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
                     try {
+                        // delay after the test
                         synchronized (this) {
-                            this.wait(100);
+                            this.wait(pause);
                         }
                     } catch (InterruptedException e) {
                         mLogAdapter.logMessage("InterruptedException", true);
                     }
-
-                    mProxyService.waiting(false);
-
-                    if (expecting.equals(responses)) {
-                        pass = true;
-                        if (integration) {
-                            mActivityInstance.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    AlertDialog.Builder alert =
-                                            new AlertDialog.Builder(mActivityInstance);
-                                    alert.setMessage(userPrompt);
-                                    alert.setPositiveButton("Yes",
-                                            new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int which) {
-                                                    pass = true;
-                                                    synchronized (threadContext) {
-                                                        threadContext.notify();
-                                                    }
-                                                }
-                                            });
-                                    alert.setNegativeButton("No",
-                                            new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int which) {
-                                                    pass = false;
-                                                    synchronized (threadContext) {
-                                                        threadContext.notify();
-                                                    }
-                                                }
-                                            });
-                                    alert.show();
-                                }
-                            });
-
-                            try {
-                                synchronized (this) {
-                                    this.wait();
-                                }
-                            } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException", true);
-                            }
-                        }
-                    }
-
-                    // restore the default marshaller
-                    mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
                 } else {
-                    Log.e(TAG, "Current test " + currentTest +
-                            " or its requests " + currentTest.getRequests() + " is null!");
+                    Log.i(TAG, "No pause after " + currentTest.getName());
                 }
-				
-				synchronized (_instance) {
-                    _instance.notify();
+
+                // wait for incoming messages
+                try {
+                    synchronized (this) {
+                        this.wait(100);
+                    }
+                } catch (InterruptedException e) {
+                    mLogAdapter.logMessage("InterruptedException", true);
                 }
-				
-				Thread.currentThread().interrupt();
+
+                mProxyService.waiting(false);
+
+                if (!expecting.equals(sResponses)) {
+                    restoreMarshaller(defaultMarshaller);
+                    return;
+                }
+
+                testResult.setTestComplete(true);
+
+                if (!integration) {
+                    restoreMarshaller(defaultMarshaller);
+                    return;
+                }
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(mActivityInstance);
+                        alert.setMessage(userPrompt);
+                        alert.setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(true);
+                                        synchronized (sThreadContext) {
+                                            sThreadContext.notify();
+                                        }
+                                    }
+                                }
+                        );
+                        alert.setNegativeButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(false);
+                                        synchronized (sThreadContext) {
+                                            sThreadContext.notify();
+                                        }
+                                    }
+                                }
+                        );
+                        alert.show();
+                    }
+                });
+
+                try {
+                    synchronized (this) {
+                        this.wait();
+                    }
+                } catch (InterruptedException e) {
+                    mLogAdapter.logMessage("InterruptedException", true);
+                }
+
+                restoreMarshaller(defaultMarshaller);
 			}
+
+            private void showInterruptDialog(final String title, final String message,
+                                             final boolean doInterruptFlow) {
+                final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(mActivityInstance);
+                        alert.setTitle(title);
+                        alert.setMessage(message);
+                        alert.setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(true);
+                                        countDownLatch.countDown();
+                                    }
+                                }
+                        );
+                        alert.setNegativeButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(false);
+                                        if (doInterruptFlow) {
+                                            testResult.setTestFlowInterrupted(true);
+                                        }
+                                        countDownLatch.countDown();
+                                    }
+                                }
+                        );
+                        alert.show();
+                    }
+                });
+
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            private void restoreMarshaller(IJsonRPCMarshaller defaultMarshaller) {
+                mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
+                interruptThread();
+            }
+
+            private void interruptThread() {
+                synchronized (sInstance) {
+                    sInstance.notify();
+                }
+                Thread.currentThread().interrupt();
+            }
 		});
 		newThread.start();
 		
 		try {
-			synchronized (this) { this.wait();}
+			synchronized (this) {
+                this.wait();
+            }
 		} catch (InterruptedException e) {
 			mLogAdapter.logMessage("InterruptedException", true);
 		}
 		
 		newThread.interrupt();
-		newThread = null;
-		return pass;
+		return testResult;
 	}
 	
 	public static ModuleTest getModuleTestInstance() {
-		return _instance;
+		return sInstance;
 	}
 	
 	public Runnable getThreadContext() {
-		return threadContext;
+		return sThreadContext;
 	}
 	
 	/**
