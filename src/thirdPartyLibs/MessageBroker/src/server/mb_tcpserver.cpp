@@ -66,11 +66,12 @@ namespace NsMessageBroker
       ssize_t nb = -1;
 
       std::string* pReceivingBuffer = getBufferFor(fd);
-      //char buf[RECV_BUFFER_LENGTH] = {'\0'};
-      char* buf = (char*)calloc(RECV_BUFFER_LENGTH + pReceivingBuffer->size(),sizeof(char));
-      DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n", pReceivingBuffer->size(),pReceivingBuffer->c_str()));
-      memcpy(buf, pReceivingBuffer->c_str(), pReceivingBuffer->size());
-      nb = recv(fd, buf+ pReceivingBuffer->size(), MAX_RECV_DATA , 0);
+      std::vector<char> buf(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
+      DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n",
+          pReceivingBuffer->size(), pReceivingBuffer->c_str()));
+      buf.assign(pReceivingBuffer->c_str(),
+                 pReceivingBuffer->c_str() + pReceivingBuffer->size());
+      nb = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
       DBG_MSG(("Recieved %d from %d\n", nb, fd));
       nb += pReceivingBuffer->size();
       DBG_MSG(("Recieved with buffer %d from %d\n", nb, fd));
@@ -78,34 +79,27 @@ namespace NsMessageBroker
       if (nb > 0)
       {
          unsigned int recieved_data = nb;
-         char* data = buf;
-         if (isWebSocket(fd))
-         {
+         if (isWebSocket(fd)) {
            const unsigned int data_length =
-               mWebSocketHandler.parseWebSocketDataLength(buf, recieved_data);
+               mWebSocketHandler.parseWebSocketDataLength(&buf[0], recieved_data);
 
            DBG_MSG(("Received %d actual data length %d\n",
-               recieved_data, data_length));
-           if (data_length > RECV_BUFFER_LENGTH) {
-             char buf_tmp[MAX_RECV_BUFFER_LENGTH];
-             memset(buf_tmp, 0 , MAX_RECV_BUFFER_LENGTH);
-             memcpy(buf_tmp, buf, MAX_RECV_DATA);
-             ssize_t recv_data = 0;
-             while ((data_length > recieved_data) &&
-                 (0 < (recv_data =
-                     recv(fd, buf_tmp + recieved_data, MAX_RECV_DATA, 0)))) {
-               recieved_data += recv_data;
-             }
-             nb = recieved_data;
-             data = buf_tmp;
+                    recieved_data, data_length));
+
+           if (data_length > recieved_data) {
+             DBG_MSG_ERROR(("Received %d actual data length %d\n",
+                             recieved_data, data_length));
+             DBG_MSG_ERROR(("Incomplete message"));
+             *pReceivingBuffer = std::string(&buf[0], nb);
+             return false;
            }
 
-           mWebSocketHandler.parseWebSocketData(data, (unsigned int&)nb);
+           mWebSocketHandler.parseWebSocketData(&buf[0], (unsigned int&)nb);
          }
 
-         *pReceivingBuffer = std::string(data,nb);
-         free(buf);
-          DBG_MSG(("pReceivingBuffer before onMessageReceived:%d : %s", pReceivingBuffer->size(), pReceivingBuffer->c_str()));
+         *pReceivingBuffer = std::string(&buf[0], nb);
+         DBG_MSG(("pReceivingBuffer before onMessageReceived:%d : %s",
+             pReceivingBuffer->size(), pReceivingBuffer->c_str()));
          // we need to check websocket clients here
          if (!checkWebSocketHandShake(fd, pReceivingBuffer))
          {//JSON MESSAGE received. Send data in CMessageBroker.
