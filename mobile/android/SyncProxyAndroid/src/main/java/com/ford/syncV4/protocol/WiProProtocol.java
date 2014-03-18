@@ -70,7 +70,7 @@ public class WiProProtocol extends AbstractProtocol {
     @Override
     public void startSecureService(byte sessionId) {
         DebugTool.logInfo("Security Service should start");
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSecureService(sessionId,
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSecureService(ServiceType.Secure_Service, sessionId,
                 _version);
         sendFrameToTransport(header);
     }

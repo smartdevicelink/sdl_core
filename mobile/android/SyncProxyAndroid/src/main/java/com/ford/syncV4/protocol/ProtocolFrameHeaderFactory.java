@@ -36,16 +36,19 @@ public class ProtocolFrameHeaderFactory {
      * Create {@link com.ford.syncV4.protocol.ProtocolFrameHeader} object for the
      * {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service}
      *
-     * @param version version of protocol
+     *
+     * @param serviceType
      * @param sessionId Id of the current session
      *
+     * @param version version of protocol
      * @return {@link com.ford.syncV4.protocol.ProtocolFrameHeader} object
      */
-    public static ProtocolFrameHeader createStartSecureService(byte sessionId, byte version) {
+    public static ProtocolFrameHeader createStartSecureService(ServiceType serviceType, byte sessionId, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
+        msg.setEncrypted(true);
         msg.setFrameType(FrameType.Control);
-        msg.setServiceType(ServiceType.Secure_Service);
+        msg.setServiceType(serviceType);
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setSessionID(sessionId);
         return msg;
