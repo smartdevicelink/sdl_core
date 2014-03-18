@@ -78,8 +78,9 @@ namespace NsMessageBroker
      char* recBuffer = Buffer;
      unsigned int parsedBufferPosition = 0;
      unsigned char position = 0; // current buffer position
+     unsigned int size = b_size;
 
-     while (0 < b_size) {
+     while (0 < size) {
 
        bool fin = ((recBuffer[0] & 0x80) | (recBuffer[0] & 0x01)) == 0x81;
        bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
@@ -92,7 +93,7 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::fin = %d recBuffer[0] = 0x%02X\n"
            " parsedlength = %d b_size= %d parsedBufferPosition = %d\n",
            fin, recBuffer[0], parsedBufferPosition + position,
-           b_size, parsedBufferPosition));
+           size, parsedBufferPosition));
 
 
        if (false == fin) {
@@ -104,12 +105,12 @@ namespace NsMessageBroker
         (recBuffer[1] & 0x08) | (recBuffer[1] & 0x04) | (recBuffer[1] & 0x02) |
         (recBuffer[1] & 0x01));
 
-       unsigned int size = b_size;
        unsigned long length = parseWebSocketDataLength(recBuffer, size);
        position = 2;
 
        if (length > size) {
-          break;
+          DBG_MSG_ERROR(("Incomplete message"));
+          return b_size;
        }
 
        switch(payload) {
@@ -139,7 +140,7 @@ namespace NsMessageBroker
           DBG_MSG(("CWebSocketHandler::parseWebSocketData()maskKeys[0]:0x%02X;"
                  " maskKeys[1]:0x%02X; maskKeys[2]:0x%02X; maskKeys[3]:0x%02X\n"
                  , maskKeys[0], maskKeys[1], maskKeys[2], maskKeys[3]));
-          for( unsigned long i = position; i < position+length; i++)
+          for (unsigned long i = position; i < position+length; i++)
           {
              recBuffer[i] = recBuffer[i] ^ maskKeys[(i-position)%4];
           }
@@ -147,15 +148,15 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       for( unsigned long i = position; i < size, i < position+length; i++)
+       for (unsigned long i = position; i < size, i < position+length; i++)
        {
           Buffer[parsedBufferPosition++] = recBuffer[i];
        }
 
        recBuffer += length+position;
-       b_size -= length+position;
-
+       size -= length+position;
      }
+
      b_size = parsedBufferPosition;
      return b_size;
    }
