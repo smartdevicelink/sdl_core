@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,27 +48,26 @@ class LastState : public utils::Singleton<LastState> {
  */
   Json::Value dictionary;
 
-  private:
-
-  /**
-   * @brief File to save Dictionary
-   */
+ private:
+/**
+ * @brief File to save Dictionary
+ */
   static const std::string filename;
-
-  /**
-   * @brief Saving dictionary to filesystem as Json
-   */
+/**
+ * @brief Saving dictionary to filesystem
+ */
   void SaveToFileSystem();
-
-  /**
-   * @brief Load dictionary from filesystem as Json
-   */
+/**
+ * @brief Load dictionary from filesystem
+ */
   void LoadFromFileSystem();
-
- /**
+/**
  * @brief Private default constructor
  */
   LastState();
+/**
+ * @brief Private destructor
+ */
   ~LastState();
 
 

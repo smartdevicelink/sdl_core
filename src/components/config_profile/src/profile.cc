@@ -615,6 +615,16 @@ void Profile::UpdateValues() {
 
   (void) ReadIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout,
                       kMainSection, "HeartBeatTimeout");
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "UseLastState", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      use_last_state_ = true;
+    }
+    LOG4CXX_INFO(logger_, "Set UseLastState to " << value);
+  }
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

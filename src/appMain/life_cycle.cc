@@ -35,6 +35,7 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
+#include "resumption/last_state.h"
 
 using threads::Thread;
 
@@ -257,6 +258,9 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);

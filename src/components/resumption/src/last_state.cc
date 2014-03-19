@@ -35,6 +35,8 @@
 
 namespace resumption {
 
+const std::string LastState::filename = "LastState.dat";
+
 void LastState::SaveToFileSystem() {
   const std::string& str = dictionary.toStyledString();
   const std::vector<uint8_t> char_vector_pdata(
@@ -61,5 +63,4 @@ LastState::~LastState() {
   SaveToFileSystem();
 }
 
-const std::string LastState::filename = "TM.dat";
 }

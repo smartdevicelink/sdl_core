@@ -93,20 +93,24 @@ void TcpTransportAdapter::Store() const {
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      int port = tcp_device->GetApplicationPort(app_handle);
-      if (port != -1) { // don't want to store incoming applications
-        Json::Value application_dictionary;
-        char port_record[12];
-        sprintf(port_record, "%d", port);
-        application_dictionary["port"] = std::string(port_record);
-        applications_dictionary.append(application_dictionary);
+      if (FindEstablishedConnection(tcp_device->name(), app_handle)) {
+        int port = tcp_device->GetApplicationPort(app_handle);
+        if (port != -1) { // don't want to store incoming applications
+          Json::Value application_dictionary;
+          char port_record[12];
+          sprintf(port_record, "%d", port);
+          application_dictionary["port"] = std::string(port_record);
+          applications_dictionary.append(application_dictionary);
+        }
       }
     }
-    device_dictionary["applications"] = applications_dictionary;
-    devices_dictionary.append(device_dictionary);
+    if (!applications_dictionary.empty()) {
+      device_dictionary["applications"] = applications_dictionary;
+      devices_dictionary.append(device_dictionary);
+    }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  resumption::LastState::instance()->dictionary["TcpAdapter"] =
+  resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"] =
     tcp_adapter_dictionary;
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -115,7 +119,7 @@ bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
   const Json::Value tcp_adapter_dictionary =
-    resumption::LastState::instance()->dictionary["TcpAdapter"];
+    resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
     i != devices_dictionary.end(); ++i) {

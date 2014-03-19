@@ -86,19 +86,23 @@ void BluetoothTransportAdapter::Store() const {
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      uint8_t rfcomm_channel;
-      bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
-      Json::Value application_dictionary;
-      char rfcomm_channel_record[4];
-      sprintf(rfcomm_channel_record, "%ud", rfcomm_channel);
-      application_dictionary["rfcomm_channel"] = std::string(rfcomm_channel_record);
-      applications_dictionary.append(application_dictionary);
+      if (FindEstablishedConnection(bluetooth_device->name(), app_handle)) {
+        uint8_t rfcomm_channel;
+        bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
+        Json::Value application_dictionary;
+        char rfcomm_channel_record[4];
+        sprintf(rfcomm_channel_record, "%u", rfcomm_channel);
+        application_dictionary["rfcomm_channel"] = std::string(rfcomm_channel_record);
+        applications_dictionary.append(application_dictionary);
+      }
     }
-    device_dictionary["applications"] = applications_dictionary;
-    devices_dictionary.append(device_dictionary);
+    if (!applications_dictionary.empty()) {
+      device_dictionary["applications"] = applications_dictionary;
+      devices_dictionary.append(device_dictionary);
+    }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  resumption::LastState::instance()->dictionary["BluetoothAdapter"] =
+  resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"] =
     bluetooth_adapter_dictionary;
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -107,7 +111,7 @@ bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
-    resumption::LastState::instance()->dictionary["BluetoothAdapter"];
+    resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
     i != devices_dictionary.end(); ++i) {

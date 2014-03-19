@@ -77,6 +77,7 @@ include_directories (
   ../components/smart_objects/include/
   ../components/media_manager/include/
   ../components/policies/include/
+  ../components/resumption/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/

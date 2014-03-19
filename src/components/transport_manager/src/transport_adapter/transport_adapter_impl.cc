@@ -418,6 +418,8 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
     }
     pthread_mutex_unlock(&devices_mutex_);
   }
+
+  Store();
 }
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
@@ -483,6 +485,8 @@ void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnConnectDone(this, device_id, app_handle);
+
+  Store();
 }
 
 void TransportAdapterImpl::ConnectFailed(const DeviceUID& device_id,
@@ -569,13 +573,13 @@ bool TransportAdapterImpl::ToBeAutoConnected(DeviceSptr device) const {
 }
 
 ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+    const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
   ConnectionSptr connection;
   pthread_mutex_lock(&connections_mutex_);
-  ConnectionMap::iterator it =
+  ConnectionMap::const_iterator it =
       connections_.find(std::make_pair(device_id, app_handle));
   if (it != connections_.end()) {
-    ConnectionInfo& info = it->second;
+    const ConnectionInfo& info = it->second;
     if (info.state == ConnectionInfo::ESTABLISHED) connection = info.connection;
   }
   pthread_mutex_unlock(&connections_mutex_);

@@ -393,7 +393,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
- private:
   /**
    * @brief Find connection that has state - ESTABLISHED.
    *
@@ -403,7 +402,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return ConnectionSptr smart pointer to the connection.
    */
   ConnectionSptr FindEstablishedConnection(const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle);
+                                           const ApplicationHandle& app_handle) const;
+
+ private:
   /**
    * @brief Connect to all applications discovered on device
    * @param device Pointer to device
