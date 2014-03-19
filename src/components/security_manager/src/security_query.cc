@@ -84,31 +84,34 @@ bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
       break;
     default: // On wrong query id
       header_.query_id = INVALID_QUERY_ID;
-      //return with error
-      return false;
+      break;
   }
+  header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
+  header_.json_size =
+      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data + 8));
+
   //All requests shall have binary or json data
-  if(bin_data_size > header_size)
+  if(bin_data_size <= header_size)
     return false;
 
-  header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
-  if(SEND_HANDSHAKE_DATA == header_.query_id) {
-    // copy from end of header to end of binary data
-    data_.assign(binary_data + header_size, binary_data + bin_data_size);
-    return true;
-  }
-  if(SEND_INTERNAL_ERROR == header_.query_id) {
-    const uint32_t json_size =
-        BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data + 4));
-    if(json_size <= 0)
-      //Internal error shall have json data
-      return false;
-    const char* const error_data =
+  //JSON data shall be LE all binary data
+  if(header_.json_size > (bin_data_size - header_size))
+    return false;
+
+  if(header_.json_size > 0) {
+    const char* const json_data =
         reinterpret_cast<const char*>(binary_data + header_size);
-    json_message_.assign(error_data, error_data + json_size);
-    return true;
+    json_message_.assign(json_data, json_data + header_.json_size);
     }
-  return false;
+
+  //Any data
+  const uint32_t raw_data_size = bin_data_size - header_size - header_.json_size;
+  if(raw_data_size > 0) {
+    const char* const raw_data =
+        reinterpret_cast<const char*>(binary_data + header_size + header_.json_size);
+    data_.assign(raw_data, raw_data + raw_data_size);
+    }
+  return true;
 }
 
 void SecurityQuery::set_data(const uint8_t * const binary_data,

@@ -70,18 +70,18 @@ public:
    * Handle as binary data in Ford Protocol
    */
   enum InternalErrors {
-    ERROR_SUCCESS = 0x0,
-    ERROR_INVALID_QUERY_SIZE = 0x1, //low size of message
-    ERROR_INVALID_QUERY_ID = 0x2,   //unknown query id
-    ERROR_NULL_DATA = 0x3,          //Received query with null data
-    ERROR_NOT_SUPPORTED = 0x6,
+    ERROR_SUCCESS            = 0x0,
+    ERROR_INVALID_QUERY_SIZE = 0x1,  //low size of message
+    ERROR_INVALID_QUERY_ID   = 0x2,   //unknown query id
+    ERROR_NULL_DATA          = 0x3,          //Received query with null data
+    ERROR_NOT_SUPPORTED      = 0x6,
 
     ERROR_SERVICE_ALREADY_PROTECTED,
     ERROR_CREATE_SLLSERVER,
     ERROR_CONNECTION_NOT_FOUND,
     ERROR_SESSION_NOT_FOUND,
 
-    ERROR_SSL_INVALID_DATA = 0xF0,
+    ERROR_SSL_INVALID_DATA     = 0xF0,
     ERROR_OTHER_INTERNAL_ERROR = 0xFF
   };
   /**
@@ -111,6 +111,7 @@ public:
    * as query with header and binary data or json message
    * \param binary_data pointer to binary data array
    * \param bin_data_size size of binary data array
+   * \return \c true on correct parse and \c false on wrong size of data
    */
   bool ParseQuery(const uint8_t * const binary_data, const size_t bin_data_size);
   /**
