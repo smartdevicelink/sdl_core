@@ -565,7 +565,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onProxyClosed() {
         resetAdapters();
-        mLogAdapter.logMessage("Disconnected", true);
     }
 
     @Override

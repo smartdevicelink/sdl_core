@@ -875,7 +875,11 @@ public class ModuleTest {
                     }
                 }
 
-                if (mProxyService.getSessionId() == 0) {
+                // Temporary commit this check point
+
+                /*if (!currentTest.getName().toLowerCase()
+                        .startsWith(Names.UnregisterAppInterface.toLowerCase()) &&
+                        mProxyService.getSessionId() == 0) {
                     Log.e(TAG, "Current test session id 0");
 
                     showInterruptDialog("Warning",
@@ -885,7 +889,7 @@ public class ModuleTest {
                         interruptThread();
                         return;
                     }
-                }
+                }*/
 
                 int numResponses = expecting.size();
                 if (numResponses > 0) {
