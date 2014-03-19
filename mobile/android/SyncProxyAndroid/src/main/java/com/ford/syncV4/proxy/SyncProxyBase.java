@@ -1884,12 +1884,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
         Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
-        if ( serviceToCypher != null ) {
-            getSyncConnection().startSecureService();
-        }else{
-            restartRPCProtocolSession();
-            notifySessionStarted(currentSession.getSessionId(), correlationID);
-        }
+        restartRPCProtocolSession();
+        notifySessionStarted(currentSession.getSessionId(), correlationID);
     }
 
 
@@ -1945,7 +1941,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void setupSecureProxy() {
-        if ( serviceToCypher != null ) {
+        if (serviceToCypher != null) {
             protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
             protocolSecureManager.addServiceToEncrypt(serviceToCypher);
             protocolSecureManager.setupSecureEnvironment();
