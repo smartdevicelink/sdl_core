@@ -71,7 +71,7 @@ public:
    */
   enum InternalErrors {
     ERROR_SUCCESS                = 0x0,
-    ERROR_INVALID_QUERY_SIZE     = 0x1, //low size of message
+    ERROR_INVALID_QUERY_SIZE     = 0x1, //low size of message or wrong json_size
     ERROR_INVALID_QUERY_ID       = 0x2, //unknown query id
     ERROR_NOT_SUPPORTED          = 0x3, //No CryptoManager
     ERROR_SERVICE_ALREADY_PROTECTED = 0x4,
@@ -108,11 +108,11 @@ public:
   /**
    * \brief Parse income from Mobile Application data
    * as query with header and binary data or json message
-   * \param binary_data pointer to binary data array
-   * \param bin_data_size size of binary data array
+   * \param raw_data pointer to binary data array
+   * \param raw_data_size size of binary data array
    * \return \c true on correct parse and \c false on wrong size of data
    */
-  bool ParseQuery(const uint8_t * const binary_data, const size_t bin_data_size);
+  bool ParseQuery(const uint8_t * const raw_data, const size_t raw_data_size);
   /**
    * \brief Set binary data. (No header modification)
    * \param binary_data pointer to binary data array

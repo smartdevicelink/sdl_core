@@ -57,13 +57,13 @@ SecurityQuery::SecurityQuery(
   header_(header), connection_key_(connection_key) {
 }
 
-bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
-                               const size_t bin_data_size) {
+bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
+                               const size_t raw_data_size) {
   const size_t header_size = sizeof(QueryHeader);
-  if(bin_data_size < header_size || !binary_data) {
+  if(raw_data_size < header_size || !raw_data) {
     return false;
   }
-  const uint8_t guery_type = binary_data[0];
+  const uint8_t guery_type = raw_data[0];
   switch (guery_type) {
     case REQUEST:
         header_.query_type = REQUEST;
@@ -80,7 +80,7 @@ bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
   }
   // Convert to Little-Endian and clean high byte
   const uint32_t query_id = 0x00FFFFFF &
-      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data));
+      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data));
   switch (query_id) {
     case SEND_HANDSHAKE_DATA:
       header_.query_id = SEND_HANDSHAKE_DATA;
@@ -92,31 +92,25 @@ bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
       header_.query_id = INVALID_QUERY_ID;
       break;
   }
-  header_.seq_number = *reinterpret_cast<const uint32_t*>(binary_data + 4);
+  header_.seq_number = *reinterpret_cast<const uint32_t*>(raw_data + 4);
   header_.json_size =
-      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(binary_data + 8));
+      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
 
-  //All requests shall have binary or json data
-  if(bin_data_size <= header_size)
-    return false;
-
-  //JSON data shall be LE all binary data
-  if(header_.json_size > (bin_data_size - header_size))
+  if(header_.json_size > raw_data_size - header_size)
     return false;
 
   if(header_.json_size > 0) {
     const char* const json_data =
-        reinterpret_cast<const char*>(binary_data + header_size);
+        reinterpret_cast<const char*>(raw_data + header_size);
     json_message_.assign(json_data, json_data + header_.json_size);
-    }
+  }
 
-  //Any data
-  const uint32_t raw_data_size = bin_data_size - header_size - header_.json_size;
-  if(raw_data_size > 0) {
-    const char* const raw_data =
-        reinterpret_cast<const char*>(binary_data + header_size + header_.json_size);
-    data_.assign(raw_data, raw_data + raw_data_size);
-    }
+  const uint32_t bin_data_size = raw_data_size - header_size - header_.json_size;
+  if(bin_data_size > 0) {
+    const char* const bin_data =
+        reinterpret_cast<const char*>(raw_data + header_size + header_.json_size);
+    data_.assign(bin_data, bin_data + bin_data_size);
+  }
   return true;
 }
 

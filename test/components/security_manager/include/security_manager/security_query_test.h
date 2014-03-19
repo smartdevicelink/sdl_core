@@ -195,10 +195,29 @@ namespace security_manager_test {
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
   }
   /*
-   * Security QueryHeader Parse few (equal header size) data
+   * Security QueryHeader Parse data equal header size
    */
-  TEST_F(SecurityQueryTest, Parse_LessBinaryData) {
+  TEST_F(SecurityQueryTest, Parse_HeaderData) {
     SecurityQuery query;
+    const bool result_parse =
+        ParseQuery(query, init_header, NULL, 0);
+
+    ASSERT_TRUE(result_parse);
+    //check side-effects
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
+  }
+  /*
+   * Security QueryHeader Parse wrong header
+   */
+  TEST_F(SecurityQueryTest, Parse_HeaderDataWrongJ) {
+    //Wrong json size
+    init_header.json_size = 0x0FFFFFFF;
+    SecurityQuery query;
+
     const bool result_parse =
         ParseQuery(query, init_header, NULL, 0);
 
@@ -229,13 +248,60 @@ namespace security_manager_test {
         ParseQuery(query, invalide_query_header, raw_data, raw_data_size);
     ASSERT_TRUE(result_parse);
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_query_header);
+    ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
       }
     //check side-effects
     ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), raw_data_size);
+    ASSERT_TRUE(query.get_json_message().empty());
+  }
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with Iunknows types and ids
+   */
+  TEST_F(SecurityQueryTest, Parse_InvalideQuery_UnknowTypeId) {
+    SecurityQuery::QueryHeader invalide_type_id_header(
+          SecurityQuery::INVALID_QUERY_TYPE - 1,
+          //Use not enum value for additional testing
+          SecurityQuery::INVALID_QUERY_ID - 1, seq_number);
+
+    SecurityQuery query;
+    const bool result_parse =
+        ParseQuery(query, invalide_type_id_header, NULL, 0);
+    ASSERT_TRUE(result_parse);
+    //Parse set all unknow types and ids to INVALID_QUERY_ID
+    invalide_type_id_header.query_type = SecurityQuery::INVALID_QUERY_TYPE;
+    invalide_type_id_header.query_id = SecurityQuery::INVALID_QUERY_ID;
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_type_id_header);
+    //check side-effects
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_TRUE(query.get_json_message().empty());
+  }
+  /*
+   * Security QueryHeader Parse data contains header and binary data
+   * with Iunknows types and ids
+   */
+  TEST_F(SecurityQueryTest, Parse_InvalideQuery_UnknowId_Response) {
+    SecurityQuery::QueryHeader invalide_id_header(
+          SecurityQuery::RESPONSE,
+          //Use not enum value for additional testing
+          SecurityQuery::INVALID_QUERY_ID - 2, seq_number);
+
+    SecurityQuery query;
+    const bool result_parse =
+        ParseQuery(query, invalide_id_header, NULL, 0);
+    ASSERT_TRUE(result_parse);
+    //Parse set all unknow types and ids to INVALID_QUERY_ID
+    invalide_id_header.query_id = SecurityQuery::INVALID_QUERY_ID;
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_id_header);
+    //check side-effects
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -256,13 +322,13 @@ namespace security_manager_test {
         ParseQuery(query, handshake_header, raw_data, raw_data_size);
     ASSERT_TRUE(result_parse);
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), handshake_header);
+    ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
       }
     //check side-effects
     ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -284,9 +350,9 @@ namespace security_manager_test {
     ASSERT_TRUE(result_parse);
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), internal_error_header);
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), 0);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_json_message(), error_str);
   }
 } // security_manager_test

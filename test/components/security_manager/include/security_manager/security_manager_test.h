@@ -81,17 +81,6 @@ namespace security_manager_test {
             new RawMessage( key, protocolVersion, data, dataSize, serviceType));
       security_manager_->OnMessageReceived(rawMessagePtr);
     }
-
-    /*
-    * Wrapper for fast send Handshake
-    */
-    void EmulateMobileMessageHandShake(const uint8_t* const data,
-                                       const uint32_t data_size ){
-      const SecurityQuery::QueryHeader header(
-            SecurityQuery::NOTIFICATION,
-            SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
-      EmulateMobileMessage(header, data, data_size);
-    }
     /*
     * Wrapper for fast send query
     */
@@ -109,7 +98,16 @@ namespace security_manager_test {
                              protocol_handler::kControl);
       delete[] data_sending;
     }
-
+    /*
+    * Wrapper for fast send Handshake
+    */
+    void EmulateMobileMessageHandShake(const uint8_t* const data,
+                                       const uint32_t data_size ){
+      const SecurityQuery::QueryHeader header(
+            SecurityQuery::NOTIFICATION,
+            SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
+      EmulateMobileMessage(header, data, data_size);
+    }
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<SessionObserverMock>   mock_session_observer;
@@ -133,22 +131,6 @@ namespace security_manager_test {
     security_manager_->set_session_observer(NULL);
     security_manager_->set_protocol_handler(NULL);
     security_manager_->set_crypto_manager(NULL);
-  }
-  /*
-   * SecurityManager with NULL CryptoManager shall send
-   * InternallError (ERROR_NOT_SUPPORTED) on any Query
-   */
-  TEST_F(SecurityManagerTest, SecurityManager_NULLData) {
-    // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).Times(1);
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::REQUEST,
-          //It could be any query id
-          SecurityQuery::INVALID_QUERY_ID);
-    EmulateMobileMessage(header, NULL, 0);
   }
   /*
    * SecurityManager with NULL CryptoManager shall send
@@ -198,6 +180,22 @@ namespace security_manager_test {
                     SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
+  }
+  /*
+   * SecurityManger shall send InternallError on null data recieved
+   */
+  TEST_F(SecurityManagerTest, GetWrongJSONSize) {
+    SetMockCryptoManger();
+    // Expect InternalError with ERROR_ID
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(
+                  InternalErrorWithErrId(
+                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).Times(1);
+    SecurityQuery::QueryHeader header(
+          SecurityQuery::REQUEST,
+          SecurityQuery::INVALID_QUERY_ID);
+    header.json_size = 0x0FFFFFFF;
+    EmulateMobileMessage(header, NULL, 0);
   }
   /*
    * SecurityManger shall send InternallError on INVALID_QUERY_ID
@@ -397,15 +395,11 @@ namespace security_manager_test {
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
   }
   /*
-   * SecurityManger shall send InternallError on getting
-   * SEND_INTERNAL_ERROR from mobile with NULL data
+   * SecurityManger shall not any query on getting
+   * empty SEND_INTERNAL_ERROR
    */
   TEST_F(SecurityManagerTest, GetInternalError_NullData) {
     SetMockCryptoManger();
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).Times(1);
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::NOTIFICATION,

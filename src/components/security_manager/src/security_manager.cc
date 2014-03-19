@@ -55,7 +55,6 @@ void SecurityManager::OnMessageReceived(
   SecurityMessage securityMessagePtr(new SecurityQuery());
   const bool result = securityMessagePtr->ParseQuery(
         message->data(), message->data_size());
-  //TODO (EZ): move to ::Handle
   if(!result) {
     //result will be false only if data less then query header
     LOG4CXX_ERROR(logger_, "Incorrect message received");
