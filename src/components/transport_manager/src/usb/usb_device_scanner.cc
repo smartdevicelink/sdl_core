@@ -58,11 +58,28 @@ bool IsGoogleAccessory(uint16_t vid, uint16_t pid) {
   return (vid == kAoaVid) && (pid == kAoaPid1 || pid == kAoaPid2);
 }
 
+bool IsAppleDevice(uint16_t vid, uint16_t pid) {
+  return (kAppleVid == vid) &&
+    ((kApplePid1 == pid) ||
+     (kApplePid2 == pid) ||
+     (kApplePid3 == pid) ||
+     (kApplePid4 == pid) ||
+     (kApplePid5 == pid) ||
+     (kApplePid6 == pid) ||
+     (kApplePid7 == pid) ||
+     (kApplePid8 == pid));
+}
+
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
-  if (IsGoogleAccessory(device->vendor_id(), device->product_id())) {
-    GoogleAccessoryFound(device);
-  } else {
-    TurnIntoAccessoryMode(device);
+  if (IsAppleDevice(device->vendor_id(), device->product_id())) {
+    AppleDeviceFound(device);
+  }
+  else {
+    if (IsGoogleAccessory(device->vendor_id(), device->product_id())) {
+      GoogleAccessoryFound(device);
+    } else {
+      TurnIntoAccessoryMode(device);
+    }
   }
 }
 
@@ -167,6 +184,21 @@ void UsbDeviceScanner::GoogleAccessoryFound(PlatformUsbDevice* device) {
   devices_.push_back(device);
   pthread_mutex_unlock(&devices_mutex_);
   LOG4CXX_INFO(logger_, "Google accessory (bus number "
+                            << static_cast<int>(device->bus_number())
+                            << ", address "
+                            << static_cast<int>(device->address())
+                            << ") identified as: " << device->GetManufacturer()
+                            << ", " << device->GetProductName());
+  UpdateList();
+}
+
+void UsbDeviceScanner::AppleDeviceFound(PlatformUsbDevice* device) {
+  LOG4CXX_INFO(logger_, "Google accessory found");
+
+  pthread_mutex_lock(&devices_mutex_);
+  devices_.push_back(device);
+  pthread_mutex_unlock(&devices_mutex_);
+  LOG4CXX_INFO(logger_, "Apple device (bus number "
                             << static_cast<int>(device->bus_number())
                             << ", address "
                             << static_cast<int>(device->address())

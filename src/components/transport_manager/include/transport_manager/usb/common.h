@@ -54,6 +54,17 @@ static const uint16_t kAoaVid = 0x18d1;
 static const uint16_t kAoaPid1 = 0x2d00;
 static const uint16_t kAoaPid2 = 0x2d01;
 static const uint8_t kAoaInterfaceSubclass = 0xff;
+
+static const uint16_t kAppleVid = 0x05ac;
+static const uint16_t kApplePid1 = 0x1290;
+static const uint16_t kApplePid2 = 0x1292;
+static const uint16_t kApplePid3 = 0x1294;
+static const uint16_t kApplePid4 = 0x1297;
+static const uint16_t kApplePid5 = 0x129a;
+static const uint16_t kApplePid6 = 0x129f;
+static const uint16_t kApplePid7 = 0x12a0;
+static const uint16_t kApplePid8 = 0x12a8;
+
 static const int kUsbConfiguration = 1;
 
 typedef utils::SharedPtr<UsbHandler> UsbHandlerSptr;
