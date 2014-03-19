@@ -14,6 +14,7 @@ set (SOURCES
   ./src/crypto_manager_impl_test.cc
   ./src/security_manager_test.cc
   ./src/security_query_test.cc
+  ./security_manager_mock.cc
 )
 
 set (LIBRARIES

@@ -87,6 +87,7 @@ public:
    * Equal Ford Binary Header Definition
    */
   struct QueryHeader {
+    QueryHeader();
     QueryHeader(uint8_t queryType, uint32_t queryId, uint32_t seqNumber = 0);
     uint32_t query_type:8;
     uint32_t query_id:24;  // API function identifier

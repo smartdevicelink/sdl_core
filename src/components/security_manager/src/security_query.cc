@@ -37,6 +37,11 @@
 
 using namespace security_manager;
 
+SecurityQuery::QueryHeader::QueryHeader() :
+  query_type(INVALID_QUERY_TYPE), query_id(INVALID_QUERY_ID),
+  seq_number(0), json_size(0) {
+}
+
 SecurityQuery::QueryHeader::QueryHeader(
     uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
   query_type(queryType), query_id(queryId), seq_number(seqNumber), json_size(0) {
@@ -55,7 +60,7 @@ SecurityQuery::SecurityQuery(
 bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
                                  const size_t bin_data_size) {
   const size_t header_size = sizeof(QueryHeader);
-  if(bin_data_size < header_size) {
+  if(bin_data_size < header_size || binary_data) {
     return false;
   }
   const uint8_t guery_type = binary_data[0];
