@@ -132,7 +132,7 @@ private:
    */
   void SendInternalError(const int32_t connection_key,
                          const int &error_id,
-                         const std::string& error_str = "");
+                         const uint32_t seq_number = 0);
 
   /**
    * \brief Send binary data answer with QueryHeader

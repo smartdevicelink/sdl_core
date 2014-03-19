@@ -37,12 +37,13 @@
 
 using namespace security_manager;
 
-SecurityQuery::QueryHeader::QueryHeader(uint8_t queryType, uint32_t queryId) :
-  query_type(queryType), query_id(queryId), seq_number(0), json_size(0) {
+SecurityQuery::QueryHeader::QueryHeader(
+    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
+  query_type(queryType), query_id(queryId), seq_number(seqNumber), json_size(0) {
 }
 
 SecurityQuery::SecurityQuery() :
-  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID), connection_key_(0) {
+  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
 }
 
 SecurityQuery::SecurityQuery(

@@ -58,10 +58,9 @@ void SecurityManager::OnMessageReceived(
   //TODO (EZ): move to ::Handle
   if(!result) {
     //result will be false only if data less then query header
-    const std::string error("Incorrect message received");
-    LOG4CXX_ERROR(logger_, error);
+    LOG4CXX_ERROR(logger_, "Incorrect message received");
     SendInternalError(message->connection_key(),
-                      SecurityQuery::ERROR_INVALID_QUERY_SIZE, error);
+                      SecurityQuery::ERROR_INVALID_QUERY_SIZE);
     return;
   }
   securityMessagePtr->set_connection_key(message->connection_key());
@@ -105,10 +104,9 @@ void SecurityManager::Handle(const SecurityMessage &message) {
   DCHECK(message);DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
   if(!crypto_manager_)  {
-    const std::string error("Invalid (NULL) CryptoManager.");
-    LOG4CXX_ERROR(logger_, error);
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) CryptoManager.");
     SendInternalError(message->get_connection_key(),
-                      SecurityQuery::ERROR_NOT_SUPPORTED, error);
+                      SecurityQuery::ERROR_NOT_SUPPORTED);
     return;
   }
   switch (message->get_header().query_id) {
@@ -123,10 +121,10 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       return;
     default: { // SecurityQuery::InvalidQuery
-      const std::string error("Unknown query identifier.");
-      LOG4CXX_ERROR(logger_, error);
+      LOG4CXX_ERROR(logger_, "Unknown query identifier.");
       SendInternalError(message->get_connection_key(),
-                        SecurityQuery::ERROR_INVALID_QUERY_ID, error);
+                        SecurityQuery::ERROR_INVALID_QUERY_ID,
+                        message->get_header().seq_number);
       }
       break;
     }
@@ -135,32 +133,30 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_); DCHECK(crypto_manager_);
 
-  const security_manager::SSLContext * const currentSSLContext =
-      session_observer_->GetSSLContext(connection_key);
-  if(currentSSLContext) {
-    LOG4CXX_WARN(logger_, "Conenction is already protected, key "
+  if(session_observer_->GetSSLContext(connection_key)) {
+    LOG4CXX_WARN(logger_, "Connenction is already protected, key "
                  << connection_key);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED);
-    return true;
+    return false;
   }
 
   security_manager::SSLContext * newSSLContext = crypto_manager_->CreateSSLContext();
   if(!newSSLContext) {
-      const std::string error("CryptoManager could not create SSl context.");
-      LOG4CXX_ERROR(logger_, error);
+      LOG4CXX_ERROR(logger_, "CryptoManager could not create SSl context.");
       //Generate response query and post to security_messages_
-      SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SLLSERVER);
+      SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SLL);
       return false;
   }
+
   const int result = session_observer_->SetSSLContext(connection_key, newSSLContext);
-  if(SecurityQuery::ERROR_SUCCESS == result) {
-    return true;
+  if(SecurityQuery::ERROR_SUCCESS != result) {
+    //delete SSLContex on any error
+    crypto_manager_->ReleaseSSLContext(newSSLContext);
+    SendInternalError(connection_key, result);
+    return false;
   }
-  //delete SSLContex on any error
-  crypto_manager_->ReleaseSSLContext(newSSLContext);
-  SendInternalError(connection_key, result);
-  return false;
+  return true;
 }
 
 bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
@@ -173,8 +169,8 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   if(!inMessage->get_data_size()) {
     const std::string error("SendHandshakeData: null arguments size.");
     LOG4CXX_ERROR(logger_, error);
-    SendInternalError(connectionKey, SecurityQuery::ERROR_INVALID_QUERY_SIZE,
-                      error);
+    SendInternalError(connectionKey,
+                      SecurityQuery::ERROR_INVALID_QUERY_SIZE, seqNumber);
     return false;
   }
   SSLContext * sslContext =
@@ -182,8 +178,8 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   if(!sslContext) {
     const std::string error("SendHandshakeData: No ssl context.");
     LOG4CXX_ERROR(logger_, error);
-    SendInternalError(connectionKey, SecurityQuery::ERROR_OTHER_INTERNAL_ERROR,
-                      error);
+    SendInternalError(connectionKey,
+                      SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, seqNumber);
     return false;
   }
   size_t out_data_size;
@@ -194,8 +190,8 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     std::string error("SendHandshakeData: Handshake failed.");
     error += LastError();
     LOG4CXX_WARN(logger_, error);
-    SendInternalError(connectionKey, SecurityQuery::ERROR_SSL_INVALID_DATA,
-                      error);
+    SendInternalError(connectionKey,
+                      SecurityQuery::ERROR_SSL_INVALID_DATA, seqNumber);
     return false;
   }
 
@@ -204,14 +200,17 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   return true;
 }
 
-void SecurityManager::SendInternalError(
-    const int32_t connection_key,
-    const int &error_id,
-    const std::string &error_str) {
-  const SecurityQuery::QueryHeader header(
-        SecurityQuery::NOTIFICATION, SecurityQuery::SEND_INTERNAL_ERROR);
-
-  const size_t data_sending_size = error_str.size() + 1;
+void SecurityManager::SendInternalError(const int32_t connection_key,
+                                        const int &error_id,
+                                        const uint32_t seq_number) {
+  const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
+                                          SecurityQuery::SEND_INTERNAL_ERROR,
+                                          seq_number);
+  std::stringstream stream;
+  stream << "{ \"ERROR_ID\":" << error_id << " }";
+  const std::string error_str = stream.str();
+  // FIXME (EZmakhov) Add set json instted of raw binary data
+  const size_t data_sending_size = error_str.size();
   uint8_t* data_sending = new uint8_t[data_sending_size];
   data_sending[0] = error_id;
   memcpy(data_sending + 1, error_str.c_str(), error_str.size());
