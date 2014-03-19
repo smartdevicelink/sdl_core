@@ -50,6 +50,8 @@ namespace security_manager_test {
   using ::security_manager::SecurityQuery;
   using ::testing::Return;
   using ::testing::ReturnNull;
+  using ::testing::ReturnPointee;
+  using ::testing::DoAll;
   using ::testing::ElementsAreArray;
   using ::testing::SetArgPointee;
   using ::testing::_;
@@ -87,7 +89,7 @@ namespace security_manager_test {
                                        const uint32_t data_size ){
       const SecurityQuery::QueryHeader header(
             SecurityQuery::NOTIFICATION,
-            SecurityQuery::SEND_INTERNAL_ERROR, seq_number);
+            SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
       EmulateMobileMessage(header, data, data_size);
     }
     /*
@@ -289,8 +291,7 @@ namespace security_manager_test {
   }
   /*
    * SecurityManger shall send InternallError on
-   * getting SEND_HANDSHAKE_DATA from mobile side before
-   * PROTECT_SERVICE_RESPONSE
+   * getting SEND_HANDSHAKE_DATA with NULL data
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
     SetMockCryptoManger();
@@ -304,30 +305,22 @@ namespace security_manager_test {
   /*
    * SecurityManger shall send InternallError on
    * getting SEND_HANDSHAKE_DATA from mobile side
-   * for service not requested protection
+   * for service which is not protected
    */
-  TEST_F(SecurityManagerTest, ProccessHandshakeData_ProtectionNotRequested) {
+  TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
     SetMockCryptoManger();
-    //Try to protecte kMobileNav service
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
-
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_PROTECTION_NOT_REQUESTED),is_final)).
+                    SecurityQuery::ERROR_SERVICE_NOT_PROTECTED),is_final)).
         Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return(reinterpret_cast< ::security_manager::SSLContext*>(NULL)));
+                GetSSLContext(key)).WillOnce(ReturnNull());
 
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_HANDSHAKE_DATA);
-    const uint8_t service_type_uint8 = encryption_service_type;
-    EmulateMobileMessageHandShake(header, &service_type_uint8, 1);
+    const uint8_t data[] = {0x1, 0x2};
+    EmulateMobileMessageHandShake(data, sizeof(data)/sizeof(data[0]));
   }
   /*
    * SecurityManger shall send InternallError on getting
@@ -336,117 +329,112 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData_NULLPointer) {
     SetMockCryptoManger();
-    //Try to protecte kMobileNav service
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
-    //random data as handshake
-    const size_t handshake_data_size = 20;
-    uint8_t* handshake_data = new uint8_t[handshake_data_size + 1];
-    handshake_data[0]=encryption_service_type;
+    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
+    const size_t handshake_data_size =
+        sizeof(handshake_data)/sizeof(handshake_data[0]);
+
+    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
+    const size_t handshake_data_out_size =
+        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
 
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(1);
+                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(3);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, encryption_service_type)).
+                GetSSLContext(key)).
         WillOnce(Return(&mock_ssl_context_exists));
-    // Expect SSLContext::IsInitCompleted
+    // Expect SSLContext::DoHandshakeStep 3 times
+    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(
-                  //FIXME(EZ):add matcher for compare handshale data
-                  _, handshake_data_size, _))
-        .WillOnce(DoAll(SetArgPointee<2>(0xFF),
-                        Return(reinterpret_cast<void*>(0))));
-
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_HANDSHAKE_DATA);
-    EmulateMobileMessageHandShake(header, handshake_data, handshake_data_size + 1);
-
-    delete[] handshake_data;
-  }
-  /*
-   * SecurityManger shall send InternallError on getting
-   * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
-   * data (DoHandshakeStep return NULL size)
-   */
-  TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData_NULLSize) {
-    SetMockCryptoManger();
-    //Try to protecte kMobileNav service
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
-    //random data as handshake
-    const size_t handshake_data_size = 20;
-    uint8_t* handshake_data = new uint8_t[handshake_data_size + 1];
-    handshake_data[0]=encryption_service_type;
-
-    // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(1);
-    // Expect SessionObserver::GetSSLContext
-    EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return(&mock_ssl_context_exists));
-    // Expect SSLContext::IsInitCompleted
+                DoHandshakeStep(_, handshake_data_size, _))
+        .WillOnce(DoAll( SetArgPointee<2>(0),
+                         ReturnNull()));
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(
-                  //FIXME(EZ):add matcher for compare handshale data
-                  _, handshake_data_size, _))
-        .WillOnce(DoAll(SetArgPointee<2>(0),
-                        Return(reinterpret_cast<void*>(0xFFFF))));
-
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_HANDSHAKE_DATA);
-    EmulateMobileMessageHandShake(header, handshake_data, handshake_data_size + 1);
-
-    delete[] handshake_data;
-  }
-  /*
-   * SecurityManger shall send InternallError on getting
-   * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
-   * data (DoHandshakeStep return NULL pointer and size)
-   */
-  TEST_F(SecurityManagerTest,
-         ProccessHandshakeData_InvalidData_NULLSizeAndPointer) {
-    SetMockCryptoManger();
-    //Try to protecte kMobileNav service
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
-    //random data as handshake
-    const size_t handshake_data_size = 20;
-    uint8_t* handshake_data = new uint8_t[handshake_data_size + 1];
-    handshake_data[0]=encryption_service_type;
-
-    // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(1);
-    // Expect SessionObserver::GetSSLContext
-    EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, encryption_service_type)).
-        WillOnce(Return(&mock_ssl_context_exists));
-    // Expect SSLContext::IsInitCompleted
+                DoHandshakeStep( _, handshake_data_size, _))
+        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
+                         ReturnNull()));
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(
-                  //FIXME(EZ):add matcher for compare handshale data
-                  _, handshake_data_size, _))
-        .WillOnce(DoAll(SetArgPointee<2>(0),
-                        Return(reinterpret_cast<void*>(0x0))));
+                DoHandshakeStep(_, handshake_data_size, _))
+        .WillOnce(DoAll( SetArgPointee<2>(0),
+                         Return(handshake_data_out)));
 
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_HANDSHAKE_DATA);
-    EmulateMobileMessageHandShake(header, handshake_data, handshake_data_size + 1);
-
-    delete[] handshake_data;
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
   }
+//  /*
+//   * SecurityManger shall send InternallError on getting
+//   * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
+//   * data (DoHandshakeStep return NULL size)
+//   */
+//  TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData_NULLSize) {
+//    SetMockCryptoManger();
+//    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
+//    const size_t handshake_data_size =
+//        sizeof(handshake_data)/sizeof(handshake_data[0]);
+
+//    // Expect InternalError with ERROR_ID
+//    EXPECT_CALL(mock_protocol_observer,
+//                SendMessageToMobileApp(
+//                  InternalErrorWithErrId(
+//                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(1);
+//    // Expect SessionObserver::GetSSLContext
+//    EXPECT_CALL(mock_session_observer,
+//                GetSSLContext(key)).
+//        WillOnce(Return(&mock_ssl_context_exists));
+//    // Expect SSLContext::IsInitCompleted
+//    EXPECT_CALL(mock_ssl_context_exists,
+//                DoHandshakeStep(
+//                  //FIXME(EZ):add matcher for compare handshale data
+//                  _, handshake_data_size, _))
+//        .WillOnce(DoAll(SetArgPointee<2>(0),
+//                        Return(reinterpret_cast<void*>(0xFFFF))));
+
+//    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+//  }
+//  /*
+//   * SecurityManger shall send InternallError on getting
+//   * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
+//   * data (DoHandshakeStep return NULL pointer and size)
+//   */
+//  TEST_F(SecurityManagerTest,
+//         ProccessHandshakeData_InvalidData_NULLSizeAndPointer) {
+//    SetMockCryptoManger();
+//    //Try to protecte kMobileNav service
+//    const ::protocol_handler::ServiceType encryption_service_type =
+//        ::protocol_handler::kMobileNav;
+//    //random data as handshake
+//    const size_t handshake_data_size = 20;
+//    uint8_t* handshake_data = new uint8_t[handshake_data_size + 1];
+//    handshake_data[0]=encryption_service_type;
+
+//    // Expect InternalError with ERROR_ID
+//    EXPECT_CALL(mock_protocol_observer,
+//                SendMessageToMobileApp(
+//                  InternalErrorWithErrId(
+//                    SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).Times(1);
+//    // Expect SessionObserver::GetSSLContext
+//    EXPECT_CALL(mock_session_observer,
+//                GetSSLContext(key)).
+//        WillOnce(Return(&mock_ssl_context_exists));
+//    // Expect SSLContext::IsInitCompleted
+//    EXPECT_CALL(mock_ssl_context_exists,
+//                DoHandshakeStep(
+//                  //FIXME(EZ):add matcher for compare handshale data
+//                  _, handshake_data_size, _))
+//        .WillOnce(DoAll(SetArgPointee<2>(0),
+//                        Return(reinterpret_cast<void*>(0x0))));
+
+//    const SecurityQuery::QueryHeader header(
+//          SecurityQuery::NOTIFICATION,
+//          SecurityQuery::SEND_HANDSHAKE_DATA);
+//    EmulateMobileMessageHandShake(header, handshake_data, handshake_data_size + 1);
+
+//    delete[] handshake_data;
+//  }
   /*
    * SecurityManger shall send HandshakeData on
    * getting SEND_HANDSHAKE_DATA from mobile side
@@ -454,42 +442,31 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
     SetMockCryptoManger();
-    //Try to protecte kMobileNav service
-    const ::protocol_handler::ServiceType encryption_service_type =
-        ::protocol_handler::kMobileNav;
-    const SecurityQuery::QueryHeader header(
-          SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_HANDSHAKE_DATA);
-    //random data as handshake
-    const size_t handshake_data_size = 20;
-    uint8_t* handshake_data = new uint8_t[handshake_data_size + 1];
-    handshake_data[0]=encryption_service_type;
+    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
+    const size_t handshake_data_size =
+        sizeof(handshake_data)/sizeof(handshake_data[0]);
 
-    const size_t handshake_data_out_size = 10;
-    uint8_t* handshake_data_out = new uint8_t[handshake_data_out_size];
+    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
+    const size_t handshake_data_out_size =
+        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
 
-    // Expect HandShake query with complete_data_out
+    // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
-                  //FIXME: check handshake data
-//                  RawMessageEq(complete_data_out,complete_data_out_size),
+                  // FIXME : !!!
                   _, is_final)).Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, encryption_service_type)).
+                GetSSLContext(key)).
         WillOnce(Return(&mock_ssl_context_exists));
-    // Expect SSLContext::IsInitCompleted
+
+    // Expect SSLContext::DoHandshakeStep
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(
-                  //FIXME(EZ):add matcher for compare handshale data
-                  _, handshake_data_size, _))
-        .WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_size),
-                        Return(reinterpret_cast<void*>(handshake_data_out))));
+                DoHandshakeStep(_, handshake_data_size, _))
+        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
+                         Return(handshake_data_out)));
 
-    EmulateMobileMessageHandShake(header, handshake_data, handshake_data_size + 1);
-
-    delete[] handshake_data;
-    delete[] handshake_data_out;
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
   }
   /*
    * SecurityManger shall not send any query on getting SEND_INTERNAL_ERROR
@@ -499,8 +476,8 @@ namespace security_manager_test {
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_INTERNAL_ERROR);
-    EmulateMobileMessageHandShake(header, NULL, 0);
+          SecurityQuery::SEND_INTERNAL_ERROR, 0);
+    EmulateMobileMessage(header, NULL, 0);
   }
   /*
    * SecurityManger shall not send any query on getting
@@ -511,9 +488,9 @@ namespace security_manager_test {
 
     const SecurityQuery::QueryHeader header(
           SecurityQuery::NOTIFICATION,
-          SecurityQuery::SEND_INTERNAL_ERROR);
+          SecurityQuery::SEND_INTERNAL_ERROR, 0);
     std::string error("some error");
-    EmulateMobileMessageHandShake(header,
+    EmulateMobileMessage(header,
                          reinterpret_cast<const uint8_t*>(error.c_str()),
                          error.size());
   }
