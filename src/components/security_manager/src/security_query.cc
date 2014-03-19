@@ -58,9 +58,9 @@ SecurityQuery::SecurityQuery(
 }
 
 bool SecurityQuery::ParseQuery(const uint8_t * const binary_data,
-                                 const size_t bin_data_size) {
+                               const size_t bin_data_size) {
   const size_t header_size = sizeof(QueryHeader);
-  if(bin_data_size < header_size || binary_data) {
+  if(bin_data_size < header_size || !binary_data) {
     return false;
   }
   const uint8_t guery_type = binary_data[0];

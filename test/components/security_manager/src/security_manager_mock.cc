@@ -32,23 +32,24 @@
 
 #include "security_manager/security_manager_mock.h"
 
-using namespace test::components::security_manager_test;
-
 ::testing::AssertionResult QueryHeader_EQ(
     const char* m_expr, const char* n_expr,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2 ) {
   ::testing::AssertionResult fail_result = ::testing::AssertionFailure();
-  fail_result << m_expr << " and " << n_expr << ") are not equal : different" ;
-  if (q1.json_size  == q2.json_size)
-    return fail_result << "json_size";
-  if (q1.query_id  == q2.query_id)
-    return fail_result << "query_id";
-  if (q1.query_type  == q2.query_type)
-    return fail_result << "";
-  if (q1.query_type  == q2.query_type)
-    return fail_result << "query_type";
-  if (q1.seq_number  == q2.seq_number)
-    return fail_result << "";
+  fail_result  << "(\"" << m_expr << " and \"" << n_expr << "\") are not equal "
+               << " : different " ;
+  if (q1.json_size  != q2.json_size)
+    return fail_result << "json_size_1=" << q1.json_size
+                       << ", json_size_2=" << q2.json_size;
+  if (q1.query_id   != q2.query_id)
+    return fail_result << "query_id_1=" << q1.query_id
+                       << ", query_id_2=" << q2.query_id;
+  if (q1.query_type != q2.query_type)
+    return fail_result << "query_type_1=" << q1.query_type
+                       << ", query_type_2=" << q2.query_type;
+  if (q1.seq_number != q2.seq_number)
+    return fail_result  << "seq_number_1=" << q1.seq_number
+                        << ", seq_number_2=" << q2.seq_number;
   return ::testing::AssertionSuccess();
 }

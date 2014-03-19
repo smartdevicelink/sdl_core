@@ -188,15 +188,15 @@ namespace security_manager_test {
     }
     return true;
   }
-  /*
-   * Matcher for checking QueryHeader equal in GTests
-   */
-  ::testing::AssertionResult QueryHeader_EQ(
-      const char* m_expr, const char* n_expr,
-      const ::security_manager::SecurityQuery::QueryHeader& q1,
-      const ::security_manager::SecurityQuery::QueryHeader& q2 );
-
 } // security_manager_test
 } // namespace components
 } // namespace test
+/*
+ * Matcher for checking QueryHeader equal in GTests
+ */
+::testing::AssertionResult QueryHeader_EQ(
+    const char* m_expr, const char* n_expr,
+    const ::security_manager::SecurityQuery::QueryHeader& q1,
+    const ::security_manager::SecurityQuery::QueryHeader& q2 );
+
 #endif // SECURITY_MANAGER_MOCK_H
