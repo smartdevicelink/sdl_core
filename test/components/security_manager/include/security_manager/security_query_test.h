@@ -52,7 +52,7 @@ namespace security_manager_test {
       header_size = sizeof(SecurityQuery::QueryHeader);
       query_type = SecurityQuery::NOTIFICATION;
       query_id = SecurityQuery::SEND_HANDSHAKE_DATA;
-      //Get any NULL data for comfortable compare
+      //Get any not NULL data for comfortable compare
       seq_number = 0x12345678;
       json_size = 0x1;
       connection_key = 0xABCDEF0;
@@ -64,7 +64,6 @@ namespace security_manager_test {
       invalide_header = SecurityQuery::QueryHeader(
             SecurityQuery::INVALID_QUERY_TYPE,
             SecurityQuery::INVALID_QUERY_ID, 0);
-
     }
     /*
     * Wrapper for fast call SecurityQuery::ParseQuery
@@ -86,10 +85,7 @@ namespace security_manager_test {
     }
     size_t header_size;
     uint8_t query_type;
-    uint32_t query_id;
-    uint32_t seq_number;
-    uint32_t json_size;
-    uint32_t connection_key;
+    uint32_t query_id, seq_number, json_size, connection_key;
     SecurityQuery::QueryHeader init_header, invalide_header;
   };
   /*
@@ -105,6 +101,7 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
     SecurityQuery::QueryHeader new_header;
+
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, new_header, invalide_header);
   }
   /*
@@ -113,6 +110,7 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, QueryHeaderConstructor2) {
     SecurityQuery::QueryHeader new_header(query_type, query_id, seq_number);
+
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, new_header, init_header);
   }
   /*
@@ -120,6 +118,7 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, QueryConstructor) {
     SecurityQuery query;
+
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), 0);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
@@ -166,16 +165,50 @@ namespace security_manager_test {
   /*
    * Security QueryHeader Parse NULL data
    */
-  TEST_F(SecurityQueryTest, Parse_HullData) {
+  TEST_F(SecurityQueryTest, Parse_NullData) {
     SecurityQuery query;
     const bool result_parse = query.ParseQuery(NULL, 0);
+
     ASSERT_FALSE(result_parse);
+    //check side-effects
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), 0);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
-
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
+  }
+  /*
+   * Security QueryHeader Parse few (less header size) data
+   */
+  TEST_F(SecurityQueryTest, Parse_LessHeaderData) {
+    std::vector<uint8_t> vector(header_size - 1, 0);
+
+    SecurityQuery query;
+    const bool result_parse = query.ParseQuery(&vector[0], vector.size());
+
+    ASSERT_FALSE(result_parse);
+    //check side-effects
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
+  }
+  /*
+   * Security QueryHeader Parse few (equal header size) data
+   */
+  TEST_F(SecurityQueryTest, Parse_LessBinaryData) {
+    SecurityQuery query;
+    const bool result_parse =
+        ParseQuery(query, init_header, NULL, 0);
+
+    ASSERT_FALSE(result_parse);
+    //check side-effects
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_TRUE(query.get_json_message().empty());
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
   }
   /*
    * Security QueryHeader Parse data contains header and binary data
@@ -207,7 +240,7 @@ namespace security_manager_test {
   }
   /*
    * Security QueryHeader Parse data contains header and binary data
-   * with SEND_HANDSHAKE_DATA
+   * with INVALID_QUERY_TYPE
    */
   TEST_F(SecurityQueryTest, Parse_Handshake) {
     SecurityQuery::QueryHeader handshake_header(
