@@ -74,7 +74,8 @@ namespace security_manager_test {
                     const uint8_t * const binary_data,
                     const size_t bin_data_size) {
       //convert to Big-Endian (network) order
-      header.query_id = LE_TO_BE32(header.query_id << 8);
+      header.query_id  = LE_TO_BE32(header.query_id << 8);
+      header.json_size = LE_TO_BE32(header.json_size);
       std::vector<uint8_t> vector;
       vector.reserve(header_size + bin_data_size);
       const uint8_t* header_data = reinterpret_cast<uint8_t*>(&header);
@@ -194,6 +195,7 @@ namespace security_manager_test {
     const bool result_parse =
         ParseQuery(query, invalide_query_header, raw_data, raw_data_size);
     ASSERT_TRUE(result_parse);
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_query_header);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
@@ -202,7 +204,6 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_TRUE(query.get_json_message().empty());
-    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_query_header);
   }
   /*
    * Security QueryHeader Parse data contains header and binary data
@@ -210,9 +211,8 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, Parse_Handshake) {
     SecurityQuery::QueryHeader handshake_header(
-                SecurityQuery::REQUEST,
+                SecurityQuery::NOTIFICATION,
                 SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
-
     //some sample data
     uint8_t raw_data[] = {0x6, 0x7, 0x8};
     const size_t raw_data_size =
@@ -222,6 +222,7 @@ namespace security_manager_test {
     const bool result_parse =
         ParseQuery(query, handshake_header, raw_data, raw_data_size);
     ASSERT_TRUE(result_parse);
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), handshake_header);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     for (int i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
@@ -230,30 +231,30 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_connection_key(), 0);
     ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_TRUE(query.get_json_message().empty());
-    EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), handshake_header);
   }
   /*
    * Security QueryHeader Parse data contains header and binary data
    * with SEND_HANDSHAKE_DATA
    */
   TEST_F(SecurityQueryTest, Parse_InternalError) {
+    std::string error_str = "{some error}";
     SecurityQuery::QueryHeader internal_error_header(
                 SecurityQuery::REQUEST,
                 SecurityQuery::SEND_INTERNAL_ERROR, seq_number);
-    const std::string error_str = "some error text";
+    internal_error_header.json_size = error_str.size();
 
-    uint8_t raw_data[] = {0x6, 0x7, 0x8};
-    const size_t raw_data_size = error_str.size();
+    const uint8_t* raw_data = reinterpret_cast<const uint8_t*>(error_str.c_str());
 
     SecurityQuery query;
     const bool result_parse =
-        ParseQuery(query, internal_error_header, raw_data, raw_data_size);
+        ParseQuery(query, internal_error_header, raw_data, error_str.size());
     ASSERT_TRUE(result_parse);
-    ASSERT_EQ(query.get_connection_key(), 0);
-//    ASSERT_EQ(query.get_data_size(), 0);
-//    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-//    ASSERT_EQ(query.get_json_message(), error_str);
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), internal_error_header);
+    //check side-effects
+    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
+    ASSERT_EQ(query.get_json_message(), error_str);
   }
 } // security_manager_test
 } // namespace components
