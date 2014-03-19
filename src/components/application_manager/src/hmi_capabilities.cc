@@ -230,20 +230,19 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     app_mngr_(app_mngr),
     prerecorded_speech_(NULL) {
 
+  load_capabilities_from_file();
   if (false == profile::Profile::instance()->launch_hmi()) {
-    if (load_capabilities_from_file()) {
-      is_vr_ready_response_recieved_ = true;
-      is_tts_ready_response_recieved_ = true;
-      is_ui_ready_response_recieved_ = true;
-      is_navi_ready_response_recieved_ = true;
-      is_ivi_ready_response_recieved_ = true;
+    is_vr_ready_response_recieved_ = true;
+    is_tts_ready_response_recieved_ = true;
+    is_ui_ready_response_recieved_ = true;
+    is_navi_ready_response_recieved_ = true;
+    is_ivi_ready_response_recieved_ = true;
 
-      is_vr_cooperating_ = true;
-      is_tts_cooperating_ = true;
-      is_ui_cooperating_ = true;
-      is_navi_cooperating_ = true;
-      is_ivi_cooperating_ = true;
-    }
+    is_vr_cooperating_ = true;
+    is_tts_cooperating_ = true;
+    is_ui_cooperating_ = true;
+    is_navi_cooperating_ = true;
+    is_ivi_cooperating_ = true;
   }
 }
 
