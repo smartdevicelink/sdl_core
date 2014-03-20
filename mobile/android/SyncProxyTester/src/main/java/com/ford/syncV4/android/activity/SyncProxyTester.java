@@ -3387,7 +3387,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             mLatestAddCommand = null;
         } else {
-            Log.w(LOG_TAG, "Latest addCommand is unset");
+            Log.w(LOG_TAG, "Latest addCommand is null");
         }
     }
 

@@ -33,72 +33,72 @@ public class TextFieldNameTest extends TestCase {
                         TextFieldName.tertiaryText));
     }
 
-    public void testValueForStringmainField1ShouldReturnCorrectValue() {
+    public void testValueForStringMainField1ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mainField1"),
                 is(TextFieldName.mainField1));
     }
 
-    public void testValueForStringmainField2ShouldReturnCorrectValue() {
+    public void testValueForStringMainField2ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mainField2"),
                 is(TextFieldName.mainField2));
     }
 
-    public void testValueForStringmainField3ShouldReturnCorrectValue() {
+    public void testValueForStringMainField3ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mainField3"),
                 is(TextFieldName.mainField3));
     }
 
-    public void testValueForStringmainField4ShouldReturnCorrectValue() {
+    public void testValueForStringMainField4ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mainField4"),
                 is(TextFieldName.mainField4));
     }
 
-    public void testValueForStringstatusBarShouldReturnCorrectValue() {
+    public void testValueForStringStatusBarShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("statusBar"),
                 is(TextFieldName.statusBar));
     }
 
-    public void testValueForStringmediaClockShouldReturnCorrectValue() {
+    public void testValueForStringMediaClockShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mediaClock"),
                 is(TextFieldName.mediaClock));
     }
 
-    public void testValueForStringmediaTrackShouldReturnCorrectValue() {
+    public void testValueForStringMediaTrackShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("mediaTrack"),
                 is(TextFieldName.mediaTrack));
     }
 
-    public void testValueForStringalertText1ShouldReturnCorrectValue() {
+    public void testValueForStringAlertText1ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("alertText1"),
                 is(TextFieldName.alertText1));
     }
 
-    public void testValueForStringalertText2ShouldReturnCorrectValue() {
+    public void testValueForStringAlertText2ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("alertText2"),
                 is(TextFieldName.alertText2));
     }
 
-    public void testValueForStringalertText3ShouldReturnCorrectValue() {
+    public void testValueForStringAlertText3ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("alertText3"),
                 is(TextFieldName.alertText3));
     }
 
-    public void testValueForStringscrollableMessageBodyShouldReturnCorrectValue() {
+    public void testValueForStringScrollableMessageBodyShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("scrollableMessageBody"),
                 is(TextFieldName.scrollableMessageBody));
     }
 
-    public void testValueForStringinitialInteractionTextShouldReturnCorrectValue() {
+    public void testValueForStringInitialInteractionTextShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("initialInteractionText"),
                 is(TextFieldName.initialInteractionText));
     }
 
-    public void testValueForStringnavigationText1ShouldReturnCorrectValue() {
+    public void testValueForStringNavigationText1ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("navigationText1"),
                 is(TextFieldName.navigationText1));
     }
 
-    public void testValueForStringnavigationText2ShouldReturnCorrectValue() {
+    public void testValueForStringNavigationText2ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("navigationText2"),
                 is(TextFieldName.navigationText2));
     }
@@ -107,102 +107,102 @@ public class TextFieldNameTest extends TestCase {
         assertThat(TextFieldName.valueForString("ETA"), is(TextFieldName.ETA));
     }
 
-    public void testValueForStringtotalDistanceShouldReturnCorrectValue() {
+    public void testValueForStringTotalDistanceShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("totalDistance"),
                 is(TextFieldName.totalDistance));
     }
 
-    public void testValueForStringaudioPassThruDisplayText1ShouldReturnCorrectValue() {
+    public void testValueForStringAudioPassThroughDisplayText1ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("audioPassThruDisplayText1"),
                 is(TextFieldName.audioPassThruDisplayText1));
     }
 
-    public void testValueForStringaudioPassThruDisplayText2ShouldReturnCorrectValue() {
+    public void testValueForStringAudioPassThroughDisplayText2ShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("audioPassThruDisplayText2"),
                 is(TextFieldName.audioPassThruDisplayText2));
     }
 
-    public void testValueForStringsliderHeaderShouldReturnCorrectValue() {
+    public void testValueForStringSliderHeaderShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("sliderHeader"),
                 is(TextFieldName.sliderHeader));
     }
 
-    public void testValueForStringsliderFooterShouldReturnCorrectValue() {
+    public void testValueForStringSliderFooterShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("sliderFooter"),
                 is(TextFieldName.sliderFooter));
     }
 
-    public void testValueForStringmenuNameShouldReturnCorrectValue() {
+    public void testValueForStringMenuNameShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("menuName"),
                 is(TextFieldName.menuName));
     }
 
-    public void testValueForStringsecondaryTextShouldReturnCorrectValue() {
+    public void testValueForStringSecondaryTextShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("secondaryText"),
                 is(TextFieldName.secondaryText));
     }
 
-    public void testValueForStringtertiaryTextShouldReturnCorrectValue() {
+    public void testValueForStringTertiaryTextShouldReturnCorrectValue() {
         assertThat(TextFieldName.valueForString("tertiaryText"),
                 is(TextFieldName.tertiaryText));
     }
 
-    public void testmainField1ToStringShouldReturnCorrectValue() {
+    public void testMainField1ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mainField1.toString(), is("mainField1"));
     }
 
-    public void testmainField2ToStringShouldReturnCorrectValue() {
+    public void testMainField2ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mainField2.toString(), is("mainField2"));
     }
 
-    public void testmainField3ToStringShouldReturnCorrectValue() {
+    public void testMainField3ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mainField3.toString(), is("mainField3"));
     }
 
-    public void testmainField4ToStringShouldReturnCorrectValue() {
+    public void testMainField4ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mainField4.toString(), is("mainField4"));
     }
 
-    public void teststatusBarToStringShouldReturnCorrectValue() {
+    public void testStatusBarToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.statusBar.toString(), is("statusBar"));
     }
 
-    public void testmediaClockToStringShouldReturnCorrectValue() {
+    public void testMediaClockToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mediaClock.toString(), is("mediaClock"));
     }
 
-    public void testmediaTrackToStringShouldReturnCorrectValue() {
+    public void testMediaTrackToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.mediaTrack.toString(), is("mediaTrack"));
     }
 
-    public void testalertText1ToStringShouldReturnCorrectValue() {
+    public void testAlertText1ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.alertText1.toString(), is("alertText1"));
     }
 
-    public void testalertText2ToStringShouldReturnCorrectValue() {
+    public void testAlertText2ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.alertText2.toString(), is("alertText2"));
     }
 
-    public void testalertText3ToStringShouldReturnCorrectValue() {
+    public void testAlertText3ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.alertText3.toString(), is("alertText3"));
     }
 
-    public void testscrollableMessageBodyToStringShouldReturnCorrectValue() {
+    public void testScrollableMessageBodyToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.scrollableMessageBody.toString(),
                 is("scrollableMessageBody"));
     }
 
-    public void testinitialInteractionTextToStringShouldReturnCorrectValue() {
+    public void testInitialInteractionTextToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.initialInteractionText.toString(),
                 is("initialInteractionText"));
     }
 
-    public void testnavigationText1ToStringShouldReturnCorrectValue() {
+    public void testNavigationText1ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.navigationText1.toString(),
                 is("navigationText1"));
     }
 
-    public void testnavigationText2ToStringShouldReturnCorrectValue() {
+    public void testNavigationText2ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.navigationText2.toString(),
                 is("navigationText2"));
     }
@@ -211,37 +211,37 @@ public class TextFieldNameTest extends TestCase {
         assertThat(TextFieldName.ETA.toString(), is("ETA"));
     }
 
-    public void testtotalDistanceToStringShouldReturnCorrectValue() {
+    public void testTotalDistanceToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.totalDistance.toString(), is("totalDistance"));
     }
 
-    public void testaudioPassThruDisplayText1ToStringShouldReturnCorrectValue() {
+    public void testAudioPassThroughDisplayText1ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.audioPassThruDisplayText1.toString(),
                 is("audioPassThruDisplayText1"));
     }
 
-    public void testaudioPassThruDisplayText2ToStringShouldReturnCorrectValue() {
+    public void testAudioPassThroughDisplayText2ToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.audioPassThruDisplayText2.toString(),
                 is("audioPassThruDisplayText2"));
     }
 
-    public void testsliderHeaderToStringShouldReturnCorrectValue() {
+    public void testSliderHeaderToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.sliderHeader.toString(), is("sliderHeader"));
     }
 
-    public void testsliderFooterToStringShouldReturnCorrectValue() {
+    public void testSliderFooterToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.sliderFooter.toString(), is("sliderFooter"));
     }
 
-    public void testmenuNameToStringShouldReturnCorrectValue() {
+    public void testMenuNameToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.menuName.toString(), is("menuName"));
     }
 
-    public void testsecondaryTextToStringShouldReturnCorrectValue() {
+    public void testSecondaryTextToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.secondaryText.toString(), is("secondaryText"));
     }
 
-    public void testtertiaryTextToStringShouldReturnCorrectValue() {
+    public void testTertiaryTextToStringShouldReturnCorrectValue() {
         assertThat(TextFieldName.tertiaryText.toString(), is("tertiaryText"));
     }
 

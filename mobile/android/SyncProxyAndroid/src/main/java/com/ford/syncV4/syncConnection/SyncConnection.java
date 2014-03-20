@@ -53,7 +53,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private static final String TAG = "SyncConnection";
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
-    ISyncConnectionListener _connectionListener = null;
+    ISyncConnectionListener mConnectionListener = null;
     AbstractPacketizer mVideoPacketizer = null;
     AbstractPacketizer mAudioPacketizer = null;
     // Thread safety locks
@@ -77,7 +77,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @param listener Sync connection listener.
      */
     public SyncConnection(ISyncConnectionListener listener) {
-        _connectionListener = listener;
+        mConnectionListener = listener;
         mIsInit = false;
     }
 
@@ -211,8 +211,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void stopHeartbeatMonitor() {
+    private void stopHeartbeatMonitor() {
         if (_heartbeatMonitor != null) {
+            Log.d(TAG, "Stop HeartBeat");
             _heartbeatMonitor.stop();
         }
     }
@@ -362,8 +363,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 } catch (OutOfMemoryError e) {
                     final String info =
                             "Out of memory while handling incoming message";
-                    if (_connectionListener != null) {
-                        _connectionListener.onProtocolError(info, e);
+                    if (mConnectionListener != null) {
+                        mConnectionListener.onProtocolError(info, e);
                     } else {
                         Log.e(TAG, info, e);
                     }
@@ -374,14 +375,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onTransportConnected() {
-        initialiseSession();
+        if (mConnectionListener != null) {
+            mConnectionListener.onTransportConnected();
+        }
     }
 
-    private void initialiseSession() {
+    public void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
-        }else {
-
+        } else {
+            // TODO :
         }
         startProtocolSession();
     }
@@ -399,7 +402,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onTransportDisconnected(String info) {
         if (!_isHeartbeatTimedout) {
             // Pass directly to connection listener
-            _connectionListener.onTransportDisconnected(info);
+            mConnectionListener.onTransportDisconnected(info);
         }
         _isHeartbeatTimedout = false;
     }
@@ -408,7 +411,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onTransportError(String info, Exception e) {
         if (!_isHeartbeatTimedout) {
             // Pass directly to connection listener
-            _connectionListener.onTransportError(info, e);
+            mConnectionListener.onTransportError(info, e);
         }
         _isHeartbeatTimedout = false;
     }
@@ -426,7 +429,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
-                //Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
+                Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 _transport.sendBytes(msgBytes, offset, length);
             }
         }
@@ -434,7 +437,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolMessageReceived(ProtocolMessage msg) {
-        _connectionListener.onProtocolMessageReceived(msg);
+        mConnectionListener.onProtocolMessageReceived(msg);
 
         // Unblock USB reader thread by this method
         FunctionID functionID = new FunctionID();
@@ -461,13 +464,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onProtocolSessionStarted(Session session,
                                          byte version, String correlationID) {
 
-        _connectionListener.onProtocolSessionStarted(session, version, correlationID);
+        mConnectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
     @Override
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
                                        String correlationID) {
-        _connectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
+        mConnectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
         processEndService(serviceType);
     }
 
@@ -504,7 +507,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolError(String info, Exception e) {
-        _connectionListener.onProtocolError(info, e);
+        mConnectionListener.onProtocolError(info, e);
     }
 
     @Override
@@ -514,17 +517,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-        _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
     }
 
     @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
-        _connectionListener.onMobileNavAckReceived(frameReceivedNumber);
+        mConnectionListener.onMobileNavAckReceived(frameReceivedNumber);
     }
 
     @Override
     public void onStartServiceNackReceived(ServiceType serviceType) {
-        _connectionListener.onStartServiceNackReceived(serviceType);
+        mConnectionListener.onStartServiceNackReceived(serviceType);
     }
 
     /**
@@ -559,7 +562,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         Log.d(TAG, "Heartbeat timeout; closing connection");
         _isHeartbeatTimedout = true;
         closeConnection((byte) 0, false, false);
-        _connectionListener.onHeartbeatTimedOut();
+        mConnectionListener.onHeartbeatTimedOut();
     }
 
     public byte getSessionId() {
