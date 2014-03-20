@@ -33,15 +33,15 @@
 #include <sys/siginfo.h>
 #include <sys/netmgr.h>
 
-#include "transport_manager/usb/qnx/usb_iap2_connection.h"
+#include "transport_manager/usb/qnx/usb_iap_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-const char* UsbIAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
+const char* UsbIAPConnection::protocol = "com.qnx.eaf";  // TODO(nvaganov@luxoft.com) choose protocol name
 
-UsbIAP2Connection::UsbIAP2Connection(const DeviceUID& device_uid,
+UsbIAPConnection::UsbIAPConnection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
   TransportAdapterController* controller,
   const char* device_path) : device_uid_(device_uid),
@@ -50,10 +50,10 @@ UsbIAP2Connection::UsbIAP2Connection(const DeviceUID& device_uid,
   device_path_(device_path) {
 }
 
-bool UsbIAP2Connection::Init() {
+bool UsbIAPConnection::Init() {
   LOG4CXX_TRACE(logger_, "Connecting to " << device_path_);
-  iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);
-  if (iap2_hdl_ != 0) {
+  ipod_hdl_ = ipod_connect(device_path_.c_str(), 0);
+  if (ipod_hdl_ != 0) {
     LOG4CXX_DEBUG(logger_, "Connected to " << device_path_);
   }
   else {
@@ -62,8 +62,12 @@ bool UsbIAP2Connection::Init() {
   }
 
   LOG4CXX_TRACE(logger_, "Opening protocol " << protocol);
-  iap2ea_hdl_ = iap2_eap_open(device_path_.c_str(), protocol, 0);
-  if (iap2ea_hdl_ != 0) {
+// ipod_eaf_addprotocol() accepts pointer to non-const char
+  int protocol_id = ipod_eaf_addprotocol(ipod_hdl_, const_cast<char*>(protocol));
+  ipod_reidentify(ipod_hdl_);
+  ipod_eaf_session_accept(ipod_hdl_, protocol_id, 0);
+  session_id_ = ipod_eaf_session_open(ipod_hdl_, protocol_id);
+  if (session_id_ != -1) {
     LOG4CXX_DEBUG(logger_, "Protocol " << protocol << " opened");
   }
   else {
@@ -71,35 +75,35 @@ bool UsbIAP2Connection::Init() {
     return false;
   }
 
-  receiver_thread_ = new threads::Thread("USB iAP2 receiver",
-    new ReceiverThreadDelegate(iap2ea_hdl_, this));
+  receiver_thread_ = new threads::Thread("USB iAP receiver",
+    new ReceiverThreadDelegate(ipod_hdl_, session_id_, this));
   receiver_thread_->start();
 
   controller_->ConnectDone(device_uid_, app_handle_);
   return true;
 }
 
-TransportAdapter::Error UsbIAP2Connection::SendData(RawMessageSptr message) {
-  LOG4CXX_TRACE(logger_, "USB iAP2: sending data");
-  if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
-    LOG4CXX_INFO(logger_, "USB iAP2: data sent successfully");
+TransportAdapter::Error UsbIAPConnection::SendData(RawMessageSptr message) {
+  LOG4CXX_TRACE(logger_, "USB iAP: sending data");
+  if (ipod_eaf_send(ipod_hdl_, session_id_, message->data(), message->data_size()) != -1) {
+    LOG4CXX_INFO(logger_, "USB iAP: data sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "USB iAP2: error occured while sending data");
+    LOG4CXX_WARN(logger_, "USB iAP: error occured while sending data");
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
 }
 
-TransportAdapter::Error UsbIAP2Connection::Disconnect() {
+TransportAdapter::Error UsbIAPConnection::Disconnect() {
   TransportAdapter::Error error = TransportAdapter::OK;
 
   receiver_thread_->stop();
 
   LOG4CXX_TRACE(logger_, "Closing protocol " << protocol);
-  if (iap2_eap_close(iap2ea_hdl_) != -1) {
+  if (ipod_eaf_session_free(ipod_hdl_, session_id_) != -1) {
     LOG4CXX_DEBUG(logger_, "Protocol " << protocol << " closed");
   }
   else {
@@ -108,7 +112,7 @@ TransportAdapter::Error UsbIAP2Connection::Disconnect() {
   }
 
   LOG4CXX_TRACE(logger_, "Disconnecting from " << device_path_);
-  if (iap2_disconnect(iap2_hdl_) != -1) {
+  if (ipod_disconnect(ipod_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "Disconnected from " << device_path_);
   }
   else {
@@ -120,17 +124,17 @@ TransportAdapter::Error UsbIAP2Connection::Disconnect() {
   return error;
 }
 
-void UsbIAP2Connection::OnDataReceived(RawMessageSptr message) {
+void UsbIAPConnection::OnDataReceived(RawMessageSptr message) {
   controller_->DataReceiveDone(device_uid_, app_handle_, message);
 }
 
-void UsbIAP2Connection::OnReceiveFailed() {
+void UsbIAPConnection::OnReceiveFailed() {
   controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
 }
 
-UsbIAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl,
-  UsbIAP2Connection* parent) :
-  parent_(parent), run_(false), iap2ea_hdl_(iap2ea_hdl) {
+UsbIAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
+  ipod_hdl_t* ipod_hdl, int session_id, UsbIAPConnection* parent) :
+  parent_(parent), run_(false), ipod_hdl_(ipod_hdl), session_id_(session_id) {
 
   LOG4CXX_TRACE(logger_, "Creating QNX channel");
   chid_ = ChannelCreate(0);
@@ -155,43 +159,32 @@ UsbIAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* 
   run_ = true;
 }
 
-void UsbIAP2Connection::ReceiverThreadDelegate::threadMain() {
+void UsbIAPConnection::ReceiverThreadDelegate::threadMain() {
   while (run_) {
     struct sigevent event;
     SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE_EAP, 0);
-    LOG4CXX_TRACE(logger_, "Arming for USB iAP2 input notification");
-    int arm_result = iap2_eap_event_arm(iap2ea_hdl_, &event);
-    switch (arm_result) {
-      case -1: // failure
-        LOG4CXX_WARN(logger_, "Could not arm for USB iAP2 input notification");
-        break;
-      case 0: { // successfully armed
-        LOG4CXX_DEBUG(logger_, "Successfully armed for USB iAP2 input notification");
-        struct _pulse pulse;
-        LOG4CXX_INFO(logger_, "USB iAP2: waiting for pulse on QNX channel " << chid_);
-        int pulse_result = MsgReceivePulse(chid_, &pulse, sizeof(pulse), 0);
-        if (pulse_result != -1) {
-          LOG4CXX_INFO(logger_, "USB iAP2: received pulse on QNX channel " << chid_);
-          switch (pulse.code) {
-            case PULSE_CODE_EAP:
-              receive();
-              break;
-          }
+    LOG4CXX_TRACE(logger_, "Arming for USB iAP input notification");
+    if (ipod_notify(ipod_hdl_, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_INPUT, &event) != -1) {
+      LOG4CXX_DEBUG(logger_, "Successfully armed for USB iAP input notification");
+      struct _pulse pulse;
+      LOG4CXX_INFO(logger_, "USB iAP: waiting for pulse on QNX channel " << chid_);
+      int pulse_result = MsgReceivePulse(chid_, &pulse, sizeof(pulse), 0);
+      if (pulse_result != -1) {
+        LOG4CXX_INFO(logger_, "USB iAP: received pulse on QNX channel " << chid_);
+        switch (pulse.code) {
+          case PULSE_CODE_EAP:
+            receive();
+            break;
         }
-        else {
-          LOG4CXX_WARN(logger_, "USB iAP2: error occured while waiting for pulse on QNX channel " << chid_);
-        }
-        break;
       }
-      case 1: // data is available
-        LOG4CXX_DEBUG(logger_, "USB iAP2: data is already available");
-        receive();
-        break;
+    }
+    else {
+      LOG4CXX_WARN(logger_, "Could not arm for USB iAP input notification");
     }
   }
 }
 
-bool UsbIAP2Connection::ReceiverThreadDelegate::exitThreadMain() {
+bool UsbIAPConnection::ReceiverThreadDelegate::exitThreadMain() {
   run_ = false;
 
   LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel" << chid_);
@@ -213,18 +206,18 @@ bool UsbIAP2Connection::ReceiverThreadDelegate::exitThreadMain() {
   return true;
 }
 
-void UsbIAP2Connection::ReceiverThreadDelegate::receive() {
+void UsbIAPConnection::ReceiverThreadDelegate::receive() {
 // this method can be invoked from the only thread
 // thus it does not need any synchronization
-  LOG4CXX_TRACE(logger_, "USB iAP2: receiving data");
-  int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
+  LOG4CXX_TRACE(logger_, "USB iAP: receiving data");
+  int size = ipod_eaf_recv(ipod_hdl_, session_id_, buffer_, kBufferSize);
   if (size != -1) {
-    LOG4CXX_INFO(logger_, "USB iAP2: received " << size << " bytes");
+    LOG4CXX_INFO(logger_, "USB iAP: received " << size << " bytes");
     RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
     parent_->OnDataReceived(message);
   }
   else {
-    LOG4CXX_WARN(logger_, "USB iAP2: error occured while receiving data");
+    LOG4CXX_WARN(logger_, "USB iAP: error occured while receiving data");
     parent_->OnReceiveFailed();
   }
 }

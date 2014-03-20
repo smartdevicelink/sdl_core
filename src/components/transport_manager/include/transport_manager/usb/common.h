@@ -56,14 +56,14 @@ static const uint16_t kAoaPid2 = 0x2d01;
 static const uint8_t kAoaInterfaceSubclass = 0xff;
 
 static const uint16_t kAppleVid = 0x05ac;
-static const uint16_t kApplePid1 = 0x1290;
-static const uint16_t kApplePid2 = 0x1292;
-static const uint16_t kApplePid3 = 0x1294;
-static const uint16_t kApplePid4 = 0x1297;
-static const uint16_t kApplePid5 = 0x129a;
-static const uint16_t kApplePid6 = 0x129f;
-static const uint16_t kApplePid7 = 0x12a0;
-static const uint16_t kApplePid8 = 0x12a8;
+static const uint16_t kApplePid1 = 0x1290; // iPhone
+static const uint16_t kApplePid2 = 0x1292; // iPhone 3G
+static const uint16_t kApplePid3 = 0x1294; // iPhone 3GS
+static const uint16_t kApplePid4 = 0x1297; // iPhone 4
+static const uint16_t kApplePid5 = 0x129a; // iPad
+static const uint16_t kApplePid6 = 0x129f; // iPad 2
+static const uint16_t kApplePid7 = 0x12a0; // iPhone 4S
+static const uint16_t kApplePid8 = 0x12a8; // iPhone 5
 
 static const int kUsbConfiguration = 1;
 

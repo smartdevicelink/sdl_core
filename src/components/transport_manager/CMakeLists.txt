@@ -59,6 +59,7 @@ if (BUILD_USB_SUPPORT)
     list(APPEND SOURCES
     ./src/usb/qnx/usb_handler.cc
     ./src/usb/qnx/usb_connection.cc
+    ./src/usb/qnx/usb_iap_connection.cc
     ./src/usb/qnx/usb_iap2_connection.cc
     ./src/usb/qnx/platform_usb_device.cc
     )
@@ -70,6 +71,7 @@ add_library("TransportManager" ${SOURCES})
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     target_link_libraries ("TransportManager" usbdi)
+    target_link_libraries ("TransportManager" ipod)
     target_link_libraries ("TransportManager" iap2client)
   endif()
 endif(BUILD_USB_SUPPORT)

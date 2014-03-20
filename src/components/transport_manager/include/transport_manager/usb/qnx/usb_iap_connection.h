@@ -30,11 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
 
-#include <sys/neutrino.h>
-#include <iap2/iap2.h>
+#include <ipod/ipod.h>
 
 #include "utils/threads/thread.h"
 
@@ -44,9 +43,9 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAP2Connection : public Connection {
+class UsbIAPConnection : public Connection {
  public:
-  UsbIAP2Connection(const DeviceUID& device_uid,
+  UsbIAPConnection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
     const char* device_path);
@@ -66,8 +65,8 @@ class UsbIAP2Connection : public Connection {
   TransportAdapterController* controller_;
   std::string device_path_;
 
-  iap2_hdl_t* iap2_hdl_;
-  iap2ea_hdl_t* iap2ea_hdl_;
+  ipod_hdl_t* ipod_hdl_;
+  int session_id_;
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
 
@@ -75,7 +74,7 @@ class UsbIAP2Connection : public Connection {
 
   class ReceiverThreadDelegate : public threads::ThreadDelegate {
    public:
-    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
+    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, int session_id, UsbIAPConnection* parent);
     virtual void threadMain();
     virtual bool exitThreadMain();
 
@@ -86,11 +85,12 @@ class UsbIAP2Connection : public Connection {
 
     void receive();
 
-    UsbIAP2Connection* parent_;
+    UsbIAPConnection* parent_;
     bool run_;
     int chid_;
     int coid_;
-    iap2ea_hdl_t* iap2ea_hdl_;
+    ipod_hdl_t* ipod_hdl_;
+    int session_id_;
     uint8_t buffer_[kBufferSize];
   };
 };
@@ -98,4 +98,4 @@ class UsbIAP2Connection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
