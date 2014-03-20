@@ -226,6 +226,7 @@ void SecurityManager::SendData(
   const size_t header_size = sizeof(header);
   std::vector<uint8_t> data_sending(header_size + data_size);
   memcpy(&data_sending[0], &header, header_size);
+  //TODO (EZamakhov): Fix invalide read (by Valgrind)
   memcpy(&data_sending[header_size], data, data_size);
 
   SendBinaryData(connectionKey, &data_sending[0], data_sending.size());
