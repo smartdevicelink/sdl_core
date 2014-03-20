@@ -4,6 +4,7 @@ include_directories(
   ../transport_manager/include/
   ../connection_handler/include
   ../utils/include/
+  ../config_profile/include/
 )
 
 set (SOURCES
@@ -14,4 +15,4 @@ set (SOURCES
 )
 
 add_library(SecurityManager ${SOURCES})
-target_link_libraries(SecurityManager crypto ssl ProtocolHandler)
+target_link_libraries(SecurityManager crypto ssl ProtocolHandler ConfigProfile)

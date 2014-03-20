@@ -41,6 +41,7 @@
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/ssl_context.h"
+#include "utils/logger.h"
 
 namespace security_manager {
   class CryptoManagerImpl : public CryptoManager {
@@ -75,6 +76,8 @@ namespace security_manager {
     virtual void ReleaseSSLContext(SSLContext* context);
    private:
     SSL_CTX *context_;
+
+    static ::log4cxx::LoggerPtr logger_;
   };
 } // namespace security_manager
 

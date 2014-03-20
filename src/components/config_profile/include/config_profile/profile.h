@@ -264,16 +264,54 @@ class Profile : public utils::Singleton<Profile> {
       */
     const std::string& system_files_path() const;
 
-    // Members section
+    /**
+     * @brief Reads a string value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadStringValue(std::string* value,
+                         const char* default_value,
+                         const char* const pSection,
+                         const char* const pKey) const;
 
-  protected:
-    // Methods section
-
-    // Members section
+    /**
+     * @brief Reads an int32_t value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadIntValue(int32_t* value,
+                      int32_t  default_value,
+                      const char* const pSection,
+                      const char* const pKey) const;
+    /**
+     * @brief Reads an bool value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadBoolValue(bool *value,
+                       const bool default_value,
+                       const char * const pSection,
+                       const char * const pKey) const;
 
   private:
-    // Methods section
-
     /**
      * Default constructor
      *
@@ -302,7 +340,8 @@ class Profile : public utils::Singleton<Profile> {
                    const char* const pKey) const;
 
     /**
-     * @brief Reads a string value from the profile
+     * @brief Reads a string value from the profile and interpret it
+     * as \c true on "true" value or as \c false on any other value
      *
      * @param value      The value to return
      * @param pSection   The section to read the value in
@@ -314,39 +353,6 @@ class Profile : public utils::Singleton<Profile> {
     bool ReadValue(std::string* value,
                    const char* const pSection,
                    const char* const pKey) const;
-
-
-    /**
-     * @brief Reads a string value from the profile
-     *
-     * @param value         Result value
-     * @param default_value Value to use key wasn't found
-     * @param pSection      The section to read the value in
-     * @param pKey          The key whose value needs to be read out
-     *
-     * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
-     */
-    bool ReadStringValue(std::string* value,
-                         const char* default_value,
-                         const char* const pSection,
-                         const char* const pKey) const;
-
-    /**
-     * @brief Reads an int32_t value from the profile
-     *
-     * @param value         Result value
-     * @param default_value Value to use key wasn't found
-     * @param pSection      The section to read the value in
-     * @param pKey          The key whose value needs to be read out
-     *
-     * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
-     */
-    bool ReadIntValue(int32_t* value,
-                      int32_t  default_value,
-                      const char* const pSection,
-                      const char* const pKey) const;
 
     // Members section
     bool                            launch_hmi_;

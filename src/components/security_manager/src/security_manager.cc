@@ -246,3 +246,8 @@ void SecurityManager::SendBinaryData(const int32_t connectionKey,
   // FIXME(EZ): final_message - false?
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
 }
+
+
+const char *SecurityManager::ConfigSection() {
+  return "Security Manager";
+}

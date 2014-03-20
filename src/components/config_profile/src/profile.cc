@@ -619,14 +619,14 @@ void Profile::UpdateValues() {
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
                         const char* const pKey) const {
+  DCHECK(value);
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
   *buf = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
-    const int32_t tmpVal = atoi(buf);
-    if (0 == tmpVal) {
+    if (strcmp(buf, "true")) {
       *value = false;
     } else {
       *value = true;
@@ -640,6 +640,7 @@ bool Profile::ReadValue(bool* value, const char* const pSection,
 
 bool Profile::ReadValue(std::string* value, const char* const pSection,
                         const char* const pKey) const {
+  DCHECK(value);
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
@@ -656,6 +657,7 @@ bool Profile::ReadValue(std::string* value, const char* const pSection,
 bool Profile::ReadStringValue(std::string* value, const char* default_value,
                               const char* const pSection,
                               const char* const pKey) const {
+  DCHECK(value);
   if (!ReadValue(value, pSection, pKey)) {
     *value = default_value;
     return false;
@@ -666,6 +668,7 @@ bool Profile::ReadStringValue(std::string* value, const char* default_value,
 bool Profile::ReadIntValue(int32_t* value, int32_t default_value,
                            const char* const pSection,
                            const char* const pKey) const {
+  DCHECK(value);
   std::string string_value;
   if (!ReadValue(&string_value, pSection, pKey)) {
     *value = default_value;
@@ -676,4 +679,13 @@ bool Profile::ReadIntValue(int32_t* value, int32_t default_value,
   }
 }
 
+bool Profile::ReadBoolValue(bool* value, const bool default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  DCHECK(value);
+  bool read_value;
+  const bool result = ReadValue(&read_value, pSection, pKey);
+  *value = result ? read_value : default_value;
+  return result;
+}
 }  //  namespace profile

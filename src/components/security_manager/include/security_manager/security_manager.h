@@ -33,7 +33,7 @@
 #ifndef SECURE_MANAGER_H
 #define SECURE_MANAGER_H
 
-#include <log4cxx/log4cxx.h>
+#include "utils/logger.h"
 
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/raw_message.h"
@@ -116,6 +116,12 @@ public:
    * CALLED in SecurityMessageLoop thread
    */
   bool ProtectConnection(const uint32_t &connection_key);
+
+  /**
+   * @brief SecurityConfigSection
+   * @return Session name in config file
+   */
+  static const char *ConfigSection();
 private:
   /**
    * \brief Parse SecurityMessage as HandshakeData request
