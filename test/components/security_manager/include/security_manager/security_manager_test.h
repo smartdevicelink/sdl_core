@@ -73,7 +73,7 @@ namespace security_manager_test {
       security_manager_->set_crypto_manager(&mock_crypto_manager);
     }
     /*
-    * Wrapper for fast send SecurityManager::OnMessageReceived
+    * Wrapper for fast emulate recieve SecurityManager::OnMessageReceived
     */
     void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
                                 const protocol_handler::ServiceType serviceType) {
@@ -82,12 +82,13 @@ namespace security_manager_test {
       security_manager_->OnMessageReceived(rawMessagePtr);
     }
     /*
-    * Wrapper for fast send query
+    * Wrapper for fast emulate recieve query
     */
     void EmulateMobileMessage(SecurityQuery::QueryHeader header,
                               const uint8_t* const data, const uint32_t data_size ){
       //convert to Big-Endian (network) order
-      header.query_id = LE_TO_BE32(header.query_id << 8);
+      header.query_id  = LE_TO_BE32(header.query_id << 8);
+      header.json_size = LE_TO_BE32(header.json_size);
 
       const size_t data_sending_size = sizeof(header) + data_size;
       uint8_t* data_sending = new uint8_t[data_sending_size];
@@ -99,7 +100,7 @@ namespace security_manager_test {
       delete[] data_sending;
     }
     /*
-    * Wrapper for fast send Handshake
+    * Wrapper for fast emulate recieve Handshake
     */
     void EmulateMobileMessageHandShake(const uint8_t* const data,
                                        const uint32_t data_size ){

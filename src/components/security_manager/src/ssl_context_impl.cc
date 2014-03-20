@@ -88,6 +88,7 @@ DoHandshakeStep(const void* client_data,  size_t client_data_size,
 
   int pen = BIO_pending(bioOut_);
 
+  // FIXME (EZamakhov): What if pen is less zero?
   if (!pen) {
     return NULL;
   }

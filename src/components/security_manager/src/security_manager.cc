@@ -202,21 +202,17 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 void SecurityManager::SendInternalError(const int32_t connection_key,
                                         const int &error_id,
                                         const uint32_t seq_number) {
-  const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
-                                          SecurityQuery::SEND_INTERNAL_ERROR,
-                                          seq_number);
   std::stringstream stream;
   stream << "{ \"ERROR_ID\":" << error_id << " }";
   const std::string error_str = stream.str();
-  // FIXME (EZmakhov) Add set json instted of raw binary data
-  const size_t data_sending_size = error_str.size();
-  uint8_t* data_sending = new uint8_t[data_sending_size];
-  data_sending[0] = error_id;
-  memcpy(data_sending + 1, error_str.c_str(), error_str.size());
+  SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
+                                    SecurityQuery::SEND_INTERNAL_ERROR,
+                                    seq_number, error_str.size());
+  std::vector<uint8_t> data_sending(error_str.size() + 1);
+  memcpy(&data_sending[0], error_str.c_str(), error_str.size());
+  data_sending[data_sending.size()-1]=error_id;
 
-  SendData(connection_key, header, data_sending, data_sending_size);
-
-  delete[] data_sending;
+  SendData(connection_key, header, &data_sending[0], data_sending.size());
 }
 
 void SecurityManager::SendData(
@@ -224,17 +220,15 @@ void SecurityManager::SendData(
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
   // FIXME(EZ): move to SecurityQuery class
-  header.query_id = LE_TO_BE32(header.query_id << 8);
+  header.query_id  = LE_TO_BE32(header.query_id << 8);
+  header.json_size = LE_TO_BE32(header.json_size);
 
   const size_t header_size = sizeof(header);
-  const size_t data_sending_size = header_size + data_size;
-  uint8_t* data_sending = new uint8_t[data_sending_size];
-  memcpy(data_sending, &header, header_size);
-  memcpy(data_sending + header_size, data, data_size);
+  std::vector<uint8_t> data_sending(header_size + data_size);
+  memcpy(&data_sending[0], &header, header_size);
+  memcpy(&data_sending[header_size], data, data_size);
 
-  SendBinaryData(connectionKey, data_sending, data_sending_size);
-
-  delete[] data_sending;
+  SendBinaryData(connectionKey, &data_sending[0], data_sending.size());
 }
 
 void SecurityManager::SendBinaryData(const int32_t connectionKey,

@@ -42,9 +42,10 @@ SecurityQuery::QueryHeader::QueryHeader() :
   seq_number(0), json_size(0) {
 }
 
-SecurityQuery::QueryHeader::QueryHeader(
-    uint8_t queryType, uint32_t queryId, uint32_t seqNumber) :
-  query_type(queryType), query_id(queryId), seq_number(seqNumber), json_size(0) {
+SecurityQuery::QueryHeader::QueryHeader(uint8_t queryType, uint32_t queryId,
+                                        uint32_t seqNumber, uint32_t jsonSize) :
+  query_type(queryType), query_id(queryId),
+  seq_number(seqNumber), json_size(jsonSize) {
 }
 
 SecurityQuery::SecurityQuery() :

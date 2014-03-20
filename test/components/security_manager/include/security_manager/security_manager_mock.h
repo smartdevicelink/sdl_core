@@ -178,9 +178,17 @@ namespace security_manager_test {
       *result_listener << "Notification is not InternalError";
       return false;
     }
+    const uint32_t json_size = arg->data()[8] << 24 |
+                               arg->data()[9]  << 16 |
+                               arg->data()[10] <<  8 |
+                               arg->data()[11];
+    if(header_size + json_size >= arg->data_size()){
+      *result_listener << "InternalError contains only JSON data.";
+      return false;
+    }
     //Read err_id as bin data number
     const uint8_t* err_id =
-        reinterpret_cast<uint8_t*>(arg->data() + header_size);
+        reinterpret_cast<uint8_t*>(arg->data() + header_size + json_size);
     if(expectedErrorId != *err_id) {
       *result_listener << "InternalError id " << int(*err_id)
                        << " and not equal error " << expectedErrorId;
