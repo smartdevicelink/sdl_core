@@ -40,27 +40,27 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;
-  const uint32_t app_id = application->mobile_app_id()->asInt();
+  const std::string& m_app_id = application->mobile_app_id()->asString();
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
             it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == app_id) {
+    if ((*it)[strings::app_id].asString() == m_app_id) {
       json_app = &(*it);
       LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id"
-                            "is already exist ( update info ) " << app_id);
+                            "is already exist ( update info ) " << m_app_id);
       break;
     }
   }
 
   if (json_app == NULL) {
     LOG4CXX_INFO(logger_, "ResumeCtrl Application with this ID does not"
-				 "exist. Add new" << app_id);
+         "exist. Add new" << m_app_id);
     saved_applications_.push_back(Json::Value());
     json_app = &(saved_applications_.back());
   }
   uint32_t hash = application->curHash();
   LOG4CXX_INFO(logger_, " Hash = " << hash);
   uint32_t connection_key = application->app_id();
-  (*json_app)[strings::app_id] = app_id;
+  (*json_app)[strings::app_id] = m_app_id;
   (*json_app)[strings::connection_key] = connection_key;
   (*json_app)[strings::hmi_level] =
       static_cast<int32_t> (application->hmi_level());
@@ -121,8 +121,9 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
       it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
 
       mobile_apis::HMILevel::eType saved_hmi_level;
       mobile_apis::HMILevel::eType restored_hmi_level;
@@ -144,7 +145,7 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       }
       MessageHelper::SendHMIStatusNotification(*(application.get()));
       LOG4CXX_INFO(logger_, "Restore Application "
-                   << (*it)[strings::app_id].asInt()
+                   << saved_m_app_id
                    << " to HMILevel " << restored_hmi_level);
       return true;
     }
@@ -159,8 +160,9 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
 
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
       break;
     }
   }
@@ -289,7 +291,8 @@ bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr applicatio
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
       it != saved_applications_.end(); ) {
-    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id == application->mobile_app_id()->asString()) {
       saved_applications_.erase(it);
       return true;
     } else {
@@ -338,8 +341,9 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
 
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
 
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
@@ -360,10 +364,11 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   return false;
 }
 
-bool ResumeCtrl::CheckApplicationHash(uint32_t app_id, uint32_t hash) {
+bool ResumeCtrl::CheckApplicationHash(std::string mobile_app_id, uint32_t hash) {
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == app_id) {
+    std::string saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id == mobile_app_id) {
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
       if (hash == saved_hash) {
         return true;

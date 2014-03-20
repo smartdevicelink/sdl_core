@@ -334,7 +334,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-    if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
+    const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
+    if (!resumer.CheckApplicationHash(mobile_app_id,
                                       hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
     }
@@ -543,7 +544,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
-  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  const std::string& mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asString();
 
   const std::set<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications();
@@ -552,7 +553,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asString()) {
       return true;
     }
   }
