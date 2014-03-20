@@ -45,7 +45,6 @@ class SmartObject;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
-
 class ApplicationManagerImpl;
 
 class HMICapabilities {
@@ -405,6 +404,7 @@ class HMICapabilities {
   smart_objects::SmartObject*      prerecorded_speech_;
 
   ApplicationManagerImpl*          app_mngr_;
+  static log4cxx::LoggerPtr logger_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
 };
