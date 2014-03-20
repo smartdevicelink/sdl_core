@@ -1,5 +1,7 @@
 [CW12]
-+ SyncProxyTester:Set AppId parameter at Application SetUp dialog
+* SyncProxyTester: Check open session (by Session Id) when executing automatic tests DISABLED
++ SyncProxyTester: Check connection and open session when executing automatic tests
++ SyncProxyTester: Set AppId parameter at Application SetUp dialog
 
 [CW11]
 * SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"

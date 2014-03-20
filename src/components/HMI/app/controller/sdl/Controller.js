@@ -68,6 +68,7 @@ SDL.SDLController = Em.Object
             }
         }.property('SDL.DriverDistraction.active',
             'SDL.OptionsView.active',
+            'SDL.SliderView.active',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
             'SDL.TBTClientStateView.active',

@@ -565,7 +565,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onProxyClosed() {
         resetAdapters();
-        mLogAdapter.logMessage("Disconnected", true);
     }
 
     @Override
@@ -876,7 +875,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             menu.add(0, MNU_SET_UP_POLICY_FILES, 0, "Set Up Policy files");
             MenuItem menuitem = menu.add(0, MNU_WAKELOCK, 0, "Lock screen while testing");
             menuitem.setCheckable(true);
-            menuitem.setChecked(!getDisableLockFlag());
+            menuitem.setChecked(!AppPreferencesManager.getDisableLockFlag());
             return true;
         } else {
             return false;
@@ -887,7 +886,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem menuItem = menu.findItem(MNU_WAKELOCK);
         if (menuItem != null) {
-            menuItem.setChecked(!getDisableLockFlag());
+            menuItem.setChecked(!AppPreferencesManager.getDisableLockFlag());
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -982,7 +981,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 clearMessageSelectCount();
                 break;
             case MNU_WAKELOCK:
-                toggleDisableLock();
+                AppPreferencesManager.toggleDisableLock();
                 break;
             case MNU_HASH_ID_SETUP:
                 DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
@@ -1015,39 +1014,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void xmlTestContinue(String filePath) {
         if (mTesterMain != null) {
-            mTesterMain.restart(filePath);
             SafeToast.showToastAnyThread("start your engines");
         } else {
             mBoundProxyService.startModuleTest();
-            mTesterMain.restart(filePath);
             SafeToast.showToastAnyThread("Start the app on SYNC first");
         }
-    }
-
-    /**
-     * Toggles the current state of the disable lock when testing flag, and
-     * writes it to the preferences.
-     */
-    private void toggleDisableLock() {
-        SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        boolean disableLock = prefs.getBoolean(
-                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
-        disableLock = !disableLock;
-        prefs.edit()
-                .putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                        disableLock).commit();
-    }
-
-    /**
-     * Returns the current state of the disable lock when testing flag.
-     *
-     * @return true if the screen lock is disabled
-     */
-    public boolean getDisableLockFlag() {
-        return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
-                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+        mTesterMain.restart(filePath);
     }
 
     private String getAssetsContents(String filename, String defaultString) {

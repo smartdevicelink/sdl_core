@@ -2884,6 +2884,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return currentSession.getServicesNumber();
     }
 
+    /**
+     * @return id of te current session
+     */
+    public int getSessionId() {
+        return currentSession.getSessionId();
+    }
+
     public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
         _syncMsgVersionRequest = syncMsgVersionRequest;
     }

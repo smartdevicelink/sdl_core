@@ -232,6 +232,33 @@ public class AppPreferencesManager {
     }
 
     /**
+     * Returns the current state of the disable lock when testing flag.
+     *
+     * @return true if the screen lock is disabled
+     */
+    public static boolean getDisableLockFlag() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(
+                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
+                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+    }
+
+    /**
+     * Toggles the current state of the disable lock when testing flag, and
+     * writes it to the preferences.
+     */
+    public static void toggleDisableLock() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        boolean disableLock = sharedPreferences.getBoolean(
+                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
+                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+        disableLock = !disableLock;
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING, disableLock);
+        editor.commit();
+    }
+
+    /**
      * @return the Context of the application
      */
     private static Context getAppContext() {
