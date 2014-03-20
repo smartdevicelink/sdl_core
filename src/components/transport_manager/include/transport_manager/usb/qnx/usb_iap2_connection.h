@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
 
+#include <sys/neutrino.h>
 #include <iap2/iap2.h>
 
 #include "utils/threads/thread.h"
@@ -58,6 +59,7 @@ class UsbIAP2Connection : public Connection {
 
  private:
   void OnDataReceived(RawMessageSptr message);
+  void OnReceiveFailed();
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -71,7 +73,26 @@ class UsbIAP2Connection : public Connection {
 
   static const char* protocol;
 
-  friend void OnDataReceived(UsbIAP2Connection* connection, RawMessageSptr message);
+  class ReceiverThreadDelegate : public threads::ThreadDelegate {
+   public:
+    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
+    virtual void threadMain();
+    virtual bool exitThreadMain();
+
+   private:
+    enum {PULSE_CODE_EAP = _PULSE_CODE_MINAVAIL + 1};
+
+    static const size_t kBufferSize = 1024;
+
+    void receive();
+
+    UsbIAP2Connection* parent_;
+    bool run_;
+    int chid_;
+    int coid_;
+    iap2ea_hdl_t* iap2ea_hdl_;
+    uint8_t buffer_[kBufferSize];
+  };
 };
 
 }  // namespace transport_adapter
