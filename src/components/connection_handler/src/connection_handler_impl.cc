@@ -575,14 +575,11 @@ ConnectionList &ConnectionHandlerImpl::getConnectionList(){
   return connection_list_;
 }
 
-bool ConnectionHandlerImpl::addDeviceConnection(const transport_manager::DeviceInfo &device_info, const transport_manager::ConnectionUID &connection_id) {
+void ConnectionHandlerImpl::addDeviceConnection(const transport_manager::DeviceInfo &device_info, const transport_manager::ConnectionUID &connection_id) {
   //Add Device
-  const bool result =
-      AddDeviceInDeviceListIfNotExist(device_info);
-  if(result)
-    //Add connection
-    OnConnectionEstablished(device_info, connection_id);
-  return result;
+  OnDeviceAdded(device_info);
+  //Add connection
+  OnConnectionEstablished(device_info, connection_id);
 }
 #endif
 

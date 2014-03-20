@@ -321,7 +321,7 @@ private:
      */
 public:
     ConnectionList& getConnectionList();
-    bool addDeviceConnection(
+    void addDeviceConnection(
         const transport_manager::DeviceInfo& device_info,
         const transport_manager::ConnectionUID& connection_id);
 #endif

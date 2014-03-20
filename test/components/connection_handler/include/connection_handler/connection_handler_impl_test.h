@@ -57,9 +57,7 @@ class ConnectionHandlerTest: public ::testing::Test {
     const transport_manager::DeviceInfo device_info(
           device_handle, std::string("test_address"), std::string("test_name"));
     //Add Device and connection
-    const bool result =
-        connection_handler_->addDeviceConnection(device_info, uid);
-    EXPECT_TRUE(result);
+    connection_handler_->addDeviceConnection(device_info, uid);
   }
 
   ConnectionHandlerImpl* connection_handler_;
