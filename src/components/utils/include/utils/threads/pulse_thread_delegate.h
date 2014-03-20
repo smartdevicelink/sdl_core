@@ -30,24 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_PULSE_THREAD_DELEGATE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_PULSE_THREAD_DELEGATE_H_
 
 #include <sys/neutrino.h>
 
 #include "utils/threads/thread_delegate.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace threads {
 
-class PulseThreadDelegate : public threads::ThreadDelegate {
+/**
+ * @brief This ThreadDelegate derivative is designed
+ * to implement threads waiting for QNX Pulse messages
+ * When constucted, an instance of this class creates QNX channel and connects to it
+ * In exitThreadMain() channel is disconnected and destroyed
+ * In threadMain() endless loop event is armed via pure virtual method ArmEvent()
+ * and thread blocks on MsgReceivePulse() waiting for Pulse
+ * When Pulse comes, OnPulse() pure virtual method is invoked
+ * Subclassed must implement ArmEvent() for events of interest
+ * and OnPulse() for reaction on such events
+ */
+class PulseThreadDelegate : public ThreadDelegate {
  public:
+/**
+  * @brief default constructor
+  */
   PulseThreadDelegate();
   virtual void threadMain();
   virtual bool exitThreadMain();
 
  protected:
+/**
+  * @brief This method is to be implemented to arm events of interest
+  * @param event pointer to structure sigevent
+  * @return If this method returns true, thread is blocked on MsgReceivePulse() waiting for Pulse
+  */
   virtual bool ArmEvent(struct sigevent* event) = 0;
+/**
+  * @brief This method is invoked from threadMain() when Pulse comes
+  */
   virtual void OnPulse() = 0;
 
  private:
@@ -58,7 +79,6 @@ class PulseThreadDelegate : public threads::ThreadDelegate {
   int coid_;
 };
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace threads
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_PULSE_THREAD_DELEGATE_H_

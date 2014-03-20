@@ -32,11 +32,17 @@
 
 #include <sys/netmgr.h>
 
-#include "transport_manager/usb/qnx/pulse_thread_delegate.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "utils/threads/pulse_thread_delegate.h"
+#include "utils/logger.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace threads {
+
+namespace {
+
+log4cxx::LoggerPtr logger_ =
+  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::PulseThreadDelegate"));
+
+}  // anonimous namespace
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
   LOG4CXX_TRACE(logger_, "Creating QNX channel");
@@ -106,5 +112,4 @@ bool PulseThreadDelegate::exitThreadMain() {
   return true;
 }
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace threads

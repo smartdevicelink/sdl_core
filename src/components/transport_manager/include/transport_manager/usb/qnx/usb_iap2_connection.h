@@ -36,10 +36,10 @@
 #include <iap2/iap2.h>
 
 #include "utils/threads/thread.h"
+#include "utils/threads/pulse_thread_delegate.h"
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "pulse_thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -73,7 +73,7 @@ class UsbIAP2Connection : public Connection {
 
   static const char* protocol;
 
-  class ReceiverThreadDelegate : public PulseThreadDelegate {
+  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:
     ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
     virtual bool ArmEvent(struct sigevent* event);
