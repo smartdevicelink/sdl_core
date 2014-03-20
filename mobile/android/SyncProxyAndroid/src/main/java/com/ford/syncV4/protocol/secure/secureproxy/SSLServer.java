@@ -1,5 +1,7 @@
 package com.ford.syncV4.protocol.secure.secureproxy;
 
+import android.util.Base64;
+
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.util.DebugTool;
@@ -104,7 +106,7 @@ public class SSLServer implements ISSLComponent {
         private void startSocket() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableKeyException, KeyManagementException {
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            InputStream is = new ByteArrayInputStream(KEYSTORE.getBytes());
+            InputStream is = new ByteArrayInputStream(Base64.decode(KEYSTORE, Base64.DEFAULT));
             keyStore.load(is, "android".toCharArray());
 
             String keyalg = KeyManagerFactory.getDefaultAlgorithm();

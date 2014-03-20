@@ -24,7 +24,7 @@ public class ProtocolSecureManager {
 
     private IHandshakeDataListener handshakeDataListener;
     private ISecureProxyServer listener;
-    SecureProxyServer secureProxyServer;
+    ISSLComponent secureProxyServer;
     ISSLComponent sslClient;
     private boolean handshakeFinished;
     private CountDownLatch countDownLatchInput = new CountDownLatch(1);
@@ -67,15 +67,15 @@ public class ProtocolSecureManager {
     }
 
     public void startHandShake() {
-        startSSLClient();
+        startProxy();
     }
 
     public void setupSecureEnvironment() {
-        startSecureProxy();
+        startSSLComponent();
     }
 
-    private void startSecureProxy() {
-        secureProxyServer = new SecureProxyServer(new ISecureProxyServer() {
+    private void startProxy() {
+        secureProxyServer = new SecureProxyClient(new ISecureProxyServer() {
             @Override
             public void onDataReceived(byte[] data) {
                 if (!handshakeFinished) {
@@ -117,8 +117,8 @@ public class ProtocolSecureManager {
         }
     }
 
-    private void startSSLClient() {
-        sslClient = new SSLClient(new ITransportListener() {
+    private void startSSLComponent() {
+        sslClient = new SSLServer(new ITransportListener() {
             @Override
             public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
 
