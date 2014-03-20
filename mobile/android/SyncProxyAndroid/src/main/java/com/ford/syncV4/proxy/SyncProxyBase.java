@@ -3107,7 +3107,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolMessageReceived(ProtocolMessage msg) {
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data
-            if (msg.getData().length > 0 || msg.getBulkData().length > 0) {
+            if ((msg.getData() != null && msg.getData().length > 0) ||
+                    (msg.getBulkData() != null && msg.getBulkData().length > 0)) {
                 queueIncomingMessage(msg);
             }
         }
