@@ -33,9 +33,9 @@
 #ifndef RPC_BASE_DBUS_INL_H_
 #define RPC_BASE_DBUS_INL_H_
 
-#include <rpc_base/dbus_message.h>
-#include "rpc_base/rpc_base.h"
+#include "dbus/dbus_message.h"
 #include "json/value.h"
+#include "rpc_base/rpc_base.h"
 
 namespace rpc {
 namespace impl {

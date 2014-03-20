@@ -10,9 +10,9 @@ add_subdirectory(./thirdPartyLibs)
 add_subdirectory(./tools)
 
 include_directories (
-  ../src/thirdPartyLibs/gmock-1.6.0/include
+  ../src/thirdPartyLibs/gmock-1.7.0/include
   ../src/thirdPartyLibs/jsoncpp/include/
-  ../src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ../src/thirdPartyLibs/MessageBroker/include
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include

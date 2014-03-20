@@ -201,6 +201,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool ApplicationIsSaved(const uint32_t app_id);
 
     Json::Value GetApplicationCommands(const uint32_t app_id);
+    Json::Value GetApplicationSubMenus(const uint32_t app_id);
     Json::Value GetApplicationInteractionChoiseSets(const uint32_t app_id);
     Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
     Json::Value GetApplicationSubscriptions(const uint32_t app_id);

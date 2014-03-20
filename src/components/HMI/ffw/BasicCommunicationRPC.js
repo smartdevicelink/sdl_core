@@ -585,13 +585,14 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.OnStartDeviceDiscovery",
+                "method": "BasicCommunication.OnSystemRequest",
                 "params":{
                     "requestType": "HTTP",
                     "url": "http://127.0.0.1",
-                    "fileType": "BINARY",
+                    "fileType": "JSON",
                     "offset": 1000,
-                    "length": 10000
+                    "length": 10000,
+                    "timeout": 500
                 }
             };
             this.client.send(JSONMessage);

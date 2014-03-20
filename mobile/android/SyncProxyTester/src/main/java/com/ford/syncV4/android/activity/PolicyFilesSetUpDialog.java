@@ -45,6 +45,11 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
         mSelectedPolicyUpdateFileNameView =
                 (EditText) layout.findViewById(R.id.policy_update_local_file_name);
 
+        if (!AppPreferencesManager.getPolicyTableUpdateFilePath().isEmpty()) {
+            mSelectedPolicyUpdateFileNameView.setText(
+                    AppPreferencesManager.getPolicyTableUpdateFilePath());
+        }
+
         final Button mPolicyUpdateSelectLocalFileView =
                 (Button) layout.findViewById(R.id.policy_update_select_file_button);
         mPolicyUpdateSelectLocalFileView.setOnClickListener(new View.OnClickListener() {
@@ -74,8 +79,8 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         String mFilePath = mSelectedPolicyUpdateFileNameView.getText().toString();
-                        if (mFilePath == null || mFilePath.equals("")) {
-                            return;
+                        if (mFilePath == null) {
+                            mFilePath = "";
                         }
                         AppPreferencesManager.setPolicyTableUpdateFilePath(mFilePath);
                     }
@@ -89,10 +94,11 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
 
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == Const.REQUEST_POLICY_UPDATE_FILE_OPEN) {
-                String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+                String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
                 if (mSelectedPolicyUpdateFileNameView != null) {
-                    mSelectedPolicyUpdateFileNameView.setText(fileName);
+                    mSelectedPolicyUpdateFileNameView.setText(filePath);
                 }
+                AppPreferencesManager.setPolicyTableUpdateFilePath(filePath);
             }
         }
     }

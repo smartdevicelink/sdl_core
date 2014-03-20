@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -27,9 +27,11 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.marshaller.CustomJsonRPCMarshaller;
 import com.ford.syncV4.android.marshaller.InvalidJsonRPCMarshaller;
 import com.ford.syncV4.android.module.reader.BinaryDataReader;
@@ -66,7 +68,6 @@ import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -76,114 +77,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class ModuleTest {
-	/**
-	 * Wraps the {@link RPCRequest} class to add some extra fields (pause after
-	 * the request; whether to generate invalid JSON; custom JSON to set in
-	 * request).
-	 */
-	class RPCRequestWrapper {
-		private RPCRequest request = null;
-		private long pause = 0;
-		private boolean generateInvalidJSON = false;
-		private String customJSON = null;
-		
-		public RPCRequestWrapper(RPCRequest request, long pause,
-				boolean generateInvalidJSON) {
-			this(request, pause, generateInvalidJSON, null);
-		}
-		
-		public RPCRequestWrapper(RPCRequest request, long pause,
-				boolean generateInvalidJSON, String customJSON) {
-			this.request = request;
-			this.pause = pause;
-			this.generateInvalidJSON = generateInvalidJSON;
-			this.customJSON = customJSON;
-		}
 
-		public long getPause() {
-			return pause;
-		}
-
-		public void setPause(long pause) {
-			this.pause = pause;
-		}
-
-		public RPCRequest getRequest() {
-			return request;
-		}
-
-		public boolean isGenerateInvalidJSON() {
-			return generateInvalidJSON;
-		}
-
-		public void setGenerateInvalidJSON(boolean generateInvalidJSON) {
-			this.generateInvalidJSON = generateInvalidJSON;
-		}
-
-		public String getCustomJSON() {
-			return customJSON;
-		}
-
-		public void setCustomJSON(String customJSON) {
-			this.customJSON = customJSON;
-		}
-	}
-	
-	/** Represents a test as read from the test file. */
-	class Test {
-		private String name = null;
-		private long pause = 0;
-		private List<RPCRequestWrapper> requests = null;
-		
-		public Test() {
-			super();
-		}
-
-		public Test(String name, long pause, List<RPCRequestWrapper> requests) {
-			this.name = name;
-			this.pause = pause;
-			this.requests = requests;
-		}
-		
-		/**
-		 * Adds the specified request to the list. If the list is null, it's
-		 * created first.
-		 * 
-		 * @param request request to add
-		 */
-		public void addRequest(RPCRequestWrapper request) {
-			if (requests == null) {
-				requests = new ArrayList<ModuleTest.RPCRequestWrapper>();
-			}
-			
-			requests.add(request);
-		}
-
-		public String getName() {
-			return name;
-		}
-		
-		public void setName(String name) {
-			this.name = name;
-		}
-		
-		public long getPause() {
-			return pause;
-		}
-		
-		public void setPause(long pause) {
-			this.pause = pause;
-		}
-		
-		public List<RPCRequestWrapper> getRequests() {
-			return requests;
-		}
-		
-		public void setRequests(List<RPCRequestWrapper> requests) {
-			this.requests = requests;
-		}
-	}
-	
 	/** Log tag for the class. */
 	private static final String TAG = ModuleTest.class.getSimpleName();
 	/** Specifies whether to display debug info from the XML parser. */
@@ -218,14 +112,12 @@ public class ModuleTest {
 	/** Attribute name of request's correlation ID. */
 	private final static String CORRELATION_ID_ATTR = "correlationID";
 	
-	private static ModuleTest _instance;
+	private static ModuleTest sInstance;
 	private SyncProxyTester mActivityInstance;
 	private LogAdapter mLogAdapter;
-	private static Runnable threadContext;
-	private static ModuleTest DialogThreadContext;
+	private static Runnable sThreadContext;
 	private Thread mainThread;
 	
-	private boolean pass;
 	private boolean integration;
 	private String userPrompt;
 	
@@ -234,7 +126,7 @@ public class ModuleTest {
 	private ArrayList<Pair<Integer, Result>> expecting = new ArrayList<Pair<Integer, Result>>();
 	private Test currentTest = null;
 	
-	public static ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
+	public static ArrayList<Pair<Integer, Result>> sResponses = new ArrayList<Pair<Integer, Result>>();
 	
 	/** Factory that is used to return a reader for the binary data in tests. */
 	private BinaryDataReaderFactory binaryDataReaderFactory = new BinaryDataReaderFactory();
@@ -254,8 +146,8 @@ public class ModuleTest {
 		mLogAdapter = logAdapter;
 		
 		// Set this's instance
-		_instance = this;
-		mActivityInstance.setTesterMain(_instance);
+		sInstance = this;
+		mActivityInstance.setTesterMain(sInstance);
 		
 		mainThread = makeThread();
 	}
@@ -366,11 +258,9 @@ public class ModuleTest {
 					final int numFilePaths = filePaths.size();
 
 					Intent email = new Intent(
-							numFilePaths > 1 ? Intent.ACTION_SEND_MULTIPLE
-									: Intent.ACTION_SEND);
+							numFilePaths > 1 ? Intent.ACTION_SEND_MULTIPLE : Intent.ACTION_SEND);
 					email.setType("text/plain");
-					email.putExtra(Intent.EXTRA_EMAIL,
-							new String[] { "youremail@ford.com" });
+					email.putExtra(Intent.EXTRA_EMAIL, new String[] { "youremail@ford.com" });
 					email.putExtra(Intent.EXTRA_SUBJECT, "Lua Unit Test Export");
 
 					switch (numFilePaths) {
@@ -379,8 +269,7 @@ public class ModuleTest {
 						break;
 
 					case 1:
-						email.putExtra(Intent.EXTRA_STREAM,
-								Uri.fromFile(new File(filePaths.get(0))));
+						email.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(new File(filePaths.get(0))));
 						break;
 
 					default:
@@ -389,8 +278,7 @@ public class ModuleTest {
 						for (String filePath : filePaths) {
 							uris.add(Uri.fromFile(new File(filePath)));
 						}
-						email.putParcelableArrayListExtra(Intent.EXTRA_STREAM,
-								uris);
+						email.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 						break;
 					}
 
@@ -399,334 +287,352 @@ public class ModuleTest {
 				}
 			}
 
-			private void processTestFile(String filename) throws IOException,
-					XmlPullParserException {
-				AcceptedRPC acceptedRPC = new AcceptedRPC();
-				XmlPullParser parser = Xml.newPullParser();
-				RPCRequest rpc;
-				try {
-					if (mActivityInstance.getDisableLockFlag()) {
-						acquireWakeLock();
-					}
-					
-					FileInputStream fin = new FileInputStream(filename);
-					InputStreamReader isr = new InputStreamReader(fin);
+            private void processTestFile(String filename) throws IOException,
+                    XmlPullParserException {
+                AcceptedRPC acceptedRPC = new AcceptedRPC();
+                XmlPullParser parser = Xml.newPullParser();
+                RPCRequest rpc;
+                try {
+                    if (AppPreferencesManager.getDisableLockFlag()) {
+                        acquireWakeLock();
+                    }
 
-					// file writer for test results
-					String outFile = getTestResultsFilename(filename);
-					File out = new File(outFile);
-					FileWriter writer = new FileWriter(out);
-					writer.flush();
+                    FileInputStream fin = new FileInputStream(filename);
+                    InputStreamReader isr = new InputStreamReader(fin);
 
-					// file writer for test errors
-					String outErrorFile = getTestErrorsFilename(filename);
-					File outError = new File(outErrorFile);
-					FileWriter errorWriter = new FileWriter(outError);
-					errorWriter.flush();
+                    // file writer for test results
+                    String outFile = getTestResultsFilename(filename);
+                    File out = new File(outFile);
+                    FileWriter writer = new FileWriter(out);
+                    writer.flush();
 
-					parser.setInput(isr);
-					int eventType = parser.getEventType();
-					String name;
-					boolean done = false;
-					while (eventType != XmlPullParser.END_DOCUMENT && !done) {
-						name = parser.getName();
-						
-						switch (eventType) {
-						case XmlPullParser.START_DOCUMENT:
-							logParserDebugInfo("START_DOCUMENT, name: " + name);
-							break;
-						case XmlPullParser.END_DOCUMENT:
-							logParserDebugInfo("END_DOCUMENT, name: " + name);
-							break;
-						case XmlPullParser.START_TAG:
-							name = parser.getName();
-							if (name.equalsIgnoreCase("test")) {
-								mLogAdapter.logMessage("test " + parser.getAttributeValue(0), true);
-								
-								long pause = 0;
-								String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
-								if (pauseString != null) {
-									try {
-										pause = Long.parseLong(pauseString);
-									} catch (NumberFormatException e) {
-										Log.e(TAG, "Couldn't parse pause number: " + pauseString);
-									}
-								}
-								currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
-										pause, null);
-								expecting.clear();
-								responses.clear();
-								try {
-									if (parser.getAttributeName(1) != null) {
-										if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
-											try {numIterations = Integer.parseInt(parser.getAttributeValue(1));} 
-											catch (Exception e) {Log.e(TAG, "Unable to parse number of iterations");}
-										} else numIterations = 1;
-									} else numIterations = 1;
-								} catch (Exception e) {
-									numIterations = 1;
-								}
-							} else if (name.equalsIgnoreCase("type")) {
-								if (parser.getAttributeValue(0).equalsIgnoreCase("integration")) integration = true;
-								else if (parser.getAttributeValue(0).equalsIgnoreCase("unit")) integration = false;
-							} else if (acceptedRPC.isAcceptedRPC(name)) {
-								//Create correct object
-								if (name.equalsIgnoreCase(Names.RegisterAppInterface)) {
-									rpc = new RegisterAppInterface();
-								} else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
-									rpc = new UnregisterAppInterface();
-								} else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
-									rpc = RPCRequestFactory.buildSetGlobalProperties();
-								} else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
-									rpc = new ResetGlobalProperties();
-								} else if (name.equalsIgnoreCase(Names.AddCommand)) {
-									rpc = RPCRequestFactory.buildAddCommand();
-								} else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
-									rpc = new DeleteCommand();
-								} else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
-									rpc = RPCRequestFactory.buildAddSubMenu();
-								} else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
-									rpc = new DeleteSubMenu();
-								} else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
-									rpc = RPCRequestFactory.buildCreateInteractionChoiceSet();
-								} else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
-									rpc = new PerformInteraction();
-								} else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
-									rpc = new DeleteInteractionChoiceSet();
-								} else if (name.equalsIgnoreCase(Names.Alert)) {
-									rpc = new Alert();
-								} else if (name.equalsIgnoreCase(Names.Show)) {
-									rpc = new Show();
-								} else if (name.equalsIgnoreCase(Names.Speak)) {
-									rpc = new Speak();
-								} else if (name.equalsIgnoreCase(Names.SetMediaClockTimer)) {
-									rpc = new SetMediaClockTimer();
-								} else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
-									rpc = new EncodedSyncPData();
-								} else if (name.equalsIgnoreCase(Names.SyncPData)) {
-									rpc = new SyncPData();
-								} else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
-									rpc = new PerformAudioPassThru();
-								} else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
-									rpc = new EndAudioPassThru();
-								} else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
-									rpc = RPCRequestFactory.buildSubscribeButton();
-								} else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
-									rpc = new UnsubscribeButton();
-								} else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
-									rpc = RPCRequestFactory.buildSubscribeVehicleData();
-							    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
-									rpc = new UnsubscribeVehicleData();
-							    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {
-									rpc = new GetVehicleData();
-							    } else if (name.equalsIgnoreCase(Names.ReadDID)) {
-									rpc = new ReadDID();
-							    } else if (name.equalsIgnoreCase(Names.GetDTCs)) {
-									rpc = new GetDTCs();
-							    } else if (name.equalsIgnoreCase(Names.ScrollableMessage)) {
-									rpc = new ScrollableMessage();
-							    } else if (name.equalsIgnoreCase(Names.Slider)) {
-									rpc = new Slider();
-							    } else if (name.equalsIgnoreCase(Names.ShowConstantTBT)) {
-									rpc = new ShowConstantTBT();
-							    } else if (name.equalsIgnoreCase(Names.AlertManeuver)) {
-									rpc = new AlertManeuver();
-							    } else if (name.equalsIgnoreCase(Names.UpdateTurnList)) {
-									rpc = new UpdateTurnList();
-							    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
-									rpc = new ChangeRegistration();
-							    } else if (name.equalsIgnoreCase(Names.PutFile)) {
-									rpc = RPCRequestFactory.buildPutFile();
-							    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
-									rpc = new DeleteFile();
-							    } else if (name.equalsIgnoreCase(Names.ListFiles)) {
-									rpc = new ListFiles();
-							    } else if (name.equalsIgnoreCase(Names.SetAppIcon)) {
-									rpc = new SetAppIcon();
-							    } else if (name.equalsIgnoreCase(Names.SetDisplayLayout)) {
-									rpc = new SetDisplayLayout();
-								} else if (name.equalsIgnoreCase("ClearMediaClockTimer")) {
-									rpc = new Show();
-									((Show) rpc).setMainField1(null);
-									((Show) rpc).setMainField2(null);
-									((Show) rpc).setStatusBar(null);
-									((Show) rpc).setMediaClock("     ");
-									((Show) rpc).setMediaTrack(null);
-									((Show) rpc).setAlignment(null);
-								} else if (name.equalsIgnoreCase("PauseMediaClockTimer")) {
-									rpc = new SetMediaClockTimer();
-									StartTime startTime = new StartTime();
-									startTime.setHours(0);
-									startTime.setMinutes(0);
-									startTime.setSeconds(0);
-									((SetMediaClockTimer) rpc).setStartTime(startTime);
-									((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.PAUSE);
-								} else if (name.equalsIgnoreCase("ResumeMediaClockTimer")) {
-									rpc = new SetMediaClockTimer();
-									StartTime startTime = new StartTime();
-									startTime.setHours(0);
-									startTime.setMinutes(0);
-									startTime.setSeconds(0);
-									((SetMediaClockTimer) rpc).setStartTime(startTime);
-									((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
-                                } else if (name.equalsIgnoreCase(GenericRequest.NAME)) {
-                                    rpc = new GenericRequest();
-								} else {
-									rpc = RPCRequestFactory.buildSetGlobalProperties();
-								}
+                    // file writer for test errors
+                    String outErrorFile = getTestErrorsFilename(filename);
+                    File outError = new File(outErrorFile);
+                    FileWriter errorWriter = new FileWriter(outError);
+                    errorWriter.flush();
 
-								try {
-									rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
-								} catch (NumberFormatException e) {
-									Log.e(TAG, "Unable to parse correlation ID");
-								}
-								
-								long pause = 0;
-								String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
-								if (pauseString != null) {
-									try {
-										pause = Long.parseLong(pauseString);
-									} catch (NumberFormatException e) {
-										Log.e(TAG, "Couldn't parse pause number: " + pauseString);
-									}
-								}
-								
-								boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
-										!= null);
-								
-								String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
-								
-								//TODO: Set rpc parameters
-								Hashtable hash = setParams(name, parser);
-								logParserDebugInfo("" + hash);
-								//TODO: Iterate through hash table and add it to parameters
-								for (Object key : hash.keySet()) {
-                                    final Object value = hash.get(key);
-                                    if (((String) key).equals(BULK_DATA_ATTR)) {
-                                        if (value instanceof byte[]) {
-                                            rpc.setBulkData((byte[]) value);
-                                        } else {
-                                            rpc.setBulkData(new byte[]{ });
+                    parser.setInput(isr);
+                    int eventType = parser.getEventType();
+                    String name;
+                    boolean isParsingDone = false;
+                    while (eventType != XmlPullParser.END_DOCUMENT && !isParsingDone) {
+                        name = parser.getName();
+
+                        switch (eventType) {
+                            case XmlPullParser.START_DOCUMENT:
+                                logParserDebugInfo("START_DOCUMENT, name: " + name);
+                                break;
+                            case XmlPullParser.END_DOCUMENT:
+                                logParserDebugInfo("END_DOCUMENT, name: " + name);
+                                break;
+                            case XmlPullParser.START_TAG:
+                                name = parser.getName();
+                                if (name.equalsIgnoreCase("test")) {
+                                    mLogAdapter.logMessage("test " + parser.getAttributeValue(0), true);
+
+                                    long pause = 0;
+                                    String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+                                    if (pauseString != null) {
+                                        try {
+                                            pause = Long.parseLong(pauseString);
+                                        } catch (NumberFormatException e) {
+                                            Log.e(TAG, "Couldn't parse pause number: " + pauseString);
                                         }
-									} else {
-										rpc.setParameters((String) key, value);
-									}
-								}
-								
-							    Iterator it = hash.entrySet().iterator();
-							    while (it.hasNext()) {
-							    		Hashtable.Entry pairs = (Hashtable.Entry)it.next();
-							        logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
-							    }
-								
-							    if (currentTest != null) {
-							    		RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
-							    				generateInvalidJSON, customJSON);
-							    		currentTest.addRequest(wrapper);
-							    }
-							} else if (name.equalsIgnoreCase("result")) {
-								expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
-							} else if (name.equalsIgnoreCase("userPrompt") && integration) {
-								userPrompt = parser.getAttributeValue(0);
-							}
-							break;
-						case XmlPullParser.END_TAG:
-							name = parser.getName();
-							if (name.equalsIgnoreCase("test")) {
-								try {
-									final String FIELD_SEPARATOR = ", ";
-									final String EOL = "\n";
+                                    }
+                                    currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
+                                            pause, null);
+                                    expecting.clear();
+                                    sResponses.clear();
+                                    numIterations = 1;
+                                    try {
+                                        if (parser.getAttributeName(1) != null) {
+                                            if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
+                                                try {
+                                                    numIterations = Integer.parseInt(parser.getAttributeValue(1));
+                                                } catch (Exception e) {
+                                                    Log.w(TAG, "Unable to parse number of iterations");
+                                                }
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        Log.w(TAG, "Unable to parse number of iterations");
+                                    }
+                                } else if (name.equalsIgnoreCase("type")) {
+                                    if (parser.getAttributeValue(0).equalsIgnoreCase("integration"))
+                                        integration = true;
+                                    else if (parser.getAttributeValue(0).equalsIgnoreCase("unit"))
+                                        integration = false;
+                                } else if (acceptedRPC.isAcceptedRPC(name)) {
+                                    //Create correct object
+                                    if (name.equalsIgnoreCase(Names.RegisterAppInterface)) {
+                                        rpc = new RegisterAppInterface();
+                                    } else if (name.equalsIgnoreCase(Names.UnregisterAppInterface)) {
+                                        rpc = new UnregisterAppInterface();
+                                    } else if (name.equalsIgnoreCase(Names.SetGlobalProperties)) {
+                                        rpc = RPCRequestFactory.buildSetGlobalProperties();
+                                    } else if (name.equalsIgnoreCase(Names.ResetGlobalProperties)) {
+                                        rpc = new ResetGlobalProperties();
+                                    } else if (name.equalsIgnoreCase(Names.AddCommand)) {
+                                        rpc = RPCRequestFactory.buildAddCommand();
+                                    } else if (name.equalsIgnoreCase(Names.DeleteCommand)) {
+                                        rpc = new DeleteCommand();
+                                    } else if (name.equalsIgnoreCase(Names.AddSubMenu)) {
+                                        rpc = RPCRequestFactory.buildAddSubMenu();
+                                    } else if (name.equalsIgnoreCase(Names.DeleteSubMenu)) {
+                                        rpc = new DeleteSubMenu();
+                                    } else if (name.equalsIgnoreCase(Names.CreateInteractionChoiceSet)) {
+                                        rpc = RPCRequestFactory.buildCreateInteractionChoiceSet();
+                                    } else if (name.equalsIgnoreCase(Names.PerformInteraction)) {
+                                        rpc = new PerformInteraction();
+                                    } else if (name.equalsIgnoreCase(Names.DeleteInteractionChoiceSet)) {
+                                        rpc = new DeleteInteractionChoiceSet();
+                                    } else if (name.equalsIgnoreCase(Names.Alert)) {
+                                        rpc = new Alert();
+                                    } else if (name.equalsIgnoreCase(Names.Show)) {
+                                        rpc = new Show();
+                                    } else if (name.equalsIgnoreCase(Names.Speak)) {
+                                        rpc = new Speak();
+                                    } else if (name.equalsIgnoreCase(Names.SetMediaClockTimer)) {
+                                        rpc = new SetMediaClockTimer();
+                                    } else if (name.equalsIgnoreCase(Names.EncodedSyncPData)) {
+                                        rpc = new EncodedSyncPData();
+                                    } else if (name.equalsIgnoreCase(Names.SyncPData)) {
+                                        rpc = new SyncPData();
+                                    } else if (name.equalsIgnoreCase(Names.PerformAudioPassThru)) {
+                                        rpc = new PerformAudioPassThru();
+                                    } else if (name.equalsIgnoreCase(Names.EndAudioPassThru)) {
+                                        rpc = new EndAudioPassThru();
+                                    } else if (name.equalsIgnoreCase(Names.SubscribeButton)) {
+                                        rpc = RPCRequestFactory.buildSubscribeButton();
+                                    } else if (name.equalsIgnoreCase(Names.UnsubscribeButton)) {
+                                        rpc = new UnsubscribeButton();
+                                    } else if (name.equalsIgnoreCase(Names.SubscribeVehicleData)) {
+                                        rpc = RPCRequestFactory.buildSubscribeVehicleData();
+                                    } else if (name.equalsIgnoreCase(Names.UnsubscribeVehicleData)) {
+                                        rpc = new UnsubscribeVehicleData();
+                                    } else if (name.equalsIgnoreCase(Names.GetVehicleData)) {
+                                        rpc = new GetVehicleData();
+                                    } else if (name.equalsIgnoreCase(Names.ReadDID)) {
+                                        rpc = new ReadDID();
+                                    } else if (name.equalsIgnoreCase(Names.GetDTCs)) {
+                                        rpc = new GetDTCs();
+                                    } else if (name.equalsIgnoreCase(Names.ScrollableMessage)) {
+                                        rpc = new ScrollableMessage();
+                                    } else if (name.equalsIgnoreCase(Names.Slider)) {
+                                        rpc = new Slider();
+                                    } else if (name.equalsIgnoreCase(Names.ShowConstantTBT)) {
+                                        rpc = new ShowConstantTBT();
+                                    } else if (name.equalsIgnoreCase(Names.AlertManeuver)) {
+                                        rpc = new AlertManeuver();
+                                    } else if (name.equalsIgnoreCase(Names.UpdateTurnList)) {
+                                        rpc = new UpdateTurnList();
+                                    } else if (name.equalsIgnoreCase(Names.ChangeRegistration)) {
+                                        rpc = new ChangeRegistration();
+                                    } else if (name.equalsIgnoreCase(Names.PutFile)) {
+                                        rpc = RPCRequestFactory.buildPutFile();
+                                    } else if (name.equalsIgnoreCase(Names.DeleteFile)) {
+                                        rpc = new DeleteFile();
+                                    } else if (name.equalsIgnoreCase(Names.ListFiles)) {
+                                        rpc = new ListFiles();
+                                    } else if (name.equalsIgnoreCase(Names.SetAppIcon)) {
+                                        rpc = new SetAppIcon();
+                                    } else if (name.equalsIgnoreCase(Names.SetDisplayLayout)) {
+                                        rpc = new SetDisplayLayout();
+                                    } else if (name.equalsIgnoreCase("ClearMediaClockTimer")) {
+                                        rpc = new Show();
+                                        ((Show) rpc).setMainField1(null);
+                                        ((Show) rpc).setMainField2(null);
+                                        ((Show) rpc).setStatusBar(null);
+                                        ((Show) rpc).setMediaClock("     ");
+                                        ((Show) rpc).setMediaTrack(null);
+                                        ((Show) rpc).setAlignment(null);
+                                    } else if (name.equalsIgnoreCase("PauseMediaClockTimer")) {
+                                        rpc = new SetMediaClockTimer();
+                                        StartTime startTime = new StartTime();
+                                        startTime.setHours(0);
+                                        startTime.setMinutes(0);
+                                        startTime.setSeconds(0);
+                                        ((SetMediaClockTimer) rpc).setStartTime(startTime);
+                                        ((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.PAUSE);
+                                    } else if (name.equalsIgnoreCase("ResumeMediaClockTimer")) {
+                                        rpc = new SetMediaClockTimer();
+                                        StartTime startTime = new StartTime();
+                                        startTime.setHours(0);
+                                        startTime.setMinutes(0);
+                                        startTime.setSeconds(0);
+                                        ((SetMediaClockTimer) rpc).setStartTime(startTime);
+                                        ((SetMediaClockTimer) rpc).setUpdateMode(UpdateMode.RESUME);
+                                    } else if (name.equalsIgnoreCase(GenericRequest.NAME)) {
+                                        rpc = new GenericRequest();
+                                    } else {
+                                        rpc = RPCRequestFactory.buildSetGlobalProperties();
+                                    }
 
-									boolean localPass = true;
-									int i = numIterations;
-									int numPass = 0;
-									while (i > 0) {
-										xmlTest();
-										if (pass) {
-											numPass++;
-										} else {
-											localPass = false;
-											StringBuilder errorBuilder = new StringBuilder(currentTest.getName());
-											errorBuilder.append(" Expected");
-											for (Pair p : expecting) {
-												errorBuilder.append(FIELD_SEPARATOR);
-												errorBuilder.append(p.first);
-												errorBuilder.append(" ");
-												errorBuilder.append(p.second);
-											}
-											errorBuilder.append(EOL);
+                                    try {
+                                        rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
+                                    } catch (NumberFormatException e) {
+                                        Log.e(TAG, "Unable to parse correlation ID");
+                                    }
 
-											errorBuilder.append(currentTest.getName());
-											errorBuilder.append(" Actual");
-											for (Pair p : responses) {
-												errorBuilder.append(FIELD_SEPARATOR);
-												errorBuilder.append(p.first);
-												errorBuilder.append(" ");
-												errorBuilder.append(p.second);
-											}
-											errorBuilder.append(EOL);
+                                    long pause = 0;
+                                    String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+                                    if (pauseString != null) {
+                                        try {
+                                            pause = Long.parseLong(pauseString);
+                                        } catch (NumberFormatException e) {
+                                            Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+                                        }
+                                    }
 
-											String errorLine = errorBuilder.toString();
-											errorWriter.write(errorLine);
-										}
-										i--;
-									}
+                                    boolean generateInvalidJSON = (parser.getAttributeValue(null, INVALID_JSON_ATTR)
+                                            != null);
 
-									if (currentTest != null) {
-										StringBuilder result = new StringBuilder(currentTest.getName());
-										String[] fields = { (localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations) };
-										for (String field : fields) {
-											result.append(FIELD_SEPARATOR);
-											result.append(field);
-										}
-										String resultLine = result.toString();
+                                    String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
 
-										writer.write(resultLine + EOL);
-										Log.i(TAG, resultLine);
-										mLogAdapter.logMessage(resultLine, true);
-									}
-								} catch (Exception e) {
-									if (currentTest != null) {
-										mLogAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
-									}
-								}
-							}
-							break;
-						case XmlPullParser.TEXT:
-							//logParserDebugInfo("TEXT, name: " + name);
-							break;
-						case XmlPullParser.CDSECT:
-							logParserDebugInfo("CDSECT, name: " + name);
-							break;
-						case XmlPullParser.ENTITY_REF:
-							logParserDebugInfo("ENTITY_REF, name: " + name);
-							break;
-						case XmlPullParser.IGNORABLE_WHITESPACE:
-							logParserDebugInfo("IGNORABLE_WHITESPACE, name: " + name);
-							break;
-						case XmlPullParser.PROCESSING_INSTRUCTION:
-							logParserDebugInfo("PROCESSING_INSTRUCTION, name: " + name);
-							break;
-						case XmlPullParser.COMMENT:
-							logParserDebugInfo("COMMENT, name: " + name);
-							break;
-						case XmlPullParser.DOCDECL:
-							logParserDebugInfo("DOCDECL, name: " + name);
-							break;
-						default:
-							break;
-						}
-						eventType = parser.next();
-					}
-					writer.close();
-					errorWriter.close();
-					Log.d(TAG, "Tests finished");
-					
-					currentTest = null;
-				} finally {
-					releaseWakeLock();
-				}
-			}
+                                    //TODO: Set rpc parameters
+                                    Hashtable hash = setParams(name, parser);
+                                    logParserDebugInfo("" + hash);
+                                    //TODO: Iterate through hash table and add it to parameters
+                                    for (Object key : hash.keySet()) {
+                                        final Object value = hash.get(key);
+                                        if (key.equals(BULK_DATA_ATTR)) {
+                                            if (value instanceof byte[]) {
+                                                rpc.setBulkData((byte[]) value);
+                                            } else {
+                                                rpc.setBulkData(new byte[]{});
+                                            }
+                                        } else {
+                                            Log.d(TAG, "RPC name:" + rpc.getFunctionName() + ", key:" + key + ", val:" + value);
+                                            rpc.setParameters((String) key, value);
+                                        }
+                                    }
+
+                                    for (Object o : hash.entrySet()) {
+                                        Hashtable.Entry pairs = (Hashtable.Entry) o;
+                                        logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
+                                    }
+
+                                    if (currentTest != null) {
+                                        RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
+                                                generateInvalidJSON, customJSON);
+                                        currentTest.addRequest(wrapper);
+                                    }
+                                } else if (name.equalsIgnoreCase("result")) {
+                                    expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
+                                } else if (name.equalsIgnoreCase("userPrompt") && integration) {
+                                    userPrompt = parser.getAttributeValue(0);
+                                }
+                                break;
+                            case XmlPullParser.END_TAG:
+                                name = parser.getName();
+                                if (name.equalsIgnoreCase("test")) {
+                                    try {
+                                        final String FIELD_SEPARATOR = ", ";
+                                        final String EOL = "\n";
+
+                                        boolean localPass = true;
+                                        int i = numIterations;
+                                        int numPass = 0;
+                                        boolean doInterrupt = false;
+                                        while (i > 0) {
+                                            TestResult testResult = xmlTest();
+                                            if (testResult.isTestComplete()) {
+                                                numPass++;
+                                            } else {
+                                                localPass = false;
+                                                StringBuilder errorBuilder = new StringBuilder(currentTest.getName());
+                                                errorBuilder.append(" Expected");
+                                                for (Pair p : expecting) {
+                                                    errorBuilder.append(FIELD_SEPARATOR);
+                                                    errorBuilder.append(p.first);
+                                                    errorBuilder.append(" ");
+                                                    errorBuilder.append(p.second);
+                                                }
+                                                errorBuilder.append(EOL);
+
+                                                errorBuilder.append(currentTest.getName());
+                                                errorBuilder.append(" Actual");
+                                                for (Pair p : sResponses) {
+                                                    errorBuilder.append(FIELD_SEPARATOR);
+                                                    errorBuilder.append(p.first);
+                                                    errorBuilder.append(" ");
+                                                    errorBuilder.append(p.second);
+                                                }
+                                                errorBuilder.append(EOL);
+
+                                                String errorLine = errorBuilder.toString();
+                                                errorWriter.write(errorLine);
+                                            }
+                                            i--;
+
+                                            if (testResult.isTestFlowInterrupted()) {
+                                                doInterrupt = true;
+                                                break;
+                                            }
+
+                                            doInterrupt = false;
+                                        }
+
+                                        if (doInterrupt) {
+                                            isParsingDone = true;
+                                        }
+
+                                        if (currentTest != null) {
+                                            StringBuilder result = new StringBuilder(currentTest.getName());
+                                            String[] fields = {(localPass ? "Pass" : "Fail"), String.valueOf(numPass), String.valueOf(numIterations)};
+                                            for (String field : fields) {
+                                                result.append(FIELD_SEPARATOR);
+                                                result.append(field);
+                                            }
+                                            String resultLine = result.toString();
+
+                                            writer.write(resultLine + EOL);
+                                            Log.i(TAG, resultLine);
+                                            mLogAdapter.logMessage(resultLine, true);
+                                        }
+                                    } catch (Exception e) {
+                                        if (currentTest != null) {
+                                            mLogAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
+                                        }
+                                    }
+                                }
+                                break;
+                            case XmlPullParser.TEXT:
+                                //logParserDebugInfo("TEXT, name: " + name);
+                                break;
+                            case XmlPullParser.CDSECT:
+                                logParserDebugInfo("CDSECT, name: " + name);
+                                break;
+                            case XmlPullParser.ENTITY_REF:
+                                logParserDebugInfo("ENTITY_REF, name: " + name);
+                                break;
+                            case XmlPullParser.IGNORABLE_WHITESPACE:
+                                logParserDebugInfo("IGNORABLE_WHITESPACE, name: " + name);
+                                break;
+                            case XmlPullParser.PROCESSING_INSTRUCTION:
+                                logParserDebugInfo("PROCESSING_INSTRUCTION, name: " + name);
+                                break;
+                            case XmlPullParser.COMMENT:
+                                logParserDebugInfo("COMMENT, name: " + name);
+                                break;
+                            case XmlPullParser.DOCDECL:
+                                logParserDebugInfo("DOCDECL, name: " + name);
+                                break;
+                            default:
+                                break;
+                        }
+                        eventType = parser.next();
+                    }
+                    writer.close();
+                    errorWriter.close();
+                    Log.d(TAG, "Tests finished");
+
+                    currentTest = null;
+                } finally {
+                    releaseWakeLock();
+                }
+            }
 
 			private String getTestResultsFilename(String filename) {
 				return filename.substring(0,
@@ -935,67 +841,87 @@ public class ModuleTest {
 		return hash;
 	}
 	
-	private Boolean xmlTest() {
-		pass = false;
-		
+	private TestResult xmlTest() {
+
+        final TestResult testResult = new TestResult();
+
 		Thread newThread = new Thread(new Runnable() {
+
 			public void run () {
-                if (mProxyService != null && currentTest != null && currentTest.getRequests() != null) {
-                    threadContext = this;
 
-                    int numResponses = expecting.size();
-                    if (numResponses > 0) {
-                        mProxyService.waiting(true);
+                sThreadContext = this;
+
+                if (mProxyService == null && currentTest == null) {
+                    Log.e(TAG, "Current test is null");
+                    interruptThread();
+                    return;
+                }
+
+                if (currentTest.getRequests() == null) {
+                    Log.e(TAG, "Current test request is null");
+                    interruptThread();
+                    return;
+                }
+
+                if (!mProxyService.isSyncProxyConnected()) {
+                    Log.e(TAG, "Current test - connection - is null");
+
+                    showInterruptDialog("Warning",
+                            "Connection is lost, would You like to continue run tests?", true);
+
+                    if (testResult.isTestFlowInterrupted()) {
+                        interruptThread();
+                        return;
+                    }
+                }
+
+                // Temporary commit this check point
+
+                /*if (!currentTest.getName().toLowerCase()
+                        .startsWith(Names.UnregisterAppInterface.toLowerCase()) &&
+                        mProxyService.getSessionId() == 0) {
+                    Log.e(TAG, "Current test session id 0");
+
+                    showInterruptDialog("Warning",
+                            "Current Session Id is 0, would You like to continue run tests?", true);
+
+                    if (testResult.isTestFlowInterrupted()) {
+                        interruptThread();
+                        return;
+                    }
+                }*/
+
+                int numResponses = expecting.size();
+                if (numResponses > 0) {
+                    mProxyService.waiting(true);
+                }
+
+                IJsonRPCMarshaller defaultMarshaller = mProxyService.syncProxyGetJsonRPCMarshaller();
+                IJsonRPCMarshaller invalidMarshaller =  new InvalidJsonRPCMarshaller();
+                CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
+
+                for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
+                    RPCRequest rpc = wrapper.getRequest();
+                    boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
+                    String customJSON = wrapper.getCustomJSON();
+                    if (customJSON != null) {
+                        customMarshaller.setStubbedValue(customJSON);
                     }
 
-                    IJsonRPCMarshaller defaultMarshaller =
-                            mProxyService.syncProxyGetJsonRPCMarshaller();
-                    IJsonRPCMarshaller invalidMarshaller =  new InvalidJsonRPCMarshaller();
-                    CustomJsonRPCMarshaller customMarshaller = new CustomJsonRPCMarshaller(null);
+                    IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller :
+                                    (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
+                    mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
+                    mProxyService.syncProxySendRPCRequest(rpc);
 
-                    for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
-                        RPCRequest rpc = wrapper.getRequest();
-                        boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
-                        String customJSON = wrapper.getCustomJSON();
-                        if (customJSON != null) {
-                            customMarshaller.setStubbedValue(customJSON);
-                        }
+                    // restore the default marshaller
+                    mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
 
-                        IJsonRPCMarshaller currentMarshaller =
-                                (customJSON != null) ? customMarshaller :
-                                        (generateInvalidJSON ?
-                                                invalidMarshaller :
-                                                defaultMarshaller);
-                        mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
-                        mProxyService.syncProxySendRPCRequest(rpc);
-
-                        // restore the default marshaller
-                        mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
-
-                        long pause = wrapper.getPause();
-                        if (pause > 0) {
-                            Log.v(TAG, "Pause for " + pause + " ms. after " +
-                                    currentTest.getName() + "." + rpc.getFunctionName());
-                            try {
-                                // delay between requests of one test
-                                synchronized (this) {
-                                    this.wait(pause);
-                                }
-                            } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException", true);
-                            }
-                        } else {
-                            Log.i(TAG,
-                                    "No pause after " + currentTest.getName() +
-                                            "." + rpc.getFunctionName());
-                        }
-                    }
-
-                    long pause = currentTest.getPause();
+                    long pause = wrapper.getPause();
                     if (pause > 0) {
-                        Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
+                        Log.v(TAG, "Pause for " + pause + " ms. after " +
+                                currentTest.getName() + "." + rpc.getFunctionName());
                         try {
-                            // delay after the test
+                            // delay between requests of one test
                             synchronized (this) {
                                 this.wait(pause);
                             }
@@ -1003,99 +929,164 @@ public class ModuleTest {
                             mLogAdapter.logMessage("InterruptedException", true);
                         }
                     } else {
-                        Log.i(TAG, "No pause after " + currentTest.getName());
+                        Log.i(TAG, "No pause after " + currentTest.getName() +
+                                        "." + rpc.getFunctionName());
                     }
+                }
 
-                    // wait for incoming messages
+                long pause = currentTest.getPause();
+                if (pause > 0) {
+                    Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
                     try {
+                        // delay after the test
                         synchronized (this) {
-                            this.wait(100);
+                            this.wait(pause);
                         }
                     } catch (InterruptedException e) {
                         mLogAdapter.logMessage("InterruptedException", true);
                     }
-
-                    mProxyService.waiting(false);
-
-                    if (expecting.equals(responses)) {
-                        pass = true;
-                        if (integration) {
-                            mActivityInstance.runOnUiThread(new Runnable() {
-                                public void run() {
-                                    AlertDialog.Builder alert =
-                                            new AlertDialog.Builder(mActivityInstance);
-                                    alert.setMessage(userPrompt);
-                                    alert.setPositiveButton("Yes",
-                                            new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int which) {
-                                                    pass = true;
-                                                    synchronized (threadContext) {
-                                                        threadContext.notify();
-                                                    }
-                                                }
-                                            });
-                                    alert.setNegativeButton("No",
-                                            new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int which) {
-                                                    pass = false;
-                                                    synchronized (threadContext) {
-                                                        threadContext.notify();
-                                                    }
-                                                }
-                                            });
-                                    alert.show();
-                                }
-                            });
-
-                            try {
-                                synchronized (this) {
-                                    this.wait();
-                                }
-                            } catch (InterruptedException e) {
-                                mLogAdapter.logMessage("InterruptedException", true);
-                            }
-                        }
-                    }
-
-                    // restore the default marshaller
-                    mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
                 } else {
-                    Log.e(TAG, "Current test " + currentTest +
-                            " or its requests " + currentTest.getRequests() + " is null!");
+                    Log.i(TAG, "No pause after " + currentTest.getName());
                 }
-				
-				synchronized (_instance) {
-                    _instance.notify();
+
+                // wait for incoming messages
+                try {
+                    synchronized (this) {
+                        this.wait(100);
+                    }
+                } catch (InterruptedException e) {
+                    mLogAdapter.logMessage("InterruptedException", true);
                 }
-				
-				Thread.currentThread().interrupt();
+
+                mProxyService.waiting(false);
+
+                if (!expecting.equals(sResponses)) {
+                    restoreMarshaller(defaultMarshaller);
+                    return;
+                }
+
+                testResult.setTestComplete(true);
+
+                if (!integration) {
+                    restoreMarshaller(defaultMarshaller);
+                    return;
+                }
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(mActivityInstance);
+                        alert.setMessage(userPrompt);
+                        alert.setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(true);
+                                        synchronized (sThreadContext) {
+                                            sThreadContext.notify();
+                                        }
+                                    }
+                                }
+                        );
+                        alert.setNegativeButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(false);
+                                        synchronized (sThreadContext) {
+                                            sThreadContext.notify();
+                                        }
+                                    }
+                                }
+                        );
+                        alert.show();
+                    }
+                });
+
+                try {
+                    synchronized (this) {
+                        this.wait();
+                    }
+                } catch (InterruptedException e) {
+                    mLogAdapter.logMessage("InterruptedException", true);
+                }
+
+                restoreMarshaller(defaultMarshaller);
 			}
+
+            private void showInterruptDialog(final String title, final String message,
+                                             final boolean doInterruptFlow) {
+                final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlertDialog.Builder alert = new AlertDialog.Builder(mActivityInstance);
+                        alert.setTitle(title);
+                        alert.setMessage(message);
+                        alert.setPositiveButton("Yes",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(true);
+                                        countDownLatch.countDown();
+                                    }
+                                }
+                        );
+                        alert.setNegativeButton("No",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        testResult.setTestComplete(false);
+                                        if (doInterruptFlow) {
+                                            testResult.setTestFlowInterrupted(true);
+                                        }
+                                        countDownLatch.countDown();
+                                    }
+                                }
+                        );
+                        alert.show();
+                    }
+                });
+
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            private void restoreMarshaller(IJsonRPCMarshaller defaultMarshaller) {
+                mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
+                interruptThread();
+            }
+
+            private void interruptThread() {
+                synchronized (sInstance) {
+                    sInstance.notify();
+                }
+                Thread.currentThread().interrupt();
+            }
 		});
 		newThread.start();
 		
 		try {
-			synchronized (this) { this.wait();}
+			synchronized (this) {
+                this.wait();
+            }
 		} catch (InterruptedException e) {
 			mLogAdapter.logMessage("InterruptedException", true);
 		}
 		
 		newThread.interrupt();
-		newThread = null;
-		return pass;
+		return testResult;
 	}
 	
 	public static ModuleTest getModuleTestInstance() {
-		return _instance;
+		return sInstance;
 	}
 	
 	public Runnable getThreadContext() {
-		return threadContext;
+		return sThreadContext;
 	}
 	
 	/**

@@ -1,5 +1,13 @@
+[CW12]
+* SyncProxyTester: Check open session (by Session Id) when executing automatic tests DISABLED
++ SyncProxyTester: Check connection and open session when executing automatic tests
++ SyncProxyTester: Set AppId parameter at Application SetUp dialog
+
 [CW11]
-* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
+* SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
+* SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
+* SyncProxyTester: Fix bug with "Two requests RegisterAppInterface with and without hashID after UnregisterAppInterface"
+* SyncProxyAndroid SDK: Eliminate EndService request with session ID = 0
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
 + SyncProxyTester: Add AlertManeuver UI.
 

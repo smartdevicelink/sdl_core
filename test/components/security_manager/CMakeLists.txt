@@ -1,7 +1,7 @@
 include_directories (
   ./include/
-  ../../../src/thirdPartyLibs/gmock-1.6.0/include
-  ../../../src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ../../../src/thirdPartyLibs/gmock-1.7.0/include
+  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ../../../src/components/security_manager/include
   ../../../src/components/transport_manager/include
   ../../../src/components/protocol_handler/include

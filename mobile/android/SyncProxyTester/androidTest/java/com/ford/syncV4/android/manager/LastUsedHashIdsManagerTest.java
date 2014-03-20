@@ -31,8 +31,6 @@ public class LastUsedHashIdsManagerTest extends InstrumentationTestCase {
     }
 
     public void testFirstInLastOut() {
-        AppPreferencesManager.setAppContext(getInstrumentation().getTargetContext());
-
         String id_1 = "1234567890";
         String id_2 = "qwertyuiop";
         LastUsedHashIdsManager lastUsedHashIdsManager = new LastUsedHashIdsManager();
@@ -44,8 +42,6 @@ public class LastUsedHashIdsManagerTest extends InstrumentationTestCase {
     }
 
     public void testSaveAndInitDataFILO() {
-        AppPreferencesManager.setAppContext(getInstrumentation().getTargetContext());
-
         String id_1 = "1234567890";
         String id_2 = "qwertyuiop";
         LastUsedHashIdsManager lastUsedHashIdsManager = new LastUsedHashIdsManager();

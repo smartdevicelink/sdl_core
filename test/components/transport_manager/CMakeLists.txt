@@ -1,6 +1,6 @@
 include_directories (
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.6.0/gtest/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ${CMAKE_SOURCE_DIR}/src/components/transport_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/

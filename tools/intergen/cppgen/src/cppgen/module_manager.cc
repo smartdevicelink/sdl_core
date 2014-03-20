@@ -35,6 +35,8 @@
 #include <errno.h>
 #include <fstream>
 
+#include "cppgen/generator_preferences.h"
+
 #ifdef OS_POSIX
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -64,7 +66,8 @@ bool CreateDirectory(const std::string& name) {
 
 namespace codegen {
 
-ModuleManager::ModuleManager(const std::string& name)
+ModuleManager::ModuleManager(const std::string& name,
+                             const TypePreferences& prefs)
     : module_name_(name),
       enums_header_(module_name_ + "/enums.h", module_name_, true),
       enums_source_(module_name_ + "/enums.cc", module_name_, false),
@@ -85,17 +88,8 @@ ModuleManager::ModuleManager(const std::string& name)
   enums_header_.Include(CppFile::Header("string", false));
   enums_source_.Include(CppFile::Header(enums_header_.file_name(), true));
   structs_source_.Include(CppFile::Header(structs_header_.file_name(), true));
-  structs_source_.Include(
-      CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
-  structs_source_.Include(
-      CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
   functions_source_.Include(CppFile::Header(functions_header_.file_name(),
                                             true));
-  functions_source_.Include(
-      CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
-  functions_source_.Include(
-      CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
-
   interface_source_.Include((CppFile::Header(interface_header_.file_name(),
                                              true)));
   interface_source_.Include(CppFile::Header(functions_header_.file_name(),
@@ -105,6 +99,18 @@ ModuleManager::ModuleManager(const std::string& name)
       CppFile::Header(structs_header_.file_name(), true));
   additional_validation_source_.Include(
       CppFile::Header(functions_header_.file_name(), true));
+  if (prefs.generate_json) {
+    structs_source_.Include(
+        CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
+    functions_source_.Include(
+        CppFile::Header("rpc_base/rpc_base_json_inl.h", true));
+  }
+  if (prefs.generate_dbus) {
+    structs_source_.Include(
+        CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
+    functions_source_.Include(
+        CppFile::Header("rpc_base/rpc_base_dbus_inl.h", true));
+  }
 }
 
 ModuleManager::~ModuleManager() {

@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_
 
 #include <map>
+#include <memory>
 #include <set>
 #include "utils/logger.h"
 #include "utils/prioritized_queue.h"
@@ -279,6 +280,13 @@ class ProtocolHandlerImpl
       const transport_manager::DataSendError& error,
       const RawMessagePtr& message);
 
+    virtual void OnConnectionEstablished(
+        const transport_manager::DeviceInfo& device_info,
+        const transport_manager::ConnectionUID& connection_id);
+
+    virtual void OnConnectionClosed(
+        const transport_manager::ConnectionUID& connection_id);
+
     /**
      * @brief Notifies subscribers about message
      * recieved from mobile device.
@@ -457,6 +465,9 @@ class ProtocolHandlerImpl
      *\brief Counter of messages sent in each session.
      */
     std::map<uint8_t, uint32_t> message_counters_;
+
+    class IncomingDataHandler;
+    std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
     impl::FromMobileQueue raw_ford_messages_from_mobile_;

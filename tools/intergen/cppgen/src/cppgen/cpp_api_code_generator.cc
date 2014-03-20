@@ -77,7 +77,7 @@ std::set<std::string> codegen::CppApiCodeGenerator::Generate(
 
 bool CppApiCodeGenerator::GenerateInterface(const Interface* interface,
                                             const TypePreferences& preferences) {
-  ModuleManager mgr(LowercaseIntefaceName(*interface));
+  ModuleManager mgr(LowercaseIntefaceName(*interface), preferences);
   CppInterfaceCodeGenerator interface_generator(interface,
                                                 &preferences,
                                                 &mgr);

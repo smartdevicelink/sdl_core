@@ -69,68 +69,6 @@ TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerI
   return c;
 }
 
-class TransportManagerImpl::IncomingDataHandler {
- public:
-  IncomingDataHandler(TransportManagerImpl* tm_impl)
-      : connections_data_(), tm_impl_(tm_impl) {}
-
-  bool ProcessData(ConnectionUID connection_id, uint8_t* data,
-                   std::size_t size) {
-    LOG4CXX_TRACE(logger_, "Start of processing incoming data of size "
-                               << size << " for connection " << connection_id);
-    const uint32_t kBytesForSizeDetection = 8;
-    ConnectionsData::iterator it = connections_data_.find(connection_id);
-    if (connections_data_.end() == it) {
-      LOG4CXX_ERROR(logger_, "ProcessData requested for unknown connection");
-      return false;
-    }
-    std::vector<uint8_t>& connection_data = it->second;
-    connection_data.insert(connection_data.end(), data, data + size);
-
-    LOG4CXX_TRACE(logger_, "Total data size for connection "
-                               << connection_id << " is "
-                               << connection_data.size());
-    while (connection_data.size() >= kBytesForSizeDetection) {
-      const uint32_t packet_size =
-          tm_impl_->GetPacketSize(kBytesForSizeDetection, &connection_data[0]);
-      if (0 == packet_size) {
-        LOG4CXX_ERROR(logger_, "Failed to get packet size");
-        return false;
-      }
-      LOG4CXX_TRACE(logger_, "Packet size " << packet_size);
-      if (connection_data.size() >= packet_size) {
-        RawMessageSptr raw_message(new protocol_handler::RawMessage(
-            connection_id, 0,  // It's not up to TM to know protocol version
-            &connection_data[0], packet_size));
-        tm_impl_->RaiseEvent(&TransportManagerListener::OnTMMessageReceived,
-                             raw_message);
-        connection_data.erase(connection_data.begin(),
-                              connection_data.begin() + packet_size);
-        LOG4CXX_TRACE(logger_,
-                      "Packet created and passed, new data size for connection "
-                          << connection_id << " is " << connection_data.size());
-      } else {
-        LOG4CXX_TRACE(logger_, "Packet data is not available yet");
-        return true;
-      }
-    }
-    return true;
-  }
-
-  void AddConnection(ConnectionUID connection_id) {
-    connections_data_[connection_id];
-  }
-
-  void RemoveConnection(ConnectionUID connection_id) {
-    connections_data_.erase(connection_id);
-  }
-
- private:
-  typedef std::map<ConnectionUID, std::vector<uint8_t> > ConnectionsData;
-  ConnectionsData connections_data_;
-  TransportManagerImpl* tm_impl_;
-};
-
 TransportManagerImpl::TransportManagerImpl()
     : message_queue_mutex_(),
       all_thread_active_(false),
@@ -138,8 +76,7 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
-      connection_id_counter_(0),
-      incoming_data_handler_(new IncomingDataHandler(this)) {
+      connection_id_counter_(0) {
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
   pthread_rwlock_init(&message_queue_rwlock_, NULL);
@@ -588,7 +525,6 @@ void* TransportManagerImpl::EventListenerStartThread(void* data) {
 
 void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
-  incoming_data_handler_->AddConnection(c.id);
 }
 
 void TransportManagerImpl::RemoveConnection(int id) {
@@ -599,7 +535,6 @@ void TransportManagerImpl::RemoveConnection(int id) {
       break;
     }
   }
-  incoming_data_handler_->RemoveConnection(id);
 }
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
@@ -620,42 +555,6 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     }
   }
   return NULL;
-}
-
-// TODO this function should be moved outside of TM to protocol handler or
-// somewhere else
-unsigned int TransportManagerImpl::GetPacketSize(unsigned int data_size,
-                                                 unsigned char* first_bytes) {
-  DCHECK(first_bytes);
-  unsigned char offset = sizeof(uint32_t);
-  if (data_size < 2 * offset) {
-    LOG4CXX_ERROR(logger_, "Received bytes are not enough to parse frame size.");
-    return 0;
-  }
-
-  unsigned char* received_bytes = first_bytes;
-  DCHECK(received_bytes);
-
-  unsigned char version = received_bytes[0] >> 4u;
-  uint32_t frame_body_size = received_bytes[offset++] << 24u;
-  frame_body_size |= received_bytes[offset++] << 16u;
-  frame_body_size |= received_bytes[offset++] << 8u;
-  frame_body_size |= received_bytes[offset++];
-
-  unsigned int required_size = frame_body_size;
-  switch (version) {
-    case protocol_handler::PROTOCOL_VERSION_1:
-      required_size += protocol_handler::PROTOCOL_HEADER_V1_SIZE;
-      break;
-    case protocol_handler::PROTOCOL_VERSION_2:
-      required_size += protocol_handler::PROTOCOL_HEADER_V2_SIZE;
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown protocol version.");
-      return 0;
-  }
-
-  return required_size;
 }
 
 void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
@@ -811,14 +710,8 @@ void TransportManagerImpl::EventListenerThread(void) {
                                                    << ") not found");
             break;
           }
-          const bool ok = incoming_data_handler_->ProcessData(
-              connection->id, data->data(), data->data_size());
-          if (!ok) {
-            LOG4CXX_ERROR(
-                logger_,
-                "Incoming data processing failed. Terminating connection.");
-            DisconnectForce(connection->id);
-          }
+          data->set_connection_key(connection->id);
+          RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {

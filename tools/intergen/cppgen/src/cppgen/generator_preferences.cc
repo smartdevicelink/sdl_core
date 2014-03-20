@@ -43,15 +43,22 @@ using typesafe_format::format;
 namespace codegen {
 
 TypePreferences::TypePreferences(int minimum_interger_size,
-                                 bool avoid_unsigned)
+                                 bool avoid_unsigned,
+                                 bool generate_json,
+                                 bool generate_dbus)
     : minimum_interger_size(minimum_interger_size),
-      avoid_unsigned(avoid_unsigned) {
+      avoid_unsigned(avoid_unsigned),
+      generate_json(generate_json),
+      generate_dbus(generate_dbus) {
 }
 
 Preferences::Preferences(int minimum_interger_size,
                          bool avoid_unsigned,
+                         bool generate_json,
+                         bool generate_dbus,
                          const std::set<std::string>& requested_interfaces)
-    : type_preferences(minimum_interger_size, avoid_unsigned),
+    : type_preferences(minimum_interger_size, avoid_unsigned,
+                       generate_json, generate_dbus),
       requested_interfaces(requested_interfaces) {
 }
 

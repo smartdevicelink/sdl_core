@@ -1740,7 +1740,7 @@
     <param name="resolutionHeight" type="Integer" minvalue="1" maxvalue="10000">
       <description>The image resolution height.</description>
     </param>
-  </struct>  
+  </struct>
 
   <struct name="ImageField">
      <param name="name" type="ImageFieldName">
@@ -1753,7 +1753,7 @@
        <description>The image resolution of this field.</description>
      </param>
    </struct>
-  
+
   <struct name="TouchCoord">
     <param name="x" type="Integer" mandatory="true" minvalue="0" maxvalue="10000">
       <description>The x coordinate of the touch.</description>

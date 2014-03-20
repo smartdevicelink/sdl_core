@@ -115,8 +115,6 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
-import com.ford.syncV4.proxy.rpc.enums.AudioType;
-import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
@@ -124,7 +122,6 @@ import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
@@ -132,6 +129,7 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
@@ -217,7 +215,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_WAKELOCK = 17;
     private final int MNU_SET_UP_POLICY_FILES = 18;
     private final int MNU_HASH_ID_SETUP = 19;
-    private ModuleTest _testerMain;
+    private ModuleTest mTesterMain;
     private ScrollView _scroller = null;
     private ListView mListview = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
@@ -330,6 +328,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String PERFORM_AUDIO_PASS_THRU_DIALOG_TAG = "PerformAudioPassThruDialogTag";
     private final static String SYSTEM_REQST_DIALOG_TAG = "SystemRequestDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
     private final static String SET_GLOBAL_PROPERTIES_DIALOG_TAG = "SetGlobalPropertiesDialogTag";
@@ -364,6 +363,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void runInUIThread(Runnable runnable) {
         mUIHandler.post(runnable);
     }
+    
+    private ArrayAdapter<String> adapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -371,8 +372,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         Log.d(LOG_TAG, SyncProxyTester.class.getSimpleName() + " On Create");
 
         _activity = this;
-
-        AppPreferencesManager.setAppContext(this);
 
         setContentView(R.layout.main);
 
@@ -509,7 +508,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             });
 
-            if (AppPreferencesManager.getTransportType() == Const.Transport.KEY_BLUETOOTH) {
+            if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                 intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
                 if (mBluetoothDeviceManager == null) {
                     mBluetoothDeviceManager = new BluetoothDeviceManager();
@@ -526,7 +525,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onBluetoothDeviceRestoreConnection() {
         Log.i(LOG_TAG, "Bluetooth connection restored");
-        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+        if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
         // TODO : Consider this case.
@@ -538,7 +537,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onBluetoothDeviceTurningOff() {
         Log.i(LOG_TAG, "Bluetooth turning off");
-        if (AppPreferencesManager.getTransportType() != Const.Transport.KEY_BLUETOOTH) {
+        if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
 
@@ -566,7 +565,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onProxyClosed() {
         resetAdapters();
-        mLogAdapter.logMessage("Disconnected", true);
     }
 
     @Override
@@ -877,7 +875,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             menu.add(0, MNU_SET_UP_POLICY_FILES, 0, "Set Up Policy files");
             MenuItem menuitem = menu.add(0, MNU_WAKELOCK, 0, "Lock screen while testing");
             menuitem.setCheckable(true);
-            menuitem.setChecked(!getDisableLockFlag());
+            menuitem.setChecked(!AppPreferencesManager.getDisableLockFlag());
             return true;
         } else {
             return false;
@@ -888,7 +886,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem menuItem = menu.findItem(MNU_WAKELOCK);
         if (menuItem != null) {
-            menuItem.setChecked(!getDisableLockFlag());
+            menuItem.setChecked(!AppPreferencesManager.getDisableLockFlag());
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -983,7 +981,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 clearMessageSelectCount();
                 break;
             case MNU_WAKELOCK:
-                toggleDisableLock();
+                AppPreferencesManager.toggleDisableLock();
                 break;
             case MNU_HASH_ID_SETUP:
                 DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
@@ -1015,40 +1013,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void xmlTestContinue(String filePath) {
-        if (_testerMain != null) {
-            _testerMain.restart(filePath);
-            Toast.makeText(getApplicationContext(), "start your engines", Toast.LENGTH_SHORT).show();
+        if (mTesterMain != null) {
+            SafeToast.showToastAnyThread("start your engines");
         } else {
             mBoundProxyService.startModuleTest();
-            _testerMain.restart(filePath);
-            Toast.makeText(getApplicationContext(), "Start the app on SYNC first", Toast.LENGTH_LONG).show();
+            SafeToast.showToastAnyThread("Start the app on SYNC first");
         }
-    }
-
-    /**
-     * Toggles the current state of the disable lock when testing flag, and
-     * writes it to the preferences.
-     */
-    private void toggleDisableLock() {
-        SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        boolean disableLock = prefs.getBoolean(
-                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
-        disableLock = !disableLock;
-        prefs.edit()
-                .putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                        disableLock).commit();
-    }
-
-    /**
-     * Returns the current state of the disable lock when testing flag.
-     *
-     * @return true if the screen lock is disabled
-     */
-    public boolean getDisableLockFlag() {
-        return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
-                Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING,
-                Const.PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING);
+        mTesterMain.restart(filePath);
     }
 
     private String getAssetsContents(String filename, String defaultString) {
@@ -1145,52 +1116,61 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Adds the function name to the adapter.
      */
-    private void addToFunctionsAdapter(ArrayAdapter<String> adapter, String functionName) {
-        adapter.add(functionName);
+    private void fillFunctionsAdapter() {
+        adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
+
+        adapter.add(Names.Alert);
+        adapter.add(Names.Speak);
+        adapter.add(Names.Show);
+        adapter.add(ButtonSubscriptions);
+        adapter.add(Names.AddCommand);
+        adapter.add(Names.DeleteCommand);
+        adapter.add(Names.AddSubMenu);
+        adapter.add(Names.DeleteSubMenu);
+        adapter.add(Names.SetGlobalProperties);
+        adapter.add(Names.ResetGlobalProperties);
+        adapter.add(Names.SetMediaClockTimer);
+        adapter.add(Names.CreateInteractionChoiceSet);
+        adapter.add(Names.DeleteInteractionChoiceSet);
+        adapter.add(Names.PerformInteraction);
+        adapter.add(Names.EncodedSyncPData);
+        adapter.add(Names.SyncPData);
+        adapter.add(Names.Slider);
+        adapter.add(Names.ScrollableMessage);
+        adapter.add(Names.ChangeRegistration);
+        adapter.add(Names.PutFile);
+        adapter.add(Names.DeleteFile);
+        adapter.add(Names.ListFiles);
+        adapter.add(Names.SetAppIcon);
+        adapter.add(Names.PerformAudioPassThru);
+        adapter.add(Names.EndAudioPassThru);
+        adapter.add(VehicleDataSubscriptions);
+        adapter.add(Names.GetVehicleData);
+        adapter.add(Names.ReadDID);
+        adapter.add(Names.GetDTCs);
+        adapter.add(Names.ShowConstantTBT);
+        adapter.add(Names.AlertManeuver);
+        adapter.add(Names.UpdateTurnList);
+        adapter.add(Names.SetDisplayLayout);
+        adapter.add(Names.DiagnosticMessage);
+        adapter.add(Names.RegisterAppInterface);
+        adapter.add(Names.UnregisterAppInterface);
+        adapter.add(Names.SystemRequest);
+        adapter.add(GenericRequest.NAME);
+    }
+
+    /**
+     * @return array adapter with a function names to perform message sending operations
+     */
+    public ArrayAdapter<String> getFunctionsAdapter() {
+        return adapter;
     }
 
     public void onClick(View v) {
         if (v == findViewById(R.id.btnSendMessage)) {
-            final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.select_dialog_item);
-            addToFunctionsAdapter(adapter, Names.Alert);
-            addToFunctionsAdapter(adapter, Names.Speak);
-            addToFunctionsAdapter(adapter, Names.Show);
-            addToFunctionsAdapter(adapter, ButtonSubscriptions);
-            addToFunctionsAdapter(adapter, Names.AddCommand);
-            addToFunctionsAdapter(adapter, Names.DeleteCommand);
-            addToFunctionsAdapter(adapter, Names.AddSubMenu);
-            addToFunctionsAdapter(adapter, Names.DeleteSubMenu);
-            addToFunctionsAdapter(adapter, Names.SetGlobalProperties);
-            addToFunctionsAdapter(adapter, Names.ResetGlobalProperties);
-            addToFunctionsAdapter(adapter, Names.SetMediaClockTimer);
-            addToFunctionsAdapter(adapter, Names.CreateInteractionChoiceSet);
-            addToFunctionsAdapter(adapter, Names.DeleteInteractionChoiceSet);
-            addToFunctionsAdapter(adapter, Names.PerformInteraction);
-            addToFunctionsAdapter(adapter, Names.EncodedSyncPData);
-            addToFunctionsAdapter(adapter, Names.SyncPData);
-            addToFunctionsAdapter(adapter, Names.Slider);
-            addToFunctionsAdapter(adapter, Names.ScrollableMessage);
-            addToFunctionsAdapter(adapter, Names.ChangeRegistration);
-            addToFunctionsAdapter(adapter, Names.PutFile);
-            addToFunctionsAdapter(adapter, Names.DeleteFile);
-            addToFunctionsAdapter(adapter, Names.ListFiles);
-            addToFunctionsAdapter(adapter, Names.SetAppIcon);
-            addToFunctionsAdapter(adapter, Names.PerformAudioPassThru);
-            addToFunctionsAdapter(adapter, Names.EndAudioPassThru);
-            addToFunctionsAdapter(adapter, VehicleDataSubscriptions);
-            addToFunctionsAdapter(adapter, Names.GetVehicleData);
-            addToFunctionsAdapter(adapter, Names.ReadDID);
-            addToFunctionsAdapter(adapter, Names.GetDTCs);
-            addToFunctionsAdapter(adapter, Names.ShowConstantTBT);
-            addToFunctionsAdapter(adapter, Names.AlertManeuver);
-            addToFunctionsAdapter(adapter, Names.UpdateTurnList);
-            addToFunctionsAdapter(adapter, Names.SetDisplayLayout);
-            addToFunctionsAdapter(adapter, Names.DiagnosticMessage);
-            addToFunctionsAdapter(adapter, Names.RegisterAppInterface);
-            addToFunctionsAdapter(adapter, Names.UnregisterAppInterface);
-            addToFunctionsAdapter(adapter, Names.SystemRequest);
-            addToFunctionsAdapter(adapter, GenericRequest.NAME);
-
+            if (adapter == null) {
+                fillFunctionsAdapter();
+            }
             adapter.sort(new Comparator<String>() {
                 @Override
                 public int compare(String lhs, String rhs) {
@@ -1535,7 +1515,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 dlg = builder.create();
                                 dlg.show();
                             } else if (adapter.getItem(which).equals(Names.PerformAudioPassThru)) {
-                                sendPerformAudioPassThru();
+                                DialogFragment performAudioPassThruDialog = PerformAudioPassThruDialog.newInstance();
+                                performAudioPassThruDialog.show(getFragmentManager(), PERFORM_AUDIO_PASS_THRU_DIALOG_TAG);
                             } else if (adapter.getItem(which).equals(Names.EndAudioPassThru)) {
                                 //EndAudioPassThru
                                 EndAudioPassThru msg = new EndAudioPassThru();
@@ -1928,87 +1909,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
                                         msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        SafeToast.showToastAnyThread("Couldn't parse number");
-                                    }
-                                }
-                            });
-                            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
-                            builder.setView(layout);
-                            builder.show();
-                        }
-
-                        /**
-                         * Opens the dialog for PerformAudioPassThru message and sends it.
-                         */
-                        private void sendPerformAudioPassThru() {
-                            final Context mContext = adapter.getContext();
-                            LayoutInflater inflater = (LayoutInflater) mContext
-                                    .getSystemService(LAYOUT_INFLATER_SERVICE);
-                            View layout = inflater.inflate(R.layout.performaudiopassthru, null);
-
-                            final EditText txtInitialPrompt = (EditText) layout
-                                    .findViewById(R.id.performaudiopassthru_txtInitialPrompt);
-                            final EditText txtAudioPassThruDisplayText1 = (EditText) layout
-                                    .findViewById(R.id.performaudiopassthru_txtAudioPassThruDisplayText1);
-                            final EditText txtAudioPassThruDisplayText2 = (EditText) layout
-                                    .findViewById(R.id.performaudiopassthru_txtAudioPassThruDisplayText2);
-                            final Spinner spnSamplingRate = (Spinner) layout
-                                    .findViewById(R.id.performaudiopassthru_spnSamplingRate);
-                            final EditText txtMaxDuration = (EditText) layout
-                                    .findViewById(R.id.performaudiopassthru_txtMaxDuration);
-                            final Spinner spnBitsPerSample = (Spinner) layout
-                                    .findViewById(R.id.performaudiopassthru_spnBitsPerSample);
-                            final Spinner spnAudioType = (Spinner) layout
-                                    .findViewById(R.id.performaudiopassthru_spnAudioType);
-                            final CheckBox chkMuteAudio = (CheckBox) layout
-                                    .findViewById(R.id.performaudiopassthru_muteAudio);
-
-                            ArrayAdapter<SamplingRate> spinnerAdapterSamplingRate = new ArrayAdapter<SamplingRate>(
-                                    adapter.getContext(),
-                                    android.R.layout.simple_spinner_item, SamplingRate.values());
-                            spinnerAdapterSamplingRate
-                                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                            spnSamplingRate.setAdapter(spinnerAdapterSamplingRate);
-
-                            ArrayAdapter<BitsPerSample> spinnerAdapterBitsPerSample = new ArrayAdapter<BitsPerSample>(
-                                    adapter.getContext(),
-                                    android.R.layout.simple_spinner_item, BitsPerSample.values());
-                            spinnerAdapterBitsPerSample
-                                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                            spnBitsPerSample.setAdapter(spinnerAdapterBitsPerSample);
-
-                            ArrayAdapter<AudioType> spinnerAdapterAudioType = new ArrayAdapter<AudioType>(
-                                    adapter.getContext(),
-                                    android.R.layout.simple_spinner_item, AudioType.values());
-                            spinnerAdapterAudioType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                            spnAudioType.setAdapter(spinnerAdapterAudioType);
-
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    Vector<TTSChunk> initChunks = TTSChunkFactory
-                                            .createSimpleTTSChunks(txtInitialPrompt.getText().toString());
-                                    try {
-                                        PerformAudioPassThru msg = new PerformAudioPassThru();
-                                        msg.setInitialPrompt(initChunks);
-                                        msg.setAudioPassThruDisplayText1(txtAudioPassThruDisplayText1.getText().toString());
-                                        msg.setAudioPassThruDisplayText2(txtAudioPassThruDisplayText2.getText().toString());
-                                        msg.setSamplingRate((SamplingRate) spnSamplingRate.getSelectedItem());
-                                        msg.setMaxDuration(Integer.parseInt(txtMaxDuration.getText().toString()));
-                                        msg.setBitsPerSample((BitsPerSample) spnBitsPerSample.getSelectedItem());
-                                        msg.setAudioType((AudioType) spnAudioType.getSelectedItem());
-                                        msg.setMuteAudio(chkMuteAudio.isChecked());
-                                        msg.setCorrelationID(getCorrelationid());
-                                        latestPerformAudioPassThruMsg = msg;
-                                        mLogAdapter.logMessage(msg, true);
                                         if (mBoundProxyService != null) {
                                             mBoundProxyService.syncProxySendRPCRequest(msg);
                                         }
@@ -3288,6 +3188,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     /**
      * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.PerformAudioPassThruDialog}
+     *
+     * @param performAudioPassThru {@link com.ford.syncV4.proxy.rpc.PerformAudioPassThru}
+     */
+    public void onPerformAudioPassThruDialogResult(PerformAudioPassThru performAudioPassThru) {
+        latestPerformAudioPassThruMsg = performAudioPassThru;
+        if (mBoundProxyService != null) {
+            mBoundProxyService.syncProxySendRPCRequest(performAudioPassThru);
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
      *
      * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
@@ -3352,7 +3265,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }*/
 
     public void setTesterMain(ModuleTest _instance) {
-        this._testerMain = _instance;
+        this.mTesterMain = _instance;
     }
 
     @Override

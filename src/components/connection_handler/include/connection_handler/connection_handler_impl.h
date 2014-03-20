@@ -268,24 +268,6 @@ private:
     ConnectionHandlerImpl();
 
     /**
-     * \brief Checks does device exist in list from TransportManager
-     * \param DeviceHandle Handle of device for checking.
-     * \param DeviceHandle Handle of device for checking.
-     * \return True if device exists.
-     */
-    bool DoesDeviceExistInTMList(
-      const std::vector<transport_manager::DeviceInfo>& device_list,
-      const connection_handler::DeviceHandle device_handle);
-
-    /**
-     * \brief Checks does device exist in list and adds if not
-     * \param DeviceHandle Handle of device for checking.
-     * \return True if device was added
-     */
-    bool AddDeviceInDeviceListIfNotExist(
-      const transport_manager::DeviceInfo& device);
-
-    /**
      * \brief Disconnect application.
      *
      * \param device_handle DeviceHandle of disconnected device.

@@ -119,8 +119,8 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
                                    [strings::menu_id].asInt(),
                         (*message_)[strings::msg_params]);
        }
-
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      application->UpdateHash();
       break;
     }
     default: {

@@ -98,8 +98,8 @@ public class Session {
     }
 
     public void stopSession() {
-        Log.i(TAG, "Stop " + toString());
         serviceList.clear();
         sessionId = 0;
+        Log.i(TAG, "Stop " + toString());
     }
 }

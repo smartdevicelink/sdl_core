@@ -77,7 +77,9 @@
     <string name="show_customPresetsDefault">GEN0,GEN1,GEN2,GEN3,GEN4,GEN5</string>
     <string name="selectprotocol_media">Media</string>
     <string name="selectprotocol_appName">App name:</string>
+    <string name="selectprotocol_appIdCustom">Custom App ID:</string>
     <string name="selectprotocol_appNameDefault">SyncProxyTester</string>
+    <string name="selectprotocol_appIdDefault">SyncProxyTester</string>
     <string name="selectprotocol_sourceMP4">MP4</string>
     <string name="selectprotocol_sourceH264">H264</string>
     <string name="selectprotocol_lang">Language:</string>

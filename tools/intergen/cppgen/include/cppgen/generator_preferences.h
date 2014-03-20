@@ -40,15 +40,21 @@
 namespace codegen {
 
 struct TypePreferences {
-  TypePreferences(int minimum_interger_size,
-                  bool avoid_unsigned);
   int minimum_interger_size;
   bool avoid_unsigned;
+  bool generate_json;
+  bool generate_dbus;
+  TypePreferences(int minimum_interger_size,
+                  bool avoid_unsigned,
+                  bool generate_json,
+                  bool generate_dbus);
 };
 
 struct Preferences {
   Preferences(int minimum_interger_size,
               bool avoid_unsigned,
+              bool generate_json,
+              bool generate_dbus,
               const std::set<std::string>& requested_interfaces);
   TypePreferences type_preferences;
   std::set<std::string> requested_interfaces;
