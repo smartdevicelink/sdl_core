@@ -13,13 +13,22 @@ public class ProtocolMessage {
     private int _functionID;
     private int _correlationID;
     private int _dataSize;
-
+    private boolean isEncrypted = false;
     private byte[] _data = null;
     private byte[] _bulkData = null;
 
     public static byte RPCTYPE_REQUEST = 0x00;
     public static byte RPCTYPE_RESPONSE = 0x01;
     public static byte RPCTYPE_NOTIFICATION = 0x02;
+
+    public boolean isEncrypted() {
+        return isEncrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.isEncrypted = encrypted;
+    }
+
 
     public ProtocolMessage() {
     }
@@ -38,6 +47,7 @@ public class ProtocolMessage {
         this._functionID = that._functionID;
         this._correlationID = that._correlationID;
         this._dataSize = that._dataSize;
+        this.isEncrypted = that.isEncrypted;
         if (null != that._data) {
             this._data = that._data.clone();
         }
@@ -151,6 +161,7 @@ public class ProtocolMessage {
                 "version=" + version +
                 ", _serviceType=" + _serviceType +
                 ", _messageType=" + _messageType +
+                ", isEncrypted=" + isEncrypted +
                 ", _sessionID=" + _sessionID +
                 ", _rpcType=" + _rpcType +
                 ", _functionID=" + _functionID +

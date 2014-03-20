@@ -10,7 +10,6 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
@@ -67,13 +66,6 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    @Override
-    public void startSecureService(byte sessionId) {
-        DebugTool.logInfo("Security Service should start");
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSecureService(ServiceType.Secure_Service, sessionId,
-                _version);
-        sendFrameToTransport(header);
-    }
 
     @Override
     public void StartProtocolSession(byte sessionId) {
@@ -81,25 +73,6 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
                 sessionId, _version);
         sendFrameToTransport(header);
-    }
-
-    @Override
-    public void startSecuringService(byte sessionId, ServiceType serviceType) {
-        DebugTool.logInfo("Start Secure Service:" + serviceType);
-        Log.d(TAG, "Start Secure Service:" + serviceType);
-
-        ProtocolMessage protocolMessage =
-                SecureServiceMessageFactory.buildProtectServiceRequest(sessionId, serviceType);
-
-        SendMessage(protocolMessage, serviceType);
-    }
-
-    @Override
-    public void startSecureHandshake(byte sessionId, ServiceType serviceType) {
-        DebugTool.logInfo("Start Secure Handshake:" + serviceType);
-
-
-        //SendMessage(protocolMessage);
     }
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
@@ -513,9 +486,7 @@ public class WiProProtocol extends AbstractProtocol {
         } // end-method
 
         private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
-            if (header.getServiceType().equals(ServiceType.Secure_Service)) {
-                handleSecureServiceStarted(_version);
-            } else if (header.getServiceType().equals(ServiceType.RPC)) {
+            if (header.getServiceType().equals(ServiceType.RPC)) {
                 handleProtocolSessionStarted(header.getServiceType(),
                         header.getSessionID(), _version, "");
             } else {
@@ -538,6 +509,7 @@ public class WiProProtocol extends AbstractProtocol {
             } // end-if
             message.setSessionType(header.getServiceType());
             message.setSessionID(header.getSessionID());
+            message.setEncrypted(header.isEncrypted());
             //If it is WiPro 2.0 it must have binary header
             if (_version == 2) {
                 BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
@@ -553,7 +525,7 @@ public class WiProProtocol extends AbstractProtocol {
                 }
 
                 // Set Secure Service payload data
-                if (message.getServiceType() == ServiceType.Secure_Service) {
+                if (message.isEncrypted()) {
                     message.setData(data);
                 }
 

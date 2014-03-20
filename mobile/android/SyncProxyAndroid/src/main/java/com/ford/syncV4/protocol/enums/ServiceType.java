@@ -36,8 +36,7 @@ public class ServiceType extends ByteEnumer {
             MOBILE_NAV_NAME);
     public final static ServiceType Audio_Service = new ServiceType(AUDIO_SERVICE_ID,
             AUDIO_SERVICE_NAME);
-    public final static ServiceType Secure_Service = new ServiceType(SECURE_SERVICE_ID,
-            SECURE_SERVICE_NAME);
+
 
     static {
         sVector.addElement(RPC);
@@ -45,7 +44,6 @@ public class ServiceType extends ByteEnumer {
         sVector.addElement(Mobile_Nav);
         sVector.addElement(Audio_Service);
         sVector.addElement(Heartbeat);
-        sVector.addElement(Secure_Service);
     }
 
     public static ServiceType valueOf(byte passedButton) {

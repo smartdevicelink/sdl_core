@@ -15,14 +15,6 @@ public interface IProtocolListener {
 	// Called to indicate that a protocol currentSession has been started (from either side)
 	void onProtocolSessionStarted(Session session, byte version, String correlationID);
 
-    /**
-     * Called to indicate that a {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service}
-     * has been started
-     *
-     * @param version protocol version
-     */
-    void onSecureServiceStarted(byte version);
-
 	// Called to indicate that a protocol currentSession has ended (from either side)
 	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);
 

@@ -116,9 +116,9 @@ public class SSLServer implements ISSLComponent {
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(kmf.getKeyManagers(), null, null);
             SSLServerSocket ss = (SSLServerSocket) context.getServerSocketFactory().createServerSocket(8090);
+            transportListener.onTransportConnected();
             socket = ss.accept();
             handshakeCompletedListener.handshakeCompleted(null);
-            transportListener.onTransportConnected();
         }
 
         private void readData() throws IOException {

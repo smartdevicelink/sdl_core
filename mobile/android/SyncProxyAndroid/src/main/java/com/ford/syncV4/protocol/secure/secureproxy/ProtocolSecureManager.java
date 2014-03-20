@@ -67,7 +67,7 @@ public class ProtocolSecureManager {
     }
 
     public void startHandShake() {
-        startProxy();
+
     }
 
     public void setupSecureEnvironment() {
@@ -126,6 +126,7 @@ public class ProtocolSecureManager {
 
             @Override
             public void onTransportConnected() {
+                startProxy();
             }
 
             @Override

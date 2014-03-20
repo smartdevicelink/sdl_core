@@ -3260,17 +3260,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
-                if (shouldEncryptService(ServiceType.Mobile_Nav)) {
-                    getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Mobile_Nav);
-                } else {
-                    onMobileNaviServiceStarted(sessionID, correlationID);
-                }
+                onMobileNaviServiceStarted(sessionID, correlationID);
             } else if (serviceType == ServiceType.Audio_Service) {
-                if (shouldEncryptService(ServiceType.Audio_Service)) {
-                    getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.Audio_Service);
-                } else {
-                    onAudioServiceStarted(sessionID, correlationID);
-                }
+                onAudioServiceStarted(sessionID, correlationID);
             }
         }
 

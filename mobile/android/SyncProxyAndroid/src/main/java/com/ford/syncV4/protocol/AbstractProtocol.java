@@ -76,27 +76,7 @@ public abstract class AbstractProtocol {
     // currentSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
-    /**
-     * Start a special service "Secure Service" provides management system for data sessions
-     * encryption and encryption initialization.
-     */
-    public abstract void startSecureService(byte sessionId);
 
-    /**
-     * Start a procedure to register a Service to be secured
-     *
-     * @param serviceType a type of the service
-     * @param sessionId Id of the current active session
-     */
-    public abstract void startSecuringService(byte sessionId, ServiceType serviceType);
-
-    /**
-     * Start a handshake procedure with selected Service
-     *
-     * @param serviceType a type of the service
-     * @param sessionId Id of the current active session
-     */
-    public abstract void startSecureHandshake(byte sessionId, ServiceType serviceType);
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be

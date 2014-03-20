@@ -43,7 +43,7 @@ public class ProtocolMessageConverter {
         if (mProtocolVersion == 2) {
 
             // TODO - Ugly way to create Secure Service payload data (binary frame header + data)
-            if (mServiceType == ServiceType.Secure_Service) {
+            if (mServiceType == ServiceType.Heartbeat && ) {
                 byte[] secureData = mProtocolMsg.getData().clone();
                 mData = new byte[FRAME_HEADER_LENGTH + secureData.length];
 
