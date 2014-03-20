@@ -30,33 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_tts_stopped_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/event_engine/event.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RECORD_START_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RECORD_START_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnTTSStoppedNotification::OnTTSStoppedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+/**
+ * @brief OnRecordStartdNotification command class
+ **/
+class OnRecordStartdNotification : public NotificationToHMI {
+ public:
+  /**
+   * @brief OnRecordStartdNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnRecordStartdNotification(const MessageSharedPtr& message);
 
-OnTTSStoppedNotification::~OnTTSStoppedNotification() {
-}
+  /**
+   * @brief OnRecordStartdNotification class destructor
+   **/
+  virtual ~OnRecordStartdNotification();
 
-void OnTTSStoppedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSStoppedNotification::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
-  event.set_smart_object(*message_);
-  event.raise();
-  ApplicationManagerImpl::instance()->Unmute();
-
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnRecordStartdNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RECORD_START_NOTIFICATION_H_

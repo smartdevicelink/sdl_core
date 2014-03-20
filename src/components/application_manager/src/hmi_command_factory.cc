@@ -221,6 +221,7 @@
 #include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 #include "application_manager/commands/hmi/on_sdl_close_notification.h"
+#include "application_manager/commands/hmi/on_record_start_notification.h"
 
 namespace application_manager {
 
@@ -1860,6 +1861,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
       command.reset(new commands::OnSDLCloseNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_OnRecordStart: {
+      command.reset(new commands::OnRecordStartdNotification(message));
       break;
     }
   }

@@ -296,6 +296,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
+./src/commands/hmi/on_record_start_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

@@ -2621,6 +2621,12 @@
       <description>Currently used method name on which was triggered action</description>
     </param>
   </function>
+  <function name="OnRecordStart" messagetype="notification">
+    <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
 </interface>
 
 <interface name="Navigation" version="1.0" date="2013-05-22">
