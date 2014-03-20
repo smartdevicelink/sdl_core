@@ -21,7 +21,7 @@ import javax.net.ssl.X509TrustManager;
 /**
  * Created by Andrew Batutin on 3/11/14.
  */
-public class SSLClient {
+public class SSLClient implements ISSLComponent {
 
     private final HandshakeCompletedListener handshakeCompletedListener;
     private SSLSocket socket;
@@ -35,13 +35,10 @@ public class SSLClient {
         this.handshakeCompletedListener = handshakeCompletedListener;
     }
 
+    @Override
     public void setupClient() throws IOException {
         sslClientReader = new SSLClientReader();
         sslClientReader.start();
-    }
-
-    public void startHandshake(){
-        socket.getSession();
     }
 
     private void startSocket() throws IOException, NoSuchAlgorithmException, KeyManagementException {
@@ -93,14 +90,17 @@ public class SSLClient {
         }};
     }
 
+    @Override
     public synchronized void writeData(byte[] data) throws IOException {
         socket.getOutputStream().write(data);
     }
 
+    @Override
     public void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
         this.RPCPacketListener = RPCPacketListener;
     }
 
+    @Override
     public IRCCodedDataListener getRPCPacketListener() {
         return RPCPacketListener;
     }

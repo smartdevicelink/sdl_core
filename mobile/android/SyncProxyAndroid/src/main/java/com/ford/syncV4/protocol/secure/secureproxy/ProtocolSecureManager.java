@@ -25,7 +25,7 @@ public class ProtocolSecureManager {
     private IHandshakeDataListener handshakeDataListener;
     private ISecureProxyServer listener;
     SecureProxyServer secureProxyServer;
-    SSLClient sslClient;
+    ISSLComponent sslClient;
     private boolean handshakeFinished;
     private CountDownLatch countDownLatchInput = new CountDownLatch(1);
 
@@ -111,7 +111,7 @@ public class ProtocolSecureManager {
                 }
         );
         try {
-            secureProxyServer.setupServer();
+            secureProxyServer.setupClient();
         } catch (IOException e) {
             DebugTool.logError("Failed to setup secureProxyServer", e);
         }
@@ -147,7 +147,11 @@ public class ProtocolSecureManager {
             public void handshakeCompleted(HandshakeCompletedEvent event) {
                 setHandshakeFinished(true);
                 handshakeDataListener.onHandShakeCompleted();
-                DebugTool.logInfo("GREAT SUCCESS" + event.toString());
+                if ( event!=null ) {
+                    DebugTool.logInfo("GREAT SUCCESS" + event.toString());
+                }else{
+                    DebugTool.logInfo("GREAT SUCCESS");
+                }
             }
         });
         try {

@@ -7,37 +7,29 @@ import com.ford.syncV4.util.DebugTool;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
 /**
- * Created by Andrew Batutin on 3/11/14.
+ * Created by Andrew Batutin on 3/20/14.
  */
-public class SecureProxyServer implements ISSLComponent {
+public class SecureProxyClient implements ISSLComponent {
 
-    private Socket socket;
-
+    private ITransportListener transportListener;
+    private ISecureProxyServer sourceStream;
+    private IRCCodedDataListener RPCPacketListener;
     private InputStream inputStream;
     private OutputStream outputStream;
-    ITransportListener transportListener;
-    private ISecureProxyServer sourceStream;
-    private ServerSocket serverSocket;
-    private IRCCodedDataListener RPCPacketListener;
+    private Socket socket;
 
-    public SecureProxyServer(ISecureProxyServer sourceListener, ITransportListener listener) {
+    public SecureProxyClient(ISecureProxyServer sourceListener, ITransportListener listener) {
         sourceStream = sourceListener;
         transportListener = listener;
     }
 
-    private void startServer() throws IOException {
-        serverSocket = new ServerSocket(8090);
-        transportListener.onTransportConnected();
-    }
-
     @Override
     public void setupClient() throws IOException {
-        SecureProxyServerReader secureProxyServerReader = new SecureProxyServerReader();
+        SecureProxyClientReader secureProxyServerReader = new SecureProxyClientReader();
         secureProxyServerReader.start();
     }
 
@@ -53,7 +45,8 @@ public class SecureProxyServer implements ISSLComponent {
         return RPCPacketListener;
     }
 
-    public class SecureProxyServerReader extends Thread {
+
+    public class SecureProxyClientReader extends Thread {
 
         public synchronized boolean isConnected() {
             return isConnected;
@@ -70,19 +63,23 @@ public class SecureProxyServer implements ISSLComponent {
         public void run() {
             try {
                 if (!isConnected()) {
-                    startServer();
+                    startClient();
                 }
                 readData();
             } catch (IOException e) {
-                DebugTool.logError("SecureProxyServerReader fail", e);
-                transportListener.onTransportError("SecureProxyServer", e);
+                DebugTool.logError("SecureProxyClientReader fail", e);
+                transportListener.onTransportError("SecureProxyClientReader", e);
             }
         }
 
-        private void readData() throws IOException {
-            socket = serverSocket.accept();
+        private void startClient() throws IOException {
+            socket = new Socket("127.0.0.1", 8090);
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
+
+        }
+
+        private void readData() throws IOException {
             byte[] buffer = new byte[WiProProtocol.MTU_SIZE];
             try {
                 int i;
@@ -96,10 +93,9 @@ public class SecureProxyServer implements ISSLComponent {
                     }
                 }
             } catch (IOException e) {
-                DebugTool.logError("SecureProxyServerReader fail", e);
-                transportListener.onTransportError("SecureProxyServer", e);
+                DebugTool.logError("SecureProxyClientReader fail", e);
+                transportListener.onTransportError("SecureProxyClientReader", e);
             }
         }
     }
-
 }
