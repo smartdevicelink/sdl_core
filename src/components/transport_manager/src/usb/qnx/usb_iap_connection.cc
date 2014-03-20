@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/siginfo.h>
-#include <sys/netmgr.h>
-
 #include "transport_manager/usb/qnx/usb_iap_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
@@ -134,76 +131,23 @@ void UsbIAPConnection::OnReceiveFailed() {
 
 UsbIAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
   ipod_hdl_t* ipod_hdl, int session_id, UsbIAPConnection* parent) :
-  parent_(parent), run_(false), ipod_hdl_(ipod_hdl), session_id_(session_id) {
-
-  LOG4CXX_TRACE(logger_, "Creating QNX channel");
-  chid_ = ChannelCreate(0);
-  if (chid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Created QNX channel " << chid_);
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "Failed to create QNX channel");
-    return;
-  }
-
-  LOG4CXX_TRACE(logger_, "Connecting to QNX channel " << chid_);
-  coid_ = ConnectAttach(ND_LOCAL_NODE, 0, chid_, _NTO_SIDE_CHANNEL, 0);
-  if (coid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Connected to QNX channel " << chid_);
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "Failed to connect to QNX channel " << chid_);
-    return;
-  }
-
-  run_ = true;
+  parent_(parent), ipod_hdl_(ipod_hdl), session_id_(session_id) {
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::threadMain() {
-  while (run_) {
-    struct sigevent event;
-    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE_EAP, 0);
-    LOG4CXX_TRACE(logger_, "Arming for USB iAP input notification");
-    if (ipod_notify(ipod_hdl_, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_INPUT, &event) != -1) {
-      LOG4CXX_DEBUG(logger_, "Successfully armed for USB iAP input notification");
-      struct _pulse pulse;
-      LOG4CXX_INFO(logger_, "USB iAP: waiting for pulse on QNX channel " << chid_);
-      int pulse_result = MsgReceivePulse(chid_, &pulse, sizeof(pulse), 0);
-      if (pulse_result != -1) {
-        LOG4CXX_INFO(logger_, "USB iAP: received pulse on QNX channel " << chid_);
-        switch (pulse.code) {
-          case PULSE_CODE_EAP:
-            receive();
-            break;
-        }
-      }
-    }
-    else {
-      LOG4CXX_WARN(logger_, "Could not arm for USB iAP input notification");
-    }
+bool UsbIAPConnection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
+  LOG4CXX_TRACE(logger_, "Arming for USB iAP input notification");
+  if (ipod_notify(ipod_hdl_, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_INPUT, event) != -1) {
+    LOG4CXX_DEBUG(logger_, "Successfully armed for USB iAP input notification");
+    return true;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Could not arm for USB iAP input notification");
+    return false;
   }
 }
 
-bool UsbIAPConnection::ReceiverThreadDelegate::exitThreadMain() {
-  run_ = false;
-
-  LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel" << chid_);
-  if (ConnectDetach(coid_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Disconnected from QNX channel " << chid_);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Failed to disconnect from QNX channel " << chid_);
-  }
-
-  LOG4CXX_TRACE(logger_, "Destroying QNX channel " << chid_);
-  if (ChannelDestroy(chid_) != -1) { // unblocks MsgReceivePulse()
-    LOG4CXX_DEBUG(logger_, "QNX channel " << chid_ << " destroyed");
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Failed to destroy QNX channel " << chid_);
-  }
-
-  return true;
+void UsbIAPConnection::ReceiverThreadDelegate::OnPulse() {
+  receive();
 }
 
 void UsbIAPConnection::ReceiverThreadDelegate::receive() {

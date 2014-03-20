@@ -30,68 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_
 
-#include <ipod/ipod.h>
+#include <sys/neutrino.h>
 
-#include "utils/threads/thread.h"
-
-#include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "pulse_thread_delegate.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAPConnection : public Connection {
+class PulseThreadDelegate : public threads::ThreadDelegate {
  public:
-  UsbIAPConnection(const DeviceUID& device_uid,
-    const ApplicationHandle& app_handle,
-    TransportAdapterController* controller,
-    const char* device_path);
-
-  bool Init();
+  PulseThreadDelegate();
+  virtual void threadMain();
+  virtual bool exitThreadMain();
 
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
-  virtual TransportAdapter::Error Disconnect();
+  virtual bool ArmEvent(struct sigevent* event) = 0;
+  virtual void OnPulse() = 0;
 
  private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
+  enum {PULSE_CODE_EAP = _PULSE_CODE_MINAVAIL + 1};
 
-  DeviceUID device_uid_;
-  ApplicationHandle app_handle_;
-  TransportAdapterController* controller_;
-  std::string device_path_;
-
-  ipod_hdl_t* ipod_hdl_;
-  int session_id_;
-
-  utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  static const char* protocol;
-
-  class ReceiverThreadDelegate : public PulseThreadDelegate {
-   public:
-    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, int session_id, UsbIAPConnection* parent);
-    virtual bool ArmEvent(struct sigevent* event);
-    virtual void OnPulse();
-
-   private:
-    static const size_t kBufferSize = 1024;
-
-    void receive();
-
-    UsbIAPConnection* parent_;
-    ipod_hdl_t* ipod_hdl_;
-    int session_id_;
-    uint8_t buffer_[kBufferSize];
-  };
+  bool run_;
+  int chid_;
+  int coid_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_PULSE_THREAD_DELEGATE_H_

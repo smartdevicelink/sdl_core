@@ -59,6 +59,7 @@ if (BUILD_USB_SUPPORT)
     list(APPEND SOURCES
     ./src/usb/qnx/usb_handler.cc
     ./src/usb/qnx/usb_connection.cc
+    ./src/usb/qnx/pulse_thread_delegate.cc
     ./src/usb/qnx/usb_iap_connection.cc
     ./src/usb/qnx/usb_iap2_connection.cc
     ./src/usb/qnx/platform_usb_device.cc
