@@ -14,6 +14,7 @@ import com.ford.syncV4.messageDispatcher.IncomingProtocolMessageComparitor;
 import com.ford.syncV4.messageDispatcher.InternalProxyMessageComparitor;
 import com.ford.syncV4.messageDispatcher.OutgoingProtocolMessageComparitor;
 import com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher;
+import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -95,7 +96,6 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.TestConfig;
@@ -154,7 +154,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private static final Object RECONNECT_TIMER_TASK_LOCK = new Object();
     final int HEARTBEAT_CORRELATION_ID = 65531; // TODO: remove
     // Protected Correlation IDs
-    public final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
+    public static final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
     private IRPCMessageHandler rpcMessageHandler;
@@ -821,210 +821,58 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
-        try {
-            final int CONNECTION_TIMEOUT = timeout * 1000; // in ms
-            Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl() go! ");
-            //Log.i("sendEncodedSyncPDataToUrl", "CONNECTION_TIMEOUT: " + CONNECTION_TIMEOUT);
-            //Log.i("sendEncodedSyncPDataToUrl", "urlString: " + urlString);
-            //Log.i("sendEncodedSyncPDataToUrl", "timeout: " + timeout);
-            //Log.i("sendEncodedSyncPDataToUrl", "encodedSyncPData.firstElement(): " + encodedSyncPData.firstElement());
-
-            // Form the JSON message to send to the cloud
-            JSONArray jsonArrayOfSyncPPackets = new JSONArray(encodedSyncPData);
-            JSONObject jsonObjectToSendToServer = new JSONObject();
-            jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
-            String valid_json = jsonObjectToSendToServer.toString().replace("\\", "");
-            byte[] bytesToSend = valid_json.getBytes("UTF-8");
-
-            // Send the Bytes to the Cloud and get the Response
-            HttpParams httpParams = new BasicHttpParams();
-
-            // Set the timeout in milliseconds until a connection is established.
-            // The default value is zero, that means the timeout is not used.
-            HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
-
-            // Set the default socket timeout (SO_TIMEOUT)
-            // in milliseconds which is the timeout for waiting for data.
-            HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
-
-            HttpClient client = new DefaultHttpClient(httpParams);
-            HttpPost request = new HttpPost(urlString);
-            request.setHeader("Content-type", "application/json");
-            request.setEntity(new ByteArrayEntity(bytesToSend));
-            HttpResponse response = client.execute(request);
-            Log.i("sendEncodedSyncPDataToUrl", "sent and received");
-
-            // If response is null, then return
-            if (response == null) {
-                DebugTool.logError("Response from server returned null: ");
-                Log.i("sendEncodedSyncPDataToUrl", "Response from server returned null: ");
-                return;
-            }
-
-            Vector<String> encodedSyncPDataReceived = new Vector<String>();
-            if (response.getStatusLine().getStatusCode() == 200) {
-
-                // Convert the response to JSON
-                JSONObject jsonResponse = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-
-                if (jsonResponse.get("data") instanceof JSONArray) {
-                    JSONArray jsonArray = jsonResponse.getJSONArray("data");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        if (jsonArray.get(i) instanceof String) {
-                            encodedSyncPDataReceived.add(jsonArray.getString(i));
-                        }
-                    }
-                } else if (jsonResponse.get("data") instanceof String) {
-                    encodedSyncPDataReceived.add(jsonResponse.getString("data"));
-                } else {
-                    DebugTool.logError("sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
-                    //Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
-                    return;
-                }
-
-                // Send new encodedSyncPDataRequest to SYNC
-                EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesReservedCorrelationID());
-
+        SyncPDataSender syncPDataSender = new SyncPDataSender();
+        syncPDataSender.sendEncodedPData(urlString, encodedSyncPData, timeout,
+                new SyncPDataSender.SyncPDataSenderCallback() {
+            @Override
+            public void onComplete(RPCRequest rpcRequest) {
                 if (getIsConnected()) {
-                    sendRPCRequestPrivate(encodedSyncPDataRequest);
-                    Log.i("sendEncodedSyncPDataToUrl", "sent to sync");
+                    try {
+                        sendRPCRequestPrivate(rpcRequest);
+                        Log.i(TAG, "Encoded SyncPData sent to SDL");
+                    } catch (SyncException e) {
+                        Log.i(TAG, "Error sending Encoded SyncPData to SDL:" + e.getMessage());
+                    }
                 }
-            } else if (response.getStatusLine().getStatusCode() == 500) {
-                Log.i("sendEncodedSyncPDataToUrl", "Status 500");
-                //returnVal = "Status 500";
             }
 
-        } catch (SyncException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not get data from JSONObject received.", e);
-        } catch (JSONException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: JSONException: ", e);
-        } catch (UnsupportedEncodingException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not encode string.", e);
-        } catch (ProtocolException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not set request method to post.", e);
-        } catch (MalformedURLException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: URL Exception when sending EncodedSyncPData to an external server.", e);
-        } catch (IOException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: IOException: ", e);
-        } catch (Exception e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Unexpected Exception: ", e);
-        }
+            @Override
+            public void onError(String message) {
+                Log.i(TAG, "Error send Encoded SyncPData to SDL:" + message);
+            }
+        });
     }
 
-    public void sendSyncPDataToUrl(String urlString, byte[] bs, Integer timeout) {
-        try {
-            final int CONNECTION_TIMEOUT = timeout * 1000; // in ms
-            Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl() go! ");
-            //Log.i("sendEncodedSyncPDataToUrl", "CONNECTION_TIMEOUT: " + CONNECTION_TIMEOUT);
-            //Log.i("sendEncodedSyncPDataToUrl", "urlString: " + urlString);
-            //Log.i("sendEncodedSyncPDataToUrl", "timeout: " + timeout);
-            //Log.i("sendEncodedSyncPDataToUrl", "encodedSyncPData.firstElement(): " + encodedSyncPData.firstElement());
-
-            //base64 encode the binary syncp packet before sending to cloud
-            String base64SyncP = Base64.encodeBytes(bs);
-            //Log.i("text", "base64 encoded syncP: " + base64SyncP);
-
-            // Form the JSON message to send to the cloud
-            JSONArray jsonArrayOfSyncPPackets = new JSONArray(base64SyncP);
-            JSONObject jsonObjectToSendToServer = new JSONObject();
-            jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
-            String valid_json = jsonObjectToSendToServer.toString().replace("\\", "");
-            byte[] bytesToSend = valid_json.getBytes("UTF-8");
-
-            // Send the Bytes to the Cloud and get the Response
-            HttpParams httpParams = new BasicHttpParams();
-
-            // Set the timeout in milliseconds until a connection is established.
-            // The default value is zero, that means the timeout is not used.
-            HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
-
-            // Set the default socket timeout (SO_TIMEOUT)
-            // in milliseconds which is the timeout for waiting for data.
-            HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
-            HttpClient client = new DefaultHttpClient(httpParams);
-            HttpPost request = new HttpPost(urlString);
-            request.setHeader("Content-type", "application/json");
-            request.setEntity(new ByteArrayEntity(bytesToSend));
-            HttpResponse response = client.execute(request);
-
-            Log.i("sendEncodedSyncPDataToUrl", "sent and received");
-
-            // If response is null, then return
-            if (response == null) {
-                DebugTool.logError("Response from server returned null: ");
-                Log.i("sendEncodedSyncPDataToUrl", "Response from server returned null: ");
-                return;
-            }
-
-            Vector<String> encodedSyncPDataReceived = new Vector<String>();
-            if (response.getStatusLine().getStatusCode() == 200) {
-                // Convert the response to JSON
-                JSONObject jsonResponse = new JSONObject(EntityUtils.toString(response.getEntity(), "UTF-8"));
-
-                if (jsonResponse.get("data") instanceof JSONArray) {
-                    JSONArray jsonArray = jsonResponse.getJSONArray("data");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        if (jsonArray.get(i) instanceof String) {
-                            encodedSyncPDataReceived.add(jsonArray.getString(i));
-                            //Log.i("sendEncodedSyncPDataToUrl", "jsonArray.getString(i): " + jsonArray.getString(i));
-                        }
-                    }
-                } else if (jsonResponse.get("data") instanceof String) {
-                    encodedSyncPDataReceived.add(jsonResponse.getString("data"));
-                    //Log.i("sendEncodedSyncPDataToUrl", "jsonResponse.getString(data): " + jsonResponse.getString("data"));
-                } else {
-                    DebugTool.logError("sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
-                    //Log.i("sendEncodedSyncPDataToUrl", "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
-                    return;
-                }
-
-                //convert encodedsyncp packet to binary
-                byte[] syncppacket = encodedSyncPDataReceived.firstElement().getBytes();
-
-                // Send new binary syncp data to SYNC
-                SyncPData syncPDataRequest = RPCRequestFactory.buildSyncPData(syncppacket, getPoliciesReservedCorrelationID());
-
+    public void sendSyncPDataToUrl(String urlString, byte[] bytes, Integer timeout) {
+        SyncPDataSender syncPDataSender = new SyncPDataSender();
+        syncPDataSender.sendPData(urlString, bytes, timeout, new SyncPDataSender.SyncPDataSenderCallback() {
+            @Override
+            public void onComplete(RPCRequest rpcRequest) {
                 if (getIsConnected()) {
-                    sendRPCRequestPrivate(syncPDataRequest);
-                    Log.i("sendEncodedSyncPDataToUrl", "sent to sync");
+                    try {
+                        sendRPCRequestPrivate(rpcRequest);
+                        Log.i(TAG, "SyncPData sent to SDL");
+                    } catch (SyncException e) {
+                        Log.i(TAG, "Error sending SyncPData to SDL:" + e.getMessage());
+                    }
                 }
-            } else if (response.getStatusLine().getStatusCode() == 500) {
-                Log.i("sendEncodedSyncPDataToUrl", "Status 500");
-                //returnVal = "Status 500";
             }
 
-        } catch (SyncException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not get data from JSONObject received.", e);
-        } catch (JSONException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: JSONException: ", e);
-        } catch (UnsupportedEncodingException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not encode string.", e);
-        } catch (ProtocolException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not set request method to post.", e);
-        } catch (MalformedURLException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: URL Exception when sending EncodedSyncPData to an external server.", e);
-        } catch (IOException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: IOException: ", e);
-        } catch (Exception e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Unexpected Exception: ", e);
-        }
-    }
-
-    private int getPoliciesReservedCorrelationID() {
-        return POLICIES_CORRELATION_ID;
+            @Override
+            public void onError(String message) {
+                Log.i(TAG, "Error sending SyncPData to SDL:" + message);
+            }
+        });
     }
 
     // Test correlationID
     protected boolean isCorrelationIDProtected(Integer correlationID) {
-        if (correlationID != null &&
+        return correlationID != null &&
                 (HEARTBEAT_CORRELATION_ID == correlationID
                         || REGISTER_APP_INTERFACE_CORRELATION_ID == correlationID
                         || UNREGISTER_APP_INTERFACE_CORRELATION_ID == correlationID
-                        || POLICIES_CORRELATION_ID == correlationID)) {
-            return true;
-        }
+                        || POLICIES_CORRELATION_ID == correlationID);
 
-        return false;
     }
 
     // Protected isConnected method to allow legacy proxy to poll isConnected state

@@ -40,7 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by Andrew Batutin on 1/13/14.
+ * Created by Andrew Batutin on 1/13/14
  */
 public class SyncProxyBaseTest extends InstrumentationTestCase {
 

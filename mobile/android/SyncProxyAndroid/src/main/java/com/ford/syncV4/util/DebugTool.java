@@ -13,9 +13,9 @@ public class DebugTool {
 
 	public static final String TAG = "SyncProxy";
 
-	private static boolean isErrorEnabled = false;
-	private static boolean isWarningEnabled = false;
-	private static boolean isInfoEnabled = false;
+	private static boolean isErrorEnabled = true;
+	private static boolean isWarningEnabled = true;
+	private static boolean isInfoEnabled = true;
 	
 	public static void enableDebugTool() {
 		isErrorEnabled = true;

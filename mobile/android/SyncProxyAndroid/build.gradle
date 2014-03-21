@@ -21,6 +21,7 @@ android {
 
         androidTest {
             java.srcDirs = ['androidTest/java']
+            assets.srcDirs = ['androidTest/assets']
         }
     }
 
