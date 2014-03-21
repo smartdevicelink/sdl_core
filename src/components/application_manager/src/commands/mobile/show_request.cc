@@ -191,15 +191,16 @@ void ShowRequest::Run() {
         hmi_capabilities.display_capabilities();
     msg_params[strings::custom_presets] = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
-    char name_custom_preset [50] = {0};
     int amount_custom_preset = 0;
-      if ((*display_capabilities).keyExists
-          (hmi_response::num_custom_presets_available)) {
-        amount_custom_preset = (*display_capabilities)
-            [hmi_response::num_custom_presets_available].asInt();
-      }
+    if ((*display_capabilities).keyExists
+        (hmi_response::num_custom_presets_available)) {
+      amount_custom_preset = (*display_capabilities)
+          [hmi_response::num_custom_presets_available].asInt();
+    }
+    char name_custom_preset [11] = {0};
     for (int i = 0; i < amount_custom_preset; ++i) {
-      sprintf(name_custom_preset, "%s%d", "PRESET_", i+1);
+      snprintf(name_custom_preset, sizeof(name_custom_preset),
+              "%s%d", "PRESET_", i+1);
       msg_params[strings::custom_presets][i] = name_custom_preset;
     }
   }
