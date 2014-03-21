@@ -128,10 +128,10 @@ public class WiProProtocol extends AbstractProtocol {
         if (getProtocolSecureManager() != null) {
             try {
                 if (protocolMsg.getBulkData() != null) {
-                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(ServiceType.Bulk_Data, data);
+                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(false, data);
                     processFrameToSend(serviceType, sessionID, result);
                 } else {
-                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.getServiceType(), data);
+                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.isEncrypted(), data);
                     processFrameToSend(serviceType, sessionID, result);
                 }
             } catch (IOException e) {

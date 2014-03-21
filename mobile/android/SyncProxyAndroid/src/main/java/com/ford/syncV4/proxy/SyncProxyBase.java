@@ -496,13 +496,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHandShakeCompleted() {
 
-            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
-                registerAppInterface();
-            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
-                onAudioServiceStarted(currentSession.getSessionId(), "", false);
-            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
-                onMobileNaviServiceStarted(currentSession.getSessionId(), "", false);
-            }
         }
 
         @Override
@@ -1496,6 +1489,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void dispatchOutgoingMessage(final ProtocolMessage message) {
         if (mSyncConnection.getIsConnected()) {
+            if (currentSession.getService(ServiceType.RPC) != null) {
+                message.setEncrypted(currentSession.getService(ServiceType.RPC).isEncrypted());
+            }
             mSyncConnection.sendMessage(message);
         }
 
@@ -2053,7 +2049,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
-        createService(sessionID, ServiceType.Audio_Service,encrypted);
+        createService(sessionID, ServiceType.Audio_Service, encrypted);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2132,7 +2128,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startH264() {
         OutputStream stream = null;
         if (mSyncConnection != null) {
-            stream = mSyncConnection.startH264(currentSession.getSessionId());
+            boolean encrypt = false;
+            if (currentSession.getService(ServiceType.Mobile_Nav) != null) {
+                encrypt = currentSession.getService(ServiceType.Mobile_Nav).isEncrypted();
+            }
+            stream = mSyncConnection.startH264(currentSession.getSessionId(), encrypt);
         }
         return stream;
     }
@@ -2146,7 +2146,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startAudioDataTransfer() {
         OutputStream stream = null;
         if (mSyncConnection != null) {
-            stream = mSyncConnection.startAudioDataTransfer(currentSession.getSessionId());
+            boolean encrypt = false;
+            if (currentSession.getService(ServiceType.Audio_Service) != null) {
+                encrypt = currentSession.getService(ServiceType.Audio_Service).isEncrypted();
+            }
+            stream = mSyncConnection.startAudioDataTransfer(currentSession.getSessionId(), encrypt);
         }
         return stream;
     }
@@ -3111,7 +3115,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void startAudioService(Session session) {
-        if (mSyncConnection!=null){
+        if (mSyncConnection != null) {
 
             mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
         }
@@ -3234,7 +3238,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
                                              String correlationID) {
             if (_wiproVersion == 2) {
-                handleServiceStarted(serviceType, sessionID, encrypted,correlationID);
+                handleServiceStarted(serviceType, sessionID, encrypted, correlationID);
 
                 if (getSyncConnection() == null) {
                     return;
@@ -3248,18 +3252,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
-                onMobileNaviServiceStarted(sessionID, correlationID,encrypted);
+                onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
             } else if (serviceType == ServiceType.Audio_Service) {
-                onAudioServiceStarted(sessionID, correlationID,encrypted);
+                onAudioServiceStarted(sessionID, correlationID, encrypted);
             }
         }
 
-        private boolean shouldEncryptService(ServiceType serviceType) {
-            if (protocolSecureManager == null) {
-                return false;
-            }
-            return protocolSecureManager.containsServiceTypeToEncrypt(serviceType);
-        }
+
     }
 
     public IRPCRequestConverterFactory getRpcRequestConverterFactory() {

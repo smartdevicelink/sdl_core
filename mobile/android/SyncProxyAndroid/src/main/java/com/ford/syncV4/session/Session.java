@@ -68,6 +68,18 @@ public class Session {
         return false;
     }
 
+    public Service getService(ServiceType serviceType) {
+        if (serviceList == null || serviceList.isEmpty()) {
+            return null;
+        }
+        for (Service service : serviceList) {
+            if (service.getServiceType() == serviceType) {
+                return service;
+            }
+        }
+        return null;
+    }
+
     public int getServicesNumber() {
         return serviceList != null ? serviceList.size() : 0;
     }

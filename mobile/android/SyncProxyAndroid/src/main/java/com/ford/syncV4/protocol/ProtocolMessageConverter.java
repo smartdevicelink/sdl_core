@@ -43,25 +43,25 @@ public class ProtocolMessageConverter {
         if (mProtocolVersion == 2) {
 
             // TODO - Ugly way to create Secure Service payload data (binary frame header + data)
-//            if (mServiceType == ServiceType.Heartbeat && ) {
-//                byte[] secureData = mProtocolMsg.getData().clone();
-//                mData = new byte[FRAME_HEADER_LENGTH + secureData.length];
-//
-//                SecureServiceRequestResponseSeqNumberHolder holder =
-//                        SecureServiceRequestResponseSeqNumberHolder.getInstance();
-//                int seqNumber = holder.getNextSeqNumber();
-//
-//                holder.addServiceWithKey(seqNumber, serviceTypeToBeSecured.getName());
-//
-//                BinaryFrameHeader binFrameHeader =
-//                        ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
-//                                mProtocolMsg.getFunctionID(), seqNumber, 0);
-//                System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
-//                        FRAME_HEADER_LENGTH);
-//                System.arraycopy(secureData, 0, mData, FRAME_HEADER_LENGTH, secureData.length);
-//
-//                return this;
-//            }
+            if (mServiceType == ServiceType.Heartbeat  ) {
+                byte[] secureData = mProtocolMsg.getData().clone();
+                mData = new byte[FRAME_HEADER_LENGTH + secureData.length];
+
+                SecureServiceRequestResponseSeqNumberHolder holder =
+                        SecureServiceRequestResponseSeqNumberHolder.getInstance();
+                int seqNumber = holder.getNextSeqNumber();
+
+                holder.addServiceWithKey(seqNumber, serviceTypeToBeSecured.getName());
+
+                BinaryFrameHeader binFrameHeader =
+                        ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
+                                mProtocolMsg.getFunctionID(), seqNumber, 0);
+                System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
+                        FRAME_HEADER_LENGTH);
+                System.arraycopy(secureData, 0, mData, FRAME_HEADER_LENGTH, secureData.length);
+
+                return this;
+            }
 
             // TODO - get rid of this ugly if statements. FAST!
             if (mServiceType == ServiceType.Mobile_Nav ||

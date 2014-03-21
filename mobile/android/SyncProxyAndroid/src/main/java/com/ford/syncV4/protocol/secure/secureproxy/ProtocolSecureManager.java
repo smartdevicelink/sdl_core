@@ -159,23 +159,7 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized byte[] sendDataToProxyServer(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
-        if (serviceTypesToEncrypt.contains(serviceType)) {
-            writeDataToProxyServer(data, new IRPCodedDataListener() {
-                @Override
-                public void onRPCPayloadCoded(byte[] bytes) {
-                    if (handshakeFinished) {
-                        deCypheredData = Arrays.copyOf(bytes, bytes.length);
-                        countDownLatchOutput.countDown();
-                    }
-                }
-            });
-            countDownLatchOutput.await();
-            return deCypheredData;
-        } else {
-            return data;
-        }
-    }
+
 
 
     public byte[] sendDataToProxyServerByteByByte(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
@@ -206,8 +190,8 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized byte[] sendDataTOSSLClient(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
-        if (!serviceTypesToEncrypt.contains(serviceType)) {
+    public synchronized byte[] sendDataTOSSLClient(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
+        if (!isEncrypted) {
             return data;
         }
         RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();

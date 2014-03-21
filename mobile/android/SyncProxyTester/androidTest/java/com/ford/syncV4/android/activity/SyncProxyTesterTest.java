@@ -45,7 +45,7 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
     public void testStaticFileReader() throws Exception {
         OutputStream os = new PipedOutputStream();
         InputStream is = new PipedInputStream((PipedOutputStream) os);
-        mPacketizer = new H264Packetizer(this, is, (byte) 0, ServiceType.Mobile_Nav);
+        mPacketizer = new H264Packetizer(this, is, (byte) 0, ServiceType.Mobile_Nav, false);
         mPacketizer.start();
 
         StaticFileReader staticFileReader = new StaticFileReader(getActivity(), new DataReaderListener() {

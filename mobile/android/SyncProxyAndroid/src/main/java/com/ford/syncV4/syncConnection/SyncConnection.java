@@ -289,11 +289,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startH264(byte rpcSessionID) {
+    public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav);
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
@@ -308,11 +308,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startAudioDataTransfer(byte rpcSessionID) {
+    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service);
+            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
             mAudioPacketizer.start();
             return os;
         } catch (IOException e) {
