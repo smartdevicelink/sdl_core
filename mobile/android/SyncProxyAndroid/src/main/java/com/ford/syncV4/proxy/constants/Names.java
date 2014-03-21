@@ -464,6 +464,7 @@ public class Names {
     /**
      * v4_protocol_v3_0_revP
      */
+    public static final String deviceInfo = "deviceInfo";
     public static final String hardware = "hardware";
     public static final String firmwareRev = "firmwareRev";
     public static final String os = "os";

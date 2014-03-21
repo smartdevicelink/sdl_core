@@ -1,4 +1,5 @@
 [CW12]
++ SyncProxyAndroid SDK: Add new field "DeviceInfo" to the RegisterAppInterface request
 + SyncProxyAndroid SDK: Add new structure "DeviceInfo"
 * SyncProxyAndroid SDK: PerformAudioPassThru: no OnAudioPassThru notifications
 * SyncProxyAndroid SDK: Connection closes after UnregisterAppInterface

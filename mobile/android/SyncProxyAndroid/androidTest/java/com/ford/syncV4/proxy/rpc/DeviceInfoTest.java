@@ -28,15 +28,7 @@ public class DeviceInfoTest extends TestCase {
     private static final int MAX_INT_LENGTH = 100;
 
     public void testSerialization() throws JSONException {
-        DeviceInfo deviceInfo = new DeviceInfo();
-        assertNotNull(deviceInfo);
-
-        deviceInfo.setHardware(HARDWARE_LEGAL);
-        deviceInfo.setFirmwareRev(FIRMWARE_REV_LEGAL);
-        deviceInfo.setOS(DEVICE_OS_LEGAL);
-        deviceInfo.setOSVersion(DEVICE_OS_VERSION_LEGAL);
-        deviceInfo.setCarrier(CARRIER_LEGAL);
-        deviceInfo.setMaxNumberRFCOMMPorts(MAX_RF_COMM_PORTS_NUMBER_LEGAL);
+        DeviceInfo deviceInfo = getDeviceInfo();
 
         int fieldsNumber = 6;
 
@@ -442,5 +434,16 @@ public class DeviceInfoTest extends TestCase {
             randomStringBuilder.append(tempChar);
         }
         return randomStringBuilder.toString();
+    }
+
+    public static DeviceInfo getDeviceInfo() {
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setHardware(HARDWARE_LEGAL);
+        deviceInfo.setFirmwareRev(FIRMWARE_REV_LEGAL);
+        deviceInfo.setOS(DEVICE_OS_LEGAL);
+        deviceInfo.setOSVersion(DEVICE_OS_VERSION_LEGAL);
+        deviceInfo.setCarrier(CARRIER_LEGAL);
+        deviceInfo.setMaxNumberRFCOMMPorts(MAX_RF_COMM_PORTS_NUMBER_LEGAL);
+        return deviceInfo;
     }
 }
