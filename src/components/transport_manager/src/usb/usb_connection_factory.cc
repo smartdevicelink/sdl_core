@@ -70,16 +70,20 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   ConnectionSptr connection;
   bool initialized = false;
   if (IsAppleIAPDevice(platform_device)) {
+#if defined(__QNXNTO__)
     UsbIAPConnection* usb_connection =
       new UsbIAPConnection(device_uid, app_handle, controller_, "/fs/ipod0");
     connection = usb_connection;
     initialized = usb_connection->Init();
+#endif
   }
   else if (IsAppleIAP2Device(platform_device)) {
+#if defined(__QNXNTO__)
     UsbIAP2Connection* usb_connection =
       new UsbIAP2Connection(device_uid, app_handle, controller_, "/dev/ipod0");
     connection = usb_connection;
     initialized = usb_connection->Init();
+#endif
   }
   else {
     UsbConnection* usb_connection =
