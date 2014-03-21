@@ -163,12 +163,12 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void onMobileNaviServiceStarted(byte sessionID, String correlationID) {
-                super.onMobileNaviServiceStarted(sessionID, correlationID);
+            protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+                super.onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
                 assertEquals("Session ID should be equal", currentSession.getSessionId(), (byte) 48);
             }
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID), VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "");
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -351,7 +351,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID), VERSION, "correlationID");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "correlationID");
         verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
         assertEquals("correlationID", correlationIdCaptor.getValue());

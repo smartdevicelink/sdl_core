@@ -98,8 +98,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
+                super.onProtocolServiceStarted(serviceType,sessionID, encrypted, version, correlationID);
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);

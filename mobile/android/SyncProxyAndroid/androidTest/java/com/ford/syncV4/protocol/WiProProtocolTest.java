@@ -91,7 +91,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
                 }
 
@@ -463,7 +463,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
             }
 
@@ -599,7 +599,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
+                                                 boolean encrypted, byte version, String correlationID) {
 
             }
 
@@ -613,7 +613,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
         });
-        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
+        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false, VERSION, "");
         assertTrue("test should pass", passed[0]);
     }
 
@@ -652,7 +652,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), false, versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
@@ -715,7 +715,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), false, versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
@@ -789,7 +789,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
+                                                 boolean encrypted, byte version, String correlationID) {
 
             }
 

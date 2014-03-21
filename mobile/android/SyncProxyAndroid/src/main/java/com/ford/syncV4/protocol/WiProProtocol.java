@@ -488,10 +488,10 @@ public class WiProProtocol extends AbstractProtocol {
         private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
             if (header.getServiceType().equals(ServiceType.RPC)) {
                 handleProtocolSessionStarted(header.getServiceType(),
-                        header.getSessionID(), _version, "");
+                        header.getSessionID(), header.isEncrypted() ,_version, "");
             } else {
                 handleProtocolServiceStarted(header.getServiceType(),
-                        header.getSessionID(), _version, "");
+                        header.getSessionID(), header.isEncrypted(),_version, "");
             }
         }
 

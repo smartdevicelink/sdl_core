@@ -57,7 +57,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
             }
 
@@ -147,7 +147,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
             }
 

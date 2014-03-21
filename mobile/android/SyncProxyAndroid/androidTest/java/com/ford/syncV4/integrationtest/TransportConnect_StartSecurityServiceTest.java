@@ -115,7 +115,7 @@ public class TransportConnect_StartSecurityServiceTest extends InstrumentationTe
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
+                                                 boolean encrypted, byte version, String correlationID) {
 
             }
 

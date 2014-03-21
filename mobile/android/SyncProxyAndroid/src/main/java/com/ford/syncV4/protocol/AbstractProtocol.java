@@ -227,20 +227,20 @@ public abstract class AbstractProtocol {
     // This method handles the startup of a protocol currentSession. A callback is sent
     // to the protocol listener.
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID);
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
+        Session session = Session.createSession(serviceType, sessionID, encrypted);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {
             throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

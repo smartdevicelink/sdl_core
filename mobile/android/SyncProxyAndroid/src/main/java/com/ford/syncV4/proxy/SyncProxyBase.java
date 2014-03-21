@@ -322,7 +322,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     SyncConnection mSyncConnection;
 
     // RPC Session ID
-    protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID);
+    protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID, false);
     Boolean _haveReceivedFirstNonNoneHMILevel = false;
 
     public proxyListenerType getProxyListener() {
@@ -499,9 +499,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
                 registerAppInterface();
             } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
-                onAudioServiceStarted(currentSession.getSessionId(), "");
+                onAudioServiceStarted(currentSession.getSessionId(), "", false);
             } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
-                onMobileNaviServiceStarted(currentSession.getSessionId(), "");
+                onMobileNaviServiceStarted(currentSession.getSessionId(), "", false);
             }
         }
 
@@ -539,7 +539,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     protocolSecureManager.writeDataToProxyServer(data, new IRPCodedDataListener() {
                         @Override
                         public void onRPCPayloadCoded(byte[] bytes) {
-
                         }
                     });
                 } catch (IOException e) {
@@ -2036,9 +2035,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID) {
+    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
-        createService(sessionID, ServiceType.Mobile_Nav);
+        createService(sessionID, ServiceType.Mobile_Nav, false);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2052,9 +2051,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void onAudioServiceStarted(byte sessionID, String correlationID) {
+    protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
-        createService(sessionID, ServiceType.Audio_Service);
+        createService(sessionID, ServiceType.Audio_Service,encrypted);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2068,11 +2067,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private void createService(byte sessionID, ServiceType serviceType) {
+    private void createService(byte sessionID, ServiceType serviceType, boolean encrypted) {
         if (sessionID != currentSession.getSessionId()) {
             throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
         }
         Service service = currentSession.createService(serviceType);
+        service.setEncrypted(encrypted);
         currentSession.addService(service);
     }
 
@@ -3203,7 +3203,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     setWiProVersion(version);
                 }
             }
-
             if (session.hasService(ServiceType.RPC)) {
                 onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
             }
@@ -3232,10 +3231,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
 
         @Override
-        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
                                              String correlationID) {
             if (_wiproVersion == 2) {
-                handleServiceStarted(serviceType, sessionID, correlationID);
+                handleServiceStarted(serviceType, sessionID, encrypted,correlationID);
 
                 if (getSyncConnection() == null) {
                     return;
@@ -3247,11 +3246,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
 
-        private void handleServiceStarted(ServiceType serviceType, byte sessionID, String correlationID) {
+        private void handleServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
-                onMobileNaviServiceStarted(sessionID, correlationID);
+                onMobileNaviServiceStarted(sessionID, correlationID,encrypted);
             } else if (serviceType == ServiceType.Audio_Service) {
-                onAudioServiceStarted(sessionID, correlationID);
+                onAudioServiceStarted(sessionID, correlationID,encrypted);
             }
         }
 
