@@ -123,6 +123,8 @@ class TypeRegistry {
   // fields
   const Interface* interface_;
   BuiltinTypeRegistry* builtin_type_registry_;
+  // Special FunctionID enum. Enum is filled by TypeRegistry if it is
+  // defined in input file. Otherwise it is filled when interface is parsed.
   Enum* function_ids_enum_;
   const ModelFilter* model_filter_;
   std::set<Array> arrays_;
