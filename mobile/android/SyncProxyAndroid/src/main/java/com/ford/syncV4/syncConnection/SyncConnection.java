@@ -403,15 +403,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         startProtocolSession();
     }
 
-    public void startSecureService() {
-        synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                Log.d(TAG, "Start Secure Service, session id:" + mSessionId);
-                _protocol.startSecureService(mSessionId);
-            }
-        }
-    }
-
     private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
@@ -491,10 +482,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _connectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
-    @Override
-    public void onSecureServiceStarted(byte version) {
-        _connectionListener.onSecureServiceStarted(version);
-    }
 
     @Override
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,

@@ -232,16 +232,6 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
-    /**
-     * Handles Service of {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service} start
-     * procedure
-     *
-     * @param version protocol version
-     */
-    protected void handleSecureServiceStarted(byte version) {
-        _protocolListener.onSecureServiceStarted(version);
-    }
-
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {

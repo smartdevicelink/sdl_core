@@ -3171,12 +3171,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolMessageReceived(ProtocolMessage msg) {
             Log.d(TAG, "ProtocolMessageReceived:" + msg.getServiceType());
 
-            // Process Secure Service first (start secure service, handshake response, etc ...) and
+            // TODO Process Secure Service first (start secure service, handshake response, etc ...) and
             // do not put these messages into queue
-            if (msg.getServiceType() == ServiceType.Secure_Service) {
-                mSecureServiceMessageManager.processMessage(msg);
-                return;
-            }
+//            if (msg.getServiceType() == ServiceType.Secure_Service) {
+//                mSecureServiceMessageManager.processMessage(msg);
+//                return;
+//            }
 
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data
@@ -3195,28 +3195,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             if (session.hasService(ServiceType.RPC)) {
                 onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
-            }
-        }
-
-        @Override
-        public void onSecureServiceStarted(byte version) {
-            Log.i(TAG, "Secure Service started");
-            if (_callbackToUIThread) {
-                // Run in UI thread
-                _mainUIHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        _proxyListener.onSecureServiceStart();
-                    }
-                });
-            } else {
-                _proxyListener.onSecureServiceStart();
-            }
-
-            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
-                getSyncConnection().getWiProProtocol().startSecuringService(currentSession.getSessionId(), ServiceType.RPC);
-            } else {
-                registerAppInterface();
             }
         }
 

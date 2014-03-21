@@ -84,9 +84,7 @@ public class SecureServiceRequestResponseSeqNumberHolder {
         if (name.equals(ServiceType.AUDIO_SERVICE_NAME)) {
             return ServiceType.Audio_Service;
         }
-        if (name.equals(ServiceType.SECURE_SERVICE_NAME)) {
-            return ServiceType.Secure_Service;
-        }
+
         return null;
     }
 }

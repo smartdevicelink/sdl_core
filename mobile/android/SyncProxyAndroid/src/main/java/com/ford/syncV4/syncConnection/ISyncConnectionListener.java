@@ -15,14 +15,6 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
 
-    /**
-     * Called to indicate that a {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service}
-     * has been started
-     *
-     * @param version protocol version
-     */
-    public void onSecureServiceStarted(byte version);
-
 	public void onProtocolServiceEnded(ServiceType serviceType,
                                        byte sessionID, String correlationID);
 	
