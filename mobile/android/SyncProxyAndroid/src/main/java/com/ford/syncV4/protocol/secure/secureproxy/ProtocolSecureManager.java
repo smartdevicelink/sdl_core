@@ -162,8 +162,8 @@ public class ProtocolSecureManager {
 
 
 
-    public byte[] sendDataToProxyServerByteByByte(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
-        if (serviceTypesToEncrypt.contains(serviceType)) {
+    public byte[] sendDataToProxyServerByteByByte(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
+        if (isEncrypted) {
             IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
             writeDataToProxyServer(data, listenerOfDeCodedData);
             getCountDownLatchOutput().await();

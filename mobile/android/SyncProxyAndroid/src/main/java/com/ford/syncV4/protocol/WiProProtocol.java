@@ -347,7 +347,7 @@ public class WiProProtocol extends AbstractProtocol {
                 final byte[] data = accumulator.toByteArray();
                 if (getProtocolSecureManager() != null) {
                     try {
-                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.getServiceType(), data);
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
                         createBigFrame(header, decipheredData);
                     } catch (IOException e) {
                         DebugTool.logError("Decipher error", e);
@@ -429,8 +429,7 @@ public class WiProProtocol extends AbstractProtocol {
                 } else {
                     if (getProtocolSecureManager() != null) {
                         try {
-                            //byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServer(header.getServiceType(), data);
-                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.getServiceType(), data);
+                            byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
                             handleSingleFrameMessageFrame(header, decipheredData);
                         } catch (IOException e) {
                             Log.i(TAG, "Decipher error", e);
@@ -488,10 +487,10 @@ public class WiProProtocol extends AbstractProtocol {
         private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
             if (header.getServiceType().equals(ServiceType.RPC)) {
                 handleProtocolSessionStarted(header.getServiceType(),
-                        header.getSessionID(), header.isEncrypted() ,_version, "");
+                        header.getSessionID(), header.isEncrypted(), _version, "");
             } else {
                 handleProtocolServiceStarted(header.getServiceType(),
-                        header.getSessionID(), header.isEncrypted(),_version, "");
+                        header.getSessionID(), header.isEncrypted(), _version, "");
             }
         }
 
@@ -525,7 +524,7 @@ public class WiProProtocol extends AbstractProtocol {
                 }
 
                 // Set Secure Service payload data
-                if (message.isEncrypted()) {
+                if (message.getServiceType().equals(ServiceType.Heartbeat)) {
                     message.setData(data);
                 }
 
