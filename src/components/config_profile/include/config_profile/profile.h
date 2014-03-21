@@ -399,7 +399,6 @@ class Profile : public utils::Singleton<Profile> {
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
 };
-
 }  //  namespace profile
 
 #endif  // SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
