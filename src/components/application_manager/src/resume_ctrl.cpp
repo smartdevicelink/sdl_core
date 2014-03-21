@@ -470,7 +470,7 @@ void ResumeCtrl::onTimer() {
   std::multiset<application_timestamp, TimeStampComparator>::iterator it=
       waiting_for_timer_.begin();
 
-  for (;it != waiting_for_timer_.end(); ++it) {
+  for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
