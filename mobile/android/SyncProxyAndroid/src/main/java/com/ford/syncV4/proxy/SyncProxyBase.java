@@ -93,6 +93,7 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
 import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.service.secure.SecureServiceMessageManager;
+import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
@@ -544,6 +545,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void onHandshakeError(SecurityInternalError error) {
+                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error, new Exception("Handshake Error " + error));
+                dispatchInternalMessage(proxyMessage);
             }
         });
     }

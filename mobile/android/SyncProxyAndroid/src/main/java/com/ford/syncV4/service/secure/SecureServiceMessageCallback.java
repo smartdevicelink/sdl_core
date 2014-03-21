@@ -35,4 +35,9 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
     public void onHandshakeResponse(byte[] data) {
         protectServiceListener.onHandshakeResponse(data);
     }
+
+    @Override
+    public void onHandshakeError(SecurityInternalError error) {
+        protectServiceListener.onHandshakeError(error);
+    }
 }

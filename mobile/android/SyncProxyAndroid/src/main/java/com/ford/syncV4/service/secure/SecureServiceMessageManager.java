@@ -62,9 +62,10 @@ public class SecureServiceMessageManager {
         Log.d(TAG, "Process Secure, fun id:" + secureServiceFunctionId);
 
         if (secureServiceFunctionId == ProtocolConst.SEND_HANDSHAKE_ID) {
-
             byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
             mMessageCallback.onHandshakeResponse(data);
+        }else{
+            mMessageCallback.onHandshakeError(secureServicePayload.getSecureError());
         }
     }
 }

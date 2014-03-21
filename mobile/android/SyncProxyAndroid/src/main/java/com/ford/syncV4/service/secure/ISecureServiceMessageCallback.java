@@ -24,4 +24,6 @@ public interface ISecureServiceMessageCallback {
      * @param data handshake server to client data
      */
     public void onHandshakeResponse(byte[] data);
+
+    public void onHandshakeError(SecurityInternalError error);
 }

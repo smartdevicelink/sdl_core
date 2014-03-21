@@ -16,4 +16,5 @@ public class ProtocolConst {
 
 
     public static final byte SEND_HANDSHAKE_ID = (byte) 0x00;
+    public static final byte SECURE_ERROR = (byte) 0x01;
 }

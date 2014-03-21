@@ -7,10 +7,8 @@ package com.ford.syncV4.protocol.secure;
  * Time: 1:24 PM
  */
 
-import android.util.Log;
-
 import com.ford.syncV4.protocol.BinaryFrameHeader;
-import com.ford.syncV4.service.secure.ProtectServiceResponse;
+import com.ford.syncV4.service.secure.SecurityInternalError;
 
 /**
  * This class build a payload byte array for the Secure Service
@@ -79,26 +77,26 @@ public class SecureServicePayload {
         return  -1;
     }
 
-    /**
-     * @return {@link com.ford.syncV4.service.secure.ProtectServiceResponse} of the Start securing
-     * service request
-     */
-    public ProtectServiceResponse getStartServiceResponse() {
+    public SecurityInternalError getSecureError() {
         if (mData != null) {
             int result = mData[0];
             switch (result) {
                 case 1:
-                    return ProtectServiceResponse.SUCCESS;
+                    return SecurityInternalError.INVALID_QUERY_SIZE;
                 case 2:
-                    return ProtectServiceResponse.PENDING;
+                    return SecurityInternalError.INVALID_QUERY_ID;
                 case 3:
-                    return ProtectServiceResponse.SERVICE_ALREADY_PROTECTED;
+                    return SecurityInternalError.NULL_DATA;
                 case 4:
-                    return ProtectServiceResponse.SERVICE_NOT_FOUND;
+                    return SecurityInternalError.INVALID_SERVICE_TYPE;
+                case 5:
+                    return SecurityInternalError.PROTECTION_NOT_REQUESTED;
+                case 0xF0:
+                    return SecurityInternalError.SSL_INVALID_DATA;
                 case 255:
-                    return ProtectServiceResponse.INTERNAL_ERROR;
+                    return SecurityInternalError.OTHER_INTERNAL_ERROR;
             }
         }
-        return ProtectServiceResponse.UNKNOWN;
+        return SecurityInternalError.UNKNOWN;
     }
 }

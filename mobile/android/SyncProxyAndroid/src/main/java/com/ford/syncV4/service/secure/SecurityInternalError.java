@@ -10,11 +10,13 @@ package com.ford.syncV4.service.secure;
 /**
  * Response codes for the Secure Service enabling request
  */
-public enum ProtectServiceResponse {
-    SUCCESS,
-    PENDING,
-    SERVICE_ALREADY_PROTECTED,
-    SERVICE_NOT_FOUND,
-    INTERNAL_ERROR,
+public enum SecurityInternalError {
+    INVALID_QUERY_SIZE,
+    INVALID_QUERY_ID,
+    NULL_DATA,
+    INVALID_SERVICE_TYPE,
+    PROTECTION_NOT_REQUESTED,
+    SSL_INVALID_DATA,
+    OTHER_INTERNAL_ERROR,
     UNKNOWN
 }
