@@ -331,15 +331,12 @@ void ResumeCtrl::SavetoFileSystem() {
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
-
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption");
   DCHECK(application.get());
   LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
-  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id());
+  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
-  sync_primitives::AutoLock auto_lock(queue_lock_);
-
-  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  std::vector<Json::Value>::const_iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
@@ -353,14 +350,16 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
         RestoreApplicationData(application);
         application->UpdateHash();
       }
-
-      waiting_for_timer_.insert(std::make_pair(application->app_id(),
-                                               time_stamp));
-      timer_.start(kTimeStep);
+      {
+        sync_primitives::AutoLock auto_lock(queue_lock_);
+        waiting_for_timer_.insert(std::make_pair(application->app_id(),
+                                                 time_stamp));
+        timer_.start(kTimeStep);
+      }
       return true;
     }
   }
-
+  LOG4CXX_INFO(logger_, "ResumeCtrl::Applicaton didn't saved");
   return false;
 }
 
@@ -380,10 +379,10 @@ bool ResumeCtrl::CheckApplicationHash(std::string mobile_app_id, uint32_t hash) 
 }
 
 void ResumeCtrl::onTimer() {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()");
+  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()" << waiting_for_timer_.size());
   sync_primitives::AutoLock auto_lock(queue_lock_);
 
-  std::set<application_timestamp, TimeStampComparator>::iterator it=
+  std::multiset<application_timestamp, TimeStampComparator>::iterator it=
       waiting_for_timer_.begin();
 
   for (;it != waiting_for_timer_.end(); ++it) {

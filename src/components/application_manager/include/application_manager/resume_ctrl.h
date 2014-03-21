@@ -182,7 +182,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     *       wait for timer to resume HMI Level
     *
     */
-    std::set<application_timestamp, TimeStampComparator> waiting_for_timer_;
+    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
 
 
     ApplicationManagerImpl* app_mngr_;
