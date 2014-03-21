@@ -238,6 +238,9 @@ void file_system::Close(std::ofstream* file_stream) {
 std::string file_system::FullPath(const std::string& file) {
   // FILENAME_MAX defined stdio_lim.h was replaced with less value
   // since it seems, that is caused overflow in some cases
+  if (file.size() > 0 && file[0] == '/') {
+    return file;
+  }
 
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];

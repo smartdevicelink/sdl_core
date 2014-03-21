@@ -331,6 +331,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   uint32_t hash_id = 0;
 
+  char* add_info = "";
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
@@ -338,11 +339,24 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     if (!resumer.CheckApplicationHash(mobile_app_id,
                                       hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Hash does not maches");
+      add_info = "Hash does not maches";
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
+      result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Persistent data is missed");
+      add_info = "Persistent data is missed";
+    } else {
+      add_info = " Resume Succesed";
     }
   }
 
-  SendResponse(true, result, "", params);
-  resumer.StartResumption(application, hash_id);
+  SendResponse(true, result, add_info, params);
+  if (result != mobile_apis::Result::RESUME_FAILED) {
+    resumer.StartResumption(application, hash_id);
+  } else {
+    resumer.StartResumptionOnlyHMILevel(application);
+  }
+
 }
 
 mobile_apis::Result::eType
