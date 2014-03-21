@@ -117,14 +117,11 @@ void SecurityManager::Handle(const SecurityMessage &message) {
         LOG4CXX_ERROR(logger_, "Proccess HandshakeData failed");
       }
       break;
-    case SecurityQuery::SEND_INTERNAL_ERROR: {
-      LOG4CXX_INFO(logger_,"Recieved InternalError with Json message"
-                    << message->get_json_message());
-      Json::Value value(message->get_json_message());
-      LOG4CXX_ERROR(logger_,"InternalError error received err_id "
-                    << value["err_id"]);
+    case SecurityQuery::SEND_INTERNAL_ERROR:
+      if(!ProccessInternalError(message)) {
+        LOG4CXX_ERROR(logger_, "Processing income InternalError failed");
       }
-      return;
+      break;
     default: { // SecurityQuery::InvalidQuery
       LOG4CXX_ERROR(logger_, "Unknown query identifier.");
       SendInternalError(message->get_connection_key(),
@@ -204,6 +201,22 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 
   //answer with the same header as income message
   SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
+  return true;
+}
+
+bool SecurityManager::ProccessInternalError(
+    const SecurityMessage &inMessage) {
+  LOG4CXX_INFO(logger_,"Recieved InternalError with Json message"
+                << inMessage->get_json_message());
+
+  Json::Value root;
+  Json::Reader reader;
+  const bool parsingSuccessful =
+      reader.parse(inMessage->get_json_message(), root );
+  if(!parsingSuccessful)
+    return false;
+  Json::Value value(inMessage->get_json_message());
+  LOG4CXX_ERROR(logger_,"Recieved InternalError id " << value[err_id].asString());
   return true;
 }
 

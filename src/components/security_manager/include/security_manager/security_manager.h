@@ -128,7 +128,11 @@ private:
    * \param inMessage SecurityMessage with binary data of handshake
    */
   bool ProccessHandshakeData(const SecurityMessage &inMessage);
-
+  /**
+   * \brief Parse InternalError from mobile side
+   * \param inMessage SecurityMessage with binary data of handshake
+   */
+  bool ProccessInternalError(const SecurityMessage &inMessage);
   /**
    * \brief Send InternallError with text message to Mobiel Application
    * \param connection_key Unique key used by other components as session identifier
