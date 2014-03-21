@@ -1,4 +1,5 @@
 [CW12]
++ SyncProxyAndroid SDK: Add new structure "DeviceInfo"
 * SyncProxyAndroid SDK: PerformAudioPassThru: no OnAudioPassThru notifications
 * SyncProxyAndroid SDK: Connection closes after UnregisterAppInterface
 * SyncProxyTester | SyncProxyAndroid SDK: Add possibility to restart RPC service for the specific Test Cases
