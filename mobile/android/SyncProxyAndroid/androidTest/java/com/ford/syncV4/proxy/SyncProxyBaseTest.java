@@ -217,13 +217,14 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, VERSION, "");
         proxyALM.startAudioDataTransfer();
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(boolean.class);
+        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture(), encryptionCaptor.capture());
     }
 
     public void testStartAudioDataTransferReturnsStream() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.mSyncConnection = mock(SyncConnection.class);
-        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
+        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID, false)).thenReturn(new PipedOutputStream());
         Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, VERSION, "");
@@ -549,9 +550,9 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals(vrSynonyms, proxy.getVrSynonyms());
         assertEquals((Boolean) true, proxy.getIsMediaApp());
         assertEquals(Language.AR_SA, proxy.getSyncLanguageDesired());
-        assertEquals( Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
-        assertEquals( appHMITypeVector, proxy.getAppHMIType());
-        assertEquals( "appID", proxy.getAppID());
+        assertEquals(Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
+        assertEquals(appHMITypeVector, proxy.getAppHMIType());
+        assertEquals("appID", proxy.getAppID());
     }
 
     public void testRPCMessageHandlerIsSetAfterCreation() throws Exception {

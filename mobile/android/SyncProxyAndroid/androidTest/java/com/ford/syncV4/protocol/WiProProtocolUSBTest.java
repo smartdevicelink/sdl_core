@@ -66,10 +66,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             }
 
-            @Override
-            public void onSecureServiceStarted(byte version) {
 
-            }
         };
 
         requiredMethodCalled = false;
@@ -156,10 +153,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             }
 
-            @Override
-            public void onSecureServiceStarted(byte version) {
 
-            }
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);

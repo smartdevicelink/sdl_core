@@ -208,14 +208,14 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferReturnsOutputStream() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID, false);
         assertNotNull("output stream should be created", stream);
     }
 
     public void testStartAudioDataTransferCreatesAudioPacketizer() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
         assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
     }
 
@@ -234,7 +234,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferSetsSessionID() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals("session id should be equal SESSION_ID", SESSION_ID, packetizer.getSessionID());
     }

@@ -53,17 +53,5 @@ public class ServiceTypeTest extends AndroidTestCase {
         assertTrue(ServiceType.containsService(ServiceType.Heartbeat));
     }
 
-    public void testServiceTypeSecureNameIsSecure_Service() throws Exception {
-        String name = ServiceType.Secure_Service.getName();
-        assertEquals(name, "Secure_Service");
-    }
 
-    public void testServiceTypeSecureValueIs11() throws Exception {
-        byte value = ServiceType.Secure_Service.getValue();
-        assertEquals(value, ServiceType.SECURE_SERVICE_ID);
-    }
-
-    public void testSecureServiceIsInServiceTypeList() throws Exception {
-        assertTrue(ServiceType.containsService(ServiceType.Secure_Service));
-    }
 }

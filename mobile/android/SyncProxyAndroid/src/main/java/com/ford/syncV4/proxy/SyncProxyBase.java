@@ -3257,8 +3257,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 onAudioServiceStarted(sessionID, correlationID, encrypted);
             }
         }
-
-
     }
 
     public IRPCRequestConverterFactory getRpcRequestConverterFactory() {
