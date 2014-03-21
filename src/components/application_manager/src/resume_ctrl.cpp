@@ -180,7 +180,24 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
   Json::Value& global_properties = saved_app[strings::application_global_properties];
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
+  Json::Value& application_files= saved_app[strings::application_files];
 
+  // files
+  for (Json::Value::iterator json_it = application_files.begin();
+      json_it != application_files.end(); ++json_it)  {
+    Json::Value& file_data = *json_it;
+
+    bool is_persistent = file_data[strings::persistent_file].asBool();
+    if (is_persistent) {
+      AppFile file;
+      file.is_persistent = is_persistent;
+      file.is_download_complete = file_data[strings::is_download_complete].asBool();
+      file.file_name = file_data[strings::sync_file_name].asString();
+      file.file_type = static_cast<mobile_apis::FileType::eType> (
+                         file_data[strings::file_type].asInt());
+      application->AddFile(file);
+    }
+  }
 
   //add submenus
   for (Json::Value::iterator json_it = app_submenus.begin();
@@ -610,6 +627,7 @@ Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
       file_data[strings::persistent_file] = file.is_persistent;
       file_data[strings::is_download_complete] = file.is_download_complete;
       file_data[strings::sync_file_name] = file.file_name;
+      file_data[strings::file_type] = file.file_type;
       result.append(file_data);
     }
   }

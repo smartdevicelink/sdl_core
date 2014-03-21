@@ -331,7 +331,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   uint32_t hash_id = 0;
 
-  char* add_info = "";
+  const char* add_info = "";
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
