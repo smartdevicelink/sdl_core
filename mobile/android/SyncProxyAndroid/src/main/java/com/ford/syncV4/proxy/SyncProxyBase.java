@@ -483,6 +483,39 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private ProtocolSecureManager protocolSecureManager;
 
+    IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
+
+        @Override
+        public void onHandshakeDataReceived(byte[] data) {
+            ProtocolMessage protocolMessage =
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, serviceToCypher);
+            dispatchOutgoingMessage(protocolMessage);
+        }
+
+        @Override
+        public void onHandShakeCompleted() {
+
+            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
+                registerAppInterface();
+            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
+                onAudioServiceStarted(currentSession.getSessionId(), "");
+            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
+                onMobileNaviServiceStarted(currentSession.getSessionId(), "");
+            }
+        }
+
+        @Override
+        public void onError(Exception e) {
+            String errorMsg = "Secure Connection Error ";
+            if (e.getMessage() != null) {
+                errorMsg = e.getMessage();
+            }
+            InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
+            dispatchInternalMessage(proxyMessage);
+        }
+    };
+
+
     /**
      * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
      *
@@ -1903,38 +1936,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
-
-        @Override
-        public void onHandshakeDataReceived(byte[] data) {
-            ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, serviceToCypher);
-            dispatchOutgoingMessage(protocolMessage);
-        }
-
-        @Override
-        public void onHandShakeCompleted() {
-
-            if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC)) {
-                registerAppInterface();
-            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service)) {
-                onAudioServiceStarted(currentSession.getSessionId(), "");
-            } else if (protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav)) {
-                onMobileNaviServiceStarted(currentSession.getSessionId(), "");
-            }
-        }
-
-        @Override
-        public void onError(Exception e) {
-            String errorMsg = "Secure Connection Error ";
-            if (e.getMessage() != null) {
-                errorMsg = e.getMessage();
-            }
-            InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
-            dispatchInternalMessage(proxyMessage);
-        }
-    };
-
     private void registerAppInterface() {
         restartRPCProtocolSession();
         notifySessionStarted(currentSession.getSessionId(), "");
@@ -3106,6 +3107,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         serviceToCypher = typeToCypher;
     }
 
+    public void startAudioService(Session session) {
+        if (mSyncConnection!=null){
+
+            mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+        }
+    }
+
     // Private Class to Interface with SyncConnection
     public class SyncInterfaceBroker implements ISyncConnectionListener {
 
@@ -3302,7 +3310,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 mSyncConnection.startMobileNavService(currentSession);
             }
             if (currentSession.hasService(ServiceType.Audio_Service)) {
-                mSyncConnection.startAudioService(currentSession);
+                startAudioService(currentSession);
             }
         }
     }

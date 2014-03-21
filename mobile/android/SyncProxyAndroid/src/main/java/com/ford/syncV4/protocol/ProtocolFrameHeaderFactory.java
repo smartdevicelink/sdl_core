@@ -20,11 +20,12 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, byte sessionID, byte version) {
+    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, byte sessionID, byte version, boolean isCyphered) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
+        msg.setEncrypted(isCyphered);
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(0);
         msg.setSessionID(sessionID);

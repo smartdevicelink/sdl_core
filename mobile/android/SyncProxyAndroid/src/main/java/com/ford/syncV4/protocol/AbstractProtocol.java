@@ -69,7 +69,7 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolService(ServiceType serviceType, Session session);
+    public abstract void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered);
 
     // This method ends a protocol currentSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol

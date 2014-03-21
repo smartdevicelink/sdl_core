@@ -71,18 +71,18 @@ public class WiProProtocol extends AbstractProtocol {
     public void StartProtocolSession(byte sessionId) {
         DebugTool.logInfo("Protocol session should start: " + sessionId);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
-                sessionId, _version);
+                sessionId, _version, false);
         sendFrameToTransport(header);
     }
 
-    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
+    public void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered) throws IllegalArgumentException {
         byte sessionId = session.getSessionId();
         DebugTool.logInfo("Protocol service should start: " + serviceType);
         if (sessionId == 0) {
             throw new IllegalArgumentException("currentSession id 0 should be used to start " +
                     "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, _version);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, _version, isCyphered);
         sendFrameToTransport(header);
     } // end-method
 

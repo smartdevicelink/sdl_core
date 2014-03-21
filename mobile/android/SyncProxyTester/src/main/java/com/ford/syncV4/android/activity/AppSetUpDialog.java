@@ -62,7 +62,7 @@ public class AppSetUpDialog extends DialogFragment {
                 getActivity().LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
-        String[] services = new String[]{ServiceType.RPC_NAME, ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
+        String[] services = new String[]{ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
         ArrayAdapter<String> cypherProtocolAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_spinner_item, services);
         cypherProtocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

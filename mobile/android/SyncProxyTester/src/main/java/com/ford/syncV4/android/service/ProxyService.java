@@ -1991,7 +1991,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void syncProxyStartAudioService(Session session) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startAudioService(session);
+            mSyncProxy.startAudioService(session);
         }
     }
 

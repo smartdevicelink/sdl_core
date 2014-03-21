@@ -514,7 +514,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         };
         Session session = new Session();
         session.setSessionId(id);
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
     }
 
     public void testStartSessionWithSessionId() throws Exception {
@@ -534,7 +534,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             Session session = new Session();
             session.setSessionId((byte) 0);
-            protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
             assertTrue("Should not get here", false);
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);

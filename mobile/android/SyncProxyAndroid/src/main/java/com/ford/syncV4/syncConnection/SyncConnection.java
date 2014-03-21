@@ -32,7 +32,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
-import com.ford.syncV4.util.BitConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -356,15 +355,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void startMobileNavService(Session session) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
             }
         }
     }
 
-    public void startAudioService(Session session) {
+    public void startAudioService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+                _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
             }
         }
     }
@@ -396,8 +395,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
-        }else {
-
         }
 
         startProtocolSession();

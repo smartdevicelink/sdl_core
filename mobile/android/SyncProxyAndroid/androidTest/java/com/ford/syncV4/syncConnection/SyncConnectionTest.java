@@ -70,7 +70,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, VERSION);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, VERSION, false);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -183,7 +183,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, VERSION);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, VERSION, false);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -201,7 +201,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.init(config);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setVersion(VERSION);
-        connection.startAudioService(session);
+        connection.startAudioService(session, false);
         assertTrue(isPassed[0]);
     }
 
