@@ -3114,6 +3114,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         serviceToCypher = typeToCypher;
     }
 
+    public void startMobileNavService(Session session){
+        if (mSyncConnection != null) {
+            mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+        }
+    }
+
     public void startAudioService(Session session) {
         if (mSyncConnection != null) {
 
@@ -3306,7 +3312,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void restoreServices() {
         if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             if (currentSession.hasService(ServiceType.Mobile_Nav)) {
-                mSyncConnection.startMobileNavService(currentSession);
+                startMobileNavService(currentSession);
             }
             if (currentSession.hasService(ServiceType.Audio_Service)) {
                 startAudioService(currentSession);

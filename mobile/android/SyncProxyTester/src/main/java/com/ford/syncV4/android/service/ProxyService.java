@@ -2085,7 +2085,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void syncProxyStartMobileNavService(Session session) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startMobileNavService(session);
+            mSyncProxy.startMobileNavService(session);
         }
     }
 

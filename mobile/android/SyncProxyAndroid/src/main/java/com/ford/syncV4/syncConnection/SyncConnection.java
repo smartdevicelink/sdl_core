@@ -352,10 +352,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startMobileNavService(Session session) {
+    public void startMobileNavService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
+                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, isCyphered);
             }
         }
     }
