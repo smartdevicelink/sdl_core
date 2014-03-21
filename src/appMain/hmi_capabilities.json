@@ -83,18 +83,8 @@
                                           	"resolutionWidth":35,
 						"resolutionHeight":35
                                          }
-                        	},
-                        	{
-					"name":"graphic",
-                         		"imageTypeSupported":
-                                	[
-                                	],
-                        		"imageResolution":
-                                         {
-                                          	"resolutionWidth":,
-						"resolutionHeight":
-                                         }
                         	}
+                        	
                         ],
 			"mediaClockFormats":
 			[

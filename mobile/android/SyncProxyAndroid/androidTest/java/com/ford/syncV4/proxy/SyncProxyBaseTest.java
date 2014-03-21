@@ -20,7 +20,7 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;

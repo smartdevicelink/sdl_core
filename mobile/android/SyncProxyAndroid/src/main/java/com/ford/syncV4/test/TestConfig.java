@@ -1,4 +1,4 @@
-package com.ford.syncV4.util;
+package com.ford.syncV4.test;
 
 /**
  * Created with Android Studio.
@@ -32,6 +32,13 @@ public class TestConfig {
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance
      */
     private String mCustomHashId;
+
+    /**
+     * Indicates whether or not it is necessary to call
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} just right after RPC Session is
+     * established
+     */
+    private boolean mDoCallRegisterAppInterface = true;
 
     /**
      * @return a value of the functionality: whether or not to use parameter
@@ -91,5 +98,27 @@ public class TestConfig {
      */
     public void setCustomHashId(String mCustomHashId) {
         this.mCustomHashId = mCustomHashId;
+    }
+
+    /**
+     * @return <b>true</b> if it is necessary to call
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} when RPC session has been established,
+     * <b>false</b> - if not
+     */
+    public boolean isDoCallRegisterAppInterface() {
+        return mDoCallRegisterAppInterface;
+    }
+
+    /**
+     * Set <b>true</b> if it is necessary to call
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} when RPC session has been established,
+     * <b>false</b> - if not.<br/
+     * <b> When set this value to false it is important to revert it back to true when Test is
+     * complete!</b>
+     *
+     * @param mDoCallRegisterAppInterface boolean  value
+     */
+    public void setDoCallRegisterAppInterface(boolean mDoCallRegisterAppInterface) {
+        this.mDoCallRegisterAppInterface = mDoCallRegisterAppInterface;
     }
 }

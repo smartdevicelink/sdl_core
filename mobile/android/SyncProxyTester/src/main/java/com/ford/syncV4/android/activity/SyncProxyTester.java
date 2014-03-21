@@ -565,7 +565,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onProxyClosed() {
         resetAdapters();
-        mLogAdapter.logMessage("Disconnected", true);
     }
 
     @Override
@@ -3388,7 +3387,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             mLatestAddCommand = null;
         } else {
-            Log.w(LOG_TAG, "Latest addCommand is unset");
+            Log.w(LOG_TAG, "Latest addCommand is null");
         }
     }
 

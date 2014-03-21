@@ -52,11 +52,14 @@ FFW.UI = FFW.RPCObserver.create({
     // temp var for debug
     appID: 1,
 
+    onRecordStartSubscribeRequestID: -1,
     onShowNotificationSubscribeRequestID: -1,
 
+    onRecordStartUnsubscribeRequestID: -1,
     onShowNotificationUnsubscribeRequestID: -1,
 
     // const
+    onRecordStartNotification: "UI.OnRecordStart",
     onShowNotificationNotification: "UI.ShowNotification",
 
     /**
@@ -93,6 +96,7 @@ FFW.UI = FFW.RPCObserver.create({
 
         // subscribe to notifications
         this.onShowNotificationSubscribeRequestID = this.client.subscribeToNotification(this.onShowNotificationNotification);
+        this.onRecordStartSubscribeRequestID = this.client.subscribeToNotification(this.onRecordStartNotification);
     },
 
     /**
@@ -105,6 +109,7 @@ FFW.UI = FFW.RPCObserver.create({
 
         // unsubscribe from notifications
         this.onShowNotificationUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onShowNotificationNotification);
+        this.onRecordStartUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onRecordStartNotification);
     },
 
     /**
@@ -144,6 +149,10 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         if (notification.method == this.onShowNotificationNotification) {
+            // to do
+        }
+
+        if (notification.method == this.onRecordStartNotification) {
             // to do
         }
     },

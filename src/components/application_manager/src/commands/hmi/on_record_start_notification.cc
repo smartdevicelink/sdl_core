@@ -30,30 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_tts_stopped_notification.h"
+#include "application_manager/commands/hmi/on_record_start_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnTTSStoppedNotification::OnTTSStoppedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+OnRecordStartdNotification::OnRecordStartdNotification(
+    const MessageSharedPtr& message) : NotificationToHMI(message) {
 }
 
-OnTTSStoppedNotification::~OnTTSStoppedNotification() {
+OnRecordStartdNotification::~OnRecordStartdNotification() {
 }
 
-void OnTTSStoppedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSStoppedNotification::Run");
+void OnRecordStartdNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnRecordStartdNotification::Run");
 
-  event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
-  event.set_smart_object(*message_);
-  event.raise();
-  ApplicationManagerImpl::instance()->Unmute();
-
+  SendNotification();
 }
 
 }  // namespace commands
