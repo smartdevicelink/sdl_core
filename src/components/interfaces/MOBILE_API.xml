@@ -4185,9 +4185,9 @@
   </function>
 
   <function name="UpdateTurnList" functionID="UpdateTurnListID" messagetype="request">
-    <param name="turnList" type="Turn" minsize="1" maxsize="100" array="true">
+    <param name="turnList" type="Turn" minsize="1" maxsize="100" array="true" mandatory="false">
     </param>
-    <param name="softButtons" type="SoftButton" minsize="0" maxsize="1" array="true">
+    <param name="softButtons" type="SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
       <description>If omitted on supported displays, app-defined SoftButton will be left blank.</description>
     </param>
   </function>
