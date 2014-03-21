@@ -665,7 +665,7 @@ bool Profile::ReadStringValue(std::string* value, const char* default_value,
   return true;
 }
 
-bool Profile::ReadIntValue(int32_t* value, int32_t default_value,
+bool Profile::ReadIntValue(int32_t* value, const int32_t default_value,
                            const char* const pSection,
                            const char* const pKey) const {
   DCHECK(value);
@@ -687,5 +687,38 @@ bool Profile::ReadBoolValue(bool* value, const bool default_value,
   const bool result = ReadValue(&read_value, pSection, pKey);
   *value = result ? read_value : default_value;
   return result;
+}
+
+std::list<int> Profile::ReadIntContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const
+{
+  const std::list<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::list<int> value_list;
+  for (std::list<std::string>::const_iterator it = string_list.begin();
+       string_list.end()!=it; ++it) {
+    value_list.push_back(strtol(it->c_str(), NULL, 16));
+    }
+  return value_list;
+}
+
+std::list<std::string> Profile::ReadStringContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const {
+  std::string string;
+  const bool result = ReadValue(&string, pSection, pKey);
+  if(out_result)
+    *out_result = result;
+  std::list<std::string> value_container;
+  if(result) {
+    std::istringstream iss(string);
+    std::string temp_str;
+    while (iss) {
+      if (!getline( iss, temp_str, ',' )) break;
+      value_container.push_back( temp_str);
+    }
+  }
+  return value_container;
 }
 }  //  namespace profile

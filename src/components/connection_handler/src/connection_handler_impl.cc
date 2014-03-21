@@ -220,6 +220,19 @@ void ConnectionHandlerImpl::RemoveConnection(
     return -1;
   }
 
+  //Check deliver-specifis services (which shall/shall not to be protected)
+  const char * section =
+      is_protected ? "ForceUnprotectedService" : "ForceProtectedService";
+  const std::list<int> protecteSpecific =
+      profile::Profile::instance()->ReadIntContainer(
+        "Security Manager", section, NULL);
+  if(protecteSpecific.end() != std::find(
+       protecteSpecific.begin(), protecteSpecific.end(), service_type)) {
+    LOG4CXX_ERROR(logger_, "Service " << service_type << "is specified "
+                  << (is_protected ? "not" : "") << "to be protected");
+    return -1;
+  }
+
   Connection* connection = it->second;
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
     new_session_id = connection->AddNewSession();

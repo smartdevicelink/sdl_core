@@ -35,6 +35,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include <stdint.h>
 #include "utils/macro.h"
 #include "utils/singleton.h"
@@ -310,8 +311,38 @@ class Profile : public utils::Singleton<Profile> {
                        const bool default_value,
                        const char * const pSection,
                        const char * const pKey) const;
-
-  private:
+    /**
+     * @brief Reads an container of string values from the profile,
+     * which handle as "Value1, Value2, Value3"
+     *
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     * @param out_result    Pointer to bool value for result reading Section
+     * (could be NULL)
+     *
+     * @return container of values or empty continer
+     * if could not read the value out of the profile
+     */
+    std::list<std::string> ReadStringContainer(
+        const char * const pSection,
+        const char * const pKey,
+        bool* out_result) const;
+    /**
+     * @brief Reads an container of hex int values from the profile,
+     * which handle as "0x01, 0xA0, 0XFF"
+     *
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     * @param out_result    Pointer to bool value for result reading Section
+     * (could be NULL)
+     *
+     * @return container of values or empty continer
+     * if could not read the value out of the profile
+     */
+    std::list<int> ReadIntContainer( const char * const pSection,
+                                     const char * const pKey,
+                                     bool* out_result) const;
+private:
     /**
      * Default constructor
      *

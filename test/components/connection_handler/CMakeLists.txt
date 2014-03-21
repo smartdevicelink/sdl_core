@@ -7,6 +7,7 @@ include_directories (
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../src/components/security_manager/include
+  ../../../src/components/config_profile/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
@@ -19,7 +20,7 @@ set (LIBRARIES
     connectionHandler
     TransportManager
     Utils
-    ConfigProfile   
+    ConfigProfile
 )
 
 set (SOURCES
