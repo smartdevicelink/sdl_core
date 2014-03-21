@@ -33,7 +33,10 @@
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "utils/byte_order.h"
+#include "json/json.h"
+
 using namespace security_manager;
+static const char* err_id ="ERROR_ID";
 
 log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecurityManager"));
@@ -115,8 +118,11 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR: {
-      LOG4CXX_ERROR(logger_,"InternalError error received "
+      LOG4CXX_INFO(logger_,"Recieved InternalError with Jdon message"
                     << message->get_json_message());
+      Json::Value value(message->get_json_message());
+      LOG4CXX_ERROR(logger_,"InternalError error received err_id "
+                    << value["err_id"]);
       }
       return;
     default: { // SecurityQuery::InvalidQuery
@@ -204,9 +210,9 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 void SecurityManager::SendInternalError(const int32_t connection_key,
                                         const int &error_id,
                                         const uint32_t seq_number) {
-  std::stringstream stream;
-  stream << "{ \"ERROR_ID\":" << error_id << " }";
-  const std::string error_str = stream.str();
+  Json::Value value;
+  value[err_id]=error_id;
+  const std::string error_str = value.toStyledString();
   SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
                                     SecurityQuery::SEND_INTERNAL_ERROR,
                                     seq_number, error_str.size());
