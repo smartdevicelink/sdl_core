@@ -114,6 +114,11 @@ SDL.SDLAppModel = Em.Object.extend({
         TTSVRLanguage: 'EN-US',
 
         /**
+         * List of VR commands
+         */
+        VRCommands: [],
+
+        /**
          * Array of Soft Buttons
          *
          * @type {Array}

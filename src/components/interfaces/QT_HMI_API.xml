@@ -561,6 +561,15 @@
   </element>
 </enum>
 
+<enum name="VRCommandType">
+  <element name="Choice">
+    <description>Type that expound that current AddCommand should be pocessed as choise for initiated PerformInteraction request for current active on HMI.</description>
+  </element>
+  <element name="Command">
+    <description>Type that expound that current AddCommand should be pocessed as common command for current application on HMI.</description>
+  </element>
+</enum>
+
 <!--IVI part-->
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -1953,6 +1962,9 @@
     </param>
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
       <description>List of strings to be used as VR commands.</description>
+    </param>
+    <param name="type" type="Common.VRCommandType" mandatory="true">
+      <description>Type of added command. See VRCommandType.</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>

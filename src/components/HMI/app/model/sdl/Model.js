@@ -58,6 +58,11 @@ SDL.SDLModel = Em.Object.create({
     timeStamp: null,
 
     /**
+     * List of VR commands
+     */
+    VRCommands: [],
+
+    /**
      * Video player object for navigationApp
      *
      * @type {Object}
@@ -356,6 +361,15 @@ SDL.SDLModel = Em.Object.create({
     hmiUILanguage: 'EN-US',
 
     /**
+     * Parameter describes if performInteraction session was started on HMI
+     * this flag set to true when UI.PerformInteraction request came on HMI
+     * and set to false when HMI send response to SDL Core on UI.PerformInteraction request
+     *
+     * @type {Boolean}
+     */
+    performInteractionSession: false,
+
+    /**
      * List of supported languages
      *
      * @type {Array}
@@ -631,14 +645,14 @@ SDL.SDLModel = Em.Object.create({
         }
 
         if (params.ttsName) {
-            SDL.VRPopUp.AddActivateApp(params.ttsName.text ,params.appID);
+            var message = {"cmdID": 0, "vrCommands": [params.ttsName.text], "appID": params.application.appID, "type": "Application"};
+            this.addCommandVR(message);
         }
 
         if (params.vrSynonyms) {
-            var length = params.vrSynonyms.length
-            for (var i = 0; i < length; i++) {
-                SDL.VRPopUp.AddActivateApp(params.vrSynonyms[i] ,params.application.appID);
-            }
+
+            var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};
+            this.addCommandVR(message);
         }
 
         if (params.application.isMediaApplication) {
@@ -818,6 +832,8 @@ SDL.SDLModel = Em.Object.create({
      */
     uiPerformInteraction: function (message) {
 
+        this.set('performInteractionSession', true);
+
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
@@ -834,6 +850,10 @@ SDL.SDLModel = Em.Object.create({
         SDL.InteractionChoicesView.activate(message);
 
         SDL.SDLController.VRMove();
+
+        if (message.choiceSet) {
+            SDL.VRPopUp.hideCommands();
+        }
     },
 
     /**
@@ -944,12 +964,26 @@ SDL.SDLModel = Em.Object.create({
      */
     addCommandVR: function (message) {
 
-        var appId = 0;
-        if ("appID" in message) {
-            appId = message.appID;
+        var appID = 0;
+        if (message.type == "Application") {
+
+            SDL.SDLModel.VRCommands.push(message);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type);
+        } else if ("appID" in message) {
+
+            appID = message.appID;
+
+            SDL.SDLController.getApplicationModel(appID).VRCommands.push(message);
+
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID) {
+
+                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appID, message.type);
+            }
+        } else {
+
+            SDL.SDLModel.VRCommands.push(message);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appID, message.type);
         }
-
-        SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appId);
     },
 
     /**
@@ -958,21 +992,30 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Number}
      */
-    deleteCommandVR: function (commandID) {
+    deleteCommandVR: function (params) {
 
-        SDL.VRPopUp.DeleteCommand(commandID);
+        SDL.VRPopUp.DeleteCommand(params.cmdID, params.appID);
+
+        var len = SDL.SDLController.getApplicationModel(params.appID).VRCommands.length;
+
+        for (var i = len - 1; i >= 0 ; i--) {
+            if (SDL.SDLController.getApplicationModel(params.appID).VRCommands[i].appID == params.appID &&
+                SDL.SDLController.getApplicationModel(params.appID).VRCommands[i].cmdID == params.cmdID) {
+                SDL.SDLController.getApplicationModel(params.appID).VRCommands.splice(i, 1);
+            }
+        }
     },
-
-    /**
-     * SDL VR DeleteCommand response handler delete command from voice
-     * recognition window
-     *
-     * @param {Number}
-     */
-    deleteCommandVR: function (commandID) {
-
-        SDL.VRPopUp.DeleteCommand(commandID);
-    },
+//
+//    /**
+//     * SDL VR DeleteCommand response handler delete command from voice
+//     * recognition window
+//     *
+//     * @param {Number}
+//     */
+//    deleteCommandVR: function (commandID) {
+//
+//        SDL.VRPopUp.DeleteCommand(commandID);
+//    },
 
     onDeactivateApp: function (target, appID) {
 

@@ -1264,6 +1264,8 @@ FFW.UI = FFW.RPCObserver.create({
             };
         }
 
+        SDL.SDLModel.set('performInteractionSession', false);
+
         this.client.send(JSONMessage);
     },
 
