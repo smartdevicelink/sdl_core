@@ -8,11 +8,9 @@ import java.io.IOException;
 public interface ISSLComponent {
     void setupClient() throws IOException;
 
-
-
     void writeData(byte[] data) throws IOException;
 
-    void setRPCPacketListener(IRCCodedDataListener RPCPacketListener);
+    void setRPCPacketListener(IRPCodedDataListener RPCPacketListener);
 
-    IRCCodedDataListener getRPCPacketListener();
+    IRPCodedDataListener getRPCPacketListener();
 }

@@ -27,7 +27,7 @@ public class SSLClient implements ISSLComponent {
     private SSLSocket socket;
     ITransportListener transportListener;
     private SSLClientReader sslClientReader;
-    private IRCCodedDataListener RPCPacketListener;
+    private IRPCodedDataListener RPCPacketListener;
 
 
     public SSLClient(ITransportListener transportListener, HandshakeCompletedListener handshakeCompletedListener) {
@@ -96,12 +96,12 @@ public class SSLClient implements ISSLComponent {
     }
 
     @Override
-    public void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
+    public void setRPCPacketListener(IRPCodedDataListener RPCPacketListener) {
         this.RPCPacketListener = RPCPacketListener;
     }
 
     @Override
-    public IRCCodedDataListener getRPCPacketListener() {
+    public IRPCodedDataListener getRPCPacketListener() {
         return RPCPacketListener;
     }
 

@@ -17,7 +17,7 @@ public class SecureProxyClient implements ISSLComponent {
 
     private ITransportListener transportListener;
     private ISecureProxyServer sourceStream;
-    private IRCCodedDataListener RPCPacketListener;
+    private IRPCodedDataListener RPCPacketListener;
     private InputStream inputStream;
     private OutputStream outputStream;
     private Socket socket;
@@ -37,11 +37,11 @@ public class SecureProxyClient implements ISSLComponent {
         outputStream.write(data);
     }
 
-    public synchronized void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
+    public synchronized void setRPCPacketListener(IRPCodedDataListener RPCPacketListener) {
         this.RPCPacketListener = RPCPacketListener;
     }
 
-    public synchronized IRCCodedDataListener getRPCPacketListener() {
+    public synchronized IRPCodedDataListener getRPCPacketListener() {
         return RPCPacketListener;
     }
 

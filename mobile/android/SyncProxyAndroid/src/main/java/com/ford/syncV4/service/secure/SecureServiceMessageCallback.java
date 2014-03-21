@@ -7,9 +7,6 @@ package com.ford.syncV4.service.secure;
  * Time: 5:08 PM
  */
 
-import android.util.Log;
-
-import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
 
 /**
@@ -32,23 +29,6 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
      */
     public void setSessionId(byte mSessionId) {
         this.mSessionId = mSessionId;
-    }
-
-    @Override
-    public void onProtectServiceResponse(ProtectServiceResponse result, ServiceType serviceType) {
-        Log.d(TAG, "ProtectServiceResponse:" + result);
-
-        if (protectServiceListener == null) {
-            Log.w(TAG, SecureServiceMessageCallback.class.getSimpleName() +
-                    " protectServiceListener is NULL");
-            return;
-        }
-
-        switch (result) {
-            case SUCCESS:
-                protectServiceListener.onProtectServiceStarted(mSessionId, serviceType);
-                break;
-        }
     }
 
     @Override

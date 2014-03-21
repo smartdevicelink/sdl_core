@@ -30,7 +30,7 @@ public class SSLServer implements ISSLComponent {
 
     private final HandshakeCompletedListener handshakeCompletedListener;
     ITransportListener transportListener;
-    private IRCCodedDataListener RPCPacketListener;
+    private IRPCodedDataListener RPCPacketListener;
     private SSLServerReader sslServerReader;
     private Socket socket;
 
@@ -52,12 +52,12 @@ public class SSLServer implements ISSLComponent {
     }
 
     @Override
-    public void setRPCPacketListener(IRCCodedDataListener RPCPacketListener) {
+    public void setRPCPacketListener(IRPCodedDataListener RPCPacketListener) {
         this.RPCPacketListener = RPCPacketListener;
     }
 
     @Override
-    public IRCCodedDataListener getRPCPacketListener() {
+    public IRPCodedDataListener getRPCPacketListener() {
         return RPCPacketListener;
     }
 

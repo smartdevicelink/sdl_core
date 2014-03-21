@@ -15,15 +15,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  */
 public interface ISecureServiceMessageCallback {
 
-    /**
-     * Call this callback when response for the
-     * {@link com.ford.syncV4.service.secure.SecureServiceMessageFactory#buildProtectServiceRequest(byte, com.ford.syncV4.protocol.enums.ServiceType)}
-     * is received
-     *
-     * @param result {@link ProtectServiceResponse}
-     * @param serviceType a type of the Service
-     */
-    public void onProtectServiceResponse(ProtectServiceResponse result, ServiceType serviceType);
 
     /**
      * Call this callback when response for the

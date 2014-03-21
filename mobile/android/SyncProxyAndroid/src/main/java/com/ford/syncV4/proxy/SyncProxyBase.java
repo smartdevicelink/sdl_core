@@ -21,7 +21,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.secure.secureproxy.IHandshakeDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
-import com.ford.syncV4.protocol.secure.secureproxy.IRCCodedDataListener;
+import com.ford.syncV4.protocol.secure.secureproxy.IRPCodedDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -531,15 +531,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             return;
         }
         mSecureServiceMessageCallback.setSyncConnection(new IProtectServiceListener() {
-            @Override
-            public void onProtectServiceStarted(byte sessionId, ServiceType serviceType) {
-                protocolSecureManager.startHandShake();
-            }
 
             @Override
             public void onHandshakeResponse(byte[] data) {
                 try {
-                    protocolSecureManager.writeDataToProxyServer(data, new IRCCodedDataListener() {
+                    protocolSecureManager.writeDataToProxyServer(data, new IRPCodedDataListener() {
                         @Override
                         public void onRPCPayloadCoded(byte[] bytes) {
 
@@ -3179,12 +3175,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolMessageReceived(ProtocolMessage msg) {
             Log.d(TAG, "ProtocolMessageReceived:" + msg.getServiceType());
 
-            // TODO Process Secure Service first (start secure service, handshake response, etc ...) and
+
             // do not put these messages into queue
-//            if (msg.getServiceType() == ServiceType.Secure_Service) {
-//                mSecureServiceMessageManager.processMessage(msg);
-//                return;
-//            }
+            if (msg.getServiceType() == ServiceType.Heartbeat) {
+                mSecureServiceMessageManager.processMessage(msg);
+                return;
+            }
 
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data

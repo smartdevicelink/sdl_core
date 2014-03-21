@@ -24,7 +24,7 @@ public class ProtocolSecureManager {
 
     private IHandshakeDataListener handshakeDataListener;
     private ISecureProxyServer listener;
-    ISSLComponent secureProxyServer;
+    ISSLComponent secureProxy;
     ISSLComponent sslClient;
     private boolean handshakeFinished;
     private CountDownLatch countDownLatchInput = new CountDownLatch(1);
@@ -66,16 +66,12 @@ public class ProtocolSecureManager {
         this.handshakeDataListener = listener;
     }
 
-    public void startHandShake() {
-
-    }
-
     public void setupSecureEnvironment() {
         startSSLComponent();
     }
 
     private void startProxy() {
-        secureProxyServer = new SecureProxyClient(new ISecureProxyServer() {
+        secureProxy = new SecureProxyClient(new ISecureProxyServer() {
             @Override
             public void onDataReceived(byte[] data) {
                 if (!handshakeFinished) {
@@ -111,9 +107,9 @@ public class ProtocolSecureManager {
                 }
         );
         try {
-            secureProxyServer.setupClient();
+            secureProxy.setupClient();
         } catch (IOException e) {
-            DebugTool.logError("Failed to setup secureProxyServer", e);
+            DebugTool.logError("Failed to setup secureProxy", e);
         }
     }
 
@@ -165,7 +161,7 @@ public class ProtocolSecureManager {
 
     public synchronized byte[] sendDataToProxyServer(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
         if (serviceTypesToEncrypt.contains(serviceType)) {
-            writeDataToProxyServer(data, new IRCCodedDataListener() {
+            writeDataToProxyServer(data, new IRPCodedDataListener() {
                 @Override
                 public void onRPCPayloadCoded(byte[] bytes) {
                     if (handshakeFinished) {
@@ -184,7 +180,7 @@ public class ProtocolSecureManager {
 
     public byte[] sendDataToProxyServerByteByByte(ServiceType serviceType, byte[] data) throws IOException, InterruptedException {
         if (serviceTypesToEncrypt.contains(serviceType)) {
-            IRCCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
+            IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
             writeDataToProxyServer(data, listenerOfDeCodedData);
             getCountDownLatchOutput().await();
             return deCypheredData;
@@ -194,14 +190,13 @@ public class ProtocolSecureManager {
     }
 
 
-    public synchronized void writeDataToProxyServer(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
-        sslClient.setRPCPacketListener(ircCodedDataListener);
-        secureProxyServer.writeData(data);
-
+    public synchronized void writeDataToProxyServer(byte[] data, IRPCodedDataListener rpcCodedDataListener) throws IOException {
+        sslClient.setRPCPacketListener(rpcCodedDataListener);
+        secureProxy.writeData(data);
     }
 
-    public synchronized void writeDataToSSLSocket(byte[] data, IRCCodedDataListener ircCodedDataListener) throws IOException {
-        secureProxyServer.setRPCPacketListener(ircCodedDataListener);
+    public synchronized void writeDataToSSLSocket(byte[] data, IRPCodedDataListener IRPCodedDataListener) throws IOException {
+        secureProxy.setRPCPacketListener(IRPCodedDataListener);
         sslClient.writeData(data);
     }
 
@@ -228,7 +223,7 @@ public class ProtocolSecureManager {
         handshakeDataListener.onError(e);
     }
 
-    private class RPCDeCodedDataListener implements IRCCodedDataListener {
+    private class RPCDeCodedDataListener implements IRPCodedDataListener {
 
         ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
 
@@ -272,7 +267,7 @@ public class ProtocolSecureManager {
         }
     }
 
-    private class RPCCodedDataListener implements IRCCodedDataListener {
+    private class RPCCodedDataListener implements IRPCodedDataListener {
 
         ByteArrayOutputStream bOutput = new ByteArrayOutputStream();
 

@@ -61,30 +61,10 @@ public class SecureServiceMessageManager {
 
         Log.d(TAG, "Process Secure, fun id:" + secureServiceFunctionId);
 
-        if (secureServiceFunctionId == ProtocolConst.PROTECT_SERVICE_RESPONSE_ID) {
+        if (secureServiceFunctionId == ProtocolConst.SEND_HANDSHAKE_ID) {
 
-            ProtectServiceResponse protectServiceResponse = secureServicePayload.getStartServiceResponse();
-            Log.d(TAG, "Process Secure, response:" + protectServiceResponse);
-
-            if (protectServiceResponse == ProtectServiceResponse.SUCCESS) {
-                SecureServiceRequestResponseSeqNumberHolder holder =
-                        SecureServiceRequestResponseSeqNumberHolder.getInstance();
-
-                ServiceType serviceType = holder.getServiceTypeBySeqNumber(secureServicePayload.getSeqNumber());
-
-                Log.d(TAG, "Process Secure. Service type:" + serviceType);
-
-                if (serviceType != null) {
-                    mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
-                }
-            }
+            byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
+            mMessageCallback.onHandshakeResponse(data);
         }
-        else{
-            if (protocolMessage.getFunctionID() == 3){
-                byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
-                mMessageCallback.onHandshakeResponse(data);
-            }
-        }
-        //mMessageCallback.onProtectServiceResponse(ProtectServiceResponse.SUCCESS, serviceType);
     }
 }

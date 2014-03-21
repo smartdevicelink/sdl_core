@@ -18,14 +18,14 @@ public class ServiceType extends ByteEnumer {
     public static final String BULK_DATA_NAME = "Bulk_Data";
     public static final String MOBILE_NAV_NAME = "Mobile_Nav";
     public static final String AUDIO_SERVICE_NAME = "Audio_Service";
-    public static final String SECURE_SERVICE_NAME = "Secure_Service";
+    
 
     private static Vector sVector = new Vector();
 
     protected ServiceType(byte value, String name) {
         super(value, name);
     }
-
+    //TODO rename to control service
     public final static ServiceType Heartbeat = new ServiceType(HEARTBEAT_SERVICE_ID,
             HEARTBEAT_SERVICE_NAME);
     public final static ServiceType RPC = new ServiceType(RPC_SERVICE_ID,

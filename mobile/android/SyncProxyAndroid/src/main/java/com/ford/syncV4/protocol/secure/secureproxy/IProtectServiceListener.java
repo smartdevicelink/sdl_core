@@ -7,7 +7,5 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  */
 public interface IProtectServiceListener {
 
-    public void onProtectServiceStarted(byte sessionId, ServiceType serviceType);
-
     public void onHandshakeResponse(byte[] data);
 }
