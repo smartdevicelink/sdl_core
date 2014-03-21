@@ -83,7 +83,7 @@ class ConnectionHandlerTest: public ::testing::Test {
   }
   //Check Service Wrapper
   void CheckService(const int connectionId, const int session_id,
-                    const protocol_handler::ServiceType service,
+                    const protocol_handler::ServiceType serviceId,
                     const security_manager::SSLContext* ssl_context,
                     const bool is_protected) {
     //check all tree to find Service and check own protected value
@@ -95,8 +95,7 @@ class ConnectionHandlerTest: public ::testing::Test {
 
     const SessionMap& session_map = connection.session_map();
     ASSERT_FALSE(session_map.empty());
-    // Hint: session id handled in connection with +1
-    SessionMap::const_iterator sess_it = session_map.find(session_id + 1);
+    SessionMap::const_iterator sess_it = session_map.find(session_id);
     ASSERT_NE(sess_it, session_map.end());
     const Session& session = sess_it->second;
 
@@ -105,7 +104,7 @@ class ConnectionHandlerTest: public ::testing::Test {
     const ServiceList& service_list = session.service_list;
     ASSERT_FALSE(service_list.empty());
     ServiceList::const_iterator serv_it =
-        std::find(service_list.begin(), service_list.end(), service);
+        std::find(service_list.begin(), service_list.end(), serviceId);
     ASSERT_NE(serv_it, service_list.end());
 
     const Service& service = *serv_it;
@@ -121,23 +120,21 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
   const uint8_t sessionID = 0;
   //start new session with RPC service
   const int32_t result_fail =
-      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc, true);
+      connection_handler_->OnSessionStartedCallback(uid, sessionID,
+                                                    protocol_handler::kRpc, true);
   //Unknown connection error is '-1'
   EXPECT_EQ(result_fail, -1);
   EXPECT_TRUE(connection_handler_->getConnectionList().empty());
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
-  //null sessionId for start new session
-  const uint8_t sessionID = 0;
-
   //Add virtual device and connection
   AddTestDeviceConnection();
 
   //start new session with RPC service
   const int32_t session_id_on_rpc_secure =
-      connection_handler_->OnSessionStartedCallback(uid, sessionID, protocol_handler::kRpc,
-                                                    false);
+      connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                    protocol_handler::kRpc, false);
   EXPECT_NE(session_id_on_rpc_secure, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
@@ -153,15 +150,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
-  //null sessionId for start new session
-  const uint8_t start_session_id = 0;
-
   //Add virtual device and connection
   AddTestDeviceConnection();
 
   //start new session with RPC service
   const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     false);
   EXPECT_NE(session_id, -1);
@@ -169,7 +163,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   EXPECT_EQ(connection_list.size(), 1);
   EXPECT_EQ(connection_list.begin()->first, 0);
 
-  //start new session with RPC service
+  //start new session with Audio service
   const int32_t session_id_on_start_secure =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
@@ -181,15 +175,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
 }
 
 TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
-  //null sessionId for start new session
-  const uint8_t start_session_id = 0;
-
   //Add virtual device and connection
   AddTestDeviceConnection();
 
   //start new session with RPC service
   const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     false);
   EXPECT_NE(session_id, -1);
@@ -218,59 +209,120 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
 }
 // FIXME (EZamakhov) Add test with create secured services and create kContorl Service
 
-TEST_F(ConnectionHandlerTest, SessionStarted_SecureSpecific_StartSessionProtect) {
+TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {
   //Add virtual device and connection
   AddTestDeviceConnection();
 
   //Forbid start kRPC without encryption
   SetSpecificServices("0x07", "");
-  //null sessionId for start new session
-  const uint8_t start_session_id = 0;
   //start new session with RPC service
   const int32_t session_id_fail =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     false);
   EXPECT_EQ(session_id_fail, -1);
 
   //Allow start kRPC without encryption
-  SetSpecificServices("Non", "");
-  //null sessionId for start new session
+  SetSpecificServices("0x00, Non", "");
   //start new session with RPC service
   const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     false);
   EXPECT_NE(session_id, -1);
-  CheckService(uid, start_session_id, protocol_handler::kRpc, NULL, false);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
 }
-TEST_F(ConnectionHandlerTest, SessionStarted_SecureSpecific_StartSessionUnprotect) {
+TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect) {
   //Add virtual device and connection
   AddTestDeviceConnection();
 
   //Forbid start kRPC with encryption
-  SetSpecificServices("", "0x07");
-  //null sessionId for start new session
-  const uint8_t start_session_id = 0;
+  SetSpecificServices("", "0x06, 0x07, 0x08, Non");
   //start new session with RPC service
   const int32_t session_id_fail =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     true);
   EXPECT_EQ(session_id_fail, -1);
 
   //Allow start kRPC with encryption
-  SetSpecificServices("Non", "");
-  //null sessionId for start new session
+  SetSpecificServices("", "0x00, 0x05, Non");
   //start new session with RPC service
   const int32_t session_id =
-      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+      connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
                                                     true);
   EXPECT_NE(session_id, -1);
 
   //Protection steal FALSE because of APPlink Protocol implementation
-  CheckService(uid, start_session_id, protocol_handler::kRpc, NULL, false);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+  // TODO (EZamakhov) add test - protect kRPC
+}
+TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprotect) {
+  AddTestDeviceConnection();
+
+  ASSERT_EQ(0x0A, protocol_handler::kAudio);
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                    protocol_handler::kRpc,
+                                                    false);
+  EXPECT_NE(session_id, -1);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+
+  //Audio is 0x0A
+  ASSERT_EQ(0x0A, protocol_handler::kAudio);
+
+  //Forbid start kAudio without encryption
+  SetSpecificServices("0x06, 0x0A, 0x08, Non", "");
+  //start new session with Audio service
+  const int32_t session_id2 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    false);
+  EXPECT_EQ(session_id2, -1);
+
+  //Allow start kAudio without encryption
+  SetSpecificServices("0x06, 0x0B, 0x08, Non", "");
+  const int32_t session_id3 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    false);
+  EXPECT_NE(session_id3, -1);
+  EXPECT_EQ(session_id3, session_id);
+  CheckService(uid, session_id3, protocol_handler::kRpc, NULL, false);
+}
+TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect) {
+  AddTestDeviceConnection();
+
+  ASSERT_EQ(0x0A, protocol_handler::kAudio);
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                    protocol_handler::kRpc,
+                                                    false);
+  EXPECT_NE(session_id, -1);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+
+  //Audio is 0x0A
+  ASSERT_EQ(0x0A, protocol_handler::kAudio);
+
+  //Forbid start kAudio with encryption
+  SetSpecificServices("", "0x06, 0x0A, 0x08, Non");
+  //start new session with Audio service
+  const int32_t session_id2 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    true);
+  EXPECT_EQ(session_id2, -1);
+
+  //Allow start kAudio without encryption
+  SetSpecificServices("", "Non");
+  const int32_t session_id3 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    true);
+  EXPECT_NE(session_id3, -1);
+  EXPECT_EQ(session_id3, session_id);
+  CheckService(uid, session_id3, protocol_handler::kAudio, NULL, true);
 }
 
 } // connection_handle_test
