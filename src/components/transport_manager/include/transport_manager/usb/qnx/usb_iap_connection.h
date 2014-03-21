@@ -51,6 +51,8 @@ class UsbIAPConnection : public Connection {
     TransportAdapterController* controller,
     const char* device_path);
 
+  ~UsbIAPConnection();
+
   bool Init();
 
  protected:
@@ -60,6 +62,8 @@ class UsbIAPConnection : public Connection {
  private:
   void OnDataReceived(RawMessageSptr message);
   void OnReceiveFailed();
+  void OnSessionOpened(int session_id);
+  void OnSessionClosed();
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -71,23 +75,29 @@ class UsbIAPConnection : public Connection {
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
 
-  static const char* protocol;
-
   class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:
-    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, int session_id, UsbIAPConnection* parent);
+    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, UsbIAPConnection* parent);
     virtual bool ArmEvent(struct sigevent* event);
     virtual void OnPulse();
 
    private:
     static const size_t kBufferSize = 1024;
+    static const size_t kEventsBufferSize = 32;
+    static const int kProtocolNameSize = 256;
 
-    void receive();
+    void ParseEvents();
+    void AcceptSession(uint32_t protocol_id);
+    void CloseSession(uint32_t session_id);
+    void ReceiveData(uint32_t session_id);
+    void OpenSession(uint32_t protocol_id);
 
     UsbIAPConnection* parent_;
     ipod_hdl_t* ipod_hdl_;
     int session_id_;
     uint8_t buffer_[kBufferSize];
+    ipod_eaf_event_t events_[kEventsBufferSize];
+    char protocol_name_[kProtocolNameSize];
   };
 };
 

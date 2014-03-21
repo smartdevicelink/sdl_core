@@ -1,8 +1,5 @@
-/**
- * \file usb_connection_factory.cc
- * \brief UsbConnectionFactory class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +34,10 @@
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
-#if defined(__QNX__) || defined(__QNXNTO__)
+#if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
+#include "transport_manager/usb/qnx/usb_iap_connection.h"
+#include "transport_manager/usb/qnx/usb_iap2_connection.h"
 #else
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
@@ -67,18 +66,38 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection =
+  PlatformUsbDevice* platform_device = usb_device->usb_device();
+  ConnectionSptr connection;
+  bool initialized = false;
+  if (IsAppleIAPDevice(platform_device)) {
+    UsbIAPConnection* usb_connection =
+      new UsbIAPConnection(device_uid, app_handle, controller_, "/fs/ipod0");
+    connection = usb_connection;
+    initialized = usb_connection->Init();
+  }
+  else if (IsAppleIAP2Device(platform_device)) {
+    UsbIAP2Connection* usb_connection =
+      new UsbIAP2Connection(device_uid, app_handle, controller_, "/dev/ipod0");
+    connection = usb_connection;
+    initialized = usb_connection->Init();
+  }
+  else {
+    UsbConnection* usb_connection =
       new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-                        usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
+        usb_device->usb_device());
+    connection = usb_connection;
+    initialized = usb_connection->Init();
+  }
 
   controller_->ConnectionCreated(connection, device_uid, app_handle);
-  if (!usb_connection->Init()) {
+
+  if (initialized) {
+    LOG4CXX_INFO(logger_, "USB connection initialised");
+    return TransportAdapter::OK;
+  }
+  else {
     return TransportAdapter::FAIL;
   }
-  LOG4CXX_INFO(logger_, "Usb connection initialised");
-
-  return TransportAdapter::OK;
 }
 
 void UsbConnectionFactory::Terminate() {}

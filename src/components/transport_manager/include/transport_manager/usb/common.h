@@ -1,8 +1,5 @@
-/**
- * \file common.h
- * \brief TM USB adapter common definitions
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +37,7 @@
 
 #include "utils/shared_ptr.h"
 
-#if defined(__QNX__) || (__QNXNTO__)
+#if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_handler.h"
 #else
 #include "transport_manager/usb/libusb/usb_handler.h"
@@ -86,6 +83,31 @@ class UsbDeviceListener {
  private:
   UsbHandlerSptr usb_handler_;
 };
+
+inline bool IsGoogleAccessory(const PlatformUsbDevice* device) {
+  return (kAoaVid == device->vendor_id()) &&
+    ((kAoaPid1 == device->product_id()) || (kAoaPid2 == device->product_id()));
+}
+
+inline bool IsAppleIAPDevice(const PlatformUsbDevice* device) {
+  return (kAppleVid == device->vendor_id()) &&
+    ((kApplePid1 == device->product_id()) ||
+     (kApplePid2 == device->product_id()) ||
+     (kApplePid3 == device->product_id()) ||
+     (kApplePid4 == device->product_id()) ||
+     (kApplePid5 == device->product_id()) ||
+     (kApplePid6 == device->product_id()) ||
+     (kApplePid7 == device->product_id()));
+}
+
+inline bool IsAppleIAP2Device(const PlatformUsbDevice* device) {
+  return (kAppleVid == device->vendor_id()) &&
+    (kApplePid8 == device->product_id());
+}
+
+inline bool IsAppleDevice(const PlatformUsbDevice* device) {
+  return IsAppleIAPDevice(device) || IsAppleIAP2Device(device);
+}
 
 }  // namespace
 }  // namespace

@@ -48,23 +48,23 @@ UsbIAP2Connection::UsbIAP2Connection(const DeviceUID& device_uid,
 }
 
 bool UsbIAP2Connection::Init() {
-  LOG4CXX_TRACE(logger_, "Connecting to " << device_path_);
+  LOG4CXX_TRACE(logger_, "USB iAP2: connecting to " << device_path_);
   iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);
   if (iap2_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "Connected to " << device_path_);
+    LOG4CXX_DEBUG(logger_, "USB iAP2: connected to " << device_path_);
   }
   else {
-    LOG4CXX_ERROR(logger_, "Could not connect to " << device_path_);
+    LOG4CXX_ERROR(logger_, "USB iAP2: could not connect to " << device_path_);
     return false;
   }
 
-  LOG4CXX_TRACE(logger_, "Opening protocol " << protocol);
+  LOG4CXX_TRACE(logger_, "USB iAP2: opening protocol " << protocol);
   iap2ea_hdl_ = iap2_eap_open(device_path_.c_str(), protocol, 0);
   if (iap2ea_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "Protocol " << protocol << " opened");
+    LOG4CXX_DEBUG(logger_, "USB iAP2: protocol " << protocol << " opened");
   }
   else {
-    LOG4CXX_ERROR(logger_, "Could not open protocol " << protocol);
+    LOG4CXX_ERROR(logger_, "USB iAP2: could not open protocol " << protocol);
     return false;
   }
 
@@ -95,21 +95,21 @@ TransportAdapter::Error UsbIAP2Connection::Disconnect() {
 
   receiver_thread_->stop();
 
-  LOG4CXX_TRACE(logger_, "Closing protocol " << protocol);
+  LOG4CXX_TRACE(logger_, "USB iAP2: closing protocol " << protocol);
   if (iap2_eap_close(iap2ea_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Protocol " << protocol << " closed");
+    LOG4CXX_DEBUG(logger_, "USB iAP2: protocol " << protocol << " closed");
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not close protocol " << protocol);
+    LOG4CXX_WARN(logger_, "USB iAP2: could not close protocol " << protocol);
     error = TransportAdapter::FAIL;
   }
 
-  LOG4CXX_TRACE(logger_, "Disconnecting from " << device_path_);
+  LOG4CXX_TRACE(logger_, "USB iAP2: disconnecting from " << device_path_);
   if (iap2_disconnect(iap2_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Disconnected from " << device_path_);
+    LOG4CXX_DEBUG(logger_, "USB iAP2: disconnected from " << device_path_);
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not disconnect from " << device_path_);
+    LOG4CXX_WARN(logger_, "USB iAP2: could not disconnect from " << device_path_);
     error = TransportAdapter::FAIL;
   }
 
@@ -143,7 +143,7 @@ bool UsbIAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event)
     case 1: // data is available
       LOG4CXX_DEBUG(logger_, "USB iAP2: data is already available");
       receive();
-      return false;
+      return false; // don't need to wait for Pulse in this case
   }
   return false;
 }
@@ -153,8 +153,6 @@ void UsbIAP2Connection::ReceiverThreadDelegate::OnPulse() {
 }
 
 void UsbIAP2Connection::ReceiverThreadDelegate::receive() {
-// this method can be invoked from the only thread
-// thus it does not need any synchronization
   LOG4CXX_TRACE(logger_, "USB iAP2: receiving data");
   int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
   if (size != -1) {
