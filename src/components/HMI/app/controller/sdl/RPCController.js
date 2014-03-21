@@ -992,24 +992,6 @@ SDL.RPCController = Em.Object
                             return this.resultStruct;
                         }
                     }
-                    if (params.turnList == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'navigationTexts' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.turnList.length < 1) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'navigationTexts'!"
-                        };
-
-                        return this.resultStruct;
-                    }
                     if ("turnList" in params) {
 
                         for ( var i = 0; i < params.turnList.length; i++) {

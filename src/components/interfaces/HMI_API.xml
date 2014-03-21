@@ -797,31 +797,31 @@
   <element name="VEHICLEDATA_GPS">
     <description>Notifies GPSData may be subscribed</description>
   </element>
-  <element name="VEHICLEDATA_SPEED" />
-  <element name="VEHICLEDATA_RPM" />
-  <element name="VEHICLEDATA_FUELLEVEL" />
-  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
-  <element name="VEHICLEDATA_FUELCONSUMPTION" />
-  <element name="VEHICLEDATA_EXTERNTEMP" />
-  <element name="VEHICLEDATA_VIN" />
-  <element name="VEHICLEDATA_PRNDL" />
-  <element name="VEHICLEDATA_TIREPRESSURE" />
-  <element name="VEHICLEDATA_ODOMETER" />
-  <element name="VEHICLEDATA_BELTSTATUS" />
-  <element name="VEHICLEDATA_BODYINFO" />
-  <element name="VEHICLEDATA_DEVICESTATUS" />
-  <element name="VEHICLEDATA_ECALLINFO" />
-  <element name="VEHICLEDATA_AIRBAGSTATUS" />
-  <element name="VEHICLEDATA_EMERGENCYEVENT" />
-  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
-  <element name="VEHICLEDATA_MYKEY" />
-  <element name="VEHICLEDATA_BRAKING" />
-  <element name="VEHICLEDATA_WIPERSTATUS" />
-  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
-  <element name="VEHICLEDATA_BATTVOLTAGE" />
-  <element name="VEHICLEDATA_ENGINETORQUE" />
-  <element name="VEHICLEDATA_ACCPEDAL" />
-  <element name="VEHICLEDATA_STEERINGWHEEL" />
+    <element name="VEHICLEDATA_SPEED" />
+    <element name="VEHICLEDATA_RPM" />
+    <element name="VEHICLEDATA_FUELLEVEL" />
+    <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+    <element name="VEHICLEDATA_FUELCONSUMPTION" />
+    <element name="VEHICLEDATA_EXTERNTEMP" />
+    <element name="VEHICLEDATA_VIN" />
+    <element name="VEHICLEDATA_PRNDL" />
+    <element name="VEHICLEDATA_TIREPRESSURE" />
+    <element name="VEHICLEDATA_ODOMETER" />    
+    <element name="VEHICLEDATA_BELTSTATUS" />
+    <element name="VEHICLEDATA_BODYINFO" />
+    <element name="VEHICLEDATA_DEVICESTATUS" />
+    <element name="VEHICLEDATA_ECALLINFO"/>
+    <element name="VEHICLEDATA_AIRBAGSTATUS"/>
+    <element name="VEHICLEDATA_EMERGENCYEVENT"/>
+    <element name="VEHICLEDATA_CLUSTERMODESTATUS"/>
+    <element name="VEHICLEDATA_MYKEY"/>
+    <element name="VEHICLEDATA_BRAKING" />  
+    <element name="VEHICLEDATA_WIPERSTATUS" />
+    <element name="VEHICLEDATA_HEADLAMPSTATUS" /> 
+    <element name="VEHICLEDATA_BATTVOLTAGE" />
+    <element name="VEHICLEDATA_ENGINETORQUE" />          
+    <element name="VEHICLEDATA_ACCPEDAL" />         
+    <element name="VEHICLEDATA_STEERINGWHEEL" />    
 </enum>
 
 <enum name="WiperStatus">
@@ -1425,6 +1425,25 @@
   </param>
   <param name="id" type="Integer" mandatory="true">
     <description>The ID of the device connected</description>
+  </param>
+  <description>Various information about connecting device.</description>
+  <param name="hardware" type="String" maxlength="500" mandatory="false">
+    <description>Device model</description>
+  </param>
+  <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
+    <description>Device firmware revision</description>
+  </param>
+  <param name="os" type="String" maxlength="500" mandatory="false">
+    <description>Device OS</description>
+  </param>
+  <param name="osVersion" type="String" maxlength="500" mandatory="false">
+    <description>Device OS version</description>
+  </param>
+  <param name="carrier" type="String" maxlength="500" mandatory="false">
+    <description>Device mobile carrier (if applicable)</description>
+  </param>
+  <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+   <description>Omitted if connected not via BT.</description>
   </param>
 </struct>
 
@@ -2697,7 +2716,7 @@
   </function>
   <function name="UpdateTurnList" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to update turn list.</description>
-    <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="turnList" type="Common.Turn" minsize="1" maxsize="100" array="true" mandatory="false">
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="1" array="true" mandatory="false">
       <description>If omitted, app-defined SoftButton should be left blank.</description>
