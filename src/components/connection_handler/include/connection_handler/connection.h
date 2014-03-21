@@ -199,15 +199,17 @@ class Connection {
    */
   int SetSSLContext(uint8_t sessionId,
                     security_manager::SSLContext* context);
-
   /**
-   * \brief Gets crypto context of service
-     * \param sessionId Identifier of the session
+   * \brief Gets crypto context of session, use service_type to get NULL
+   * SSLContex for not protected services or ControlService (0x0)
+   * to get current SSLContext of connection
+   * \param key Unique key used by other components as session identifier
    * \param service_type Type of service
-   * \return \c true in case of service is protected or \c false otherwise
+   * \return \ref SSLContext of connection
    */
   security_manager::SSLContext* GetSSLContext(
-      uint8_t sessionId) const;
+      uint8_t sessionId,
+      const protocol_handler::ServiceType& service_type) const;
 
   /**
    * \brief Returns map of sessions which have been opened in

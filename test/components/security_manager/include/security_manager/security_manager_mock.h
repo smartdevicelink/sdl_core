@@ -47,9 +47,10 @@ namespace security_manager_test {
     MOCK_METHOD2(SetSSLContext,
                  int( const uint32_t& key,
                       security_manager::SSLContext* context));
-    MOCK_METHOD1(GetSSLContext,
+    MOCK_METHOD2(GetSSLContext,
                  security_manager::SSLContext* (
-                   const uint32_t& key));
+                   const uint32_t& key,
+                   const protocol_handler::ServiceType& service_type));
     MOCK_METHOD4(OnSessionStartedCallback,
                  int32_t(
                    const transport_manager::ConnectionUID& connection_handle,

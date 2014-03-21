@@ -434,7 +434,8 @@ int ConnectionHandlerImpl::SetSSLContext(
 }
 
 security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
-      const uint32_t &key) {
+    const uint32_t &key,
+    const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetSSLContext");
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
@@ -447,7 +448,7 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
       return NULL;
     }
   Connection& connection = *it->second;
-  return connection.GetSSLContext(session_id);
+  return connection.GetSSLContext(session_id, service_type);
 }
 
 void ConnectionHandlerImpl::set_transport_manager(

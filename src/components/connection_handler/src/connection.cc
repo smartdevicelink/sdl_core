@@ -165,7 +165,9 @@ int Connection::SetSSLContext( uint8_t sessionId,
   return security_manager::SecurityQuery::ERROR_SUCCESS;
 }
 
-security_manager::SSLContext* Connection::GetSSLContext( uint8_t sessionId) const {
+security_manager::SSLContext* Connection::GetSSLContext(
+    uint8_t sessionId,
+    const protocol_handler::ServiceType &service_type) const {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
@@ -173,6 +175,20 @@ security_manager::SSLContext* Connection::GetSSLContext( uint8_t sessionId) cons
     return NULL;
   }
   const Session& session = session_it->second;
+  //for control services return current SSLContext value
+  if(protocol_handler::kControl == service_type)
+    return session.ssl_context;
+  const ServiceList& service_list= session_it->second.service_list;
+  ServiceList::const_iterator service_it = std::find(service_list.begin(),
+                                                     service_list.end(),
+                                                     service_type);
+  if (service_it == service_list.end()) {
+    LOG4CXX_ERROR(logger_, "Service not found in this session!");
+    return NULL;
+  }
+  const Service& service = *service_it;
+  if(!service.is_protected_)
+    return NULL;
   return session.ssl_context;
 }
 

@@ -229,7 +229,7 @@ namespace security_manager_test {
         Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).
+                GetSSLContext(key, protocol_handler::kControl)).
         WillOnce(Return(&mock_ssl_context_new));
 
     const bool rezult = security_manager_->ProtectConnection(key);
@@ -249,7 +249,7 @@ namespace security_manager_test {
         Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).
+                GetSSLContext(key, protocol_handler::kControl)).
         WillOnce(ReturnNull());
     // Expect CryptoManager::CreateSSLContext
     EXPECT_CALL(mock_crypto_manager,
@@ -272,7 +272,7 @@ namespace security_manager_test {
                     SecurityQuery::ERROR_UNKWOWN_INTERNAL_ERROR),is_final)).
         Times(1);
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).
+                GetSSLContext(key, protocol_handler::kControl)).
         WillOnce(ReturnNull());
     EXPECT_CALL(mock_crypto_manager,
                 CreateSSLContext()).
@@ -317,7 +317,8 @@ namespace security_manager_test {
         Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).WillOnce(ReturnNull());
+                GetSSLContext(key, protocol_handler::kControl)).
+        WillOnce(ReturnNull());
 
     const uint8_t data[] = {0x1, 0x2};
     EmulateMobileMessageHandShake(data, sizeof(data)/sizeof(data[0]));
@@ -345,7 +346,7 @@ namespace security_manager_test {
         Times(3);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).
+                GetSSLContext(key, protocol_handler::kControl)).
         Times(3).WillRepeatedly(Return(&mock_ssl_context_exists));
     // Expect SSLContext::DoHandshakeStep 3 times
     // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
@@ -384,7 +385,7 @@ namespace security_manager_test {
                   _, is_final)).Times(1);
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key)).
+                GetSSLContext(key, protocol_handler::kControl)).
         WillOnce(Return(&mock_ssl_context_exists));
 
     // Expect SSLContext::DoHandshakeStep

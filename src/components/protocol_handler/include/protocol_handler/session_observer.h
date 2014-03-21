@@ -143,22 +143,26 @@ public:
       std::list<uint32_t>* applications_list,
       std::string* mac_address) = 0;
 
-    /**
-     * \brief Sets crypto context of service
-     * \param key Unique key used by other components as session identifier
-     * \return \c SecurityQuery::ProtectSessionResult value
-     */
+  /**
+   * \brief Sets crypto context of connection
+   * \param key Unique key used by other components as session identifier
+   * \param context SSLContext to be set
+   * \return \c SecurityQuery::ProtectSessionResult value
+   */
     virtual int SetSSLContext(
       const uint32_t& key,
       security_manager::SSLContext* context) = 0;
-
     /**
-     * \brief Gets crypto context of service
+     * \brief Gets crypto context of connection, use service_type to get NULL
+     * SSLContex for not protected services or ControlService (0x0)
+     * to get current SSLContext of connection
      * \param key Unique key used by other components as session identifier
-     * \return \ref SSLContext
+     * \param service_type Type of service
+     * \return \ref SSLContext of connection
      */
     virtual security_manager::SSLContext* GetSSLContext(
-        const uint32_t& key) = 0;
+        const uint32_t& key,
+        const protocol_handler::ServiceType& service_type) = 0;
   protected:
     /**
      * \brief Destructor

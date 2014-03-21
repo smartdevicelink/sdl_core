@@ -225,22 +225,25 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::string* mac_address = NULL);
 
     /**
-     * \brief Sets crypto context of service
+     * \brief Sets crypto context of connection
      * \param key Unique key used by other components as session identifier
-     * \param service_type Type of service
+     * \param context SSLContext to be set
      * \return \c SecurityQuery::ProtectSessionResult value
      */
-    virtual int SetSSLContext(
+    int SetSSLContext(
       const uint32_t& key,
       security_manager::SSLContext* context) OVERRIDE;
-
-    /**
-     * \brief Gets crypto context of service
-     * \param key Unique key used by other components as session identifier
-     * \return \c exists SSLContext
-     */
-    security_manager::SSLContext* GetSSLContext(
-        const uint32_t& key) OVERRIDE;
+  /**
+   * \brief Gets crypto context of connection, use service_type to get NULL
+   * SSLContex for not protected services or ControlService (0x0)
+   * to get current SSLContext of connection
+   * \param key Unique key used by other components as session identifier
+   * \param service_type Type of service
+   * \return \ref SSLContext of connection
+   */
+  security_manager::SSLContext* GetSSLContext(
+      const uint32_t& key,
+      const protocol_handler::ServiceType& service_type) OVERRIDE;
 
     /**
      * \brief Method which should start devices discoveryng

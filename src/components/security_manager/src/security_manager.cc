@@ -132,7 +132,8 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_); DCHECK(crypto_manager_);
 
-  if(session_observer_->GetSSLContext(connection_key)) {
+  if(session_observer_->GetSSLContext(connection_key,
+                                      protocol_handler::kControl)) {
     LOG4CXX_WARN(logger_, "Connenction is already protected, key "
                  << connection_key);
     SendInternalError(connection_key,
@@ -173,7 +174,8 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     return false;
   }
   SSLContext * sslContext =
-      session_observer_->GetSSLContext(connectionKey);
+      session_observer_->GetSSLContext(connectionKey,
+                                       protocol_handler::kControl);
   if(!sslContext) {
     const std::string error("SendHandshakeData: No ssl context.");
     LOG4CXX_ERROR(logger_, error);

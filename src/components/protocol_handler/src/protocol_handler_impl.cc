@@ -499,7 +499,8 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
       session_observer_->KeyFromPair(connection_id, session_id);
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(connection_key);
+      session_observer_->GetSSLContext(connection_key,
+                                       ServiceTypeFromByte(service_type));
   if(context) {
     size_t new_data_size;
     data = static_cast<uint8_t*>
@@ -551,7 +552,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   // Encrypt data
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(connection_key );
+      session_observer_->GetSSLContext(connection_key,
+                                       ServiceTypeFromByte(service_type));
 
   if(context) {
     size_t new_data_size;
@@ -907,7 +909,8 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
       session_observer_->KeyFromPair(connection_id, packet.session_id());
 
   security_manager::SSLContext* context =
-      session_observer_->GetSSLContext(connection_key);
+      session_observer_->GetSSLContext(connection_key,
+                                       ServiceTypeFromByte(packet.service_type()));
   if(context) {
       const uint8_t* data = packet.data();
       const size_t data_size = packet.data_size();
