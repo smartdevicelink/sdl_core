@@ -105,8 +105,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
                     commandID: cmdID,
                     text: vrCommands[j],
                     type: type,
-                    commandType: commandType,
-                    classNameBindings: this.commandType ? 'SDL.SDLModel.performInteractionSession:hide' :  'SDL.SDLModel.performInteractionSession::hide',
+                    classNameBindings: commandType ? 'SDL.SDLModel.performInteractionSession:hide' :  'SDL.SDLModel.performInteractionSession::hide',
                     classNames: 'list-item',
                     templateName: 'text'
                 } ) );
