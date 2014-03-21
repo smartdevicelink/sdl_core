@@ -118,7 +118,7 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR: {
-      LOG4CXX_INFO(logger_,"Recieved InternalError with Jdon message"
+      LOG4CXX_INFO(logger_,"Recieved InternalError with Json message"
                     << message->get_json_message());
       Json::Value value(message->get_json_message());
       LOG4CXX_ERROR(logger_,"InternalError error received err_id "
