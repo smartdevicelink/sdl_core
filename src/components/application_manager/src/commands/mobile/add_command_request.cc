@@ -166,6 +166,8 @@ void AddCommandRequest::Run() {
         (*message_)[strings::msg_params][strings::vr_commands];
     vr_msg_params[strings::app_id] = app->app_id();
 
+    vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+
     send_vr_ = true;
   }
 
