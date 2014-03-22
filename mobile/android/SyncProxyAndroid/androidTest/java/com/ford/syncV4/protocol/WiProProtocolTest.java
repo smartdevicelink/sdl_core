@@ -21,8 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Hashtable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
@@ -640,14 +638,16 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), false, versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), encryptionCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
+        assertEquals(false, encryptionCaptor.getValue().booleanValue());
     }
 
     public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
@@ -704,13 +704,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), false, versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), encryptionCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
+        assertEquals(false, encryptionCaptor.getValue().booleanValue());
     }
 
     public void testHeartBeatMonitorResetOnMessageSent() throws Exception {
