@@ -30,62 +30,73 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
+#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
 
+#include <string.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#include "utils/macro.h"
+#include "utils/logger.h"
+#include "utils/signals.h"
 #include "config_profile/profile.h"
-#include "utils/file_system_tests.h"
-#include "utils/prioritized_queue_tests.h"
-#include "protocol_handler/protocol_handler_tm_test.h"
-#include "application_manager/formatters_commands.h"
-#include "media_manager/media_manager_impl_test.h"
-#include "SmartObjectDraftTest.h"
-#include "SmartObjectInvalidTest.h"
-#include "SmartObjectStressTest.h"
-#include "SmartObjectUnitTest.h"
-#include "TSharedPtrTest.h"
-// #include "jsoncpp/json_reader_test.h"
-
-// #include "json_handler/smart_schema_draft_test.h"
-// #include "SmartObjectConvertionTimeTest.h"
-// #include "request_watchdog/request_watchdog_test.h"
-// #include "json_handler/formatters/formatter_test_helper.h"
-// #include "json_handler/formatters/formatter_json_alrpcv1_test.h"
-// #include "json_handler/formatters/formatter_json_alrpcv2_test.h"
-// #include "json_handler/formatters/formatter_json_rpcv2_test.h"
-
-#include "rpc/admin_app_test.h"
-
+#include "networking.h"
+#include "application_manager/message_helper.h"
+#include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
 #include "utils/threads/thread.h"
-#include "life_cycle.cc"
 
-#include "hmi_message_handler/hmi_message_handler.h"
+namespace InitializeHMI {
+  /**
+   * @brief Patch to browser
+   */
+  const char kBrowser[] = "/usr/bin/chromium-browser";
+  /**
+   * @brief Browser name
+   */
+  const char kBrowserName[] = "chromium-browser";
+  /**
+   * @brief Browser params
+   */
+  const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
+  /**
+   * @brief Local host address
+   */
+  const char kLocalHostAddress[] = "127.0.0.1";
+  /**
+   * @brief Initialize HTML based HMI.
+   *
+   * @return true if success otherwise false.
+   */
+  // bool InitHmi();
 
-// #define QT_HMI
+  class InitHMI : public threads::ThreadDelegate {
+   public:
+    InitHMI();
 
-#ifdef __cplusplus
-extern "C" void __gcov_flush();
-#endif
+    ~InitHMI();
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleMock(&argc, argv);
+    virtual void threadMain();
 
-  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-  test::AdminAppTest app;
+   private:
+    DISALLOW_COPY_AND_ASSIGN(InitHMI);
+  };
 
-  app.Run();
-  sleep(5);
+  bool InitFuncHmi();
 
-  int result = RUN_ALL_TESTS();
+  bool InitHmi();
 
-  #ifdef __cplusplus
-    __gcov_flush();
-  #endif
+}  // namespace InitializeHMI
 
-  sleep(2);
-  return result;
-}
-
-
+#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
