@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.util.BitConverter;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -61,7 +62,15 @@ public class TCPTransport extends SyncTransport {
     /**
      * Instance of the server socket
      */
-    private ServerSocket mServerSocket = null;
+    private  ServerSocket mServerSocket = null;
+
+    public synchronized InputStream getInputStream() {
+        return mInputStream;
+    }
+
+    public synchronized OutputStream getOutputStream() {
+        return mOutputStream;
+    }
 
     /**
      * Instance of the input stream. Used to read data from ApplinkCore
@@ -118,7 +127,7 @@ public class TCPTransport extends SyncTransport {
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        logInfo("TCPTransport.sendBytesOverTransport: successfully send data");
+                        logInfo("TCPTransport.sendBytesOverTransport: successfully send data:" + BitConverter.bytesToHex(msgBytes));
                     } catch (IOException e) {
                         logWarning("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;

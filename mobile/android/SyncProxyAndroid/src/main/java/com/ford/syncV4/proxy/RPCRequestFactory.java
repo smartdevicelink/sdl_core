@@ -39,6 +39,10 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
+/**
+ * This class provides the functionality to create messages of
+ * {@link com.ford.syncV4.proxy.RPCMessage} type
+ */
 public class RPCRequestFactory {
 
 	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;

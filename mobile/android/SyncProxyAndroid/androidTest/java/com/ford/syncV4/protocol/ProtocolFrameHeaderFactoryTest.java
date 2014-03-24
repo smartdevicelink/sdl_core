@@ -27,7 +27,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getFrameData(),
                 FrameDataControlFrameType.StartService.getValue());
         assertEquals(header.getVersion(), (byte) 2);
-        assertEquals(header.isCompressed(), false);
+        assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
@@ -58,7 +58,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getFrameData(),
                 FrameDataControlFrameType.StartServiceACK.getValue());
         assertEquals(header.getVersion(), (byte) 2);
-        assertEquals(header.isCompressed(), false);
+        assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
@@ -73,7 +73,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getFrameData(),
                 FrameDataControlFrameType.EndService.getValue());
         assertEquals(header.getVersion(), (byte) 2);
-        assertEquals(header.isCompressed(), false);
+        assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
@@ -87,7 +87,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getFrameType(), FrameType.Single);
         assertEquals(header.getFrameData(), 0x00);
         assertEquals(header.getVersion(), (byte) 2);
-        assertEquals(header.isCompressed(), false);
+        assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 10);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
@@ -102,7 +102,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.getFrameData(),
                 FrameDataControlFrameType.MobileNaviACK.getValue());
         assertEquals(header.getVersion(), (byte) 2);
-        assertEquals(header.isCompressed(), false);
+        assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0);
         assertTrue(header.getMessageID() == 48);
         assertTrue(header.getSessionID() == (byte) 48);
@@ -124,7 +124,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
                 ServiceType.Heartbeat, PROTOCOL_VERSION);
 
         assertThat("Wrong version", header.getVersion(), is(PROTOCOL_VERSION));
-        assertThat("Wrong compression flag", header.isCompressed(), is(false));
+        assertThat("Wrong compression flag", header.isEncrypted(), is(false));
         assertThat("Wrong frame type", header.getFrameType(),
                 is(FrameType.Control));
         assertThat("Wrong currentSession type", header.getServiceType(),
@@ -156,7 +156,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
                         PROTOCOL_VERSION);
 
         assertThat("Wrong version", header.getVersion(), is(PROTOCOL_VERSION));
-        assertThat("Wrong compression flag", header.isCompressed(), is(false));
+        assertThat("Wrong compression flag", header.isEncrypted(), is(false));
         assertThat("Wrong frame type", header.getFrameType(),
                 is(FrameType.Control));
         assertThat("Wrong currentSession type", header.getServiceType(),

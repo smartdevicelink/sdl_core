@@ -48,6 +48,16 @@ public class BTTransport extends SyncTransport {
     static final boolean ANDROID_PRIOR_TO_42 =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1;
 
+    @Override
+    public synchronized InputStream getInputStream() {
+        return _input;
+    }
+
+    @Override
+    public synchronized OutputStream getOutputStream() {
+        return _output;
+    }
+
     public BTTransport(ITransportListener transportListener) {
 		super(transportListener);
 

@@ -31,7 +31,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 /**
  * Created by Andrew Batutin on 8/21/13.
  */
@@ -90,7 +89,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
                 }
 
@@ -98,12 +97,19 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 public void onStartServiceNackReceived(ServiceType serviceType) {
 
                 }
+
+
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
     private WiProProtocol sut;
     private ProtocolFrameHeader currentFrameHeader;
     private byte[] currentData;
+
+    /**
+     * Time out of the {@link java.util.concurrent.CountDownLatch}, in milliseconds
+     */
+    private static final int TIME_OUT = 1000;
 
     public WiProProtocolTest() {
     }
@@ -242,7 +248,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
         assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
         assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-        assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+        assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
         assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
         assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
         assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -256,7 +262,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -273,7 +279,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -296,7 +302,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -313,7 +319,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             assertEquals("FrameType should be equal.", currentFrameHeader.getFrameType(), messageHeader.getFrameType());
             assertEquals("FrameData should be equal.", currentFrameHeader.getFrameData(), messageHeader.getFrameData());
             assertEquals("Version should be equal.", currentFrameHeader.getVersion(), messageHeader.getVersion());
-            assertEquals("Compressed state should be equal.", currentFrameHeader.isCompressed(), messageHeader.isCompressed());
+            assertEquals("Compressed state should be equal.", currentFrameHeader.isEncrypted(), messageHeader.isEncrypted());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getDataSize(), messageHeader.getDataSize());
             assertEquals("DataSize should be equal.", currentFrameHeader.getMessageID(), messageHeader.getMessageID());
             assertEquals("Frame headers should be equal.", currentFrameHeader.getSessionID(), messageHeader.getSessionID());
@@ -452,7 +458,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
 
             }
 
@@ -460,6 +466,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
+
+
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -498,7 +506,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         };
         Session session = new Session();
         session.setSessionId(id);
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
     }
 
     public void testStartSessionWithSessionId() throws Exception {
@@ -518,7 +526,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             Session session = new Session();
             session.setSessionId((byte) 0);
-            protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
             assertTrue("Should not get here", false);
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);
@@ -539,16 +547,20 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                assertEquals("currentSession id should be SESSION_ID", SESSION_ID, session.getSessionId());
+            public void onProtocolSessionStarted(Session session, byte version,
+                                                 String correlationID) {
+                assertEquals("currentSession id should be SESSION_ID", SESSION_ID,
+                        session.getSessionId());
                 Service service = session.getServiceList().get(0);
                 assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-                assertEquals("service should belong to the currentSession", session, service.getSession());
+                assertEquals("service should belong to the currentSession", session,
+                        service.getSession());
                 passed[0] = true;
             }
 
             @Override
-            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
+                                               String correlationID) {
 
             }
 
@@ -578,7 +590,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 boolean encrypted, byte version, String correlationID) {
 
             }
 
@@ -586,11 +599,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             public void onStartServiceNackReceived(ServiceType serviceType) {
 
             }
+
+
         });
-        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
+        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false, VERSION, "");
         assertTrue("test should pass", passed[0]);
     }
-
 
     public void testStartServiceACK_RPC_FrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
@@ -624,14 +638,16 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), encryptionCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
+        assertEquals(false, encryptionCaptor.getValue().booleanValue());
     }
 
     public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
@@ -673,7 +689,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         }
     }
 
-
     public void testStartServiceACK_AudioService_FrameReceived() throws Exception {
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
@@ -689,15 +704,16 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(Boolean.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), encryptionCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(2, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
+        assertEquals(false, encryptionCaptor.getValue().booleanValue());
     }
-
 
     public void testHeartBeatMonitorResetOnMessageSent() throws Exception {
         IProtocolListener protocolListener = mock(IProtocolListener.class);
@@ -712,6 +728,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
         verify(protocolListener).onResetHeartbeat();
     }
+
+
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {
         IProtocolListener protocolListener = mock(IProtocolListener.class);
@@ -793,5 +811,4 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         System.arraycopy(data, 90 , expectedResult,frameHeaderArray.length, 10);
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
-
 }

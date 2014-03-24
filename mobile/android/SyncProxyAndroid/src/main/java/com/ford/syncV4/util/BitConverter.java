@@ -2,6 +2,9 @@ package com.ford.syncV4.util;
 
 public class BitConverter {
 	public static String bytesToHex(byte [] bytes) {
+        if (bytes == null){
+            return "null";
+        }
 		return bytesToHex(bytes, 0, bytes.length);
 	} // end-method
 
@@ -53,6 +56,13 @@ public class BitConverter {
     		ret |= 0xFF & sizeBuf[i];
     	}
     	return ret;
+    }
+
+    public static int intFromByteArray(byte[] b) {
+        return b[3] & 0xFF |
+                (b[2] & 0xFF) << 8 |
+                (b[1] & 0xFF) << 16 |
+                (b[0] & 0xFF) << 24;
     }
 
     public static long unsignedIntFromByteArray(byte[] sizeBuf, int offset) {
