@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <limits.h>
+
 #include <algorithm>
 
 #include "connection_handler/connection.h"
@@ -64,6 +66,21 @@ Connection::~Connection() {
   session_map_.clear();
 }
 
+// Finds a key not presented in std::map<unsigned char, T>
+// Returns 0 if that key not found
+namespace {
+template <class T>
+int32_t findGap(const std::map<unsigned char, T>& map) {
+  for (int32_t i = 1; i <= UCHAR_MAX; ++i) {
+    if (map.find(i) == map.end()) {
+      return i;
+    }
+  }
+  return 0;
+}
+}
+
+
 int32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -73,18 +90,15 @@ int32_t Connection::AddNewSession() {
     heartbeat_monitor_.BeginMonitoring();
   }
 
-  const uint8_t max_connections = 255;
-  int32_t size = session_map_.size();
-  if (max_connections > size) {
-
-    ++size;
+  int32_t session_id = findGap(session_map_);
+  if (session_id > 0) {
     /* whenever new session created RPC and Bulk services are
     established automatically */
       //TODO: Dmitriy Trunov + Klimenko
-    session_map_[size].service_list.push_back(protocol_handler::kRpc);
-    session_map_[size].service_list.push_back(protocol_handler::kBulk);
+    session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
+    session_map_[session_id].service_list.push_back(protocol_handler::kBulk);
 
-    result = size;
+    result = session_id;
   }
 
   return result;
@@ -116,7 +130,7 @@ bool Connection::AddNewService(uint8_t session,
     return result;
   }
 
-  ServiceList& service_list= session_it->second.service_list;
+  ServiceList& service_list = session_it->second.service_list;
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), serviceType);
   if (service_it != service_list.end()) {
@@ -140,7 +154,7 @@ bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType se
     return result;
   }
 
-  ServiceList& service_list= session_it->second.service_list;
+  ServiceList& service_list = session_it->second.service_list;
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), service_type);
   if (service_it != service_list.end()) {
@@ -178,7 +192,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   //for control services return current SSLContext value
   if(protocol_handler::kControl == service_type)
     return session.ssl_context;
-  const ServiceList& service_list= session_it->second.service_list;
+  const ServiceList& service_list = session_it->second.service_list;
   ServiceList::const_iterator service_it = std::find(service_list.begin(),
                                                      service_list.end(),
                                                      service_type);

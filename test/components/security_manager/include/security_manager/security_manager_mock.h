@@ -118,6 +118,9 @@ namespace security_manager_test {
    */
   class SSLContextMock: public security_manager::SSLContext {
   public:
+    MOCK_CONST_METHOD0(mode, int ());
+    MOCK_METHOD1(StartHandshake,
+                 void* (size_t* out_data_size));
     MOCK_METHOD3(DoHandshakeStep,
                  void* (const void* client_data,  size_t client_data_size,
                         size_t* server_data_size));

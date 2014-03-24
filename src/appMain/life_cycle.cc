@@ -114,6 +114,7 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
+  // protocol_handler_->set_crypto_manager(crypto_manager_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
@@ -127,7 +128,7 @@ bool LifeCycle::StartComponents() {
   security_manager_->set_protocol_handler(protocol_handler_);
   security_manager_->set_crypto_manager(crypto_manager_);
 
-  // It's important to initialise TM after setting up listener chain
+  // It's important to initialize TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 

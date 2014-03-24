@@ -50,6 +50,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
+#include "security_manager/security_manager.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -156,6 +157,9 @@ class ProtocolHandlerImpl
      * ISessionObserver
      */
     void set_session_observer(SessionObserver* observer);
+
+    void set_security_manager(
+        const security_manager::SecurityManager* security_manager);
 
     /**
      * \brief Method for sending message to Mobile Application
@@ -289,7 +293,7 @@ class ProtocolHandlerImpl
 
     /**
      * @brief Notifies subscribers about message
-     * recieved from mobile device.
+     * received from mobile device.
      * @param message Message with already parsed header.
      */
     void NotifySubscribers(const RawMessagePtr& message);
@@ -421,6 +425,8 @@ class ProtocolHandlerImpl
     RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
 
+    void set_security_manager(security_manager::SecurityManager* security_manager);
+
   private:
     /**
      * \brief For logging.
@@ -468,6 +474,7 @@ class ProtocolHandlerImpl
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
+    security_manager::SecurityManager *security_manager_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
     impl::FromMobileQueue raw_ford_messages_from_mobile_;

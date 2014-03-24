@@ -87,6 +87,8 @@ public:
    */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr&) OVERRIDE;
 
+  void StartHandshake(uint32_t session_key);
+
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing

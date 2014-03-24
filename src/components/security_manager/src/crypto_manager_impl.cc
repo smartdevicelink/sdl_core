@@ -38,23 +38,25 @@
 #include "config_profile/profile.h"
 #include "security_manager/security_manager.h"
 
+namespace {
+  const char* CertificatePath = "CertificatePath";
+  const char* KeyPath         = "KeyPath";
+  // SSL mode could be SERVER or CLIENT
+  const char* SSLMode         = "SSLMode";
+  // Could be ALL ciphers or list of chosen
+  const char* CipherList      = "CipherList";
+  // Verify Mobile app certificate
+  const char* VerifyPeer      = "VerifyPeer";
+  // Terminate handshake if mobile app did not return a certificate
+  const char* FailOnNoCert    = "FailOnNoCert";
+  // do not ask for certificate again in case of a renegotiation
+  const char* VerifyClientOnce= "VerifyClientOnce";
+}
+
 namespace security_manager {
 
 log4cxx::LoggerPtr CryptoManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("CryptoManagerImpl"));
-
-const char* CertificatePath = "CertificatePath";
-const char* KeyPath         = "KeyPath";
-// SSL mode could be SERVER or CLIENT
-const char* SSLMode         = "SSLMode";
-// Could be ALL ciphers or list of chosen
-const char* CipherList      = "CipherList";
-// Verify Mobile app certificate
-const char* VerifyPeer      = "VerifyPeer";
-// Terminate handshake if mobile app did not return a certificate
-const char* FialOnNoCert    = "FialOnNoCert";
-// do not ask for certificate again in case of a renegotiation
-const char* VerifyClientOnce= "VerifyClientOnce";
 
 CryptoManagerImpl::CryptoManagerImpl()
     : context_(NULL) {
@@ -108,7 +110,7 @@ bool CryptoManagerImpl::Init() {
     bool fail_on_no_cert, verify_client_once;
 
     profile::Profile::instance()->ReadBoolValue(
-          &fail_on_no_cert, false, SecurityManager::ConfigSection(), FialOnNoCert);
+          &fail_on_no_cert, false, SecurityManager::ConfigSection(), FailOnNoCert);
     if(fail_on_no_cert) {
       verify_mode_id |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
       LOG4CXX_INFO(logger_, "Enable fail on no certificate.");
@@ -120,7 +122,7 @@ bool CryptoManagerImpl::Init() {
       verify_mode_id |= SSL_VERIFY_CLIENT_ONCE;
       LOG4CXX_INFO(logger_, "Enable verify client one.");
     }
-    }
+  }
   LOG4CXX_INFO(logger_, "Final verify mode: " << verify_mode_id);
   SSL_CTX_set_verify(context_, verify_mode_id, NULL);
 
@@ -143,9 +145,16 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   if (conn == NULL)
     return NULL;
 
-  SSL_set_accept_state(conn);
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", SecurityManager::ConfigSection(), SSLMode);
+  if (ssl_mode == "SERVER") {
+    SSL_set_accept_state(conn);
+  } else {
+    SSL_set_connect_state(conn);
+  }
   // TODO (EZamakhov) : add return NULL pointer on no keys
-  return new SSLContextImpl(conn);
+  return new SSLContextImpl(conn, ssl_mode == "CLIENT");
 }
 
 void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {

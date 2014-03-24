@@ -32,7 +32,19 @@
 
 #ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
 #define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+
 #include <string>
+
+/**
+ * \class security_manager::CryptoManager
+ * \brief Class factory, producing instances of \ref SSLContext
+ *
+ * \fn security_manager::SSLContext* security_manager::CryptoManager::CreateSSLContext()
+ * \brief Creates an instance of \ref SSLContext class
+ *
+  * \fn void security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext* context)
+ * \brief Frees \ref SSLContext instance
+ */
 
 namespace security_manager {
 class SSLContext;

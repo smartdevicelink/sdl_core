@@ -76,6 +76,28 @@ void SecurityManager::OnMobileMessageSent(
 //  LOG4CXX_INFO(logger_, "OnMobileMessageSent");
 }
 
+void SecurityManager::StartHandshake(uint32_t connection_key) {
+  security_manager::SSLContext* ssl_context =
+      session_observer_->GetSSLContext(connection_key,
+                                       protocol_handler::kControl);
+  if (!ssl_context && !ProtectConnection(connection_key)) {
+    LOG4CXX_ERROR(logger_, "StartHandshake failed");
+    return;
+  }
+  ssl_context = session_observer_->GetSSLContext(connection_key,
+                                                 protocol_handler::kControl);
+  DCHECK(ssl_context != NULL);
+
+  if (!ssl_context->IsInitCompleted()) {
+    size_t data_size;
+    const uint8_t* data =
+        static_cast<uint8_t*>(ssl_context->StartHandshake(&data_size));
+    DCHECK(data);
+    DCHECK(data_size);
+    SendBinaryData(connection_key, data, data_size);
+  }
+}
+
 void SecurityManager::set_session_observer(
     protocol_handler::SessionObserver *observer) {
   if (!observer) {
@@ -131,13 +153,14 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       break;
     }
 }
+
 bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_); DCHECK(crypto_manager_);
 
   if(session_observer_->GetSSLContext(connection_key,
                                       protocol_handler::kControl)) {
-    LOG4CXX_WARN(logger_, "Connenction is already protected, key "
+    LOG4CXX_WARN(logger_, "Connection is already protected, key "
                  << connection_key);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED);
@@ -146,8 +169,8 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
 
   security_manager::SSLContext * newSSLContext = crypto_manager_->CreateSSLContext();
   if(!newSSLContext) {
-      LOG4CXX_ERROR(logger_, "CryptoManager could not create SSl context.");
-      //Generate response query and post to security_messages_
+      LOG4CXX_ERROR(logger_, "CryptoManager could not create SSL context.");
+      // Generate response query and post to security_messages_
       SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SLL);
       return false;
   }
@@ -247,7 +270,7 @@ void SecurityManager::SendData(
   const size_t header_size = sizeof(header);
   std::vector<uint8_t> data_sending(header_size + data_size);
   memcpy(&data_sending[0], &header, header_size);
-  //TODO (EZamakhov): Fix invalide read (by Valgrind)
+  //TODO (EZamakhov): Fix invalid read (by Valgrind)
   memcpy(&data_sending[header_size], data, data_size);
 
   SendBinaryData(connectionKey, &data_sending[0], data_sending.size());
@@ -259,10 +282,10 @@ void SecurityManager::SendBinaryData(const int32_t connectionKey,
 //   LOG4CXX_INFO(logger_, "SendBinaryDataData");
   DCHECK(protocol_handler_)
   const protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage( connectionKey,
-                                          protocol_handler::PROTOCOL_VERSION_2,
-                                          data, data_size,
-                                          protocol_handler::kControl));
+        new protocol_handler::RawMessage(connectionKey,
+                                         protocol_handler::PROTOCOL_VERSION_2,
+                                         data, data_size,
+                                         protocol_handler::kControl));
   // Add RawMessage to ProtocolHandler message query
   // FIXME(EZ): final_message - false?
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);

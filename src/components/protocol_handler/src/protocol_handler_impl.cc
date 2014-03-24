@@ -37,7 +37,6 @@
 #include <memory.h>
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
-#include "security_manager/crypto_manager.h"
 
 namespace protocol_handler {
 
@@ -147,6 +146,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     : protocol_observers_(),
       session_observer_(0),
       transport_manager_(transport_manager_param),
+      security_manager_(NULL),
       kPeriodForNaviAck(5),
       incoming_data_handler_(new IncomingDataHandler),
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
@@ -370,9 +370,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   if (tm_message) {
     LOG4CXX_INFO_EXT(
         logger_,
-        "Received from TM " << tm_message->data() << " with connection id "
-                            << tm_message->connection_key() << " msg data_size "
-                            << tm_message->data_size());
+        "Received from TM "    << tm_message->data() <<
+        " with connection id " << tm_message->connection_key() <<
+        " msg data_size "      << tm_message->data_size());
   } else {
     LOG4CXX_ERROR(
         logger_,
@@ -380,6 +380,40 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
         << " ProtocolHandler from Transport Manager.");
     return;
   }
+
+  ProtocolFramePtr ptr = ProtocolFramePtr(
+      new protocol_handler::ProtocolPacket(
+          tm_message->connection_key(),
+          tm_message->data(),
+          tm_message->data_size()));
+
+  if (ptr->is_compress()) {
+    security_manager::SSLContext* context =
+        connection_handler->GetSSLContext(tm_message->connection_key(),
+                                          tm_message->service_type());
+    if (!context) {
+      LOG4CXX_ERROR(logger_, "Encrypted message received through not protected service");
+      return;
+    }
+
+    size_t dec_data_size = 0;
+    uint8_t *dec_data = static_cast<uint8_t*>(
+        context->Decrypt(tm_message->data(), tm_message->data_size(),
+                          &dec_data_size));
+
+    if (!dec_data) {
+      LOG4CXX_ERROR(logger_, "Decryption failed: " <<
+                    security_manager::LastError());
+      return;
+    }
+    ptr = ProtocolFramePtr(new protocol_handler::ProtocolPacket(
+        tm_message->connection_key(),
+        dec_data,
+        dec_data_size));
+  }
+
+  raw_ford_messages_from_mobile_.PostMessage(
+      impl::RawFordMessageFromMobile(ptr));
 
   std::vector<ProtocolFramePtr> protocol_frames;
   const bool ok =
@@ -619,9 +653,9 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       memcpy(outDataFrame, data + (maxdata_size * i), lastdata_size);
 
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          versionF, compress, FRAME_TYPE_CONSECUTIVE,
-          service_type, 0x0, session_id, lastdata_size,
-          message_counters_[session_id], outDataFrame));
+          versionF, compress, FRAME_TYPE_CONSECUTIVE, service_type, 0x0,
+          session_id, lastdata_size, message_counters_[session_id],
+          outDataFrame));
 
       raw_ford_messages_to_mobile_.PostMessage(
           impl::RawFordMessageToMobile(ptr, false));
@@ -637,21 +671,17 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   switch (packet->frame_type()) {
-    case FRAME_TYPE_CONTROL: {
-      LOG4CXX_INFO(logger_, "handleMessage(1) - case FRAME_TYPE_CONTROL");
+    case FRAME_TYPE_CONTROL:
+      LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
       LOG4CXX_TRACE_EXIT(logger_);
       return HandleControlMessage(connection_id, packet);
-    }
-    case FRAME_TYPE_SINGLE: {
+    case FRAME_TYPE_SINGLE:
       return HandleSingleFrameMessage(connection_id, packet);
-    }
     case FRAME_TYPE_FIRST:
-    case FRAME_TYPE_CONSECUTIVE: {
+    case FRAME_TYPE_CONSECUTIVE:
       LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
-
       LOG4CXX_TRACE_EXIT(logger_);
       return HandleMultiFrameMessage(connection_id, packet);
-    }
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case default!!!");
       return RESULT_FAIL;
@@ -675,7 +705,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
   if(!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
-    }
+  }
   NotifySubscribers(rawMessage);
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -747,7 +777,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       if(!rawMessage){
         LOG4CXX_TRACE_EXIT(logger_);
         return RESULT_FAIL;
-        }
+      }
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -832,8 +862,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {
   LOG4CXX_INFO(logger_,
-               "ProtocolHandlerImpl::HandleControlMessageStartSession"
-				<< (int) packet.protocol_version() );
+               "ProtocolHandlerImpl::HandleControlMessageStartSession "
+               << static_cast<int>(packet.protocol_version()));
   LOG4CXX_INFO_EXT(logger_,
                    "Version 2 " << (packet.protocol_version() == PROTOCOL_VERSION_2));
 
@@ -844,10 +874,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         );
 
   if (-1 != session_id) {
-    SendStartSessionAck(
-        connection_id, session_id, packet.protocol_version(),
-        session_observer_->KeyFromPair(connection_id, session_id),
-        packet.service_type());
+    if (packet.is_compress()) {
+      DCHECK(security_manager_);
+      security_manager_->StartHandshake(session_observer_->KeyFromPair(connection_id, session_id));
+    } else {
+      SendStartSessionAck(
+          connection_id, session_id, packet.protocol_version(),
+          session_observer_->KeyFromPair(connection_id, session_id),
+          packet.service_type());
+    }
   } else {
     LOG4CXX_INFO_EXT(
         logger_,
@@ -894,6 +929,11 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
       " protocolVersion " << message->protocol_version());
 
   SendFrame(message->connection_key(), (*message.get()));
+}
+
+void ProtocolHandlerImpl::set_security_manager(
+    security_manager::SecurityManager* security_manager) {
+  security_manager_ = security_manager;
 }
 
 RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
