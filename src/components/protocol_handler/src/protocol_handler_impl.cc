@@ -387,6 +387,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
           tm_message->data(),
           tm_message->data_size()));
 
+#if 0
   if (ptr->is_compress()) {
     security_manager::SSLContext* context =
         connection_handler->GetSSLContext(tm_message->connection_key(),
@@ -414,6 +415,8 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
 
   raw_ford_messages_from_mobile_.PostMessage(
       impl::RawFordMessageFromMobile(ptr));
+
+#endif
 
   std::vector<ProtocolFramePtr> protocol_frames;
   const bool ok =
