@@ -176,6 +176,8 @@ class ProtocolHandlerImpl
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
 
+    void set_security_manager(security_manager::SecurityManager* security_manager);
+
   protected:
 
     /**
@@ -193,8 +195,9 @@ class ProtocolHandlerImpl
       ConnectionID connection_id,
       uint8_t session_id,
       uint8_t protocol_version,
-      uint32_t hash_code = 0,
-      uint8_t service_type = SERVICE_TYPE_RPC);
+      uint32_t hash_code,
+      uint8_t service_type,
+      bool encrypted);
 
     /**
      * \brief Sends fail of starting session to mobile application
@@ -424,8 +427,6 @@ class ProtocolHandlerImpl
     // FIXME (EZamakhov): add brief
     RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
-
-    void set_security_manager(security_manager::SecurityManager* security_manager);
 
   private:
     /**

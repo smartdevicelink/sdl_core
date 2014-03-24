@@ -37,6 +37,8 @@
 #include <memory.h>
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
+#include "security_manager/security_manager_listener.h"
+#include "security_manager/crypto_manager.h"
 
 namespace protocol_handler {
 
@@ -196,11 +198,12 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
                                               uint8_t protocol_version,
                                               uint32_t hash_code,
-                                              uint8_t service_type) {
+                                              uint8_t service_type,
+                                              bool encrypted) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      protocol_version, encrypted, FRAME_TYPE_CONTROL,
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -793,6 +796,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 
@@ -808,6 +812,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     case FRAME_DATA_HEART_BEAT: {
       LOG4CXX_INFO(logger_,
                    "Received heart beat for connection " << connection_id);
+
+      LOG4CXX_TRACE_EXIT(logger_);
       return HandleControlMessageHeartBeat(connection_id, *(packet.get()));
     }
     default:
@@ -815,6 +821,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
           logger_,
           "Control message of type " << int32_t(packet->frame_data())
               << " ignored");
+      LOG4CXX_TRACE_EXIT(logger_);
       return RESULT_OK;
   }
 }
@@ -862,6 +869,49 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   return RESULT_OK;
 }
 
+namespace {
+class StartSessionHandler : public security_manager::SecurityManagerListener {
+ public:
+  StartSessionHandler(
+      impl::ToMobileQueue* queue,
+      ConnectionID connection_id,
+      int32_t session_id,
+      uint8_t protocol_version,
+      uint32_t hash_code,
+      uint8_t service_type,
+      security_manager::SecurityManager* security_manager)
+     : connection_id_(connection_id),
+       session_id_(session_id),
+       protocol_version_(protocol_version),
+       hash_code_(hash_code),
+       service_type_(service_type),
+       queue_(queue),
+       security_manager_(security_manager) {
+  }
+  void OnHandshakeDone(bool success) {
+    ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
+        protocol_version_, success, FRAME_TYPE_CONTROL,
+        service_type_, FRAME_DATA_START_SERVICE_ACK, session_id_,
+        0, hash_code_));
+
+    queue_->PostMessage(
+        impl::RawFordMessageToMobile(ptr, false));
+    security_manager_->RemoveListener(this);
+    delete this;
+  }
+  void OnHandshakeFailed() {
+  }
+ private:
+  ConnectionID connection_id_;
+  int32_t session_id_;
+  uint8_t protocol_version_;
+  uint32_t hash_code_;
+  uint8_t service_type_;
+  impl::ToMobileQueue* queue_;
+  security_manager::SecurityManager* security_manager_;
+};
+}
+
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {
   LOG4CXX_INFO(logger_,
@@ -873,18 +923,49 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   int32_t session_id = session_observer_->OnSessionStartedCallback(
         connection_id, packet.session_id(),
         ServiceTypeFromByte(packet.service_type()),
-        true
+        packet.is_compress()
         );
 
   if (-1 != session_id) {
-    if (packet.is_compress()) {
-      DCHECK(security_manager_);
-      security_manager_->StartHandshake(session_observer_->KeyFromPair(connection_id, session_id));
-    } else {
+    if (!packet.is_compress()) {
       SendStartSessionAck(
           connection_id, session_id, packet.protocol_version(),
           session_observer_->KeyFromPair(connection_id, session_id),
-          packet.service_type());
+          packet.service_type(),
+          false);
+    } else {
+      security_manager::SSLContext* ssl_context =
+          session_observer_->GetSSLContext(
+              session_observer_->KeyFromPair(connection_id, session_id),
+              ServiceTypeFromByte(packet.service_type()));
+      if (ssl_context && ssl_context->IsInitCompleted()) {
+        SendStartSessionAck(
+            connection_id, session_id, packet.protocol_version(),
+            session_observer_->KeyFromPair(connection_id, session_id),
+            packet.service_type(),
+            true);
+      } else {
+        security_manager_->AddListener(
+            new StartSessionHandler(
+                &raw_ford_messages_to_mobile_,
+                connection_id,
+                session_id,
+                packet.protocol_version(),
+                session_observer_->KeyFromPair(connection_id, session_id),
+                packet.service_type(),
+                security_manager_));
+
+        security_manager_->StartHandshake(session_observer_->KeyFromPair(connection_id, session_id));
+        /*
+        ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+            packet.protocol_version(), COMPRESS_OFF, FRAME_TYPE_CONTROL,
+            SERVICE_TYPE_CONTROL, FRAME_DATA_START_SERVICE_NACK,
+            session_id, 0, 0));
+
+          raw_ford_messages_to_mobile_.PostMessage(
+              impl::RawFordMessageToMobile(ptr, false));
+        */
+      }
     }
   } else {
     LOG4CXX_INFO_EXT(

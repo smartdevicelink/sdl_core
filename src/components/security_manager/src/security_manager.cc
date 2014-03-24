@@ -86,6 +86,10 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
   }
   ssl_context = session_observer_->GetSSLContext(connection_key,
                                                  protocol_handler::kControl);
+  if (ssl_context == NULL) {
+    ssl_context = crypto_manager_->CreateSSLContext();
+    session_observer_->SetSSLContext(connection_key, ssl_context);
+  }
   DCHECK(ssl_context != NULL);
 
   if (!ssl_context->IsInitCompleted()) {
@@ -185,6 +189,14 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   return true;
 }
 
+void SecurityManager::AddListener(SecurityManagerListener * const listener) {
+  listeners_.push_back(listener);
+}
+
+void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
+  listeners_.remove(listener);
+}
+
 bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage->get_header().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
@@ -219,11 +231,25 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     LOG4CXX_WARN(logger_, error);
     SendInternalError(connectionKey,
                       SecurityQuery::ERROR_SSL_INVALID_DATA, seqNumber);
+    for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+            it != listeners_.end(); ++it) {
+          (*it)->OnHandshakeFailed();
+    }
     return false;
   }
 
-  //answer with the same header as income message
+  // answer with the same header as income message
   SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
+
+  // TODO: upgrade SSLContext interface to let caller know
+  //       if handshake wasn't successful
+  if (sslContext->IsInitCompleted()) {
+    for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+        it != listeners_.end(); ++it) {
+      (*it)->OnHandshakeDone(true);
+    }
+  }
+
   return true;
 }
 

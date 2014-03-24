@@ -88,6 +88,10 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
   connection_handler_observer_ = observer;
 }
 
+void ConnectionHandlerImpl::set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler) {
+  protocol_handler_ = protocol_handler;
+}
+
 void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>& device_info_list) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
@@ -223,17 +227,18 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     return -1;
   }
 
-  //Check deliver-specifis services (which shall/shall not to be protected)
+  // Check deliver-specific services (which shall/shall not to be protected)
   const char * section =
       is_protected ? "ForceUnprotectedService" : "ForceProtectedService";
-  const std::list<int> protecteSpecific = profile::Profile::instance()
-      ->ReadIntContainer("Security Manager", section, NULL);
-  if (protecteSpecific.end()
-      != std::find(protecteSpecific.begin(), protecteSpecific.end(),
-                   service_type)) {
+  const std::list<int> protectedSpecific =
+      profile::Profile::instance()->ReadIntContainer("Security Manager", section, NULL);
+  // FIXME(dchmerev@luxoft.com): Tricky logic
+  if(protectedSpecific.end() != std::find(
+       protectedSpecific.begin(), protectedSpecific.end(), service_type)) {
     LOG4CXX_ERROR(
         logger_,
-        "Service " << service_type << "is specified " << (is_protected ? "not" : "") << "to be protected");
+        "Service " << service_type << "is "
+        << (is_protected ? "forbidden" : "forced") << " to be protected");
     return -1;
   }
 

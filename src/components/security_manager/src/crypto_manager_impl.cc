@@ -67,7 +67,15 @@ CryptoManagerImpl::CryptoManagerImpl()
 }
 
 bool CryptoManagerImpl::Init() {
-  context_ = SSL_CTX_new(SSLv23_server_method());
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", SecurityManager::ConfigSection(), SSLMode);
+  if (ssl_mode == "SERVER") {
+    context_ = SSL_CTX_new(SSLv23_server_method());
+  } else {
+    context_ = SSL_CTX_new(SSLv23_client_method());
+  }
+
 
   std::string config_value;
   profile::Profile::instance()->ReadStringValue(
