@@ -330,6 +330,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 int versionNumber = getCurrentProtocolVersion();
                 String appName = settings.getString(Const.PREFS_KEY_APPNAME,
                         Const.PREFS_DEFAULT_APPNAME);
+                String serviceTypeToCypher = settings.getString(
+                        Const.PREFS_KEY_CYPHER_SERVICE, Const.PREFS_DEFAULT_CYPHER_SERVICE);
+                ServiceType typeToCypher = ServiceType.RPC;
+                if ( serviceTypeToCypher.equals(ServiceType.MOBILE_NAV_NAME)){
+                    typeToCypher = ServiceType.Mobile_Nav;
+                }else if( serviceTypeToCypher.equals(ServiceType.AUDIO_SERVICE_NAME)){
+                    typeToCypher = ServiceType.Audio_Service;
+                }else if( serviceTypeToCypher.equals(ServiceType.RPC_NAME)){
+                    typeToCypher = ServiceType.RPC;
+                }
+
                 Language lang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
@@ -370,6 +381,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
 
 
+                SyncProxyALM.setServiceToCypher(typeToCypher);
                 mSyncProxy = new SyncProxyALM(this,
                         /*sync proxy configuration resources*/null,
                         /*enable advanced lifecycle management true,*/
@@ -386,6 +398,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*preRegister*/ false,
                         versionNumber,
                         config, mTestConfig);
+
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -1665,6 +1678,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(notification);
     }
 
+    @Override
+    public void onSecureServiceStart() {
+        createDebugMessageForAdapter("Secure Service started");
+    }
+
     private void resendUnsentPutFiles() {
         SparseArray<PutFile> unsentPutFiles = mPutFileTransferManager.getCopy();
         mPutFileTransferManager.clear();
@@ -1982,7 +2000,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void syncProxyStartAudioService(Session session) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startAudioService(session);
+            mSyncProxy.startAudioService(session);
         }
     }
 
@@ -2076,7 +2094,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public void syncProxyStartMobileNavService(Session session) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startMobileNavService(session);
+            mSyncProxy.startMobileNavService(session);
         }
     }
 

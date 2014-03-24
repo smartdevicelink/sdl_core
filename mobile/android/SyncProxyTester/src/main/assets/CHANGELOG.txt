@@ -4,6 +4,11 @@
 + SyncProxyTester: Set AppId parameter at Application SetUp dialog
 
 [CW11]
+* SyncProxyAndroid SDK: Bulk data messages are not coded
+* SyncProxyAndroid SDK: change RPC coded frame decode procedure
++ SyncProxyTester: added ability to choose service to cypher
++ SyncProxyAndroid SDK: added secure RPC service
+- SyncProxyAndroid SDK: removed secure audio encryption service
 * SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
 * SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
 * SyncProxyTester: Fix bug with "Two requests RegisterAppInterface with and without hashID after UnregisterAppInterface"

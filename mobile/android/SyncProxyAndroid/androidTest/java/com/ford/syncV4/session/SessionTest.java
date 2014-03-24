@@ -41,7 +41,7 @@ public class SessionTest extends AndroidTestCase{
     }
 
     public void testInitialSessionCreationCreatesRPCService() throws Exception {
-        Session session = Session.createSession(ServiceType.RPC, (byte) 0);
+        Session session = Session.createSession(ServiceType.RPC, (byte) 0, false);
         Service service = session.getServiceList().get(0);
         assertEquals("currentSession id should be SESSION_ID", (byte) 0, session.getSessionId());
         assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
@@ -49,7 +49,7 @@ public class SessionTest extends AndroidTestCase{
     }
 
     public void testRemoveServiceRemovesService() throws Exception {
-        Session session = Session.createSession(ServiceType.RPC, (byte) 0);
+        Session session = Session.createSession(ServiceType.RPC, (byte) 0, false);
         Service service = new Service();
         service.setSession(session);
         service.setServiceType(ServiceType.RPC);
@@ -57,7 +57,7 @@ public class SessionTest extends AndroidTestCase{
     }
 
     public void testStopSessionClearsServiceList() throws Exception {
-        Session session = Session.createSession(ServiceType.RPC, (byte) 10);
+        Session session = Session.createSession(ServiceType.RPC, (byte) 10, false);
         session.stopSession();
         assertEquals("service list should be 0",  0, session.getServiceList().size());
         assertEquals("session id should be 0",0, session.getSessionId());

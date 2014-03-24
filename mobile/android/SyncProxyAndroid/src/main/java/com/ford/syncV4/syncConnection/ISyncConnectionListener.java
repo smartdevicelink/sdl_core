@@ -14,7 +14,7 @@ public interface ISyncConnectionListener {
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
 	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
-	
+
 	public void onProtocolServiceEnded(ServiceType serviceType,
                                        byte sessionID, String correlationID);
 	
@@ -22,7 +22,9 @@ public interface ISyncConnectionListener {
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
 
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID);
 
     public void onStartServiceNackReceived(ServiceType serviceType);
+
+
 }

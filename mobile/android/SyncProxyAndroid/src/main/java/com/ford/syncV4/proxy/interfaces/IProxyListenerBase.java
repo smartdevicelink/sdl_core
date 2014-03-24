@@ -340,6 +340,12 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onHashChange(OnHashChange onHashChange);
 
     /**
+     * Notify that {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service} has been
+     * started
+     */
+    public void onSecureServiceStart();
+
+    /**
      * Provide a callback to listener in case of USB problem
      * https://code.google.com/p/android/issues/detail?id=20545
      */

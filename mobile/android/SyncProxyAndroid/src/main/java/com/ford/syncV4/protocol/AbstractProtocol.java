@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
@@ -27,6 +28,16 @@ public abstract class AbstractProtocol {
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
 
+    public synchronized ProtocolSecureManager getProtocolSecureManager() {
+        return protocolSecureManager;
+    }
+
+    public synchronized void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
+        this.protocolSecureManager = protocolSecureManager;
+    }
+
+    private ProtocolSecureManager protocolSecureManager;
+
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
         if (protocolListener == null) {
@@ -34,7 +45,6 @@ public abstract class AbstractProtocol {
         } // end-if
         _protocolListener = protocolListener;
     }// end-ctor
-
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
@@ -59,12 +69,14 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolService(ServiceType serviceType, Session session);
+    public abstract void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered);
 
     // This method ends a protocol currentSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
     // currentSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
+
+
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -215,20 +227,20 @@ public abstract class AbstractProtocol {
     // This method handles the startup of a protocol currentSession. A callback is sent
     // to the protocol listener.
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID);
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
+        Session session = Session.createSession(serviceType, sessionID, encrypted);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {
             throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

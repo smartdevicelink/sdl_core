@@ -15,22 +15,47 @@ public class ProtocolFrameHeaderFactory {
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(messageID);
         msg.setSessionID(sessionID);
-        msg.setCompressed(false);
+        msg.setEncrypted(false);
         msg.setDataSize(0);
         return msg;
     }
 
-    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, byte sessionID, byte version) {
+    public static ProtocolFrameHeader createStartSession(ServiceType serviceType, byte sessionID, byte version, boolean isCyphered) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);
         msg.setServiceType(serviceType);
+        msg.setEncrypted(isCyphered);
         msg.setFrameData(FrameDataControlFrameType.StartService.value());
         msg.setMessageID(0);
         msg.setSessionID(sessionID);
 
         return msg;
     }
+
+    /**
+     * Create {@link com.ford.syncV4.protocol.ProtocolFrameHeader} object for the
+     * {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service}
+     *
+     *
+     * @param serviceType
+     * @param sessionId Id of the current session
+     *
+     * @param version version of protocol
+     * @return {@link com.ford.syncV4.protocol.ProtocolFrameHeader} object
+     */
+    public static ProtocolFrameHeader createStartSecureService(ServiceType serviceType, byte sessionId, byte version) {
+        ProtocolFrameHeader msg = new ProtocolFrameHeader();
+        msg.setVersion(version);
+        msg.setEncrypted(true);
+        msg.setFrameType(FrameType.Control);
+        msg.setServiceType(serviceType);
+        msg.setFrameData(FrameDataControlFrameType.StartService.value());
+        msg.setSessionID(sessionId);
+        return msg;
+    }
+
+
 
     public static ProtocolFrameHeader createStartSessionACK(ServiceType serviceType, byte sessionID, int messageID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();

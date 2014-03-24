@@ -18,12 +18,13 @@ public class Session {
     private static final String TAG = "Session";
 
     public static Session createSession(ServiceType serviceType,
-                                         byte sessionID) {
+                                        byte sessionID, boolean encrypted) {
         Session session = new Session();
         session.setSessionId(sessionID);
         Service service = new Service();
         service.setSession(session);
         service.setServiceType(serviceType);
+        service.setEncrypted(encrypted);
         session.addService(service);
         return session;
     }
@@ -65,6 +66,18 @@ public class Session {
             }
         }
         return false;
+    }
+
+    public Service getService(ServiceType serviceType) {
+        if (serviceList == null || serviceList.isEmpty()) {
+            return null;
+        }
+        for (Service service : serviceList) {
+            if (service.getServiceType() == serviceType) {
+                return service;
+            }
+        }
+        return null;
     }
 
     public int getServicesNumber() {

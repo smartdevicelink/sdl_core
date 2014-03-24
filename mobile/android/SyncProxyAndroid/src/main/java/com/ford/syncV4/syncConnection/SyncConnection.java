@@ -32,7 +32,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
-import com.ford.syncV4.util.BitConverter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +50,11 @@ import java.util.Hashtable;
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
     private static final String TAG = "SyncConnection";
+
+    public SyncTransport getTransport() {
+        return _transport;
+    }
+
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener _connectionListener = null;
@@ -99,6 +103,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @param transport an instance of transport (Bluetooth, USB, WiFi)
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
+        init(transportConfig, transport, null);
+    }
+
+    /**
+     * Initialize transport with provided configuration and transport instance
+     *
+     * @param transportConfig configuration of the transport to be used, refer to
+     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     * @param protocol an instance of {@link com.ford.syncV4.protocol.AbstractProtocol}
+     *                 implementation
+     */
+    public void init(BaseTransportConfig transportConfig, SyncTransport transport,
+                     AbstractProtocol protocol) {
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             // Ensure transport is null
@@ -271,11 +289,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startH264(byte rpcSessionID) {
+    public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav);
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
@@ -290,11 +308,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startAudioDataTransfer(byte rpcSessionID) {
+    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service);
+            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
             mAudioPacketizer.start();
             return os;
         } catch (IOException e) {
@@ -334,34 +352,31 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startMobileNavService(Session session) {
+    public void startMobileNavService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, isCyphered);
             }
         }
     }
 
-    public void startAudioService(Session session) {
+    public void startAudioService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+                _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
             }
         }
     }
 
     @Override
-    public void onTransportBytesReceived(byte[] receivedBytes,
-                                         int receivedBytesLength) {
+    public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 try {
-                    _protocol.HandleReceivedBytes(receivedBytes,
-                            receivedBytesLength);
+                    _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
                 } catch (OutOfMemoryError e) {
-                    final String info =
-                            "Out of memory while handling incoming message";
+                    final String info = "Out of memory while handling incoming message";
                     if (_connectionListener != null) {
                         _connectionListener.onProtocolError(info, e);
                     } else {
@@ -380,16 +395,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void initialiseSession() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
-        }else {
-
         }
+
         startProtocolSession();
     }
 
     private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                Log.d(TAG, "StartProtocolSession, id:" + mSessionId);
+                Log.d(TAG, "StartProtocolSession, session id:" + mSessionId);
                 _protocol.StartProtocolSession(mSessionId);
             }
         }
@@ -438,7 +452,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         // Unblock USB reader thread by this method
         FunctionID functionID = new FunctionID();
-        if (functionID.getFunctionName(msg.getFunctionID()).equals(Names.OnAppInterfaceUnregistered)) {
+        String functionName = functionID.getFunctionName(msg.getFunctionID());
+        if (functionName != null && functionName.equals(Names.OnAppInterfaceUnregistered)) {
             IJsonRPCMarshaller marshaller = new JsonRPCMarshaller();
             Hashtable<String, Object> hashtable = marshaller.unmarshall(msg.getData());
             if (hashtable.containsKey(Names.reason)) {
@@ -463,6 +478,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         _connectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
+
 
     @Override
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
@@ -513,8 +529,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-        _connectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
+                                         String correlationID) {
+        _connectionListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
     }
 
     @Override
@@ -525,6 +542,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onStartServiceNackReceived(ServiceType serviceType) {
         _connectionListener.onStartServiceNackReceived(serviceType);
+
+        /*if (serviceType == ServiceType.Secure_Service) {
+            startProtocolSession();
+        }*/
     }
 
     /**
@@ -540,6 +561,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void sendH264(ProtocolMessage pm) {
         if (pm != null) {
+            //_connectionListener.onPacketCreated(pm);
             sendMessage(pm);
         }
     }

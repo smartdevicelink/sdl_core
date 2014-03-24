@@ -15,7 +15,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     private byte[] tail = null;
 
     private Thread thread = null;
-
+    private boolean encrypt;
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
 
@@ -23,9 +23,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         return thread;
     }
 
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType) throws IOException {
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType, boolean encrypt) throws IOException {
         super(streamListener, is, rpcSessionID);
         _serviceType = serviceType;
+        this.encrypt = encrypt;
     }
 
     public void start() throws IOException {
@@ -81,8 +82,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setSessionType(_serviceType);
         pm.setFunctionID(0);
         pm.setCorrID(0);
+        pm.setEncrypted(encrypt);
         pm.setData(frameData, frameData.length);
-
         _streamListener.sendH264(pm);
         return pm;
     }
