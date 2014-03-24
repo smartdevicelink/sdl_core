@@ -1,6 +1,5 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
-find_package(LibXML2 REQUIRED)
 
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
@@ -8,18 +7,14 @@ find_package(LibXML2 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-
-#add_subdirectory(./tools)
-
+add_subdirectory(./tools)
 
 include_directories (
   ../src/thirdPartyLibs/gmock-1.7.0/include
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ../src/thirdPartyLibs/MessageBroker/include
-  ../src/appMain
   ../src/components/application_manager/include
-  ../src/components/policies/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
@@ -30,8 +25,8 @@ include_directories (
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
+  ../src/components/resumption/include
   ../src/components/utils/include/
-  ../src/components/resumption/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
   ../test/components/media_manager/include
@@ -46,7 +41,6 @@ include_directories (
   ../test/components/application_manager/rpc/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}
-  ${LibXML2_INCLUDE_DIR}
 #  /usr/lib/i386-linux-gnu/glib-2.0/include
 #  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
 #  ${GSTREAMER_gst_INCLUDE_DIR}
@@ -54,18 +48,28 @@ include_directories (
 )
 
 set(LIBRARIES
+    
     test_App_Manager
+
     ApplicationManager
     MediaManager
+
+    Resumption
     gtest
     gtest_main
     gmock
     gmock_main
+    
     formatters
     HMI_API
+    
+    
     v4_protocol_v1_2_no_extra
+
     SmartObjects
+    
     RequestWatchdog
+
     policies
     ProtocolHandler
     Utils
@@ -79,30 +83,41 @@ set(LIBRARIES
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
     #test_MobileMessageHandlerTest
+    
+    
+    
     connectionHandler
     MOBILE_API
     jsoncpp
-#################################################
+    
+#################################################    
     TransportManager
     HMIMessageHandler
     MessageBroker
     MessageBrokerClient
     MessageBrokerServer
+    
     encryption
-    bluetooth
-    pthread
-    avahi-client
-    avahi-common
-    ${LibXML2_LIBRARIES} -lxml2
-    # rt
-    # ${GSTREAMER_gstreamer_LIBRARY}
-    Resumption
+#   rt
+   # ${GSTREAMER_gstreamer_LIBRARY}
 )
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
 endif()
+endif()
+
+if (BUILD_BT_SUPPORT)
+  list(APPEND LIBRARIES bluetooth)
+endif()
+
+if (BUILD_AVAHI_SUPPORT)
+  list(APPEND LIBRARIES avahi-client avahi-common)
+endif()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES pthread)
 endif()
 
 add_executable("test_suit" "./test_suit.cc")
