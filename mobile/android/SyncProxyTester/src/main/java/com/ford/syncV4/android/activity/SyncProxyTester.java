@@ -457,8 +457,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             onSetUpDialogResult();
         }
 
-        loadMessageSelectCount();
-
         isFirstActivityRun = false;
     }
 
@@ -825,8 +823,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         removeListeners();
 
-        //endSyncProxyInstance();
-        saveMessageSelectCount();
         _activity = null;
         if (mBoundProxyService != null) {
             mBoundProxyService.setLogAdapter(null);
@@ -1157,6 +1153,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         adapter.add(Names.UnregisterAppInterface);
         adapter.add(Names.SystemRequest);
         adapter.add(GenericRequest.NAME);
+
+        loadMessageSelectCount();
     }
 
     /**
@@ -1593,6 +1591,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 curCount = 0;
                             }
                             messageSelectCount.put(function, curCount + 1);
+
+                            saveMessageSelectCount();
                         }
 
                         private void sendAlertManeuver() {
