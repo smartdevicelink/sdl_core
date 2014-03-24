@@ -1594,7 +1594,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 }
 
 
-void ApplicationManagerImpl::Mute() {
+void ApplicationManagerImpl::Mute(bool vr_session_state) {
   mobile_apis::AudioStreamingState::eType state =
       hmi_capabilities_.attenuated_supported()
       ? mobile_apis::AudioStreamingState::ATTENUATED
@@ -1604,22 +1604,32 @@ void ApplicationManagerImpl::Mute() {
   std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
-      (*it)->set_audio_streaming_state(state);
-      (*it)->set_tts_speak_state(true);
-      MessageHelper::SendHMIStatusNotification(*(*it));
+      if (!vr_session_state) {
+        (*it)->set_tts_speak_state(true);
+      }
+      if ((*it)->audio_streaming_state() != state) {
+        (*it)->set_audio_streaming_state(state);
+        MessageHelper::SendHMIStatusNotification(*(*it));
+      }
     }
   }
 }
 
-void ApplicationManagerImpl::Unmute() {
+void ApplicationManagerImpl::Unmute(bool vr_session_state) {
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
   std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
-      (*it)->set_audio_streaming_state(
-        mobile_apis::AudioStreamingState::AUDIBLE);
-      (*it)->set_tts_speak_state(false);
-      MessageHelper::SendHMIStatusNotification(*(*it));
+      if (!vr_session_state) {
+        (*it)->set_tts_speak_state(false);
+      }
+      if ((!(vr_session_started())) &&
+          ((*it)->audio_streaming_state() !=
+              mobile_apis::AudioStreamingState::AUDIBLE)) {
+        (*it)->set_audio_streaming_state(
+            mobile_apis::AudioStreamingState::AUDIBLE);
+        MessageHelper::SendHMIStatusNotification(*(*it));
+      }
     }
   }
 }

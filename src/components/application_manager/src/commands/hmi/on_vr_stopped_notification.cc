@@ -49,6 +49,7 @@ void OnVRStoppedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnVRStoppedNotification::Run");
 
   ApplicationManagerImpl::instance()->set_vr_session_started(false);
+  ApplicationManagerImpl::instance()->Unmute(true);
 }
 
 }  // namespace commands

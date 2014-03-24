@@ -411,14 +411,20 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Change AudioStreamingState for all application according to
      * system audio-mixing capabilities (NOT_AUDIBLE/ATTENUATED) and
      * send notification for this changes
+     * @param If vr_session_state - true function is used by on_vr_started_
+     * notification, if vr_session_state - false function is used by
+     * on_tts_started_notification
      */
-    void Mute();
+    void Mute(bool vr_session_state);
 
     /*
      * @brief Change AudioStreamingState for all application to AUDIBLE and
      * send notification for this changes
+     * @param If vr_session_state - true function is used by on_vr_stopped_
+     * notification, if vr_session_state - false function is used by
+     * on_tts_stopped_notification
      */
-    void Unmute();
+    void Unmute(bool vr_session_state);
 
     /*
      * @brief Checks HMI level and returns true if audio streaming is allowed
