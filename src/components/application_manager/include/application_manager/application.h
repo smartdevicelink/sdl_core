@@ -55,8 +55,10 @@ typedef int32_t ErrorCode;
 
 enum APIVersion {
   kUnknownAPI = -1,
+  kAPIV0 = 0,
   kAPIV1 = 1,
-  kAPIV2 = 2
+  kAPIV2 = 2,
+  kAPIV3 = 3
 };
 
 struct Version {

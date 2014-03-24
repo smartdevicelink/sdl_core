@@ -188,9 +188,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   smart_objects::SmartObject& response_params = *params;
 
   response_params[strings::sync_msg_version][strings::major_version] =
-    APIVersion::kAPIV2;
+    APIVersion::kAPIV3;
   response_params[strings::sync_msg_version][strings::minor_version] =
-    APIVersion::kAPIV2;
+    APIVersion::kAPIV0;
 
   response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =
