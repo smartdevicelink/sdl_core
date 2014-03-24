@@ -141,8 +141,8 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
         restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
       } else {
         restored_hmi_level = saved_hmi_level;
-        application->set_hmi_level(saved_hmi_level);
       }
+      application->set_hmi_level(restored_hmi_level);
       MessageHelper::SendHMIStatusNotification(*(application.get()));
       LOG4CXX_INFO(logger_, "Restore Application "
                    << saved_m_app_id
@@ -366,8 +366,12 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
         RestoreApplicationData(application);
       }
       application->UpdateHash();
-      {
+      if ( !timer_.isRunning() && app_mngr_->applications().size() > 1 ) {
+        RestoreApplicationHMILevel(application);
+        RemoveApplicationFromSaved(application);
+      } else {
         sync_primitives::AutoLock auto_lock(queue_lock_);
+        MessageHelper::SendHMIStatusNotification(*application);
         waiting_for_timer_.insert(std::make_pair(application->app_id(),
                                                  time_stamp));
         timer_.start(kTimeStep);
@@ -376,6 +380,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
     }
   }
   LOG4CXX_INFO(logger_, "ResumeCtrl::Applicaton didn't saved");
+  MessageHelper::SendHMIStatusNotification(*application);
   return false;
 }
 
@@ -392,8 +397,12 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
-      {
+      if ( !timer_.isRunning() && app_mngr_->applications().size() > 1 ) {
+        RestoreApplicationHMILevel(application);
+        RemoveApplicationFromSaved(application);
+      } else {
         sync_primitives::AutoLock auto_lock(queue_lock_);
+        MessageHelper::SendHMIStatusNotification(*application);
         waiting_for_timer_.insert(std::make_pair(application->app_id(),
                                                  time_stamp));
         timer_.start(kTimeStep);
@@ -402,6 +411,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
     }
   }
   LOG4CXX_INFO(logger_, "ResumeCtrl::Applicaton didn't saved");
+  MessageHelper::SendHMIStatusNotification(*application);
   return false;
 }
 
