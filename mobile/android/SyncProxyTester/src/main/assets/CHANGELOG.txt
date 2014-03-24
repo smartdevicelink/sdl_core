@@ -1,3 +1,6 @@
+[CW13]
++ SyncProxyTester: TCP port configuration with NSD
+
 [CW12]
 + SyncProxyAndroid SDK: Add new field "DeviceInfo" to the RegisterAppInterface request
 + SyncProxyAndroid SDK: Add new structure "DeviceInfo"
