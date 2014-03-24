@@ -1788,6 +1788,18 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
+    <function name="OnFileRemoved" messagetype="notification">
+      <description>Notifies HMI in case some application file has been removed</description>
+      <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
+        <description>The name of the removed file</description>
+      </param>
+      <param name="fileType" type="Common.FileType" mandatory="true">
+        <description>The file type. See FileType.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application.</description>
+      </param>
+    </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
@@ -1913,10 +1925,10 @@
       </param>
     </function>
     <function name="OnSystemRequest" messagetype="notification" >
-	<description>
+      <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
 	Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
-	</description>
+      </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
