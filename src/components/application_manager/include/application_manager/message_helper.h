@@ -141,7 +141,7 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl);
+      const Application& application_impl, bool resumption = false);
 
     /**
      * @brief Create mobile HashUpdateNotification

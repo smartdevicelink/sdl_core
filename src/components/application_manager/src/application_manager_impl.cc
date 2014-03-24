@@ -391,10 +391,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::PutApplicationInLimited(
     if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
       if (curr_app->is_media_application()) {
         result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
       } else {
         result = mobile_api::HMILevel::HMI_LIMITED;
       }
-      break;
     }
 
   }
@@ -420,10 +420,10 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
         if (curr_app->is_media_application()) {
           result = mobile_api::HMILevel::HMI_BACKGROUND;
+          break;
         } else {
           result = mobile_api::HMILevel::HMI_LIMITED;
         }
-        break;
       }
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
         result = mobile_api::HMILevel::HMI_BACKGROUND;
@@ -436,7 +436,6 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
       }
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
         result = mobile_api::HMILevel::HMI_FULL;
-        break;
       }
     }
   }

@@ -200,7 +200,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl) {
+  const Application& application_impl, bool resumption ) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -218,6 +218,10 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   const smart_objects::SmartObject* ngn_media_screen_name =
     application_impl.ngn_media_screen_name();
+
+  if (resumption) {
+    message[strings::msg_params][strings::resumption] = true;
+  }
 
   if (ngn_media_screen_name) {
     message[strings::msg_params][strings::application]

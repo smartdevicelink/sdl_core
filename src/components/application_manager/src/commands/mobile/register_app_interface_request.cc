@@ -142,8 +142,6 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     SendRegisterAppInterfaceResponseToMobile();
 
   }
@@ -332,7 +330,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   uint32_t hash_id = 0;
 
   const char* add_info = "";
-  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+  bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
+  if (resumption) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
     const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
@@ -349,7 +348,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       add_info = " Resume Succesed";
     }
   }
-
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()), resumption);
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
