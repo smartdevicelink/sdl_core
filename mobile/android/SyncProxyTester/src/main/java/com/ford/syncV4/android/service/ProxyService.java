@@ -305,6 +305,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
+     * @return an object which contains Testing configuration data
+     */
+    public TestConfig getTestConfig() {
+        return mTestConfig;
+    }
+
+    /**
      * Prepare all necessary parameters to be passed to Sync proxy
      */
     private void prepareTestConfig() {
@@ -1391,7 +1398,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(
                     new Pair<Integer, Result>(response.getCorrelationID(),
-                            response.getResultCode()));
+                            response.getResultCode())
+            );
             synchronized (mTesterMain.getXMLTestThreadContext()) {
                 mTesterMain.getXMLTestThreadContext().notify();
             }

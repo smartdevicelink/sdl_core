@@ -328,6 +328,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String SEND_SINGLE_RPC_COMMAND_DIALOG_TAG = "SendSingleRPCCommandDialogTag";
     private final static String PERFORM_AUDIO_PASS_THRU_DIALOG_TAG = "PerformAudioPassThruDialogTag";
     private final static String SYSTEM_REQST_DIALOG_TAG = "SystemRequestDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
@@ -1805,11 +1806,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          * Sends UnregisterAppInterface message.
                          */
                         private void sendUnregisterAppInterface() {
-                            UnregisterAppInterface msg = new UnregisterAppInterface();
-                            msg.setCorrelationID(getCorrelationid());
-                            if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                            }
+                            UnregisterAppInterface unregisterAppInterface = new UnregisterAppInterface();
+                            unregisterAppInterface.setCorrelationID(getCorrelationid());
+
+                            SendSingleRPCRequestDialog sendSingleRPCRequestDialog = SendSingleRPCRequestDialog.newInstance();
+                            sendSingleRPCRequestDialog.setCommand(unregisterAppInterface);
+                            sendSingleRPCRequestDialog.show(getFragmentManager(), SEND_SINGLE_RPC_COMMAND_DIALOG_TAG);
                         }
 
                         /**
@@ -3219,6 +3221,28 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
         } else {
             Log.w(LOG_TAG, "OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.SendSingleRPCRequestDialog}. This Dialog set some
+     * properties to at the command, such as "send as encoded" or "UnregisterAppInterface do not
+     * close USB connection"
+     *
+     * @param rpcRequest modified {@link com.ford.syncV4.proxy.RPCMessage}
+     */
+    public void onSingleRPCCommandDialogResult(RPCRequest rpcRequest, boolean doEncode,
+                                               boolean doCloseUSBReader) {
+        if (mBoundProxyService != null) {
+
+            if (doCloseUSBReader) {
+                // When set this value to true it is important to revert it back to false when Test is
+                // complete!
+                mBoundProxyService.getTestConfig().setDoKeepUSBTransportConnected(true);
+            }
+
+            mBoundProxyService.syncProxySendRPCRequest(rpcRequest);
         }
     }
 

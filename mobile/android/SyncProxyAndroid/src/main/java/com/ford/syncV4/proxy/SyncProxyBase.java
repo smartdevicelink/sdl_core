@@ -1091,6 +1091,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             WiProProtocol protocol = (WiProProtocol) mSyncConnection.getWiProProtocol();
             protocol.setVersion(_wiproVersion);
 
+            /**
+             * TODO : Set TestConfig for the Connection
+             */
+            mSyncConnection.setTestConfig(mTestConfig);
+
             mSyncConnection.startTransport();
         }
     }
