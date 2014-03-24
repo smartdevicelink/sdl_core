@@ -40,6 +40,7 @@ option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -298,6 +299,9 @@ add_subdirectory(./src/appMain)
 
 # Building tests
 if(BUILD_TESTS)
+    if(BUILD_TESTS_WITH_HMI)
+      add_definitions(-DTESTS_WITH_HMI)
+    endif()
     enable_testing()
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
