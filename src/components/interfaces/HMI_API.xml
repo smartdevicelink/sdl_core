@@ -1426,25 +1426,6 @@
   <param name="id" type="Integer" mandatory="true">
     <description>The ID of the device connected</description>
   </param>
-  <description>Various information about connecting device.</description>
-  <param name="hardware" type="String" maxlength="500" mandatory="false">
-    <description>Device model</description>
-  </param>
-  <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
-    <description>Device firmware revision</description>
-  </param>
-  <param name="os" type="String" maxlength="500" mandatory="false">
-    <description>Device OS</description>
-  </param>
-  <param name="osVersion" type="String" maxlength="500" mandatory="false">
-    <description>Device OS version</description>
-  </param>
-  <param name="carrier" type="String" maxlength="500" mandatory="false">
-    <description>Device mobile carrier (if applicable)</description>
-  </param>
-  <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-   <description>Omitted if connected not via BT.</description>
-  </param>
 </struct>
 
 <!--IVI part-->
@@ -1944,7 +1925,7 @@
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
     </function>
     <function name="OnSDLClose" messagetype="notification">
