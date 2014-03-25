@@ -45,14 +45,14 @@ public class CheckBoxState {
     public void setStateOff() {
         getItem().setText(textStringOn);
         //getItem().setHint(hintString);
-        //getItem().setEnabled(true);
+        getItem().setEnabled(true);
         getItem().setChecked(false);
         setState(CheckBoxStateValue.OFF);
     }
 
     public void setStateOn() {
         getItem().setText(textStringOff);
-        //getItem().setEnabled(true);
+        getItem().setEnabled(true);
         getItem().setChecked(true);
         setState(CheckBoxStateValue.ON);
     }

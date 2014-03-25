@@ -3,6 +3,7 @@ package com.ford.syncV4.android.activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.util.Pair;
@@ -389,8 +391,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         buttonServicesView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                DialogFragment serviceDialog = ServicesDialog.newInstance();
-                serviceDialog.show(getFragmentManager(), SERVICES_DIALOG_TAG);
+                FragmentManager fragmentManager = getFragmentManager();
+
+                if (fragmentManager.findFragmentByTag(SERVICES_DIALOG_TAG) == null) {
+                    DialogFragment serviceDialog = ServicesDialog.newInstance();
+                    serviceDialog.show(getFragmentManager(), SERVICES_DIALOG_TAG);
+                } else {
+                    android.app.Fragment fragment = (android.app.Fragment) fragmentManager.findFragmentByTag(SERVICES_DIALOG_TAG);
+                }
             }
         });
 

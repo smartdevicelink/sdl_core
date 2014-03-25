@@ -29,7 +29,7 @@
             android:id="@+id/rpc_service_secure_checkbox_view"
             android:layout_weight="1"
             android:text="@string/secure_service_check_view_on"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
