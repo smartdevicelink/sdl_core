@@ -912,7 +912,7 @@ SDL.SDLModel = Em.Object.create({
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
-            SDL.SDLController.interactionChoiseCloseResponse(message.appID, SDL.SDLModel.resultCode['REJECTED']);
+            SDL.SDLController.interactionChoiseCloseResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
             return;
         }
 

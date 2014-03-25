@@ -1246,7 +1246,7 @@ FFW.UI = FFW.RPCObserver.create({
                 JSONMessage.result.choiceID = commandID;
             }
 
-            if (manualTextEntry) {
+            if (manualTextEntry != null) {
                 JSONMessage.result.manualTextEntry = manualTextEntry;
             }
         } else {

@@ -1870,11 +1870,9 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
-
       <param name="resume" type="Boolean" mandatory="false">
         <description>The information about resumption application. </description>
       </param>
-
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
