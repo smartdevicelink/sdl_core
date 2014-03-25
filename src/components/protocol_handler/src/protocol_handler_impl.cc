@@ -888,6 +888,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
        queue_(queue),
        security_manager_(security_manager) {
   }
+  // FIXME (EZamakhov) : OnHandshakeDone shall get SSLCOntext or session, which is encrupted
   void OnHandshakeDone(bool success) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
         protocol_version_, success, FRAME_TYPE_CONTROL,
@@ -900,6 +901,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
     delete this;
   }
   void OnHandshakeFailed() {
+    // FIXME (EZamakhov) : Add NAck
   }
  private:
   ConnectionID connection_id_;

@@ -80,6 +80,7 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
   security_manager::SSLContext* ssl_context =
       session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
+  // FIXME (EZamakhov) : ProtectConnection calls wrong
   if (!ssl_context && !ProtectConnection(connection_key)) {
     LOG4CXX_ERROR(logger_, "StartHandshake failed");
     return;
