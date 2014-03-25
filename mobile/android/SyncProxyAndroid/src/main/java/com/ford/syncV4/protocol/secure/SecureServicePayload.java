@@ -79,24 +79,34 @@ public class SecureServicePayload {
 
     public SecurityInternalError getSecureError() {
         if (mData != null) {
-            int result = mData[0];
+            int result = mBinaryFrameHeader.getBulkData()[0];
             switch (result) {
-                case 1:
-                    return SecurityInternalError.INVALID_QUERY_SIZE;
-                case 2:
-                    return SecurityInternalError.INVALID_QUERY_ID;
-                case 3:
-                    return SecurityInternalError.NULL_DATA;
-                case 4:
-                    return SecurityInternalError.INVALID_SERVICE_TYPE;
-                case 5:
-                    return SecurityInternalError.PROTECTION_NOT_REQUESTED;
+                case 0x0:
+                    return SecurityInternalError.ERROR_SUCCESS;
+                case 0x1:
+                    return SecurityInternalError.ERROR_INVALID_QUERY_SIZE;
+                case 0x2:
+                    return SecurityInternalError.ERROR_INVALID_QUERY_ID;
+                case 0x3:
+                    return SecurityInternalError.ERROR_NOT_SUPPORTED;
+                case 0x4:
+                    return SecurityInternalError.ERROR_SERVICE_ALREADY_PROTECTED;
+                case 0x5:
+                    return SecurityInternalError.ERROR_CREATE_SLL;
+                case 0x6:
+                    return SecurityInternalError.ERROR_CONNECTION_NOT_FOUND;
+                case 0x7:
+                    return SecurityInternalError.ERROR_SESSION_NOT_FOUND;
+                case 0x8:
+                    return SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED;
                 case 0xF0:
-                    return SecurityInternalError.SSL_INVALID_DATA;
-                case 255:
-                    return SecurityInternalError.OTHER_INTERNAL_ERROR;
+                    return SecurityInternalError.ERROR_SSL_INVALID_DATA;
+                case 0xFF:
+                    return SecurityInternalError.ERROR_UNKWOWN_INTERNAL_ERROR;
+
             }
         }
         return SecurityInternalError.UNKNOWN;
     }
+
 }

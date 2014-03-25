@@ -15,6 +15,6 @@ public class ProtocolConst {
     public static final int PROTOCOL_V2_HEADER_SIZE = 12;
 
 
-    public static final byte SEND_HANDSHAKE_ID = (byte) 0x00;
-    public static final byte SECURE_ERROR = (byte) 0x01;
+    public static final byte SEND_HANDSHAKE_ID = (byte) 0x01;
+    public static final byte SECURE_ERROR = (byte) 0x02;
 }

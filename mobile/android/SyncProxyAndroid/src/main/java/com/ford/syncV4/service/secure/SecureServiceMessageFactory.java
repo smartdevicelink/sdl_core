@@ -21,7 +21,7 @@ public class SecureServiceMessageFactory {
         protocolMessage.setSessionID(sessionId);
         protocolMessage.setVersion((byte) 2);
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
-        protocolMessage.setSessionType(serviceType);
+        protocolMessage.setSessionType(ServiceType.Heartbeat);
         protocolMessage.setFunctionID(ProtocolConst.SEND_HANDSHAKE_ID);
         protocolMessage.setData(payloadData);
         return protocolMessage;
