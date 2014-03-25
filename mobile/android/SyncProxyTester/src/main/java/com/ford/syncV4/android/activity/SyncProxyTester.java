@@ -45,7 +45,10 @@ import android.widget.Toast;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
+import com.ford.syncV4.android.activity.mobilenav.CheckBoxState;
+import com.ford.syncV4.android.activity.mobilenav.CheckBoxStateValue;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
+import com.ford.syncV4.android.activity.mobilenav.RPCServiceCheckboxState;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -344,6 +347,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private ProxyService mBoundProxyService;
     private ExecutorService mStreamCommandsExecutorService;
 
+    private RPCServiceCheckboxState mRPCServiceSecureState;
+
     public static SyncProxyTester getInstance() {
         return _activity;
     }
@@ -383,6 +388,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
         findViewById(R.id.btnPlayPause).setOnClickListener(this);
+
+        // RPC Service Secure check box processing
+        CheckBox rpcSecureCheckBoxView = (CheckBox) findViewById(R.id.rpc_service_secure_checkbox_view);
+        mRPCServiceSecureState = new RPCServiceCheckboxState(rpcSecureCheckBoxView, this);
+        rpcSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
 
         // Process Services
         Button buttonServicesView = (Button) findViewById(R.id.btnServices);
@@ -3723,6 +3738,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             }
         });
+    }
+
+    /**
+     * Process a state of the "Start Secure RPC Service" checkbox
+     */
+    private void processRPCSecureCheckBox() {
+        if (mRPCServiceSecureState.getState() == CheckBoxStateValue.OFF) {
+            mRPCServiceSecureState.setStateOn();
+            Log.d(LOG_TAG, "Start Secure RPC service");
+        } else if (mRPCServiceSecureState.getState() == CheckBoxStateValue.ON) {
+            mRPCServiceSecureState.setStateOff();
+            Log.d(LOG_TAG, "Stop Secure RPC service");
+        }
     }
 
     public boolean isProxyReadyForWork() {
