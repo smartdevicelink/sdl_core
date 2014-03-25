@@ -234,6 +234,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                         SDL.States.goToStates('info.apps');
                     }
 
+                    SDL.SDLModel.stateLimited = null;
+
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }

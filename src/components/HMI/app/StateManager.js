@@ -187,6 +187,7 @@ var StateManager = Em.StateManager.extend({
 
                 this._super();
 
+                SDL.SDLModel.stateLimited = SDL.SDLAppController.model.appID;
                 SDL.SDLAppController.deactivateApp();
             }
 

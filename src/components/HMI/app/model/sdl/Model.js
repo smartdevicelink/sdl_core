@@ -44,6 +44,11 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * ID of app in LIMITED HMI state
+     */
+    stateLimited: null,
+
+    /**
      * IScroll object to manage scroll on PerformInteraction view
      *
      * @type {Object}
@@ -1034,25 +1039,22 @@ SDL.SDLModel = Em.Object.create({
      */
     addCommandVR: function (message) {
 
-        var appID = 0;
         if (message.type == "Application") {
 
             SDL.SDLModel.VRCommands.push(message);
             SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type);
         } else if ("appID" in message) {
 
-            appID = message.appID;
+            SDL.SDLController.getApplicationModel(message.appID).VRCommands.push(message);
 
-            SDL.SDLController.getApplicationModel(appID).VRCommands.push(message);
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID == message.appID) {
 
-            if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID) {
-
-                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appID, message.type);
+                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type);
             }
         } else {
 
             SDL.SDLModel.VRCommands.push(message);
-            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appID, message.type);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, 0, message.type);
         }
     },
 
