@@ -230,7 +230,11 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(
          inMessage->get_data(), inMessage->get_data_size(), &out_data_size));
-  if(!out_data || !out_data_size){
+  if(!out_data || !out_data_size) {
+    if(sslContext->IsInitCompleted()) {
+      LOG4CXX_INFO(logger_, "SSL inititalization finished success.")
+      return true;
+    }
     std::string error("SendHandshakeData: Handshake failed.");
     error += LastError();
     LOG4CXX_WARN(logger_, error);
