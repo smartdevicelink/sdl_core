@@ -3122,7 +3122,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void startMobileNavService(Session session){
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+            mSyncConnection.startMobileNavService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
         }
     }
 
