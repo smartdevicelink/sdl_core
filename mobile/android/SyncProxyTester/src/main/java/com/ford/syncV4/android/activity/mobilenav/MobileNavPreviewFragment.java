@@ -67,7 +67,6 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(LOG_TAG, "Mobile Navi Service Check Box click");
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {

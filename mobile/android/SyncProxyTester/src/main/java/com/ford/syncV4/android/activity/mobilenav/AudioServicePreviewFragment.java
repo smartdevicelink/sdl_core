@@ -46,7 +46,6 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.d(LOG_TAG, "Audio Service Check Box click");
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {
