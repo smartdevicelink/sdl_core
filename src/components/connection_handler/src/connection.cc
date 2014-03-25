@@ -176,6 +176,8 @@ int Connection::SetSSLContext( uint8_t sessionId,
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
     return security_manager::SecurityQuery::ERROR_SESSION_NOT_FOUND;
   }
+  Session& session = session_it->second;
+  session.ssl_context = context;
   return security_manager::SecurityQuery::ERROR_SUCCESS;
 }
 
