@@ -51,7 +51,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 field2       : '<field2>',
                 field3       : '<field3>',
                 mediaClock   : '<mediaClock>',
-                trackIcon    : 'images/sdl/audio_icon.jpg',
+                trackIcon    : SDL.SDLModel.defaultListOfIcons.trackIcon,
                 customPresets: [
                     '<no definition>',
                     '<no definition>',

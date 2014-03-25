@@ -327,9 +327,12 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {Object}
      */
-    listOfIcons: {
+    defaultListOfIcons: {
         // appID: syncFileName
-        0: "images/media/ico_li.png"
+        //0: "images/media/ico_li.png"
+        'app': 'images/info/info_leftMenu_apps_ico.png',
+        'command': 'images/common/defaultButtonImage.png',
+        'trackIcon': 'images/sdl/audio_icon.jpg'
     },
 
     /**
@@ -480,6 +483,73 @@ SDL.SDLModel = Em.Object.create({
 
         if (event.originalEvent.type == "mouseup") {
             FLAGS.TOUCH_EVENT_STARTED = false;
+        }
+    },
+
+    /**
+     * Method to remove deleted by SDL Core images used in HMI
+     * check images came in request from SDLCore like UI.Show, UI.AddCommand, UI.SetGlobalProperties,
+     * UI.SeAppIcon, Navigation.ShowConstantTBT, Navigation.UpdateTurnList, UI.ShowNotification
+     *
+     * @param {Object}
+     */
+    onFileRemoved: function(params) {
+
+        var result = false;
+
+        if (params.fileType === "GRAPHIC_PNG" && SDL.SDLController.getApplicationModel(params.appID)) {
+            result = SDL.SDLController.getApplicationModel(params.appID).onImageRemoved(params.fileName);
+
+            if (SDL.SDLController.getApplicationModel(params.appID).appIcon.indexOf(params.fileName) != -1) {
+                SDL.SDLController.getApplicationModel(params.appID).set('appIcon', SDL.SDLModel.defaultListOfIcons.app);
+            }
+
+            if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams) {
+
+                if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.turnIcon.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.set('turnIcon', SDL.SDLModel.defaultListOfIcons.command);
+                }
+
+                if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.nextTurnIcon.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.set('nextTurnIcon', SDL.SDLModel.defaultListOfIcons.command);
+                }
+            }
+
+            if (SDL.SDLAppController.model.appInfo.trackIcon && SDL.SDLAppController.model.appInfo.trackIcon.indexOf(params.fileName) != -1) {
+                SDL.SDLAppController.model.appInfo.set('trackIcon', SDL.SDLModel.defaultListOfIcons.trackIcon);
+            }
+
+            if (SDL.SDLAppController.model.appInfo.mainImage && SDL.SDLAppController.model.appInfo.mainImage.indexOf(params.fileName) != -1) {
+                SDL.SDLAppController.model.appInfo.set('mainImage', SDL.SDLModel.defaultListOfIcons.trackIcon);
+            }
+
+            var len = SDL.SDLController.getApplicationModel(params.appID).turnList.length;
+            for (var i = 0; i < len; i++) {
+                if (SDL.SDLController.getApplicationModel(params.appID).turnList[i].turnIcon.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).turnList[i].turnIcon = SDL.SDLModel.defaultListOfIcons.command;
+                }
+            }
+
+            SDL.TBTTurnList.updateList(params.appID);
+
+            if (SDL.SDLController.getApplicationModel(params.appID).softButtons) {
+                var len = SDL.SDLController.getApplicationModel(params.appID).softButtons;
+                for (var i = 0; i < len; i++) {
+                    if (SDL.SDLController.getApplicationModel(params.appID).softButtons[i].image.value.indexOf(params.fileName) != -1) {
+                        SDL.SDLController.getApplicationModel(params.appID).softButtons[i].image.value = SDL.SDLModel.defaultListOfIcons.command;
+                    }
+                }
+
+                if (params.appID == SDL.SDLAppController.model.appID) {
+                    SDL.sdlView.innerMenu.refreshItems();
+                }
+            }
+
+        }
+
+
+        if (result && SDL.OptionsView.active && SDL.SDLAppController.model.appID == params.appID) {
+            SDL.OptionsView.commands.refreshItems();
         }
     },
 
