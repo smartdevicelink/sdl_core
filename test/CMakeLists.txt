@@ -99,10 +99,10 @@ if (BUILD_TESTS_WITH_HMI)
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
    )
-else()
+else(BUILD_TESTS_WITH_HMI)
 set(LIBRARIES
-    ApplicationManager
     MediaManager
+    ApplicationManager
     gtest
     gtest_main
     gmock
@@ -144,7 +144,7 @@ set(LIBRARIES
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
 )
-endif()
+endif(BUILD_TESTS_WITH_HMI)
 
 
 if (BUILD_USB_SUPPORT)

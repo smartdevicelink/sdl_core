@@ -55,14 +55,13 @@
 // #include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
 #ifdef TESTS_WITH_HMI
-  #include "rpc/admin_app_test.h"
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "life_cycle.cc"
+#include "rpc/admin_app_test.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_options.h"
 #endif
 
-#include "utils/threads/thread_options.h"
-#include "utils/threads/thread.h"
-#include "life_cycle.cc"
-
-#include "hmi_message_handler/hmi_message_handler.h"
 
 // #define QT_HMI
 
