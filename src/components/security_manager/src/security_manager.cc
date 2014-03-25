@@ -236,8 +236,10 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
       // TODO: upgrade SSLContext interface to let caller know
       //       if handshake wasn't successful
       for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-          it != listeners_.end(); ++it) {
+          it != listeners_.end(); ) {
         (*it)->OnHandshakeDone(true);
+        RemoveListener(*it);
+        it = listeners_.begin();
       }
       return true;
     }

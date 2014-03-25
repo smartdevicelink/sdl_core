@@ -888,7 +888,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
        queue_(queue),
        security_manager_(security_manager) {
   }
-  // FIXME (EZamakhov) : OnHandshakeDone shall get SSLCOntext or session, which is encrupted
+  // FIXME (EZamakhov) : OnHandshakeDone shall get SSLContext or session, which is encrupted
   void OnHandshakeDone(bool success) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
         protocol_version_, success, FRAME_TYPE_CONTROL,
@@ -897,11 +897,17 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 
     queue_->PostMessage(
         impl::RawFordMessageToMobile(ptr, false));
-    security_manager_->RemoveListener(this);
     delete this;
   }
   void OnHandshakeFailed() {
-    // FIXME (EZamakhov) : Add NAck
+    ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
+        protocol_version_, false, FRAME_TYPE_CONTROL,
+        service_type_, FRAME_DATA_START_SERVICE_NACK, session_id_,
+        0, hash_code_));
+
+    queue_->PostMessage(
+        impl::RawFordMessageToMobile(ptr, false));
+    delete this;
   }
  private:
   ConnectionID connection_id_;
@@ -928,7 +934,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         packet.is_compress()
         );
 
-  if (-1 != session_id) {
+   if (-1 != session_id) {
     if (!packet.is_compress()) {
       SendStartSessionAck(
           connection_id, session_id, packet.protocol_version(),
