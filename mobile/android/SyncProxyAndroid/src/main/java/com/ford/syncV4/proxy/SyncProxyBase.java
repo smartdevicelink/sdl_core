@@ -2034,7 +2034,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav, encrypted);
-        if(protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav) && encrypted){
+        if (protocolSecureManager !=  null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav) &&
+                encrypted) {
             protocolSecureManager.setHandshakeFinished(true);
         }
         if (_callbackToUIThread) {
@@ -2053,7 +2055,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
-        if(protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service) && encrypted){
+        if (protocolSecureManager != null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service) &&
+                encrypted) {
             protocolSecureManager.setHandshakeFinished(true);
         }
         if (_callbackToUIThread) {
@@ -3129,13 +3133,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void startMobileNavService(Session session) {
         if (mSyncConnection != null) {
-            mSyncConnection.startMobileNavService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+            mSyncConnection.startMobileNavService(session,
+                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
         }
     }
 
     public void startAudioService(Session session) {
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+            mSyncConnection.startAudioService(session,
+                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
         }
     }
 
