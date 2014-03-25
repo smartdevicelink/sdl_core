@@ -2033,7 +2033,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
-        createService(sessionID, ServiceType.Mobile_Nav, false);
+        createService(sessionID, ServiceType.Mobile_Nav, encrypted);
+        if(protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav) && encrypted){
+            protocolSecureManager.setHandshakeFinished(true);
+        }
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2050,6 +2053,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
+        if(protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service) && encrypted){
+            protocolSecureManager.setHandshakeFinished(true);
+        }
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {

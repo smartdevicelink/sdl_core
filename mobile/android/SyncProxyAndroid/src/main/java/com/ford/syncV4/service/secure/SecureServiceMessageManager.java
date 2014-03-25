@@ -11,7 +11,6 @@ import android.util.Log;
 
 import com.ford.syncV4.protocol.ProtocolConst;
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.SecureServicePayload;
 import com.ford.syncV4.protocol.secure.SecureServicePayloadParser;
 
@@ -52,7 +51,6 @@ public class SecureServiceMessageManager {
         }
 
         Log.d(TAG, "Process Secure msg");
-
         SecureServicePayloadParser secureServicePayloadParser = new SecureServicePayloadParser();
         SecureServicePayload secureServicePayload =
                 secureServicePayloadParser.parse(protocolMessage.getData());
@@ -60,7 +58,6 @@ public class SecureServiceMessageManager {
         int secureServiceFunctionId = secureServicePayload.getFunctionId();
 
         Log.d(TAG, "Process Secure, fun id:" + secureServiceFunctionId);
-
         if (secureServiceFunctionId == ProtocolConst.SEND_HANDSHAKE_ID) {
             byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
             mMessageCallback.onHandshakeResponse(data);
@@ -68,4 +65,6 @@ public class SecureServiceMessageManager {
             mMessageCallback.onHandshakeError(secureServicePayload.getSecureError());
         }
     }
+
+
 }

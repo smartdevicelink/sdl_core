@@ -26,7 +26,12 @@ public class ProtocolSecureManager {
     private ISecureProxyServer listener;
     ISSLComponent secureProxy;
     ISSLComponent sslClient;
-    private boolean handshakeFinished;
+
+    public boolean isHandshakeFinished() {
+        return handshakeFinished;
+    }
+
+    private  boolean handshakeFinished = false;
     private CountDownLatch countDownLatchInput = new CountDownLatch(1);
 
     public synchronized CountDownLatch getCountDownLatchOutput() {
@@ -74,7 +79,7 @@ public class ProtocolSecureManager {
         secureProxy = new SecureProxyClient(new ISecureProxyServer() {
             @Override
             public void onDataReceived(byte[] data) {
-                if (!handshakeFinished) {
+                if (!isHandshakeFinished()) {
                     handshakeDataListener.onHandshakeDataReceived(data);
                 }
             }
@@ -142,13 +147,14 @@ public class ProtocolSecureManager {
         }, new HandshakeCompletedListener() {
             @Override
             public void handshakeCompleted(HandshakeCompletedEvent event) {
-                setHandshakeFinished(true);
+                //handshakeFinished = true;
                 handshakeDataListener.onHandShakeCompleted();
                 if ( event!=null ) {
                     DebugTool.logInfo("GREAT SUCCESS" + event.toString());
                 }else{
                     DebugTool.logInfo("GREAT SUCCESS");
                 }
+                //setHandshakeFinished(true);
             }
         });
         try {
@@ -173,7 +179,6 @@ public class ProtocolSecureManager {
         }
     }
 
-
     public synchronized void writeDataToProxyServer(byte[] data, IRPCodedDataListener rpcCodedDataListener) throws IOException {
         sslClient.setRPCPacketListener(rpcCodedDataListener);
         secureProxy.writeData(data);
@@ -185,7 +190,7 @@ public class ProtocolSecureManager {
     }
 
 
-    private synchronized void setHandshakeFinished(boolean handshakeFinished) {
+    public void setHandshakeFinished(boolean handshakeFinished) {
         this.handshakeFinished = handshakeFinished;
     }
 
