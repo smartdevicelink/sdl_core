@@ -67,13 +67,13 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
   PlatformUsbDevice* platform_device = usb_device->usb_device();
-  ConnectionSptr connection;
   bool initialized = false;
   if (IsAppleIAPDevice(platform_device)) {
 #if defined(__QNXNTO__)
     UsbIAPConnection* usb_connection =
       new UsbIAPConnection(device_uid, app_handle, controller_, "/fs/ipod0");
-    connection = usb_connection;
+    ConnectionSptr connection(usb_connection);
+    controller_->ConnectionCreated(connection, device_uid, app_handle);
     initialized = usb_connection->Init();
 #endif
   }
@@ -81,7 +81,8 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 #if defined(__QNXNTO__)
     UsbIAP2Connection* usb_connection =
       new UsbIAP2Connection(device_uid, app_handle, controller_, "/dev/ipod0");
-    connection = usb_connection;
+    ConnectionSptr connection(usb_connection);
+    controller_->ConnectionCreated(connection, device_uid, app_handle);
     initialized = usb_connection->Init();
 #endif
   }
@@ -89,11 +90,10 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
     UsbConnection* usb_connection =
       new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
         usb_device->usb_device());
-    connection = usb_connection;
+    ConnectionSptr connection(usb_connection);
+    controller_->ConnectionCreated(connection, device_uid, app_handle);
     initialized = usb_connection->Init();
   }
-
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
 
   if (initialized) {
     LOG4CXX_INFO(logger_, "USB connection initialised");
