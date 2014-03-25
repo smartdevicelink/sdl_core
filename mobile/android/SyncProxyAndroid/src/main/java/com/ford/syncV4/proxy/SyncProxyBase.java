@@ -3121,15 +3121,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         serviceToCypher = typeToCypher;
     }
 
-    public void startMobileNavService(Session session){
+    public void startMobileNavService(Session session) {
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+            mSyncConnection.startMobileNavService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
         }
     }
 
     public void startAudioService(Session session) {
         if (mSyncConnection != null) {
-
             mSyncConnection.startAudioService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
         }
     }

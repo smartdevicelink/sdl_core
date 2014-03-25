@@ -5,16 +5,22 @@
 
     <CheckBox
         android:id="@+id/mobileNavCheckBox"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:checked="false"
-        android:enabled="false"
-        android:hint="@string/mobile_navi_hint"
+        android:text="@string/service_check_view_on"
         />
 
-    <Button
+    <CheckBox
+        android:id="@+id/mobile_navi_service_secure_checkbox_view"
+        android:text="@string/secure_service_check_view_on"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!--<Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Send Data"
@@ -23,14 +29,14 @@
         android:layout_below="@+id/mobileNavCheckBox"
         android:layout_alignParentLeft="true"
         android:visibility="gone"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true" />-->
 
     <Button
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
         android:id="@+id/file_streaming"
-        android:layout_below="@+id/videobutton"
+        android:layout_below="@+id/mobileNavCheckBox"
         android:enabled="false"
         android:layout_centerHorizontal="true" />
 

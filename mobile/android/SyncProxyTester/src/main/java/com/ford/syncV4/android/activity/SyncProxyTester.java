@@ -216,8 +216,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_SET_UP_POLICY_FILES = 18;
     private final int MNU_HASH_ID_SETUP = 19;
     private ModuleTest mTesterMain;
-    private ScrollView _scroller = null;
-    private ListView mListview = null;
+    private ListView mListView = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
     private ArrayAdapter<Integer> mCommandAdapter = null;
     private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
@@ -328,6 +327,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String SERVICES_DIALOG_TAG = "ServicesDialogTag";
     private final static String PERFORM_AUDIO_PASS_THRU_DIALOG_TAG = "PerformAudioPassThruDialogTag";
     private final static String SYSTEM_REQST_DIALOG_TAG = "SystemRequestDialogTag";
     private final static String ADD_SUB_MENU_DIALOG_TAG = "AddSubMenuDialogTag";
@@ -381,10 +381,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         mStreamCommandsExecutorService = Executors.newFixedThreadPool(3);
 
-        _scroller = (ScrollView) findViewById(R.id.scrollConsole);
-
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
         findViewById(R.id.btnPlayPause).setOnClickListener(this);
+
+        // Process Services
+        Button buttonServicesView = (Button) findViewById(R.id.btnServices);
+        buttonServicesView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment serviceDialog = ServicesDialog.newInstance();
+                serviceDialog.show(getFragmentManager(), SERVICES_DIALOG_TAG);
+            }
+        });
 
         resetAdapters();
 
@@ -397,11 +405,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         mLogAdapter = new LogAdapter(LOG_TAG, false, this, R.layout.row, _logMessages);
 
-        mListview = (ListView) findViewById(R.id.messageList);
-        mListview.setClickable(true);
-        mListview.setAdapter(mLogAdapter);
-        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        mListview.setOnItemClickListener(new OnItemClickListener() {
+        mListView = (ListView) findViewById(R.id.messageList);
+        mListView.setClickable(true);
+        mListView.setAdapter(mLogAdapter);
+        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
@@ -660,39 +668,24 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    Handler myHandler = new Handler();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
-                            if (outputStream != null) {
-                                AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
-                                        getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                                fragment.setAudioServiceStateOn(outputStream);
-                            }
-                        }
-                    }, 3000);
+                    OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
+                    if (outputStream != null) {
+                        AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+                        fragment.setAudioServiceStateOn(outputStream);
+                    }
                 }
             });
         } else if (serviceType == ServiceType.Mobile_Nav) {
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    Handler myHandler = new Handler();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
-                            if (outputStream != null) {
-                                MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
-                                        getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                                fragment.setMobileNaviStateOn(outputStream);
-                            }
-                        }
-                    }, 3000);
-
-
+                    OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
+                    if (outputStream != null) {
+                        MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+                        fragment.setMobileNaviStateOn(outputStream);
+                    }
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
@@ -964,12 +957,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 stopProxyServiceOnExit();
                 break;
             case MNU_TOGGLE_CONSOLE:
-                if (_scroller.getVisibility() == ScrollView.VISIBLE) {
-                    _scroller.setVisibility(ScrollView.GONE);
-                    mListview.setVisibility(ListView.VISIBLE);
+                if (mListView.getVisibility() == ScrollView.VISIBLE) {
+                    mListView.setVisibility(ListView.GONE);
                 } else {
-                    _scroller.setVisibility(ScrollView.VISIBLE);
-                    mListview.setVisibility(ListView.GONE);
+                    mListView.setVisibility(ListView.VISIBLE);
                 }
                 return true;
             case MNU_CLEAR:
