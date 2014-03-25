@@ -99,7 +99,10 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
         static_cast<uint8_t*>(ssl_context->StartHandshake(&data_size));
     DCHECK(data);
     DCHECK(data_size);
-    SendBinaryData(connection_key, data, data_size);
+    SecurityQuery::QueryHeader header(
+          SecurityQuery::NOTIFICATION,
+          SecurityQuery::SEND_HANDSHAKE_DATA, 0);
+    SendData(connection_key, header, data, data_size);
   }
 }
 
