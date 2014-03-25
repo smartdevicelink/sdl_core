@@ -1717,6 +1717,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onUnregisterAppInterfaceResponse(Hashtable hash) {
+        setHashId(null);
         stopAllServices();
         closeSyncConnection(true);
         stopSession();

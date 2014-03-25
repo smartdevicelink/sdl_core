@@ -1,4 +1,5 @@
 [CW13]
+* SyncProxyTester: RegisterAppInterface without HashId in case of UnregisterAppInterface have take place
 + SyncProxyTester | SyncProxyAndroid SDK: Add possibility do not close USB connection when perform single UnregisterAppInterface command
 + SyncProxyTester: TCP port configuration with NSD
 
