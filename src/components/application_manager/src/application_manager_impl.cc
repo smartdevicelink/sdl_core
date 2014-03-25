@@ -1500,7 +1500,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
-  resume_ctrl_.SavetoFileSystem();
+  resume_ctrl_.IgnitionOff();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {

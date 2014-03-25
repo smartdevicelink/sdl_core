@@ -40,9 +40,10 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;
+
   const std::string& m_app_id = application->mobile_app_id()->asString();
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-            it != saved_applications_.end(); ++it) {
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+            it != GetSavedApplications().end(); ++it) {
     if ((*it)[strings::app_id].asString() == m_app_id) {
       json_app = &(*it);
       LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id"
@@ -54,9 +55,9 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   if (json_app == NULL) {
     LOG4CXX_INFO(logger_, "ResumeCtrl Application with this ID does not"
          "exist. Add new" << m_app_id);
-    saved_applications_.push_back(Json::Value());
-    json_app = &(saved_applications_.back());
+    json_app = &(GetSavedApplications().append(Json::Value()));
   }
+
   uint32_t hash = application->curHash();
   LOG4CXX_INFO(logger_, " Hash = " << hash);
   uint32_t connection_key = application->app_id();
@@ -101,14 +102,8 @@ void ResumeCtrl::LoadApplications() {
     LOG4CXX_INFO(logger_, "There are no Saved applications");
     return;
   }
+  SetSavedApplication(root);
 
-  for (Json::Value::iterator it = root.begin(); it != root.end(); ++it) {
-    Json::Value cur_app_data = (*it);
-    LOG4CXX_INFO(logger_, "Restored Application: " << 
-						  cur_app_data.toStyledString());
-    saved_applications_.push_back(cur_app_data);
-    uint32_t session_key = cur_app_data[strings::connection_key].asUInt();
-  }
 }
 
 void ResumeCtrl::on_event(const event_engine::Event& event) {
@@ -119,8 +114,8 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::RestoreApplicationHMILevel");
   DCHECK(application.get());
 
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-      it != saved_applications_.end(); ++it) {
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
@@ -162,15 +157,15 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "RestoreApplicationData");
   DCHECK(application.get());
 
-  std::vector<Json::Value>::iterator it = saved_applications_.begin();
-  for (; it != saved_applications_.end(); ++it) {
+  Json::Value::iterator it = GetSavedApplications().begin();
+  for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
       break;
     }
   }
-  if (it == saved_applications_.end()) {
+  if (it == GetSavedApplications().end()) {
     LOG4CXX_WARN(logger_,"Application not saved");
     return false;
   }
@@ -297,8 +292,8 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
 bool ResumeCtrl::ApplicationIsSaved(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::ApplicationIsSaved " << app_id);
 
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-      it != saved_applications_.end(); ++it) {
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
     if ((*it)[strings::connection_key].asInt() == app_id) {
       return true;
     }
@@ -310,20 +305,29 @@ bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr applicatio
   LOG4CXX_INFO(logger_, "ResumeCtrl::RemoveApplicationFromSaved ");
   DCHECK(application.get());
 
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-      it != saved_applications_.end(); ) {
+  bool result = false;
+  std::vector<Json::Value> temp;
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
-    if (saved_m_app_id == application->mobile_app_id()->asString()) {
-      saved_applications_.erase(it);
-      return true;
+    if (saved_m_app_id != application->mobile_app_id()->asString()) {
+      temp.push_back((*it));
     } else {
-      ++it;
+      result = true;
     }
   }
-  return false;
+  if (result = false) {
+    return result;
+  }
+  GetSavedApplications().clear();
+  for (std::vector<Json::Value>::iterator it = temp.begin();
+      it != temp.end(); ++it) {
+    GetSavedApplications().append((*it));
+  }
+  return result;
 }
 
-void ResumeCtrl::SavetoFileSystem() {
+void ResumeCtrl::IgnitionOff() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::SavetoFileSystem()");
 
   const std::string& storage =
@@ -331,8 +335,8 @@ void ResumeCtrl::SavetoFileSystem() {
   std::ofstream file(file_system::FullPath(storage).c_str(),
                      std::ios::out);
   Json::Value to_save;
-  for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
-      it != saved_applications_.end(); ++it) {
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
     uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
     if (ign_off_count < kApplicationLifes) {
       ign_off_count++;
@@ -340,7 +344,7 @@ void ResumeCtrl::SavetoFileSystem() {
       to_save.append(*it);
     }
   }
-
+  SetSavedApplication(to_save);
   if (file.is_open()) {
     file << to_save.toStyledString();
   } else {
@@ -357,8 +361,8 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
-  std::vector<Json::Value>::const_iterator it = saved_applications_.begin();
-  for (; it != saved_applications_.end(); ++it) {
+  Json::Value::iterator it = GetSavedApplications().begin();
+  for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
@@ -370,7 +374,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
         RestoreApplicationData(application);
       }
       application->UpdateHash();
-      if ( !timer_.isRunning() && app_mngr_->applications().size() > 1 ) {
+      if (!timer_.isRunning() && app_mngr_->applications().size() > 1) {
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {
@@ -395,8 +399,8 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
-  std::vector<Json::Value>::const_iterator it = saved_applications_.begin();
-  for (; it != saved_applications_.end(); ++it) {
+  Json::Value::iterator it = GetSavedApplications().begin();
+  for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
@@ -423,15 +427,15 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
   LOG4CXX_INFO(logger_, "RestoreApplicationData");
   DCHECK(application.get());
 
-  std::vector<Json::Value>::iterator it = saved_applications_.begin();
-  for (; it != saved_applications_.end(); ++it) {
+  Json::Value::iterator it = GetSavedApplications().begin();
+  for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id ==
         application->mobile_app_id()->asString()) {
       break;
     }
   }
-  if (it == saved_applications_.end()) {
+  if (it == GetSavedApplications().end()) {
     LOG4CXX_WARN(logger_,"Application not saved");
     return false;
   }
@@ -477,8 +481,10 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
 }
 
 bool ResumeCtrl::CheckApplicationHash(std::string mobile_app_id, uint32_t hash) {
-  std::vector<Json::Value>::iterator it = saved_applications_.begin();
-  for (; it != saved_applications_.end(); ++it) {
+  Json::Value::iterator it = GetSavedApplications().begin();
+  for (; it != GetSavedApplications()
+
+       .end(); ++it) {
     std::string saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id == mobile_app_id) {
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();

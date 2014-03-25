@@ -121,7 +121,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application info to FileSystem
      */
-    void SavetoFileSystem();
+    void IgnitionOff();
 
     /**
      * @brief Start timer for resumption applications
@@ -183,7 +183,15 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
     *@brief Data of applications, that whait for resuming
     */
-    std::vector<Json::Value> saved_applications_;
+    Json::Value saved_applications_;
+
+    Json::Value& GetSavedApplications() {
+      return saved_applications_;
+    }
+
+    void SetSavedApplication(Json::Value& apps_json) {
+      saved_applications_ = apps_json;
+    }
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
