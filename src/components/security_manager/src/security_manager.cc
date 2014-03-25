@@ -232,7 +232,13 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
          inMessage->get_data(), inMessage->get_data_size(), &out_data_size));
   if(!out_data || !out_data_size) {
     if(sslContext->IsInitCompleted()) {
-      LOG4CXX_INFO(logger_, "SSL inititalization finished success.")
+      LOG4CXX_INFO(logger_, "SSL inititalization finished success.");
+      // TODO: upgrade SSLContext interface to let caller know
+      //       if handshake wasn't successful
+      for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+          it != listeners_.end(); ++it) {
+        (*it)->OnHandshakeDone(true);
+      }
       return true;
     }
     std::string error("SendHandshakeData: Handshake failed.");
@@ -249,15 +255,6 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 
   // answer with the same header as income message
   SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
-
-  // TODO: upgrade SSLContext interface to let caller know
-  //       if handshake wasn't successful
-  if (sslContext->IsInitCompleted()) {
-    for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-        it != listeners_.end(); ++it) {
-      (*it)->OnHandshakeDone(true);
-    }
-  }
 
   return true;
 }
