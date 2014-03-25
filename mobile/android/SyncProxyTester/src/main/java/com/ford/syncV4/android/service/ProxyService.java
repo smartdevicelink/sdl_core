@@ -2038,7 +2038,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         try {
-            if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface) &&
+                    getSessionId() == 0) {
                 syncProxySendRegisterRequest((RegisterAppInterface) request);
             } else {
                 createDebugMessageForAdapter(request);
@@ -2086,13 +2087,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
-        if (mSyncProxy != null) {
-            // TODO it's seems stupid in order to register send onTransportConnected
-            mSyncProxy.updateRegisterAppInterfaceParameters(msg);
-            if (mSyncProxy.getSyncConnection() != null) {
-                mSyncProxy.getSyncConnection().onTransportConnected();
-            }
+        if (mSyncProxy == null) {
+            return;
         }
+
+        if (mSyncProxy.getSyncConnection() == null) {
+            return;
+        }
+
+        // TODO it's seems stupid in order to register send onTransportConnected
+        mSyncProxy.updateRegisterAppInterfaceParameters(msg);
+
+        mSyncProxy.getSyncConnection().onTransportConnected();
     }
 
     public byte syncProxyGetWiProVersion() {
