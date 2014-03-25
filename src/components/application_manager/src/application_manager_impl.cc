@@ -626,10 +626,12 @@ std::string ApplicationManagerImpl::GetDeviceName(
 void ApplicationManagerImpl::OnMessageReceived(
     const protocol_handler::RawMessagePtr& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
+  DCHECK(message);
 
-  if (!message) {
-    LOG4CXX_ERROR(logger_, "Null-pointer message received.");
-    NOTREACHED();
+  if (message->service_type() != protocol_handler::kRpc
+      && message->service_type() != protocol_handler::kBulk) {
+    // skip this message, not under handling of ApplicationManager
+    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
     return;
   }
   //Return empty SharedPtr on not kRpc or kBulk service

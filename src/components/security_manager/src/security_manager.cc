@@ -50,8 +50,8 @@ void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kControl) {
-    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
-                 << message->service_type());
+//    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
+//                 << message->service_type());
     return;
   }
 
@@ -210,8 +210,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   const uint32_t connectionKey = inMessage->get_connection_key();
 
   if(!inMessage->get_data_size()) {
-    const std::string error("SendHandshakeData: null arguments size.");
-    LOG4CXX_ERROR(logger_, error);
+    LOG4CXX_ERROR(logger_, "SendHandshakeData: null arguments size.");
     SendInternalError(connectionKey,
                       SecurityQuery::ERROR_INVALID_QUERY_SIZE, seqNumber);
     return false;
@@ -220,8 +219,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
       session_observer_->GetSSLContext(connectionKey,
                                        protocol_handler::kControl);
   if(!sslContext) {
-    const std::string error("SendHandshakeData: No ssl context.");
-    LOG4CXX_ERROR(logger_, error);
+    LOG4CXX_ERROR(logger_, "SendHandshakeData: No ssl context.");
     SendInternalError(connectionKey,
                       SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, seqNumber);
     return false;

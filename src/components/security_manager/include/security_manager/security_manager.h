@@ -109,6 +109,17 @@ public:
   void set_crypto_manager(CryptoManager* crypto_manager);
 
   /**
+   * \brief Send InternallError with text message to Mobiel Application
+   * \param connection_key Unique key used by other components as session identifier
+   * \param seq_number resieved from Mobile Application
+   * \param error_id  unique error identifier
+   * \param error_str internal error trin representation
+   */
+  void SendInternalError(const int32_t connection_key,
+                         const int &error_id,
+                         const uint32_t seq_number = 0);
+
+  /**
    * \brief Handle SecurityMessage from mobile for processing
    * threads::MessageLoopThread<*>::Handler implementations
    * CALLED in SecurityMessageLoop thread
@@ -141,16 +152,6 @@ private:
    * \param inMessage SecurityMessage with binary data of handshake
    */
   bool ProccessInternalError(const SecurityMessage &inMessage);
-  /**
-   * \brief Send InternallError with text message to Mobiel Application
-   * \param connection_key Unique key used by other components as session identifier
-   * \param seq_number resieved from Mobile Application
-   * \param error_id  unique error identifier
-   * \param error_str internal error trin representation
-   */
-  void SendInternalError(const int32_t connection_key,
-                         const int &error_id,
-                         const uint32_t seq_number = 0);
 
   /**
    * \brief Send binary data answer with QueryHeader
