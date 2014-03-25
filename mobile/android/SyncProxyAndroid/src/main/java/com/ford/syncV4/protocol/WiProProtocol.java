@@ -371,16 +371,20 @@ public class WiProProtocol extends AbstractProtocol {
             message.setSessionID(header.getSessionID());
             //If it is WiPro 2.0 it must have binary header
             if (_version == 2) {
-                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
-                        parseBinaryHeader(data);
                 message.setVersion(_version);
-                message.setRPCType(binFrameHeader.getRPCType());
-                message.setFunctionID(binFrameHeader.getFunctionID());
-                message.setCorrID(binFrameHeader.getCorrID());
-                if (binFrameHeader.getJsonSize() > 0)
-                    message.setData(binFrameHeader.getJsonData());
-                if (binFrameHeader.getBulkData() != null)
-                    message.setBulkData(binFrameHeader.getBulkData());
+                if (message.getServiceType().equals(ServiceType.Heartbeat)) {
+                    message.setData(data);
+                } else {
+                    BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
+                            parseBinaryHeader(data);
+                    message.setRPCType(binFrameHeader.getRPCType());
+                    message.setFunctionID(binFrameHeader.getFunctionID());
+                    message.setCorrID(binFrameHeader.getCorrID());
+                    if (binFrameHeader.getJsonSize() > 0)
+                        message.setData(binFrameHeader.getJsonData());
+                    if (binFrameHeader.getBulkData() != null)
+                        message.setBulkData(binFrameHeader.getBulkData());
+                }
             } else message.setData(data);
 
             _assemblerForMessageID.remove(header.getMessageID());
@@ -443,6 +447,10 @@ public class WiProProtocol extends AbstractProtocol {
 
                 }
             } // end-if
+        }
+
+        private void handleHandshakeMessage(ProtocolFrameHeader header, byte[] data) {
+
         }
 
         private void handleProtocolHeartbeatACK(ProtocolFrameHeader header,
@@ -511,21 +519,22 @@ public class WiProProtocol extends AbstractProtocol {
             message.setEncrypted(header.isEncrypted());
             //If it is WiPro 2.0 it must have binary header
             if (_version == 2) {
-                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
-                message.setVersion(_version);
-                message.setRPCType(binFrameHeader.getRPCType());
-                message.setFunctionID(binFrameHeader.getFunctionID());
-                message.setCorrID(binFrameHeader.getCorrID());
-                if (binFrameHeader.getJsonSize() > 0) {
-                    message.setData(binFrameHeader.getJsonData());
-                }
-                if (binFrameHeader.getBulkData() != null) {
-                    message.setBulkData(binFrameHeader.getBulkData());
-                }
 
+                message.setVersion(_version);
                 // Set Secure Service payload data
                 if (message.getServiceType().equals(ServiceType.Heartbeat)) {
                     message.setData(data);
+                } else {
+                    BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
+                    message.setRPCType(binFrameHeader.getRPCType());
+                    message.setFunctionID(binFrameHeader.getFunctionID());
+                    message.setCorrID(binFrameHeader.getCorrID());
+                    if (binFrameHeader.getJsonSize() > 0) {
+                        message.setData(binFrameHeader.getJsonData());
+                    }
+                    if (binFrameHeader.getBulkData() != null) {
+                        message.setBulkData(binFrameHeader.getBulkData());
+                    }
                 }
 
             } else {
