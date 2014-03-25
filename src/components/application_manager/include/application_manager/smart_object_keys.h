@@ -147,6 +147,7 @@ const char vr_capabilities[] = "vrCapabilities";
 const char audio_pass_thru_capabilities[] = "audioPassThruCapabilities";
 // PutFile
 const char sync_file_name[] = "syncFileName";
+const char file_name[] = "fileName";
 const char file_type[] = "fileType";
 const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";

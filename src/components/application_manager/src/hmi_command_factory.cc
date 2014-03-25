@@ -188,6 +188,7 @@
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
+#include "application_manager/commands/hmi/on_file_removed_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
@@ -1871,6 +1872,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
       command.reset(new commands::OnSDLCloseNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnFileRemoved: {
+      command.reset(new commands::OnFileRemovedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::UI_OnRecordStart: {

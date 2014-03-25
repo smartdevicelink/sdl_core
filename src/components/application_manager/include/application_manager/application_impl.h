@@ -102,6 +102,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool DeleteFile(const std::string& file_name);
   virtual const AppFilesMap& getAppFiles() const;
 
+  virtual const AppFile* GetFile(const std::string& file_name);
+
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);

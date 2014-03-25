@@ -422,6 +422,7 @@ class Application : public virtual InitialApplicationData,
      */
     virtual bool UpdateFile(AppFile& file) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
+    virtual const AppFile* GetFile(const std::string& file_name) = 0;
 
     virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;
     virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;

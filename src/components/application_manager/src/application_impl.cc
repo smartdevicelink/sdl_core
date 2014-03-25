@@ -278,6 +278,13 @@ const AppFilesMap& ApplicationImpl::getAppFiles() const {
   return this->app_files_;
 }
 
+const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
+   if (app_files_.find(file_name) != app_files_.end()) {
+     return &(app_files_[file_name]);
+   }
+   return NULL;
+}
+
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.insert(btn_name);
