@@ -39,7 +39,7 @@
 
 namespace security_manager {
 
-CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, int mode)
+CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
   : connection_(conn),
     bioIn_(BIO_new(BIO_s_mem())),
     bioOut_(BIO_new(BIO_s_mem())),
@@ -62,6 +62,7 @@ std::string LastError() {
     return std::string();
   }
 }
+
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
   return SSL_is_init_finished(connection_);
 }

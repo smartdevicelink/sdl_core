@@ -102,8 +102,32 @@ bool LifeCycle::StartComponents() {
 
   security_manager_ = new security_manager::SecurityManager();
 
+  std::string cert_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &cert_filename, "mycert.pem", security_manager::SecurityManager::ConfigSection(), "CertificatePath");
+
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", security_manager::SecurityManager::ConfigSection(), "SSLMode");
   crypto_manager_ = new security_manager::CryptoManagerImpl();
-  if(!crypto_manager_->Init()) {
+
+  std::string key_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &key_filename, "mykey.pem", security_manager::SecurityManager::ConfigSection(), "KeyPath");
+
+  std::string ciphers_list;
+  profile::Profile::instance()->ReadStringValue(
+        &ciphers_list, "ALL", security_manager::SecurityManager::ConfigSection(), "CipherList");
+
+  bool verify_peer;
+  profile::Profile::instance()->ReadBoolValue(
+        &verify_peer, false, security_manager::SecurityManager::ConfigSection(), "VerifyPeer");
+  if(!crypto_manager_->Init(
+      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          cert_filename,
+          key_filename,
+          ciphers_list,
+          verify_peer)) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
   }
 

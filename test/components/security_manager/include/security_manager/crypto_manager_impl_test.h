@@ -72,7 +72,7 @@ class SSLTest : public testing::Test {
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 
     crypto_manager = new security_manager::CryptoManagerImpl();
-    crypto_manager->Init();
+    crypto_manager->Init(security_manager::SERVER, "mycert.pem", "mykey.pem", "ALL", false);
   }
 
   static void TearDownTestCase() {
@@ -252,21 +252,24 @@ TEST_F(SSLTest, Positive) {
 
   EXPECT_EQ(res, 1);
 
+  EXPECT_NE(SSL_is_init_finished(connection), 0);
+
   BIO *bioF = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
 
-  char *text = "abra";
+  const char *text = "abra";
   char *encryptedText = new char[10240];
   char *decryptedText;
   size_t text_len;
 
   // Encrypt text on client side
-  BIO_write(bioF, text, sizeof(text));
+  BIO_write(bioF, text, strlen(text));
   text_len = BIO_ctrl_pending(bioOut);
   size_t len = BIO_read(bioOut, encryptedText, text_len);
 
   // Decrypt text on server
   decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+  decryptedText[text_len] = 0;
 
   EXPECT_TRUE(decryptedText != NULL);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
@@ -274,33 +277,36 @@ TEST_F(SSLTest, Positive) {
   text = "abra cadabra";
 
   // Encrypt text on client side
-  BIO_write(bioF, text, sizeof(text));
+  BIO_write(bioF, text, strlen(text));
   text_len = BIO_ctrl_pending(bioOut);
   len = BIO_read(bioOut, encryptedText, text_len);
 
   // Decrypt text on server
   decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+  decryptedText[text_len] = 0;
 
   EXPECT_TRUE(decryptedText != NULL);
   EXPECT_EQ(strcmp(decryptedText, text), 0);
 
   // Encrypt text on server
-  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, sizeof(text), &text_len));
+  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, strlen(text), &text_len));
 
   // Decrypt it on client
   BIO_write(bioIn, encryptedText, text_len);
   decryptedText = new char[BIO_ctrl_pending(bioF)];
   text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
+  decryptedText[text_len] = 0;
   EXPECT_EQ(strcmp(decryptedText, text), 0);
   EXPECT_EQ(LastError().length(), 0);
 
   // Encrypt text on server
-  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, sizeof(text), &text_len));
+  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, strlen(text), &text_len));
 
   // Decrypt it on client
   BIO_write(bioIn, encryptedText, text_len);
   decryptedText = new char[BIO_ctrl_pending(bioF)];
   text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
+  decryptedText[text_len] = 0;
   EXPECT_EQ(strcmp(decryptedText, text), 0);
   EXPECT_EQ(LastError().length(), 0);
 }
