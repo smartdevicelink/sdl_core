@@ -48,10 +48,17 @@
 
 namespace security_manager {
 class SSLContext;
+
+enum Mode { CLIENT, SERVER };
+
 std::string LastError();
 class CryptoManager {
  public:
-  virtual bool Init()=0;
+  virtual bool Init(Mode mode,
+                    const std::string& cert_filename,
+                    const std::string& key_filename,
+                    const std::string& ciphers_list,
+                    bool verify_peer)=0;
   virtual void Finish()=0;
   virtual SSLContext *CreateSSLContext()=0;
   virtual void ReleaseSSLContext(SSLContext* context)=0;
