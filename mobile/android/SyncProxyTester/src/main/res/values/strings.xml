@@ -285,4 +285,6 @@
     <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
     <string name="use_request_type">Use request type</string>
 
+    <string name="do_encrypt">Do encrypt command?</string>
+
 </resources>
