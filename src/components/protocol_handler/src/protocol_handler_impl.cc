@@ -384,14 +384,18 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     return;
   }
 
+#if 0
   ProtocolFramePtr ptr = ProtocolFramePtr(
       new protocol_handler::ProtocolPacket(
           tm_message->connection_key(),
           tm_message->data(),
           tm_message->data_size()));
-
-#if 0
-  if (ptr->is_compress()) {
+  const uint32_t packet_size = GetPacketSize(&connection_data[0]);
+  if (0 == packet_size) {
+    LOG4CXX_ERROR(logger_, "Failed to get packet size");
+    return false;
+  }
+  if (ptr && ptr->is_compress()) {
     security_manager::SSLContext* context =
         connection_handler->GetSSLContext(tm_message->connection_key(),
                                           tm_message->service_type());
@@ -857,10 +861,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     hash_code = packet.message_id();
   }
 
+  const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   bool success = true;
   int32_t session_hash_code = session_observer_->OnSessionEndedCallback(
-      connection_id, current_session_id, hash_code,
-      ServiceTypeFromByte(packet.service_type()));
+      connection_id, current_session_id, hash_code, service_type);
 
   if (-1 != session_hash_code) {
     if (2 == packet.protocol_version()) {
@@ -876,14 +880,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     SendEndSessionAck(
         connection_id, current_session_id, packet.protocol_version(),
         session_observer_->KeyFromPair(connection_id, current_session_id),
-        packet.service_type());
+        service_type);
     message_counters_.erase(current_session_id);
   } else {
     LOG4CXX_INFO_EXT(
         logger_,
-        "Refused to end session " << packet.service_type() << " type.");
+        "Refused to end session " << service_type << " type.");
     SendEndSessionNAck(connection_id, current_session_id, packet.protocol_version(),
-                       packet.service_type());
+                       service_type);
   }
   return RESULT_OK;
 }
