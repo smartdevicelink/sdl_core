@@ -100,7 +100,7 @@ class TransportManager {
   virtual int Disconnect(const ConnectionUID &connection_id) = 0;
 
   /**
-   * @brief Disconnect and clear all unreceived data.
+   * @brief Disconnect and clear all unprocessed data.
    *
    * @param connection Connection unique identifier.
    */

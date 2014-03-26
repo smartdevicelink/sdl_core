@@ -49,7 +49,8 @@ namespace security_manager {
 
     class SSLContextImpl : public SSLContext {
      public:
-      SSLContextImpl(SSL *conn);
+      SSLContextImpl(SSL *conn, int mode);
+      virtual void* StartHandshake(size_t* out_data_size);
       virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
                                     size_t* server_data_size);
       virtual void* Encrypt(const void* data,  size_t data_size,
@@ -57,6 +58,7 @@ namespace security_manager {
       virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                             size_t* data_size);
       virtual bool  IsInitCompleted() const;
+      virtual int   mode() const;
       virtual ~SSLContextImpl();
      private:
       void EnsureBufferSizeEnough(size_t size);
@@ -66,6 +68,7 @@ namespace security_manager {
       BIO *bioFilter_;
       size_t buffer_size_;
       char *buffer_;
+      int mode_;
     };
 
    public:

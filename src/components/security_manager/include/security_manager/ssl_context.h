@@ -58,6 +58,7 @@
 namespace security_manager {
 class SSLContext {
  public:
+  virtual void* StartHandshake(size_t* out_data_size)=0;
   virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
                                size_t* server_data_size)=0;
   virtual void* Encrypt(const void* data,  size_t data_size,
@@ -65,6 +66,7 @@ class SSLContext {
   virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
                         size_t* data_size)=0;
   virtual bool  IsInitCompleted() const = 0;
+  virtual int   mode() const = 0;
   virtual ~SSLContext() { }
 };
 } // namespace security_manager

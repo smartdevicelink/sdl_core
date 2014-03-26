@@ -33,6 +33,8 @@
 #ifndef SECURE_MANAGER_H
 #define SECURE_MANAGER_H
 
+#include <list>
+
 #include "utils/logger.h"
 
 #include "protocol_handler/protocol_observer.h"
@@ -46,6 +48,7 @@
 #include "security_manager/crypto_manager.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
+#include "security_manager/security_manager_listener.h"
 
 namespace security_manager {
 /**
@@ -87,6 +90,8 @@ public:
    */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr&) OVERRIDE;
 
+  void StartHandshake(uint32_t session_key);
+
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
@@ -104,6 +109,17 @@ public:
   void set_crypto_manager(CryptoManager* crypto_manager);
 
   /**
+   * \brief Send InternallError with text message to Mobiel Application
+   * \param connection_key Unique key used by other components as session identifier
+   * \param seq_number resieved from Mobile Application
+   * \param error_id  unique error identifier
+   * \param error_str internal error trin representation
+   */
+  void SendInternalError(const int32_t connection_key,
+                         const int &error_id,
+                         const uint32_t seq_number = 0);
+
+  /**
    * \brief Handle SecurityMessage from mobile for processing
    * threads::MessageLoopThread<*>::Handler implementations
    * CALLED in SecurityMessageLoop thread
@@ -116,6 +132,9 @@ public:
    * CALLED in SecurityMessageLoop thread
    */
   bool ProtectConnection(const uint32_t &connection_key);
+
+  void AddListener(SecurityManagerListener* const listener);
+  void RemoveListener(SecurityManagerListener* const listener);
 
   /**
    * @brief SecurityConfigSection
@@ -133,16 +152,6 @@ private:
    * \param inMessage SecurityMessage with binary data of handshake
    */
   bool ProccessInternalError(const SecurityMessage &inMessage);
-  /**
-   * \brief Send InternallError with text message to Mobiel Application
-   * \param connection_key Unique key used by other components as session identifier
-   * \param seq_number resieved from Mobile Application
-   * \param error_id  unique error identifier
-   * \param error_str internal error trin representation
-   */
-  void SendInternalError(const int32_t connection_key,
-                         const int &error_id,
-                         const uint32_t seq_number = 0);
 
   /**
    * \brief Send binary data answer with QueryHeader
@@ -162,7 +171,7 @@ private:
    * \param data pointer to binary data array
    * \param data_size size of binary data array
    */
-  //post income array as park of RawMessage
+  // post income array as park of RawMessage
   void SendBinaryData(const int32_t connectionKey,
                       const uint8_t * const data,
                       size_t data_size);
@@ -182,6 +191,8 @@ private:
    *\brief Pointer on instance of class implementing ProtocolHandler
    */
   protocol_handler::ProtocolHandler* protocol_handler_;
+
+  std::list<SecurityManagerListener*> listeners_;
 
   DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   static log4cxx::LoggerPtr logger_;

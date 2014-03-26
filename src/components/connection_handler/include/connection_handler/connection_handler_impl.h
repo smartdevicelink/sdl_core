@@ -44,6 +44,7 @@
 
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -89,6 +90,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      **/
     virtual void set_transport_manager(
       transport_manager::TransportManager* transport_mngr);
+
+    void set_protocol_handler(
+        protocol_handler::ProtocolHandler* protocol_handler);
 
     /**
      * \brief Connects to all services of device
@@ -290,6 +294,8 @@ private:
      * \brief Pointer to TransportManager
      */
     transport_manager::TransportManager* transport_manager_;
+
+    protocol_handler::ProtocolHandler* protocol_handler_;
 
     /**
      * \brief List of devices

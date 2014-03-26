@@ -290,7 +290,7 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
     }
     packet_data_.data = new uint8_t[dataBytes];
     packet_data_.totalDataBytes = dataBytes;
-    }
+  }
 }
 
 void ProtocolPacket::set_data(

@@ -39,13 +39,14 @@
 
 namespace security_manager {
 
-CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn)
+CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, int mode)
   : connection_(conn),
     bioIn_(BIO_new(BIO_s_mem())),
     bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
     buffer_size_(1024), // TODO: Collect some statistics, determine the most appropriate value
-    buffer_(new char[buffer_size_]) {
+    buffer_(new char[buffer_size_]),
+    mode_(mode) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
@@ -66,21 +67,25 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
 }
 
 void* CryptoManagerImpl::SSLContextImpl::
+StartHandshake(size_t *out_data_size) {
+  return DoHandshakeStep(NULL, 0, out_data_size);
+}
+
+void* CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const void* client_data,  size_t client_data_size,
                 size_t* server_data_size) {
   if (IsInitCompleted()) {
     return NULL;
   }
 
-  if (!client_data || !client_data_size) {
-    return NULL;
+  if (client_data && client_data_size) {
+    int ret = BIO_write(bioIn_, client_data, client_data_size);
+    if (ret <= 0) {
+      return NULL;
+    }
   }
 
-  int ret = BIO_write(bioIn_, client_data, client_data_size);
-  if (ret <= 0) {
-    return NULL;
-  }
-  ret = SSL_do_handshake(connection_);
+  int ret = SSL_do_handshake(connection_);
   if (ret == 1) {
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
@@ -88,14 +93,12 @@ DoHandshakeStep(const void* client_data,  size_t client_data_size,
 
   int pen = BIO_pending(bioOut_);
 
-  // FIXME (EZamakhov): What if pen is less zero?
   if (!pen) {
     return NULL;
   }
   EnsureBufferSizeEnough(pen);
 
   ret = BIO_read(bioOut_, static_cast<char*>(buffer_), pen);
-  // FIXME (EZamakhov): What if handshake data bigget than buffer?
   if (ret > 0) {
     *server_data_size = ret;
     return buffer_;
@@ -170,6 +173,10 @@ void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
     buffer_ = new char[size];
     buffer_size_ = size;
   }
+}
+
+int CryptoManagerImpl::SSLContextImpl::mode() const {
+  return mode_;
 }
 
 }  // namespace security_manager
