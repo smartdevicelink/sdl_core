@@ -3133,6 +3133,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    public void startRpcService(Session session) {
+        if (mSyncConnection != null) {
+
+            mSyncConnection.startRpcService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+        }
+    }
+
     // Private Class to Interface with SyncConnection
     public class SyncInterfaceBroker implements ISyncConnectionListener {
 

@@ -368,6 +368,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    public void startRpcService(Session session, boolean encrypt) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.StartProtocolService(ServiceType.RPC, session, encrypt);
+            }
+        }
+    }
+
     @Override
     public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
@@ -597,4 +605,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         mSessionId = sessionId;
         Log.d(TAG, "SetSessionId:" + mSessionId);
     }
+
+
 }

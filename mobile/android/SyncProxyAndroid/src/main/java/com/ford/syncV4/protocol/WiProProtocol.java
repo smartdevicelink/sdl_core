@@ -129,10 +129,10 @@ public class WiProProtocol extends AbstractProtocol {
             try {
                 if (protocolMsg.getBulkData() != null) {
                     byte[] result = getProtocolSecureManager().sendDataTOSSLClient(false, data);
-                    processFrameToSend(serviceType, sessionID, result);
+                    processFrameToSend(serviceType, sessionID,false, result);
                 } else {
                     byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.isEncrypted(), data);
-                    processFrameToSend(serviceType, sessionID, result);
+                    processFrameToSend(serviceType, sessionID, protocolMsg.isEncrypted(), result);
                 }
             } catch (IOException e) {
                 getProtocolSecureManager().reportAnError(e);
@@ -142,13 +142,13 @@ public class WiProProtocol extends AbstractProtocol {
                 DebugTool.logError("Error data coding", e);
             }
         } else {
-            processFrameToSend(serviceType, sessionID, data);
+            processFrameToSend(serviceType, sessionID, false, data);
         }
 
 
     }
 
-    private void processFrameToSend(ServiceType serviceType, byte sessionID, byte[] data) {
+    private void processFrameToSend(ServiceType serviceType, byte sessionID, boolean encrypted, byte[] data) {
         // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {
@@ -162,7 +162,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 messageID++;
                 ProtocolFrameHeader firstHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType, sessionID, messageID, _version);
-
+                firstHeader.setEncrypted(encrypted);
                 // Assemble first frame.
                 int frameCount = data.length / MAX_DATA_SIZE;
                 if (data.length % MAX_DATA_SIZE > 0) {
@@ -199,12 +199,14 @@ public class WiProProtocol extends AbstractProtocol {
                     }
 
                     ProtocolFrameHeader consecHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType, sessionID, bytesToWrite, frameSequenceNumber, messageID, _version);
+                    consecHeader.setEncrypted(encrypted);
                     handleProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
                     currentOffset += bytesToWrite;
                 }
             } else {
                 messageID++;
                 ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID, data.length, messageID, _version);
+                header.setEncrypted(encrypted);
                 handleProtocolFrameToSend(header, data, 0, data.length);
 
             }
