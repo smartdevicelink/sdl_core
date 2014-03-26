@@ -2322,7 +2322,7 @@
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>ID of the choice that was selected in response to PerformInteraction.</description>
     </param>
-    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+    <param name="manualTextEntry" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
 	       	Manually entered text selection, e.g. through keyboard
         	Can be returned in lieu of choiceID, depending on trigger source
