@@ -53,8 +53,32 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
+        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.audio_service_secure_checkbox_view);
+        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    changeEncryptCheckBoxState();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
-        mSessionCheckBoxState.setStateOff();
+        mEncryptServiceCheckBoxState = new AudioServiceEncryptCheckboxState(encryptCheckBoxView,
+                getActivity());
+    }
+
+    private void changeEncryptCheckBoxState() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
+            mEncryptServiceCheckBoxState.setStateOn();
+            syncProxyTester.startAudioServiceEncryption();
+        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
+            mEncryptServiceCheckBoxState.setStateOff();
+            syncProxyTester.stopAudioServiceEncryption();
+        }
     }
 
     private void changeCheckBoxState() {

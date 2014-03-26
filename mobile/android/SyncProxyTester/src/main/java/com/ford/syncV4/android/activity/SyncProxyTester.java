@@ -3743,16 +3743,61 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
+     * Encrypt section
+     */
+
+    /**
      * Process a state of the "Start Secure RPC Service" checkbox
      */
     private void processRPCSecureCheckBox() {
         if (mRPCServiceSecureState.getState() == CheckBoxStateValue.OFF) {
             mRPCServiceSecureState.setStateOn();
+
+            // TODO : Implement logic here
             Log.d(LOG_TAG, "Start Secure RPC service");
+
         } else if (mRPCServiceSecureState.getState() == CheckBoxStateValue.ON) {
             mRPCServiceSecureState.setStateOff();
+
+            // TODO : Implement logic here
             Log.d(LOG_TAG, "Stop Secure RPC service");
         }
+    }
+
+    /**
+     * Starts to encrypt Audio Service
+     */
+    public void startAudioServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Audio Service start encrypt");
+    }
+
+    /**
+     * Stops to encrypt Audio Service
+     */
+    public void stopAudioServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Audio Service stop encrypt");
+    }
+
+    /**
+     * Starts to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Mobile Navi Service start encrypt");
+    }
+
+    /**
+     * Stops to encrypt Mobile Navi Service
+     */
+    public void stopMobileNaviServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Mobile Navi Service stop encrypt");
     }
 
     public boolean isProxyReadyForWork() {

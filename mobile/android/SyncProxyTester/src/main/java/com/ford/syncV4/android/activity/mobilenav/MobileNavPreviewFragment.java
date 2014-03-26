@@ -74,8 +74,31 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
+        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.mobile_navi_service_secure_checkbox_view);
+        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    changeEncryptCheckBoxState();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mSessionCheckBoxState.setStateOff();
+        mEncryptServiceCheckBoxState = new MobileNaviEncryptCheckBoxState(encryptCheckBoxView,
+                getActivity());
+    }
+
+    private void changeEncryptCheckBoxState() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
+            mEncryptServiceCheckBoxState.setStateOn();
+            syncProxyTester.startMobileNaviServiceEncryption();
+        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
+            mEncryptServiceCheckBoxState.setStateOff();
+            syncProxyTester.stopMobileNaviServiceEncryption();
+        }
     }
 
     private void changeCheckBoxState() {
