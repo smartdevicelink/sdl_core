@@ -1234,6 +1234,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 final Spinner spnSpeakType3 = (Spinner) layout.findViewById(R.id.spnSpeakType3);
                                 final Spinner spnSpeakType4 = (Spinner) layout.findViewById(R.id.spnSpeakType4);
 
+                                final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.speak_do_encrypt_view);
+
                                 ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(
                                         adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values());
                                 int textCapabilityPos = speechSpinnerAdapter.getPosition(SpeechCapabilities.TEXT);
@@ -1249,8 +1251,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        Speak msg = new Speak();
-                                        msg.setCorrelationID(getCorrelationid());
+                                        Speak speak = new Speak();
+                                        speak.setCorrelationID(getCorrelationid());
                                         String speak1 = txtSpeakText1.getText().toString();
                                         String speak2 = txtSpeakText2.getText().toString();
                                         String speak3 = txtSpeakText3.getText().toString();
@@ -1269,9 +1271,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         if (speak4.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
                                         }
-                                        msg.setTtsChunks(chunks);
+                                        speak.setTtsChunks(chunks);
+                                        speak.setDoEncryption(doEncryptView.isChecked());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequest(speak);
                                         }
                                     }
                                 });
