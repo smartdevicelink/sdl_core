@@ -571,7 +571,9 @@ SDL.SDLController = Em.Object
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
-                            FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            if (str) {
+                                FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            }
                             break;
                         }
                     }

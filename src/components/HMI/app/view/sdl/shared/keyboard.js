@@ -120,6 +120,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
     clearBtn: function (element) {
         this.searchBar.input.set('value', this.searchBar.input.value.slice(0, -1));
         this.target.set('value', this.searchBar.input.value);
+        if (this.searchBar.input.value == "") {
+            FFW.UI.OnKeyboardInput("", "ENTRY_CANCELLED");
+        }
         SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
     },
 
