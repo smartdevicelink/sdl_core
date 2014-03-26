@@ -83,6 +83,8 @@ public:
     // TODO  (EZamakhov) : add error to send
     ERROR_DECRYPTION_FAILED          = 0x10, //
     ERROR_SSL_INVALID_DATA           = 0xF0,
+    // TODO (EZamakhov) : remove ERROR_SESSION_NOT_FOUND and so with ERROR_INTERNAL
+    ERROR_INTERNAL                   = 0xF1,
     ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFF
   };
   /**

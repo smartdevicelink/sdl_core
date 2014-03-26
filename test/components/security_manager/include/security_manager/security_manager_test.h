@@ -348,6 +348,9 @@ namespace security_manager_test {
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, protocol_handler::kControl)).
         Times(3).WillRepeatedly(Return(&mock_ssl_context_exists));
+    EXPECT_CALL(mock_ssl_context_exists,
+                IsInitCompleted()).
+        Times(3).WillRepeatedly(Return(false));
     // Expect SSLContext::DoHandshakeStep 3 times
     // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
     EXPECT_CALL(mock_ssl_context_exists,
@@ -394,6 +397,43 @@ namespace security_manager_test {
         .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
                          Return(handshake_data_out)));
 
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+  }
+  /*
+   * SecurityManger shall scall all listeners on success end handshake
+   */
+  TEST_F(SecurityManagerTest, ProccessHandshakeData_HandShakeFinished) {
+    SetMockCryptoManger();
+    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
+    const size_t handshake_data_size =
+        sizeof(handshake_data)/sizeof(handshake_data[0]);
+
+    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
+    const size_t handshake_data_out_size =
+        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+
+    // Expect SessionObserver::GetSSLContext
+    EXPECT_CALL(mock_session_observer,
+                GetSSLContext(key, protocol_handler::kControl)).
+        Times(3).WillRepeatedly(Return(&mock_ssl_context_exists));
+    EXPECT_CALL(mock_ssl_context_exists,
+                IsInitCompleted()).
+        Times(3).WillRepeatedly(Return(true));
+    // Expect SSLContext::DoHandshakeStep 3 times
+    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
+    EXPECT_CALL(mock_ssl_context_exists,
+                DoHandshakeStep(_, handshake_data_size, _))
+        .WillOnce(DoAll( SetArgPointee<2>(0),
+                         ReturnNull()))
+        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
+                         ReturnNull()))
+        .WillOnce(DoAll( SetArgPointee<2>(0),
+                         Return(handshake_data_out)));
+
+    // Expect NO InternalError with ERROR_ID
+
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
   }
   /*

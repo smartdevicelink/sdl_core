@@ -896,6 +896,7 @@ namespace {
 class StartSessionHandler : public security_manager::SecurityManagerListener {
  public:
   StartSessionHandler(
+      const uint32_t connection_key,
       impl::ToMobileQueue* queue,
       ConnectionID connection_id,
       int32_t session_id,
@@ -903,7 +904,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       uint32_t hash_code,
       uint8_t service_type,
       security_manager::SecurityManager* security_manager)
-     : connection_id_(connection_id),
+     : connection_key_(connection_key),
+       connection_id_(connection_id),
        session_id_(session_id),
        protocol_version_(protocol_version),
        hash_code_(hash_code),
@@ -912,29 +914,36 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
        security_manager_(security_manager) {
   }
   // FIXME (EZamakhov) : OnHandshakeDone shall get SSLContext or session, which is encrupted
-  void OnHandshakeDone(bool success) {
-    // TODO (Ezamakhov): add check force service
-    ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
-        protocol_version_, success, FRAME_TYPE_CONTROL,
-        service_type_, FRAME_DATA_START_SERVICE_ACK, session_id_,
-        0, hash_code_));
-
-    queue_->PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    delete this;
+  bool OnHandshakeDone(const uint32_t &connection_key, const bool success) OVERRIDE {
+    if(connection_key==connection_key_) {
+      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+                             connection_id_, protocol_version_, success,
+                             FRAME_TYPE_CONTROL, service_type_,
+                             FRAME_DATA_START_SERVICE_ACK, session_id_,
+                             0, hash_code_));
+      queue_->PostMessage(
+            impl::RawFordMessageToMobile(ptr, false));
+      delete this;
+      return true;
+    }
+    return false;
   }
-  void OnHandshakeFailed() {
-    ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id_,
-        protocol_version_, false, FRAME_TYPE_CONTROL,
-        service_type_, FRAME_DATA_START_SERVICE_NACK, session_id_,
-        0, hash_code_));
-
-    // TODO (EZamakhov) : Add check force encrypte services
-    queue_->PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    delete this;
+  bool OnHandshakeFailed(const uint32_t &connection_key) OVERRIDE {
+    if(connection_key==connection_key_) {
+      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
+                             connection_id_, protocol_version_, false,
+                             FRAME_TYPE_CONTROL, service_type_,
+                             FRAME_DATA_START_SERVICE_NACK, session_id_,
+                             0, hash_code_));
+      queue_->PostMessage(
+            impl::RawFordMessageToMobile(ptr, false));
+      delete this;
+      return true;
+    }
+    return false;
   }
  private:
+  const uint32_t connection_key_;
   ConnectionID connection_id_;
   int32_t session_id_;
   uint8_t protocol_version_;
@@ -959,37 +968,43 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         packet.is_compress()
         );
 
+  uint32_t connection_key = session_observer_->KeyFromPair(connection_id, session_id);
    if (-1 != session_id) {
     if (!packet.is_compress()) {
       SendStartSessionAck(
           connection_id, session_id, packet.protocol_version(),
-          session_observer_->KeyFromPair(connection_id, session_id),
-          packet.service_type(),
+          connection_key, packet.service_type(),
           false);
     } else {
       security_manager::SSLContext* ssl_context =
           session_observer_->GetSSLContext(
-              session_observer_->KeyFromPair(connection_id, session_id),
+              connection_key,
               ServiceTypeFromByte(packet.service_type()));
       // FIXME (EZamakhov) : add check kControl service and compression_flag
       if (ssl_context && ssl_context->IsInitCompleted()) {
         SendStartSessionAck(
             connection_id, session_id, packet.protocol_version(),
-            session_observer_->KeyFromPair(connection_id, session_id),
+            connection_key,
             packet.service_type(),
             true);
       } else {
         security_manager_->AddListener(
             new StartSessionHandler(
+                connection_key,
                 &raw_ford_messages_to_mobile_,
                 connection_id,
                 session_id,
                 packet.protocol_version(),
-                session_observer_->KeyFromPair(connection_id, session_id),
+                connection_key,
                 packet.service_type(),
                 security_manager_));
 
-        security_manager_->StartHandshake(session_observer_->KeyFromPair(connection_id, session_id));
+        if(security_manager_->ProtectConnection(connection_key)) {
+          security_manager_->StartHandshake(connection_key);
+        }
+        else {
+          LOG4CXX_ERROR(logger_, "ProtectConnection failed");
+        }
         /*
         ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
             packet.protocol_version(), COMPRESS_OFF, FRAME_TYPE_CONTROL,

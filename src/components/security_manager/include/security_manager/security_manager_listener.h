@@ -12,8 +12,15 @@ namespace security_manager {
 
 class SecurityManagerListener {
  public:
-  virtual void OnHandshakeDone(bool success)=0;
-  virtual void OnHandshakeFailed()=0;
+  /**
+   * \brief Notification about protection result
+   * \param connection_key Unique key used by other components as session identifier
+   * \param succecc result of connection protection
+   * \return \c true on success notification or \c false otherwise
+   */
+  virtual bool OnHandshakeDone(const uint32_t &connection_key,
+                               bool success)=0;
+  virtual bool OnHandshakeFailed(const uint32_t &connection_key)=0;
 };
 
 }

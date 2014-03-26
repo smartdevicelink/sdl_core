@@ -90,8 +90,6 @@ public:
    */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr&) OVERRIDE;
 
-  void StartHandshake(uint32_t session_key);
-
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
@@ -128,14 +126,29 @@ public:
 
   /**
    * \brief Start protection connection
-   * threads::MessageLoopThread<*>::Handler implementations
-   * CALLED in SecurityMessageLoop thread
+   * \param connection_key Unique key used by other components as session identifier
+   * @return \c true on success or \c false on any error
    */
   bool ProtectConnection(const uint32_t &connection_key);
 
+  /**
+   * \brief Start handshake as SSL client
+   */
+  void StartHandshake(uint32_t session_key);
+
+  /**
+   * \brief Getter/Setter for SecurityManagerListener
+   */
   void AddListener(SecurityManagerListener* const listener);
   void RemoveListener(SecurityManagerListener* const listener);
-
+  /**
+   * \brief Notifiers for listeners
+   * \param connection_key Unique key used by other components as session identifier
+   * \param succecc result of connection protection
+   */
+  void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
+                                      const bool succecc);
+  void NotifyListenersOnHandshakeFailed(const uint32_t &connection_key);
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file
@@ -161,7 +174,7 @@ private:
    * \param data pointer to binary data array
    * \param data_size size of binary data array
    */
-  void SendData(const int32_t connectionKey,
+  void SendData(const int32_t connection_key,
                 SecurityQuery::QueryHeader header,
                 const uint8_t * const data,
                 const size_t data_size);
@@ -172,7 +185,7 @@ private:
    * \param data_size size of binary data array
    */
   // post income array as park of RawMessage
-  void SendBinaryData(const int32_t connectionKey,
+  void SendBinaryData(const int32_t connection_key,
                       const uint8_t * const data,
                       size_t data_size);
 
