@@ -86,7 +86,7 @@ void BluetoothTransportAdapter::Store() const {
     ApplicationList app_ids = bluetooth_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      if (FindEstablishedConnection(bluetooth_device->name(), app_handle)) {
+      if (FindEstablishedConnection(bluetooth_device->unique_device_id(), app_handle)) {
         uint8_t rfcomm_channel;
         bluetooth_device->GetRfcommChannel(app_handle, &rfcomm_channel);
         Json::Value application_dictionary;

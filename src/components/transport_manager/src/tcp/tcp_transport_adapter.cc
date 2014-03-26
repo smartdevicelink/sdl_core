@@ -93,7 +93,7 @@ void TcpTransportAdapter::Store() const {
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      if (FindEstablishedConnection(tcp_device->name(), app_handle)) {
+      if (FindEstablishedConnection(tcp_device->unique_device_id(), app_handle)) {
         int port = tcp_device->GetApplicationPort(app_handle);
         if (port != -1) { // don't want to store incoming applications
           Json::Value application_dictionary;
