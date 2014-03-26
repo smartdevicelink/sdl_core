@@ -1617,24 +1617,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.initialText == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'initialText' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.initialText != 'object') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'initialText'!"
-                        };
-
-                        return this.resultStruct;
-                    }
                     if (params.timeout == null) {
 
                         this.resultStruct = {

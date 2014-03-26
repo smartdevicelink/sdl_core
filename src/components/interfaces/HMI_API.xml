@@ -2288,7 +2288,7 @@
   </function>
   <function name="PerformInteraction" messagetype="request">
     <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-    <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
+    <param name="initialText" type="Common.TextFieldStruct" mandatory="false">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
     <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
