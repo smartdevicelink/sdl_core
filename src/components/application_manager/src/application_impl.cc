@@ -180,6 +180,10 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
   tts_speak_state_ = state_tts_speak;
 }
 
+bool ApplicationImpl::tts_speak_state() {
+  return tts_speak_state_;
+}
+
 void ApplicationImpl::set_hmi_level(
     const mobile_api::HMILevel::eType& hmi_level) {
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
