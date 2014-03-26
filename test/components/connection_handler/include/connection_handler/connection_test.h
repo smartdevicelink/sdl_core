@@ -60,57 +60,197 @@ class ConnectionTest: public ::testing::Test {
     connection_.reset();
     ConnectionHandlerImpl::destroy();
   }
+  void StartSession() {
+    session_id = connection_->AddNewSession();
+    EXPECT_NE(session_id, -1);
+    const SessionMap sessionMap = connection_->session_map();
+    EXPECT_FALSE(sessionMap.empty());
+    const ServiceList serviceList = sessionMap.begin()->second.service_list;
+    EXPECT_FALSE(serviceList.empty());
+    const ServiceList::const_iterator it =
+        std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
+    EXPECT_NE(it, serviceList.end());
+  }
+  void AddNewService(const protocol_handler::ServiceType service_type,
+                    const bool protection,
+                    const bool expect_add_new_service_call_result,
+                    const bool expect_exist_service) {
+    const bool result = connection_->
+        AddNewService(session_id, service_type, protection);
+    EXPECT_EQ(result, expect_add_new_service_call_result);
+
+    const SessionMap newSessionMap = connection_->session_map();
+    EXPECT_FALSE(newSessionMap.empty());
+    const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
+    EXPECT_FALSE(newServiceList.empty());
+    const ServiceList::const_iterator it =
+        std::find(newServiceList.begin(), newServiceList.end(), service_type);
+    const bool found_result = it != newServiceList.end();
+    EXPECT_EQ(expect_exist_service, found_result);
+  }
+
+  void RemoveService(const protocol_handler::ServiceType service_type,
+                     const bool expect_remove_service_result,
+                     const bool expect_exist_service) {
+    const bool result = connection_->
+        RemoveService(session_id, service_type);
+    EXPECT_EQ(result, expect_remove_service_result);
+
+    const SessionMap newSessionMap = connection_->session_map();
+    EXPECT_FALSE(newSessionMap.empty());
+    const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
+    EXPECT_FALSE(newServiceList.empty());
+    const ServiceList::const_iterator it =
+        std::find(newServiceList.begin(), newServiceList.end(), service_type);
+    const bool found_result = it != newServiceList.end();
+    EXPECT_EQ(expect_exist_service, found_result);
+  }
+
   ::utils::SharedPtr<Connection> connection_;
   ConnectionHandlerImpl* connection_handler_;
+  int32_t session_id;
+  const bool encrypted = true;
+  const bool unencrypted = false;
+  const bool return_result_true = true;
+  const bool return_result_false = false;
+  const bool expect_service_exist = true;
+  const bool expect_service_not_exist = false;
 };
 
-TEST_F(ConnectionTest, Session_AddNewSession) {
-  const int32_t session_id = connection_->AddNewSession();
-  EXPECT_NE(session_id, -1);
-  const SessionMap sessionMap = connection_->session_map();
-  EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.begin()->second.service_list;
-  EXPECT_FALSE(serviceList.empty());
-  const ServiceList::const_iterator it =
-      std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
-  EXPECT_NE(it, serviceList.end());
+// Try to add service without session
+TEST_F(ConnectionTest, Session_AddNewServiceWithoySession) {
+  EXPECT_EQ(connection_->
+            AddNewService(session_id, protocol_handler::kAudio, true),
+            return_result_false);
+  EXPECT_EQ(connection_->
+            AddNewService(session_id, protocol_handler::kAudio, false),
+            return_result_false);
+  EXPECT_EQ(connection_->
+            AddNewService(session_id, protocol_handler::kMobileNav, true),
+            return_result_false);
+  EXPECT_EQ(connection_->
+            AddNewService(session_id, protocol_handler::kMobileNav, false),
+            return_result_false);
+}
+// Try to remove service without session
+TEST_F(ConnectionTest, Session_RemoveServiceWithoutSession) {
+  EXPECT_EQ(connection_->
+            RemoveService(session_id, protocol_handler::kAudio),
+            return_result_false);
+  EXPECT_EQ(connection_->
+            RemoveService(session_id, protocol_handler::kMobileNav),
+            return_result_false);
+}
+// Try to remove RPC
+TEST_F(ConnectionTest, Session_RemoveRPCBulk) {
+  StartSession();
+  EXPECT_EQ(connection_->
+            RemoveService(session_id, protocol_handler::kRpc),
+            return_result_false);
+  EXPECT_EQ(connection_->
+            RemoveService(session_id, protocol_handler::kBulk),
+            return_result_false);
+}
+// Control Service couldnot be started anyway
+TEST_F(ConnectionTest, Session_AddControlService) {
+  StartSession();
+
+  AddNewService(protocol_handler::kControl, unencrypted,
+               return_result_false,
+               expect_service_not_exist);
+  AddNewService(protocol_handler::kControl, encrypted,
+               return_result_false,
+               expect_service_not_exist);
 }
 
-TEST_F(ConnectionTest, Session_AudioService) {
-  const int32_t session_id = connection_->AddNewSession();
-  EXPECT_NE(session_id, -1);
-  const SessionMap sessionMap = connection_->session_map();
-  EXPECT_FALSE(sessionMap.empty());
-  const ServiceList serviceList = sessionMap.begin()->second.service_list;
-  EXPECT_FALSE(serviceList.empty());
-  const ServiceList::const_iterator it =
-      std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
-  EXPECT_NE(it, serviceList.end());
+// Invalid Services couldnot be started anyway
+TEST_F(ConnectionTest, Session_AddInvalideService) {
+  StartSession();
 
-  //TODO: check Secure plugin enable
-
-  const bool result = connection_->AddNewService(session_id, protocol_handler::kAudio,
-                                                 false);
-  EXPECT_TRUE(result);
-  const SessionMap newSessionMap = connection_->session_map();
-  EXPECT_FALSE(newSessionMap.empty());
-  const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
-  EXPECT_FALSE(newServiceList.empty());
-  const ServiceList::const_iterator it1 =
-      std::find(newServiceList.begin(), newServiceList.end(), protocol_handler::kAudio);
-  EXPECT_NE(it1, newServiceList.end());
-
-  const bool result2 = connection_->RemoveService(session_id, protocol_handler::kAudio);
-  EXPECT_TRUE(result2);
-  const SessionMap newSessionMap2 = connection_->session_map();
-  EXPECT_FALSE(newSessionMap2.empty());
-  const ServiceList newServiceList2 = newSessionMap2.begin()->second.service_list;
-  EXPECT_FALSE(newServiceList2.empty());
-  const ServiceList::const_iterator it2 =
-      std::find(newServiceList2.begin(), newServiceList2.end(), protocol_handler::kAudio);
-  EXPECT_EQ(it2, newServiceList2.end());
+  AddNewService(protocol_handler::kInvalidServiceType, unencrypted,
+               return_result_false,
+               expect_service_not_exist);
+  AddNewService(protocol_handler::kInvalidServiceType, encrypted,
+               return_result_false,
+               expect_service_not_exist);
 }
-// FIXME (EZamakhov) Add test with create secured services and create kContorl Service
+
+// RPC and Bulk Services could be only delay protected
+TEST_F(ConnectionTest, Session_AddRPCBulkServices) {
+  StartSession();
+
+  AddNewService(protocol_handler::kRpc, unencrypted,
+               return_result_false,
+               expect_service_exist);
+  AddNewService(protocol_handler::kRpc, encrypted,
+               return_result_true,
+               expect_service_exist);
+
+  AddNewService(protocol_handler::kBulk, unencrypted,
+               return_result_false,
+               expect_service_exist);
+  AddNewService(protocol_handler::kBulk, encrypted,
+               return_result_true,
+               expect_service_exist);
+}
+TEST_F(ConnectionTest, Session_AddAllOtherService_Unprotected) {
+  StartSession();
+
+  AddNewService(protocol_handler::kAudio, unencrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, unencrypted,
+               return_result_true,
+               expect_service_exist);
+}
+
+TEST_F(ConnectionTest, Session_AddAllOtherService_Protected) {
+  StartSession();
+
+  AddNewService(protocol_handler::kAudio, encrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, encrypted,
+               return_result_true,
+               expect_service_exist);
+}
+
+TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected1) {
+  StartSession();
+
+  AddNewService(protocol_handler::kAudio, unencrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, unencrypted,
+               return_result_true,
+               expect_service_exist);
+
+
+  AddNewService(protocol_handler::kAudio, encrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, encrypted,
+               return_result_true,
+               expect_service_exist);
+}
+//Use other order
+TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected2) {
+  StartSession();
+
+  AddNewService(protocol_handler::kAudio, unencrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, encrypted,
+               return_result_true,
+               expect_service_exist);
+
+  AddNewService(protocol_handler::kMobileNav, unencrypted,
+               return_result_true,
+               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, encrypted,
+               return_result_true,
+               expect_service_exist);
+}
 
 } // connection_handle
 } // namespace components

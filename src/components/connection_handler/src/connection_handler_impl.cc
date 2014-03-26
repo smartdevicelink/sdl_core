@@ -236,8 +236,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   if(protectedSpecific.end() != std::find(
        protectedSpecific.begin(), protectedSpecific.end(), service_type)) {
     LOG4CXX_ERROR(
-        logger_,
-        "Service " << service_type << "is "
+        logger_, "Service " << service_type << "is "
         << (is_protected ? "forbidden" : "forced") << " to be protected");
     return -1;
   }

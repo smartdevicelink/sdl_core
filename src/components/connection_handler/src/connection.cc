@@ -119,53 +119,70 @@ int32_t Connection::RemoveSession(uint8_t session) {
 }
 
 bool Connection::AddNewService(uint8_t session,
-                               protocol_handler::ServiceType serviceType,
+                               protocol_handler::ServiceType service_type,
                                const bool is_protected) {
+  //Ignore wrong services
+  if(protocol_handler::kControl == service_type ||
+     protocol_handler::kInvalidServiceType == service_type )
+    return false;
+
   sync_primitives::AutoLock lock(session_map_lock_);
-  bool result = false;
 
   SessionMapIterator session_it = session_map_.find(session);
   if (session_it == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return result;
-  }
-
-  ServiceList& service_list = session_it->second.service_list;
-  ServiceListIterator service_it = find(service_list.begin(),
-                                        service_list.end(), serviceType);
-  if (service_it != service_list.end()) {
-    LOG4CXX_ERROR(logger_, "Session " << session << " already established"
-                  " service " << serviceType);
-  } else {
-    service_list.push_back(Service(serviceType, is_protected));
-    result = true;
-  }
-
-  return result;
-}
-
-bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType service_type) {
-  sync_primitives::AutoLock lock(session_map_lock_);
-  bool result = false;
-
-  SessionMapIterator session_it = session_map_.find(session);
-  if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return result;
+    return false;
   }
 
   ServiceList& service_list = session_it->second.service_list;
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), service_type);
+  // if service already exists
   if (service_it != service_list.end()) {
-    service_list.erase(service_it);
-    result = true;
+    Service service = *service_it;
+    // For unproteced service could be start protection
+    if(!service.is_protected_ && is_protected) {
+      service.is_protected_ = true;
+    }
+    // Protected services shall not be unprotected or twice protected
+    else {
+      LOG4CXX_ERROR(logger_, "Session " << session << " already established"
+                    " service " << service_type);
+      return false;
+    }
   } else {
-    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
-                  " service " << service_type);
+    service_list.push_back(Service(service_type, is_protected));
   }
 
-  return result;
+  return true;
+}
+
+bool Connection::RemoveService(
+    uint8_t session, protocol_handler::ServiceType service_type) {
+  //Ignore wrong and required for Session services
+  if(protocol_handler::kControl == service_type ||
+     protocol_handler::kInvalidServiceType == service_type ||
+     protocol_handler::kRpc  == service_type ||
+     protocol_handler::kBulk == service_type )
+    return false;
+  sync_primitives::AutoLock lock(session_map_lock_);
+
+  SessionMapIterator session_it = session_map_.find(session);
+  if (session_it == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return false;
+  }
+
+  ServiceList& service_list = session_it->second.service_list;
+  ServiceListIterator service_it = find(service_list.begin(),
+                                        service_list.end(), service_type);
+  if (service_it == service_list.end()) {
+    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
+                  " service " << service_type);
+    return false;
+  }
+  service_list.erase(service_it);
+  return true;
 }
 
 int Connection::SetSSLContext( uint8_t sessionId,
@@ -182,8 +199,7 @@ int Connection::SetSSLContext( uint8_t sessionId,
 }
 
 security_manager::SSLContext* Connection::GetSSLContext(
-    uint8_t sessionId,
-    const protocol_handler::ServiceType &service_type) const {
+    uint8_t sessionId, const protocol_handler::ServiceType &service_type) const {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {

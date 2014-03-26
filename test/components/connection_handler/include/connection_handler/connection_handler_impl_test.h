@@ -317,9 +317,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   //Allow start kAudio without encryption
   SetSpecificServices("", "Non");
   const int32_t session_id3 =
-      connection_handler_->OnSessionStartedCallback(uid, session_id,
-                                                    protocol_handler::kAudio,
-                                                    true);
+      connection_handler_->OnSessionStartedCallback(
+        uid, session_id, protocol_handler::kAudio, true);
   EXPECT_NE(session_id3, -1);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id3, protocol_handler::kAudio, NULL, true);
