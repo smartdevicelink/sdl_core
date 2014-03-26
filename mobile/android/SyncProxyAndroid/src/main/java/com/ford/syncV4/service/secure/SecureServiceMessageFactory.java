@@ -15,7 +15,7 @@ public class SecureServiceMessageFactory {
     private static final String TAG = "SecureServiceMessageFactory";
 
 
-    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData, ServiceType serviceType) {
+    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData) {
 
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);

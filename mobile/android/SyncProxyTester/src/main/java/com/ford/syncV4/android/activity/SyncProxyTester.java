@@ -45,7 +45,6 @@ import android.widget.Toast;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
-import com.ford.syncV4.android.activity.mobilenav.CheckBoxState;
 import com.ford.syncV4.android.activity.mobilenav.CheckBoxStateValue;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.RPCServiceCheckboxState;
@@ -3771,6 +3770,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         // TODO : Implement logic here
         Log.d(LOG_TAG, "Audio Service start encrypt");
+        startAudioService(true);
     }
 
     /**
@@ -3819,14 +3819,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return true;
     }
 
-    public void startAudioService() {
+    public void startAudioService(final boolean encrypted) {
         if (isProxyReadyForWork()) {
             mLogAdapter.logMessage("Should start Mobile Audio service", true);
 
             mStreamCommandsExecutorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    mBoundProxyService.syncProxyStartAudioService(rpcSession);
+                    mBoundProxyService.syncProxyStartAudioService(rpcSession, encrypted);
                 }
             });
         }

@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -85,7 +84,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startAudioService();
+            tester.startAudioService(false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();

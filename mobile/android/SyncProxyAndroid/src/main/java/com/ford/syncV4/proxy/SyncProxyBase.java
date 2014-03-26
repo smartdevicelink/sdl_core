@@ -166,7 +166,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
             POLICIES_CORRELATION_ID = 65535;
     private IRPCMessageHandler rpcMessageHandler;
-    private static ServiceType serviceToCypher;
+
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -484,12 +484,20 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private ProtocolSecureManager protocolSecureManager;
 
+    public ProtocolSecureManager getProtocolSecureManager() {
+        return protocolSecureManager;
+    }
+
+    public void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
+        this.protocolSecureManager = protocolSecureManager;
+    }
+
     IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
 
         @Override
         public void onHandshakeDataReceived(byte[] data) {
             ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, serviceToCypher);
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
             dispatchOutgoingMessage(protocolMessage);
         }
 
@@ -1940,12 +1948,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void setupSecureProxy() {
-        if (serviceToCypher != null) {
-            protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
-            protocolSecureManager.addServiceToEncrypt(serviceToCypher);
-            protocolSecureManager.setupSecureEnvironment();
-            mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
-        }
+        protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
+        protocolSecureManager.setupSecureEnvironment();
+        mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
     }
 
     private void addIfNotExsistRpcServiceToSession() {
@@ -2034,7 +2039,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav, encrypted);
-        if (protocolSecureManager !=  null &&
+        if (protocolSecureManager != null &&
                 protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav) &&
                 encrypted) {
             protocolSecureManager.setHandshakeFinished(true);
@@ -3125,10 +3130,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void setRPCMessageHandler(IRPCMessageHandler RPCMessageHandler) {
         this.rpcMessageHandler = RPCMessageHandler;
-    }
-
-    public static void setServiceToCypher(ServiceType typeToCypher) {
-        serviceToCypher = typeToCypher;
     }
 
     public void startMobileNavService(Session session) {

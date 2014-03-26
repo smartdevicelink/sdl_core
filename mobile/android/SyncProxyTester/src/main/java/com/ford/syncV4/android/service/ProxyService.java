@@ -330,16 +330,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 int versionNumber = getCurrentProtocolVersion();
                 String appName = settings.getString(Const.PREFS_KEY_APPNAME,
                         Const.PREFS_DEFAULT_APPNAME);
-                String serviceTypeToCypher = settings.getString(
-                        Const.PREFS_KEY_CYPHER_SERVICE, Const.PREFS_DEFAULT_CYPHER_SERVICE);
-                ServiceType typeToCypher = ServiceType.RPC;
-                if ( serviceTypeToCypher.equals(ServiceType.MOBILE_NAV_NAME)){
-                    typeToCypher = ServiceType.Mobile_Nav;
-                }else if( serviceTypeToCypher.equals(ServiceType.AUDIO_SERVICE_NAME)){
-                    typeToCypher = ServiceType.Audio_Service;
-                }else if( serviceTypeToCypher.equals(ServiceType.RPC_NAME)){
-                    typeToCypher = ServiceType.RPC;
-                }
 
                 Language lang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
@@ -379,9 +369,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 if (AppPreferencesManager.getIsCustomAppId()) {
                     appID = AppPreferencesManager.getCustomAppId();
                 }
-
-
-                SyncProxyALM.setServiceToCypher(typeToCypher);
                 mSyncProxy = new SyncProxyALM(this,
                         /*sync proxy configuration resources*/null,
                         /*enable advanced lifecycle management true,*/
@@ -1384,7 +1371,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(
                     new Pair<Integer, Result>(response.getCorrelationID(),
-                            response.getResultCode()));
+                            response.getResultCode())
+            );
             synchronized (mTesterMain.getThreadContext()) {
                 mTesterMain.getThreadContext().notify();
             }
@@ -1998,8 +1986,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
-    public void syncProxyStartAudioService(Session session) {
+    public void syncProxyStartAudioService(Session session, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
+            if (encrypted) {
+                if (mSyncProxy.getProtocolSecureManager() != null) {
+                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
+                }
+            }
             mSyncProxy.startAudioService(session);
         }
     }
