@@ -164,10 +164,6 @@ public class ProtocolSecureManager {
         }
     }
 
-
-
-
-
     public byte[] sendDataToProxyServerByteByByte(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
             IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
@@ -193,7 +189,6 @@ public class ProtocolSecureManager {
     public void setHandshakeFinished(boolean handshakeFinished) {
         this.handshakeFinished = handshakeFinished;
     }
-
 
     public synchronized byte[] sendDataTOSSLClient(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (!isEncrypted) {

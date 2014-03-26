@@ -3780,6 +3780,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         // TODO : Implement logic here
         Log.d(LOG_TAG, "Audio Service stop encrypt");
+        stopAudioService();
     }
 
     /**
