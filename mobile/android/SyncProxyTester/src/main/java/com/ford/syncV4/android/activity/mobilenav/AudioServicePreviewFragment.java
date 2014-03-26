@@ -98,8 +98,15 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
     @Override
     public void setStateOff() {
         super.setStateOff();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.audioServiceCheckBox);
-        box.setChecked(false);
+    }
+
+    public void setEncryptedAudioServiceStateOff() {
+        mEncryptServiceCheckBoxState.setStateOff();
+    }
+
+    public void setEncryptedAudioServiceStateOn() {
+        mEncryptServiceCheckBoxState.setStateOn();
+
     }
 
     public void setAudioServiceStateOn(OutputStream stream) {

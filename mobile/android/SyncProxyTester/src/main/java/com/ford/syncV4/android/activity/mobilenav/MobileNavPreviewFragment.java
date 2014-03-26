@@ -36,10 +36,15 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     @Override
     public void setStateOff() {
         super.setStateOff();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
-        box.setChecked(false);
-        //Button button = (Button) getView().findViewById(R.id.videobutton);
-        //button.setEnabled(false);
+    }
+
+    public void setEncryptedMobileNaviServiceStateOff() {
+        mEncryptServiceCheckBoxState.setStateOff();
+    }
+
+    public void setEncryptedMobileNaviServiceStateOn() {
+        mEncryptServiceCheckBoxState.setStateOn();
+
     }
 
     public void setMobileNaviStateOn(OutputStream stream) {
