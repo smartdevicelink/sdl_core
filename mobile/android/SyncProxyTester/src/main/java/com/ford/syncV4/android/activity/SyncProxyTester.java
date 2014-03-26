@@ -1743,12 +1743,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
                             final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
+                            final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
-                            sb1.setSoftButtonID(
-                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
                             sb1.setText("ReRoute");
                             sb1.setType(SoftButtonType.SBT_TEXT);
                             sb1.setIsHighlighted(false);
@@ -1767,9 +1767,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             btnSoftButtons.setOnClickListener(new OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    IntentHelper
-                                            .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    IntentHelper.addObjectForKey(currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
@@ -1780,31 +1779,31 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        Alert msg = new Alert();
-                                        msg.setCorrelationID(getCorrelationid());
-                                        msg.setAlertText1(txtAlertField1.getText().toString());
-                                        msg.setAlertText2(txtAlertField2.getText().toString());
-                                        msg.setAlertText3(txtAlertField3.getText().toString());
+                                        Alert alert = new Alert();
+                                        alert.setCorrelationID(getCorrelationid());
+                                        alert.setAlertText1(txtAlertField1.getText().toString());
+                                        alert.setAlertText2(txtAlertField2.getText().toString());
+                                        alert.setAlertText3(txtAlertField3.getText().toString());
                                         if (useDuration.isChecked()) {
-                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                            alert.setDuration(Integer.parseInt(txtDuration.getText().toString()));
                                         }
-                                        msg.setPlayTone(chkPlayTone.isChecked());
-                                        msg.setProgressIndicator(useProgressIndicator.isChecked());
+                                        alert.setPlayTone(chkPlayTone.isChecked());
+                                        alert.setProgressIndicator(useProgressIndicator.isChecked());
 
                                         String toSpeak = txtSpeak.getText().toString();
                                         if (toSpeak.length() > 0) {
                                             Vector<TTSChunk> ttsChunks = TTSChunkFactory
-                                                    .createSimpleTTSChunks(
-                                                            toSpeak);
-                                            msg.setTtsChunks(ttsChunks);
+                                                    .createSimpleTTSChunks(toSpeak);
+                                            alert.setTtsChunks(ttsChunks);
                                         }
                                         if (chkIncludeSoftButtons.isChecked() &&
                                                 (currentSoftButtons != null) &&
                                                 (currentSoftButtons.size() > 0)) {
-                                            msg.setSoftButtons(currentSoftButtons);
+                                            alert.setSoftButtons(currentSoftButtons);
                                         }
+                                        alert.setDoEncryption(doEncryptView.isChecked());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequest(alert);
                                         }
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
