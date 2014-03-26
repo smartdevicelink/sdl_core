@@ -461,6 +461,11 @@ class ApplicationManagerImpl : public ApplicationManager,
                                           const std::string& file_path,
                                           const uint32_t offset);
 
+    /*
+     * @brief returns true if HMI is cooperating
+     */
+    bool IsHMICooperating() const;
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);

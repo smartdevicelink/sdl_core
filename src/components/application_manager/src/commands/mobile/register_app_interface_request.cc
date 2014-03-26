@@ -62,10 +62,8 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "<< connection_key());
 
-  // wait till all HMI capabilities initialized
-  const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-  while (!hmi_capabilities.is_hmi_capabilities_initialized()) {
+  // wait till HMI started
+  while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
