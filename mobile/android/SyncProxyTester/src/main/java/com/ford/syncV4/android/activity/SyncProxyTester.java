@@ -36,6 +36,7 @@ import android.widget.CheckBox;
 import android.widget.CheckedTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -44,7 +45,10 @@ import android.widget.Toast;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
+import com.ford.syncV4.android.activity.mobilenav.CheckBoxState;
+import com.ford.syncV4.android.activity.mobilenav.CheckBoxStateValue;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
+import com.ford.syncV4.android.activity.mobilenav.RPCServiceCheckboxState;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -216,8 +220,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_SET_UP_POLICY_FILES = 18;
     private final int MNU_HASH_ID_SETUP = 19;
     private ModuleTest mTesterMain;
-    private ScrollView _scroller = null;
-    private ListView mListview = null;
+    private ListView mListView = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
     private ArrayAdapter<Integer> mCommandAdapter = null;
     private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
@@ -344,6 +347,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private ProxyService mBoundProxyService;
     private ExecutorService mStreamCommandsExecutorService;
 
+    private RPCServiceCheckboxState mRPCServiceSecureState;
+
     public static SyncProxyTester getInstance() {
         return _activity;
     }
@@ -381,10 +386,29 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         mStreamCommandsExecutorService = Executors.newFixedThreadPool(3);
 
-        _scroller = (ScrollView) findViewById(R.id.scrollConsole);
-
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
         findViewById(R.id.btnPlayPause).setOnClickListener(this);
+
+        // RPC Service Secure check box processing
+        CheckBox rpcSecureCheckBoxView = (CheckBox) findViewById(R.id.rpc_service_secure_checkbox_view);
+        mRPCServiceSecureState = new RPCServiceCheckboxState(rpcSecureCheckBoxView, this);
+        rpcSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
+
+        // Process Services
+        Button buttonServicesView = (Button) findViewById(R.id.btnServices);
+        buttonServicesView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LinearLayout servicesLayout = (LinearLayout) findViewById(R.id.services_layout_view);
+                servicesLayout.setVisibility((servicesLayout.getVisibility() == View.GONE) ?
+                                                View.VISIBLE : View.GONE);
+            }
+        });
 
         resetAdapters();
 
@@ -397,11 +421,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         mLogAdapter = new LogAdapter(LOG_TAG, false, this, R.layout.row, _logMessages);
 
-        mListview = (ListView) findViewById(R.id.messageList);
-        mListview.setClickable(true);
-        mListview.setAdapter(mLogAdapter);
-        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
-        mListview.setOnItemClickListener(new OnItemClickListener() {
+        mListView = (ListView) findViewById(R.id.messageList);
+        mListView.setClickable(true);
+        mListView.setAdapter(mLogAdapter);
+        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
@@ -660,39 +684,24 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    Handler myHandler = new Handler();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
-                            if (outputStream != null) {
-                                AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
-                                        getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                                fragment.setAudioServiceStateOn(outputStream);
-                            }
-                        }
-                    }, 3000);
+                    OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
+                    if (outputStream != null) {
+                        AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.audioFragment);
+                        fragment.setAudioServiceStateOn(outputStream);
+                    }
                 }
             });
         } else if (serviceType == ServiceType.Mobile_Nav) {
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-
-                    Handler myHandler = new Handler();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
-                            if (outputStream != null) {
-                                MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
-                                        getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                                fragment.setMobileNaviStateOn(outputStream);
-                            }
-                        }
-                    }, 3000);
-
-
+                    OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
+                    if (outputStream != null) {
+                        MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
+                                getSupportFragmentManager().findFragmentById(R.id.videoFragment);
+                        fragment.setMobileNaviStateOn(outputStream);
+                    }
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
@@ -921,7 +930,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         switch (item.getItemId()) {
             case PROXY_START:
                 BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (!mBtAdapter.isEnabled()) {
+                if (mBtAdapter != null && !mBtAdapter.isEnabled()) {
                     mBtAdapter.enable();
                 }
 
@@ -936,7 +945,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     mBoundProxyService.reset();
                 }
 
-                if (!mBtAdapter.isDiscovering()) {
+                if (mBtAdapter != null && !mBtAdapter.isDiscovering()) {
                     Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                     discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
                     startActivity(discoverableIntent);
@@ -964,12 +973,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 stopProxyServiceOnExit();
                 break;
             case MNU_TOGGLE_CONSOLE:
-                if (_scroller.getVisibility() == ScrollView.VISIBLE) {
-                    _scroller.setVisibility(ScrollView.GONE);
-                    mListview.setVisibility(ListView.VISIBLE);
+                if (mListView.getVisibility() == ScrollView.VISIBLE) {
+                    mListView.setVisibility(ListView.GONE);
                 } else {
-                    _scroller.setVisibility(ScrollView.VISIBLE);
-                    mListview.setVisibility(ListView.GONE);
+                    mListView.setVisibility(ListView.VISIBLE);
                 }
                 return true;
             case MNU_CLEAR:
@@ -1227,6 +1234,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 final Spinner spnSpeakType3 = (Spinner) layout.findViewById(R.id.spnSpeakType3);
                                 final Spinner spnSpeakType4 = (Spinner) layout.findViewById(R.id.spnSpeakType4);
 
+                                final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.speak_do_encrypt_view);
+
                                 ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(
                                         adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values());
                                 int textCapabilityPos = speechSpinnerAdapter.getPosition(SpeechCapabilities.TEXT);
@@ -1242,8 +1251,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        Speak msg = new Speak();
-                                        msg.setCorrelationID(getCorrelationid());
+                                        Speak speak = new Speak();
+                                        speak.setCorrelationID(getCorrelationid());
                                         String speak1 = txtSpeakText1.getText().toString();
                                         String speak2 = txtSpeakText2.getText().toString();
                                         String speak3 = txtSpeakText3.getText().toString();
@@ -1262,9 +1271,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         if (speak4.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
                                         }
-                                        msg.setTtsChunks(chunks);
+                                        speak.setTtsChunks(chunks);
+                                        speak.setDoEncryption(doEncryptView.isChecked());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequest(speak);
                                         }
                                     }
                                 });
@@ -1736,12 +1746,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
                             final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
+                            final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
-                            sb1.setSoftButtonID(
-                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
                             sb1.setText("ReRoute");
                             sb1.setType(SoftButtonType.SBT_TEXT);
                             sb1.setIsHighlighted(false);
@@ -1760,9 +1770,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             btnSoftButtons.setOnClickListener(new OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    IntentHelper
-                                            .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    IntentHelper.addObjectForKey(currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
@@ -1773,31 +1782,31 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        Alert msg = new Alert();
-                                        msg.setCorrelationID(getCorrelationid());
-                                        msg.setAlertText1(txtAlertField1.getText().toString());
-                                        msg.setAlertText2(txtAlertField2.getText().toString());
-                                        msg.setAlertText3(txtAlertField3.getText().toString());
+                                        Alert alert = new Alert();
+                                        alert.setCorrelationID(getCorrelationid());
+                                        alert.setAlertText1(txtAlertField1.getText().toString());
+                                        alert.setAlertText2(txtAlertField2.getText().toString());
+                                        alert.setAlertText3(txtAlertField3.getText().toString());
                                         if (useDuration.isChecked()) {
-                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                            alert.setDuration(Integer.parseInt(txtDuration.getText().toString()));
                                         }
-                                        msg.setPlayTone(chkPlayTone.isChecked());
-                                        msg.setProgressIndicator(useProgressIndicator.isChecked());
+                                        alert.setPlayTone(chkPlayTone.isChecked());
+                                        alert.setProgressIndicator(useProgressIndicator.isChecked());
 
                                         String toSpeak = txtSpeak.getText().toString();
                                         if (toSpeak.length() > 0) {
                                             Vector<TTSChunk> ttsChunks = TTSChunkFactory
-                                                    .createSimpleTTSChunks(
-                                                            toSpeak);
-                                            msg.setTtsChunks(ttsChunks);
+                                                    .createSimpleTTSChunks(toSpeak);
+                                            alert.setTtsChunks(ttsChunks);
                                         }
                                         if (chkIncludeSoftButtons.isChecked() &&
                                                 (currentSoftButtons != null) &&
                                                 (currentSoftButtons.size() > 0)) {
-                                            msg.setSoftButtons(currentSoftButtons);
+                                            alert.setSoftButtons(currentSoftButtons);
                                         }
+                                        alert.setDoEncryption(doEncryptView.isChecked());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequest(alert);
                                         }
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
@@ -3731,6 +3740,64 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             }
         });
+    }
+
+    /**
+     * Encrypt section
+     */
+
+    /**
+     * Process a state of the "Start Secure RPC Service" checkbox
+     */
+    private void processRPCSecureCheckBox() {
+        if (mRPCServiceSecureState.getState() == CheckBoxStateValue.OFF) {
+            mRPCServiceSecureState.setStateOn();
+
+            // TODO : Implement logic here
+            Log.d(LOG_TAG, "Start Secure RPC service");
+
+        } else if (mRPCServiceSecureState.getState() == CheckBoxStateValue.ON) {
+            mRPCServiceSecureState.setStateOff();
+
+            // TODO : Implement logic here
+            Log.d(LOG_TAG, "Stop Secure RPC service");
+        }
+    }
+
+    /**
+     * Starts to encrypt Audio Service
+     */
+    public void startAudioServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Audio Service start encrypt");
+    }
+
+    /**
+     * Stops to encrypt Audio Service
+     */
+    public void stopAudioServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Audio Service stop encrypt");
+    }
+
+    /**
+     * Starts to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Mobile Navi Service start encrypt");
+    }
+
+    /**
+     * Stops to encrypt Mobile Navi Service
+     */
+    public void stopMobileNaviServiceEncryption() {
+
+        // TODO : Implement logic here
+        Log.d(LOG_TAG, "Mobile Navi Service stop encrypt");
     }
 
     public boolean isProxyReadyForWork() {

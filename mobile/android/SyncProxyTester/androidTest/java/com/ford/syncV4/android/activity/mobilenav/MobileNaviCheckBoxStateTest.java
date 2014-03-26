@@ -26,7 +26,7 @@ public class MobileNaviCheckBoxStateTest extends ActivityInstrumentationTestCase
 
     public void testInitialStateOff() throws Exception {
         assertEquals("should have empty text", "", sut.getItem().getText());
-        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.mobile_navi_hint));
+        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.service_check_view_on));
         assertTrue("should be enabled", sut.getItem().isEnabled());
         assertEquals("should be at OFF state", sut.getState(), CheckBoxStateValue.OFF);
     }
@@ -39,14 +39,14 @@ public class MobileNaviCheckBoxStateTest extends ActivityInstrumentationTestCase
     public void testStateOff() throws Exception {
         sut.setStateOff();
         assertEquals("should have empty text", "", sut.getItem().getText());
-        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.mobile_navi_hint));
+        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.service_check_view_on));
         assertTrue("should be enabled", sut.getItem().isEnabled());
         assertEquals("should be at OFF state", sut.getState(), CheckBoxStateValue.OFF);
     }
 
     public void testStateOn() throws Exception {
         sut.setStateOn();
-        assertEquals("should have video streaming text", getActivity().getString(R.string.mobile_navi_check_box_on), sut.getItem().getText());
+        assertEquals("should have video streaming text", getActivity().getString(R.string.service_check_view_off), sut.getItem().getText());
         assertTrue("should be enabled", sut.getItem().isEnabled());
         assertEquals("should be at ON state", sut.getState(), CheckBoxStateValue.ON);
     }
@@ -62,7 +62,7 @@ public class MobileNaviCheckBoxStateTest extends ActivityInstrumentationTestCase
         sut.setStateOff();
         sut.setStateDisabled();
         sut.setStateOn();
-        assertEquals("should have video streaming text", getActivity().getString(R.string.mobile_navi_check_box_on), sut.getItem().getText());
+        assertEquals("should have video streaming text", getActivity().getString(R.string.service_check_view_off), sut.getItem().getText());
         assertTrue("should be enabled", sut.getItem().isEnabled());
         assertEquals("should be at ON state", sut.getState(), CheckBoxStateValue.ON);
     }
@@ -73,7 +73,7 @@ public class MobileNaviCheckBoxStateTest extends ActivityInstrumentationTestCase
         sut.setStateOn();
         sut.setStateDisabled();
         assertEquals("check box should be disabled", false, sut.getItem().isEnabled());
-        assertEquals("should have video streaming text", getActivity().getString(R.string.mobile_navi_check_box_on), sut.getItem().getText());
+        assertEquals("should have video streaming text", getActivity().getString(R.string.service_check_view_off), sut.getItem().getText());
         assertEquals("should be at DISABLED state", sut.getState(), CheckBoxStateValue.DISABLED);
     }
 
@@ -84,7 +84,7 @@ public class MobileNaviCheckBoxStateTest extends ActivityInstrumentationTestCase
         sut.setStateDisabled();
         sut.setStateOff();
         assertEquals("should have empty text", "", sut.getItem().getText());
-        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.mobile_navi_hint));
+        assertEquals("should have video checkbox hint",  sut.getItem().getHint(), getActivity().getString(R.string.service_check_view_on));
         assertTrue("should be enabled", sut.getItem().isEnabled());
         assertEquals("should be at OFF state", sut.getState(), CheckBoxStateValue.OFF);
     }

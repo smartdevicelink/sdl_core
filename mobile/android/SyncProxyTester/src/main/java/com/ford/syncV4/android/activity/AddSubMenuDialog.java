@@ -46,6 +46,7 @@ public class AddSubMenuDialog extends DialogFragment {
         final EditText editMenuName = (EditText) layout.findViewById(R.id.addsubmenu_menuName);
         final EditText editMenuID = (EditText) layout.findViewById(R.id.addsubmenu_menuID);
         final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addsubmenu_useMenuPos);
+        final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.add_sub_menu_do_encrypt_view);
         final EditText editMenuPos = (EditText) layout.findViewById(R.id.addsubmenu_menuPos);
 
         // set suggested value
@@ -88,6 +89,8 @@ public class AddSubMenuDialog extends DialogFragment {
                         if (chkUseMenuPos.isChecked()) {
                             addSubMenu.setPosition(pos);
                         }
+                        addSubMenu.setDoEncryption(doEncryptView.isChecked());
+
                         ((SyncProxyTester) getActivity()).onAddSubMenuDialogResult(addSubMenu,
                                 subMenu);
                     }

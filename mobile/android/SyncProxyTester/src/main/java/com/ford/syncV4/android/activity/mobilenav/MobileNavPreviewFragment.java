@@ -19,7 +19,7 @@ import java.io.OutputStream;
 
 public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
 
-    private static final String TAG = MobileNavPreviewFragment.class.getSimpleName();
+    private static final String LOG_TAG = "MobileNavPreviewFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,23 +33,24 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         initiateView(view);
     }
 
-    public void onMobileNaviCheckBoxAction(View v) {
-        changeMobileNaviCheckBoxState();
-    }
-
     @Override
     public void setStateOff() {
         super.setStateOff();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
-        box.setChecked(false);
-        Button button = (Button) getView().findViewById(R.id.videobutton);
-        button.setEnabled(false);
+    }
+
+    public void setEncryptedMobileNaviServiceStateOff() {
+        mEncryptServiceCheckBoxState.setStateOff();
+    }
+
+    public void setEncryptedMobileNaviServiceStateOn() {
+        mEncryptServiceCheckBoxState.setStateOn();
+
     }
 
     public void setMobileNaviStateOn(OutputStream stream) {
         mSessionCheckBoxState.setStateOn();
-        Button button = (Button) getView().findViewById(R.id.videobutton);
-        button.setEnabled(true);
+        //Button button = (Button) getView().findViewById(R.id.videobutton);
+        //button.setEnabled(true);
         mDataStreamingButton.setEnabled(true);
 
         mFileStreamingLogic.setOutputStream(stream);
@@ -72,17 +73,40 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             @Override
             public void onClick(View view) {
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    onMobileNaviCheckBoxAction(view);
+                    changeCheckBoxState();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.mobile_navi_service_secure_checkbox_view);
+        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    changeEncryptCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
             }
         });
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mSessionCheckBoxState.setStateOff();
+        mEncryptServiceCheckBoxState = new MobileNaviEncryptCheckBoxState(encryptCheckBoxView,
+                getActivity());
     }
 
-    private void changeMobileNaviCheckBoxState() {
+    private void changeEncryptCheckBoxState() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
+            mEncryptServiceCheckBoxState.setStateOn();
+            syncProxyTester.startMobileNaviServiceEncryption();
+        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
+            mEncryptServiceCheckBoxState.setStateOff();
+            syncProxyTester.stopMobileNaviServiceEncryption();
+        }
+    }
+
+    private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
@@ -92,8 +116,8 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavService();
             mSessionCheckBoxState.setStateOff();
-            Button button = (Button) getView().findViewById(R.id.videobutton);
-            button.setEnabled(false);
+            //Button button = (Button) getView().findViewById(R.id.videobutton);
+            //button.setEnabled(false);
         }
     }
 
@@ -112,7 +136,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 break;
 
             default:
-                Log.e(TAG, "Unknown video source " + videoSource);
+                Log.e(LOG_TAG, "Unknown video source " + videoSource);
                 return;
         }
         startBaseFileStreaming(videoResID);

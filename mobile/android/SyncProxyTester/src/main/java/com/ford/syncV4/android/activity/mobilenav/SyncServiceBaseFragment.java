@@ -23,6 +23,7 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     protected Button mDataStreamingButton;
     protected CheckBoxState mSessionCheckBoxState;
+    protected CheckBoxState mEncryptServiceCheckBoxState;
     protected FileStreamingLogic mFileStreamingLogic;
 
     @Override

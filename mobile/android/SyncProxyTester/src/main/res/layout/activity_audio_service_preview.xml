@@ -3,17 +3,22 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
-
     <CheckBox
         android:id="@+id/audioServiceCheckBox"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:checked="false"
-        android:enabled="false"
-        android:hint="Turn On Audio Service"
+        android:text="@string/service_check_view_on"
         />
+
+    <CheckBox
+        android:id="@+id/audio_service_secure_checkbox_view"
+        android:text="@string/secure_service_check_view_on"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <Button
         android:layout_width="fill_parent"
@@ -23,6 +28,5 @@
         android:layout_below="@+id/audioServiceCheckBox"
         android:enabled="false"
         android:layout_centerHorizontal="true" />
-
 
 </RelativeLayout>

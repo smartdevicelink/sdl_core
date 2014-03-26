@@ -7,7 +7,7 @@ import java.util.Hashtable;
 public class RPCMessage extends RPCStruct {
 
     public RPCMessage(String functionName) {
-        this(functionName, "request");
+        this(functionName, Names.request);
     }
 
     protected RPCMessage(RPCMessage rpcm) {
