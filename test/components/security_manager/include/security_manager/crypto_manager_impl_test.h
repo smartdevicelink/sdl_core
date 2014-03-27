@@ -133,6 +133,7 @@ TEST_F(SSLTest, BrokenHandshake) {
   char *outBuf = new char[1024 * 1024];
   char *inBuf;
 
+  // FIXME (EZamakhov): fix infinity loop on wrong handshake
   for(;;) {
     res = SSL_do_handshake(connection);
     if (res >= 0) {
@@ -309,6 +310,80 @@ TEST_F(SSLTest, Positive) {
   decryptedText[text_len] = 0;
   EXPECT_EQ(strcmp(decryptedText, text), 0);
   EXPECT_EQ(LastError().length(), 0);
+}
+TEST_F(SSLTest, Positive2) {
+  using security_manager::LastError;
+  int res = 0;
+
+  char *outBuf = new char[1024 * 1024];
+  char *inBuf;
+
+  for(;;) {
+    res = SSL_do_handshake(connection);
+    if (res >= 0) {
+      break;
+    }
+
+    if (isErrorFatal(connection, res)) {
+      break;
+    }
+
+    size_t outLen  = BIO_ctrl_pending(bioOut);
+    if (outLen) {
+      BIO_read(bioOut, outBuf, outLen);
+    }
+    size_t inLen;
+    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    EXPECT_TRUE(inBuf != NULL);
+
+    if (inLen) {
+      BIO_write(bioIn, inBuf, inLen);
+    }
+  }
+
+  EXPECT_EQ(res, 1);
+
+  EXPECT_NE(SSL_is_init_finished(connection), 0);
+
+  BIO *bioF = BIO_new(BIO_f_ssl());
+  BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
+
+  const int N =1000;
+  int last_max = 0;
+  int min_oh = N , max_oh = 0;
+  for (int l = 1; l < N; ++l) {
+    char *text = new char[l+1];
+    text[l]='\0';
+    char *encryptedText = new char[1024*N];
+    char *decryptedText;
+    size_t text_len;
+    // Encrypt text on client side
+    BIO_write(bioF, text, l);
+    text_len = BIO_ctrl_pending(bioOut);
+    size_t len = BIO_read(bioOut, encryptedText, text_len);
+    const int temp = len - l;
+    min_oh = temp < min_oh ? temp : min_oh;
+    max_oh = temp > max_oh ? temp : max_oh;
+    if(last_max < len) {
+      std::cout << l << "->" << len;
+      if(l>1) {
+        std::cout << ", last overhead = " << last_max << "-" << l-1
+                  << " = " << last_max - (l-1) << "bytes || ";
+        std::cout << " overhead = " << len << "-" << l
+                  << " = " << len - l << "bytes";
+      }
+      std::cout << std::endl;
+      last_max = len;
+    };
+
+    // Decrypt text on server
+    decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+    decryptedText[text_len] = 0;
+
+    EXPECT_TRUE(decryptedText != NULL);
+    EXPECT_EQ(strcmp(decryptedText, text), 0);
+    }
+  std::cout << " min = " << min_oh << ", max = " << max_oh << std::endl;
 }
 
 }  // namespace crypto_manager_test
