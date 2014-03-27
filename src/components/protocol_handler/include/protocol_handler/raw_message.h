@@ -86,7 +86,7 @@ class RawMessage {
     /**
      * \brief Getter for message size
      */
-    uint32_t data_size() const;
+    size_t data_size() const;
 
     /**
      * \brief Getter for protocol version
@@ -124,7 +124,7 @@ class RawMessage {
     /**
      * \brief Size of message
      */
-    uint32_t data_size_;
+    size_t data_size_;
 
     /**
      * \brief Version of SmartDeviceLink protocol (currently 1,2)

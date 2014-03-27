@@ -50,8 +50,8 @@ void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr &message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kControl) {
-    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
-                 << message->service_type());
+//    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
+//                 << message->service_type());
     return;
   }
 
@@ -131,24 +131,27 @@ void SecurityManager::Handle(const SecurityMessage &message) {
       break;
     }
 }
+
 bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_); DCHECK(crypto_manager_);
 
   if(session_observer_->GetSSLContext(connection_key,
                                       protocol_handler::kControl)) {
-    LOG4CXX_WARN(logger_, "Connenction is already protected, key "
+    LOG4CXX_WARN(logger_, "Connection is already protected, key "
                  << connection_key);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED);
+    NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
 
   security_manager::SSLContext * newSSLContext = crypto_manager_->CreateSSLContext();
   if(!newSSLContext) {
-      LOG4CXX_ERROR(logger_, "CryptoManager could not create SSl context.");
-      //Generate response query and post to security_messages_
+      LOG4CXX_ERROR(logger_, "CryptoManager could not create SSL context.");
+      // Generate response query and post to security_messages_
       SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SLL);
+      NotifyListenersOnHandshakeDone(connection_key, false);
       return false;
   }
 
@@ -157,9 +160,64 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
     //delete SSLContex on any error
     crypto_manager_->ReleaseSSLContext(newSSLContext);
     SendInternalError(connection_key, result);
+    NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
+  DCHECK(session_observer_->GetSSLContext(connection_key,
+                                          protocol_handler::kControl));
   return true;
+}
+
+void SecurityManager::StartHandshake(uint32_t connection_key) {
+  LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
+  security_manager::SSLContext* ssl_context =
+      session_observer_->GetSSLContext(connection_key,
+                                       protocol_handler::kControl);
+  if(!ssl_context){
+    LOG4CXX_ERROR(logger_, "StartHandshake failed, conection is not protected");
+    SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL);
+    DCHECK(ssl_context);
+    return;
+  }
+
+  if (!ssl_context->IsInitCompleted()) {
+    size_t data_size;
+    const uint8_t* data =
+        static_cast<uint8_t*>(ssl_context->StartHandshake(&data_size));
+    DCHECK(data);
+    DCHECK(data_size);
+    SecurityQuery::QueryHeader header(
+          SecurityQuery::NOTIFICATION,
+          SecurityQuery::SEND_HANDSHAKE_DATA, 0);
+    SendData(connection_key, header, data, data_size);
+  }
+}
+void SecurityManager::AddListener(SecurityManagerListener * const listener) {
+  listeners_.push_back(listener);
+}
+
+void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
+  listeners_.remove(listener);
+}
+
+void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
+                                                     const bool succecc) {
+  // TODO: upgrade SSLContext interface to let caller know
+  //       if handshake wasn't successful
+  for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+      it != listeners_.end(); ) {
+    if((*it)->OnHandshakeDone(connection_key, succecc)) {
+      RemoveListener(*it);
+      it = listeners_.begin();
+    }
+  }
+}
+
+void SecurityManager::NotifyListenersOnHandshakeFailed(const uint32_t &connection_key) {
+  for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+          it != listeners_.end(); ++it) {
+    (*it)->OnHandshakeFailed(connection_key);
+  }
 }
 
 bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
@@ -167,22 +225,20 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   DCHECK(inMessage->get_header().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
   DCHECK(inMessage); DCHECK(session_observer_);
   const uint32_t seqNumber = inMessage->get_header().seq_number;
-  const uint32_t connectionKey = inMessage->get_connection_key();
+  const uint32_t connection_key = inMessage->get_connection_key();
 
   if(!inMessage->get_data_size()) {
-    const std::string error("SendHandshakeData: null arguments size.");
-    LOG4CXX_ERROR(logger_, error);
-    SendInternalError(connectionKey,
+    LOG4CXX_ERROR(logger_, "SendHandshakeData: null arguments size.");
+    SendInternalError(connection_key,
                       SecurityQuery::ERROR_INVALID_QUERY_SIZE, seqNumber);
     return false;
   }
   SSLContext * sslContext =
-      session_observer_->GetSSLContext(connectionKey,
+      session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
   if(!sslContext) {
-    const std::string error("SendHandshakeData: No ssl context.");
-    LOG4CXX_ERROR(logger_, error);
-    SendInternalError(connectionKey,
+    LOG4CXX_ERROR(logger_, "SendHandshakeData: No ssl context.");
+    SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, seqNumber);
     return false;
   }
@@ -190,17 +246,24 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   const uint8_t * out_data = static_cast<uint8_t *>
       (sslContext->DoHandshakeStep(
          inMessage->get_data(), inMessage->get_data_size(), &out_data_size));
-  if(!out_data || !out_data_size){
+  if(!out_data || !out_data_size) {
+    if(sslContext->IsInitCompleted()) {
+      LOG4CXX_INFO(logger_, "SSL inititalization finished success.");
+      NotifyListenersOnHandshakeDone(connection_key, true);
+      return true;
+    }
     std::string error("SendHandshakeData: Handshake failed.");
     error += LastError();
     LOG4CXX_WARN(logger_, error);
-    SendInternalError(connectionKey,
+    SendInternalError(connection_key,
                       SecurityQuery::ERROR_SSL_INVALID_DATA, seqNumber);
+    NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
 
-  //answer with the same header as income message
-  SendData(connectionKey, inMessage->get_header(), out_data, out_data_size);
+  // answer with the same header as income message
+  SendData(connection_key, inMessage->get_header(), out_data, out_data_size);
+
   return true;
 }
 
@@ -237,7 +300,7 @@ void SecurityManager::SendInternalError(const int32_t connection_key,
 }
 
 void SecurityManager::SendData(
-    const int32_t connectionKey,
+    const int32_t connection_key,
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
   // FIXME(EZ): move to SecurityQuery class
@@ -247,22 +310,22 @@ void SecurityManager::SendData(
   const size_t header_size = sizeof(header);
   std::vector<uint8_t> data_sending(header_size + data_size);
   memcpy(&data_sending[0], &header, header_size);
-  //TODO (EZamakhov): Fix invalide read (by Valgrind)
+  //TODO (EZamakhov): Fix invalid read (by Valgrind)
   memcpy(&data_sending[header_size], data, data_size);
 
-  SendBinaryData(connectionKey, &data_sending[0], data_sending.size());
+  SendBinaryData(connection_key, &data_sending[0], data_sending.size());
 }
 
-void SecurityManager::SendBinaryData(const int32_t connectionKey,
+void SecurityManager::SendBinaryData(const int32_t connection_key,
                                      const uint8_t * const data,
                                      size_t data_size) {
 //   LOG4CXX_INFO(logger_, "SendBinaryDataData");
   DCHECK(protocol_handler_)
   const protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage( connectionKey,
-                                          protocol_handler::PROTOCOL_VERSION_2,
-                                          data, data_size,
-                                          protocol_handler::kControl));
+        new protocol_handler::RawMessage(connection_key,
+                                         protocol_handler::PROTOCOL_VERSION_2,
+                                         data, data_size,
+                                         protocol_handler::kControl));
   // Add RawMessage to ProtocolHandler message query
   // FIXME(EZ): final_message - false?
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);

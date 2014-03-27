@@ -102,8 +102,32 @@ bool LifeCycle::StartComponents() {
 
   security_manager_ = new security_manager::SecurityManager();
 
+  std::string cert_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &cert_filename, "mycert.pem", security_manager::SecurityManager::ConfigSection(), "CertificatePath");
+
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", security_manager::SecurityManager::ConfigSection(), "SSLMode");
   crypto_manager_ = new security_manager::CryptoManagerImpl();
-  if(!crypto_manager_->Init()) {
+
+  std::string key_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &key_filename, "mykey.pem", security_manager::SecurityManager::ConfigSection(), "KeyPath");
+
+  std::string ciphers_list;
+  profile::Profile::instance()->ReadStringValue(
+        &ciphers_list, "ALL", security_manager::SecurityManager::ConfigSection(), "CipherList");
+
+  bool verify_peer;
+  profile::Profile::instance()->ReadBoolValue(
+        &verify_peer, false, security_manager::SecurityManager::ConfigSection(), "VerifyPeer");
+  if(!crypto_manager_->Init(
+      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          cert_filename,
+          key_filename,
+          ciphers_list,
+          verify_peer)) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
   }
 
@@ -114,20 +138,23 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
+  // protocol_handler_->set_crypto_manager(crypto_manager_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
   protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
+  connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
   security_manager_->set_session_observer(connection_handler_);
   security_manager_->set_protocol_handler(protocol_handler_);
   security_manager_->set_crypto_manager(crypto_manager_);
 
-  // It's important to initialise TM after setting up listener chain
+  // It's important to initialize TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 

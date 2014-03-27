@@ -20,6 +20,7 @@ import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.stericson.RootTools.RootTools;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -85,6 +86,8 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
         final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
         final CheckBox isRootedView = (CheckBox) layout.findViewById(R.id.register_app_interface_is_rooted_view);
         final EditText appID = (EditText) layout.findViewById(R.id.registerappinterface_appID);
+
+        isRootedView.setChecked(RootTools.isRootAvailable());
 
         final ArrayAdapter<Language> languageAdapter =
                 new ArrayAdapter<Language>(mContext,

@@ -76,7 +76,7 @@ uint8_t* RawMessage::data() const {
   return data_;
 }
 
-uint32_t RawMessage::data_size() const {
+size_t RawMessage::data_size() const {
   return data_size_;
 }
 

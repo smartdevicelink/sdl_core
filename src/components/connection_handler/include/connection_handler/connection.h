@@ -177,11 +177,15 @@ class Connection {
   int32_t RemoveSession(uint8_t session);
 
   /**
-   * \brief Adds service to session
+   * \brief Adds service to session oradd protection to service been started before
+   * \param session session ID
+   * \param service_type Type of service
+   * \param is_protected protection state
    * \return TRUE on success, otherwise FALSE
    */
   bool AddNewService(uint8_t session,
-                     protocol_handler::ServiceType service, const bool is_protected);
+                     protocol_handler::ServiceType service_type,
+                     const bool is_protected);
 
   /**
    * \brief Removes service from session

@@ -70,17 +70,22 @@ public:
    * Handle as binary data in Ford Protocol
    */
   enum InternalErrors {
-    ERROR_SUCCESS                = 0x0,
-    ERROR_INVALID_QUERY_SIZE     = 0x1, //low size of message or wrong json_size
-    ERROR_INVALID_QUERY_ID       = 0x2, //unknown query id
-    ERROR_NOT_SUPPORTED          = 0x3, //No CryptoManager
-    ERROR_SERVICE_ALREADY_PROTECTED = 0x4,
-    ERROR_CREATE_SLL             = 0x5,
-    ERROR_CONNECTION_NOT_FOUND   = 0x6,
-    ERROR_SESSION_NOT_FOUND      = 0x7,
-    ERROR_SERVICE_NOT_PROTECTED  = 0x8, //got handshake for not protected service
-    ERROR_SSL_INVALID_DATA       = 0xF0,
-    ERROR_UNKWOWN_INTERNAL_ERROR = 0xFF
+    ERROR_SUCCESS                    = 0x0,
+    ERROR_INVALID_QUERY_SIZE         = 0x1, //low size of message or wrong json_size
+    ERROR_INVALID_QUERY_ID           = 0x2, //unknown query id
+    ERROR_NOT_SUPPORTED              = 0x3, //No CryptoManager
+    ERROR_SERVICE_ALREADY_PROTECTED  = 0x4,
+    ERROR_CREATE_SLL                 = 0x5,
+    ERROR_CONNECTION_NOT_FOUND       = 0x6,
+    ERROR_SESSION_NOT_FOUND          = 0x7,
+    ERROR_SERVICE_NOT_PROTECTED      = 0x8, //got handshake for not protected service
+    ERROR_SERVICE_PROTECTION_PENDING = 0x9, //get packet with flag encrypt for not
+    // TODO  (EZamakhov) : add error to send
+    ERROR_DECRYPTION_FAILED          = 0x10, //
+    ERROR_SSL_INVALID_DATA           = 0xF0,
+    // TODO (EZamakhov) : remove ERROR_SESSION_NOT_FOUND and so with ERROR_INTERNAL
+    ERROR_INTERNAL                   = 0xF1,
+    ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFF
   };
   /**
    * \brief InternalErrors is 12 byte header of security query

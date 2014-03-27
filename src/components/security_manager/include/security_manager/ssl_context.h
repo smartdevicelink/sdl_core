@@ -42,29 +42,31 @@
  * \brief Class responsible for SSL connection establishing
  *        and data encryption and decryption within this connection
  *
- * \fn security_manager::SSLContext::DoHandshake(char *in_data,  size_t  in_data_size, char *out_data, size_t *out_data_size)
+ * \fn security_manager::SSLContext::DoHandshake(char *in_data, size_t in_data_size, char *out_data, size_t *out_data_size)
  * \brief Performs SSL handshake
  * In order to establish an SSL connection it's
  * necessary to perform handshake process. During this process
  * client and server negotiate about encryption algorithms to use
  * and produce a session key.
  *
- * \param data[in]      data sent by client
- * \param data_size[in] size of \ref in_data
- * \param out_data_size[out] length of server response
+ * \param data          [in]   data sent by client
+ * \param data_size     [in]   size of \ref in_data
+ * \param out_data_size [out]  length of server response
  * \return response of server
  */
 
 namespace security_manager {
 class SSLContext {
  public:
-  virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
-                               size_t* server_data_size)=0;
-  virtual void* Encrypt(const void* data,  size_t data_size,
+  virtual void* StartHandshake(size_t* out_data_size)=0;
+  virtual void* DoHandshakeStep(const void* their_data,  size_t their_data_size,
+                               size_t* our_data_size)=0;
+  virtual void* Encrypt(const void* plain_data,  size_t plain_data_size,
                         size_t* encrypted_data_size)=0;
   virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
-                        size_t* data_size)=0;
+                        size_t* plain_data_size)=0;
   virtual bool  IsInitCompleted() const = 0;
+  virtual int   mode() const = 0;
   virtual ~SSLContext() { }
 };
 } // namespace security_manager

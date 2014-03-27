@@ -56,11 +56,6 @@ class OnButtonPressNotification : public NotificationFromHMI {
   explicit OnButtonPressNotification(const MessageSharedPtr& message);
 
   /**
-   * @brief OnButtonPressNotification class destructor
-   **/
-  virtual ~OnButtonPressNotification();
-
-  /**
    * @brief Execute command
    **/
   virtual void Run();

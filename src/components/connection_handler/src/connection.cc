@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <limits.h>
+
 #include <algorithm>
 
 #include "connection_handler/connection.h"
@@ -64,6 +66,21 @@ Connection::~Connection() {
   session_map_.clear();
 }
 
+// Finds a key not presented in std::map<unsigned char, T>
+// Returns 0 if that key not found
+namespace {
+template <class T>
+int32_t findGap(const std::map<unsigned char, T>& map) {
+  for (int32_t i = 1; i <= UCHAR_MAX; ++i) {
+    if (map.find(i) == map.end()) {
+      return i;
+    }
+  }
+  return 0;
+}
+}
+
+
 int32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -73,18 +90,15 @@ int32_t Connection::AddNewSession() {
     heartbeat_monitor_.BeginMonitoring();
   }
 
-  const uint8_t max_connections = 255;
-  int32_t size = session_map_.size();
-  if (max_connections > size) {
-
-    ++size;
+  int32_t session_id = findGap(session_map_);
+  if (session_id > 0) {
     /* whenever new session created RPC and Bulk services are
     established automatically */
       //TODO: Dmitriy Trunov + Klimenko
-    session_map_[size].service_list.push_back(protocol_handler::kRpc);
-    session_map_[size].service_list.push_back(protocol_handler::kBulk);
+    session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
+    session_map_[session_id].service_list.push_back(protocol_handler::kBulk);
 
-    result = size;
+    result = session_id;
   }
 
   return result;
@@ -105,53 +119,70 @@ int32_t Connection::RemoveSession(uint8_t session) {
 }
 
 bool Connection::AddNewService(uint8_t session,
-                               protocol_handler::ServiceType serviceType,
+                               protocol_handler::ServiceType service_type,
                                const bool is_protected) {
+  //Ignore wrong services
+  if(protocol_handler::kControl == service_type ||
+     protocol_handler::kInvalidServiceType == service_type )
+    return false;
+
   sync_primitives::AutoLock lock(session_map_lock_);
-  bool result = false;
 
   SessionMapIterator session_it = session_map_.find(session);
   if (session_it == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return result;
+    return false;
   }
 
-  ServiceList& service_list= session_it->second.service_list;
-  ServiceListIterator service_it = find(service_list.begin(),
-                                        service_list.end(), serviceType);
-  if (service_it != service_list.end()) {
-    LOG4CXX_ERROR(logger_, "Session " << session << " already established"
-                  " service " << serviceType);
-  } else {
-    service_list.push_back(Service(serviceType, is_protected));
-    result = true;
-  }
-
-  return result;
-}
-
-bool Connection::RemoveService(uint8_t session, protocol_handler::ServiceType service_type) {
-  sync_primitives::AutoLock lock(session_map_lock_);
-  bool result = false;
-
-  SessionMapIterator session_it = session_map_.find(session);
-  if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return result;
-  }
-
-  ServiceList& service_list= session_it->second.service_list;
+  ServiceList& service_list = session_it->second.service_list;
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), service_type);
+  // if service already exists
   if (service_it != service_list.end()) {
-    service_list.erase(service_it);
-    result = true;
+    Service& service = *service_it;
+    // For unproteced service could be start protection
+    if(!service.is_protected_ && is_protected) {
+      service.is_protected_ = true;
+    }
+    // Protected services shall not be unprotected or twice protected
+    else {
+      LOG4CXX_ERROR(logger_, "Session " << session << " already established"
+                    " service " << service_type);
+      return false;
+    }
   } else {
-    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
-                  " service " << service_type);
+    service_list.push_back(Service(service_type, is_protected));
   }
 
-  return result;
+  return true;
+}
+
+bool Connection::RemoveService(
+    uint8_t session, protocol_handler::ServiceType service_type) {
+  //Ignore wrong and required for Session services
+  if(protocol_handler::kControl == service_type ||
+     protocol_handler::kInvalidServiceType == service_type ||
+     protocol_handler::kRpc  == service_type ||
+     protocol_handler::kBulk == service_type )
+    return false;
+  sync_primitives::AutoLock lock(session_map_lock_);
+
+  SessionMapIterator session_it = session_map_.find(session);
+  if (session_it == session_map_.end()) {
+    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    return false;
+  }
+
+  ServiceList& service_list = session_it->second.service_list;
+  ServiceListIterator service_it = find(service_list.begin(),
+                                        service_list.end(), service_type);
+  if (service_it == service_list.end()) {
+    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
+                  " service " << service_type);
+    return false;
+  }
+  service_list.erase(service_it);
+  return true;
 }
 
 int Connection::SetSSLContext( uint8_t sessionId,
@@ -162,12 +193,13 @@ int Connection::SetSSLContext( uint8_t sessionId,
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
     return security_manager::SecurityQuery::ERROR_SESSION_NOT_FOUND;
   }
+  Session& session = session_it->second;
+  session.ssl_context = context;
   return security_manager::SecurityQuery::ERROR_SUCCESS;
 }
 
 security_manager::SSLContext* Connection::GetSSLContext(
-    uint8_t sessionId,
-    const protocol_handler::ServiceType &service_type) const {
+    uint8_t sessionId, const protocol_handler::ServiceType &service_type) const {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
@@ -178,7 +210,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   //for control services return current SSLContext value
   if(protocol_handler::kControl == service_type)
     return session.ssl_context;
-  const ServiceList& service_list= session_it->second.service_list;
+  const ServiceList& service_list = session_it->second.service_list;
   ServiceList::const_iterator service_it = std::find(service_list.begin(),
                                                      service_list.end(),
                                                      service_type);

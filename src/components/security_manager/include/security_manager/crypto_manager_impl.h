@@ -49,14 +49,16 @@ namespace security_manager {
 
     class SSLContextImpl : public SSLContext {
      public:
-      SSLContextImpl(SSL *conn);
-      virtual void* DoHandshakeStep(const void* client_data,  size_t client_data_size,
-                                    size_t* server_data_size);
-      virtual void* Encrypt(const void* data,  size_t data_size,
+      SSLContextImpl(SSL *conn, Mode mode);
+      virtual void* StartHandshake(size_t* out_data_size);
+      virtual void* DoHandshakeStep(const void* their_data,  size_t their_data_size,
+                                    size_t* our_data_size);
+      virtual void* Encrypt(const void* plain_data,  size_t plain_data_size,
                             size_t* encrypted_data_size);
       virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
-                            size_t* data_size);
+                            size_t* plain_data_size);
       virtual bool  IsInitCompleted() const;
+      virtual int   mode() const;
       virtual ~SSLContextImpl();
      private:
       void EnsureBufferSizeEnough(size_t size);
@@ -66,17 +68,22 @@ namespace security_manager {
       BIO *bioFilter_;
       size_t buffer_size_;
       char *buffer_;
+      Mode mode_;
     };
 
    public:
     CryptoManagerImpl();
-    virtual bool Init();
+    virtual bool Init(Mode mode,
+                      const std::string& cert_filename,
+                      const std::string& key_filename,
+                      const std::string& ciphers_list,
+                      bool verify_peer);
     virtual void Finish();
     virtual SSLContext *CreateSSLContext();
     virtual void ReleaseSSLContext(SSLContext* context);
    private:
     SSL_CTX *context_;
-
+    Mode mode_;
     static ::log4cxx::LoggerPtr logger_;
   };
 } // namespace security_manager

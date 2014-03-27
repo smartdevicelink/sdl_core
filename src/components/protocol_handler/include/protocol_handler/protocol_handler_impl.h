@@ -50,6 +50,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
+#include "security_manager/security_manager.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -157,6 +158,9 @@ class ProtocolHandlerImpl
      */
     void set_session_observer(SessionObserver* observer);
 
+    void set_security_manager(
+        const security_manager::SecurityManager* security_manager);
+
     /**
      * \brief Method for sending message to Mobile Application
      * \param message Message with params to be sent to Mobile App
@@ -171,6 +175,8 @@ class ProtocolHandlerImpl
      * streaming server and displayed to user.
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
+
+    void set_security_manager(security_manager::SecurityManager* security_manager);
 
   protected:
 
@@ -189,8 +195,9 @@ class ProtocolHandlerImpl
       ConnectionID connection_id,
       uint8_t session_id,
       uint8_t protocol_version,
-      uint32_t hash_code = 0,
-      uint8_t service_type = SERVICE_TYPE_RPC);
+      uint32_t hash_code,
+      uint8_t service_type,
+      bool encrypted);
 
     /**
      * \brief Sends fail of starting session to mobile application
@@ -289,7 +296,7 @@ class ProtocolHandlerImpl
 
     /**
      * @brief Notifies subscribers about message
-     * recieved from mobile device.
+     * received from mobile device.
      * @param message Message with already parsed header.
      */
     void NotifySubscribers(const RawMessagePtr& message);
@@ -310,7 +317,7 @@ class ProtocolHandlerImpl
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
       const bool compress);
 
@@ -332,10 +339,10 @@ class ProtocolHandlerImpl
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
       const bool compress,
-      const uint32_t max_data_size);
+      const size_t max_data_size);
 
     /**
      * \brief Sends message already containing protocol header.
@@ -420,6 +427,14 @@ class ProtocolHandlerImpl
     // FIXME (EZamakhov): add brief
     RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
+    RawMessagePtr DecryptRawMessage(const ConnectionID connection_id,
+                                    const RawMessagePtr &packet);
+    RESULT_CODE EncryptData(const int32_t connection_key, const uint8_t service_type,
+                            const uint8_t* const data_in, const size_t data_in_size,
+                            const uint8_t **data_out, size_t *data_out_size);
+    RESULT_CODE DecryptData(const int32_t connection_key, const uint8_t service_type,
+                            const uint8_t* const data_in, const size_t data_in_size,
+                            uint8_t**  data_out, size_t *data_out_size);
 
   private:
     /**
@@ -468,6 +483,7 @@ class ProtocolHandlerImpl
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
+    security_manager::SecurityManager *security_manager_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
     impl::FromMobileQueue raw_ford_messages_from_mobile_;

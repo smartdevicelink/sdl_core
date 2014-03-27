@@ -32,14 +32,33 @@
 
 #ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
 #define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+
 #include <string>
+
+/**
+ * \class security_manager::CryptoManager
+ * \brief Class factory, producing instances of \ref SSLContext
+ *
+ * \fn security_manager::SSLContext* security_manager::CryptoManager::CreateSSLContext()
+ * \brief Creates an instance of \ref SSLContext class
+ *
+  * \fn void security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext* context)
+ * \brief Frees \ref SSLContext instance
+ */
 
 namespace security_manager {
 class SSLContext;
+
+enum Mode { CLIENT, SERVER };
+
 std::string LastError();
 class CryptoManager {
  public:
-  virtual bool Init()=0;
+  virtual bool Init(Mode mode,
+                    const std::string& cert_filename,
+                    const std::string& key_filename,
+                    const std::string& ciphers_list,
+                    bool verify_peer)=0;
   virtual void Finish()=0;
   virtual SSLContext *CreateSSLContext()=0;
   virtual void ReleaseSSLContext(SSLContext* context)=0;

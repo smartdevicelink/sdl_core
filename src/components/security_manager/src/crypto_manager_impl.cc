@@ -35,7 +35,6 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include "config_profile/profile.h"
 #include "security_manager/security_manager.h"
 
 namespace security_manager {
@@ -43,86 +42,53 @@ namespace security_manager {
 log4cxx::LoggerPtr CryptoManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("CryptoManagerImpl"));
 
-const char* CertificatePath = "CertificatePath";
-const char* KeyPath         = "KeyPath";
-// SSL mode could be SERVER or CLIENT
-const char* SSLMode         = "SSLMode";
-// Could be ALL ciphers or list of chosen
-const char* CipherList      = "CipherList";
-// Verify Mobile app certificate
-const char* VerifyPeer      = "VerifyPeer";
-// Terminate handshake if mobile app did not return a certificate
-const char* FialOnNoCert    = "FialOnNoCert";
-// do not ask for certificate again in case of a renegotiation
-const char* VerifyClientOnce= "VerifyClientOnce";
-
 CryptoManagerImpl::CryptoManagerImpl()
-    : context_(NULL) {
+    : context_(NULL),
+      mode_(CLIENT) {
   SSL_load_error_strings();
   ERR_load_BIO_strings();
   OpenSSL_add_all_algorithms();
   SSL_library_init();
 }
 
-bool CryptoManagerImpl::Init() {
-  context_ = SSL_CTX_new(SSLv23_server_method());
+bool CryptoManagerImpl::Init(Mode mode,
+                             const std::string& cert_filename,
+                             const std::string& key_filename,
+                             const std::string& ciphers_list,
+                             bool verify_peer) {
 
-  std::string config_value;
-  profile::Profile::instance()->ReadStringValue(
-        &config_value, "mycert.pem", SecurityManager::ConfigSection(), CertificatePath);
-  LOG4CXX_INFO(logger_, "Certificate path: " << config_value);
-  if (!SSL_CTX_use_certificate_file(context_, config_value.c_str(), SSL_FILETYPE_PEM)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate " << config_value);
+  mode_ = mode;
+  if (mode == SERVER) {
+    context_ = SSL_CTX_new(SSLv23_server_method());
+  } else {
+    context_ = SSL_CTX_new(SSLv23_client_method());
+  }
+
+
+  LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
+  if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
+    LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
     return false;
   }
 
-  profile::Profile::instance()->ReadStringValue(
-        &config_value, "mykey.pem", SecurityManager::ConfigSection(), KeyPath);
-  LOG4CXX_INFO(logger_, "Key path: " << config_value);
-  if (!SSL_CTX_use_PrivateKey_file(context_, config_value.c_str(), SSL_FILETYPE_PEM)) {
-    LOG4CXX_ERROR(logger_, "Could not use key " << config_value);
+  LOG4CXX_INFO(logger_, "Key path: " << key_filename);
+  if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
+    LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
     return false;
   }
 
   if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate " << config_value);
+    LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
     return false;
   }
 
-  profile::Profile::instance()->ReadStringValue(
-        &config_value, "ALL", SecurityManager::ConfigSection(), CipherList);
-  LOG4CXX_INFO(logger_, "Cipher list: " << config_value);
-  if(!SSL_CTX_set_cipher_list(context_, config_value.c_str())) {
-    LOG4CXX_ERROR(logger_, "Could not set cipher list: " << config_value);
+  LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
+  if(!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
+    LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
     return false;
   }
 
-  bool verify_peer;
-  profile::Profile::instance()->ReadBoolValue(
-        &verify_peer, false, SecurityManager::ConfigSection(), VerifyPeer);
-
-  int verify_mode_id = SSL_VERIFY_NONE;
-  if(verify_peer) {
-    LOG4CXX_INFO(logger_, "Enable SSL verify peer.");
-    verify_mode_id |= SSL_VERIFY_PEER;
-    bool fail_on_no_cert, verify_client_once;
-
-    profile::Profile::instance()->ReadBoolValue(
-          &fail_on_no_cert, false, SecurityManager::ConfigSection(), FialOnNoCert);
-    if(fail_on_no_cert) {
-      verify_mode_id |= SSL_VERIFY_FAIL_IF_NO_PEER_CERT;
-      LOG4CXX_INFO(logger_, "Enable fail on no certificate.");
-    }
-
-    profile::Profile::instance()->ReadBoolValue(
-          &verify_client_once, false, SecurityManager::ConfigSection(), VerifyClientOnce);
-    if(verify_client_once) {
-      verify_mode_id |= SSL_VERIFY_CLIENT_ONCE;
-      LOG4CXX_INFO(logger_, "Enable verify client one.");
-    }
-    }
-  LOG4CXX_INFO(logger_, "Final verify mode: " << verify_mode_id);
-  SSL_CTX_set_verify(context_, verify_mode_id, NULL);
+  SSL_CTX_set_verify(context_, verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE, NULL);
 
   // TODO (EZamakhov): is it legacy?
   //SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
@@ -143,9 +109,13 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   if (conn == NULL)
     return NULL;
 
-  SSL_set_accept_state(conn);
+  if (mode_ == SERVER) {
+    SSL_set_accept_state(conn);
+  } else {
+    SSL_set_connect_state(conn);
+  }
   // TODO (EZamakhov) : add return NULL pointer on no keys
-  return new SSLContextImpl(conn);
+  return new SSLContextImpl(conn, mode_);
 }
 
 void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {
