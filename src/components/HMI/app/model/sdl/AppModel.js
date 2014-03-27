@@ -253,7 +253,7 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addCommand: function (request) {
 
-            var parentID = request.params.menuParams.parentID >= 0 ? request.params.menuParams.parentID : 'top';
+            var parentID = request.params.menuParams.parentID > 0 ? request.params.menuParams.parentID : 'top';
 
             if (!this.get('commandsList.' + parentID)) {
                 this.commandsList[parentID] = [];
