@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.transport.TransportType;
+import com.stericson.RootTools.RootTools;
 
 /**
  * Created with Android Studio.
@@ -263,7 +264,7 @@ public class AppPreferencesManager {
      */
     public static boolean getIsDeviceRooted() {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
-        return sharedPreferences.getBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, false);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, RootTools.isRootAvailable());
     }
 
     /**
