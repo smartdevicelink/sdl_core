@@ -91,4 +91,5 @@ public class Const {
 
     public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
     public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";
+    public static final String PREF_KEY_IS_DEVICE_ROOTED = "IsDeviceRooted";
 }

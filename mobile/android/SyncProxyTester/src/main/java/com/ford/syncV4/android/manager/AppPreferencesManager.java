@@ -259,6 +259,25 @@ public class AppPreferencesManager {
     }
 
     /**
+     * @return true if devices has been Rooted, false in other cases
+     */
+    public static boolean getIsDeviceRooted() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, false);
+    }
+
+    /**
+     * Set true if devices has been Rooted, false in other cases
+     * @param value boolean value
+     */
+    public static void setIsDeviceRooted(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, value);
+        editor.commit();
+    }
+
+    /**
      * @return the Context of the application
      */
     private static Context getAppContext() {
