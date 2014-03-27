@@ -1927,7 +1927,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         notifySessionStarted(currentSession.getSessionId(), correlationID);
     }
 
-
     private void notifySessionStarted(final byte sessionID, final String correlationID) {
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2075,6 +2074,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             });
         } else {
             _proxyListener.onAudioServiceStart();
+        }
+    }
+
+    private void onRPCServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+        Log.i(TAG, "RPC service started  " + sessionID);
+        createService(sessionID, ServiceType.Audio_Service, encrypted);
+        if (protocolSecureManager != null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC) &&
+                encrypted) {
+            protocolSecureManager.setHandshakeFinished(true);
+        }
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onRPCServiceStart();
+                }
+            });
+        } else {
+            _proxyListener.onRPCServiceStart();
         }
     }
 
@@ -3148,8 +3168,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void startRpcService(Session session) {
         if (mSyncConnection != null) {
-
-            mSyncConnection.startRpcService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+            mSyncConnection.startRpcService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC));
         }
     }
 
@@ -3287,6 +3306,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
             } else if (serviceType == ServiceType.Audio_Service) {
                 onAudioServiceStarted(sessionID, correlationID, encrypted);
+            } else if (serviceType == ServiceType.RPC) {
+                onRPCServiceStarted(sessionID, correlationID, encrypted);
             }
         }
     }

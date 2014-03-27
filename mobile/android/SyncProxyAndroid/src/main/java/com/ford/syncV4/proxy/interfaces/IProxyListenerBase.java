@@ -352,4 +352,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onUSBNoSuchDeviceException();
 
     public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
+
+    public void onRPCServiceStart();
 }

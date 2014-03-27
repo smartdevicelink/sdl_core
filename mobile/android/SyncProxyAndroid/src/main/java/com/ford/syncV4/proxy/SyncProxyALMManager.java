@@ -2622,6 +2622,11 @@ public class SyncProxyALMManager {
         }
 
         @Override
+        public void onRPCServiceStart() {
+
+        }
+
+        @Override
         public void onStartServiceNackReceived(ServiceType serviceType) {
 
         }

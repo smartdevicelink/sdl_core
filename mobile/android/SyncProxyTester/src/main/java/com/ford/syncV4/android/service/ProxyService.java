@@ -1393,6 +1393,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    public void onRPCServiceStart(){
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, (byte) -1);
+        }
+    }
+
     @Override
     public void onMobileNavAckReceived(int frameReceivedNumber) {
         if (mProxyServiceEvent != null) {
@@ -1983,6 +1989,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             } else {
                 mSyncProxy.initializeProxy();
             }
+        }
+    }
+
+    public void syncProxyStartRPCService(Session session, boolean encrypted) {
+        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
+            if (encrypted) {
+                if (mSyncProxy.getProtocolSecureManager() != null) {
+                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
+                }
+            }
+            mSyncProxy.startRpcService(session);
         }
     }
 

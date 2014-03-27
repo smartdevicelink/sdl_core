@@ -26,13 +26,16 @@ public class ProtocolSecureManager {
     private ISecureProxyServer listener;
     ISSLComponent secureProxy;
     ISSLComponent sslClient;
+    private boolean handshakeFinished = false;
+    private CountDownLatch countDownLatchInput = new CountDownLatch(1);
 
     public boolean isHandshakeFinished() {
         return handshakeFinished;
     }
 
-    private  boolean handshakeFinished = false;
-    private CountDownLatch countDownLatchInput = new CountDownLatch(1);
+    public void setHandshakeFinished(boolean handshakeFinished) {
+        this.handshakeFinished = handshakeFinished;
+    }
 
     public synchronized CountDownLatch getCountDownLatchOutput() {
         return countDownLatchOutput;
@@ -149,9 +152,9 @@ public class ProtocolSecureManager {
             public void handshakeCompleted(HandshakeCompletedEvent event) {
                 //handshakeFinished = true;
                 handshakeDataListener.onHandShakeCompleted();
-                if ( event!=null ) {
+                if (event != null) {
                     DebugTool.logInfo("GREAT SUCCESS" + event.toString());
-                }else{
+                } else {
                     DebugTool.logInfo("GREAT SUCCESS");
                 }
                 //setHandshakeFinished(true);
@@ -183,11 +186,6 @@ public class ProtocolSecureManager {
     public synchronized void writeDataToSSLSocket(byte[] data, IRPCodedDataListener IRPCodedDataListener) throws IOException {
         secureProxy.setRPCPacketListener(IRPCodedDataListener);
         sslClient.writeData(data);
-    }
-
-
-    public void setHandshakeFinished(boolean handshakeFinished) {
-        this.handshakeFinished = handshakeFinished;
     }
 
     public synchronized byte[] sendDataTOSSLClient(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {

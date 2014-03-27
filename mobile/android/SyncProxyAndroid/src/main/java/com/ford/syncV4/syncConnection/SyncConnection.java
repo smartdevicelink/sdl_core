@@ -368,10 +368,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startRpcService(Session session, boolean encrypt) {
+    public void startRpcService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.RPC, session, encrypt);
+                _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
             }
         }
     }

@@ -27,6 +27,7 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
+    protected boolean hasRPCStarted;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
         return protocolSecureManager;
@@ -234,9 +235,6 @@ public abstract class AbstractProtocol {
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionID, boolean encrypted, byte version, String correlationID) {
-        if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
-        }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }

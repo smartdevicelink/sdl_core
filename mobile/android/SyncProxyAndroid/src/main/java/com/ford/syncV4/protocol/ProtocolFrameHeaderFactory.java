@@ -55,8 +55,6 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-
-
     public static ProtocolFrameHeader createStartSessionACK(ServiceType serviceType, byte sessionID, int messageID, byte version) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);

@@ -3743,6 +3743,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private void processRPCSecureCheckBox() {
         // TODO : Implement logic here
         Log.d(LOG_TAG, "Start Secure RPC service");
+        startRPCService(true);
     }
 
     /**
@@ -3800,6 +3801,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             return false;
         }
         return true;
+    }
+
+    public void startRPCService(final boolean encrypted) {
+        if (isProxyReadyForWork()) {
+            mLogAdapter.logMessage("Should start RPC service", true);
+            mStreamCommandsExecutorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    mBoundProxyService.syncProxyStartRPCService(rpcSession, encrypted);
+                }
+            });
+        }
     }
 
     public void startAudioService(final boolean encrypted) {
