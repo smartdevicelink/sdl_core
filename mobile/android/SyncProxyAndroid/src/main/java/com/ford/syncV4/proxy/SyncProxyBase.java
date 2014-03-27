@@ -373,6 +373,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Updated hashID which can be used over connection cycles
     // (i.e. loss of connection, ignition cycles, etc.)
     private String mHashId = null;
+    private boolean mIsDeviceRooted = false;
     // This Config object stores all the necessary data for SDK testing
     private TestConfig mTestConfig;
 
@@ -402,6 +403,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void setHashId(String mHashId) {
         this.mHashId = mHashId;
+    }
+
+    /**
+     * Return a result of the Rooted device status
+     * @return boolean value
+     */
+    public boolean getIsDeviceRooted() {
+        return mIsDeviceRooted;
+    }
+
+    /**
+     * Set a status of the Root device
+     * @param mIsDeviceRooted boolean value
+     */
+    public void setDeviceRooted(boolean mIsDeviceRooted) {
+        this.mIsDeviceRooted = mIsDeviceRooted;
     }
 
     public OnLanguageChange getLastLanguageChange() {
@@ -580,16 +597,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
+                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig,
+                            boolean isDeviceRooted)
             throws SyncException {
 
         mTestConfig = testConfig;
+
+        setDeviceRooted(isDeviceRooted);
 
         setUpSecureServiceManager();
         setupSyncProxyBaseComponents(callbackToUIThread);
         // Set variables for Advanced Lifecycle Management
         setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms,
+                isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType,
+                appID, autoActivateID);
         setTransportConfig(transportConfig);
         checkConditionsInvalidateProxy(listener);
         setProxyListener(listener);
@@ -629,10 +651,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
                             String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
-                            BaseTransportConfig transportConfig, SyncConnection connection, TestConfig testConfig)
+                            BaseTransportConfig transportConfig, SyncConnection connection, TestConfig testConfig,
+                            boolean isDeviceRooted)
             throws SyncException {
 
         mTestConfig = testConfig;
+
+        setDeviceRooted(isDeviceRooted);
 
         setUpSecureServiceManager();
         setWiProVersion((byte) version);
@@ -642,7 +667,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         // Set variables for Advanced Lifecycle Management
         setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, autoActivateID);
+        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms,
+                isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType,
+                appID, autoActivateID);
         setTransportConfig(transportConfig);
 
         // Test conditions to invalidate the proxy
@@ -662,7 +689,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
-    private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
+    private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName,
+                                                      String ngnMediaScreenAppName,
+                                                      Vector<String> vrSynonyms, Boolean isMediaApp,
+                                                      SyncMsgVersion syncMsgVersion,
+                                                      Language languageDesired,
+                                                      Language hmiDisplayLanguageDesired,
+                                                      Vector<AppHMIType> appHMIType, String appID,
+                                                      String autoActivateID) {
         _applicationName = appName;
         _ttsName = ttsName;
         _ngnMediaScreenAppName = ngnMediaScreenAppName;
@@ -1975,7 +2009,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _appID,
                         _autoActivateIdDesired,
                         REGISTER_APP_INTERFACE_CORRELATION_ID,
-                        getHashId());
+                        getHashId(),
+                        getIsDeviceRooted());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. Check parameter values given to SyncProxy constructor.", e);
@@ -2646,12 +2681,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID, String hashId)
+            String appID, String autoActivateID, Integer correlationID, String hashId, boolean isRooted)
             throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId);
+                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID,
+                hashId, isRooted);
 
         sendRPCRequestPrivate(msg);
 
@@ -3128,17 +3164,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _autoActivateIdReturned;
     }
 
-    public void updateRegisterAppInterfaceParameters(RegisterAppInterface msg) {
-        _syncMsgVersionRequest = msg.getSyncMsgVersion();
-        _applicationName = msg.getAppName();
-        _ttsName = msg.getTtsName();
-        _ngnMediaScreenAppName = msg.getNgnMediaScreenAppName();
-        _vrSynonyms = msg.getVrSynonyms();
-        _isMediaApp = msg.getIsMediaApplication();
-        _syncLanguageDesired = msg.getLanguageDesired();
-        _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
-        _appHMIType = msg.getAppType();
-        _appID = msg.getAppID();
+    public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
+        _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
+        _applicationName = registerAppInterface.getAppName();
+        _ttsName = registerAppInterface.getTtsName();
+        _ngnMediaScreenAppName = registerAppInterface.getNgnMediaScreenAppName();
+        _vrSynonyms = registerAppInterface.getVrSynonyms();
+        _isMediaApp = registerAppInterface.getIsMediaApplication();
+        _syncLanguageDesired = registerAppInterface.getLanguageDesired();
+        _hmiDisplayLanguageDesired = registerAppInterface.getHmiDisplayLanguageDesired();
+        _appHMIType = registerAppInterface.getAppType();
+        _appID = registerAppInterface.getAppID();
+        setDeviceRooted(registerAppInterface.getIsRooted());
     }
 
     public IRPCMessageHandler getRPCMessageHandler() {
