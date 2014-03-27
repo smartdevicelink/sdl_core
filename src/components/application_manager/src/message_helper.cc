@@ -546,6 +546,15 @@ MessageHelper::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
     if (app->vr_help()) {
       ui_msg_params[strings::vr_help] = (*app->vr_help());
     }
+    if (app->keyboard_props()) {
+      ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
+    }
+    if (app->menu_title()) {
+      ui_msg_params[strings::menu_title] = (*app->menu_title());
+    }
+    if (app->menu_icon()) {
+      ui_msg_params[strings::menu_icon] = (*app->menu_icon());
+    }
     ui_msg_params[strings::app_id] = app->app_id();
 
     (*ui_global_properties)[strings::msg_params] = ui_msg_params;

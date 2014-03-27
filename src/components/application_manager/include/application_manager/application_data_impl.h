@@ -86,6 +86,8 @@ class DynamicApplicationDataImpl : public virtual Application {
     const smart_objects::SmartObject* show_command() const;
     const smart_objects::SmartObject* tbt_show_command() const;
     const smart_objects::SmartObject* keyboard_props() const;
+    const smart_objects::SmartObject* menu_title() const;
+    const smart_objects::SmartObject* menu_icon() const;
 
     void set_help_prompt(const smart_objects::SmartObject& help_prompt);
     void set_timeout_prompt(const smart_objects::SmartObject& timeout_prompt);
@@ -97,7 +99,8 @@ class DynamicApplicationDataImpl : public virtual Application {
     void set_show_command(const smart_objects::SmartObject& show_command);
     void set_tbt_show_command(const smart_objects::SmartObject& tbt_show);
     void set_keyboard_props(const smart_objects::SmartObject& keyboard_props);
-
+    void set_menu_title(const smart_objects::SmartObject& menu_title);
+    void set_menu_icon(const smart_objects::SmartObject& menu_icon);
     /*
      * @brief Adds a command to the in application menu
      */
@@ -271,6 +274,8 @@ class DynamicApplicationDataImpl : public virtual Application {
     smart_objects::SmartObject* show_command_;
     smart_objects::SmartObject* tbt_show_command_;
     smart_objects::SmartObject* keyboard_props_;
+    smart_objects::SmartObject* menu_title_;
+    smart_objects::SmartObject* menu_icon_;
 
 
     CommandsMap commands_;

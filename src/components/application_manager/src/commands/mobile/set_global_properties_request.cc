@@ -153,16 +153,19 @@ void SetGlobalPropertiesRequest::Run() {
 
       params[hmi_request::menu_title] =
           msg_params[hmi_request::menu_title].asString();
+      app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
     if (is_menu_icon_present) {
 
       params[hmi_request::menu_icon] =
           msg_params[hmi_request::menu_icon];
+      app->set_menu_icon(msg_params[hmi_request::menu_icon]);
     }
     if (is_keyboard_props_present) {
 
       params[hmi_request::keyboard_properties] =
           msg_params[hmi_request::keyboard_properties];
+      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
     }
 
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
@@ -198,16 +201,19 @@ void SetGlobalPropertiesRequest::Run() {
 
       params[hmi_request::menu_title] =
           msg_params[hmi_request::menu_title].asString();
+      app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
     if (is_menu_icon_present) {
 
       params[hmi_request::menu_icon] =
           msg_params[hmi_request::menu_icon];
+      app->set_menu_icon(msg_params[hmi_request::menu_icon]);
     }
     if (is_keyboard_props_present) {
 
       params[hmi_request::keyboard_properties] =
           msg_params[hmi_request::keyboard_properties];
+      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
     }
 
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,

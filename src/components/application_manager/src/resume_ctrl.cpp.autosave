@@ -245,14 +245,18 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
 
   //setglobal properties
   if (!global_properties.isNull()) {
+    LOG4CXX_INFO(logger_,"Global properties is not null");
     smart_objects::SmartObject properties_so = smart_objects::SmartObject(
                                          smart_objects::SmartType::SmartType_Map);
+    printf("%s", global_properties.toStyledString().c_str());
     Formatters::CFormatterJsonBase::jsonValueToObj(global_properties , properties_so);
+    MessageHelper::PrintSmartObject(properties_so);
 
     const smart_objects::SmartObject& vr_help_title =
         properties_so.getElement(strings::vr_help_title);
     if (vr_help_title.getType() != smart_objects::SmartType::SmartType_Invalid &&
         vr_help_title.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP vr_help_title exist" << vr_help_title.getType());
       application->set_vr_help_title(vr_help_title);
     }
 
@@ -260,6 +264,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::vr_help);
     if (vr_help.getType() != smart_objects::SmartType::SmartType_Invalid  &&
         vr_help.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP vr_help exist");
       application->set_vr_help(vr_help);
     }
 
@@ -267,6 +272,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::timeout_prompt);
     if (timeout_prompt.getType() != smart_objects::SmartType::SmartType_Invalid  &&
         timeout_prompt.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP timeout_prompt exist");
       application->set_timeout_prompt(timeout_prompt);
     }
 
@@ -274,6 +280,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::help_prompt);
     if (help_prompt.getType() != smart_objects::SmartType::SmartType_Invalid &&
         help_prompt.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP help_prompt exist");
       application->set_help_prompt(help_prompt);
     }
 
@@ -281,6 +288,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::keyboard_properties);
     if (keyboard_properties.getType() != smart_objects::SmartType::SmartType_Invalid  &&
         keyboard_properties.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP keyboard_properties exist");
       application->set_keyboard_props(keyboard_properties);
     }
 
@@ -288,6 +296,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::menu_title);
     if (menu_title.getType() != smart_objects::SmartType::SmartType_Invalid  &&
         menu_title.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP menu_title exist");
       application->set_menu_title(menu_title);
     }
 
@@ -295,6 +304,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
         properties_so.getElement(strings::menu_icon);
     if (menu_icon.getType() != smart_objects::SmartType::SmartType_Invalid  &&
         menu_icon.getType() != smart_objects::SmartType::SmartType_Null) {
+      LOG4CXX_INFO(logger_, "SGP menu_icon exist");
       application->set_menu_icon(menu_icon);
     }
 
@@ -642,6 +652,9 @@ Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
   const smart_objects::SmartObject* menu_title = app->menu_title();
   const smart_objects::SmartObject* menu_icon = app->menu_icon();
 
+
+
+
   Json::Value sgp;
   sgp[strings::help_prompt] = JsonFromSO(help_promt);
   sgp[strings::timeout_prompt] = JsonFromSO(timeout_prompt);
@@ -652,6 +665,9 @@ Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
   sgp[strings::menu_title] = JsonFromSO(menu_title);
   sgp[strings::menu_icon] = JsonFromSO(menu_icon);
 
+
+
+  LOG4CXX_INFO(logger_,"Save SGP :" << sgp.toStyledString().c_str());
   return sgp;
 }
 

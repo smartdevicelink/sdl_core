@@ -147,6 +147,8 @@ class DynamicApplicationData {
     virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const = 0;
     virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
     virtual const smart_objects::SmartObject* keyboard_props() const = 0;
+    virtual const smart_objects::SmartObject* menu_title() const = 0;
+    virtual const smart_objects::SmartObject* menu_icon() const = 0;
 
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
@@ -164,7 +166,10 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& tbt_show) = 0;
     virtual void set_keyboard_props(
         const smart_objects::SmartObject& keyboard_props) = 0;
-
+    virtual void set_menu_title(
+        const smart_objects::SmartObject& menu_title) = 0;
+    virtual void set_menu_icon(
+        const smart_objects::SmartObject& menu_icon) = 0;
     /*
      * @brief Adds a command to the in application menu
      */

@@ -166,6 +166,9 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
       vr_help_(NULL),
       tbt_state_(mobile_api::TBTState::INVALID_ENUM),
       show_command_(NULL),
+      keyboard_props_(NULL),
+      menu_title_(NULL),
+      menu_icon_(NULL),
       tbt_show_command_(NULL),
       commands_(),
       sub_menu_(),
@@ -266,6 +269,14 @@ const NsSmartDeviceLink::NsSmartObjects::SmartObject *DynamicApplicationDataImpl
   return keyboard_props_;
 }
 
+const NsSmartDeviceLink::NsSmartObjects::SmartObject *DynamicApplicationDataImpl::menu_title() const {
+  return menu_title_;
+}
+
+const NsSmartDeviceLink::NsSmartObjects::SmartObject* DynamicApplicationDataImpl::menu_icon() const {
+  return menu_icon_;
+}
+
 void DynamicApplicationDataImpl::set_help_prompt(
     const smart_objects::SmartObject& help_prompt) {
   if (help_prompt_) {
@@ -334,11 +345,27 @@ void DynamicApplicationDataImpl::set_tbt_show_command(
 }
 
 void DynamicApplicationDataImpl::set_keyboard_props(
-    const smart_objects::SmartObject &keyboard_props) {
+    const smart_objects::SmartObject& keyboard_props) {
   if (keyboard_props_) {
     delete keyboard_props_;
   }
   keyboard_props_ = new smart_objects::SmartObject(keyboard_props);
+}
+
+void DynamicApplicationDataImpl::set_menu_title(
+    const smart_objects::SmartObject& menu_title) {
+  if (menu_title_) {
+    delete menu_title_;
+  }
+  menu_title_ = new smart_objects::SmartObject(menu_title);
+}
+
+void DynamicApplicationDataImpl::set_menu_icon(
+    const smart_objects::SmartObject& menu_icon) {
+  if (menu_icon_) {
+    delete menu_icon_;
+  }
+  menu_icon_= new smart_objects::SmartObject(menu_icon);
 }
 
 
