@@ -317,7 +317,7 @@ class ProtocolHandlerImpl
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
       const bool compress);
 
@@ -339,10 +339,10 @@ class ProtocolHandlerImpl
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
       const bool compress,
-      const uint32_t max_data_size);
+      const size_t max_data_size);
 
     /**
      * \brief Sends message already containing protocol header.
@@ -431,10 +431,10 @@ class ProtocolHandlerImpl
                                     const RawMessagePtr &packet);
     RESULT_CODE EncryptData(const int32_t connection_key, const uint8_t service_type,
                             const uint8_t* const data_in, const size_t data_in_size,
-                            const uint8_t **data_out, uint32_t *data_out_size);
+                            const uint8_t **data_out, size_t *data_out_size);
     RESULT_CODE DecryptData(const int32_t connection_key, const uint8_t service_type,
                             const uint8_t* const data_in, const size_t data_in_size,
-                            uint8_t**  data_out, uint32_t *data_out_size);
+                            uint8_t**  data_out, size_t *data_out_size);
 
   private:
     /**

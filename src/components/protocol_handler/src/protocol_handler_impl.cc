@@ -531,7 +531,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    uint32_t data_size, const uint8_t* data, const bool encrypte) {
+    size_t data_size, const uint8_t* data, const bool encrypte) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   uint8_t versionF = PROTOCOL_VERSION_1;
@@ -568,8 +568,8 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    uint32_t data_size, const uint8_t* data, const bool encrypte,
-    const uint32_t maxdata_size) {
+    size_t data_size, const uint8_t* data, const bool encrypte,
+    const size_t maxdata_size) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_INFO_EXT(
@@ -1096,7 +1096,7 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
 RESULT_CODE ProtocolHandlerImpl::EncryptData(
     const int32_t connection_key, const uint8_t service_type,
     const uint8_t * const data_in, const size_t data_in_size,
-    const uint8_t **data_out, uint32_t *data_out_size) {
+    const uint8_t **data_out, size_t *data_out_size) {
   if(!data_in  || !data_in_size || !data_out || !data_out_size) {
     LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
     return RESULT_FAIL;
@@ -1130,7 +1130,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
 RESULT_CODE ProtocolHandlerImpl::DecryptData(
     const int32_t connection_key,const uint8_t service_type,
     const uint8_t * const data_in, const size_t data_in_size,
-    uint8_t **data_out, uint32_t *data_out_size) {
+    uint8_t **data_out, size_t *data_out_size) {
   if(!data_in  || !data_in_size || !data_out || !data_out_size){
     LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
     return RESULT_FAIL;
