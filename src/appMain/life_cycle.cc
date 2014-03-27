@@ -258,9 +258,6 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
-
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -329,6 +326,9 @@ void LifeCycle::StopComponents() {
 
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
 }
 
 void LifeCycle::StopComponentsOnSignal(int32_t params) {
