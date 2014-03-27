@@ -352,7 +352,7 @@ namespace security_manager_test {
                 IsInitCompleted()).
         Times(3).WillRepeatedly(Return(false));
     // Expect SSLContext::DoHandshakeStep 3 times
-    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
+    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
     EXPECT_CALL(mock_ssl_context_exists,
                 DoHandshakeStep(_, handshake_data_size, _))
         .WillOnce(DoAll( SetArgPointee<2>(0),
@@ -419,8 +419,7 @@ namespace security_manager_test {
     EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
         Times(3).WillRepeatedly(Return(true));
-    // Expect SSLContext::DoHandshakeStep 3 times
-    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshale data
+    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
     EXPECT_CALL(mock_ssl_context_exists,
                 DoHandshakeStep(_, handshake_data_size, _))
         .WillOnce(DoAll( SetArgPointee<2>(0),

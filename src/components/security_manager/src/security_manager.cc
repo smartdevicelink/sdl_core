@@ -163,6 +163,8 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
     NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
+  DCHECK(session_observer_->GetSSLContext(connection_key,
+                                          protocol_handler::kControl));
   return true;
 }
 
@@ -171,7 +173,7 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
   security_manager::SSLContext* ssl_context =
       session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
-  if(ssl_context){
+  if(!ssl_context){
     LOG4CXX_ERROR(logger_, "StartHandshake failed, conection is not protected");
     SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL);
     DCHECK(ssl_context);
