@@ -142,17 +142,17 @@ bool UsbIAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event)
       return true;
     case 1: // data is available
       LOG4CXX_DEBUG(logger_, "USB iAP2: data is already available");
-      receive();
+      ReceiveData();
       return false; // don't need to wait for Pulse in this case
   }
   return false;
 }
 
 void UsbIAP2Connection::ReceiverThreadDelegate::OnPulse() {
-  receive();
+  ReceiveData();
 }
 
-void UsbIAP2Connection::ReceiverThreadDelegate::receive() {
+void UsbIAP2Connection::ReceiverThreadDelegate::ReceiveData() {
   LOG4CXX_TRACE(logger_, "USB iAP2: receiving data");
   int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
   if (size != -1) {

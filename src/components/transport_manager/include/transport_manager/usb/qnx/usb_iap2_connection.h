@@ -82,7 +82,7 @@ class UsbIAP2Connection : public Connection {
    private:
     static const size_t kBufferSize = 1024;
 
-    void receive();
+    void ReceiveData();
 
     UsbIAP2Connection* parent_;
     iap2ea_hdl_t* iap2ea_hdl_;
