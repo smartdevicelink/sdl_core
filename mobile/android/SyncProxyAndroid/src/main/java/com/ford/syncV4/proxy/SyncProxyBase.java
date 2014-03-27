@@ -1497,9 +1497,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void dispatchOutgoingMessage(final ProtocolMessage message) {
         if (mSyncConnection.getIsConnected()) {
-            if (currentSession.getService(ServiceType.RPC) != null) {
-                message.setEncrypted(currentSession.getService(ServiceType.RPC).isEncrypted());
-            }
             mSyncConnection.sendMessage(message);
         }
 
