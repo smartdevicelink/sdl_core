@@ -59,6 +59,11 @@ bool isErrorFatal(SSL *connection, int res) {
       error != SSL_ERROR_WANT_WRITE);
 }
 
+class MobileMock {
+ public:
+
+};
+
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
@@ -130,8 +135,8 @@ TEST_F(SSLTest, BrokenHandshake) {
 
   int res = 0;
 
-  char *outBuf = new char[1024 * 1024];
-  char *inBuf;
+  uint8_t *outBuf = new uint8_t[1024 * 1024];
+  const uint8_t *inBuf;
 
   // FIXME (EZamakhov): fix infinity loop on wrong handshake
   for(;;) {
@@ -152,8 +157,8 @@ TEST_F(SSLTest, BrokenHandshake) {
     }
 
     size_t inLen;
-    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
-    EXPECT_TRUE(inBuf != NULL);
+    ::security_manager::SSLContext::HandshakeResult res2 = server_ctx->DoHandshakeStep(outBuf, outLen, &inBuf, &inLen);
+    EXPECT_EQ(res2, ::security_manager::SSLContext::Handshake_Result_Success);
 
     if (inLen) {
       BIO_write(bioIn, inBuf, inLen);
@@ -168,8 +173,8 @@ TEST_F(SSLTest, BadData) {
   using security_manager::LastError;
   int res = 0;
 
-  char *outBuf = new char[1024 * 1024];
-  char *inBuf;
+  uint8_t *outBuf = new uint8_t[1024 * 1024];
+  const uint8_t *inBuf;
 
   for(;;) {
     res = SSL_do_handshake(connection);
@@ -186,7 +191,7 @@ TEST_F(SSLTest, BadData) {
       BIO_read(bioOut, outBuf, outLen);
     }
     size_t inLen;
-    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    server_ctx->DoHandshakeStep(outBuf, outLen, &inBuf, &inLen);
     EXPECT_TRUE(inBuf != NULL);
 
     if (inLen) {
@@ -199,9 +204,9 @@ TEST_F(SSLTest, BadData) {
   BIO *bioF = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
 
-  char text[] = "Hello, it's the text to be encrypted";
-  char *encryptedText = new char[1024];
-  char *decryptedText;
+  const char *text = "Hello, it's the text to be encrypted";
+  uint8_t *encryptedText = new uint8_t[1024];
+  const   uint8_t *decryptedText;
   size_t text_len;
 
   // Encrypt text on client side
@@ -213,11 +218,11 @@ TEST_F(SSLTest, BadData) {
   encryptedText[len / 3] ^= 0x80;
 
   // Decrypt text on server
-  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
+  server_ctx->Decrypt(encryptedText, len, &decryptedText, &text_len);
 
   delete[] encryptedText;
 
-  EXPECT_TRUE(decryptedText == NULL);
+  EXPECT_FALSE(decryptedText == NULL);
   EXPECT_GT(LastError().length(), 0);
 }
 
@@ -225,8 +230,8 @@ TEST_F(SSLTest, Positive) {
   using security_manager::LastError;
   int res = 0;
 
-  char *outBuf = new char[1024 * 1024];
-  char *inBuf;
+  uint8_t *outBuf = new uint8_t[1024 * 1024];
+  const uint8_t *inBuf;
 
   for(;;) {
     res = SSL_do_handshake(connection);
@@ -243,7 +248,7 @@ TEST_F(SSLTest, Positive) {
       BIO_read(bioOut, outBuf, outLen);
     }
     size_t inLen;
-    inBuf = static_cast<char*>(server_ctx->DoHandshakeStep(outBuf, outLen, &inLen));
+    server_ctx->DoHandshakeStep(outBuf, outLen, &inBuf, &inLen);
     EXPECT_TRUE(inBuf != NULL);
 
     if (inLen) {
@@ -259,56 +264,56 @@ TEST_F(SSLTest, Positive) {
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
 
   const char *text = "abra";
-  char *encryptedText = new char[10240];
-  char *decryptedText;
+  const uint8_t *encryptedText = new uint8_t[10240];
+  const uint8_t *decryptedText;
   size_t text_len;
 
   // Encrypt text on client side
   BIO_write(bioF, text, strlen(text));
   text_len = BIO_ctrl_pending(bioOut);
-  size_t len = BIO_read(bioOut, encryptedText, text_len);
+  size_t len = BIO_read(bioOut, const_cast<uint8_t*>(encryptedText), text_len);
 
   // Decrypt text on server
-  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
-  decryptedText[text_len] = 0;
+  server_ctx->Decrypt(encryptedText, len, &decryptedText, &text_len);
+  const_cast<uint8_t*>(decryptedText)[text_len] = 0;
 
   EXPECT_TRUE(decryptedText != NULL);
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
 
   text = "abra cadabra";
 
   // Encrypt text on client side
   BIO_write(bioF, text, strlen(text));
   text_len = BIO_ctrl_pending(bioOut);
-  len = BIO_read(bioOut, encryptedText, text_len);
+  len = BIO_read(bioOut, const_cast<uint8_t*>(encryptedText), text_len);
 
   // Decrypt text on server
-  decryptedText = static_cast<char*>(server_ctx->Decrypt(encryptedText, len, &text_len));
-  decryptedText[text_len] = 0;
+  server_ctx->Decrypt(encryptedText, len, &decryptedText, &text_len);
+  const_cast<uint8_t*>(decryptedText)[text_len] = 0;
 
   EXPECT_TRUE(decryptedText != NULL);
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
 
   // Encrypt text on server
-  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, strlen(text), &text_len));
+  server_ctx->Encrypt(reinterpret_cast<const uint8_t*>(text), strlen(text), &encryptedText, &text_len);
 
   // Decrypt it on client
   BIO_write(bioIn, encryptedText, text_len);
-  decryptedText = new char[BIO_ctrl_pending(bioF)];
-  text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
-  decryptedText[text_len] = 0;
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  decryptedText = new uint8_t[BIO_ctrl_pending(bioF)];
+  text_len = BIO_read(bioF, const_cast<uint8_t*>(decryptedText), BIO_ctrl_pending(bioF));
+  const_cast<uint8_t*>(decryptedText)[text_len] = 0;
+  EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
   EXPECT_EQ(LastError().length(), 0);
 
   // Encrypt text on server
-  encryptedText = static_cast<char*>(server_ctx->Encrypt(text, strlen(text), &text_len));
+  server_ctx->Encrypt(reinterpret_cast<const uint8_t*>(text), strlen(text), &encryptedText, &text_len);
 
   // Decrypt it on client
-  BIO_write(bioIn, encryptedText, text_len);
-  decryptedText = new char[BIO_ctrl_pending(bioF)];
-  text_len = BIO_read(bioF, decryptedText, BIO_ctrl_pending(bioF));
-  decryptedText[text_len] = 0;
-  EXPECT_EQ(strcmp(decryptedText, text), 0);
+  BIO_write(bioIn, const_cast<uint8_t*>(encryptedText), text_len);
+  decryptedText = new uint8_t[BIO_ctrl_pending(bioF)];
+  text_len = BIO_read(bioF, const_cast<uint8_t*>(decryptedText), BIO_ctrl_pending(bioF));
+  const_cast<uint8_t*>(decryptedText)[text_len] = 0;
+  EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
   EXPECT_EQ(LastError().length(), 0);
 }
 TEST_F(SSLTest, Positive2) {
