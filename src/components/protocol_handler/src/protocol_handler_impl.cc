@@ -395,6 +395,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     LOG4CXX_ERROR(logger_, "Failed to get packet size");
     return false;
   }
+  // DecryptData
   if (ptr && ptr->is_compress()) {
     security_manager::SSLContext* context =
         connection_handler->GetSSLContext(tm_message->connection_key(),
@@ -694,6 +695,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
+  // DecryptData
   const RawMessagePtr rawMessage = DecryptMessage(connection_id, *packet);
   if(!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
@@ -766,6 +768,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
       ProtocolPacket* completePacket = it->second.get();
 
+      // DecryptData
       const RawMessagePtr rawMessage = DecryptMessage(connection_id, *completePacket);
       if(!rawMessage){
         LOG4CXX_TRACE_EXIT(logger_);
@@ -1120,7 +1123,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
     return RESULT_ENCRYPTION_FAILED;
   }
   LOG4CXX_INFO(logger_, "Encrypted " << data_in_size << " bytes to "
-               << data_out_size << " bytes");
+               << *data_out_size << " bytes");
   return RESULT_OK;
 }
 
@@ -1160,8 +1163,8 @@ RESULT_CODE ProtocolHandlerImpl::DecryptData(
     //return empty Ptr on error
     return RESULT_ENCRYPTION_FAILED;
     }
-  LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes to "
-               << new_data_size << " bytes");
+  LOG4CXX_INFO(logger_, "Decrypted " << data_in_size << " bytes to "
+               << *data_out_size << " bytes");
   return RESULT_OK;
 }
 
