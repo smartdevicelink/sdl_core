@@ -262,4 +262,29 @@ public class RegisterAppInterface extends RPCRequest {
             parameters.remove(Names.hashID);
         }
     }
+
+    /**
+     * @return boolean value represents if the device has been rooted
+     */
+    public Boolean getIsRooted() {
+        if (!parameters.containsKey(Names.isRoot)) {
+            return null;
+        }
+        if (parameters.get(Names.isRoot) instanceof Boolean) {
+            return (Boolean) parameters.get(Names.isRoot);
+        }
+        return null;
+    }
+
+    /**
+     * Set a value represented if the device has been rooted
+     * @param isRoot boolean value
+     */
+    public void setIsRooted(Boolean isRoot) {
+        if (isRoot != null) {
+            parameters.put(Names.isRoot, isRoot);
+        } else {
+            parameters.remove(Names.isRoot);
+        }
+    }
 }

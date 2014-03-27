@@ -1,6 +1,5 @@
 package com.ford.syncV4.android.constants;
 
-import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
 /** Stores application-wide constants. */
@@ -14,7 +13,7 @@ public class Const {
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
 	public static final String PREFS_KEY_APPNAME = "appName";
 	public static final String PREFS_KEY_LANG = "desiredLang";
-    public static final String PREFS_KEY_CYPHER_SERVICE = "cypherService";
+
 	public static final String PREFS_KEY_HMILANG = "desiredHMILang";
 	public static final String PREFS_KEY_AUTOSETAPPICON = "autoSetAppIcon";
 	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
@@ -27,7 +26,7 @@ public class Const {
     public static final boolean PREFS_DEFAULT_ISNAVIAPP = true;
     public static final int PREFS_DEFAULT_NAVI_VIDEOSOURCE = KEY_VIDEOSOURCE_MP4;
 	public static final String PREFS_DEFAULT_APPNAME = FlavorConst.PREFS_DEFAULT_APPNAME;
-	public static final String PREFS_DEFAULT_CYPHER_SERVICE = ServiceType.RPC_NAME;
+
     public static final String PREFS_DEFAULT_LANG = Language.EN_US.name();
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
 	public static final boolean PREFS_DEFAULT_AUTOSETAPPICON = true;
@@ -92,4 +91,5 @@ public class Const {
 
     public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
     public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";
+    public static final String PREF_KEY_IS_DEVICE_ROOTED = "IsDeviceRooted";
 }
