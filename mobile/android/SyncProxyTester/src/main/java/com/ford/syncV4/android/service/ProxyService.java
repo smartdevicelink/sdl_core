@@ -384,7 +384,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-                        config, mTestConfig);
+                        config, mTestConfig,
+                        // TODO: Implement in proper way
+                        AppPreferencesManager.getIsDeviceRooted());
 
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
