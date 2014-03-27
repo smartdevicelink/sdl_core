@@ -58,14 +58,6 @@ void OnVRCommandNotification::Run() {
   const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
       .asUInt();
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  if (!active_app) {
-    if (cmd_id > max_cmd_id + 1) {
-      MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
-    } else {
-      LOG4CXX_ERROR(logger_, "NULL pointer");
-    }
-    return;
-  }
 
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
@@ -73,6 +65,7 @@ void OnVRCommandNotification::Run() {
     MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
     return;
   }
+
   // Check if this is "Help"
   if (cmd_id == max_cmd_id + 1) {
     return;
