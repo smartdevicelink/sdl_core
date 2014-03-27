@@ -84,6 +84,7 @@ namespace security_manager {
     SSL_CTX *context_;
     Mode mode_;
     static ::log4cxx::LoggerPtr logger_;
+    static int instance_count_;
   };
 } // namespace security_manager
 
