@@ -397,13 +397,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         // RPC Service Secure check box processing
         Button rpcNotSecureCheckBoxView = (Button) findViewById(R.id.rpc_non_secure_button_view);
-        rpcSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+        rpcNotSecureCheckBoxView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 processRPCNotSecureCheckBox();
             }
         });
-
 
         // Process Services
         Button buttonServicesView = (Button) findViewById(R.id.btnServices);
@@ -718,13 +717,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mServicesCounter.incrementAndGet();
     }
 
-    private void notifyRPCServiceStarted(boolean encrypted){
-        TextView rpcState = (TextView) findViewById(R.id.rpc_service_state);
-        if ( encrypted ) {
-            rpcState.setText("Service is cyphered");
-        }else{
-            rpcState.setText("Service is Not cyphered");
-        }
+    private void notifyRPCServiceStarted(final boolean encrypted) {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView rpcState = (TextView) findViewById(R.id.rpc_service_state);
+                if (encrypted) {
+                    rpcState.setText("Service is cyphered");
+                } else {
+                    rpcState.setText("Service is Not cyphered");
+                }
+            }
+        });
     }
 
     @Override
