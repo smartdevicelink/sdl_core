@@ -1096,7 +1096,7 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
 RESULT_CODE ProtocolHandlerImpl::EncryptData(
     const int32_t connection_key, const uint8_t service_type,
     const uint8_t * const data_in, const size_t data_in_size,
-    const uint8_t **data_out, size_t *data_out_size) {
+    const uint8_t **data_out, uint32_t *data_out_size) {
   if(!data_in  || !data_in_size || !data_out || !data_out_size) {
     LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
     return RESULT_FAIL;
@@ -1130,7 +1130,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
 RESULT_CODE ProtocolHandlerImpl::DecryptData(
     const int32_t connection_key,const uint8_t service_type,
     const uint8_t * const data_in, const size_t data_in_size,
-    uint8_t **data_out, size_t *data_out_size) {
+    uint8_t **data_out, uint32_t *data_out_size) {
   if(!data_in  || !data_in_size || !data_out || !data_out_size){
     LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
     return RESULT_FAIL;
