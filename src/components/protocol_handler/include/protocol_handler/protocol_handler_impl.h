@@ -427,6 +427,14 @@ class ProtocolHandlerImpl
     // FIXME (EZamakhov): add brief
     RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
+    RawMessagePtr DecryptRawMessage(const ConnectionID connection_id,
+                                    const RawMessagePtr &packet);
+    RESULT_CODE EncryptData(const int32_t connection_key, const uint8_t service_type,
+                            const uint8_t* const data_in, const size_t data_in_size,
+                            const uint8_t **data_out, size_t *data_out_size);
+    RESULT_CODE DecryptData(const int32_t connection_key, const uint8_t service_type,
+                            const uint8_t* const data_in, const size_t data_in_size,
+                            uint8_t**  data_out, size_t *data_out_size);
 
   private:
     /**

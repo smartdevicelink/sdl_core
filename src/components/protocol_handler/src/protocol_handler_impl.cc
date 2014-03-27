@@ -400,7 +400,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
         connection_handler->GetSSLContext(tm_message->connection_key(),
                                           tm_message->service_type());
     if (!context) {
-      LOG4CXX_ERROR(logger_, "Encrypted message received through not protected service");
+      LOG4CXX_ERROR(logger_, "Decrypted message received through not protected service");
       return;
     }
 
@@ -543,30 +543,13 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
       session_observer_->KeyFromPair(connection_id, session_id);
 
   //Control service shall not be encrypted
-  if(service_type!=kControl && encrypte) {
-    security_manager::SSLContext* context =
-        session_observer_->GetSSLContext(connection_key,
-                                         ServiceTypeFromByte(service_type));
-    if(!context) {
-      LOG4CXX_ERROR(logger_, "Try to encrypte message for uprotected service"
-                    << service_type);
-      return RESULT_ENCRYPTION_FAILED;
+  if(encrypte && service_type!=kControl) {
+    const RESULT_CODE code = EncryptData(
+          connection_key, service_type, data, data_size, &data, &data_size);
+    if(code != RESULT_OK) {
+      LOG4CXX_ERROR(logger_, "Encryption error");
+      return code;
     }
-    if(!context->IsInitCompleted()) {
-      LOG4CXX_ERROR(logger_, "Try to encrypte message for pending protection service"
-                    << service_type);
-      return RESULT_ENCRYPTION_FAILED;
-    }
-    size_t new_data_size;
-    data = static_cast<uint8_t*>
-        (context->Encrypt(data, data_size, &new_data_size));
-    data_size = new_data_size;
-    if(!data) {
-      LOG4CXX_WARN(logger_, "Encryption failed: " <<
-                   security_manager::LastError());
-      return RESULT_ENCRYPTION_FAILED;
-    }
-    LOG4CXX_INFO(logger_, "Encrypted " << data_size << " bytes.");
   }
 
   ProtocolFramePtr ptr (
@@ -602,34 +585,15 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const int32_t connection_key =
       session_observer_->KeyFromPair(connection_id, session_id);
 
-  // Encrypt data
   //Control service shall not be encrypted
   if(service_type!=kControl && encrypte) {
-    security_manager::SSLContext* context =
-        session_observer_->GetSSLContext(connection_key,
-                                         ServiceTypeFromByte(service_type));
-    if(!context) {
-      LOG4CXX_ERROR(logger_, "Try to encrypte message for uprotected service"
-                    << service_type);
-      return RESULT_ENCRYPTION_FAILED;
+    const RESULT_CODE code = EncryptData(
+          connection_key, service_type, data, data_size, &data, &data_size);
+    if(code!=RESULT_OK) {
+      LOG4CXX_ERROR(logger_, "Encryption error");
+      return code;
+      }
     }
-    if(!context->IsInitCompleted()) {
-      LOG4CXX_ERROR(logger_, "Try to encrypte message for pending protection service"
-                    << service_type);
-      return RESULT_ENCRYPTION_FAILED;
-    }
-    size_t new_data_size;
-    data = static_cast<uint8_t*>
-        (context->Encrypt(data, data_size, &new_data_size));
-    data_size = new_data_size;
-    if(!data) {
-      LOG4CXX_WARN(logger_, "Encryption failed: " <<
-                   security_manager::LastError());
-      return RESULT_ENCRYPTION_FAILED;
-    }
-    LOG4CXX_INFO(logger_, "Encrypted " << data_size << " bytes" << " to "
-                 << new_data_size << " bytes.");
-  }
 
   // Send data
   if (data_size % maxdata_size) {
@@ -1124,6 +1088,81 @@ RawMessagePtr ProtocolHandlerImpl::DecryptMessage(
   return RawMessagePtr(
       new RawMessage(connection_key, packet.protocol_version(), packet.data(),
                      packet.total_data_bytes(), service_type));
+}
+
+RESULT_CODE ProtocolHandlerImpl::EncryptData(
+    const int32_t connection_key, const uint8_t service_type,
+    const uint8_t * const data_in, const size_t data_in_size,
+    const uint8_t **data_out, size_t *data_out_size) {
+  if(!data_in  || !data_in_size || !data_out || !data_out_size) {
+    LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
+    return RESULT_FAIL;
+    }
+
+  security_manager::SSLContext* context =
+      session_observer_->GetSSLContext(connection_key,
+                                       ServiceTypeFromByte(service_type));
+  if(!context) {
+    LOG4CXX_ERROR(logger_, "Try to encrypt message for uprotected service"
+                  << service_type);
+    return RESULT_ENCRYPTION_FAILED;
+    }
+  if(!context->IsInitCompleted()) {
+    LOG4CXX_ERROR(logger_, "Try to encrypt message for pending protection service"
+                  << service_type);
+    return RESULT_ENCRYPTION_FAILED;
+    }
+  *data_out = static_cast<uint8_t*>
+      (context->Encrypt(data_in, data_in_size, data_out_size));
+  if(!data_out || !(*data_out_size)) {
+    LOG4CXX_WARN(logger_, "Encryption failed: " <<
+                 security_manager::LastError());
+    return RESULT_ENCRYPTION_FAILED;
+  }
+  LOG4CXX_INFO(logger_, "Encrypted " << data_in_size << " bytes to "
+               << data_out_size << " bytes");
+  return RESULT_OK;
+}
+
+RESULT_CODE ProtocolHandlerImpl::DecryptData(
+    const int32_t connection_key,const uint8_t service_type,
+    const uint8_t * const data_in, const size_t data_in_size,
+    uint8_t **data_out, size_t *data_out_size) {
+  if(!data_in  || !data_in_size || !data_out || !data_out_size){
+    LOG4CXX_ERROR(logger_, "Wrong inpute or outpute data");
+    return RESULT_FAIL;
+    }
+
+  security_manager::SSLContext* context =
+      session_observer_->GetSSLContext(connection_key,
+                                       ServiceTypeFromByte(service_type));
+  if(!context) {
+    LOG4CXX_ERROR(logger_, "Received encrypted message for uprotected service "
+                  << service_type);
+    security_manager_->SendInternalError( connection_key,
+          security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED);
+    return RESULT_ENCRYPTION_FAILED;
+  }
+  if(!context->IsInitCompleted()) {
+    LOG4CXX_ERROR(logger_, "Received encrypted message for pending protection service "
+                  << service_type);
+    security_manager_->SendInternalError( connection_key,
+          security_manager::SecurityQuery::ERROR_SERVICE_PROTECTION_PENDING);
+    return RESULT_ENCRYPTION_FAILED;
+  }
+  *data_out = static_cast<uint8_t *>
+      (context->Decrypt(data_in, data_in_size, data_out_size));
+  if(!data_out || !(*data_out_size)) {
+    LOG4CXX_ERROR(logger_, "Decryption failed: " <<
+                 security_manager::LastError());
+    security_manager_->SendInternalError( connection_key,
+          security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED);
+    //return empty Ptr on error
+    return RESULT_ENCRYPTION_FAILED;
+    }
+  LOG4CXX_INFO(logger_, "Decrypted " << data_size << " bytes to "
+               << new_data_size << " bytes");
+  return RESULT_OK;
 }
 
 void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,

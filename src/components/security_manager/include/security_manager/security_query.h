@@ -79,7 +79,7 @@ public:
     ERROR_CONNECTION_NOT_FOUND       = 0x6,
     ERROR_SESSION_NOT_FOUND          = 0x7,
     ERROR_SERVICE_NOT_PROTECTED      = 0x8, //got handshake for not protected service
-    ERROR_SERVICE_PROTECTION_PENDING = 0x9, //get packet with flag encrypte for not
+    ERROR_SERVICE_PROTECTION_PENDING = 0x9, //get packet with flag encrypt for not
     // TODO  (EZamakhov) : add error to send
     ERROR_DECRYPTION_FAILED          = 0x10, //
     ERROR_SSL_INVALID_DATA           = 0xF0,
