@@ -37,6 +37,7 @@ import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
@@ -100,6 +101,7 @@ import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.DeviceInfoManager;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -323,7 +325,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
-    private TraceDeviceInfo _traceDeviceInterrogator = null;
+    private TraceDeviceInfo mTraceDeviceInterrogator = null;
     // Declare Queuing Threads
     private ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
     private ProxyMessageDispatcher<ProtocolMessage> _outgoingProxyMessageDispatcher;
@@ -367,6 +369,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private String mHashId = null;
 
     /**
+     * Describes information about device
+     */
+    private DeviceInfo mDeviceInfo;
+
+    /**
      * Test Cases fields
      */
     /**
@@ -404,6 +411,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void setHashId(String mHashId) {
         this.mHashId = mHashId;
+    }
+
+    protected DeviceInfo getDeviceInfo() {
+        return mDeviceInfo;
+    }
+
+    private void setDeviceInfo(DeviceInfo deviceInfo) {
+        mDeviceInfo = deviceInfo;
     }
 
     public OnLanguageChange getLastLanguageChange() {
@@ -519,6 +534,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         setupTelephoneManager(syncProxyConfigurationResources);
         setupMessageDispatchers();
         tryInitialiseProxy();
+
+        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
@@ -574,13 +592,28 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         setupTelephoneManager(syncProxyConfigurationResources);
 
-
         setupMessageDispatchers();
         tryInitialiseProxy();
 
+        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+    }
+
+    public void updateRegisterAppInterfaceParameters(RegisterAppInterface msg) {
+        _syncMsgVersionRequest = msg.getSyncMsgVersion();
+        _applicationName = msg.getAppName();
+        _ttsName = msg.getTtsName();
+        _ngnMediaScreenAppName = msg.getNgnMediaScreenAppName();
+        _vrSynonyms = msg.getVrSynonyms();
+        _isMediaApp = msg.getIsMediaApplication();
+        _syncLanguageDesired = msg.getLanguageDesired();
+        _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
+        _appHMIType = msg.getAppType();
+        _appID = msg.getAppID();
+        setDeviceInfo(msg.getDeviceInfo());
+        DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), msg.getDeviceInfo());
     }
 
     private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
@@ -727,10 +760,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             // Following is not quite thread-safe (because m_traceLogger could notifyOnAppInterfaceUnregistered null twice),
             // so we need to fix this, but vulnerability (i.e. two instances of listener) is
             // likely harmless.
-            if (_traceDeviceInterrogator == null) {
-                _traceDeviceInterrogator = new TraceDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
-            } // end-if
-        } // end-if
+            if (mTraceDeviceInterrogator == null) {
+                mTraceDeviceInterrogator = new TraceDeviceInfo(telephonyManager);
+            }
+        }
     }
 
     private void tryInitialiseProxy() throws SyncException {
@@ -1224,7 +1257,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
 
-            _traceDeviceInterrogator = null;
+            mTraceDeviceInterrogator = null;
         } catch (SyncException e) {
             throw e;
         } finally {
@@ -1901,7 +1934,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _appID,
                         _autoActivateIdDesired,
                         REGISTER_APP_INTERFACE_CORRELATION_ID,
-                        getHashId());
+                        getHashId(), getDeviceInfo());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. Check parameter values given to SyncProxy constructor.", e);
@@ -2532,12 +2565,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID, String hashId)
-            throws SyncException {
+            String appID, String autoActivateID, Integer correlationID, String hashId,
+            DeviceInfo deviceInfo) throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId);
+                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId,
+                deviceInfo);
 
         sendRPCRequestPrivate(msg);
 
@@ -3011,19 +3045,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public String getAutoActivateIdReturned() {
         return _autoActivateIdReturned;
-    }
-
-    public void updateRegisterAppInterfaceParameters(RegisterAppInterface msg) {
-        _syncMsgVersionRequest = msg.getSyncMsgVersion();
-        _applicationName = msg.getAppName();
-        _ttsName = msg.getTtsName();
-        _ngnMediaScreenAppName = msg.getNgnMediaScreenAppName();
-        _vrSynonyms = msg.getVrSynonyms();
-        _isMediaApp = msg.getIsMediaApplication();
-        _syncLanguageDesired = msg.getLanguageDesired();
-        _hmiDisplayLanguageDesired = msg.getHmiDisplayLanguageDesired();
-        _appHMIType = msg.getAppType();
-        _appID = msg.getAppID();
     }
 
     public IRPCMessageHandler getRPCMessageHandler() {

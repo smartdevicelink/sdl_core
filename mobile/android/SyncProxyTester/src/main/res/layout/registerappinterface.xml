@@ -9,8 +9,7 @@
             android:layout_height="wrap_content"
             android:minWidth="300dp"
             android:orientation="vertical"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip">
+            android:layout_margin="15dp">
 
         <CheckBox
                 android:id="@+id/registerappinterface_useSyncMsgVersion"

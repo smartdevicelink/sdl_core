@@ -288,7 +288,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId());
+                getHashId(), getDeviceInfo());
 	}
 	
 	/**

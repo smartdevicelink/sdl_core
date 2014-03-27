@@ -12,6 +12,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
@@ -392,22 +393,11 @@ public class RPCRequestFactory {
 		return putFile;
 	}
 	
-	public static RegisterAppInterface buildRegisterAppInterface(String appName) {
-		return buildRegisterAppInterface(appName, false);
-	}
-	
-	public static RegisterAppInterface buildRegisterAppInterface(
-			String appName, Boolean isMediaApp) {
-		
-		return buildRegisterAppInterface(null, appName, null, null, null, isMediaApp, 
-				null, null, null, null, null, null);
-	}
-	
 	public static RegisterAppInterface buildRegisterAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-			String appID, Integer correlationID, String hashId) {
+			String appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {
@@ -459,8 +449,13 @@ public class RPCRequestFactory {
             msg.setHashID(hashId);
         }
 
+        if (deviceInfo != null) {
+            msg.setDeviceInfo(deviceInfo);
+        }
+
 		return msg;
 	}
+
 
     /**
      * <b>SetAppIcon</b> section
