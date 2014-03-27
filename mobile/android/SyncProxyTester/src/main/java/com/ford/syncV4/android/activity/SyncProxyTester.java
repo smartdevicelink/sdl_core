@@ -3700,11 +3700,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviService() {
+    public void startMobileNaviService(boolean cyphered) {
         if (isProxyReadyForWork()) {
             if (mBoundProxyService != null) {
                 mLogAdapter.logMessage("Should start Mobile Navi Service", true);
-                mBoundProxyService.syncProxyStartMobileNavService(rpcSession);
+                mBoundProxyService.syncProxyStartMobileNavService(rpcSession, cyphered);
             } else {
                 mLogAdapter.logMessage("Could not start mobile nav Service", true);
             }

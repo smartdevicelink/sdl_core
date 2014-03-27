@@ -1999,7 +1999,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
                 }
             }
-            mSyncProxy.startRpcService(session);
+            mSyncProxy.startRpcService(session, encrypted);
         }
     }
 
@@ -2010,7 +2010,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
                 }
             }
-            mSyncProxy.startAudioService(session);
+            mSyncProxy.startAudioService(session, encrypted);
         }
     }
 
@@ -2102,9 +2102,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return 0;
     }
 
-    public void syncProxyStartMobileNavService(Session session) {
+    public void syncProxyStartMobileNavService(Session session, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.startMobileNavService(session);
+            if (encrypted) {
+                if (mSyncProxy.getProtocolSecureManager() != null) {
+                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Mobile_Nav);
+                }
+            }
+            mSyncProxy.startMobileNavService(session, encrypted);
         }
     }
 

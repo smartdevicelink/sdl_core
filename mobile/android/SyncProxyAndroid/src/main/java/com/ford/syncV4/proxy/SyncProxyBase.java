@@ -3149,23 +3149,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this.rpcMessageHandler = RPCMessageHandler;
     }
 
-    public void startMobileNavService(Session session) {
+    public void startMobileNavService(Session session, boolean cyphered) {
         if (mSyncConnection != null) {
-            mSyncConnection.startMobileNavService(session,
-                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+            mSyncConnection.startMobileNavService(session, cyphered);
         }
     }
 
-    public void startAudioService(Session session) {
+    public void startAudioService(Session session, boolean cyphered) {
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session,
-                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+            mSyncConnection.startAudioService(session,cyphered);
         }
     }
 
-    public void startRpcService(Session session) {
+    public void startRpcService(Session session, boolean encrypted) {
         if (mSyncConnection != null) {
-            mSyncConnection.startRpcService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC));
+            mSyncConnection.startRpcService(session, encrypted);
         }
     }
 
@@ -3356,10 +3354,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void restoreServices() {
         if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             if (currentSession.hasService(ServiceType.Mobile_Nav)) {
-                startMobileNavService(currentSession);
+                boolean cyphered = false;
+                if (protocolSecureManager != null) {
+                    cyphered = protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav);
+                }
+                startMobileNavService(currentSession, cyphered);
             }
             if (currentSession.hasService(ServiceType.Audio_Service)) {
-                startAudioService(currentSession);
+                boolean cyphered = false;
+                if (protocolSecureManager != null) {
+                    cyphered = protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service);
+                }
+                startAudioService(currentSession, cyphered);
             }
         }
     }
