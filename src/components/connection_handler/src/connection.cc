@@ -139,7 +139,7 @@ bool Connection::AddNewService(uint8_t session,
                                         service_list.end(), service_type);
   // if service already exists
   if (service_it != service_list.end()) {
-    Service service = *service_it;
+    Service& service = *service_it;
     // For unproteced service could be start protection
     if(!service.is_protected_ && is_protected) {
       service.is_protected_ = true;

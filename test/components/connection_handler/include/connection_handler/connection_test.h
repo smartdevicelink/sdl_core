@@ -87,6 +87,10 @@ class ConnectionTest: public ::testing::Test {
         std::find(newServiceList.begin(), newServiceList.end(), service_type);
     const bool found_result = it != newServiceList.end();
     EXPECT_EQ(expect_exist_service, found_result);
+    if(found_result) {
+      const Service& service = *it;
+      EXPECT_EQ(service.is_protected_, protection);
+      }
   }
 
   void RemoveService(const protocol_handler::ServiceType service_type,
