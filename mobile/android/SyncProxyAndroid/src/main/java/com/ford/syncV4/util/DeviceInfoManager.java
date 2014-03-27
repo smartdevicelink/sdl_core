@@ -61,6 +61,7 @@ public class DeviceInfoManager {
     public static void dumpDeviceInfo(DeviceInfo deviceInfo) {
         if (deviceInfo == null) {
             Log.w(LOG_TAG, "Device Info is null");
+            return;
         }
         String info = "DeviceInfo: ";
         info += "{Hardware:" + deviceInfo.getHardware() + ", ";

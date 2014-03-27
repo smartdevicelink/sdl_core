@@ -42,7 +42,15 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class RPCRequestFactory {
 
-	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
+    /**
+     * Since version 3.0O revision P
+     */
+	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 100;
+	public static final int APP_NAME_MAX_LENGTH = 100;
+	public static final int VR_SYNONYM_MAX_LENGTH = 40;
+	public static final int VR_SYNONYM_MIX_SIZE = 1;
+	public static final int VR_SYNONYM_MAX_SIZE = 100;
+
 	public static final int SYNC_MSG_MAJOR_VERSION = 1;
 	public static final int SYNC_MSG_MINOR_VERSION = 0;
 
@@ -411,26 +419,27 @@ public class RPCRequestFactory {
 			syncMsgVersion.setMinorVersion(new Integer(SYNC_MSG_MINOR_VERSION));
 		} 
 		msg.setSyncMsgVersion(syncMsgVersion);
-		
+
+        if (appName.length() > APP_NAME_MAX_LENGTH) {
+            appName = appName.substring(0, APP_NAME_MAX_LENGTH);
+        }
 		msg.setAppName(appName);
 		
 		msg.setTtsName(ttsName);
 		
-		if (ngnMediaScreenAppName == null) {
-			ngnMediaScreenAppName = appName;
+		if (ngnMediaScreenAppName != null) {
+            if (ngnMediaScreenAppName.length() > NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH) {
+                ngnMediaScreenAppName = ngnMediaScreenAppName.substring(0,
+                        NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH);
+            }
+            msg.setNgnMediaScreenAppName(ngnMediaScreenAppName);
 		}
-		
-		if (ngnMediaScreenAppName.length() > NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH) {
-			ngnMediaScreenAppName = ngnMediaScreenAppName.substring(0,
-					NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH);
+
+		if (vrSynonyms != null && vrSynonyms.size() >= VR_SYNONYM_MIX_SIZE &&
+                vrSynonyms.size() <= VR_SYNONYM_MAX_SIZE) {
+			//vrSynonyms = new Vector<String>();
+            msg.setVrSynonyms(vrSynonyms);
 		}
-		msg.setNgnMediaScreenAppName(ngnMediaScreenAppName);
-		
-		if (vrSynonyms == null) {
-			vrSynonyms = new Vector<String>();
-			vrSynonyms.add(appName);
-		}
-		msg.setVrSynonyms(vrSynonyms);
 		
 		msg.setIsMediaApplication(isMediaApp);
 		
