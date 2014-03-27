@@ -52,7 +52,7 @@ public class TestCommon {
 
         return new SyncProxyALM(proxyListener, null, "!", null, null, true,
                 null, null, null, null, null, null, false, false, 2, null,
-                connectionMock, new TestConfig());
+                connectionMock, new TestConfig(), false);
     }
 
     public static byte[] getRandomBytes(int dataSize) {

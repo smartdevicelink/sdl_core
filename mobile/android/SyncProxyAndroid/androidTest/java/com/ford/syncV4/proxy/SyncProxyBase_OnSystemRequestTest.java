@@ -82,7 +82,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig());
+                null, connectionMock, new TestConfig(), false);
         marshaller = proxy.getJsonRPCMarshaller();
 
         handlerMock = mock(IOnSystemRequestHandler.class);

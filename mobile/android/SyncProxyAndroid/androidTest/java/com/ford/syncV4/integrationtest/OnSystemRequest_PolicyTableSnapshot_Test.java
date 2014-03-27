@@ -1,7 +1,6 @@
 package com.ford.syncV4.integrationtest;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
@@ -93,7 +92,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig());
+                null, connectionMock, new TestConfig(), false);
 
         final SystemPutFileRPCRequestConverter converter = new SystemPutFileRPCRequestConverter();
         maxDataSize = 64;

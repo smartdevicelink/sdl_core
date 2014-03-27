@@ -138,7 +138,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables

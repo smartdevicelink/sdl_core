@@ -72,7 +72,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig());
+                null, connectionMock, new TestConfig(), false);
 
         WiProProtocol protocol =
                 new WiProProtocol(mock(IProtocolListener.class));

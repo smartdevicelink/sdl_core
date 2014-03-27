@@ -92,7 +92,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig());
+                null, connectionMock, new TestConfig(), false);
 
         final SystemPutFileRPCRequestConverter converter =
                 new SystemPutFileRPCRequestConverter();
