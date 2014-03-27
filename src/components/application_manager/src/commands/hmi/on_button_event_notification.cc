@@ -35,6 +35,17 @@
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 
+namespace {
+  const int hook_array[] =
+  { hmi_apis::Common_ButtonName::TUNEUP,
+    hmi_apis::Common_ButtonName::SEEKLEFT,
+    hmi_apis::Common_ButtonName::TUNEDOWN,
+    hmi_apis::Common_ButtonName::SEEKRIGHT,
+    hmi_apis::Common_ButtonName::OK};
+  const std::vector<int> hook_buttons (
+      hook_array, hook_array + sizeof(hook_array) / sizeof(hook_array[0]));
+  std::vector<int>::const_iterator hook_iterator(hook_buttons.begin());
+}
 namespace application_manager {
 
 namespace commands {
@@ -45,9 +56,6 @@ OnButtonEventNotification::OnButtonEventNotification(
     const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
-OnButtonEventNotification::~OnButtonEventNotification() {
-}
-
 void OnButtonEventNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
 
@@ -55,6 +63,32 @@ void OnButtonEventNotification::Run() {
       static_cast<int32_t>(mobile_apis::FunctionID::OnButtonEventID);
 
   SendNotificationToMobile(message_);
+
+  const int button_mode =  (*message_)[strings::msg_params][hmi_response::button_mode].asInt();
+  if(hmi_apis::Common_ButtonEventMode::BUTTONUP == button_mode) {
+    const int button_name =  (*message_)[strings::msg_params][hmi_response::button_name].asInt();
+    if(*hook_iterator != button_name) {
+      hook_iterator = hook_buttons.begin();
+    }
+    else {
+      ++hook_iterator;
+      if(hook_iterator == hook_buttons.end()) {
+        LOG4CXX_WARN(logger_,
+                     "Certificate recall will be called for FULL HMI applications!");
+        const std::set<ApplicationSharedPtr> applications =
+            ApplicationManagerImpl::instance()->applications();
+        std::set<ApplicationSharedPtr>::iterator it = applications.begin();
+        for (;applications.end() != it; ++it) {
+          ApplicationSharedPtr app = (*it);
+          if(mobile_api::HMILevel::HMI_FULL == app->hmi_level() ) {
+            LOG4CXX_WARN(logger_, "Shall call CertificateRecall - not implemented!");
+            // TODO (EZamakhov) : add app policy update after merge
+            break;
+          }
+        }
+      }
+    }
+  }
 }
 
 }  // namespace hmi
