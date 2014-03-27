@@ -52,6 +52,7 @@
                 android:layout_height="wrap_content" />
 
             <TextView
+                android:id="@+id/rpc_service_state"
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:text="@string/rpc_service_state"

@@ -2032,7 +2032,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav, encrypted);
         if (protocolSecureManager != null &&
@@ -2045,15 +2045,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNaviStart();
+                    _proxyListener.onMobileNaviStart(encrypted);
                 }
             });
         } else {
-            _proxyListener.onMobileNaviStart();
+            _proxyListener.onMobileNaviStart(encrypted);
         }
     }
 
-    protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+    protected void onAudioServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
         if (protocolSecureManager != null &&
@@ -2066,15 +2066,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onAudioServiceStart();
+                    _proxyListener.onAudioServiceStart(encrypted);
                 }
             });
         } else {
-            _proxyListener.onAudioServiceStart();
+            _proxyListener.onAudioServiceStart(encrypted);
         }
     }
 
-    private void onRPCServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+    private void onRPCServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
         Log.i(TAG, "RPC service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
         if (protocolSecureManager != null &&
@@ -2087,11 +2087,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onRPCServiceStart();
+                    _proxyListener.onRPCServiceStart(encrypted);
                 }
             });
         } else {
-            _proxyListener.onRPCServiceStart();
+            _proxyListener.onRPCServiceStart(encrypted);
         }
     }
 

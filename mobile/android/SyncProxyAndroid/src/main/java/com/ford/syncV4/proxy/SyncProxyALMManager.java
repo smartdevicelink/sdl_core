@@ -2558,7 +2558,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNaviStart() {
+        public void onMobileNaviStart(boolean encrypted) {
 
         }
 
@@ -2607,7 +2607,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAudioServiceStart() {
+        public void onAudioServiceStart(boolean encrypted) {
 
         }
 
@@ -2622,7 +2622,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onRPCServiceStart() {
+        public void onRPCServiceStart(boolean encrypted) {
 
         }
 

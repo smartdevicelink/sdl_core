@@ -189,7 +189,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, VERSION, "");
-        Mockito.verify(listenerALM, times(1)).onAudioServiceStart();
+        Mockito.verify(listenerALM, times(1)).onAudioServiceStart(false);
     }
 
     public void testAudioServiceRemovedFromPoolOnStopAudioService() throws Exception {

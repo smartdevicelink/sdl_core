@@ -305,7 +305,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onSystemRequestResponse(SystemRequestResponse response);
 
-    public void onMobileNaviStart();
+    public void onMobileNaviStart(boolean encrypted);
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
 
@@ -325,7 +325,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onSessionStarted(byte sessionID, String correlationID);
 
-    public void onAudioServiceStart();
+    public void onAudioServiceStart(boolean encrypted);
 
     public void onStartServiceNackReceived(ServiceType serviceType);
 
@@ -353,5 +353,5 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
 
-    public void onRPCServiceStart();
+    public void onRPCServiceStart(boolean encrypted);
 }

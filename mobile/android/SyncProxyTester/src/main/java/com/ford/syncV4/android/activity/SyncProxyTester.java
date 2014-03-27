@@ -40,6 +40,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.MainApp;
@@ -675,7 +676,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId) {
+    public void onServiceStart(ServiceType serviceType, byte sessionId, boolean encrypted) {
         mLogAdapter.logMessage("Service '" + serviceType + "' started", true);
 
         if (mBoundProxyService == null) {
@@ -710,11 +711,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
+            notifyRPCServiceStarted(encrypted);
             mServicesCounter.set(0);
             rpcSession.setSessionId(sessionId);
         }
-
         mServicesCounter.incrementAndGet();
+    }
+
+    private void notifyRPCServiceStarted(boolean encrypted){
+        TextView rpcState = (TextView) findViewById(R.id.rpc_service_state);
+        if ( encrypted ) {
+            rpcState.setText("Service is cyphered");
+        }else{
+            rpcState.setText("Service is Not cyphered");
+        }
     }
 
     @Override

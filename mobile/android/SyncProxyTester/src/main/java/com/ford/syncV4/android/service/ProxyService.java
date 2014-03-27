@@ -1380,22 +1380,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onMobileNaviStart() {
+    public void onMobileNaviStart(boolean encrypted) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1, encrypted);
         }
     }
 
     @Override
-    public void onAudioServiceStart() {
+    public void onAudioServiceStart(boolean encrypted) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1, encrypted);
         }
     }
 
-    public void onRPCServiceStart(){
+    public void onRPCServiceStart(boolean encrypted){
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, (byte) -1, encrypted);
         }
     }
 
@@ -1492,7 +1492,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSessionStarted(final byte sessionID, final String correlationID) {
         Log.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID, false);
         }
     }
 
