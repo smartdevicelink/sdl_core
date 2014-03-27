@@ -248,16 +248,12 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
     }
-    //TODO (EZamakhov) : Refactor if /else + add Tests
-  } else if ((0 != sessionId)) {
+  } else{
     if (!connection->AddNewService(sessionId, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
       return -1;
     }
     new_session_id = sessionId;
-  } else {
-    LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-    return -1;
   }
 
   if (connection_handler_observer_) {
