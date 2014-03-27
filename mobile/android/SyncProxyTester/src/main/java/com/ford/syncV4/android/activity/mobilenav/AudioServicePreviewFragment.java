@@ -52,7 +52,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
-        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.audio_service_secure_checkbox_view);
+        Button encryptCheckBoxView = (Button) view.findViewById(R.id.audio_service_secure_checkbox_view);
         encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,19 +65,12 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         });
 
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
-        mEncryptServiceCheckBoxState = new AudioServiceEncryptCheckboxState(encryptCheckBoxView,
-                getActivity());
+
     }
 
     private void changeEncryptCheckBoxState() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
-            mEncryptServiceCheckBoxState.setStateOn();
-            syncProxyTester.startAudioServiceEncryption();
-        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            mEncryptServiceCheckBoxState.setStateOff();
-            syncProxyTester.stopAudioServiceEncryption();
-        }
+        syncProxyTester.startAudioServiceEncryption();
     }
 
     private void changeCheckBoxState() {
@@ -99,14 +92,6 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         super.setStateOff();
     }
 
-    public void setEncryptedAudioServiceStateOff() {
-        mEncryptServiceCheckBoxState.setStateOff();
-    }
-
-    public void setEncryptedAudioServiceStateOn() {
-        mEncryptServiceCheckBoxState.setStateOn();
-
-    }
 
     public void setAudioServiceStateOn(OutputStream stream) {
         mSessionCheckBoxState.setStateOn();

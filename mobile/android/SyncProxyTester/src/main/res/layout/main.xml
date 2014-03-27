@@ -22,7 +22,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:orientation="vertical"
         android:padding="15dp"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -37,18 +37,24 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
-            <!--<CheckBox
-                android:id="@+id/rpc_service_checkbox_view"
-                android:text="@string/service_check_view_on"
+            <Button
+                android:id="@+id/rpc_service_secure_button_view"
                 android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />-->
-
-            <CheckBox
-                android:id="@+id/rpc_service_secure_checkbox_view"
-                android:layout_weight="1"
-                android:text="@string/secure_service_check_view_on"
+                android:text="@string/secure_service_send_rpc"
                 android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/rpc_non_secure_button_view"
+                android:layout_weight="1"
+                android:text="@string/not_secure_service_send_rpc"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:text="@string/rpc_service_state"
                 android:layout_height="wrap_content" />
 
         </LinearLayout>

@@ -38,15 +38,6 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         super.setStateOff();
     }
 
-    public void setEncryptedMobileNaviServiceStateOff() {
-        mEncryptServiceCheckBoxState.setStateOff();
-    }
-
-    public void setEncryptedMobileNaviServiceStateOn() {
-        mEncryptServiceCheckBoxState.setStateOn();
-
-    }
-
     public void setMobileNaviStateOn(OutputStream stream) {
         mSessionCheckBoxState.setStateOn();
         //Button button = (Button) getView().findViewById(R.id.videobutton);
@@ -79,7 +70,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
-        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.mobile_navi_service_secure_checkbox_view);
+        Button encryptCheckBoxView = (Button) view.findViewById(R.id.mobile_navi_service_secure_button_view);
         encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,19 +82,12 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             }
         });
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mEncryptServiceCheckBoxState = new MobileNaviEncryptCheckBoxState(encryptCheckBoxView,
-                getActivity());
+
     }
 
     private void changeEncryptCheckBoxState() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
-            mEncryptServiceCheckBoxState.setStateOn();
-            syncProxyTester.startMobileNaviServiceEncryption();
-        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            mEncryptServiceCheckBoxState.setStateOff();
-            syncProxyTester.stopMobileNaviServiceEncryption();
-        }
+        syncProxyTester.startMobileNaviServiceEncryption();
     }
 
     private void changeCheckBoxState() {

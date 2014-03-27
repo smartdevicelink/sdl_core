@@ -182,7 +182,8 @@
     <string name="action_settings">Settings</string>
     <string name="service_check_view_on">Turn On</string>
     <string name="service_check_view_off">Turn Off</string>
-    <string name="secure_service_check_view_on">Turn Secure On</string>
+    <string name="secure_service_send_rpc">Send Start Secure RPC</string>
+    <string name="not_secure_service_send_rpc">Send Start Not Secure RPC</string>
     <string name="secure_service_check_view_off">Turn Secure Off</string>
     <string name="mobileNavi">MobileNavi (video source:)</string>
 
@@ -286,5 +287,8 @@
     <string name="use_request_type">Use request type</string>
 
     <string name="do_encrypt">Do encrypt command?</string>
+    <string name="rpc_service_state">RPC Service State:</string>
+    <string name="start_secure_service">Send Start Secure Service</string>
+    <string name="start_not_secure_service">Send Start Not Secure Service</string>
 
 </resources>
