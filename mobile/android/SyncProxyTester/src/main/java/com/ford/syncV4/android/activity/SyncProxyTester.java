@@ -3785,11 +3785,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Stops to encrypt Audio Service
      */
-    public void stopAudioServiceEncryption() {
-
-        // TODO : Implement logic here
-        Log.d(LOG_TAG, "Audio Service stop encrypt");
-        stopAudioService();
+    public void startNotSecureAudioService() {
+        Log.d(LOG_TAG, "Audio Service start not encrypt");
+        startAudioService(false);
     }
 
     /**
@@ -3804,7 +3802,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Stops to encrypt Mobile Navi Service
      */
     public void startMobileNaviNotEncryptedService() {
-        Log.d(LOG_TAG, "Mobile Navi Service stop encrypt");
+        Log.d(LOG_TAG, "Mobile Navi Service start not encrypt");
         startMobileNaviService(false);
     }
 

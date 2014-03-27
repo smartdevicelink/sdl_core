@@ -52,12 +52,24 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
-        Button encryptCheckBoxView = (Button) view.findViewById(R.id.audio_service_secure_checkbox_view);
-        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+        Button startCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_secure_checkbox_view);
+        startCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    changeEncryptCheckBoxState();
+                    startSecureAudioService();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
+        Button startNotCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_not_service_secure_button_view);
+        startNotCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    startNotSecureAudioService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -65,10 +77,14 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         });
 
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
-
     }
 
-    private void changeEncryptCheckBoxState() {
+    private void startNotSecureAudioService() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startNotSecureAudioService();
+    }
+
+    private void startSecureAudioService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
         syncProxyTester.startAudioServiceEncryption();
     }
