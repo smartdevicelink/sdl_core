@@ -1921,6 +1921,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
 
+            DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
+
             try {
                 registerAppInterfacePrivate(
                         _syncMsgVersionRequest,

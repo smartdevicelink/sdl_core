@@ -270,6 +270,10 @@ public class DeviceInfo extends RPCStruct {
      */
     public Integer getMaxNumberRFCOMMPorts() {
         final Object object = store.get(Names.maxNumberRFCOMMPorts);
+        if (object == null) {
+            Log.w(LOG_TAG, " getMaxNumberRFCOMMPorts is not a Integer, actual value:" + object);
+            return null;
+        }
         if (object instanceof Integer) {
             Integer value = (Integer) object;
             if (value < MIN_NUMBER_RF_COMM_PORTS) {

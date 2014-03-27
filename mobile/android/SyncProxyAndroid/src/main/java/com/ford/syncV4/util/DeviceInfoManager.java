@@ -58,13 +58,28 @@ public class DeviceInfoManager {
         copyTo.setMaxNumberRFCOMMPorts(copyFrom.getMaxNumberRFCOMMPorts());
     }
 
+    public static void dumpDeviceInfo(DeviceInfo deviceInfo) {
+        if (deviceInfo == null) {
+            Log.w(LOG_TAG, "Device Info is null");
+        }
+        String info = "DeviceInfo: ";
+        info += "{Hardware:" + deviceInfo.getHardware() + ", ";
+        info += "Firmware:" + deviceInfo.getFirmwareRev() + ", ";
+        info += "OS:" + deviceInfo.getOS() + ", ";
+        info += "OSVersion:" + deviceInfo.getOSVersion() + ", ";
+        info += "Carrier:" + deviceInfo.getCarrier() + ", ";
+        info += "MaxNumberRFCOMMPorts:" + deviceInfo.getMaxNumberRFCOMMPorts() + "}";
+        Log.i(LOG_TAG, info);
+    }
+
     private static String getOSVersion() {
-        return Build.VERSION.CODENAME;
+        return Build.VERSION.RELEASE;
     }
 
     private static String getFirmwareVersion() {
-        return "Firmware: " + Build.VERSION.RELEASE + ", Kernel:" +
-                System.getProperty("os.version");
+        return "Name:" + System.getProperty("os.name") + ", " +
+                "Version:" + System.getProperty("os.version") + ", " +
+                "Arch:" + System.getProperty("os.arch");
     }
 
     private static String getDeviceModel() {
