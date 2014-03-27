@@ -45,11 +45,7 @@ SDL.SDLController = Em.Object
             if (SDL.AlertPopUp.active) {
                 return 'ALERT';
             }
-            if (SDL.TBTClientStateView.active
-                || SDL.VehicleInfo.active
-                || SDL.DriverDistraction.active
-                || SDL.ExitApp.active
-                || SDL.SliderView.active
+            if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
                 || SDL.AudioPassThruPopUp.activate) {
@@ -66,16 +62,12 @@ SDL.SDLController = Em.Object
             } else {
                 return 'MENU';
             }
-        }.property('SDL.DriverDistraction.active',
-            'SDL.OptionsView.active',
+        }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
-            'SDL.TBTClientStateView.active',
-            'SDL.VehicleInfo.active',
             'SDL.States.info.nonMedia.active',
             'SDL.States.media.sdlmedia.active',
-            'SDL.ExitApp.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active',
