@@ -3778,8 +3778,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Starts to encrypt Audio Service
      */
     public void startAudioServiceEncryption() {
-
-        // TODO : Implement logic here
         Log.d(LOG_TAG, "Audio Service start encrypt");
         startAudioService(true);
     }
@@ -3798,18 +3796,16 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Starts to encrypt Mobile Navi Service
      */
     public void startMobileNaviServiceEncryption() {
-
-        // TODO : Implement logic here
         Log.d(LOG_TAG, "Mobile Navi Service start encrypt");
+        startMobileNaviService(true);
     }
 
     /**
      * Stops to encrypt Mobile Navi Service
      */
-    public void stopMobileNaviServiceEncryption() {
-
-        // TODO : Implement logic here
+    public void startMobileNaviNotEncryptedService() {
         Log.d(LOG_TAG, "Mobile Navi Service stop encrypt");
+        startMobileNaviService(false);
     }
 
     public boolean isProxyReadyForWork() {
