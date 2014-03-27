@@ -536,7 +536,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
-                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null);
+                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null, false);
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);

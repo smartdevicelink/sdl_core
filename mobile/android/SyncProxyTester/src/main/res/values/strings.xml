@@ -229,6 +229,7 @@
     <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
     <string name="registerappinterface_useAppID">App ID</string>
     <string name="registerappinterface_appIDDefault">8675309</string>
+    <string name="register_app_interface_is_rooted">Rooted Device</string>
     <string name="menuName">Menu Name</string>
     <string name="menuIcon">Menu Icon</string>
 

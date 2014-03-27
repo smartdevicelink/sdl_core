@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
@@ -81,10 +82,9 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
         final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
-        final CheckBox useAppID = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppID);
-        final EditText appID =
-                (EditText) layout.findViewById(R.id.registerappinterface_appID);
+        final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
+        final CheckBox isRootedView = (CheckBox) layout.findViewById(R.id.register_app_interface_is_rooted_view);
+        final EditText appID = (EditText) layout.findViewById(R.id.registerappinterface_appID);
 
         final ArrayAdapter<Language> languageAdapter =
                 new ArrayAdapter<Language>(mContext,
@@ -161,6 +161,8 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                         if (useAppID.isChecked()) {
                             registerAppInterface.setAppID(appID.getText().toString());
                         }
+                        AppPreferencesManager.setIsDeviceRooted(isRootedView.isChecked());
+                        registerAppInterface.setIsRooted(isRootedView.isChecked());
 
                         ((SyncProxyTester) getActivity())
                                 .onRegisterAppInterfaceDialogResult(registerAppInterface);
