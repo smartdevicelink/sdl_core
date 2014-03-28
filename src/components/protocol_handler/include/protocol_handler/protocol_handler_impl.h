@@ -310,7 +310,7 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param protection Protection flag
+     * \param protection_flag Protection flag for message to encrypted
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(ConnectionID connection_id,
@@ -319,7 +319,7 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       size_t data_size,
       const uint8_t* data,
-      const bool protection);
+      bool protection_flag);
 
     /**
      * \brief Sends message which size doesn't permit to send it in one frame.
@@ -330,7 +330,7 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param protection Protection flag
+     * \param protection_flag Protection flag for message to encrypted
      * \param max_data_size Maximum allowed size of single frame.
      * \return \saRESULT_CODE Status of operation
      */
@@ -340,7 +340,7 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       size_t data_size,
       const uint8_t* data,
-      const bool protection,
+      bool protection_flag,
       const size_t max_data_size);
 
     /**

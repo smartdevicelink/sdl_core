@@ -331,9 +331,9 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                  &sessionID);
 
   const ServiceType service_type = ServiceTypeFromByte(message->service_type());
-  const bool protect_message = false;
-//      (session_observer_->GetSSLContext(message->connection_key(), service_type))
-//                               ? PROTECTION_ON : PROTECTION_OFF;
+  const bool protect_message =
+      (session_observer_->GetSSLContext(message->connection_key(), service_type))
+                               ? PROTECTION_ON : PROTECTION_OFF;
 
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
@@ -536,31 +536,32 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    size_t data_size, const uint8_t* data, const bool protection) {
+    size_t data_size, const uint8_t* data, const bool protection_flag) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  //Control service shall not be encrypted
+  const bool encrypt_message =
+      (service_type == kControl) ? PROTECTION_OFF : protection_flag;
+
+  if(encrypt_message) {
+    DCHECK(session_observer_);
+    const int32_t connection_key =
+        session_observer_->KeyFromPair(connection_id, session_id);
+    const RESULT_CODE code = EncryptData(
+          connection_key, service_type, data, data_size, &data, &data_size);
+    if(code != RESULT_OK) {
+      LOG4CXX_ERROR(logger_, "Encryption error");
+    }
+  }
 
   uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
   }
 
-  DCHECK(session_observer_);
-  const int32_t connection_key =
-      session_observer_->KeyFromPair(connection_id, session_id);
-
-  //Control service shall not be encrypted
-  if(protection && service_type != kControl) {
-    const RESULT_CODE code = EncryptData(
-          connection_key, service_type, data, data_size, &data, &data_size);
-    if(code != RESULT_OK) {
-      LOG4CXX_ERROR(logger_, "Encryption error");
-      return code;
-    }
-  }
-
   ProtocolFramePtr ptr (
           new protocol_handler::ProtocolPacket(
-            connection_id, versionF, protection, FRAME_TYPE_SINGLE, service_type, 0,
+            connection_id, versionF, encrypt_message, FRAME_TYPE_SINGLE, service_type, 0,
             session_id, data_size, message_counters_[session_id]++, data));
 
   raw_ford_messages_to_mobile_.PostMessage(
@@ -573,9 +574,23 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    size_t data_size, const uint8_t* data, const bool protection,
+    size_t data_size, const uint8_t* data, const bool protection_flag,
     const size_t maxdata_size) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  //Control service shall not be encrypted
+  const bool encrypt_message =
+      (service_type == kControl) ? PROTECTION_OFF : protection_flag;
+  if(encrypt_message) {
+    DCHECK(session_observer_);
+    const int32_t connection_key =
+        session_observer_->KeyFromPair(connection_id, session_id);
+    const RESULT_CODE code = EncryptData(
+          connection_key, service_type, data, data_size, &data, &data_size);
+    if(code!=RESULT_OK) {
+      LOG4CXX_ERROR(logger_, "Encryption error");
+    }
+  }
 
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
@@ -587,20 +602,6 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
   int32_t numOfFrames = 0;
   int32_t lastdata_size = 0;
-
-  const int32_t connection_key =
-      session_observer_->KeyFromPair(connection_id, session_id);
-
-  //Control service shall not be encrypted
-  if(service_type!=kControl && protection) {
-    const RESULT_CODE code = EncryptData(
-          connection_key, service_type, data, data_size, &data, &data_size);
-    if(code!=RESULT_OK) {
-      LOG4CXX_ERROR(logger_, "Encryption error");
-      return code;
-      }
-    }
-
   // Send data
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;
@@ -627,7 +628,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   outDataFirstFrame[7] = numOfFrames;
 
   ProtocolFramePtr firstPacket(new protocol_handler::ProtocolPacket(connection_id,
-      versionF, protection, FRAME_TYPE_FIRST, service_type, 0,
+      versionF, encrypt_message, FRAME_TYPE_FIRST, service_type, 0,
       session_id, FIRST_FRAME_DATA_SIZE, ++message_counters_[session_id],
       outDataFirstFrame));
 
@@ -641,7 +642,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       memcpy(outDataFrame, data + (maxdata_size * i), maxdata_size);
 
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          versionF, protection, FRAME_TYPE_CONSECUTIVE,
+          versionF, encrypt_message, FRAME_TYPE_CONSECUTIVE,
           service_type, ((i % FRAME_DATA_MAX_VALUE) + 1), session_id,
           maxdata_size, message_counters_[session_id], outDataFrame));
 
@@ -652,7 +653,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       memcpy(outDataFrame, data + (maxdata_size * i), lastdata_size);
 
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          versionF, protection, FRAME_TYPE_CONSECUTIVE, service_type, 0x0,
+          versionF, encrypt_message, FRAME_TYPE_CONSECUTIVE, service_type, 0x0,
           session_id, lastdata_size, message_counters_[session_id],
           outDataFrame));
 
@@ -1096,8 +1097,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
   }
 
   if(context->Encrypt(data_in, data_in_size, data_out, data_out_size)) {
-    LOG4CXX_WARN(logger_, "Encryption failed: " <<
-                 security_manager::LastError());
+    LOG4CXX_WARN(logger_, "Encryption failed: " << security_manager::LastError());
     return RESULT_ENCRYPTION_FAILED;
   }
   LOG4CXX_INFO(logger_, "Encrypted " << data_in_size << " bytes to "
@@ -1126,8 +1126,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptData(
   }
 
   if(!context->Decrypt(data_in, data_in_size, data_out, data_out_size)) {
-    LOG4CXX_ERROR(logger_, "Decryption failed: " <<
-                 security_manager::LastError());
+    LOG4CXX_ERROR(logger_, "Decryption failed: " << security_manager::LastError());
     security_manager_->SendInternalError( connection_key,
           security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED);
     //return empty Ptr on error
