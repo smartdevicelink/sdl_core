@@ -330,12 +330,17 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
   session_observer_->PairFromKey(message->connection_key(), &connection_handle,
                                  &sessionID);
 
+  const ServiceType service_type = ServiceTypeFromByte(message->service_type());
+  const bool protect_message =
+      (session_observer_->GetSSLContext(connection_handle, service_type))
+                               ? PROTECTION_ON : PROTECTION_OFF;
+
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
                                                 message->protocol_version(),
                                                 message->service_type(),
                                                 message->data_size(),
-                                                message->data(), false);
+                                                message->data(), protect_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send single frame message.");
@@ -349,7 +354,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                message->protocol_version(),
                                                message->service_type(),
                                                message->data_size(),
-                                               message->data(), false,
+                                               message->data(), protect_message,
                                                maxDataSize);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
