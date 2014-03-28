@@ -1053,6 +1053,13 @@ public class ModuleTest {
                     mProxyService.syncProxySendRPCRequest(rpc);
 
                     // restore the default marshaller
+                    if (currentMarshaller instanceof InvalidJsonRPCMarshaller) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
 
                     long pause = wrapper.getPause();

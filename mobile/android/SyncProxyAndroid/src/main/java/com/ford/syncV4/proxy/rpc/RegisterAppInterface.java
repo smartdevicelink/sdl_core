@@ -57,17 +57,21 @@ public class RegisterAppInterface extends RPCRequest {
     public Vector<TTSChunk> getTtsName() {
         if (parameters.get(Names.ttsName) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.ttsName);
-            if (list != null && list.size() > 0) {
-                Object obj = list.get(0);
-                if (obj instanceof TTSChunk) {
-                    return (Vector<TTSChunk>) list;
-                } else if (obj instanceof Hashtable) {
-                    Vector<TTSChunk> newList = new Vector<TTSChunk>();
-                    for (Object hashObj : list) {
-                        newList.add(new TTSChunk((Hashtable) hashObj));
-                    }
-                    return newList;
+            if (list != null) {
+                return null;
+            }
+            if (list.size() == 0) {
+                return (Vector<TTSChunk>) list;
+            }
+            Object obj = list.get(0);
+            if (obj instanceof TTSChunk) {
+                return (Vector<TTSChunk>) list;
+            } else if (obj instanceof Hashtable) {
+                Vector<TTSChunk> newList = new Vector<TTSChunk>();
+                for (Object hashObj : list) {
+                    newList.add(new TTSChunk((Hashtable) hashObj));
                 }
+                return newList;
             }
         }
         return null;
@@ -96,11 +100,15 @@ public class RegisterAppInterface extends RPCRequest {
     public Vector<String> getVrSynonyms() {
         if (parameters.get(Names.vrSynonyms) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.vrSynonyms);
-            if (list != null && list.size() > 0) {
-                Object obj = list.get(0);
-                if (obj instanceof String) {
-                    return (Vector<String>) list;
-                }
+            if (list == null) {
+                return null;
+            }
+            if (list.size() == 0) {
+                return (Vector<String>) list;
+            }
+            Object obj = list.get(0);
+            if (obj instanceof String) {
+                return (Vector<String>) list;
             }
         }
         return null;
@@ -177,26 +185,30 @@ public class RegisterAppInterface extends RPCRequest {
     public Vector<AppHMIType> getAppType() {
         if (parameters.get(Names.appHMIType) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.appHMIType);
-            if (list != null && list.size() > 0) {
-                Object obj = list.get(0);
-                if (obj instanceof AppHMIType) {
-                    return (Vector<AppHMIType>) list;
-                } else if (obj instanceof String) {
-                    Vector<AppHMIType> newList = new Vector<AppHMIType>();
-                    for (Object hashObj : list) {
-                        String strFormat = (String) hashObj;
-                        AppHMIType toAdd = null;
-                        try {
-                            toAdd = AppHMIType.valueForString(strFormat);
-                        } catch (Exception e) {
-                            DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
-                        }
-                        if (toAdd != null) {
-                            newList.add(toAdd);
-                        }
+            if (list == null) {
+                return null;
+            }
+            if (list.size() == 0) {
+                return (Vector<AppHMIType>) list;
+            }
+            Object obj = list.get(0);
+            if (obj instanceof AppHMIType) {
+                return (Vector<AppHMIType>) list;
+            } else if (obj instanceof String) {
+                Vector<AppHMIType> newList = new Vector<AppHMIType>();
+                for (Object hashObj : list) {
+                    String strFormat = (String) hashObj;
+                    AppHMIType toAdd = null;
+                    try {
+                        toAdd = AppHMIType.valueForString(strFormat);
+                    } catch (Exception e) {
+                        DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
                     }
-                    return newList;
+                    if (toAdd != null) {
+                        newList.add(toAdd);
+                    }
                 }
+                return newList;
             }
         }
         return null;
