@@ -36,8 +36,10 @@
 
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
+#if defined(__arm__)
 #include "transport_manager/usb/qnx/usb_iap_connection.h"
 #include "transport_manager/usb/qnx/usb_iap2_connection.h"
+#endif
 #else
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
@@ -69,7 +71,7 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   PlatformUsbDevice* platform_device = usb_device->usb_device();
   bool initialized = false;
   if (IsAppleIAPDevice(platform_device)) {
-#if defined(__QNXNTO__)
+#if defined(__QNXNTO__) && defined(__arm__)
     UsbIAPConnection* usb_connection =
       new UsbIAPConnection(device_uid, app_handle, controller_, "/fs/ipod0");
     ConnectionSptr connection(usb_connection);
@@ -78,7 +80,7 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 #endif
   }
   else if (IsAppleIAP2Device(platform_device)) {
-#if defined(__QNXNTO__)
+#if defined(__QNXNTO__) && defined(__arm__)
     UsbIAP2Connection* usb_connection =
       new UsbIAP2Connection(device_uid, app_handle, controller_, "/dev/ipod0");
     ConnectionSptr connection(usb_connection);
