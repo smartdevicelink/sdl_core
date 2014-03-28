@@ -831,7 +831,6 @@ void ApplicationManagerImpl::set_hmi_message_handler(
 void ApplicationManagerImpl::set_connection_handler(
   connection_handler::ConnectionHandler* handler) {
   connection_handler_ = handler;
-  resume_ctrl_.LoadApplications();
 }
 
 void ApplicationManagerImpl::set_policy_manager(
@@ -1500,7 +1499,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
-  resume_ctrl_.IgnitionOff();
+  resume_controller().IgnitionOff();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {

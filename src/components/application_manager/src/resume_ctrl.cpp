@@ -11,6 +11,7 @@
 #include "connection_handler/connection.h"
 #include "formatters/CFormatterJsonBase.hpp"
 #include "application_manager/commands/command_impl.h"
+#include "resumption/last_state.h"
 
 namespace application_manager {
   log4cxx::LoggerPtr ResumeCtrl::logger_ = log4cxx::LoggerPtr(
@@ -81,30 +82,6 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   (*json_app)[strings::application_show] = GetApplicationShow(connection_key);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
   (*json_app)[strings::audio_streaming_state] = application->audio_streaming_state();
-}
-
-void ResumeCtrl::LoadApplications() {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::LoadApplications");
-  DCHECK(app_mngr_);
-
-  const std::string& storage =
-    profile::Profile::instance()->app_info_storage();
-  Json::Value root;
-  Json::Reader m_reader;
-  std::ifstream file(file_system::FullPath(storage).c_str(),
-                     std::ios::in);
-  if (!file.is_open()) {
-    LOG4CXX_ERROR(logger_, "Error while opening file");
-    return;
-  }
-
-  m_reader.parse(file, root);
-  if (root.isNull()) {
-    LOG4CXX_INFO(logger_, "There are no Saved applications");
-    return;
-  }
-  SetSavedApplication(root);
-
 }
 
 void ResumeCtrl::on_event(const event_engine::Event& event) {
@@ -384,12 +361,8 @@ bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr applicatio
 }
 
 void ResumeCtrl::IgnitionOff() {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::SavetoFileSystem()");
+  LOG4CXX_INFO(logger_, "ResumeCtrl::IgnitionOff()");
 
-  const std::string& storage =
-      profile::Profile::instance()->app_info_storage();
-  std::ofstream file(file_system::FullPath(storage).c_str(),
-                     std::ios::out);
   Json::Value to_save;
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
@@ -401,12 +374,6 @@ void ResumeCtrl::IgnitionOff() {
     }
   }
   SetSavedApplication(to_save);
-  if (file.is_open()) {
-    file << to_save.toStyledString();
-  } else {
-    LOG4CXX_ERROR(logger_, "An error occurred during save");
-  }
-  file.close();
 }
 
 
@@ -611,6 +578,14 @@ void ResumeCtrl::onTimer() {
   waiting_for_timer_.clear();
 }
 
+Json::Value &ResumeCtrl::GetSavedApplications() {
+  return resumption::LastState::instance()->dictionary[strings::resumption];
+}
+
+void ResumeCtrl::SetSavedApplication(Json::Value& apps_json) {
+    resumption::LastState::instance()->dictionary[strings::resumption] = apps_json ;
+}
+
 Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands" << app_id);
 
@@ -808,6 +783,7 @@ void ResumeCtrl::SendHMIRequest(
     LOG4CXX_ERROR(logger_, "Unable to send request");
   }
 }
+
 
 }  // namespace application_manager
 

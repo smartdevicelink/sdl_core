@@ -11,6 +11,7 @@ include_directories (
   ../request_watchdog/include/
   ../transport_manager/include/
   ../policies/include/
+  ../resumption/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
   ../../thirdPartyLibs/MessageBroker/include

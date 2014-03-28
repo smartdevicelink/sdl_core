@@ -85,12 +85,6 @@ class ResumeCtrl: public event_engine::EventObserver {
     void SaveApplication(ApplicationConstSharedPtr application);
 
     /**
-     * @brief Load unregistered applications info from the file system
-     *        You can use this function only if connection handler is ready
-     */
-    void LoadApplications();
-
-    /**
      * @brief Set application HMI Level as saved
      * @param application is application witch HMI Level is need to restore
      * @return true if success, otherwise return false
@@ -180,18 +174,9 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     static const uint32_t kTimeStep = 3;
 
-    /**
-    *@brief Data of applications, that whait for resuming
-    */
-    Json::Value saved_applications_;
+    Json::Value& GetSavedApplications();
 
-    Json::Value& GetSavedApplications() {
-      return saved_applications_;
-    }
-
-    void SetSavedApplication(Json::Value& apps_json) {
-      saved_applications_ = apps_json;
-    }
+    void SetSavedApplication(Json::Value& apps_json);
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
