@@ -675,7 +675,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId, boolean encrypted) {
+    public void onServiceStart(ServiceType serviceType, byte sessionId, final boolean encrypted) {
         mLogAdapter.logMessage("Service '" + serviceType + "' started", true);
 
         if (mBoundProxyService == null) {
@@ -693,7 +693,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                        fragment.setAudioServiceStateOn(outputStream);
+                        fragment.setAudioServiceStateOn(outputStream, encrypted);
                     }
                 }
             });
@@ -705,7 +705,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                        fragment.setMobileNaviStateOn(outputStream);
+                        fragment.setMobileNaviStateOn(outputStream, encrypted);
                     }
                 }
             });

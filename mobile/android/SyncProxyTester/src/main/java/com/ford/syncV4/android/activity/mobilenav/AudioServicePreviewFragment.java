@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -109,7 +110,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
     }
 
 
-    public void setAudioServiceStateOn(OutputStream stream) {
+    public void setAudioServiceStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
         mDataStreamingButton.setEnabled(true);
 
@@ -117,6 +118,16 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startBaseFileStreaming(R.raw.audio_pcm);
+        }
+        notifyAudioServiceState(encrypted);
+    }
+
+    private void notifyAudioServiceState(boolean encrypted){
+        TextView textView = (TextView) getView().findViewById(R.id.audio_service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 }

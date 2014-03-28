@@ -1977,7 +1977,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         notifySessionStarted(currentSession.getSessionId(), "");
     }
 
-    private void setupSecureProxy() {
+    public void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);

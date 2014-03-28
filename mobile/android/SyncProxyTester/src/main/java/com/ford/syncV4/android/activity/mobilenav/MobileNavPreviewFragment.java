@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -38,7 +39,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         super.setStateOff();
     }
 
-    public void setMobileNaviStateOn(OutputStream stream) {
+    public void setMobileNaviStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
         //Button button = (Button) getView().findViewById(R.id.videobutton);
         //button.setEnabled(true);
@@ -48,6 +49,16 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startFileStreaming();
+        }
+        notifyServiceState(encrypted);
+    }
+
+    private void notifyServiceState(boolean encrypted) {
+        TextView textView = (TextView) getView().findViewById(R.id.audio_service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 
