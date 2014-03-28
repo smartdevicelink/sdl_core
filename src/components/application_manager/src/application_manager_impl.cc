@@ -391,10 +391,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::PutApplicationInLimited(
     if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
       if (curr_app->is_media_application()) {
         result = mobile_api::HMILevel::HMI_BACKGROUND;
+        break;
       } else {
         result = mobile_api::HMILevel::HMI_LIMITED;
       }
-      break;
     }
 
   }
@@ -420,10 +420,10 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_FULL) {
         if (curr_app->is_media_application()) {
           result = mobile_api::HMILevel::HMI_BACKGROUND;
+          break;
         } else {
           result = mobile_api::HMILevel::HMI_LIMITED;
         }
-        break;
       }
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
         result = mobile_api::HMILevel::HMI_BACKGROUND;
@@ -436,7 +436,6 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
       }
       if (curr_app->hmi_level() == mobile_api::HMILevel::HMI_LIMITED) {
         result = mobile_api::HMILevel::HMI_FULL;
-        break;
       }
     }
   }
@@ -1501,7 +1500,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication((*it)->app_id(), true);
     it = application_list_.begin();
   }
-  resume_ctrl_.SavetoFileSystem();
+  resume_ctrl_.IgnitionOff();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
@@ -1594,7 +1593,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 }
 
 
-void ApplicationManagerImpl::Mute() {
+void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
   mobile_apis::AudioStreamingState::eType state =
       hmi_capabilities_.attenuated_supported()
       ? mobile_apis::AudioStreamingState::ATTENUATED
@@ -1604,22 +1603,32 @@ void ApplicationManagerImpl::Mute() {
   std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
-      (*it)->set_audio_streaming_state(state);
-      (*it)->set_tts_speak_state(true);
-      MessageHelper::SendHMIStatusNotification(*(*it));
+      if (kTTSSessionChanging == changing_state) {
+        (*it)->set_tts_speak_state(true);
+      }
+      if ((*it)->audio_streaming_state() != state) {
+        (*it)->set_audio_streaming_state(state);
+        MessageHelper::SendHMIStatusNotification(*(*it));
+      }
     }
   }
 }
 
-void ApplicationManagerImpl::Unmute() {
+void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
   std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
-      (*it)->set_audio_streaming_state(
-        mobile_apis::AudioStreamingState::AUDIBLE);
-      (*it)->set_tts_speak_state(false);
-      MessageHelper::SendHMIStatusNotification(*(*it));
+      if (kTTSSessionChanging == changing_state) {
+        (*it)->set_tts_speak_state(false);
+      }
+      if ((!(vr_session_started())) &&
+          ((*it)->audio_streaming_state() !=
+              mobile_apis::AudioStreamingState::AUDIBLE)) {
+        (*it)->set_audio_streaming_state(
+            mobile_apis::AudioStreamingState::AUDIBLE);
+        MessageHelper::SendHMIStatusNotification(*(*it));
+      }
     }
   }
 }
@@ -1665,5 +1674,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   return mobile_apis::Result::SUCCESS;
 }
 
+bool ApplicationManagerImpl::IsHMICooperating() const {
+  return hmi_cooperating_;
+}
 
 }  // namespace application_manager

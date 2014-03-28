@@ -44,15 +44,18 @@ namespace codegen {
 
 MessageFactoryFunction::MessageFactoryFunction(
     const Interface* interface,
+    SerializationType serialization_type,
     FunctionMessage::MessageType factory_type)
     : CppFunction("",
-                  "NewFromJson",
+                  serialization_type == kJson ? "NewFromJson" : "NewFromDbus",
                   Capitalize(
                     FunctionMessage::MessageTypeToString(
                       factory_type)) + "*"),
       interface_(interface),
       factory_type_(factory_type) {
-  Add(MessageFactoryFunction::Parameter("json", "const Json::Value&"));
+  Add(MessageFactoryFunction::Parameter(
+        serialization_type == kJson ? "json" : "reader",
+        serialization_type == kJson ? "const Json::Value&": "dbus::MessageReader*"));
   Add(MessageFactoryFunction::Parameter("function_id", "FunctionID"));
 }
 
@@ -84,9 +87,10 @@ void MessageFactoryFunction::DefineCases(
   for (MessageList::const_iterator i = functions.begin(),
        end = functions.end(); i != end; ++i) {
     const FunctionMessage* message = *i;
-    strmfmt(*os, "case {0}: return new {1}(json);\n",
+    strmfmt(*os, "case {0}: return new {1}({2});\n",
             LiteralGenerator(*message->id()).result(),
-            message->name());
+            message->name(),
+            parameters_[0].name);
   }
   *os << "default: return NULL;\n";
 }

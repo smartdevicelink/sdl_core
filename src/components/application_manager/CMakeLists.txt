@@ -53,6 +53,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/add_sub_menu_response.cc
 ./src/commands/mobile/alert_request.cc
 ./src/commands/mobile/alert_response.cc
+./src/commands/mobile/alert_maneuver_request.cc
+./src/commands/mobile/alert_maneuver_response.cc
 ./src/commands/mobile/change_registration_request.cc
 ./src/commands/mobile/change_registration_response.cc
 ./src/commands/mobile/create_interaction_choice_set_request.cc
@@ -254,6 +256,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
+./src/commands/hmi/navi_alert_maneuver_request.cc
+./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_update_turn_list_request.cc
 ./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
@@ -265,6 +269,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_registered_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
+./src/commands/hmi/on_file_removed_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_tts_started_notification.cc
 ./src/commands/hmi/on_tts_stopped_notification.cc
@@ -293,9 +298,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_stop_stream_request.cc
 ./src/commands/hmi/audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
+./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
-./src/commands/hmi/on_sdl_close_notification.cc
+./src/commands/hmi/on_record_start_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

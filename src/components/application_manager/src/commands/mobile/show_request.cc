@@ -30,7 +30,6 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"

@@ -24,10 +24,12 @@ import android.widget.ToggleButton;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.transport.TransportType;
 
 /**
  * Created with Android Studio.
@@ -81,12 +83,20 @@ public class AppSetUpDialog extends DialogFragment {
         final Spinner hmiLangSpinner = (Spinner) view.findViewById(R.id.selectprotocol_hmiLang);
         final RadioGroup transportGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupTransport);
-        final EditText ipAddressEditText = (EditText) view.findViewById(R.id.selectprotocol_ipAddr);
+        final EditText ipAddressEditText = (EditText) view.findViewById(R.id.select_protocol_ip_address_edit_view);
         final EditText tcpPortEditText = (EditText) view.findViewById(R.id.selectprotocol_tcpPort);
         final LinearLayout nsdUseLayout = (LinearLayout) view.findViewById(R.id.nsd_use_layout);
         final LinearLayout ipAddressLayout = (LinearLayout) view.findViewById(R.id.ip_address_layout);
         final LinearLayout portLayout = (LinearLayout) view.findViewById(R.id.port_layout);
-        final ToggleButton mNSDUseToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
+        final ToggleButton nsdToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
+        nsdToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ipAddressEditText.setEnabled(!isChecked);
+                TextView ipAddressView = (TextView) view.findViewById(R.id.select_protocol_ip_address_view);
+                ipAddressView.setEnabled(!isChecked);
+            }
+        });
 
         final boolean mIsNSDSupported = Build.VERSION.SDK_INT >= Const.JELLYBEAN_API_LEVEL;
 
@@ -97,9 +107,55 @@ public class AppSetUpDialog extends DialogFragment {
         portLayout.setVisibility(View.GONE);
         nsdUseLayout.setVisibility(View.GONE);
 
+        final CheckBox customAppIdView = (CheckBox) view.findViewById(R.id.selectprotocol_appIdCustom);
+        customAppIdView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                processCustomAppIdCheck(view, isChecked);
+            }
+        });
+        customAppIdView.setChecked(AppPreferencesManager.getIsCustomAppId());
+
+        final EditText customAppIdEditView = (EditText) view.findViewById(R.id.selectprotocol_appId);
+        customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                //Log.d(LOG_TAG, "App Id before changed to: " + customAppIdEditView.getText().toString().trim());
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Log.d(LOG_TAG, "App Id on changed to: " + customAppIdEditView.getText().toString().trim());
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                Log.d(LOG_TAG, "App Id after changed to: " +
+                        customAppIdEditView.getText().toString().trim());
+                AppPreferencesManager.setCustomAppId(customAppIdEditView.getText().toString().trim());
+            }
+        });*/
+
         transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+                TransportType transportType = TransportType.USB;
+                switch (checkedId) {
+                    case R.id.selectprotocol_radioWiFi:
+                        transportType = TransportType.TCP;
+                        break;
+                    case R.id.selectprotocol_radioBT:
+                        transportType = TransportType.BLUETOOTH;
+                        break;
+                }
+                AppPreferencesManager.setTransportType(transportType);
+
+                if (!AppPreferencesManager.getIsCustomAppId()) {
+                    processCustomAppIdCheck(view, customAppIdView.isChecked());
+                }
+
                 boolean transportOptionsEnabled = checkedId == R.id.selectprotocol_radioWiFi;
                 ipAddressLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
                 portLayout.setVisibility(transportOptionsEnabled ? View.VISIBLE : View.GONE);
@@ -127,9 +183,6 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_DEFAULT_LANG));
         Language hmiLang = Language.valueOf(prefs.getString(
                 Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-        int transportType = prefs.getInt(
-                Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
-                Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
         String ipAddress = prefs.getString(
                 Const.Transport.PREFS_KEY_TRANSPORT_IP,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
@@ -147,15 +200,16 @@ public class AppSetUpDialog extends DialogFragment {
         hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
-        mNSDUseToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
+        nsdToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
         autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
         int groupCheck = R.id.selectprotocol_radioUSB;
+        TransportType transportType = AppPreferencesManager.getTransportType();
         switch (transportType) {
-            case Const.Transport.KEY_TCP:
+            case TCP:
                 groupCheck = R.id.selectprotocol_radioWiFi;
                 break;
-            case Const.Transport.KEY_BLUETOOTH:
+            case BLUETOOTH:
                 groupCheck = R.id.selectprotocol_radioBT;
                 break;
         }
@@ -171,6 +225,12 @@ public class AppSetUpDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        if (AppPreferencesManager.getIsCustomAppId()) {
+                            AppPreferencesManager.setCustomAppId(
+                                    customAppIdEditView.getText().toString().trim());
+                        }
+
                         boolean isMedia = mediaCheckBox.isChecked();
                         boolean isNavi = naviCheckBox.isChecked();
                         int videoSource = (videoSourceGroup.getCheckedRadioButtonId() ==
@@ -179,21 +239,10 @@ public class AppSetUpDialog extends DialogFragment {
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem()).name();
                         String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
-                        int transportType = Const.Transport.KEY_USB;
-                        switch (transportGroup.getCheckedRadioButtonId()) {
-                            case R.id.selectprotocol_radioWiFi:
-                                transportType = Const.Transport.KEY_TCP;
-                                break;
-                            case R.id.selectprotocol_radioBT:
-                                transportType = Const.Transport.KEY_BLUETOOTH;
-                                break;
-                        }
                         String ipAddress = ipAddressEditText.getText().toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
-
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
-
-                        boolean mNSDPrefValue = mIsNSDSupported && mNSDUseToggle.isChecked();
+                        boolean mNSDPrefValue = mIsNSDSupported && nsdToggle.isChecked();
                         // save the configs
                         boolean success = prefs
                                 .edit()
@@ -204,14 +253,10 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putString(Const.PREFS_KEY_APPNAME, appName)
                                 .putString(Const.PREFS_KEY_LANG, lang)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)
-                                .putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE, transportType)
-                                .putString(
-                                        Const.Transport.PREFS_KEY_TRANSPORT_IP,
-                                        ipAddress)
+                                .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
-
-                                .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
-                                        autoSetAppIcon).commit();
+                                .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
+                                .commit();
                         if (!success) {
                             Log.w(LOG_TAG, "Can't save selected protocol properties");
                         }
@@ -238,5 +283,18 @@ public class AppSetUpDialog extends DialogFragment {
         mNSDLabelView.setEnabled(false);
         mNSDToggleButtonView.setEnabled(false);
         mNSDUnsupportedView.setVisibility(View.VISIBLE);
+    }
+
+    private void processCustomAppIdCheck(View view, boolean isChecked) {
+        EditText appIdView = (EditText) view.findViewById(R.id.selectprotocol_appId);
+
+        appIdView.setEnabled(isChecked);
+        AppPreferencesManager.setIsCustomAppId(isChecked);
+
+        if (isChecked) {
+            appIdView.setText(AppPreferencesManager.getCustomAppId());
+        } else {
+            appIdView.setText(AppIdManager.getAppIdByTransport(AppPreferencesManager.getTransportType()));
+        }
     }
 }

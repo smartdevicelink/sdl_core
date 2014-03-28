@@ -188,15 +188,17 @@
 #VRPopUp span,#info_apps_deviceList_list .list-content span,#sdl_view_container .list-content span,#sdl_options .list-content span
 	{
 	margin-left: 15px;
-	position: absolute;
+	position: relative;
 	text-overflow: ellipsis;
-	width: 527px;
+	width: 521px;
 	overflow: hidden;
+    float: left;
 }
 
 #sdl_options .list-content .ico {
 	height: 49px;
 	float: left;
+    position: relative;
 }
 
 #info_nonMedia_options_submenu {

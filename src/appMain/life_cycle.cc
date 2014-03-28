@@ -303,23 +303,34 @@ void LifeCycle::StopComponents() {
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
-  mb_adapter_->unregisterController();
-  mb_adapter_thread_->Stop();
-  mb_adapter_thread_->Join();
-  delete mb_adapter_thread_;
-  mb_adapter_->Close();
-  delete mb_adapter_;
+  if (mb_adapter_) {
+    mb_adapter_->unregisterController();
+    mb_adapter_->Close();
+    delete mb_adapter_;
+  }
+  if (mb_adapter_thread_) {
+    mb_adapter_thread_->Stop();
+    mb_adapter_thread_->Join();
+    delete mb_adapter_thread_;
+  }
+
 #endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
-  mb_server_thread_->Stop();
-  mb_server_thread_->Join();
-  mb_thread_->Stop();
-  mb_thread_->Join();
+  if (mb_server_thread_) {
+    mb_server_thread_->Stop();
+    mb_server_thread_->Join();
+    delete mb_server_thread_;
+  }
+  if (mb_thread_) {
+    mb_thread_->Stop();
+    mb_thread_->Join();
+    delete mb_thread_;
+  }
   message_broker_server_->Close();
+  delete message_broker_server_;
   message_broker_->stopMessageBroker();
-  delete mb_server_thread_;
 
   networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER

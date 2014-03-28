@@ -182,10 +182,13 @@
 #include "application_manager/commands/hmi/navi_show_constant_tbt_request.h"
 #include "application_manager/commands/hmi/navi_show_constant_tbt_response.h"
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_request.h"
+#include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_request.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
+#include "application_manager/commands/hmi/on_file_removed_notification.h"
 #include "application_manager/commands/hmi/on_system_context_notification.h"
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
@@ -221,6 +224,7 @@
 #include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 #include "application_manager/commands/hmi/on_sdl_close_notification.h"
+#include "application_manager/commands/hmi/on_record_start_notification.h"
 
 namespace application_manager {
 
@@ -937,6 +941,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviIsReadyResponse(message));
       } else {
         command.reset(new commands::NaviIsReadyRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_AlertManeuver: {
+      if (is_response) {
+        command.reset(new commands::NaviAlertManeuverResponse(message));
+      } else {
+        command.reset(new commands::NaviAlertManeuverRequest(message));
       }
       break;
     }
@@ -1860,6 +1872,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
       command.reset(new commands::OnSDLCloseNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnFileRemoved: {
+      command.reset(new commands::OnFileRemovedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::UI_OnRecordStart: {
+      command.reset(new commands::OnRecordStartdNotification(message));
       break;
     }
   }

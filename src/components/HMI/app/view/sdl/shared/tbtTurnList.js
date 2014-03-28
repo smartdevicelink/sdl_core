@@ -44,9 +44,10 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
         /**
          * Activate window
          */
-        activate: function () {
+        activate: function (appID) {
 
             this.set('active', true);
+            this.updateList(appID);
         },
 
         /**

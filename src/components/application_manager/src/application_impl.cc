@@ -60,7 +60,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0) {
-    srand(time(NULL));
+  srand(time(NULL));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -180,6 +180,10 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
   tts_speak_state_ = state_tts_speak;
 }
 
+bool ApplicationImpl::tts_speak_state() {
+  return tts_speak_state_;
+}
+
 void ApplicationImpl::set_hmi_level(
     const mobile_api::HMILevel::eType& hmi_level) {
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
@@ -278,6 +282,13 @@ const AppFilesMap& ApplicationImpl::getAppFiles() const {
   return this->app_files_;
 }
 
+const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
+   if (app_files_.find(file_name) != app_files_.end()) {
+     return &(app_files_[file_name]);
+   }
+   return NULL;
+}
+
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.insert(btn_name);
@@ -338,20 +349,25 @@ uint32_t ApplicationImpl::UpdateHash() {
 void ApplicationImpl::CleanupFiles() {
   std::string directory_name = file_system::FullPath(name());
   if (file_system::DirectoryExists(directory_name)) {
-    for (AppFilesMap::const_iterator it = app_files_.begin();
-        it != app_files_.end(); ++it) {
-      if (!it->second.is_persistent) {
-        std::string file_name = directory_name;
-        file_name += "/";
-        file_name += it->second.file_name;
-        file_system::DeleteFile(file_name);
+    std::vector<std::string> files = file_system::ListFiles(
+            directory_name);
+
+    AppFilesMap::const_iterator app_files_it;
+
+    for (std::vector<std::string>::const_iterator it = files.begin();
+         it != files.end(); ++it) {
+      app_files_it = app_files_.find(*it);
+
+      if ((app_files_it == app_files_.end()) ||
+          (!app_files_it->second.is_persistent)) {
+          std::string file_name = directory_name;
+          file_name += "/";
+          file_name += *it;
+          file_system::DeleteFile(file_name);
       }
     }
-    std::vector < std::string > persistent_files = file_system::ListFiles(
-        directory_name);
-    if (0 == persistent_files.size()) {
-      file_system::RemoveDirectory(directory_name);
-    }
+
+    file_system::RemoveDirectory(directory_name, false);
   }
   app_files_.clear();
 }

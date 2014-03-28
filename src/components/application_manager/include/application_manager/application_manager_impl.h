@@ -91,6 +91,11 @@ namespace mobile_api = mobile_apis;
 
 class ApplicationManagerImpl;
 
+enum VRTTSSessionChanging {
+  kVRSessionChanging = 0,
+  kTTSSessionChanging = 1
+};
+
 namespace impl {
 using namespace threads;
 
@@ -411,14 +416,20 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Change AudioStreamingState for all application according to
      * system audio-mixing capabilities (NOT_AUDIBLE/ATTENUATED) and
      * send notification for this changes
+     * @param If changing_state == kVRSessionChanging function is used by
+     * on_vr_started_notification, if changing_state == kTTSSessionChanging
+     * function is used by on_tts_started_notification
      */
-    void Mute();
+    void Mute(VRTTSSessionChanging changing_state);
 
     /*
      * @brief Change AudioStreamingState for all application to AUDIBLE and
      * send notification for this changes
+     * @param If changing_state == kVRSessionChanging function is used by
+     * on_vr_stopped_notification, if changing_state == kTTSSessionChanging
+     * function is used by on_tts_stopped_notification
      */
-    void Unmute();
+    void Unmute(VRTTSSessionChanging changing_state);
 
     /*
      * @brief Checks HMI level and returns true if audio streaming is allowed
@@ -449,6 +460,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::Result::eType SaveBinary(const std::vector<uint8_t>& binary_data,
                                           const std::string& file_path,
                                           const uint32_t offset);
+
+    /*
+     * @brief returns true if HMI is cooperating
+     */
+    bool IsHMICooperating() const;
 
   private:
     ApplicationManagerImpl();

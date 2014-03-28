@@ -180,7 +180,7 @@ public class WiProProtocol extends AbstractProtocol {
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
 
-        Log.d(TAG, "Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength));
+        Log.d(TAG, "-> Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength));
 
         //Check for a version difference
         if (_version == 1) {
@@ -354,6 +354,7 @@ public class WiProProtocol extends AbstractProtocol {
         } // end-method
 
         protected void handleFrame(ProtocolFrameHeader header, byte[] data) {
+            Log.d(TAG, "Handle frame, type:" + header.getFrameType());
             if (header.getFrameType().equals(FrameType.Control)) {
                 handleControlFrame(header, data);
             } else {
@@ -395,10 +396,15 @@ public class WiProProtocol extends AbstractProtocol {
                 handleStartServiceNackFrame(header.getServiceType());
             } else if (header.getFrameData() == FrameDataControlFrameType.EndService.getValue()) {
                 handleEndSessionFrame(header);
+            } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceNACK.getValue()) {
+                //Log.d(TAG, "End Service NACK");
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceACK.getValue()) {
                 handleEndSessionFrame(header);
+            } else {
+                Log.w(TAG, "Unknown frame data:" + header.getFrameData() + ", service type:" +
+                        header.getServiceType());
             }
         } // end-method
 

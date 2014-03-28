@@ -66,25 +66,20 @@ void ShowConstantTBTRequest::Run() {
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
-  // TODO(DK): Missing mandatory param
-  if (!msg_params.keyExists(strings::soft_buttons)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
-    return;
-  }
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    mobile_apis::Result::eType processing_result =
+        MessageHelper::ProcessSoftButtons(msg_params, app);
 
-  mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params, app);
-
-  if (mobile_apis::Result::SUCCESS != processing_result) {
-    if (mobile_apis::Result::INVALID_DATA == processing_result) {
-      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
-      SendResponse(false, processing_result);
-      return;
-    }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      result_ = processing_result;
+    if (mobile_apis::Result::SUCCESS != processing_result) {
+      if (mobile_apis::Result::INVALID_DATA == processing_result) {
+        LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+        SendResponse(false, processing_result);
+        return;
+      }
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+        LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+        result_ = processing_result;
+      }
     }
   }
 
@@ -156,7 +151,7 @@ void ShowConstantTBTRequest::Run() {
 
   app->set_tbt_show_command(msg_params);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
-                   true);
+                 true);
 }
 
 

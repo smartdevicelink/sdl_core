@@ -45,11 +45,7 @@ SDL.SDLController = Em.Object
             if (SDL.AlertPopUp.active) {
                 return 'ALERT';
             }
-            if (SDL.TBTClientStateView.active
-                || SDL.VehicleInfo.active
-                || SDL.DriverDistraction.active
-                || SDL.ExitApp.active
-                || SDL.SliderView.active
+            if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
                 || SDL.AudioPassThruPopUp.activate) {
@@ -60,21 +56,20 @@ SDL.SDLController = Em.Object
                 return 'MENU';
             }
             if (SDL.States.info.nonMedia.active
-                || SDL.States.media.sdlmedia.active) {
+                || SDL.States.media.sdlmedia.active
+                || SDL.States.navigationApp.baseNavigation.active) {
 
                 return 'MAIN';
             } else {
                 return 'MENU';
             }
-        }.property('SDL.DriverDistraction.active',
-            'SDL.OptionsView.active',
+        }.property('SDL.OptionsView.active',
+            'SDL.SliderView.active',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
-            'SDL.TBTClientStateView.active',
-            'SDL.VehicleInfo.active',
             'SDL.States.info.nonMedia.active',
             'SDL.States.media.sdlmedia.active',
-            'SDL.ExitApp.active',
+            'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active',
@@ -170,21 +165,21 @@ SDL.SDLController = Em.Object
          */
         showVRHelpItems: function() {
 
-            if (SDL.SDLAppController.model) {
-                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
-
-                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
-
-                    if (SDL.SDLAppController.model) {
-                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
-                    }
-                } else {
-                    if (SDL.VRHelpListView.active) {
-                        SDL.VRHelpListView.deactivate();
-                    }
-                }
-            }
+//            if (SDL.SDLAppController.model) {
+//                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+//
+//                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+//                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
+//
+//                    if (SDL.SDLAppController.model) {
+//                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+//                    }
+//                } else {
+//                    if (SDL.VRHelpListView.active) {
+//                        SDL.VRHelpListView.deactivate();
+//                    }
+//                }
+//            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -530,9 +525,13 @@ SDL.SDLController = Em.Object
          */
         unregisterApplication: function(appID) {
 
-            //this.getApplicationModel(appID).set('unregistered', true);
             this.getApplicationModel(appID).onDeleteApplication(appID);
-            SDL.VRPopUp.DeleteActivateApp(appID);
+            var len = SDL.SDLModel.VRCommands.length;
+            for (var i = len - 1; i >= 0; i--) {
+                if (SDL.SDLModel.VRCommands[i].appID == appID) {
+                    SDL.SDLModel.VRCommands.splice(i, 1);
+                }
+            }
             SDL.SDLAppController.set('model', null);
         },
         /**
@@ -566,7 +565,9 @@ SDL.SDLController = Em.Object
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
-                            FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            if (str) {
+                                FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            }
                             break;
                         }
                     }

@@ -44,7 +44,7 @@ using typesafe_format::strmfmt;
 
 namespace codegen {
 
-EnumFromJsonValueFunction::EnumFromJsonValueFunction(
+EnumFromJsonStringFunction::EnumFromJsonStringFunction(
     const Enum* enm)
     : CppFunction("", "EnumFromJsonString", "bool"),
       enm_(enm) {
@@ -52,10 +52,10 @@ EnumFromJsonValueFunction::EnumFromJsonValueFunction(
   Add(Parameter("*result", enm->name()));
 }
 
-EnumFromJsonValueFunction::~EnumFromJsonValueFunction() {
+EnumFromJsonStringFunction::~EnumFromJsonStringFunction() {
 }
 
-void EnumFromJsonValueFunction::DefineBody(std::ostream* os) const {
+void EnumFromJsonStringFunction::DefineBody(std::ostream* os) const {
   const Enum::ConstantsList& consts = enm_->constants();
   if (!consts.empty()) {
     const char* if_statement = "if (\"{0}\" == {1}) {";

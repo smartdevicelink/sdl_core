@@ -62,10 +62,8 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run "<< connection_key());
 
-  // wait till all HMI capabilities initialized
-  const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-  while (!hmi_capabilities.is_hmi_capabilities_initialized()) {
+  // wait till HMI started
+  while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
@@ -142,34 +140,9 @@ void RegisterAppInterfaceRequest::Run() {
         }
       }
     }
-
-    MessageHelper::SendOnAppRegisteredNotificationToHMI(*app);
     SendRegisterAppInterfaceResponseToMobile();
 
   }
-}
-
-void RegisterAppInterfaceRequest::SendVrCommandsOnRegisterAppToHMI
-(const application_manager::Application& application_impl) {
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  uint32_t app_id = application_impl.app_id();
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::cmd_id] = (max_cmd_id + app_id);
-  msg_params[strings::vr_commands] = *(application_impl.vr_synonyms());
-  if (0 < app_id) {
-    msg_params[strings::app_id] = app_id;
-  }
-  SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
-}
-
-void RegisterAppInterfaceRequest::SendTTSChunksToHMI
-(const application_manager::Application& application_impl) {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = application_impl.app_id();
-  msg_params[strings::tts_chunks] = *(application_impl.tts_name());
-  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 
 void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
@@ -211,9 +184,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   smart_objects::SmartObject& response_params = *params;
 
   response_params[strings::sync_msg_version][strings::major_version] =
-    APIVersion::kAPIV2;
+    APIVersion::kAPIV3;
   response_params[strings::sync_msg_version][strings::minor_version] =
-    APIVersion::kAPIV2;
+    APIVersion::kAPIV0;
 
   response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =
@@ -261,6 +234,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         hmi_capabilities.display_capabilities()->getElement(
         hmi_response::text_fields);
 
+    display_caps[hmi_response::image_fields] =
+        hmi_capabilities.display_capabilities()->getElement(
+        hmi_response::image_fields);
+
     display_caps[hmi_response::media_clock_formats] =
         hmi_capabilities.display_capabilities()->getElement(
             hmi_response::media_clock_formats);
@@ -285,6 +262,18 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
       display_caps[hmi_response::graphic_supported] = false;
     }
+
+    display_caps[hmi_response::templates_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::templates_available);
+
+    display_caps[hmi_response::screen_params] =
+        hmi_capabilities.display_capabilities()->getElement(
+            hmi_response::screen_params);
+
+    display_caps[hmi_response::num_custom_presets_available] =
+        hmi_capabilities.display_capabilities()->getElement(
+                hmi_response::num_custom_presets_available);
   }
 
   if (hmi_capabilities.button_capabilities()) {
@@ -338,17 +327,33 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   uint32_t hash_id = 0;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+  const char* add_info = "";
+  bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
+  if (resumption) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-    if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
+    const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
+    if (!resumer.CheckApplicationHash(mobile_app_id,
                                       hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Hash does not maches");
+      add_info = "Hash does not maches";
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
+      result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Persistent data is missed");
+      add_info = "Persistent data is missed";
+    } else {
+      add_info = " Resume Succesed";
     }
   }
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()), resumption);
+  SendResponse(true, result, add_info, params);
+  if (result != mobile_apis::Result::RESUME_FAILED) {
+    resumer.StartResumption(application, hash_id);
+  } else {
+    resumer.StartResumptionOnlyHMILevel(application);
+  }
 
-  SendResponse(true, result, "", params);
-  resumer.StartResumption(application, hash_id);
 }
 
 mobile_apis::Result::eType
@@ -550,7 +555,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
-  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  const std::string& mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asString();
 
   const std::set<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications();
@@ -559,7 +564,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asString()) {
       return true;
     }
   }

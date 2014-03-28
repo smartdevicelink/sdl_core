@@ -141,12 +141,7 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl);
-
-    /**
-     * @brief Sendss Vr Command 'Help'
-     */
-    static void SendHelpVrCommand();
+      const Application& application_impl, bool resumption = false);
 
     /**
      * @brief Create mobile HashUpdateNotification
@@ -337,7 +332,6 @@ class MessageHelper {
   private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
-    static smart_objects::SmartObject* CreateGeneralVrCommand();
     static void SendRemoveCommandToHMI(int32_t function_id, int32_t command_id,
                                        uint32_t app_id);
     MessageHelper();

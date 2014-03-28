@@ -426,13 +426,19 @@ SDL.SDLVehicleInfoModel = Em.Object
                     if (this.vehicleData[key]) {
                         data[key] = this.vehicleData[key];
                     } else {
-                        text += key + ", ";
-                        result = false;
+                        if (!result) {
+
+                            text += ", " + key;
+                        } else {
+
+                            text += key;
+                            result = false;
+                        }
                     }
                 }
             }
 
-            text += "are not avaliable";
+            text += " are not available";
 
             if (result) {
                 FFW.VehicleInfo.sendGetVehicleDataResut(SDL.SDLModel.resultCode["SUCCESS"], message.id, message.method, data);

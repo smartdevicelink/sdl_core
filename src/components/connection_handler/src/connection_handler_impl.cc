@@ -88,37 +88,6 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 void ConnectionHandlerImpl::OnDeviceListUpdated(
   const std::vector<transport_manager::DeviceInfo>& device_info_list) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
-
-  bool list_actually_changed = false;
-  for (DeviceListIterator itr = device_list_.begin(); itr != device_list_.end();
-       ++itr) {
-    if (!DoesDeviceExistInTMList(device_info_list, (*itr).first)) {
-      // Device has been removed. Perform all needed actions.
-      // 1. Delete all the connections and sessions of this device
-      // 2. Delete device from a list
-      // 3. Let observer know that device has been deleted.
-      DeviceHandle device_for_remove_handle = (*itr).first;
-      for (ConnectionListIterator it = connection_list_.begin();
-           it != connection_list_.end(); ++it) {
-        if (device_for_remove_handle
-            == (*it).second->connection_device_handle()) {
-          RemoveConnection((*it).first);
-        }
-      }
-      device_list_.erase(device_for_remove_handle);
-      list_actually_changed = true;
-      if (connection_handler_observer_) {
-        connection_handler_observer_->RemoveDevice(device_for_remove_handle);
-      }
-    }
-  }
-  for (std::vector<transport_manager::DeviceInfo>::const_iterator it_in =
-         device_info_list.begin(); it_in != device_info_list.end(); ++it_in) {
-    list_actually_changed |= AddDeviceInDeviceListIfNotExist((*it_in));
-  }
-  if (connection_handler_observer_ && list_actually_changed) {
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
-  }
 }
 
 void ConnectionHandlerImpl::OnDeviceFound(
@@ -129,42 +98,34 @@ void ConnectionHandlerImpl::OnDeviceFound(
 void ConnectionHandlerImpl::OnDeviceAdded(
   const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceAdded()");
+  device_list_.insert(DeviceList::value_type(
+      device_info.device_handle(),
+      Device(device_info.device_handle(), device_info.name(),
+             device_info.mac_address())));
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
+  }
 }
 
 void ConnectionHandlerImpl::OnDeviceRemoved(
   const transport_manager::DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceRemoved()");
-}
-
-bool ConnectionHandlerImpl::DoesDeviceExistInTMList(
-  const std::vector<transport_manager::DeviceInfo>& device_list,
-  const connection_handler::DeviceHandle device_handle) {
-  bool result = false;
-  for (std::vector<transport_manager::DeviceInfo>::const_iterator it_in =
-         device_list.begin();
-       it_in != device_list.end();
-       ++it_in) {
-    if (it_in->device_handle() == device_handle) {
-      result = true;
-      break;
+  // Device has been removed. Perform all needed actions.
+  // 1. Delete all the connections and sessions of this device
+  // 2. Delete device from a list
+  // 3. Let observer know that device has been deleted.
+  for (ConnectionListIterator it = connection_list_.begin();
+       it != connection_list_.end(); ++it) {
+    if (device_info.device_handle() ==
+        (*it).second->connection_device_handle()) {
+      RemoveConnection((*it).first);
     }
   }
-  return result;
-}
-
-bool ConnectionHandlerImpl::AddDeviceInDeviceListIfNotExist(
-  const transport_manager::DeviceInfo& device_info) {
-  DeviceListIterator it = device_list_.find(device_info.device_handle());
-  if (device_list_.end() == it) {
-    LOG4CXX_INFO(logger_, "Adding new device!");
-    device_list_.insert(
-      DeviceList::value_type(
-        device_info.device_handle(),
-        Device(device_info.device_handle(), device_info.name(),
-               device_info.mac_address())));
-    return true;
+  device_list_.erase(device_info.device_handle());
+  if (connection_handler_observer_) {
+    connection_handler_observer_->RemoveDevice(device_info.device_handle());
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
-  return false;
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {

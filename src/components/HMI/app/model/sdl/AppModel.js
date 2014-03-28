@@ -114,6 +114,11 @@ SDL.SDLAppModel = Em.Object.extend({
         TTSVRLanguage: 'EN-US',
 
         /**
+         * List of VR commands
+         */
+        VRCommands: [],
+
+        /**
          * Array of Soft Buttons
          *
          * @type {Array}
@@ -194,6 +199,40 @@ SDL.SDLAppModel = Em.Object.extend({
         interactionChoices: {},
 
         /**
+         * Method to remove deleted by SDL Core images used in HMI
+         *
+         * @param imageName
+         */
+        onImageRemoved: function(imageName){
+
+            var result = false;
+
+            // Get list of subMenus with commands
+            for (var commands in this.commandsList) {
+
+                // Check if object item (subMenu list of commands) is added list with command in object and not an inherited method of object
+                if(this.commandsList.hasOwnProperty(commands)){
+
+                    var len = this.commandsList[commands].length;
+                    for (var i = 0; i < len; i++) {
+
+                        // Check image name with each command in each subMenu
+                        if (this.commandsList[commands][i].icon) {
+                            if (this.commandsList[commands][i].icon.indexOf(imageName) != -1) {
+
+                                // If found same image path than set default icon path
+                                this.commandsList[commands][i].icon = SDL.SDLModel.defaultListOfIcons.command;
+                                result = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        },
+
+        /**
          * Update Soft Buttons will handle on command Show
          *
          * @param {Array}
@@ -214,7 +253,7 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         addCommand: function (request) {
 
-            var parentID = request.params.menuParams.parentID >= 0 ? request.params.menuParams.parentID : 'top';
+            var parentID = request.params.menuParams.parentID > 0 ? request.params.menuParams.parentID : 'top';
 
             if (!this.get('commandsList.' + parentID)) {
                 this.commandsList[parentID] = [];

@@ -1,5 +1,24 @@
+[CW13]
++ SyncProxyTester: Add DeviceInfo object into request command
+* SyncProxyTester: RegisterAppInterface without HashId in case of UnregisterAppInterface have take place
++ SyncProxyTester | SyncProxyAndroid SDK: Add possibility do not close USB connection when perform single UnregisterAppInterface command
++ SyncProxyTester: TCP port configuration with NSD
+
+[CW12]
++ SyncProxyAndroid SDK: Add new field "DeviceInfo" to the RegisterAppInterface request
++ SyncProxyAndroid SDK: Add new structure "DeviceInfo"
+* SyncProxyAndroid SDK: PerformAudioPassThru: no OnAudioPassThru notifications
+* SyncProxyAndroid SDK: Connection closes after UnregisterAppInterface
+* SyncProxyTester | SyncProxyAndroid SDK: Add possibility to restart RPC service for the specific Test Cases
+* SyncProxyTester: Check open session (by Session Id) when executing automatic tests DISABLED
++ SyncProxyTester: Check connection and open session when executing automatic tests
++ SyncProxyTester: Set AppId parameter at Application SetUp dialog
+
 [CW11]
-* SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
+* SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
+* SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
+* SyncProxyTester: Fix bug with "Two requests RegisterAppInterface with and without hashID after UnregisterAppInterface"
+* SyncProxyAndroid SDK: Eliminate EndService request with session ID = 0
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
 + SyncProxyTester: Add AlertManeuver UI.
 

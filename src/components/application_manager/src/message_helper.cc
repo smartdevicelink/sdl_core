@@ -132,7 +132,7 @@ const VehicleData MessageHelper::vehicle_data_(kVehicleDataInitializer,
                                                ARRAYSIZE(kVehicleDataInitializer));
 
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
 namespace {
   struct VehicleInfo_Requests {
     hmi_apis::FunctionID::eType func_id;
@@ -166,7 +166,7 @@ namespace {
     { hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
   };
 }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
 
 
 void MessageHelper::SendHMIStatusNotification(
@@ -200,7 +200,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl) {
+  const Application& application_impl, bool resumption ) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -218,6 +218,10 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   const smart_objects::SmartObject* ngn_media_screen_name =
     application_impl.ngn_media_screen_name();
+
+  if (resumption) {
+    message[strings::msg_params][strings::resumption] = true;
+  }
 
   if (ngn_media_screen_name) {
     message[strings::msg_params][strings::application]
@@ -254,30 +258,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     message[strings::msg_params][strings::tts_name] = *(application_impl.tts_name());
   }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
-}
-
-smart_objects::SmartObject* MessageHelper::CreateGeneralVrCommand() {
-  smart_objects::SmartObject* vr_help_command = new smart_objects::SmartObject(
-    smart_objects::SmartType_Array);
-  if (!vr_help_command) {
-    return NULL;
-  }
-  smart_objects::SmartObject& help_object = *vr_help_command;
-  const std::vector<std::string>& vr_general_cmds = profile::Profile::instance()
-      ->vr_commands();
-  for (uint32_t i = 0; i < vr_general_cmds.size(); ++i) {
-    help_object[i] = vr_general_cmds[i];
-  }
-  return vr_help_command;
-}
-
-void MessageHelper::SendHelpVrCommand() {
-  smart_objects::SmartObject* vr_help_command = CreateGeneralVrCommand();
-  if (!vr_help_command) {
-    return;
-  }
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-  SendAddVRCommandToHMI(max_cmd_id + 1, *vr_help_command, 0);
 }
 
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(const uint32_t app_id) {
@@ -464,14 +444,14 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(const u
   }
 
   SmartObjectList hmi_requests;
-#ifdef WEB_HMI
+#ifdef HMI_JSON_API
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   (*request)[strings::msg_params] = msg_params;
   hmi_requests.push_back(request);
-#endif // #ifdef WEB_HMI
+#endif // #ifdef HMI_JSON_API
 
-#ifdef QT_HMI
+#ifdef HMI_DBUS_API
   //Generate list of ivi_subrequests
   for (int i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
     const VehicleInfo_Requests& sr = ivi_subrequests[i];
@@ -483,7 +463,7 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(const u
       hmi_requests.push_back(request);
     }
   }
-#endif // #ifdef QT_HMI
+#endif // #ifdef HMI_DBUS_API
  return hmi_requests;
 }
 
@@ -565,6 +545,15 @@ MessageHelper::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
     }
     if (app->vr_help()) {
       ui_msg_params[strings::vr_help] = (*app->vr_help());
+    }
+    if (app->keyboard_props()) {
+      ui_msg_params[strings::keyboard_properties] = (*app->keyboard_props());
+    }
+    if (app->menu_title()) {
+      ui_msg_params[strings::menu_title] = (*app->menu_title());
+    }
+    if (app->menu_icon()) {
+      ui_msg_params[strings::menu_icon] = (*app->menu_icon());
     }
     ui_msg_params[strings::app_id] = app->app_id();
 
@@ -876,6 +865,8 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(uint32_t cmd_
   if (0 < app_id) {
     msg_params[strings::app_id] = app_id;
   }
+  msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+
   (*vr_command)[strings::msg_params] = msg_params;
 
   return vr_command;
@@ -1360,9 +1351,14 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  std::string relative_file_path = app->name();
-  relative_file_path += "/";
-  relative_file_path += file_name;
+  std::string relative_file_path;
+  if (file_name.size() > 0 && file_name[0] == '/' ) {
+    relative_file_path = file_name;
+  } else {
+    relative_file_path = app->name();
+    relative_file_path += "/";
+    relative_file_path += file_name;
+  }
 
   std::string full_file_path = file_system::FullPath(relative_file_path);
 

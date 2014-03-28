@@ -45,11 +45,17 @@ class Interface;
  */
 class MessageFactoryFunction: public CppFunction {
  public:
+  enum SerializationType {
+    kJson,
+    kDbus
+  };
+
   // Methods
   // Creates function code generation object that produces
   // declaration and definition of a factory for messages of type
   // |factory_type| that belong to given |interface|
   MessageFactoryFunction(const Interface* interface,
+                         SerializationType serialization_type,
                          FunctionMessage::MessageType factory_type);
  private:
   // Types

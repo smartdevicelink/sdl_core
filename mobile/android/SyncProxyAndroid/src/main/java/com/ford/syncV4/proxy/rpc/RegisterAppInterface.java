@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy.rpc;
 
+import android.util.Log;
+
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -11,6 +13,7 @@ import com.ford.syncV4.util.DebugTool;
 
 public class RegisterAppInterface extends RPCRequest {
 
+    private static final String LOG_TAG = RegisterAppInterface.class.getSimpleName();
     private static final int HASH_ID_MAX_LENGTH = 100;
 
     public RegisterAppInterface() {
@@ -222,11 +225,13 @@ public class RegisterAppInterface extends RPCRequest {
     /**
      * Return uniquely identify of the current state of all app data that can persist through
      * connection cycles.
-     *
+     * <p/>
      * ID used to uniquely identify current state of all app data that can persist through
      * connection cycles (e.g. ignition cycles). This registered data (commands, submenus,
      * choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
      * If omitted, then the previous state of an app's commands, etc. will not be restored.
+     * When sending hashID, all RegisterAppInterface parameters should still be provided
+     * (e.g. ttsName, etc.).
      *
      * @return {@link java.lang.String} uniquely identify of the current state of all app data
      */
@@ -243,11 +248,13 @@ public class RegisterAppInterface extends RPCRequest {
     /**
      * Set uniquely identify of the current state of all app data that can persist through
      * connection cycles.
-     *
+     * <p/>
      * ID used to uniquely identify current state of all app data that can persist through
      * connection cycles (e.g. ignition cycles). This registered data (commands, submenus,
      * choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
      * If omitted, then the previous state of an app's commands, etc. will not be restored.
+     * When sending hashID, all RegisterAppInterface parameters should still be provided
+     * (e.g. ttsName, etc.).
      *
      * @param hashID uniquely identify of the current state
      */
@@ -261,5 +268,32 @@ public class RegisterAppInterface extends RPCRequest {
         } else {
             parameters.remove(Names.hashID);
         }
+    }
+
+    /**
+     * Set the object which holds various information about connecting device
+     * @param deviceInfo {@link com.ford.syncV4.proxy.rpc.DeviceInfo}
+     */
+    public void setDeviceInfo(DeviceInfo deviceInfo) {
+        if (deviceInfo != null) {
+            parameters.put(Names.deviceInfo, deviceInfo);
+        } else {
+            parameters.remove(Names.deviceInfo);
+        }
+    }
+
+    /**
+     * Return the object which holds various information about connecting device
+     * @return {@link com.ford.syncV4.proxy.rpc.DeviceInfo}
+     */
+    public DeviceInfo getDeviceInfo() {
+        Object object = parameters.get(Names.deviceInfo);
+        if (object instanceof DeviceInfo) {
+            return (DeviceInfo) object;
+        } else if (object instanceof Hashtable) {
+            return new DeviceInfo((Hashtable) object);
+        }
+        Log.w(LOG_TAG, " getDeviceInfo is not a type of DeviceInfo, current value:" + object);
+        return null;
     }
 }

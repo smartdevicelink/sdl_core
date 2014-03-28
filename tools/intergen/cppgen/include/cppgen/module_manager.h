@@ -41,6 +41,7 @@
 
 namespace codegen {
 class Namespace;
+class TypePreferences;
 
 /*
  * Manages all the source files generated for given interface.
@@ -49,7 +50,7 @@ class Namespace;
  */
 class ModuleManager {
  public:
-  ModuleManager(const std::string& name);
+  ModuleManager(const std::string& name, const TypePreferences& prefs);
   ~ModuleManager();
 
   /*

@@ -121,21 +121,37 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application info to FileSystem
      */
-    void SavetoFileSystem();
+    void IgnitionOff();
 
     /**
      * @brief Start timer for resumption applications
+     *        Restore D1-D5 data
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
     bool StartResumption(ApplicationSharedPtr application, uint32_t hash);
 
     /**
+     * @brief Start timer for resumption applications
+     *        Does not restore D1-D5 data
+     * @param application that is need to be restored
+     * @return true if it was saved, otherwise return false
+     */
+    bool StartResumptionOnlyHMILevel(ApplicationSharedPtr application);
+
+    /**
+     * @brief Check if there are all files need for resumption
+     * @param application that is need to be restored
+     * @return true if it all files exist, otherwise return false
+     */
+    bool CheckPersistenceFilesForResumption(ApplicationSharedPtr application);
+
+    /**
      * @brief Check application hash
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
-    bool CheckApplicationHash(uint32_t app_id, uint32_t hash);
+    bool CheckApplicationHash(std::string mobile_app_id, uint32_t hash);
 
     /**
      * @brief Timer callback function
@@ -167,7 +183,15 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
     *@brief Data of applications, that whait for resuming
     */
-    std::vector<Json::Value> saved_applications_;
+    Json::Value saved_applications_;
+
+    Json::Value& GetSavedApplications() {
+      return saved_applications_;
+    }
+
+    void SetSavedApplication(Json::Value& apps_json) {
+      saved_applications_ = apps_json;
+    }
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
@@ -182,7 +206,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     *       wait for timer to resume HMI Level
     *
     */
-    std::set<application_timestamp, TimeStampComparator> waiting_for_timer_;
+    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
 
 
     ApplicationManagerImpl* app_mngr_;
@@ -201,6 +225,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool ApplicationIsSaved(const uint32_t app_id);
 
     Json::Value GetApplicationCommands(const uint32_t app_id);
+    Json::Value GetApplicationSubMenus(const uint32_t app_id);
     Json::Value GetApplicationInteractionChoiseSets(const uint32_t app_id);
     Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
     Json::Value GetApplicationSubscriptions(const uint32_t app_id);

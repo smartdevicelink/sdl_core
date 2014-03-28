@@ -165,7 +165,6 @@ SDL.VehicleInfo = Em.ContainerView.create( {
      */
     toggleActivity: function() {
         this.set( 'active', !this.active );
-        SDL.SDLController.onSystemContextChange();
     },
     
     /**

@@ -16,11 +16,106 @@
 			  	"audioPassThruDisplayText1","audioPassThruDisplayText2","sliderHeader","sliderFooter","notificationText","menuName",
 			  	"secondaryText","tertiaryText","timeToDestination","turnText"
 			],
+               		"imageFields":
+			[
+                        	{
+					"name":"softButtonImage",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	},
+                                {
+					"name":"choiceImage",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	},
+                       		{
+					"name":"choiceSecondaryImage",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	},
+                                {
+					"name":"menuIcon",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	},
+                       		{
+					"name":"cmdIcon",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	},
+                       		{
+					"name":"appIcon",
+                         		"imageTypeSupported":
+                                	[
+                                	],
+                        		"imageResolution":
+                                         {
+                                          	"resolutionWidth":35,
+						"resolutionHeight":35
+                                         }
+                        	}
+                        	
+                        ],
 			"mediaClockFormats":
 			[
 				"CLOCK1","CLOCK2","CLOCK3","CLOCKTEXT1","CLOCKTEXT2","CLOCKTEXT3","CLOCKTEXT4"
 			],
 			"graphicSupported":true,
+                        "templatesAvailable":
+                        [
+                          
+                        	"DEFAULT","MEDIA","NON-MEDIA","ONSCREEN_PRESETS","NAV_FULLSCREEN_MAP","NAV_KEYBOARD",
+                        	"GRAPHIC_WITH_TEXT","TEXT_WITH_GRAPHIC","TILES_ONLY","TEXTBUTTONS_ONLY",
+                                "GRAPHIC_WITH_TILES","TILES_WITH_GRAPHIC","GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
+                        	"TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC","GRAPHIC_WITH_TEXTBUTTONS",
+                        	"TEXTBUTTONS_WITH_GRAPHIC","LARGE_GRAPHIC_WITH_SOFTBUTTONS",
+                        	"DOUBLE_GRAPHIC_WITH_SOFTBUTTONS","LARGE_GRAPHIC_ONLY"
+                        ],
+                        "screenParams":
+                        {
+                        	"resolution":
+                                {
+                                	"resolutionWidth":800,
+					"resolutionHeight":350
+                                },
+                        	"touchEventAvailable":
+                        	{
+                        		"pressAvailable":true,
+                                	"multiTouchAvailable":false,
+                                 	"doublePressAvailable":false
+                                }
+                        },
+                        "numCustomPresetsAvailable":8,
 			"imageCapabilities":
 			[
 				"DYNAMIC"

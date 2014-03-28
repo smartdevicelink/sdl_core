@@ -40,17 +40,20 @@ FFW.BasicCommunication = FFW.RPCObserver
             componentName: "BasicCommunication"
         }),
 
+        onFileRemovedSubscribeRequestID: -1,
         onAppRegisteredSubscribeRequestID: -1,
         onAppUnregisteredSubscribeRequestID: -1,
         onPlayToneSubscribeRequestID: -1,
         onSDLCloseSubscribeRequestID: -1,
 
+        onFileRemovedUnsubscribeRequestID: -1,
         onAppRegisteredUnsubscribeRequestID: -1,
         onAppUnregisteredUnsubscribeRequestID: -1,
         onPlayToneUnsubscribeRequestID: -1,
         onSDLCloseUnsubscribeRequestID: -1,
 
         // const
+        onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
@@ -90,6 +93,8 @@ FFW.BasicCommunication = FFW.RPCObserver
             this._super();
 
             // subscribe to notifications
+            this.onFileRemovedSubscribeRequestID = this.client
+                .subscribeToNotification(this.onFileRemovedNotification);
             this.onAppRegisteredSubscribeRequestID = this.client
                 .subscribeToNotification(this.onAppRegisteredNotification);
             this.onAppUnregisteredSubscribeRequestID = this.client
@@ -110,6 +115,9 @@ FFW.BasicCommunication = FFW.RPCObserver
             this._super();
 
             // unsubscribe from notifications
+
+            this.onFileRemovedUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onFileRemovedNotification);
             this.onAppRegisteredUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppRegisteredNotification);
             this.onAppUnregisteredUnsubscribeRequestID = this.client
@@ -158,6 +166,10 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             Em.Logger.log("FFW.BasicCommunicationRPC.onRPCNotification");
             this._super();
+
+            if (notification.method == this.onFileRemovedNotification) {
+                SDL.SDLModel.onFileRemoved(notification.params);
+            }
 
             if (notification.method == this.onAppRegisteredNotification) {
                 SDL.SDLModel.onAppRegistered(notification.params);
@@ -221,6 +233,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                     if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
                         SDL.States.goToStates('info.apps');
                     }
+
+                    SDL.SDLModel.stateLimited = null;
 
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
@@ -585,13 +599,14 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.OnStartDeviceDiscovery",
+                "method": "BasicCommunication.OnSystemRequest",
                 "params":{
                     "requestType": "HTTP",
-                    "url": "http://127.0.0.1",
-                    "fileType": "BINARY",
+                    "url": ["http://127.0.0.1"],
+                    "fileType": "JSON",
                     "offset": 1000,
-                    "length": 10000
+                    "length": 10000,
+                    "timeout": 500
                 }
             };
             this.client.send(JSONMessage);

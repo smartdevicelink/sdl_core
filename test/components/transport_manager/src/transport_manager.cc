@@ -264,6 +264,7 @@ TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
     const RawMessageSptr kMessage =
         new RawMessage(kConnection, kVersionProtocol, data, kSize);
     tm->SendMessageToDevice(kMessage);
+    usleep(1000);
   }
   EXPECT_TRUE(waitCond(10));
 

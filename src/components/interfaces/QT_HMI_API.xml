@@ -561,6 +561,15 @@
   </element>
 </enum>
 
+<enum name="VRCommandType">
+  <element name="Choice">
+    <description>Type that expound that current AddCommand should be pocessed as choise for initiated PerformInteraction request for current active on HMI.</description>
+  </element>
+  <element name="Command">
+    <description>Type that expound that current AddCommand should be pocessed as common command for current application on HMI.</description>
+  </element>
+</enum>
+
 <!--IVI part-->
 <enum name="ComponentVolumeStatus">
   <description>The volume status of a vehicle component.</description>
@@ -1779,6 +1788,18 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
+    <function name="OnFileRemoved" messagetype="notification">
+      <description>Notifies HMI in case some application file has been removed</description>
+      <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
+        <description>The name of the removed file</description>
+      </param>
+      <param name="fileType" type="Common.FileType" mandatory="true">
+        <description>The file type. See FileType.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application.</description>
+      </param>
+    </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
@@ -1849,6 +1870,9 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
+      <param name="resume" type="Boolean" mandatory="false">
+        <description>The information about resumption application. </description>
+      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
@@ -1904,10 +1928,10 @@
       </param>
     </function>
     <function name="OnSystemRequest" messagetype="notification" >
-	<description>
+      <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
 	Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
-	</description>
+      </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
@@ -1923,7 +1947,7 @@
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
     </function>
     <function name="OnSDLClose" messagetype="notification">
@@ -1953,6 +1977,9 @@
     </param>
     <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="100" array="true">
       <description>List of strings to be used as VR commands.</description>
+    </param>
+    <param name="type" type="Common.VRCommandType" mandatory="true">
+      <description>Type of added command. See VRCommandType.</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
@@ -2295,7 +2322,7 @@
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>ID of the choice that was selected in response to PerformInteraction.</description>
     </param>
-    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+    <param name="manualTextEntry" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
 	       	Manually entered text selection, e.g. through keyboard
         	Can be returned in lieu of choiceID, depending on trigger source
@@ -2624,6 +2651,12 @@
     </param>
     <param name="methodName" type="String" mandatory="true">
       <description>Currently used method name on which was triggered action</description>
+    </param>
+  </function>
+  <function name="OnRecordStart" messagetype="notification">
+    <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
     </param>
   </function>
 </interface>

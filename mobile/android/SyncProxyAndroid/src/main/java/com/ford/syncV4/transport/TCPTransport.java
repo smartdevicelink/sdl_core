@@ -330,10 +330,8 @@ public class TCPTransport extends SyncTransport {
                     logInfo(String.format("TCPTransport.connect: Socket is closed. Trying to connect to %s", mConfig));
 
                     if (mConfig.getIsNSD()) {
-                        // Since discovery will happen via Nsd, we don't need to care which port is used.
-                        // Just grab an available one and advertise it via Nsd.
                         if (mServerSocket == null) {
-                            mServerSocket = new ServerSocket(0);
+                            mServerSocket = new ServerSocket(mConfig.getPort());
 
                             handleOnServerSocketInit(mServerSocket.getLocalPort());
                         }
