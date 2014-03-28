@@ -331,9 +331,9 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                  &sessionID);
 
   const ServiceType service_type = ServiceTypeFromByte(message->service_type());
-  const bool protect_message =
-      (session_observer_->GetSSLContext(message->connection_key(), service_type))
-                               ? PROTECTION_ON : PROTECTION_OFF;
+  const bool protect_message = false;
+//      (session_observer_->GetSSLContext(message->connection_key(), service_type))
+//                               ? PROTECTION_ON : PROTECTION_OFF;
 
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
@@ -1090,8 +1090,8 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
       session_observer_->GetSSLContext(connection_key,
                                        ServiceTypeFromByte(service_type));
   if(!context || !context->IsInitCompleted()) {
-    LOG4CXX_ERROR(logger_, "Try to encrypt message for unprotected service"
-                  << service_type);
+    LOG4CXX_ERROR(logger_, "Try to encrypt message for unprotected service "
+                  << int(service_type));
     return RESULT_ENCRYPTION_FAILED;
   }
 
@@ -1119,7 +1119,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptData(
                                        ServiceTypeFromByte(service_type));
   if(!context || !context->IsInitCompleted()) {
     LOG4CXX_ERROR(logger_, "Received encrypted message for unprotected service "
-                  << service_type);
+                  << int(service_type));
     security_manager_->SendInternalError( connection_key,
           security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED);
     return RESULT_ENCRYPTION_FAILED;
