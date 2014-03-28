@@ -332,7 +332,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
 
   const ServiceType service_type = ServiceTypeFromByte(message->service_type());
   const bool protect_message =
-      (session_observer_->GetSSLContext(connection_handle, service_type))
+      (session_observer_->GetSSLContext(message->connection_key(), service_type))
                                ? PROTECTION_ON : PROTECTION_OFF;
 
   if (message->data_size() <= maxDataSize) {
