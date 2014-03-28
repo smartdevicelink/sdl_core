@@ -41,6 +41,7 @@ option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
+option(ENABLE_LOG "Logging feature" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -147,9 +148,14 @@ if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
 
+if (ENABLE_LOG)
+  add_definitions(-DENABLE_LOG)
+endif()
+
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 
+# FIXME(DC): weird logic
 IF(CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
     add_definitions(-DDEBUG)
