@@ -10,20 +10,20 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # please see the online documentation at vagrantup.com.
 
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.define "ubuntu12.04_32x86" do |web|
-    web.vm.box =   "ubuntu12.04_32x86"
+  config.vm.define "ubuntu12.04_32x86" do |vm1|
+    vm1.vm.box =   "ubuntu12.04_32x86"
   end
 
-  config.vm.define "ubuntu12.04_64x86" do |db|
-    db.vm.box =    "ubuntu12.04_64x86"
+  config.vm.define "ubuntu12.04_64x86" do |vm2|
+    vm2.vm.box =    "ubuntu12.04_64x86"
   end
 
-  config.vm.define "ubuntu13.10_32x86" do |db|
-    db.vm.box =    "ubuntu13.10_32x86"
+  config.vm.define "ubuntu13.10_32x86" do |vm3|
+    vm3.vm.box =    "ubuntu13.10_32x86"
   end
 
-  config.vm.define "ubuntu13.10_64x86" do |db|
-    db.vm.box =    "ubuntu13.10_64x86"
+  config.vm.define "ubuntu13.10_64x86" do |vm4|
+    vm4.vm.box =    "ubuntu13.10_64x86"
   end
   
   # The url from where the 'config.vm.box' box will be fetched if it
