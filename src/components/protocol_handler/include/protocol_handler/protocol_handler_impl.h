@@ -158,8 +158,12 @@ class ProtocolHandlerImpl
      */
     void set_session_observer(SessionObserver* observer);
 
-    void set_security_manager(
-        const security_manager::SecurityManager* security_manager);
+    /**
+     * \brief Sets pointer for SecurityManager layer for managing protection routine
+     * \param security_manager Pointer to object of the class implementing
+     * ISessionObserver
+     */
+    void set_security_manager(security_manager::SecurityManager *security_manager);
 
     /**
      * \brief Method for sending message to Mobile Application
@@ -176,10 +180,7 @@ class ProtocolHandlerImpl
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
 
-    void set_security_manager(security_manager::SecurityManager* security_manager);
-
   protected:
-
     /**
      * \brief Sends acknowledgement of starting session to mobile application
      * with session number and hash code for second version of protocol
@@ -190,14 +191,14 @@ class ProtocolHandlerImpl
      * to be sent to
      * mobile app for using when ending session
      * \param service_type Type of session: RPC or BULK Data. RPC by default
+     * \param protection Protection flag
      */
-    void SendStartSessionAck(
-      ConnectionID connection_id,
-      uint8_t session_id,
-      uint8_t protocol_version,
-      uint32_t hash_code,
-      uint8_t service_type,
-      bool encrypted);
+    void SendStartSessionAck( ConnectionID connection_id,
+                              uint8_t session_id,
+                              uint8_t protocol_version,
+                              uint32_t hash_code,
+                              uint8_t service_type,
+                              bool encrypted);
 
     /**
      * \brief Sends fail of starting session to mobile application
@@ -205,11 +206,10 @@ class ProtocolHandlerImpl
      * \param protocol_version Version of protocol used for communication
      * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
-    void SendStartSessionNAck(
-      ConnectionID connection_id,
-      uint8_t session_id,
-      uint8_t protocol_version,
-      uint8_t service_type = SERVICE_TYPE_RPC);
+    void SendStartSessionNAck(ConnectionID connection_id,
+                              uint8_t session_id,
+                              uint8_t protocol_version,
+                              uint8_t service_type);
 
     /**
      * \brief Sends acknowledgement of end session/service to mobile application
@@ -310,7 +310,7 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param compress Compression flag
+     * \param protection Protection flag
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(ConnectionID connection_id,
@@ -319,7 +319,7 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       size_t data_size,
       const uint8_t* data,
-      const bool compress);
+      const bool protection);
 
     /**
      * \brief Sends message which size doesn't permit to send it in one frame.
@@ -330,18 +330,17 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param compress Compression flag
+     * \param protection Protection flag
      * \param max_data_size Maximum allowed size of single frame.
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendMultiFrameMessage(
-      ConnectionID connection_id,
+    RESULT_CODE SendMultiFrameMessage(ConnectionID connection_id,
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
       size_t data_size,
       const uint8_t* data,
-      const bool compress,
+      const bool protection,
       const size_t max_data_size);
 
     /**
@@ -427,8 +426,9 @@ class ProtocolHandlerImpl
     // FIXME (EZamakhov): add brief
     RawMessagePtr DecryptMessage(const ConnectionID connection_id,
         ProtocolPacket &packet);
-    RawMessagePtr DecryptRawMessage(const ConnectionID connection_id,
-                                    const RawMessagePtr &packet);
+    /**
+     * \brief Encryption/Decryption methodes for SecureSecvice check
+     */
     RESULT_CODE EncryptData(const int32_t connection_key, const uint8_t service_type,
                             const uint8_t* const data_in, const size_t data_in_size,
                             const uint8_t **data_out, size_t *data_out_size);

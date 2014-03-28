@@ -49,7 +49,7 @@ ProtocolPacket::ProtocolPacket()
 }
 
 ProtocolPacket::ProtocolPacket(uint8_t connection_key,
-                               uint8_t version, bool compress,
+                               uint8_t version, bool protection,
                                uint8_t frameType,
                                uint8_t serviceType,
                                uint8_t frameData, uint8_t sessionID,
@@ -61,7 +61,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key,
       data_offset_(0),
       packet_id_(packet_id),
       connection_key_(connection_key) {
-  RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
+  RESULT_CODE result = serializePacket(version, protection, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
   if (result != RESULT_OK) {
     NOTREACHED();
@@ -93,7 +93,7 @@ ProtocolPacket::~ProtocolPacket() {
 
 // Serialization
 RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
-                                            bool compress,
+                                            bool protection,
                                             uint8_t frameType,
                                             uint8_t serviceType,
                                             uint8_t frameData,
@@ -109,12 +109,12 @@ RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
   }
 
   uint8_t offset = 0;
-  uint8_t compressF = 0x0;
+  uint8_t protectionF = 0x0;
   packet_ = new uint8_t[MAXIMUM_FRAME_DATA_SIZE];
-  if (compress) {
-    compressF = 0x1;
+  if (protection) {
+    protectionF = 0x1;
   }
-  uint8_t firstByte = ((version << 4) & 0xF0) | ((compressF << 3) & 0x08)
+  uint8_t firstByte = ((version << 4) & 0xF0) | ((protectionF << 3) & 0x08)
       | (frameType & 0x07);
 
   packet_[offset++] = firstByte;
@@ -187,9 +187,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_header_.version = firstByte >> 4u;
 
   if (firstByte & 0x08u) {
-    packet_header_.compress = true;
+    packet_header_.protection_flag = true;
   } else {
-    packet_header_.compress = false;
+    packet_header_.protection_flag = false;
   }
 
   packet_header_.frameType = firstByte & 0x07u;
@@ -250,8 +250,8 @@ uint8_t ProtocolPacket::protocol_version() const {
   return packet_header_.version;
 }
 
-bool ProtocolPacket::is_compress() const {
-  return packet_header_.compress;
+bool ProtocolPacket::protection_flag() const {
+  return packet_header_.protection_flag;
 }
 
 uint8_t ProtocolPacket::frame_type() const {

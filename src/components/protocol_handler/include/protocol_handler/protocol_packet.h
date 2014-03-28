@@ -64,9 +64,13 @@ const uint8_t PROTOCOL_VERSION_1 = 0x01;
 const uint8_t PROTOCOL_VERSION_2 = 0x02;
 
 /**
- *\brief Constant: flag of no compression
+ *\brief Constant: flag of protection
  */
-const bool COMPRESS_OFF = false;
+const bool PROTECTION_ON = true;
+/**
+ *\brief Constant: flag of no protection
+ */
+const bool PROTECTION_OFF = false;
 
 /**
  *\brief Constant: Control type of frame used in protocol header.
@@ -220,7 +224,7 @@ struct ProtocolHeader {
    */
   ProtocolHeader()
     : version(0x00),
-      compress(0x00),
+      protection_flag(0x00),
       frameType(0x00),
       serviceType(0x00),
       frameData(0x00),
@@ -235,9 +239,9 @@ struct ProtocolHeader {
   uint8_t version;
 
   /**
-   *\brief Compression flag
+   *\brief protection flag
    */
-  bool compress;
+  bool protection_flag;
 
   /**
    *\brief Type of frame (Single/First/Consecutive)
@@ -310,7 +314,7 @@ class ProtocolPacket {
     /**
      * \brief Constructor
      * \param version Version of protocol
-     * \param compress Compression flag
+     * \param protection Protection flag
      * \param frameType Type of frame (Single/First/Consecutive)
      * \param serviceType Type of session (RPC/Bulk data)
      * \param frameData Information about frame: start/end session, number of
@@ -321,7 +325,7 @@ class ProtocolPacket {
      * \param data Message string if provided
      */
     ProtocolPacket(uint8_t connection_key,
-                   uint8_t version, bool compress, uint8_t frameType,
+                   uint8_t version, bool protection, uint8_t frameType,
                    uint8_t serviceType, uint8_t frameData,
                    uint8_t sessionId, uint32_t dataSize,
                    uint32_t messageID, const uint8_t* data = 0,
@@ -335,7 +339,7 @@ class ProtocolPacket {
     /**
      * \brief Serializes info about message into protocol header.
      * \param version Version of protocol
-     * \param compress Compression flag
+     * \param protection Protection flag
      * \param frameType Type of frame (Single/First/Consecutive)
      * \param serviceType Type of session (RPC/Bulk data)
      * \param frameData Information about frame: start/end session, number of
@@ -346,7 +350,7 @@ class ProtocolPacket {
      * \param data Message string if provided
      * \return \saRESULT_CODE Status of serialization
      */
-    RESULT_CODE serializePacket(uint8_t version, bool compress,
+    RESULT_CODE serializePacket(uint8_t version, bool protection,
                                 uint8_t frameType,
                                 uint8_t serviceType,
                                 uint8_t frameData, uint8_t sessionId,
@@ -400,9 +404,9 @@ class ProtocolPacket {
     uint8_t protocol_version() const;
 
     /**
-     * \brief Getter of compression flag
+     * \brief Getter of protection flag
      */
-    bool is_compress() const;
+    bool protection_flag() const;
 
     /**
      * \brief Getter of frame type (single/first/etc)
