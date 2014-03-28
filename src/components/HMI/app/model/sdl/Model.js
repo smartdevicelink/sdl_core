@@ -567,7 +567,7 @@ SDL.SDLModel = Em.Object.create({
     startStream: function(params) {
 
         SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-        SDL.SDLModel.playVideo();
+        SDL.SDLModel.playVideo(params.appID);
     },
 
     /**
@@ -622,11 +622,11 @@ SDL.SDLModel = Em.Object.create({
     /**
      * Method to reset navigationApp streaming url from current app model
      */
-    playVideo: function(){
-        if (SDL.SDLAppController.model.navigationStream !== null) {
+    playVideo: function(appID){
+        if (SDL.SDLController.getApplicationModel(appID).navigationStream !== null) {
 
             SDL.SDLModel.naviVideo = document.getElementById("html5Player");
-            SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+            SDL.SDLModel.naviVideo.src = SDL.SDLController.getApplicationModel(appID).navigationStream;
             SDL.SDLModel.naviVideo.play();
         }
     },
