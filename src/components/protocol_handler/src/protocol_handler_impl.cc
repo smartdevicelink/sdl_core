@@ -153,7 +153,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)) {
+                                   threads::ThreadOptions(kStackSize)),
+      last_message_id_(-1) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -333,7 +334,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                 message->protocol_version(),
                                                 SERVICE_TYPE_RPC,
                                                 message->data_size(),
-                                                message->data(), false);
+                                                message->data(), false,
+                                                final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send single frame message.");
@@ -348,16 +350,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                SERVICE_TYPE_RPC,
                                                message->data_size(),
                                                message->data(), false,
-                                               maxDataSize);
+                                               maxDataSize, final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send multiframe messages.");
     }
   }
-
-  if (final_message)
-    transport_manager_->Disconnect(connection_handle);
-
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -416,6 +414,17 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
+  const ConnectionID connection_id = message->connection_key();
+  uint8_t* data = message->data();
+  const std::size_t size = message->data_size();
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  session_observer_->PairFromKey(connection_id, &connection_handle, &sessionID);
+  const ProtocolPacket sent_message(connection_id, data, size);
+  if (sent_message.message_id() == last_message_id_) {
+    last_message_id_ = -1;
+    transport_manager_->Disconnect(connection_handle);
+  }
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMobileMessageSent(message);
@@ -487,7 +496,8 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    const uint32_t data_size, const uint8_t* data, const bool compress) {
+    const uint32_t data_size, const uint8_t* data, const bool compress,
+    const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   uint8_t versionF = PROTOCOL_VERSION_1;
@@ -495,6 +505,9 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     versionF = PROTOCOL_VERSION_2;
   }
 
+  if (is_final_message) {
+    last_message_id_ = message_counters_[session_id];
+  }
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
       versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
       session_id, data_size, message_counters_[session_id]++, data));
@@ -510,7 +523,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
     const uint32_t data_size, const uint8_t* data, const bool compress,
-    const uint32_t maxdata_size) {
+    const uint32_t maxdata_size, const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
   RESULT_CODE retVal = RESULT_OK;
 
@@ -558,6 +571,9 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       impl::RawFordMessageToMobile(firstPacket, false));
   LOG4CXX_INFO_EXT(logger_, "First frame is sent.");
 
+  if (is_final_message) {
+      last_message_id_ = message_counters_[session_id];
+  }
   uint8_t* outDataFrame = new uint8_t[maxdata_size];
   for (uint32_t i = 0; i < numOfFrames; i++) {
     if (i != (numOfFrames - 1)) {
