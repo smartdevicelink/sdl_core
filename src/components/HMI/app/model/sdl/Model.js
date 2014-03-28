@@ -72,7 +72,7 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {Object}
      */
-    naviVideo: null,
+    naviVideo: {},
 
     /**
      * Flag to indicate AudioPassThruPopUp activity
@@ -583,8 +583,8 @@ SDL.SDLModel = Em.Object.create({
             }),
             videoChild = null;
 
-        SDL.NavigationAppView.removeChild(SDL.NavigationAppView.get('videoView'));
-        SDL.NavigationAppView.rerender();
+        SDL.NavigationAppView.videoView.remove();
+        SDL.NavigationAppView.videoView.destroy();
 
         SDL.SDLController.getApplicationModel(appID).set('navigationStream', null);
 
