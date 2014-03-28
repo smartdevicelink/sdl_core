@@ -354,13 +354,13 @@ namespace security_manager_test {
     // Expect SSLContext::DoHandshakeStep 3 times
     // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _))
+        .WillOnce(DoAll( SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)))
+        .WillOnce(DoAll( SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)))
+        .WillOnce(DoAll( SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)));
 
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
@@ -375,11 +375,11 @@ namespace security_manager_test {
     SetMockCryptoManger();
     const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
     const size_t handshake_data_size =
-        sizeof(handshake_data)/sizeof(handshake_data[0]);
+        sizeof(handshake_data) / sizeof(handshake_data[0]);
 
     uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
     const size_t handshake_data_out_size =
-        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+        sizeof(handshake_data_out) / sizeof(handshake_data_out[0]);
 
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
@@ -393,24 +393,24 @@ namespace security_manager_test {
 
     // Expect SSLContext::DoHandshakeStep
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _))
+        .WillOnce(DoAll( SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)));
 
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
   }
   /*
-   * SecurityManger shall scall all listeners on success end handshake
+   * SecurityManger shall call all listeners on success end handshake
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_HandShakeFinished) {
     SetMockCryptoManger();
     const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
     const size_t handshake_data_size =
-        sizeof(handshake_data)/sizeof(handshake_data[0]);
+        sizeof(handshake_data) / sizeof(handshake_data[0]);
 
     uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
     const size_t handshake_data_out_size =
-        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+        sizeof(handshake_data_out) / sizeof(handshake_data_out[0]);
 
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
@@ -421,13 +421,13 @@ namespace security_manager_test {
         Times(3).WillRepeatedly(Return(true));
     // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _))
+        .WillOnce(DoAll( SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)))
+        .WillOnce(DoAll( SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)))
+        .WillOnce(DoAll( SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::Handshake_Result_Success)));
 
     // Expect NO InternalError with ERROR_ID
 

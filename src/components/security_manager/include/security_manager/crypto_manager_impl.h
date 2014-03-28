@@ -50,15 +50,14 @@ namespace security_manager {
     class SSLContextImpl : public SSLContext {
      public:
       SSLContextImpl(SSL *conn, Mode mode);
-      virtual void* StartHandshake(size_t* out_data_size);
-      virtual void* DoHandshakeStep(const void* their_data,  size_t their_data_size,
-                                    size_t* our_data_size);
-      virtual void* Encrypt(const void* plain_data,  size_t plain_data_size,
-                            size_t* encrypted_data_size);
-      virtual void* Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
-                            size_t* plain_data_size);
+      virtual HandshakeResult StartHandshake(const uint8_t** const out_data, size_t* out_data_size);
+      virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,  size_t in_data_size,
+                                              const uint8_t** const out_data, size_t* out_data_size);
+      virtual bool Encrypt(const uint8_t * const in_data,  size_t in_data_size,
+                            const uint8_t ** const out_data, size_t* out_data_size);
+      virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
+                            const uint8_t ** const out_data, size_t* out_data_size);
       virtual bool  IsInitCompleted() const;
-      virtual int   mode() const;
       virtual ~SSLContextImpl();
      private:
       void EnsureBufferSizeEnough(size_t size);
@@ -67,7 +66,7 @@ namespace security_manager {
       BIO *bioOut_;
       BIO *bioFilter_;
       size_t buffer_size_;
-      char *buffer_;
+      uint8_t *buffer_;
       Mode mode_;
     };
 
@@ -85,6 +84,7 @@ namespace security_manager {
     SSL_CTX *context_;
     Mode mode_;
     static ::log4cxx::LoggerPtr logger_;
+    static int instance_count_;
   };
 } // namespace security_manager
 

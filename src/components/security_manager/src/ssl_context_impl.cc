@@ -37,6 +37,8 @@
 #include <openssl/err.h>
 #include <memory.h>
 
+#include "utils/macro.h"
+
 namespace security_manager {
 
 CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
@@ -45,7 +47,7 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
     bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
     buffer_size_(1024), // TODO: Collect some statistics, determine the most appropriate value
-    buffer_(new char[buffer_size_]),
+    buffer_(new uint8_t[buffer_size_]),
     mode_(mode) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
@@ -67,22 +69,23 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
   return SSL_is_init_finished(connection_);
 }
 
-void* CryptoManagerImpl::SSLContextImpl::
-StartHandshake(size_t *out_data_size) {
-  return DoHandshakeStep(NULL, 0, out_data_size);
+SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
+StartHandshake(const uint8_t** const out_data, size_t* out_data_size) {
+  return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
 
-void* CryptoManagerImpl::SSLContextImpl::
-DoHandshakeStep(const void* client_data,  size_t client_data_size,
-                size_t* server_data_size) {
+SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
+DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
+                const uint8_t** const out_data, size_t* out_data_size) {
+  *out_data = NULL;
   if (IsInitCompleted()) {
-    return NULL;
+    return SSLContext::Handshake_Result_Success;
   }
 
-  if (client_data && client_data_size) {
-    int ret = BIO_write(bioIn_, client_data, client_data_size);
+  if (in_data && in_data_size) {
+    int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
-      return NULL;
+      return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
 
@@ -90,75 +93,79 @@ DoHandshakeStep(const void* client_data,  size_t client_data_size,
   if (ret == 1) {
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
+  } else if (ret == 0) {
+    return SSLContext::Handshake_Result_Fail;
   }
 
-  int pen = BIO_pending(bioOut_);
+  int pend = BIO_ctrl_pending(bioOut_);
 
-  if (!pen) {
-    return NULL;
-  }
-  EnsureBufferSizeEnough(pen);
+  if (pend) {
+    EnsureBufferSizeEnough(pend);
 
-  ret = BIO_read(bioOut_, static_cast<char*>(buffer_), pen);
-  if (ret > 0) {
-    *server_data_size = ret;
-    return buffer_;
-  } else {
-    return NULL;
+    ret = BIO_read(bioOut_, buffer_, pend);
+    if (ret == pend) {
+      *out_data_size = ret;
+      *out_data =  buffer_;
+    } else {
+      return SSLContext::Handshake_Result_AbnormalFail;
+    }
   }
+
+  return SSLContext::Handshake_Result_Success;
 }
 
-void* CryptoManagerImpl::SSLContextImpl::
-Encrypt(const void* data,  size_t data_size,
-        size_t* encrypted_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::
+Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
+        const uint8_t ** const out_data, size_t* out_data_size) {
 
-  if (!SSL_is_init_finished(connection_)) {
-    return NULL;
+  if (!SSL_is_init_finished(connection_) ||
+      !in_data ||
+      !in_data_size) {
+    return false;
   }
 
-  if (!data || !data_size) {
-    return NULL;
-  }
-  BIO_write(bioFilter_, data, data_size);
+  BIO_write(bioFilter_, in_data, in_data_size);
   const int len = BIO_ctrl_pending(bioOut_);
 
   EnsureBufferSizeEnough(len);
   const int read_size = BIO_read(bioOut_, buffer_, len);
-  //TODO (EZamakhov) : replace to DCHECK
-  assert(len == read_size);
-  if (read_size < 0)
-    return NULL;
-  *encrypted_data_size = read_size;
+  DCHECK(len == read_size);
+  if (read_size < 0) {
+    return false;
+  }
+  *out_data_size = read_size;
+  *out_data = buffer_;
 
-  return buffer_;
+  return true;
 }
 
-void* CryptoManagerImpl::SSLContextImpl::
-Decrypt(const void* encrypted_data,  size_t encrypted_data_size,
-        size_t* data_size) {
+bool CryptoManagerImpl::SSLContextImpl::
+Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
+        const uint8_t ** const out_data, size_t* out_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
-    return NULL;
+    return false;
   }
 
-  if (!encrypted_data || !encrypted_data_size) {
-    return NULL;
+  if (!in_data || !in_data_size) {
+    return false;
   }
-  BIO_write(bioIn_, encrypted_data, encrypted_data_size);
+  BIO_write(bioIn_, in_data, in_data_size);
   int len = BIO_ctrl_pending(bioFilter_);
   ptrdiff_t offset = 0;
 
-  *data_size = 0;
+  *out_data_size = 0;
   while (len) {
     EnsureBufferSizeEnough(len + offset);
     len = BIO_read(bioFilter_, buffer_ + offset, len);
     if (len < 0)
-      return NULL;
-    *data_size += len;
+      return false;
+    *out_data_size += len;
     offset += len;
     len = BIO_ctrl_pending(bioFilter_);
   }
-  return buffer_;
+  *out_data = buffer_;
+  return true;
 }
 
 CryptoManagerImpl::SSLContextImpl::
@@ -171,13 +178,9 @@ CryptoManagerImpl::SSLContextImpl::
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
     delete[] buffer_;
-    buffer_ = new char[size];
+    buffer_ = new uint8_t[size];
     buffer_size_ = size;
   }
-}
-
-int CryptoManagerImpl::SSLContextImpl::mode() const {
-  return mode_;
 }
 
 }  // namespace security_manager
