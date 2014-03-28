@@ -551,6 +551,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
           connection_key, service_type, data, data_size, &data, &data_size);
     if(code != RESULT_OK) {
       LOG4CXX_ERROR(logger_, "Encryption error");
+      return code;
     }
   }
 
@@ -589,6 +590,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
           connection_key, service_type, data, data_size, &data, &data_size);
     if(code!=RESULT_OK) {
       LOG4CXX_ERROR(logger_, "Encryption error");
+      return code;
     }
   }
 
