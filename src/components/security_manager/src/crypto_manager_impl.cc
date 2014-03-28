@@ -65,9 +65,9 @@ bool CryptoManagerImpl::Init(Mode mode,
 
   mode_ = mode;
   if (mode == SERVER) {
-    context_ = SSL_CTX_new(TLSv1_2_server_method());
+    context_ = SSL_CTX_new(SSLv23_server_method());
   } else {
-    context_ = SSL_CTX_new(TLSv1_2_client_method());
+    context_ = SSL_CTX_new(SSLv23_client_method());
   }
 
 

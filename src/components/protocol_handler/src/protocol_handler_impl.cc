@@ -542,14 +542,14 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   uint8_t versionF = PROTOCOL_VERSION_1;
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
-    }
+  }
 
   DCHECK(session_observer_);
   const int32_t connection_key =
       session_observer_->KeyFromPair(connection_id, session_id);
 
   //Control service shall not be encrypted
-  if(protection && service_type!=kControl) {
+  if(protection && service_type != kControl) {
     const RESULT_CODE code = EncryptData(
           connection_key, service_type, data, data_size, &data, &data_size);
     if(code != RESULT_OK) {
