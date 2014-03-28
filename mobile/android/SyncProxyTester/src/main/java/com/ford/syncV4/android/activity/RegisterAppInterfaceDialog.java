@@ -164,6 +164,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                         if (useAppID.isChecked()) {
                             registerAppInterface.setAppID(appID.getText().toString());
                         }
+
                         AppPreferencesManager.setIsDeviceRooted(isRootedView.isChecked());
                         registerAppInterface.setIsRooted(isRootedView.isChecked());
 

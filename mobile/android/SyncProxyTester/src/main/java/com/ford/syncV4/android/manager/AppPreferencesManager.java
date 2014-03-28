@@ -279,6 +279,25 @@ public class AppPreferencesManager {
     }
 
     /**
+     * @return true if it is necessary to check whether device has been rooted
+     */
+    public static boolean getDoDeviceRootCheck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, true);
+    }
+
+    /**
+     * Set true if it is necessary to check whether device has been rooted
+     * @param value boolean value
+     */
+    public static void setDoDeviceRootCheck(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, value);
+        editor.commit();
+    }
+
+    /**
      * @return the Context of the application
      */
     private static Context getAppContext() {
