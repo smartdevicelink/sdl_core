@@ -60,9 +60,9 @@ namespace security_manager {
 class SSLContext {
  public:
   enum HandshakeResult {
-    Handshake_Result_Success,
-    Handshake_Result_Fail,
-    Handshake_Result_AbnormalFail
+    Handshake_Result_Success      = 0x0,
+    Handshake_Result_Fail         = 0x1,
+    Handshake_Result_AbnormalFail = 0x2
   };
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data, size_t* out_data_size)=0;
   virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,  size_t in_data_size,

@@ -124,10 +124,12 @@ namespace security_manager_test {
   public:
     MOCK_CONST_METHOD0(mode, int ());
     MOCK_METHOD2(StartHandshake,
-                 security_manager::SSLContext::HandshakeResult (const uint8_t** const, size_t*));
+                 security_manager::SSLContext::HandshakeResult (
+                   const uint8_t** const, size_t*));
     MOCK_METHOD4(DoHandshakeStep,
-                 security_manager::SSLContext::HandshakeResult (const uint8_t* const,  size_t,
-                                                                const uint8_t** const, size_t*));
+                 security_manager::SSLContext::HandshakeResult (
+                   const uint8_t* const,  size_t,
+                   const uint8_t** const, size_t*));
     MOCK_METHOD4(Encrypt,
                  bool (const uint8_t* const,  size_t,
                        const uint8_t** const, size_t*));

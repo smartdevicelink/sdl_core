@@ -243,29 +243,32 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   }
   size_t out_data_size;
   const uint8_t * out_data;
-  SSLContext::HandshakeResult handshake_result =
-      sslContext->DoHandshakeStep(
-          inMessage->get_data(),
-          inMessage->get_data_size(),
-          &out_data,
-          &out_data_size);
+  const SSLContext::HandshakeResult handshake_result =
+      sslContext->DoHandshakeStep( inMessage->get_data(), inMessage->get_data_size(),
+                                   &out_data, &out_data_size);
   if (handshake_result == SSLContext::Handshake_Result_AbnormalFail) {
+    // Do not return handshake data on AbnormalFail or null returned values
     std::string error("SendHandshakeData: Handshake failed: " + LastError());
     LOG4CXX_WARN(logger_, error);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SSL_INVALID_DATA, seqNumber);
     NotifyListenersOnHandshakeDone(connection_key, false);
+    // no handshake data to send
     return false;
-  } if(sslContext->IsInitCompleted()) {
+  }
+  if(sslContext->IsInitCompleted()) {
     LOG4CXX_INFO(logger_, "SSL initialization finished success.");
     NotifyListenersOnHandshakeDone(connection_key, true);
   }
-
-  // answer with the same header as income message
-  if (out_data && out_data_size) {
-    SendData(connection_key, inMessage->get_header(), out_data, out_data_size);
+  else if (handshake_result == SSLContext::Handshake_Result_Fail) {
+    LOG4CXX_INFO(logger_, "SSL initialization finished with fail.");
+    NotifyListenersOnHandshakeDone(connection_key, false);
   }
 
+  if(out_data && out_data_size) {
+    // answer with the same header as income message
+    SendData(connection_key, inMessage->get_header(), out_data, out_data_size);
+  }
   return true;
 }
 
