@@ -78,6 +78,7 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   (*json_app)[strings::application_subscribtions] =
       GetApplicationSubscriptions(connection_key);
   (*json_app)[strings::application_files] = GetApplicationFiles(connection_key);
+  (*json_app)[strings::application_show] = GetApplicationShow(connection_key);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
   (*json_app)[strings::audio_streaming_state] = application->audio_streaming_state();
 }
@@ -180,6 +181,20 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   Json::Value& global_properties = saved_app[strings::application_global_properties];
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
   Json::Value& application_files= saved_app[strings::application_files];
+  Json::Value& application_show= saved_app[strings::application_show];
+
+  //show
+  if (!application_show.isNull()) {
+    smart_objects::SmartObject message;
+    Formatters::CFormatterJsonBase::jsonValueToObj(application_show, message);
+    application->set_show_command(message);
+
+    requests = MessageHelper::CreateShowRequestToHMI(application);
+    for (MessageHelper::SmartObjectList::iterator it = requests.begin();
+         it != requests.end(); ++it) {
+      ProcessHMIRequest(*it, true);
+    }
+  }
 
   // files
   for (Json::Value::iterator json_it = application_files.begin();
@@ -487,6 +502,8 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
   LOG4CXX_INFO(logger_, saved_app.toStyledString());
   Json::Value& app_commands = saved_app[strings::application_commands];
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
+  Json::Value& application_show = saved_app[strings::application_show];
+
 
   //add commands
   for (Json::Value::iterator json_it = app_commands.begin();
@@ -518,6 +535,37 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
     }
   }
 
+  //show
+  if (!application_show.isNull()) {
+    smart_objects::SmartObject message = smart_objects::SmartObject(
+                                         smart_objects::SmartType::SmartType_Map);
+    Formatters::CFormatterJsonBase::jsonValueToObj(application_show, message);
+
+    mobile_apis::Result::eType processing_result =
+        MessageHelper::ProcessSoftButtons(message, application);
+    if (mobile_apis::Result::SUCCESS != processing_result) {
+      if (mobile_apis::Result::INVALID_DATA == processing_result) {
+        LOG4CXX_ERROR(logger_, "ProcessSoftButtons failed");
+        return false ;
+      }
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+        LOG4CXX_WARN(logger_, "ProcessSoftButtons UNSUPPORTED_RESOURCE!");
+      }
+    }
+
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyImageFiles(message, application);
+
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      if (mobile_apis::Result::INVALID_DATA == verification_result) {
+        LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+        return false;
+      }
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
+        LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
+      }
+    }
+  }
   return true;
 }
 
@@ -698,6 +746,19 @@ Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
       result.append(file_data);
     }
   }
+  return result;
+}
+
+Json::Value ResumeCtrl::GetApplicationShow(const uint32_t app_id) {
+  Json::Value result;
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+  DCHECK(app.get());
+  const smart_objects::SmartObject* show_so = app->show_command();
+  if (!show_so) {
+    return result;
+  }
+  result = JsonFromSO(show_so);
   return result;
 }
 

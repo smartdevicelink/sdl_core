@@ -215,6 +215,7 @@ class MessageHelper {
 
     static smart_objects::SmartObject* CreateAppVrHelp(ApplicationConstSharedPtr app);
 
+    static SmartObjectList CreateShowRequestToHMI(ApplicationConstSharedPtr app);
     static void SendShowRequestToHMI(ApplicationConstSharedPtr app);
     static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);

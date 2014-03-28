@@ -644,18 +644,12 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(ApplicationConstShare
   return result;
 }
 
-void MessageHelper::SendShowRequestToHMI(ApplicationConstSharedPtr app) {
-  if (!app) {
-    return;
-  }
+MessageHelper::SmartObjectList MessageHelper::CreateShowRequestToHMI(ApplicationConstSharedPtr app) {
+  DCHECK(app.get());
 
+  SmartObjectList requests;
   smart_objects::SmartObject* ui_show = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
-
-  if (!ui_show) {
-    return;
-  }
-
   if (app->show_command()) {
     (*ui_show)[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::UI_Show);
@@ -668,8 +662,22 @@ void MessageHelper::SendShowRequestToHMI(ApplicationConstSharedPtr app) {
     (*ui_show)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
     (*ui_show)[strings::msg_params] = (*app->show_command());
-    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(ui_show));
+    requests.push_back(ui_show);
   }
+  return requests;
+}
+
+void MessageHelper::SendShowRequestToHMI(ApplicationConstSharedPtr app) {
+  if (!app) {
+    return;
+  }
+  SmartObjectList shows  = CreateShowRequestToHMI(app);
+
+  for (SmartObjectList::const_iterator it = shows.begin();
+       it != shows.end(); ++it) {
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(*it));
+  }
+
 }
 
 void MessageHelper::SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app) {

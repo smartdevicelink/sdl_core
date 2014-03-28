@@ -230,6 +230,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
     Json::Value GetApplicationSubscriptions(const uint32_t app_id);
     Json::Value GetApplicationFiles(const uint32_t app_id);
+    Json::Value GetApplicationShow(const uint32_t app_id);
 
     Json::Value JsonFromSO(const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
 
