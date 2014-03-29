@@ -146,6 +146,10 @@ void PutFileRequest::Run() {
       return;
     }
   } else {
+
+    response_params[strings::space_available] =
+       static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
+
     full_file_path = file_system::CreateDirectory(application->name());
     full_file_path = file_system::FullPath(full_file_path);
 
