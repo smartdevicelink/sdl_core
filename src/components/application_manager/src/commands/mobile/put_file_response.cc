@@ -58,8 +58,6 @@ void PutFileResponse::Run() {
     return;
   }
 
-  (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int32_t>(file_system::GetAvailableSpaceForApp(app->name()));
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

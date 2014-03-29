@@ -53,6 +53,7 @@
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
+#include "application_manager/commands/hmi/on_put_file_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -1860,6 +1861,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemRequest: {
       command.reset(new commands::OnSystemRequestNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnPutFile: {
+      command.reset(new commands::OnPutFileNotification(message));
       break;
     }
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {

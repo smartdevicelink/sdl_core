@@ -53,6 +53,8 @@ void PutFileRequest::Run() {
 
   ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
       connection_key());
+  smart_objects::SmartObject response_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -67,52 +69,60 @@ void PutFileRequest::Run() {
       // PutFile request is limited by the configuration profile
       LOG4CXX_ERROR(logger_,
                     "Too many requests from the app with HMILevel HMI_NONE ");
-      SendResponse(false, mobile_apis::Result::REJECTED);
+      SendResponse(false, mobile_apis::Result::REJECTED,
+                   "Too many requests from the app with HMILevel HMI_NONE",
+                   &response_params);
       return;
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
     LOG4CXX_ERROR(logger_, "Binary data empty");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                 "Binary data empty",
+                 &response_params);
     return;
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::sync_file_name)) {
     LOG4CXX_ERROR(logger_, "No file name");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                 "No file name",
+                 &response_params);
     return;
   }
 
   if (!(*message_)[strings::msg_params].keyExists(strings::file_type)) {
     LOG4CXX_ERROR(logger_, "No file type");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                 "No file type",
+                 &response_params);
     return;
   }
-  const std::string& sync_file_name =
+  sync_file_name_ =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
-  const mobile_apis::FileType::eType& file_type =
+  file_type_ =
       static_cast<mobile_apis::FileType::eType>(
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
-  uint32_t offset = 0;
-  bool is_persistent_file = false;
+  offset_ = 0;
+  is_persistent_file_ = false;
   bool is_system_file = false;
-  uint32_t length = binary_data.size();
+  length_ = binary_data.size();
   bool is_download_compleate = true;
   bool offset_exist = (*message_)[strings::msg_params].keyExists(strings::offset);
 
   if (offset_exist) {
-    offset = (*message_)[strings::msg_params][strings::offset].asInt();
+    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
   }
   if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-      length =
+      length_ =
             (*message_)[strings::msg_params][strings::length].asInt();
   }
   if ((*message_)[strings::msg_params].
       keyExists(strings::persistent_file)) {
-    is_persistent_file =
+    is_persistent_file_ =
         (*message_)[strings::msg_params][strings::persistent_file].asBool();
   }
   if ((*message_)[strings::msg_params].
@@ -124,17 +134,15 @@ void PutFileRequest::Run() {
   std::string full_file_path;
 
   if (is_system_file) {
-    if (file_type != mobile_apis::FileType::BINARY) {
-      LOG4CXX_INFO(logger_, "File is System but not binary");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
+    response_params[strings::space_available] = 0;
 
     full_file_path = profile::Profile::instance()->system_files_path();
 
     if (!file_system::CreateDirectoryRecursively(full_file_path)) {
       LOG4CXX_ERROR(logger_, "Cann't create folder.");
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
+                   "Cann't create folder.",
+                   &response_params);
       return;
     }
   } else {
@@ -144,22 +152,24 @@ void PutFileRequest::Run() {
     if (binary_data.size()
         > file_system::GetAvailableSpaceForApp(application->name())) {
       LOG4CXX_ERROR(logger_, "Out of free app memory.");
-      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
+      SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY,
+                   "Out of memory.",
+                   &response_params);
       return;
     }
   }
 
   full_file_path += "/";
-  full_file_path += sync_file_name;
+  full_file_path += sync_file_name_;
 
   mobile_apis::Result::eType save_result = ApplicationManagerImpl::instance()
-      ->SaveBinary(binary_data, full_file_path, offset);
+      ->SaveBinary(binary_data, full_file_path, offset_);
 
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      AppFile file(sync_file_name, is_persistent_file, is_download_compleate,
-                   file_type);
-      if (offset == 0) {
+      AppFile file(sync_file_name_, is_persistent_file_, is_download_compleate,
+                   file_type_);
+      if (offset_ == 0) {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(file)) {
           LOG4CXX_INFO(
@@ -169,7 +179,9 @@ void PutFileRequest::Run() {
           if (!application->UpdateFile(file)) {
             LOG4CXX_INFO(logger_, "Couldn't update file");
             // If it is impossible to update file, application doesn't know about existing this file
-            SendResponse(false, mobile_apis::Result::INVALID_DATA);
+            SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                         "Couldn't update file",
+                         &response_params);
             return;
           }
         } else {
@@ -189,14 +201,40 @@ void PutFileRequest::Run() {
 //      } else {
 //        //TODO: Maybe need to save in AppFile information about downloading progress
 //      }
-      SendResponse(true, save_result);
+      SendResponse(true, save_result, "File downloaded", &response_params);
+      if (is_system_file) {
+        SendOnPutFileNotification();
+      }
       break;
     }
     default:
       LOG4CXX_INFO(logger_, "Save in unsuccesfull result = " << save_result);
-      SendResponse(false, save_result);
+      SendResponse(false, save_result, "Cant' save file", &response_params);
       break;
   }
+}
+
+void PutFileRequest::SendOnPutFileNotification() {
+
+  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+
+  smart_objects::SmartObject& message = *notification;
+  message[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_OnPutFile;
+
+  message[strings::params][strings::message_type] = MessageType::kNotification;
+  message[strings::msg_params][strings::app_id] = connection_key();
+  message[strings::msg_params][strings::sync_file_name] = sync_file_name_;
+  message[strings::msg_params][strings::offset] = offset_;
+  message[strings::msg_params][strings::length] = length_;
+  message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
+  message[strings::msg_params][strings::file_type] = file_type_;
+
+
+
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 }  // namespace commands
