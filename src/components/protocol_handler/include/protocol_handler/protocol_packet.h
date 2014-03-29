@@ -173,9 +173,9 @@ const uint8_t FRAME_DATA_MAX_VALUE = 0xFF;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum size of one frame excluding
- *\brief frame header.
+ *\brief frame header (used Ethernet MTU as default target transport)
  */
-const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1488;
+const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1500;
 
 /**
  *\brief If FRAME_TYPE_CONSECUTIVE: Constant: Marks last frame in mutliframe

@@ -311,12 +311,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
     return;
   }
 
-  uint32_t maxDataSize = 0;
-  if (PROTOCOL_VERSION_1 == message->protocol_version()) {
-    maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
-  } else if (PROTOCOL_VERSION_2 == message->protocol_version()) {
-    maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
-  }
+  const uint32_t header_size =  (PROTOCOL_VERSION_1 == message->protocol_version())
+      ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
+  const uint32_t overhead_size = 0;
+  DCHECK( MAXIMUM_FRAME_DATA_SIZE > (header_size + overhead_size) );
+  const uint32_t maxDataSize =
+      MAXIMUM_FRAME_DATA_SIZE - header_size - overhead_size;
 
   if (!session_observer_) {
     LOG4CXX_ERROR(

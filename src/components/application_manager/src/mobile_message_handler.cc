@@ -153,16 +153,15 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
   }
-  const uint32_t MAX_HEADER_SIZE = 12;
-
   uint32_t jsonSize = message->json_message().length();
   uint32_t binarySize = 0;
   if (message->has_binary_data()) {
     binarySize = message->binary_data()->size();
   }
 
-  uint8_t* dataForSending = new uint8_t[MAX_HEADER_SIZE + jsonSize
-      + binarySize];
+  const size_t dataForSendingSize =
+      protocol_handler::PROTOCOL_HEADER_V2_SIZE + jsonSize + binarySize;
+  uint8_t* dataForSending = new uint8_t[dataForSendingSize];
   uint8_t offset = 0;
 
   uint8_t rpcTypeFlag = 0;
@@ -211,7 +210,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   protocol_handler::RawMessage* msgToProtocolHandler =
     new protocol_handler::RawMessage(message->connection_key(), 2,
                                      dataForSending,
-                                     MAX_HEADER_SIZE + jsonSize + binarySize);
+                                     dataForSendingSize);
 
   return msgToProtocolHandler;
 }
