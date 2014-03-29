@@ -50,11 +50,13 @@ namespace security_manager {
 class SSLContext;
 
 enum Mode { CLIENT, SERVER };
+enum Protocol { SSLv3, TLSv1_1, TLSv1_2 };
 
 std::string LastError();
 class CryptoManager {
  public:
   virtual bool Init(Mode mode,
+                    Protocol protocol,
                     const std::string& cert_filename,
                     const std::string& key_filename,
                     const std::string& ciphers_list,

@@ -222,7 +222,9 @@ int32_t main(int32_t argc, char** argv) {
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
-  main_namespace::LifeCycle::instance()->StartComponents();
+  if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    return 1;
+  }
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.

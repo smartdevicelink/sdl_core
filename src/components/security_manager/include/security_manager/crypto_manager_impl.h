@@ -73,6 +73,7 @@ namespace security_manager {
    public:
     CryptoManagerImpl();
     virtual bool Init(Mode mode,
+                      Protocol protocol,
                       const std::string& cert_filename,
                       const std::string& key_filename,
                       const std::string& ciphers_list,
