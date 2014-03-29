@@ -43,6 +43,33 @@ SDL.SDLModel = Em.Object.create({
         'vrHelp': null
     },
 
+/**
+     * List of callback functions for request SDL.GetUserFriendlyMessage
+     * where key is requestId
+     * and parameter is a function that will handle data came in respone from SDL
+     *
+     * @type {Object}
+     */
+    userFriendlyMessagePull: {},
+
+    /**
+     * List of appID functions for request SDL.GetListOfPermissions
+     * where key is requestId
+     * and parameter is a appID that will handle data came in respone from SDL
+     *
+     * @type {Object}
+     */
+    getListOfPermissionsPull: {},
+
+    /**
+     * List of application id's for request SDL.ActivateApp
+     * where key is requestId
+     * and parameter is a id of application to be activated
+     *
+     * @type {Object}
+     */
+    activateAppRequestsList: {},
+
     /**
      * ID of app in LIMITED HMI state
      */
@@ -73,6 +100,30 @@ SDL.SDLModel = Em.Object.create({
      * @type {Object}
      */
     naviVideo: {},
+
+/**
+     * Array of strings came in SDL.GetURLS response
+     *
+     * @type {Object}
+     */
+    policyURLs: [],
+
+    /**
+     * Policy Settings Info state value
+     *
+     * @type {String}
+     */
+    settingsInfoListState: 'iAPP_BUFFER_FULL',
+
+    /**
+     * Policy Settings Info list
+     *
+     * @type {Object}
+     */
+    settingsInfoList: [
+        'iAPP_BUFFER_FULL',
+        'blah'
+    ],
 
     /**
      * Flag to indicate AudioPassThruPopUp activity
@@ -298,6 +349,13 @@ SDL.SDLModel = Em.Object.create({
     registeredApps: [],
 
     /**
+     * List of devices with registered applications
+     *
+     * @type object
+     */
+    conectedDevices: [],
+
+    /**
      * List of registered components
      *
      * @type object
@@ -377,6 +435,14 @@ SDL.SDLModel = Em.Object.create({
      */
     performInteractionSession: false,
 
+/**
+     * Array with app permissions
+     * used for policies
+     *
+     * @type {Object}
+     */
+    appPermissions: [],
+
     /**
      * List of supported languages
      *
@@ -406,6 +472,30 @@ SDL.SDLModel = Em.Object.create({
         'DA-DK',
         'NO-NO'
     ],
+
+    /**
+     * Function make diff between two arrays of permissions
+     * remove argument array from existed array of permissions
+     */
+    setAppPermissions: function(oldPermissions){
+        var temp = this.appPermissions.filter(function(item, i) {
+            var ok = oldPermissions.indexOf(item) === -1;
+//            if (ok) {
+//                array5.push(i + 1);
+//            }
+            return ok;
+        });
+
+        this.set('appPermissions', temp);
+    },
+
+    /**
+     * Method to set selected state of settings Info List
+     */
+    settingsInfoListStateChange: function() {
+
+        FFW.BasicCommunication.AddStatisticsInfo(this.settingsInfoListState);
+    }.observes('this.settingsInfoListState'),
 
     /**
      * Method to open Phone view and dial phone number

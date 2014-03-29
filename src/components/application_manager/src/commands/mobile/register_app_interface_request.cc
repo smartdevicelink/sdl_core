@@ -39,8 +39,83 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+
+namespace {
+
+mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
+  if ("DEFAULT" == str) {
+    return mobile_apis::AppHMIType::DEFAULT;
+  } else if ("COMMUNICATION" == str) {
+    return mobile_apis::AppHMIType::COMMUNICATION;
+  } else if ("MEDIA" == str) {
+    return mobile_apis::AppHMIType::MEDIA;
+  } else if ("MESSAGING" == str) {
+    return mobile_apis::AppHMIType::MESSAGING;
+  } else if ("NAVIGATION" == str) {
+    return mobile_apis::AppHMIType::NAVIGATION;
+  } else if ("INFORMATION" == str) {
+    return mobile_apis::AppHMIType::INFORMATION;
+  } else if ("SOCIAL" == str) {
+    return mobile_apis::AppHMIType::SOCIAL;
+  } else if ("BACKGROUND_PROCESS" == str) {
+    return mobile_apis::AppHMIType::BACKGROUND_PROCESS;
+  } else if ("TESTING" == str) {
+    return mobile_apis::AppHMIType::TESTING;
+  } else if ("SYSTEM" == str) {
+    return mobile_apis::AppHMIType::SYSTEM;
+  } else {
+    return mobile_apis::AppHMIType::INVALID_ENUM;
+  }
+}
+
+struct AppHMITypeInserter {
+  AppHMITypeInserter(smart_objects::SmartObject& so_array)
+      : so_array_(so_array),
+        index_(0) {
+  }
+
+  bool operator()(const std::string& app_hmi_type) {
+    so_array_[index_] = StringToAppHMIType(app_hmi_type);
+    ++index_;
+    return true;
+  }
+
+ private:
+  uint32_t index_;
+  smart_objects::SmartObject& so_array_;
+};
+
+struct CheckMissedTypes {
+  CheckMissedTypes(const policy::StringArray& policy_app_types,
+                   std::string& log)
+      : policy_app_types_(policy_app_types),
+        log_(log) {
+  }
+
+  bool operator()(const smart_objects::SmartArray::value_type& value) {
+    std::string app_type_str = value.asString();
+    policy::StringArray::const_iterator it = policy_app_types_.begin();
+    policy::StringArray::const_iterator it_end = policy_app_types_.end();
+    for (; it != it_end; ++it) {
+      if (app_type_str == *it) {
+        return true;
+      }
+    }
+
+    log_ += app_type_str;
+    log_ += ",";
+
+    return true;
+  }
+
+ private:
+  const policy::StringArray& policy_app_types_;
+  std::string& log_;
+};
+}
 
 namespace application_manager {
 
@@ -100,8 +175,15 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
+  if (mobile_apis::Result::SUCCESS != policy_result
+      && mobile_apis::Result::WARNINGS != policy_result) {
+    SendResponse(false, policy_result);
+    return;
+  }
+
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->RegisterApplication(
+      message_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -480,6 +562,67 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
   return mobile_apis::Result::SUCCESS;
 }  // method end
+
+mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
+  LOG4CXX_INFO(logger_, "CheckWithPolicyData");
+  smart_objects::SmartObject& message = *message_;
+  policy::StringArray app_nicknames;
+  policy::StringArray app_hmi_types;
+
+  bool init_result = policy::PolicyHandler::instance()->policy_manager()
+      ->GetInitialAppData(
+      message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
+      &app_hmi_types);
+
+  if (!init_result) {
+    LOG4CXX_INFO(logger_, "Error during initial application data check.");
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
+  if (!app_nicknames.empty()) {
+    policy::StringArray::const_iterator it = std::find(
+        app_nicknames.begin(), app_nicknames.end(),
+        message[strings::msg_params][strings::app_name].asString());
+    if (app_nicknames.end() == it) {
+      LOG4CXX_INFO(logger_,
+                   "Application name was not found in nicknames list.");
+      //App should be unregistered, if its name is not present in nicknames list
+      return mobile_apis::Result::INVALID_DATA;
+    }
+  }
+
+  mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS;
+
+  // If AppHMIType is not included in policy - allow any type
+  if (!app_hmi_types.empty()) {
+    if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
+      // If AppHMITypes are partially same, the system should allow those listed
+      // in the policy table and send warning info on missed values
+      smart_objects::SmartArray app_types =
+          *(message[strings::msg_params][strings::app_hmi_type].asArray());
+
+      std::string log;
+      CheckMissedTypes checker(app_hmi_types, log);
+      std::for_each(app_types.begin(), app_types.end(), checker);
+      if (!log.empty()) {
+        response_info_ = "Following AppHMITypes are not present in policy "
+            "table:" + log;
+        result = mobile_apis::Result::WARNINGS;
+      }
+    }
+    // Replace AppHMITypes in request with values allowed by policy table
+    message[strings::msg_params][strings::app_hmi_type] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+    smart_objects::SmartObject& app_hmi_type =
+        message[strings::msg_params][strings::app_hmi_type];
+
+    AppHMITypeInserter inserter(app_hmi_type);
+    std::for_each(app_hmi_types.begin(), app_hmi_types.end(), inserter);
+  }
+
+  return result;
+}
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::CheckRestrictions() const {

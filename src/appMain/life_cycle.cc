@@ -62,7 +62,6 @@ LifeCycle::LifeCycle()
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
-  , policy_manager_(NULL)
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -119,17 +118,9 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
-  policy_manager_ = policies::PolicyManagerImpl::instance();
-  DCHECK(policy_manager_);
-
-  policies::PolicyConfiguration policy_config;
-  policy_config.set_pt_file_name("wp1_policy_table.json");
-  policy_manager_->Init(policy_config);
-
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
-  app_manager_->set_policy_manager(policy_manager_);
 
   return true;
 }
@@ -223,13 +214,13 @@ bool LifeCycle::InitMessageSystem() {
  */
 bool LifeCycle::InitMessageSystem() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+                                log4cxx::Logger::getLogger("appMain"));
 
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      dbus_adapter_);
+    dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_INFO(logger, "Cannot init DBus service!");
     return false;
@@ -239,10 +230,10 @@ bool LifeCycle::InitMessageSystem() {
 
   LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
   dbus_adapter_thread_ = new System::Thread(
-      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-          *dbus_adapter_,
-          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-          NULL));
+    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+      *dbus_adapter_,
+      &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+      NULL));
   dbus_adapter_thread_->Start(false);
 
   return true;
@@ -252,9 +243,9 @@ bool LifeCycle::InitMessageSystem() {
 #ifdef MQUEUE_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      hmi_message_adapter_);
+    hmi_message_adapter_);
   return true;
 }
 #endif  // MQUEUE_HMIADAPTER
@@ -267,9 +258,6 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   app_manager_->Stop();
   application_manager::ApplicationManagerImpl::destroy();
-
-  LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
-  policies::PolicyManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   transport_manager_->Stop();

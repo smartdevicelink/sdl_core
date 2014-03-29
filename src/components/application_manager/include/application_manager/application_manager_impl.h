@@ -41,9 +41,9 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
-#include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
+#include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
@@ -72,6 +72,10 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 #include "utils/singleton.h"
+
+namespace policy {
+class PolicyManager;
+}
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -112,7 +116,9 @@ struct MessageFromMobile: public utils::SharedPtr<Message> {
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
@@ -120,34 +126,40 @@ struct MessageToMobile: public utils::SharedPtr<Message> {
                            bool final_message):
     utils::SharedPtr<Message>(message), is_final(final_message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
   // Signals if connection to mobile must be closed after sending this message
   bool is_final;
- };
+};
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
   explicit MessageToHmi(const utils::SharedPtr<Message>& message):
     utils::SharedPtr<Message>(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 // Short type names for proiritized message queues
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
+typedef threads::MessageLoopThread <
+utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
+typedef threads::MessageLoopThread <
+utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
+typedef threads::MessageLoopThread <
+utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
+typedef threads::MessageLoopThread <
+utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
@@ -159,7 +171,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   public impl::FromHmiQueue::Handler,
   public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
-  friend class ResumeCtrl;
+    friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
 
@@ -178,6 +190,16 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
     std::vector<ApplicationSharedPtr> applications_with_navi();
+    /**
+          * @brief Notifies all components interested in Vehicle Data update
+          * i.e. new value of odometer etc and returns list of applications
+          * subscribed for event.
+          * @param vehicle_info Enum value of type of vehicle data
+          * @param new value (for integer values currently) of vehicle data
+          */
+    std::vector<utils::SharedPtr<Application>> IviInfoUpdated(
+        VehicleDataType vehicle_info,
+        int value);
 
     /////////////////////////////////////////////////////
 
@@ -201,7 +223,15 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param reason Describes the reason for HU switching off
      */
     void SetUnregisterAllApplicationsReason(
-        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+      mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Called on Master_reset or Factory_defaults
+     * when User chooses to reset HU.
+     * Resets Policy Table if applicable.
+     */
+    void HeadUnitReset(
+      mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
     /*
      * @brief Closes all registered applications
@@ -325,7 +355,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
-    virtual void set_policy_manager(policies::PolicyManager* policy_manager);
     void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////
@@ -445,7 +474,9 @@ class ApplicationManagerImpl : public ApplicationManager,
       * Getter for resume_controller
       * @return Resume Controller
       */
-    ResumeCtrl& resume_controller() { return resume_ctrl_; }
+    ResumeCtrl& resume_controller() {
+      return resume_ctrl_;
+    }
 
     /*
      * @brief Save binary data to specified directory
@@ -473,7 +504,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager(PoliciesManager* managaer);
+    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
@@ -569,12 +600,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
-    policies::PolicyManager*                policy_manager_;
     request_controller::RequestController   request_ctrl_;
     HMICapabilities                         hmi_capabilities_;
-
-    // TODO(YS): Remove old implementation
-    policies_manager::PoliciesManager policies_manager_;
+    policy::PolicyManager*                  policy_manager_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;

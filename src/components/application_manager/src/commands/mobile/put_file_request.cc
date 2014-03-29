@@ -33,6 +33,7 @@
 
 #include "application_manager/commands/mobile/put_file_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
@@ -106,8 +107,13 @@ void PutFileRequest::Run() {
   const std::vector<uint8_t> binary_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
-  offset_ = 0;
-  is_persistent_file_ = false;
+  // Policy table update in json format is currently to be received via PutFile
+  if (mobile_apis::FileType::JSON == file_type) {
+    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(binary_data);
+  }
+
+  uint32_t offset = 0;
+  bool is_persistent_file = false;
   bool is_system_file = false;
   length_ = binary_data.size();
   bool is_download_compleate = true;

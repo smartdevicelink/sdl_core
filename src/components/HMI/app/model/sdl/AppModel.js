@@ -133,6 +133,15 @@ SDL.SDLAppModel = Em.Object.extend({
         turnList: [],
 
         /**
+         * Policies
+         * Array of avaliable permission codes for current app
+         * came from SDLCore in SDL.GetListOfPermissions response
+         *
+         * @type {Array}
+         */
+        allowedFunctions: [],
+
+        /**
          * URL to application Icon
          *
          * @type {String}
