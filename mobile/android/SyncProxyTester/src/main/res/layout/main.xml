@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
@@ -10,92 +9,98 @@
         android:id="@+id/btnPlayPause"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Play/Pause"/>
+        android:text="Play/Pause" />
 
     <Button
         android:id="@+id/btnServices"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Services: Open / Close"/>
+        android:text="Services: Open / Close" />
 
-    <LinearLayout android:id="@+id/services_layout_view"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
+    <ScrollView
+        android:id="@+id/services_layout_view"
         android:padding="15dp"
         android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <TextView
-            android:text="RPC Service"
-            android:textSize="18sp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-
         <LinearLayout
-            android:layout_marginBottom="10dp"
-            android:layout_width="fill_parent"
+
+            xmlns:tools="http://schemas.android.com/tools"
+            android:orientation="vertical"
+
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Button
-                android:id="@+id/rpc_service_secure_button_view"
-                android:layout_weight="1"
-                android:text="@string/secure_service_send_rpc"
-                android:layout_width="0dp"
+            <TextView
+                android:text="RPC Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
-            <Button
-                android:id="@+id/rpc_non_secure_button_view"
-                android:layout_weight="1"
-                android:text="@string/not_secure_service_send_rpc"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:layout_marginBottom="10dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/rpc_service_secure_button_view"
+                    android:layout_weight="1"
+                    android:text="@string/secure_service_send_rpc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/rpc_non_secure_button_view"
+                    android:layout_weight="1"
+                    android:text="@string/not_secure_service_send_rpc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/rpc_service_state"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:text="@string/rpc_service_state"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/rpc_service_state"
-                android:layout_weight="1"
-                android:layout_width="0dp"
-                android:text="@string/rpc_service_state"
+                android:text="Mobile Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
+            <fragment
+                android:id="@+id/videoFragment"
+                class="com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                tools:layout="@layout/activity_mobile_nav_preview" />
+
+            <TextView
+                android:text="Audio Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <fragment
+                android:id="@+id/audioFragment"
+                class="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:layout="@layout/activity_audio_service_preview" />
+
         </LinearLayout>
-
-        <TextView
-            android:text="Mobile Service"
-            android:textSize="18sp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
-
-        <fragment
-            android:id="@+id/videoFragment"
-            class="com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            tools:layout="@layout/activity_mobile_nav_preview" />
-
-        <TextView
-            android:text="Audio Service"
-            android:textSize="18sp"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            />
-
-        <fragment
-            android:id="@+id/audioFragment"
-            class="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            tools:layout="@layout/activity_audio_service_preview" />
-
-    </LinearLayout>
+    </ScrollView>
 
     <Button
         android:id="@+id/btnSendMessage"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Send Message"/>
+        android:text="Send Message" />
 
     <ListView
         android:id="@+id/messageList"

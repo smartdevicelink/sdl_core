@@ -409,7 +409,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         buttonServicesView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                LinearLayout servicesLayout = (LinearLayout) findViewById(R.id.services_layout_view);
+                View servicesLayout = findViewById(R.id.services_layout_view);
                 servicesLayout.setVisibility((servicesLayout.getVisibility() == View.GONE) ?
                         View.VISIBLE : View.GONE);
             }

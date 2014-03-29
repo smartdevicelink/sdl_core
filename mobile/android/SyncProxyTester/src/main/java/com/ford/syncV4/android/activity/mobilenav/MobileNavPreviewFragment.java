@@ -54,7 +54,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     }
 
     private void notifyServiceState(boolean encrypted) {
-        TextView textView = (TextView) getView().findViewById(R.id.audio_service_status_text_view);
+        TextView textView = (TextView) getView().findViewById(R.id.service_status_text_view);
         if (encrypted) {
             textView.setText("Service is cyphered");
         } else {
