@@ -451,15 +451,17 @@ class ProtocolHandlerImpl
      * over streaming session to send Ack
      */
     const uint32_t kPeriodForNaviAck;
-    /**
-     * \brief last_message_id_ - id message before disconnect
-     */
-    int32_t last_message_id_;
 
     /**
      *\brief Counter of messages sent in each session.
      */
     std::map<uint8_t, uint32_t> message_counters_;
+
+    /**
+     *\brief map for session last message.
+     */
+    std::map<uint8_t, uint32_t> sessions_last_message_id_;
+
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
