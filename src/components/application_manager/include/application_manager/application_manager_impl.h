@@ -545,6 +545,9 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     std::set<ApplicationSharedPtr> application_list_;
 
+    // Lock for applications list
+    mutable sync_primitives::Lock applications_list_lock_;
+
     /**
      * @brief Set of HMI notifications with timeout.
      */
@@ -594,9 +597,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
-
-    // Lock for applications list
-    sync_primitives::Lock applications_list_lock_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

@@ -209,13 +209,13 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     bool ApplicationIsSaved(const uint32_t app_id);
 
-    Json::Value GetApplicationCommands(const uint32_t app_id);
-    Json::Value GetApplicationSubMenus(const uint32_t app_id);
-    Json::Value GetApplicationInteractionChoiseSets(const uint32_t app_id);
-    Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
-    Json::Value GetApplicationSubscriptions(const uint32_t app_id);
-    Json::Value GetApplicationFiles(const uint32_t app_id);
-    Json::Value GetApplicationShow(const uint32_t app_id);
+    Json::Value GetApplicationCommands(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubMenus(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationInteractionChoiseSets(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationGlobalProperties(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubscriptions(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationFiles(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationShow(ApplicationConstSharedPtr application);
 
     Json::Value JsonFromSO(const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
 

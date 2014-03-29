@@ -140,6 +140,8 @@ bool ApplicationManagerImpl::Stop() {
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
   std::map<int32_t, ApplicationSharedPtr>::const_iterator it =
       applications_.find(app_id);
   if (applications_.end() != it) {
@@ -1502,7 +1504,8 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   resume_controller().IgnitionOff();
 }
 
-void ApplicationManagerImpl::UnregisterApplication(const uint32_t& app_id, bool is_resuming) {
+void ApplicationManagerImpl::UnregisterApplication(
+    const uint32_t& app_id, bool is_resuming) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 

@@ -69,17 +69,17 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   (*json_app)[strings::ign_off_count] = 0;
   (*json_app)[strings::hash_id] = hash;
   (*json_app)[strings::application_commands] =
-      GetApplicationCommands(connection_key);
+      GetApplicationCommands(application);
   (*json_app)[strings::application_submenus] =
-      GetApplicationSubMenus(connection_key);
+      GetApplicationSubMenus(application);
   (*json_app)[strings::application_choise_sets] =
-      GetApplicationInteractionChoiseSets(connection_key);
+      GetApplicationInteractionChoiseSets(application);
   (*json_app)[strings::application_global_properties] =
-      GetApplicationGlobalProperties(connection_key);
+      GetApplicationGlobalProperties(application);
   (*json_app)[strings::application_subscribtions] =
-      GetApplicationSubscriptions(connection_key);
-  (*json_app)[strings::application_files] = GetApplicationFiles(connection_key);
-  (*json_app)[strings::application_show] = GetApplicationShow(connection_key);
+      GetApplicationSubscriptions(application);
+  (*json_app)[strings::application_files] = GetApplicationFiles(application);
+  (*json_app)[strings::application_show] = GetApplicationShow(application);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
   (*json_app)[strings::audio_streaming_state] = application->audio_streaming_state();
 }
@@ -349,7 +349,8 @@ bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr applicatio
       result = true;
     }
   }
-  if (result = false) {
+
+  if (false == result) {
     return result;
   }
   GetSavedApplications().clear();
@@ -375,7 +376,6 @@ void ResumeCtrl::IgnitionOff() {
   }
   SetSavedApplication(to_save);
 }
-
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
@@ -586,15 +586,14 @@ void ResumeCtrl::SetSavedApplication(Json::Value& apps_json) {
     resumption::LastState::instance()->dictionary[strings::resumption] = apps_json ;
 }
 
-Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands" << app_id);
-
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
+Json::Value ResumeCtrl::GetApplicationCommands(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands "
+               << application->app_id());
 
   Json::Value result;
-  const CommandsMap& commands = app->commands_map();
+  const CommandsMap& commands = application->commands_map();
   CommandsMap::const_iterator it = commands.begin();
   for (;it != commands.end(); ++it) {
     smart_objects::SmartObject* so = it->second;
@@ -606,15 +605,14 @@ Json::Value ResumeCtrl::GetApplicationCommands(const uint32_t app_id) {
   return result;
 }
 
-Json::Value ResumeCtrl::GetApplicationSubMenus(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands" << app_id);
-
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
+Json::Value ResumeCtrl::GetApplicationSubMenus(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationCommands "
+               << application->app_id());
 
   Json::Value result;
-  const SubMenuMap& sub_menus = app->sub_menu_map();
+  const SubMenuMap& sub_menus = application->sub_menu_map();
   SubMenuMap::const_iterator it = sub_menus.begin();
   for (;it != sub_menus.end(); ++it) {
     smart_objects::SmartObject* so = it->second;
@@ -627,16 +625,13 @@ Json::Value ResumeCtrl::GetApplicationSubMenus(const uint32_t app_id) {
 }
 
 Json::Value ResumeCtrl::GetApplicationInteractionChoiseSets(
-    const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationInteractionChoiseSets"
-               << app_id);
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationInteractionChoiseSets "
+               << application->app_id());
 
   Json::Value result;
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
-
-  const ChoiceSetMap& choices = app->choice_set_map();
+  const ChoiceSetMap& choices = application->choice_set_map();
   ChoiceSetMap::const_iterator it = choices.begin();
   for ( ;it != choices.end(); ++it) {
     smart_objects::SmartObject* so = it->second;
@@ -648,22 +643,21 @@ Json::Value ResumeCtrl::GetApplicationInteractionChoiseSets(
   return result;
 }
 
-Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationGlobalProperties" << app_id);
+Json::Value ResumeCtrl::GetApplicationGlobalProperties(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationGlobalProperties "
+               << application->app_id());
 
   Json::Value result;
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
-
-  const smart_objects::SmartObject* help_promt = app->help_prompt();
-  const smart_objects::SmartObject* timeout_prompt = app->timeout_prompt();
-  const smart_objects::SmartObject* vr_help = app->vr_help();
-  const smart_objects::SmartObject* vr_help_title = app->vr_help_title();
-  const smart_objects::SmartObject* vr_synonyms = app->vr_synonyms();
-  const smart_objects::SmartObject* keyboard_props = app->keyboard_props();
-  const smart_objects::SmartObject* menu_title = app->menu_title();
-  const smart_objects::SmartObject* menu_icon = app->menu_icon();
+  const smart_objects::SmartObject* help_promt = application->help_prompt();
+  const smart_objects::SmartObject* timeout_prompt = application->timeout_prompt();
+  const smart_objects::SmartObject* vr_help = application->vr_help();
+  const smart_objects::SmartObject* vr_help_title = application->vr_help_title();
+  const smart_objects::SmartObject* vr_synonyms = application->vr_synonyms();
+  const smart_objects::SmartObject* keyboard_props = application->keyboard_props();
+  const smart_objects::SmartObject* menu_title = application->menu_title();
+  const smart_objects::SmartObject* menu_icon = application->menu_icon();
 
   Json::Value sgp;
   sgp[strings::help_prompt] = JsonFromSO(help_promt);
@@ -678,37 +672,35 @@ Json::Value ResumeCtrl::GetApplicationGlobalProperties(const uint32_t app_id) {
   return sgp;
 }
 
-Json::Value ResumeCtrl::GetApplicationSubscriptions(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationSubscriptions" << app_id);
+Json::Value ResumeCtrl::GetApplicationSubscriptions(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationSubscriptions "
+               << application->app_id());
 
   Json::Value result;
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
-
   std::set<mobile_apis::ButtonName::eType>::iterator it_button ;
   std::set<uint32_t>::iterator it_vehicle;
 
-  for (it_button = app->SubscribedButtons().begin() ;
-       it_button != app->SubscribedButtons().end(); ++it_button) {
+  for (it_button = application->SubscribedButtons().begin() ;
+       it_button != application->SubscribedButtons().end(); ++it_button) {
     result[strings::application_buttons].append(*it_button);
   }
-  for (it_vehicle = app->SubscribesIVI().begin();
-       it_vehicle != app->SubscribesIVI().end(); ++it_vehicle) {
+  for (it_vehicle = application->SubscribesIVI().begin();
+       it_vehicle != application->SubscribesIVI().end(); ++it_vehicle) {
     result[strings::application_vehicle_info].append(*it_vehicle);
   }
   return result;
 }
 
-Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationFiles" << app_id);
+Json::Value ResumeCtrl::GetApplicationFiles(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationFiles "
+               << application->app_id());
 
   Json::Value result;
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
-
-  const AppFilesMap& app_files = app->getAppFiles();
+  const AppFilesMap& app_files = application->getAppFiles();
   for(AppFilesMap::const_iterator file_it = app_files.begin();
       file_it != app_files.end(); file_it++) {
     const AppFile& file = file_it->second;
@@ -724,12 +716,14 @@ Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
   return result;
 }
 
-Json::Value ResumeCtrl::GetApplicationShow(const uint32_t app_id) {
+Json::Value ResumeCtrl::GetApplicationShow(
+    ApplicationConstSharedPtr application) {
+  DCHECK(application.get());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::GetApplicationShow "
+                 << application->app_id());
+
   Json::Value result;
-  ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
-  DCHECK(app.get());
-  const smart_objects::SmartObject* show_so = app->show_command();
+  const smart_objects::SmartObject* show_so = application->show_command();
   if (!show_so) {
     return result;
   }
