@@ -1098,7 +1098,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptData(
     return RESULT_ENCRYPTION_FAILED;
   }
 
-  if(context->Encrypt(data_in, data_in_size, data_out, data_out_size)) {
+  if(!context->Encrypt(data_in, data_in_size, data_out, data_out_size)) {
     LOG4CXX_WARN(logger_, "Encryption failed: " << security_manager::LastError());
     return RESULT_ENCRYPTION_FAILED;
   }
