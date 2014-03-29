@@ -448,7 +448,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
-                //Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 _transport.sendBytes(msgBytes, offset, length);
             }
         }

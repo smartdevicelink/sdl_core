@@ -1382,22 +1382,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onMobileNaviStart(boolean encrypted) {
+    public void onMobileNaviStart(boolean encrypted, byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, sessionId, encrypted);
         }
     }
 
     @Override
-    public void onAudioServiceStart(boolean encrypted) {
+    public void onAudioServiceStart(boolean encrypted,byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, sessionId, encrypted);
         }
     }
 
-    public void onRPCServiceStart(boolean encrypted){
+    public void onRPCServiceStart(boolean encrypted,byte sessionId){
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, (byte) -1, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionId, encrypted);
         }
     }
 

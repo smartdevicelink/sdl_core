@@ -407,6 +407,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     /**
      * Return a result of the Rooted device status
+     *
      * @return boolean value
      */
     public boolean getIsDeviceRooted() {
@@ -415,6 +416,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     /**
      * Set a status of the Root device
+     *
      * @param mIsDeviceRooted boolean value
      */
     public void setDeviceRooted(boolean mIsDeviceRooted) {
@@ -2080,11 +2082,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNaviStart(encrypted);
+                    _proxyListener.onMobileNaviStart(encrypted, currentSession.getSessionId());
                 }
             });
         } else {
-            _proxyListener.onMobileNaviStart(encrypted);
+            _proxyListener.onMobileNaviStart(encrypted, currentSession.getSessionId());
         }
     }
 
@@ -2101,11 +2103,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onAudioServiceStart(encrypted);
+                    _proxyListener.onAudioServiceStart(encrypted, currentSession.getSessionId());
                 }
             });
         } else {
-            _proxyListener.onAudioServiceStart(encrypted);
+            _proxyListener.onAudioServiceStart(encrypted, currentSession.getSessionId());
         }
     }
 
@@ -2122,11 +2124,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onRPCServiceStart(encrypted);
+                    _proxyListener.onRPCServiceStart(encrypted, currentSession.getSessionId());
                 }
             });
         } else {
-            _proxyListener.onRPCServiceStart(encrypted);
+            _proxyListener.onRPCServiceStart(encrypted, currentSession.getSessionId());
         }
     }
 
@@ -3194,7 +3196,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void startAudioService(Session session, boolean cyphered) {
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session,cyphered);
+            mSyncConnection.startAudioService(session, cyphered);
         }
     }
 

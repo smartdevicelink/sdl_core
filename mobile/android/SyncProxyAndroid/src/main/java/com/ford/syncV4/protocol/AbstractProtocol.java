@@ -106,6 +106,7 @@ public abstract class AbstractProtocol {
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
         synchronized (_frameLock) {
+            Log.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
             if (data != null) {
                 if (offset >= data.length) {
                     throw new IllegalArgumentException("offset should not be more then length");
