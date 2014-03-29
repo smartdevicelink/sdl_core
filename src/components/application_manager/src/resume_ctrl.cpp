@@ -24,7 +24,7 @@ ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* app_mngr)
 }
 
 void ResumeCtrl::SaveAllApplications() {
-  LOG4CXX_INFO(logger_, " ResumeCtrl::SaveApplications()");
+  LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplications()");
   DCHECK(app_mngr_);
 
   std::set<ApplicationSharedPtr>::iterator it = 
@@ -37,7 +37,7 @@ void ResumeCtrl::SaveAllApplications() {
 }
 
 void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
-  LOG4CXX_INFO(logger_, " ResumeCtrl::SaveApplication");
+  LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplication");
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;
@@ -47,20 +47,21 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
             it != GetSavedApplications().end(); ++it) {
     if ((*it)[strings::app_id].asString() == m_app_id) {
       json_app = &(*it);
-      LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id"
-                            "is already exist ( update info ) " << m_app_id);
+      LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id "
+                            "already exist ( update info ). mobile app_id = "
+                            << m_app_id);
       break;
     }
   }
 
   if (json_app == NULL) {
     LOG4CXX_INFO(logger_, "ResumeCtrl Application with this ID does not"
-         "exist. Add new" << m_app_id);
+         "exist. Add new. mobile app_id = " << m_app_id);
     json_app = &(GetSavedApplications().append(Json::Value()));
   }
 
   uint32_t hash = application->curHash();
-  LOG4CXX_INFO(logger_, " Hash = " << hash);
+  LOG4CXX_INFO(logger_, "Hash = " << hash);
   uint32_t connection_key = application->app_id();
   (*json_app)[strings::app_id] = m_app_id;
   (*json_app)[strings::connection_key] = connection_key;
@@ -144,7 +145,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
     }
   }
   if (it == GetSavedApplications().end()) {
-    LOG4CXX_WARN(logger_,"Application not saved");
+    LOG4CXX_WARN(logger_, "Application not saved");
     return false;
   }
 
@@ -459,7 +460,7 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
     }
   }
   if (it == GetSavedApplications().end()) {
-    LOG4CXX_WARN(logger_,"Application not saved");
+    LOG4CXX_WARN(logger_, "Application not saved");
     return false;
   }
 
@@ -482,7 +483,7 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
     mobile_apis::Result::eType verification_result =
         MessageHelper::VerifyImageFiles(message, application);
     if (verification_result == mobile_apis::Result::INVALID_DATA) {
-      LOG4CXX_WARN(logger_,"app_commands missed icons");
+      LOG4CXX_WARN(logger_, "app_commands missed icons");
       return false;
     }
   }
@@ -497,7 +498,7 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
     mobile_apis::Result::eType verification_result =
         MessageHelper::VerifyImageFiles(msg_param, application);
     if (verification_result == mobile_apis::Result::INVALID_DATA) {
-      LOG4CXX_WARN(logger_,"app_choise_sets missed icons");
+      LOG4CXX_WARN(logger_, "app_choise_sets missed icons");
       return false;
     }
   }
