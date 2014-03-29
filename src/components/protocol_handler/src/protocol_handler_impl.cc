@@ -331,9 +331,9 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                  &sessionID);
 
   const ServiceType service_type = ServiceTypeFromByte(message->service_type());
-  const bool protect_message =
-      (session_observer_->GetSSLContext(message->connection_key(), service_type))
-                               ? PROTECTION_ON : PROTECTION_OFF;
+  security_manager::SSLContext* ssl_context =
+      session_observer_->GetSSLContext(message->connection_key(), service_type);
+  const bool protect_message = ssl_context && ssl_context->IsInitCompleted();
 
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
