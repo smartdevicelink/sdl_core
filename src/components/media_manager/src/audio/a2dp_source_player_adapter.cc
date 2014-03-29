@@ -42,8 +42,10 @@
 
 namespace media_manager {
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr A2DPSourcePlayerAdapter::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("A2DPSourcePlayerAdapter"));
+#endif // ENABLE_LOG
 
 class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     : public threads::ThreadDelegate {
@@ -55,7 +57,9 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     bool exitThreadMain();
 
   private:
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     // The Sample format to use
     static const pa_sample_spec sSampleFormat_;
@@ -159,8 +163,10 @@ bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t
   return (application_key == current_application_);
 }
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("A2DPSourcePlayerThread"));
+#endif // ENABLE_LOG
 
 const pa_sample_spec A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::
 sSampleFormat_ = {

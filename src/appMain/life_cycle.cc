@@ -40,8 +40,10 @@
 using threads::Thread;
 
 namespace main_namespace {
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("appMain"));
+#endif // ENABLE_LOG
 
 namespace {
 

@@ -56,7 +56,9 @@ class MediaAdapterImpl : public MediaAdapter {
     int32_t current_application_;
 
   private:
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };

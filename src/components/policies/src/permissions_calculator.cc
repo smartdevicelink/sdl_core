@@ -48,8 +48,10 @@ namespace jsonhandler = NsSmartDeviceLink::NsJSONHandler;
 using ::NsSmartDeviceLink::NsSmartObjects::SmartObject;
 using ::NsSmartDeviceLink::NsSmartObjects::SmartType;
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr PermissionsCalculator::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
+#endif // ENABLE_LOG
 
 //----------------------------------------------------------------------------
 

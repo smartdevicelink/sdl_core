@@ -62,7 +62,9 @@ class PoliciesManager {
 
  private:
   PoliciesItems items_;
+#ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
   DISALLOW_COPY_AND_ASSIGN(PoliciesManager);
 };

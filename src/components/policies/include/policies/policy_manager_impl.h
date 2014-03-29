@@ -109,7 +109,9 @@ class PolicyManagerImpl : public PolicyManager,
     /**
      * @brief Logger
      */
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     /**
      * @brief Result of call of public method Init()

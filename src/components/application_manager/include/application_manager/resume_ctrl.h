@@ -167,7 +167,9 @@ class ResumeCtrl: public event_engine::EventObserver {
       ApplicationSharedPtr app;
     };
 
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     /**
      * @brief Time step to check resumption TIME_OUT

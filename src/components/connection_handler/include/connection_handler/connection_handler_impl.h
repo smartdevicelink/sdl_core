@@ -291,7 +291,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      *\brief For logging.
      */
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);

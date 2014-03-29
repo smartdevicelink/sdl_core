@@ -579,7 +579,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
+#   ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#   endif // ENABLE_LOG
 
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;

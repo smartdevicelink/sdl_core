@@ -416,7 +416,9 @@ class ProtocolHandlerImpl
     /**
      * \brief For logging.
      */
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     /**
      *\brief Pointer on instance of class implementing IProtocolObserver

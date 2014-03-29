@@ -41,8 +41,10 @@ namespace policies {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr PolicyManagerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("Policies"));
+#endif // ENABLE_LOG
 
 //---------------------------------------------------------------
 

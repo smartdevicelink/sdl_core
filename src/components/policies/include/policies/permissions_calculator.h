@@ -132,7 +132,9 @@ class PermissionsCalculator {
     /**
      * @brief Logger
      */
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 };
 
 }  // namespace policies
