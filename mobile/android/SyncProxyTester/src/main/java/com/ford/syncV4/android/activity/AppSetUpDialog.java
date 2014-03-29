@@ -78,6 +78,7 @@ public class AppSetUpDialog extends DialogFragment {
             }
         });
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -100,6 +101,14 @@ public class AppSetUpDialog extends DialogFragment {
 
         final CheckBox autoSetAppIconCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkAutoSetAppIcon);
+
+        doDeviceRootCheckView.setChecked(AppPreferencesManager.getDoDeviceRootCheck());
+        doDeviceRootCheckView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppPreferencesManager.setDoDeviceRootCheck(isChecked);
+            }
+        });
 
         ipAddressLayout.setVisibility(View.GONE);
         portLayout.setVisibility(View.GONE);

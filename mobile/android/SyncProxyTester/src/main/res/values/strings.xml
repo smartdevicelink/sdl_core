@@ -274,6 +274,7 @@
     <string name="putfile_length">Length</string>
 
     <string name="exit_dialog_title">Exit Application</string>
+    <string name="init_dialog_title">Init Application</string>
     <string name="app_setup_dialog_title">Please set up application properties</string>
     <string name="nsd_use_label">Network Service Discovery:</string>
     <string name="nsd_unsupported_api_level_text">NSD is supported from Android 4.1 Jellybean</string>

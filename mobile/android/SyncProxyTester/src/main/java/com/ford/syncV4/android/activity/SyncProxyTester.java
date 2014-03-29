@@ -136,6 +136,7 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
+import com.stericson.RootTools.RootTools;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -319,14 +320,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private Handler mBluetoothStopProxyServiceTimeOutHandler;
     /**
-     * progress dialog of the Exit Application
+     * progress dialog of the Application
      */
-    private ProgressDialog mExitProgressDialog;
+    private ProgressDialog mProgressDialog;
     /**
      * UI Handler to perform actions in UI Thread
      */
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
     private final static String APP_SETUP_DIALOG_TAG = "AppSetupDialogTag";
+    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
@@ -362,10 +364,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public static int getNewChoiceId() {
         return autoIncChoiceId++;
-    }
-
-    public void runInUIThread(Runnable runnable) {
-        mUIHandler.post(runnable);
     }
     
     private ArrayAdapter<String> adapter;
@@ -486,6 +484,58 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onSetUpDialogResult() {
+
+        getProgressDialog(getString(R.string.init_dialog_title)).show();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (AppPreferencesManager.getDoDeviceRootCheck() && RootTools.isRootAvailable()) {
+
+                    getProgressDialog(getString(R.string.init_dialog_title)).dismiss();
+
+                    DialogFragment rootedDeviceAlertView = RootedDeviceAlertView.newInstance();
+                    rootedDeviceAlertView.setCancelable(false);
+                    rootedDeviceAlertView.show(getFragmentManager(), ROOTED_DEVICE_ALERT_DIALOG_TAG);
+
+                    return;
+                }
+
+                if (mBoundProxyService != null) {
+                    initProxyService();
+                    try {
+                        mBoundProxyService.syncProxyOpenSession();
+                    } catch (SyncException e) {
+                        Log.e(LOG_TAG, SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
+                    }
+                } else {
+                    MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
+                        @Override
+                        public void onServiceBindComplete() {
+                            Log.d(LOG_TAG, "Service Bind Complete");
+                            getProxyService();
+                            initProxyService();
+
+                            mBoundProxyService.startProxyIfNetworkConnected();
+                        }
+                    });
+                }
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUpReceiver();
+                        showProtocolPropertiesInTitle();
+
+                        getProgressDialog(getString(R.string.init_dialog_title)).dismiss();
+                    }
+                });
+            }
+        });
+    }
+
+    /*private void postRootDetectionResult() {
         setUpReceiver();
         showProtocolPropertiesInTitle();
         if (mBoundProxyService != null) {
@@ -507,7 +557,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 }
             });
         }
-    }
+    }*/
 
     private void setUpReceiver() {
         IntentFilter intentFilter = new IntentFilter();
@@ -626,19 +676,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void dismissExitDialog() {
-        runInUIThread(new Runnable() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
             public void run() {
-                getExitDialog().dismiss();
+                getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
             }
         });
     }
 
     private void closeApplication() {
         MainApp.getInstance().unbindProxyFromMainApp();
-        runInUIThread(new Runnable() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
             @Override
             public void run() {
-                getExitDialog().dismiss();
+                getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
                 exitApp();
             }
         });
@@ -3887,7 +3937,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Exit from Activity
      */
-    private void exitApp() {
+    public void exitApp() {
         Log.i(LOG_TAG, "Exit App");
         isFirstActivityRun = true;
         //stopService(new Intent(this, ProxyService.class));
@@ -3902,7 +3952,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Stops the proxy service.
      */
     private void stopProxyServiceOnExit() {
-        getExitDialog().show();
+        getProgressDialog(getString(R.string.exit_dialog_title)).show();
 
         if (mStopProxyServiceTimeOutHandler == null) {
             mStopProxyServiceTimeOutHandler = new Handler();
@@ -3954,14 +4004,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         });
     }
 
-    private ProgressDialog getExitDialog() {
-        if (mExitProgressDialog == null) {
-            mExitProgressDialog = new ProgressDialog(this);
-            mExitProgressDialog.setTitle(R.string.exit_dialog_title);
-            mExitProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mExitProgressDialog.setIndeterminate(true);
+    private ProgressDialog getProgressDialog(String title) {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setProgressStyle(mProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setIndeterminate(true);
         }
-        return mExitProgressDialog;
+        mProgressDialog.setTitle(title);
+        return mProgressDialog;
     }
 
     /**
@@ -3972,7 +4022,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         public void run() {
             Log.w(LOG_TAG, "Exit App timer callback");
             mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
-            getExitDialog().dismiss();
+            getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
             exitApp();
             android.os.Process.killProcess(android.os.Process.myPid());
         }
