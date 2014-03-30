@@ -8,7 +8,7 @@ find_package(LibXML2 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 #add_subdirectory(./tools)
 
 
@@ -19,7 +19,6 @@ include_directories (
   ../src/thirdPartyLibs/MessageBroker/include
   ../src/appMain
   ../src/components/application_manager/include
-  ../src/components/policies/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
@@ -112,7 +111,7 @@ set(LIBRARIES
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
-    policies
+    #policy
     ProtocolHandler
     Utils
     ConfigProfile

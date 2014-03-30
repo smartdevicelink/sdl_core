@@ -43,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 PutFileRequest::PutFileRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+  : CommandRequestImpl(message) {
 }
 
 PutFileRequest::~PutFileRequest() {
@@ -53,9 +53,9 @@ void PutFileRequest::Run() {
   LOG4CXX_INFO(logger_, "PutFileRequest::Run");
 
   ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-      connection_key());
+                                       connection_key());
   smart_objects::SmartObject response_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+        smart_objects::SmartType_Map);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -66,14 +66,14 @@ void PutFileRequest::Run() {
   if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
       profile::Profile::instance()->put_file_in_none() <=
       application->put_file_in_none_count()) {
-      // If application is in the HMI_NONE level the quantity of allowed
-      // PutFile request is limited by the configuration profile
-      LOG4CXX_ERROR(logger_,
-                    "Too many requests from the app with HMILevel HMI_NONE ");
-      SendResponse(false, mobile_apis::Result::REJECTED,
-                   "Too many requests from the app with HMILevel HMI_NONE",
-                   &response_params);
-      return;
+    // If application is in the HMI_NONE level the quantity of allowed
+    // PutFile request is limited by the configuration profile
+    LOG4CXX_ERROR(logger_,
+                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Too many requests from the app with HMILevel HMI_NONE",
+                 &response_params);
+    return;
   }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
@@ -100,15 +100,16 @@ void PutFileRequest::Run() {
     return;
   }
   sync_file_name_ =
-      (*message_)[strings::msg_params][strings::sync_file_name].asString();
+    (*message_)[strings::msg_params][strings::sync_file_name].asString();
   file_type_ =
-      static_cast<mobile_apis::FileType::eType>(
+    static_cast<mobile_apis::FileType::eType>(
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
-      (*message_)[strings::params][strings::binary_data].asBinary();
+    (*message_)[strings::params][strings::binary_data].asBinary();
 
   // Policy table update in json format is currently to be received via PutFile
-  if (mobile_apis::FileType::JSON == file_type) {
+  // TODO(PV): after latest discussion has to be changed
+  if (mobile_apis::FileType::JSON == file_type_) {
     policy::PolicyHandler::instance()->ReceiveMessageFromSDK(binary_data);
   }
 
@@ -123,18 +124,18 @@ void PutFileRequest::Run() {
     offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
   }
   if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-      length_ =
-            (*message_)[strings::msg_params][strings::length].asInt();
+    length_ =
+      (*message_)[strings::msg_params][strings::length].asInt();
   }
   if ((*message_)[strings::msg_params].
       keyExists(strings::persistent_file)) {
     is_persistent_file_ =
-        (*message_)[strings::msg_params][strings::persistent_file].asBool();
+      (*message_)[strings::msg_params][strings::persistent_file].asBool();
   }
   if ((*message_)[strings::msg_params].
       keyExists(strings::system_file)) {
     is_system_file =
-        (*message_)[strings::msg_params][strings::system_file].asBool();
+      (*message_)[strings::msg_params][strings::system_file].asBool();
   }
 
   std::string full_file_path;
@@ -154,7 +155,7 @@ void PutFileRequest::Run() {
   } else {
 
     response_params[strings::space_available] =
-       static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
+      static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
 
     full_file_path = file_system::CreateDirectory(application->name());
     full_file_path = file_system::FullPath(full_file_path);
@@ -183,8 +184,8 @@ void PutFileRequest::Run() {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(file)) {
           LOG4CXX_INFO(
-              logger_,
-              "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
+            logger_,
+            "Couldn't add file to application (File already Exist in application and was rewrited on fs) ");
           // It can be first part of new big file, so we need tu update information about it's downloading status and percictency
           if (!application->UpdateFile(file)) {
             LOG4CXX_INFO(logger_, "Couldn't update file");
@@ -200,17 +201,17 @@ void PutFileRequest::Run() {
           application->increment_put_file_in_none_count();
         }
       }
-//      For future implementation ( when length will contains file size)
-//      if (offset + binary_data.size() == length) {
-//        LOG4CXX_INFO(logger_, "File is Fully downloaded");
-//        if (!application->UpdateFile(file)) {
-//          // If it is impossible to update file, application doesn't know about existing this file
-//          SendResponse(false, mobile_apis::Result::INVALID_DATA);
-//          return;
-//        }
-//      } else {
-//        //TODO: Maybe need to save in AppFile information about downloading progress
-//      }
+      //      For future implementation ( when length will contains file size)
+      //      if (offset + binary_data.size() == length) {
+      //        LOG4CXX_INFO(logger_, "File is Fully downloaded");
+      //        if (!application->UpdateFile(file)) {
+      //          // If it is impossible to update file, application doesn't know about existing this file
+      //          SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      //          return;
+      //        }
+      //      } else {
+      //        //TODO: Maybe need to save in AppFile information about downloading progress
+      //      }
       SendResponse(true, save_result, "File downloaded", &response_params);
       if (is_system_file) {
         SendOnPutFileNotification();
