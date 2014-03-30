@@ -39,6 +39,7 @@
 using namespace security_manager;
 static const char* err_id ="ERROR_ID";
 
+// TODO (EZamakhov) : add section to log4cxx.properties file
 log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecurityManager"));
 
@@ -51,8 +52,7 @@ void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kControl) {
-//    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
-//                 << message->service_type());
+    LOG4CXX_INFO(logger_, "Skipping message; not the under SM handling");
     return;
   }
 
@@ -201,22 +201,13 @@ void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
 }
 
 void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                                     const bool succecc) {
-  // TODO: upgrade SSLContext interface to let caller know
-  //       if handshake wasn't successful
+                                                     const bool success) {
   for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
       it != listeners_.end(); ) {
-    if((*it)->OnHandshakeDone(connection_key, succecc)) {
+    if((*it)->OnHandshakeDone(connection_key, success)) {
       RemoveListener(*it);
       it = listeners_.begin();
     }
-  }
-}
-
-void SecurityManager::NotifyListenersOnHandshakeFailed(const uint32_t &connection_key) {
-  for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-          it != listeners_.end(); ++it) {
-    (*it)->OnHandshakeFailed(connection_key);
   }
 }
 
@@ -269,6 +260,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   if(out_data && out_data_size) {
     // answer with the same header as income message
     SendData(connection_key, inMessage->get_header(), out_data, out_data_size);
+    LOG4CXX_INFO(logger_, "Send handshake data " << out_data_size << " bytes.");
   }
   return true;
 }

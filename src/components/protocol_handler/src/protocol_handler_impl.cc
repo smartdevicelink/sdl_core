@@ -211,9 +211,10 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
       impl::RawFordMessageToMobile(ptr, false));
 
   LOG4CXX_INFO(logger_,
-               "sendStartSessionAck() for connection " << connection_id
+               "SendStartSessionAck() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id));
+               << " session_id " << static_cast<int32_t>(session_id)
+               << " protection " << (encrypted ? "ON" : "OFF"));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -374,16 +375,14 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   connection_handler->KeepConnectionAlive(tm_message->connection_key());
 
   if (tm_message) {
-    LOG4CXX_INFO_EXT(
+    LOG4CXX_INFO(
         logger_,
-        "Received from TM "    << tm_message->data() <<
-        " with connection id " << tm_message->connection_key() <<
+        "Received data from TM  with connection id " << tm_message->connection_key() <<
         " msg data_size "      << tm_message->data_size());
   } else {
     LOG4CXX_ERROR(
         logger_,
-        "Invalid incoming message received in"
-        << " ProtocolHandler from Transport Manager.");
+        "Invalid incoming message received in ProtocolHandler from Transport Manager.");
     return;
   }
 
@@ -470,7 +469,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
                              " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   LOG4CXX_INFO(logger_,
-               "Message to send with connection id " << packet->connection_id());
+               "Message to send with connection id " << int(packet->connection_id()));
 
   if (!transport_manager_){
     LOG4CXX_WARN(logger_, "No Transport Manager found.");
@@ -814,8 +813,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       int32_t session_id,
       uint8_t protocol_version,
       uint32_t hash_code,
-      uint8_t service_type,
-      security_manager::SecurityManager* security_manager)
+      uint8_t service_type)
      : connection_key_(connection_key),
        connection_id_(connection_id),
        session_id_(session_id),
@@ -827,6 +825,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   bool OnHandshakeDone(const uint32_t &connection_key,
                        const bool success) OVERRIDE {
     if(connection_key==connection_key_) {
+      // TODO (EZamakhov) : remove as call of ProtocolHandlerImpl::SendStartSessionAck
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
                              connection_id_, protocol_version_, success,
                              FRAME_TYPE_CONTROL, service_type_,
@@ -834,20 +833,11 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
                              0, hash_code_));
       queue_->PostMessage(
             impl::RawFordMessageToMobile(ptr, false));
-      delete this;
-      return true;
-    }
-    return false;
-  }
-  bool OnHandshakeFailed(const uint32_t &connection_key) OVERRIDE {
-    if(connection_key==connection_key_) {
-      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(
-                             connection_id_, protocol_version_, false,
-                             FRAME_TYPE_CONTROL, service_type_,
-                             FRAME_DATA_START_SERVICE_NACK, session_id_,
-                             0, hash_code_));
-      queue_->PostMessage(
-            impl::RawFordMessageToMobile(ptr, false));
+      LOG4CXX_INFO(logger_,
+                   "SendStartSessionAck() for connection " << connection_id_
+                   << " for service_type " << static_cast<int32_t>(service_type_)
+                   << " session_id " << static_cast<int32_t>(session_id_)
+                   << " protection " << (success ? "ON" : "OFF"));
       delete this;
       return true;
     }
@@ -861,7 +851,10 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   uint32_t hash_code_;
   uint8_t service_type_;
   impl::ToMobileQueue* queue_;
+  static log4cxx::LoggerPtr logger_;
 };
+log4cxx::LoggerPtr StartSessionHandler::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("ProtocolHandler"));
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
@@ -909,7 +902,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     security_manager_->AddListener(
           new StartSessionHandler( connection_key, &raw_ford_messages_to_mobile_,
             connection_id, session_id, packet.protocol_version(), connection_key,
-            packet.service_type(), security_manager_));
+            packet.service_type()));
     security_manager_->StartHandshake(connection_key);
     return RESULT_OK;
   }

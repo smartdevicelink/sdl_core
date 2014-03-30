@@ -144,11 +144,10 @@ public:
   /**
    * \brief Notifiers for listeners
    * \param connection_key Unique key used by other components as session identifier
-   * \param succecc result of connection protection
+   * \param success result of connection protection
    */
   void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                      const bool succecc);
-  void NotifyListenersOnHandshakeFailed(const uint32_t &connection_key);
+                                      const bool success);
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file
