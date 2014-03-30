@@ -72,7 +72,7 @@ class ProtocolHandler {
      * \param final_message tells whether message's
      * connection must be closed when message is processed
      */
-    virtual void SendMessageToMobileApp(const RawMessagePtr& message,
+    virtual void SendMessageToMobileApp(const RawMessagePtr message,
                                         bool final_message) = 0;
 
     /**

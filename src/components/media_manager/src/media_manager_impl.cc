@@ -286,7 +286,7 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 
 
 void MediaManagerImpl::OnMessageReceived(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   if (message->service_type()
       == protocol_handler::kMobileNav) {
     if (!(application_manager::ApplicationManagerImpl::instance()->
@@ -309,7 +309,7 @@ void MediaManagerImpl::OnMessageReceived(
 }
 
 void MediaManagerImpl::OnMobileMessageSent(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
 }
 
 void MediaManagerImpl::FramesProcessed(int32_t application_key,

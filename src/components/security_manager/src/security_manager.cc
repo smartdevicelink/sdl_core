@@ -48,7 +48,7 @@ SecurityManager::SecurityManager() :
 }
 
 void SecurityManager::OnMessageReceived(
-    const protocol_handler::RawMessagePtr &message) {
+    const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
   if(message->service_type() != protocol_handler::kControl) {
 //    LOG4CXX_WARN(logger_, "Incorrect message service type of income message "
@@ -73,7 +73,7 @@ void SecurityManager::OnMessageReceived(
 }
 
 void SecurityManager::OnMobileMessageSent(
-    const protocol_handler::RawMessagePtr &) {
+    const protocol_handler::RawMessagePtr ) {
 //  LOG4CXX_INFO(logger_, "OnMobileMessageSent");
 }
 

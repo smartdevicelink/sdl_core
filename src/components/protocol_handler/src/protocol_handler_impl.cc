@@ -301,7 +301,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
   return RESULT_OK;
 }
 
-void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
+void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                  bool final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
@@ -412,7 +412,7 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
   LOG4CXX_ERROR(logger_, "Received error on attemping to recieve message.");
 }
 
-void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
+void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMessageReceived(message);
@@ -430,7 +430,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
 
 void ProtocolHandlerImpl::OnTMMessageSendFailed(
     const transport_manager::DataSendError& error,
-    const RawMessagePtr& message) {
+    const RawMessagePtr message) {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Sending message " <<
       message-> data() << " failed.");
@@ -447,7 +447,7 @@ void ProtocolHandlerImpl::OnConnectionClosed(
   incoming_data_handler_->RemoveConnection(connection_id);
 }
 
-RESULT_CODE ProtocolHandlerImpl::SendFrame(ProtocolFramePtr packet) {
+RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!packet) {
     LOG4CXX_ERROR(logger_, "Failed to send empty packet.");
@@ -589,7 +589,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
-                                               const ProtocolFramePtr& packet) {
+                                               const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   switch (packet->frame_type()) {
@@ -615,7 +615,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
-    ConnectionID connection_id, const ProtocolFramePtr &packet) {
+    ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_INFO(
@@ -639,7 +639,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
-    ConnectionID connection_id, const ProtocolFramePtr& packet) {
+    ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   if (!session_observer_) {
@@ -724,7 +724,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
-    ConnectionID connection_id, const ProtocolFramePtr& packet) {
+    ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
