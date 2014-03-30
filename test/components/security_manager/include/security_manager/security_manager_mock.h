@@ -104,8 +104,9 @@ namespace security_manager_test {
    */
   class CryptoManagerMock: public security_manager::CryptoManager {
   public:
-    MOCK_METHOD5(Init,
+    MOCK_METHOD6(Init,
                  bool (security_manager::Mode mode,
+                       security_manager::Protocol protocol,
                        const std::string& cert_filename,
                        const std::string& key_filename,
                        const std::string& ciphers_list,
@@ -136,6 +137,7 @@ namespace security_manager_test {
     MOCK_METHOD4(Decrypt,
                  bool (const uint8_t* const,  size_t,
                        const uint8_t** const, size_t*));
+    MOCK_CONST_METHOD1(get_max_block_size, size_t (size_t));
     MOCK_CONST_METHOD0(IsInitCompleted, bool());
   };
 

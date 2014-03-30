@@ -59,10 +59,10 @@ class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     crypto_manager = new security_manager::CryptoManagerImpl();
-    crypto_manager->Init(security_manager::SERVER, "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false);
+    crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false);
 
     client_manager = new security_manager::CryptoManagerImpl();
-    client_manager->Init(security_manager::CLIENT, "", "", "AES128-GCM-SHA256", false);
+    client_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2, "", "", "AES128-GCM-SHA256", false);
   }
 
   static void TearDownTestCase() {

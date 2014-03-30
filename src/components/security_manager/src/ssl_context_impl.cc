@@ -168,6 +168,14 @@ Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
   return true;
 }
 
+size_t CryptoManagerImpl::SSLContextImpl::
+get_max_block_size(size_t mtu) const {
+  return mtu - 29;
+/*
+  const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
+*/
+}
+
 CryptoManagerImpl::SSLContextImpl::
 ~SSLContextImpl() {
   //SSL_shutdown(connection_);
