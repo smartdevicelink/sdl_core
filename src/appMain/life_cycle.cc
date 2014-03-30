@@ -122,8 +122,26 @@ bool LifeCycle::StartComponents() {
   bool verify_peer;
   profile::Profile::instance()->ReadBoolValue(
         &verify_peer, false, security_manager::SecurityManager::ConfigSection(), "VerifyPeer");
+
+  std::string protocol_name;
+  profile::Profile::instance()->ReadStringValue(
+      &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
+
+  security_manager::Protocol protocol;
+  if (protocol_name == "TLSv1.1") {
+    protocol = security_manager::TLSv1_1;
+  } else if (protocol_name == "TLSv1.2") {
+    protocol = security_manager::TLSv1_2;
+  } else if (protocol_name == "SSLv3") {
+    protocol = security_manager::SSLv3;
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol_name);
+    return false;
+  }
+
   if(!crypto_manager_->Init(
       ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          protocol,
           cert_filename,
           key_filename,
           ciphers_list,

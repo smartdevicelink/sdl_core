@@ -50,6 +50,7 @@ CryptoManagerImpl::CryptoManagerImpl()
 }
 
 bool CryptoManagerImpl::Init(Mode mode,
+                             Protocol protocol,
                              const std::string& cert_filename,
                              const std::string& key_filename,
                              const std::string& ciphers_list,
@@ -64,12 +65,31 @@ bool CryptoManagerImpl::Init(Mode mode,
   instance_count_++;
 
   mode_ = mode;
-  if (mode == SERVER) {
-    context_ = SSL_CTX_new(TLSv1_2_server_method());
-  } else {
-    context_ = SSL_CTX_new(TLSv1_2_client_method());
+  const SSL_METHOD *method;
+  switch (protocol) {
+    case SSLv3:
+      method = mode == SERVER ?
+          SSLv3_server_method() :
+          SSLv3_client_method();
+      break;
+    case TLSv1_1:
+      method = mode == SERVER ?
+          TLSv1_1_server_method() :
+          TLSv1_1_client_method();
+      break;
+    case TLSv1_2:
+      method = mode == SERVER ?
+          TLSv1_2_server_method() :
+          TLSv1_2_client_method();
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
+      return false;
   }
-
+  context_ = SSL_CTX_new(method);
+  if (protocol == SSLv3) {
+    SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+  }
 
   if (!cert_filename.empty()) {
     LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
@@ -99,8 +119,6 @@ bool CryptoManagerImpl::Init(Mode mode,
 
   SSL_CTX_set_verify(context_, verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE, NULL);
 
-  // TODO (EZamakhov): is it legacy?
-  //SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
   return true;
 }
 
