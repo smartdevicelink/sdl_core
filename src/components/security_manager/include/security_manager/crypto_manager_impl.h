@@ -58,6 +58,7 @@ namespace security_manager {
       virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
                             const uint8_t ** const out_data, size_t* out_data_size);
       virtual bool  IsInitCompleted() const;
+      virtual size_t get_max_block_size(size_t mtu) const;
       virtual ~SSLContextImpl();
      private:
       void EnsureBufferSizeEnough(size_t size);

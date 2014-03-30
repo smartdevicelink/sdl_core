@@ -137,6 +137,7 @@ namespace security_manager_test {
     MOCK_METHOD4(Decrypt,
                  bool (const uint8_t* const,  size_t,
                        const uint8_t** const, size_t*));
+    MOCK_CONST_METHOD1(get_max_block_size, size_t (size_t));
     MOCK_CONST_METHOD0(IsInitCompleted, bool());
   };
 

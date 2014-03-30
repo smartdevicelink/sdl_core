@@ -72,6 +72,7 @@ class SSLContext {
   virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
                         const uint8_t ** const out_data, size_t* out_data_size)=0;
   virtual bool  IsInitCompleted() const = 0;
+  virtual size_t get_max_block_size(size_t mtu) const =0;
   virtual ~SSLContext() { }
 };
 } // namespace security_manager
