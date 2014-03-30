@@ -32,6 +32,7 @@
 
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "protocol_handler/protocol_packet.h"
 #include "utils/byte_order.h"
 #include "json/json.h"
 

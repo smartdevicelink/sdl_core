@@ -2,7 +2,7 @@
  * \file ProtocolPacket.h
  * \brief ProtocolPacket class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include "utils/macro.h"
+#include "protocol_handler/raw_message.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -92,32 +93,6 @@ const uint8_t FRAME_TYPE_FIRST = 0x02;
  *\brief protocol header.
  */
 const uint8_t FRAME_TYPE_CONSECUTIVE = 0x03;
-
-
-/**
- *\brief Constant: Frame type for HeartBeat
- */
-const uint8_t SERVICE_TYPE_CONTROL = 0x00;
-
-/**
- *\brief Constant: RPC type of session
- */
-const uint8_t SERVICE_TYPE_RPC = 0x07;
-
-/**
- *\brief Constant: Raw PCM audio service
- */
-const uint8_t SERVICE_TYPE_AUDIO = 0x0A;
-
-/**
- * \brief Constant: Mobile Navi type of session for map streaming
- */
-const uint8_t SERVICE_TYPE_NAVI = 0x0B;
-
-/**
- *\brief Constant: Bulk data type of session (hybrid)
- */
-const uint8_t SERVICE_TYPE_BULK = 0x0F;
 
 /**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
@@ -224,7 +199,7 @@ struct ProtocolHeader {
    */
   ProtocolHeader()
     : version(0x00),
-      protection_flag(0x00),
+      protection_flag(PROTECTION_OFF),
       frameType(0x00),
       serviceType(0x00),
       frameData(0x00),
@@ -305,14 +280,16 @@ class ProtocolPacket {
      *
      * \param connectionKey Identifier of connection within wich message
      * is transferred
+     * \param connection_id - Connection Identifier
      * \param data Message string
      * \param dataSize Message size
      */
-    ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+    ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
                    uint32_t data_size);
 
     /**
      * \brief Constructor
+     * \param connection_id - Connection Identifier
      * \param version Version of protocol
      * \param protection Protection flag
      * \param frameType Type of frame (Single/First/Consecutive)
@@ -324,7 +301,7 @@ class ProtocolPacket {
      * \param messageID ID of message or hash code - only for second protocol
      * \param data Message string if provided
      */
-    ProtocolPacket(uint8_t connection_key,
+    ProtocolPacket(uint8_t connection_id,
                    uint8_t version, bool protection, uint8_t frameType,
                    uint8_t serviceType, uint8_t frameData,
                    uint8_t sessionId, uint32_t dataSize,
@@ -338,25 +315,9 @@ class ProtocolPacket {
     /*Serialization*/
     /**
      * \brief Serializes info about message into protocol header.
-     * \param version Version of protocol
-     * \param protection Protection flag
-     * \param frameType Type of frame (Single/First/Consecutive)
-     * \param serviceType Type of session (RPC/Bulk data)
-     * \param frameData Information about frame: start/end session, number of
-     * frame, etc
-     * \param sessionID Number of frame within connection
-     * \param dataSize Size of message string
-     * \param messageID ID of message or hash code - only for second protocol
-     * \param data Message string if provided
-     * \return \saRESULT_CODE Status of serialization
+     * \return RawMessagePtr with all data (header and message)
      */
-    RESULT_CODE serializePacket(uint8_t version, bool protection,
-                                uint8_t frameType,
-                                uint8_t serviceType,
-                                uint8_t frameData, uint8_t sessionId,
-                                uint32_t dataSize, uint32_t messageID,
-                                const uint8_t* data = 0);
-
+    RawMessagePtr serializePacket();
     /**
      * \brief Appends message frame to existing message in
      * recieving multiframe messages.
@@ -365,12 +326,6 @@ class ProtocolPacket {
      * \return \saRESULT_CODE Status of serialization
      */
     RESULT_CODE appendData(uint8_t* chunkData, uint32_t chunkDataSize);
-
-    /**
-     * \brief Getter of serialized message with protocol header
-     * \return uint8_t * Message string or 0 if not serialized properly.
-     */
-    uint8_t* packet() const;
 
     /**
      * \brief Getter of message ID
@@ -407,6 +362,11 @@ class ProtocolPacket {
      * \brief Getter of protection flag
      */
     bool protection_flag() const;
+
+    /**
+     * \brief Setter of protection flag
+     */
+    void set_protection_flag(const bool protection);
 
     /**
      * \brief Getter of frame type (single/first/etc)
@@ -463,18 +423,9 @@ class ProtocolPacket {
     /**
     * \brief Getter for Connection Identifier
     */
-    uint8_t connection_key() const;
+    uint8_t connection_id() const;
 
   private:
-    /**
-     *\brief Serialized message string
-     */
-    uint8_t* packet_;
-
-    /**
-     *\brief Serialized message string size
-     */
-    uint32_t total_packet_size_;
 
     /**
      *\brief Protocol header
@@ -482,7 +433,7 @@ class ProtocolPacket {
     ProtocolHeader packet_header_;
 
     /**
-     *\brief Message body
+     *\brief Message body (without header)
      */
     ProtocolData packet_data_;
 
@@ -500,7 +451,7 @@ class ProtocolPacket {
     * \brief Connection Identifier
     * Obtained from connection_handler
     */
-    uint8_t connection_key_;
+    uint8_t connection_id_;
 
     DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
 };

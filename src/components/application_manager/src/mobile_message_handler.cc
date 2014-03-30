@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "application_manager/mobile_message_handler.h"
 #include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
+#include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"
 
 #include <stdint.h>

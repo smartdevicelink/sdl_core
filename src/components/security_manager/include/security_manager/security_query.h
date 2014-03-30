@@ -82,6 +82,7 @@ public:
     ERROR_SERVICE_PROTECTION_PENDING = 0x9, //get packet with flag encrypt for not
     // TODO  (EZamakhov) : add error to send
     ERROR_DECRYPTION_FAILED          = 0x10, //
+    ERROR_ENCRYPTION_FAILED          = 0x11,
     ERROR_SSL_INVALID_DATA           = 0xF0,
     // TODO (EZamakhov) : remove ERROR_SESSION_NOT_FOUND and so with ERROR_INTERNAL
     ERROR_INTERNAL                   = 0xF1,

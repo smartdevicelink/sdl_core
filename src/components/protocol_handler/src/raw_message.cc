@@ -36,6 +36,7 @@
 #include "protocol_handler/raw_message.h"
 
 #include "protocol_handler/message_priority.h"
+#include <memory.h>
 
 namespace protocol_handler {
 
@@ -49,9 +50,7 @@ RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
     data_size_(data_sz) {
   if (data_sz > 0) {
     data_ = new uint8_t[data_sz];
-    for (uint32_t i = 0; i < data_sz; ++i) {
-      data_[i] = data_param[i];
-    }
+    memcpy(data_, data_param, sizeof(*data_) * data_sz);
   } else {
     data_ = 0;
   }
