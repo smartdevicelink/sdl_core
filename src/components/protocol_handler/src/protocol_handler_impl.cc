@@ -310,14 +310,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
-
-  const uint32_t header_size =  (PROTOCOL_VERSION_1 == message->protocol_version())
-      ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
-  const uint32_t overhead_size = 0;
-  DCHECK( MAXIMUM_FRAME_DATA_SIZE > (header_size + overhead_size) );
-  const uint32_t maxDataSize =
-      MAXIMUM_FRAME_DATA_SIZE - header_size - overhead_size;
-
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -325,6 +317,17 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
         " ISessionObserver doesn't exist.");
     return;
   }
+
+  const uint32_t header_size =  (PROTOCOL_VERSION_1 == message->protocol_version())
+      ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
+  uint32_t maxDataSize = MAXIMUM_FRAME_DATA_SIZE - header_size;
+  const security_manager::SSLContext* ssl_context = session_observer_->
+      GetSSLContext(message->connection_key(), message->service_type());
+  if(ssl_context && ssl_context->IsInitCompleted()) {
+    maxDataSize = ssl_context->get_max_block_size(MAXIMUM_FRAME_DATA_SIZE - header_size);
+  }
+  DCHECK( MAXIMUM_FRAME_DATA_SIZE > maxDataSize );
+
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
   session_observer_->PairFromKey(message->connection_key(), &connection_handle,
@@ -454,7 +457,8 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
   }
-
+  // TODO (EZamakhov) : move Encryption as part of serialization process
+  // and return protect flag to Packet constructor for makeing design by Policy
   const RESULT_CODE result = EncryptFrame(packet);
   if(result!=RESULT_OK) {
     LOG4CXX_WARN(logger_, "Error frame encryption. Frame droped.");
@@ -780,7 +784,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   } else {
     success = false;
   }
-
+  // TODO (EZamakhov) : add clean up output queue (for removed service)
   if (success) {
     SendEndSessionAck(
         connection_id, current_session_id, packet.protocol_version(),
