@@ -415,6 +415,116 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
             }
         },
 
+        /********************* Requests *********************/
+
+
+        /**
+         * Send request if application was activated
+         *
+         * @param {Number} appID
+         */
+        ActivateApp: function(appID) {
+
+            var itemIndex = this.client.generateId();
+
+            SDL.SDLModel.activateAppRequestsList[itemIndex] = appID;
+
+            Em.Logger.log("FFW.SDL.OnAppActivated: Request from HMI!");
+
+            // send notification
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": itemIndex,
+                "method": "SDL.ActivateApp",
+                "params": {
+                    "appID": appID
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Send request if application was activated
+         *
+         * @param {Number} appID
+         */
+        GetURLS: function(appID) {
+
+            Em.Logger.log("FFW.SDL.GetURLS: Request from HMI!");
+
+            // send notification
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": this.client.generateId(),
+                "method": "SDL.GetURLS",
+                "params": {
+                    "service": {
+                        "servicyType": "servicyType",
+                        "policyAppId": "policyAppId"
+                    }
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Request from HMI to find out Policy Table status
+         */
+        GetStatusUpdate: function() {
+
+            Em.Logger.log("SDL.GetStatusUpdate: Request from HMI!");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": this.client.generateId(),
+                "method": "SDL.GetStatusUpdate",
+                "params": {}
+            };
+            this.client.send(JSONMessage);
+        },
+
+        UpdateSDL: function() {
+
+            Em.Logger.log("SDL.UpdateSDL: Request from HMI!");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": this.client.generateId(),
+                "method": "SDL.UpdateSDL",
+                "params": {}
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Request to SDLCore to get user friendly message
+         * callback function uses text message came in response from SDLCore
+         *
+         * @callback callbackFunc
+         */
+        GetUserFriendlyMessage: function(callbackFunc, appID) {
+
+            var itemIndex = this.client.generateId();
+
+            SDL.SDLModel.userFriendlyMessagePull[itemIndex] = {"callbackFunc": callbackFunc, "appID": appID};
+
+            Em.Logger.log("SDL.GetUserFriendlyMessage: Request from HMI!");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": itemIndex,
+                "method": "SDL.GetUserFriendlyMessage",
+                "params": {
+                    "messageCodes": ["code"],
+                    "language": SDL.SDLModel.hmiUILanguage
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
         /**
          * Request to SDLCore to get user friendly message
          * callback function uses text message came in response from SDLCore
