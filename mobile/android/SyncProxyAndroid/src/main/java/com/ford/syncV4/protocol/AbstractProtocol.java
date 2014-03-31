@@ -119,19 +119,19 @@ public abstract class AbstractProtocol {
                     dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
                 }
 
-                try {
-                    byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
-                    byte[] frameHeader = header.assembleHeaderBytes();
-                    byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-                    System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-                    System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
-                    handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
-                } catch (IOException e) {
-                    getProtocolSecureManager().reportAnError(e);
-                    DebugTool.logError("Error data coding", e);
-                } catch (InterruptedException e) {
-                    getProtocolSecureManager().reportAnError(e);
-                    DebugTool.logError("Error data coding", e);
+                if (getProtocolSecureManager() != null) {
+                    try {
+                        byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
+                        sendMessage(header, dataChunk);
+                    } catch (IOException e) {
+                        getProtocolSecureManager().reportAnError(e);
+                        DebugTool.logError("Error data coding", e);
+                    } catch (InterruptedException e) {
+                        getProtocolSecureManager().reportAnError(e);
+                        DebugTool.logError("Error data coding", e);
+                    }
+                } else {
+                    sendMessage(header, dataChunkNotCyphered);
                 }
 
             } else {
@@ -139,6 +139,14 @@ public abstract class AbstractProtocol {
                 handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
             }
         } // end-if
+    }
+
+    private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
+        byte[] frameHeader = header.assembleHeaderBytes();
+        byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+        System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+        System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+        handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
     }
 
     private synchronized void resetHeartbeat() {

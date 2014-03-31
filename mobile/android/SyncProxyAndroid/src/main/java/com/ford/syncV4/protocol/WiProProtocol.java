@@ -348,20 +348,7 @@ public class WiProProtocol extends AbstractProtocol {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
                 final byte[] data = accumulator.toByteArray();
-                if (getProtocolSecureManager() != null) {
-                    try {
-                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
-                        createBigFrame(header, decipheredData);
-                    } catch (IOException e) {
-                        DebugTool.logError("Decipher error", e);
-                        getProtocolSecureManager().reportAnError(e);
-                    } catch (InterruptedException e) {
-                        DebugTool.logError("Decipher error", e);
-                        getProtocolSecureManager().reportAnError(e);
-                    }
-                } else {
-                    createBigFrame(header, data);
-                }
+                createBigFrame(header, data);
                 hasFirstFrame = false;
                 hasSecondFrame = false;
                 accumulator = null;
@@ -404,19 +391,21 @@ public class WiProProtocol extends AbstractProtocol {
             //	hasFirstFrame = true;
             if (header.getFrameType() == FrameType.First) {
                 handleFirstDataFrame(header, data);
-            }
+            } else {
+                if (getProtocolSecureManager() != null) {
+                    try {
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
+                        handleRemainingFrame(header, decipheredData);
+                    } catch (IOException e) {
+                        Log.i(TAG, "Decipher error", e);
+                    } catch (InterruptedException e) {
+                        Log.i(TAG, "Decipher error", e);
+                    }
 
-            //} else if (!hasSecondFrame) {
-            //	hasSecondFrame = true;
-            //	framesRemaining--;
-            //	handleSecondFrame(header, data);
-            //} else {
-            //	framesRemaining--;
-            else {
-                handleRemainingFrame(header, data);
+                } else {
+                    handleRemainingFrame(header, data);
+                }
             }
-
-            //}
         } // end-method
 
         protected void handleFrame(final ProtocolFrameHeader header, byte[] data) {
@@ -501,7 +490,7 @@ public class WiProProtocol extends AbstractProtocol {
                     handleProtocolSessionStarted(header.getServiceType(),
                             header.getSessionID(), header.isEncrypted(), _version, "");
                     hasRPCStarted = true;
-                }else{
+                } else {
                     handleProtocolServiceStarted(header.getServiceType(),
                             header.getSessionID(), header.isEncrypted(), _version, "");
                 }
