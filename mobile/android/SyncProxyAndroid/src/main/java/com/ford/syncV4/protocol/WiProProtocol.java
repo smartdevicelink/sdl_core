@@ -25,7 +25,7 @@ public class WiProProtocol extends AbstractProtocol {
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
     public static int HEADER_SIZE = 8;
-    private static final int SSL_OVERHEAD = 64;
+    public static final int SSL_OVERHEAD = 64;
     public static int MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE - SSL_OVERHEAD;
     byte _version = 1;
     boolean _haveHeader = false;
@@ -394,14 +394,13 @@ public class WiProProtocol extends AbstractProtocol {
             } else {
                 if (getProtocolSecureManager() != null) {
                     try {
-                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
+                        byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByChunk(header.isEncrypted(), data);
                         handleRemainingFrame(header, decipheredData);
                     } catch (IOException e) {
                         Log.i(TAG, "Decipher error", e);
                     } catch (InterruptedException e) {
                         Log.i(TAG, "Decipher error", e);
                     }
-
                 } else {
                     handleRemainingFrame(header, data);
                 }
@@ -436,14 +435,10 @@ public class WiProProtocol extends AbstractProtocol {
                     } else {
                         handleSingleFrameMessageFrame(header, data);
                     }
-
                 }
             } // end-if
         }
 
-        private void handleHandshakeMessage(ProtocolFrameHeader header, byte[] data) {
-
-        }
 
         private void handleProtocolHeartbeatACK(ProtocolFrameHeader header,
                                                 byte[] data) {

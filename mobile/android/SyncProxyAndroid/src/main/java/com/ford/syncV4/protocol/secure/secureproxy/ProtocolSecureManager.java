@@ -2,6 +2,7 @@ package com.ford.syncV4.protocol.secure.secureproxy;
 
 import android.util.Log;
 
+import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.util.BitConverter;
@@ -167,6 +168,19 @@ public class ProtocolSecureManager {
         }
     }
 
+    public byte[] sendDataToProxyServerByChunk(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
+        if (isEncrypted) {
+            RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
+            Log.i("cypheredData.length < 1000", "data.length" + data.length);
+            listenerOFCodedData.setOriginalLength(data.length - WiProProtocol.SSL_OVERHEAD);
+            writeDataToProxyServer(data, listenerOFCodedData);
+            getCountDownLatchOutput().await();
+            return deCypheredData;
+        } else {
+            return data;
+        }
+    }
+
     public byte[] sendDataToProxyServerByteByByte(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
             IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
@@ -266,14 +280,12 @@ public class ProtocolSecureManager {
         int count = 0;
 
         private RPCCodedDataListener() {
-
             setCountDownLatchInput(new CountDownLatch(1));
         }
 
         @Override
         public void onRPCPayloadCoded(byte[] bytes) {
             if (handshakeFinished) {
-
                 try {
                     bOutput.write(bytes);
                     count++;
@@ -291,15 +303,6 @@ public class ProtocolSecureManager {
                     Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown()");
                     countDownLatchInput.countDown();
                 }
-
-//                cypheredData = bytes;
-//                if (cypheredData != null) {
-//                    Log.i("cypheredData.length < 1000", " onRPCPayloadCoded " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-//                }
-//                countDownLatchInput.countDown();
-//                if (cypheredData != null) {
-//                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown(); " + bytes.length + " cypheredData.l " + cypheredData.length + " thread:" + Thread.currentThread().getName());
-//                }
             }
         }
     }
