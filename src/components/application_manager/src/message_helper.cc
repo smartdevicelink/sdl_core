@@ -1281,11 +1281,28 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
 
   (*message)[strings::msg_params]["isSDLAllowed"] = isSDLAllowed;
 
-  // TODO(AOleynik): Add processing of other parameters
-  (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = false;
+  // TODO(AOleynik): Add processing of other parameters  
+  (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = false;  
   (*message)[strings::msg_params]["isAppRevoked"] = false;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+
+  // If application is revoked it should not be activated
+  if ((*message)[strings::msg_params]["isAppRevoked"].asBool()) {
+    return;
+  }
+
+  // Send HMI status notification to mobile
+  const std::set<ApplicationSharedPtr> app_list =
+        application_manager::ApplicationManagerImpl::instance()->applications();
+  std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
+  std::set<ApplicationSharedPtr>::const_iterator it_end = app_list.end();
+  for (; it != it_end; ++it) {
+    if ((*it)->app_id() == permissions.application_id) {
+      ApplicationManagerImpl::instance()->ActivateApplication((*it));
+      break;
+    }
+  }
 }
 
 
