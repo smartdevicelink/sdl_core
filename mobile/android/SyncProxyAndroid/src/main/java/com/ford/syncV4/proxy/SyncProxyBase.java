@@ -98,6 +98,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
@@ -107,7 +108,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
-import com.ford.syncV4.util.TestConfig;
 import com.stericson.RootTools.RootTools;
 
 import org.apache.http.HttpResponse;
@@ -1992,25 +1992,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void restartRPCProtocolSession() {
         // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
-
-            // For the Test Cases
-            Log.d(TAG, "RestartRPCProtocolSession config: " + mTestConfig);
-            if (mTestConfig != null) {
-                Log.d(TAG, "RestartRPCProtocolSession DoCallRegisterAppInterface: " + mTestConfig.isDoCallRegisterAppInterface());
-                if (!mTestConfig.isDoCallRegisterAppInterface()) {
-
-                    Log.d(TAG, "RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
-                    if (mTestConfigCallback != null) {
-                        mTestConfigCallback.onRPCServiceComplete();
-                    }
-
-                    // Revert back a value which has been set for concrete Test Case
-                    mTestConfig.setDoCallRegisterAppInterface(true);
-
-                    return;
-                }
-            }
-
             try {
                 registerAppInterfacePrivate(
                         _syncMsgVersionRequest,
@@ -3218,6 +3199,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // TODO : Hide this method from public when no Test Cases are need
+
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
      */
@@ -3491,7 +3473,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mSecureServiceMessageCallback = new SecureServiceMessageCallback();
         mSecureServiceMessageManager.setMessageCallback(mSecureServiceMessageCallback);
     }
-}
+
 
     /**
      * Test Config section

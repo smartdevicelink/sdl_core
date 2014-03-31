@@ -119,21 +119,20 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.session.Session;
-import com.ford.syncV4.test.ITestConfigCallback;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
-import com.ford.syncV4.test.TestConfig;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class ProxyService extends Service implements IProxyListenerALMTesting, ITestConfigCallback {
+public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     static final String TAG = "SyncProxyTester";
 
@@ -410,7 +409,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapter);
 
         mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
-        mSyncProxy.setTestConfigCallback(this);
+
 
         createInfoMessageForAdapter("ProxyService.startProxy() complete");
         Log.i(TAG, ProxyService.class.getSimpleName() + " Start Proxy complete:" + mSyncProxy);
@@ -617,10 +616,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             Log.e(TAG, "Sync Proxy is null when try to initialize test session");
             return;
         }
-
-        TestConfig testConfig = mSyncProxy.getTestConfig();
-        // It is important to set this value back to TRUE when concrete Test Case is complete.
-        testConfig.setDoCallRegisterAppInterface(false);
 
         mSyncProxy.initializeSession();
     }
@@ -1403,8 +1398,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     new Pair<Integer, Result>(response.getCorrelationID(),
                             response.getResultCode())
             );
-            synchronized (mTesterMain.getThreadContext()) {
-                mTesterMain.getThreadContext().notify();
+            synchronized (mTesterMain.getXMLTestThreadContext()) {
+                mTesterMain.getXMLTestThreadContext().notify();
             }
         }
     }
@@ -2277,19 +2272,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             ModuleTest.sResponses.add(new Pair<Integer, Result>(diagnosticMessageResponse.getCorrelationID(), diagnosticMessageResponse.getResultCode()));
             synchronized (mTesterMain.getXMLTestThreadContext()) {
                 mTesterMain.getXMLTestThreadContext().notify();
-            }
-        }
-    }
-
-    /**
-     * Test Section
-     */
-
-    @Override
-    public void onRPCServiceComplete() {
-        if (isModuleTesting() && !mTestConfig.isDoCallRegisterAppInterface()) {
-            synchronized (mTesterMain.getTestActionThreadContext()) {
-                mTesterMain.getTestActionThreadContext().notify();
             }
         }
     }

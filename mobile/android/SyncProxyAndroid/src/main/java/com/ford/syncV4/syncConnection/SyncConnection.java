@@ -543,7 +543,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
                                          String correlationID) {
-        _connectionListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
     }
 
     @Override
@@ -553,7 +553,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onStartServiceNackReceived(ServiceType serviceType) {
-        _connectionListener.onStartServiceNackReceived(serviceType);
+        mConnectionListener.onStartServiceNackReceived(serviceType);
 
         /*if (serviceType == ServiceType.Secure_Service) {
             startProtocolSession();
