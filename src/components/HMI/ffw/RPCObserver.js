@@ -82,7 +82,7 @@ FFW.RPCObserver = Em.Object
                 var parsedMethod = request.method.split(/[.]/), validateFunc, result;
 
                 //if (request.params && "appID" in request.params && SDL.SDLModel.registeredApps.filterProperty('appID', request.params.appID).length > 0) {
-                if ("appID" in request.params && SDL.SDLModel.registeredApps.filterProperty('appID', request.params.appID).length <= 0) {
+                if (request.params && "appID" in request.params && SDL.SDLModel.registeredApps.filterProperty('appID', request.params.appID).length <= 0) {
                     Em.Logger.error('No application registered with current appID!');
                     return false;
                 }
