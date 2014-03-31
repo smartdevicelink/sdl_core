@@ -17,7 +17,7 @@ public class RPCServiceCheckboxState extends CheckBoxState {
         super(item, context);
         //hintString = getResources().getString(R.string.service_check_view_on);
         textStringOff = getResources().getString(R.string.secure_service_check_view_off);
-        textStringOn = getResources().getString(R.string.secure_service_check_view_on);
+        textStringOn = getResources().getString(R.string.secure_service_send_rpc);
         setStateOff();
     }
 }

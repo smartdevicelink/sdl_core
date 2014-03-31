@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -38,16 +39,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         super.setStateOff();
     }
 
-    public void setEncryptedMobileNaviServiceStateOff() {
-        mEncryptServiceCheckBoxState.setStateOff();
-    }
-
-    public void setEncryptedMobileNaviServiceStateOn() {
-        mEncryptServiceCheckBoxState.setStateOn();
-
-    }
-
-    public void setMobileNaviStateOn(OutputStream stream) {
+    public void setMobileNaviStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
         //Button button = (Button) getView().findViewById(R.id.videobutton);
         //button.setEnabled(true);
@@ -57,6 +49,16 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startFileStreaming();
+        }
+        notifyServiceState(encrypted);
+    }
+
+    private void notifyServiceState(boolean encrypted) {
+        TextView textView = (TextView) getView().findViewById(R.id.service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 
@@ -79,38 +81,48 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
-        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.mobile_navi_service_secure_checkbox_view);
-        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+        Button sendSecureServiceButton = (Button) view.findViewById(R.id.mobile_navi_service_secure_button_view);
+        sendSecureServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    changeEncryptCheckBoxState();
+                    sendStartEncryptedService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
             }
         });
+
+        Button sendNotSecureServiceButton = (Button) view.findViewById(R.id.mobile_navi_not_service_secure_button_view);
+        sendNotSecureServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    sendStartNotEncryptedService();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mEncryptServiceCheckBoxState = new MobileNaviEncryptCheckBoxState(encryptCheckBoxView,
-                getActivity());
     }
 
-    private void changeEncryptCheckBoxState() {
+    private void sendStartEncryptedService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
-            mEncryptServiceCheckBoxState.setStateOn();
-            syncProxyTester.startMobileNaviServiceEncryption();
-        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            mEncryptServiceCheckBoxState.setStateOff();
-            syncProxyTester.stopMobileNaviServiceEncryption();
-        }
+        syncProxyTester.startMobileNaviServiceEncryption();
+    }
+
+    private void sendStartNotEncryptedService() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startMobileNaviNotEncryptedService();
     }
 
     private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviService();
+            tester.startMobileNaviService(false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();

@@ -129,7 +129,7 @@ public class WiProProtocol extends AbstractProtocol {
             try {
                 if (protocolMsg.getBulkData() != null) {
                     byte[] result = getProtocolSecureManager().sendDataTOSSLClient(false, data);
-                    processFrameToSend(serviceType, sessionID,false, result);
+                    processFrameToSend(serviceType, sessionID, false, result);
                 } else {
                     byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.isEncrypted(), data);
                     processFrameToSend(serviceType, sessionID, protocolMsg.isEncrypted(), result);
@@ -496,8 +496,14 @@ public class WiProProtocol extends AbstractProtocol {
 
         private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
             if (header.getServiceType().equals(ServiceType.RPC)) {
-                handleProtocolSessionStarted(header.getServiceType(),
-                        header.getSessionID(), header.isEncrypted(), _version, "");
+                if (!hasRPCStarted) {
+                    handleProtocolSessionStarted(header.getServiceType(),
+                            header.getSessionID(), header.isEncrypted(), _version, "");
+                    hasRPCStarted = true;
+                }else{
+                    handleProtocolServiceStarted(header.getServiceType(),
+                            header.getSessionID(), header.isEncrypted(), _version, "");
+                }
             } else {
                 handleProtocolServiceStarted(header.getServiceType(),
                         header.getSessionID(), header.isEncrypted(), _version, "");

@@ -76,7 +76,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -134,7 +134,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -193,7 +193,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -257,7 +257,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -318,7 +318,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -378,7 +378,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
 
 
             @Override
@@ -424,7 +424,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, syncConnectionMock, new TestConfig());
+                        2, null, syncConnectionMock, new TestConfig(), false);
         SyncConnection connection =
                 new SyncConnection(proxy.getInterfaceBroker());
         connection.init(null, mock(SyncTransport.class));

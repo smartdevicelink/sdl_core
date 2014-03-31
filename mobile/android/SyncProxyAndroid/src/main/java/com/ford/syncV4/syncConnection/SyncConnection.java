@@ -368,10 +368,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startRpcService(Session session, boolean encrypt) {
+    public void startRpcService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.RPC, session, encrypt);
+                _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
             }
         }
     }
@@ -448,7 +448,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
-                //Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 _transport.sendBytes(msgBytes, offset, length);
             }
         }

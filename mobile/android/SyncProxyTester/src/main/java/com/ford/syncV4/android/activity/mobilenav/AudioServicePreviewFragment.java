@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -52,12 +53,24 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
-        CheckBox encryptCheckBoxView = (CheckBox) view.findViewById(R.id.audio_service_secure_checkbox_view);
-        encryptCheckBoxView.setOnClickListener(new View.OnClickListener() {
+        Button startCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_secure_checkbox_view);
+        startCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    changeEncryptCheckBoxState();
+                    startSecureAudioService();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
+        Button startNotCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_not_service_secure_button_view);
+        startNotCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                    startNotSecureAudioService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -65,19 +78,16 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         });
 
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
-        mEncryptServiceCheckBoxState = new AudioServiceEncryptCheckboxState(encryptCheckBoxView,
-                getActivity());
     }
 
-    private void changeEncryptCheckBoxState() {
+    private void startNotSecureAudioService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.OFF) {
-            mEncryptServiceCheckBoxState.setStateOn();
-            syncProxyTester.startAudioServiceEncryption();
-        } else if (mEncryptServiceCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            mEncryptServiceCheckBoxState.setStateOff();
-            syncProxyTester.stopAudioServiceEncryption();
-        }
+        syncProxyTester.startNotSecureAudioService();
+    }
+
+    private void startSecureAudioService() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startAudioServiceEncryption();
     }
 
     private void changeCheckBoxState() {
@@ -99,16 +109,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         super.setStateOff();
     }
 
-    public void setEncryptedAudioServiceStateOff() {
-        mEncryptServiceCheckBoxState.setStateOff();
-    }
 
-    public void setEncryptedAudioServiceStateOn() {
-        mEncryptServiceCheckBoxState.setStateOn();
-
-    }
-
-    public void setAudioServiceStateOn(OutputStream stream) {
+    public void setAudioServiceStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
         mDataStreamingButton.setEnabled(true);
 
@@ -116,6 +118,16 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startBaseFileStreaming(R.raw.audio_pcm);
+        }
+        notifyAudioServiceState(encrypted);
+    }
+
+    private void notifyAudioServiceState(boolean encrypted){
+        TextView textView = (TextView) getView().findViewById(R.id.audio_service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 }

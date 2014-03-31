@@ -407,6 +407,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     /**
      * Return a result of the Rooted device status
+     *
      * @return boolean value
      */
     public boolean getIsDeviceRooted() {
@@ -415,6 +416,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     /**
      * Set a status of the Root device
+     *
      * @param mIsDeviceRooted boolean value
      */
     public void setDeviceRooted(boolean mIsDeviceRooted) {
@@ -1531,9 +1533,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void dispatchOutgoingMessage(final ProtocolMessage message) {
         if (mSyncConnection.getIsConnected()) {
-            if (currentSession.getService(ServiceType.RPC) != null) {
-                message.setEncrypted(currentSession.getService(ServiceType.RPC).isEncrypted());
-            }
             mSyncConnection.sendMessage(message);
         }
 
@@ -1961,7 +1960,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         notifySessionStarted(currentSession.getSessionId(), correlationID);
     }
 
-
     private void notifySessionStarted(final byte sessionID, final String correlationID) {
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1981,7 +1979,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         notifySessionStarted(currentSession.getSessionId(), "");
     }
 
-    private void setupSecureProxy() {
+    public void setupSecureProxy() {
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
@@ -2071,7 +2069,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+    protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
         Log.i(TAG, "Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav, encrypted);
         if (protocolSecureManager != null &&
@@ -2084,15 +2082,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNaviStart();
+                    _proxyListener.onMobileNaviStart(encrypted, currentSession.getSessionId());
                 }
             });
         } else {
-            _proxyListener.onMobileNaviStart();
+            _proxyListener.onMobileNaviStart(encrypted, currentSession.getSessionId());
         }
     }
 
-    protected void onAudioServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
+    protected void onAudioServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
         Log.i(TAG, "Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
         if (protocolSecureManager != null &&
@@ -2105,11 +2103,32 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onAudioServiceStart();
+                    _proxyListener.onAudioServiceStart(encrypted, currentSession.getSessionId());
                 }
             });
         } else {
-            _proxyListener.onAudioServiceStart();
+            _proxyListener.onAudioServiceStart(encrypted, currentSession.getSessionId());
+        }
+    }
+
+    private void onRPCServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
+        Log.i(TAG, "RPC service started  " + sessionID);
+        createService(sessionID, ServiceType.Audio_Service, encrypted);
+        if (protocolSecureManager != null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC) &&
+                encrypted) {
+            protocolSecureManager.setHandshakeFinished(true);
+        }
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onRPCServiceStart(encrypted, currentSession.getSessionId());
+                }
+            });
+        } else {
+            _proxyListener.onRPCServiceStart(encrypted, currentSession.getSessionId());
         }
     }
 
@@ -3169,24 +3188,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this.rpcMessageHandler = RPCMessageHandler;
     }
 
-    public void startMobileNavService(Session session) {
+    public void startMobileNavService(Session session, boolean cyphered) {
         if (mSyncConnection != null) {
-            mSyncConnection.startMobileNavService(session,
-                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav));
+            mSyncConnection.startMobileNavService(session, cyphered);
         }
     }
 
-    public void startAudioService(Session session) {
+    public void startAudioService(Session session, boolean cyphered) {
         if (mSyncConnection != null) {
-            mSyncConnection.startAudioService(session,
-                    protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+            mSyncConnection.startAudioService(session, cyphered);
         }
     }
 
-    public void startRpcService(Session session) {
+    public void startRpcService(Session session, boolean encrypted) {
         if (mSyncConnection != null) {
-
-            mSyncConnection.startRpcService(session, protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service));
+            mSyncConnection.startRpcService(session, encrypted);
         }
     }
 
@@ -3323,6 +3339,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
             } else if (serviceType == ServiceType.Audio_Service) {
                 onAudioServiceStarted(sessionID, correlationID, encrypted);
+            } else if (serviceType == ServiceType.RPC) {
+                onRPCServiceStarted(sessionID, correlationID, encrypted);
             }
         }
     }
@@ -3374,10 +3392,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void restoreServices() {
         if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             if (currentSession.hasService(ServiceType.Mobile_Nav)) {
-                startMobileNavService(currentSession);
+                boolean cyphered = false;
+                if (protocolSecureManager != null) {
+                    cyphered = protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Mobile_Nav);
+                }
+                startMobileNavService(currentSession, cyphered);
             }
             if (currentSession.hasService(ServiceType.Audio_Service)) {
-                startAudioService(currentSession);
+                boolean cyphered = false;
+                if (protocolSecureManager != null) {
+                    cyphered = protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.Audio_Service);
+                }
+                startAudioService(currentSession, cyphered);
             }
         }
     }

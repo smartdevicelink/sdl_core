@@ -40,14 +40,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
-import com.ford.syncV4.android.activity.mobilenav.CheckBoxStateValue;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
-import com.ford.syncV4.android.activity.mobilenav.RPCServiceCheckboxState;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.SyncSubMenu;
@@ -348,7 +347,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private ProxyService mBoundProxyService;
     private ExecutorService mStreamCommandsExecutorService;
 
-    private RPCServiceCheckboxState mRPCServiceSecureState;
 
     public static SyncProxyTester getInstance() {
         return _activity;
@@ -365,7 +363,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public static int getNewChoiceId() {
         return autoIncChoiceId++;
     }
-    
+
+    public void runInUIThread(Runnable runnable) {
+        mUIHandler.post(runnable);
+    }
+
     private ArrayAdapter<String> adapter;
 
     @Override
@@ -387,12 +389,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         findViewById(R.id.btnPlayPause).setOnClickListener(this);
 
         // RPC Service Secure check box processing
-        CheckBox rpcSecureCheckBoxView = (CheckBox) findViewById(R.id.rpc_service_secure_checkbox_view);
-        mRPCServiceSecureState = new RPCServiceCheckboxState(rpcSecureCheckBoxView, this);
+        Button rpcSecureCheckBoxView = (Button) findViewById(R.id.rpc_service_secure_button_view);
         rpcSecureCheckBoxView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 processRPCSecureCheckBox();
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcNotSecureCheckBoxView = (Button) findViewById(R.id.rpc_non_secure_button_view);
+        rpcNotSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCNotSecureCheckBox();
             }
         });
 
@@ -401,9 +411,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         buttonServicesView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                LinearLayout servicesLayout = (LinearLayout) findViewById(R.id.services_layout_view);
+                View servicesLayout = findViewById(R.id.services_layout_view);
                 servicesLayout.setVisibility((servicesLayout.getVisibility() == View.GONE) ?
-                                                View.VISIBLE : View.GONE);
+                        View.VISIBLE : View.GONE);
             }
         });
 
@@ -719,7 +729,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId) {
+    public void onServiceStart(ServiceType serviceType, byte sessionId, final boolean encrypted) {
         mLogAdapter.logMessage("Service '" + serviceType + "' started", true);
 
         if (mBoundProxyService == null) {
@@ -737,7 +747,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                        fragment.setAudioServiceStateOn(outputStream);
+                        fragment.setAudioServiceStateOn(outputStream, encrypted);
                     }
                 }
             });
@@ -749,16 +759,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                        fragment.setMobileNaviStateOn(outputStream);
+                        fragment.setMobileNaviStateOn(outputStream, encrypted);
                     }
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
+            notifyRPCServiceStarted(encrypted);
             mServicesCounter.set(0);
             rpcSession.setSessionId(sessionId);
         }
-
         mServicesCounter.incrementAndGet();
+    }
+
+    private void notifyRPCServiceStarted(final boolean encrypted) {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView rpcState = (TextView) findViewById(R.id.rpc_service_state);
+                if (encrypted) {
+                    rpcState.setText("Service is cyphered");
+                } else {
+                    rpcState.setText("Service is Not cyphered");
+                }
+            }
+        });
     }
 
     @Override
@@ -3730,11 +3754,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviService() {
+    public void startMobileNaviService(boolean cyphered) {
         if (isProxyReadyForWork()) {
             if (mBoundProxyService != null) {
                 mLogAdapter.logMessage("Should start Mobile Navi Service", true);
-                mBoundProxyService.syncProxyStartMobileNavService(rpcSession);
+                mBoundProxyService.syncProxyStartMobileNavService(rpcSession, cyphered);
             } else {
                 mLogAdapter.logMessage("Could not start mobile nav Service", true);
             }
@@ -3792,33 +3816,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
-     * Encrypt section
-     */
-
-    /**
      * Process a state of the "Start Secure RPC Service" checkbox
      */
     private void processRPCSecureCheckBox() {
-        if (mRPCServiceSecureState.getState() == CheckBoxStateValue.OFF) {
-            mRPCServiceSecureState.setStateOn();
+        Log.d(LOG_TAG, "Start Secure RPC service");
+        startRPCService(true);
+    }
 
-            // TODO : Implement logic here
-            Log.d(LOG_TAG, "Start Secure RPC service");
-
-        } else if (mRPCServiceSecureState.getState() == CheckBoxStateValue.ON) {
-            mRPCServiceSecureState.setStateOff();
-
-            // TODO : Implement logic here
-            Log.d(LOG_TAG, "Stop Secure RPC service");
-        }
+    private void processRPCNotSecureCheckBox() {
+        Log.d(LOG_TAG, "Start Not Secure RPC service");
+        startRPCService(false);
     }
 
     /**
      * Starts to encrypt Audio Service
      */
     public void startAudioServiceEncryption() {
-
-        // TODO : Implement logic here
         Log.d(LOG_TAG, "Audio Service start encrypt");
         startAudioService(true);
     }
@@ -3826,29 +3839,25 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Stops to encrypt Audio Service
      */
-    public void stopAudioServiceEncryption() {
-
-        // TODO : Implement logic here
-        Log.d(LOG_TAG, "Audio Service stop encrypt");
-        stopAudioService();
+    public void startNotSecureAudioService() {
+        Log.d(LOG_TAG, "Audio Service start not encrypt");
+        startAudioService(false);
     }
 
     /**
      * Starts to encrypt Mobile Navi Service
      */
     public void startMobileNaviServiceEncryption() {
-
-        // TODO : Implement logic here
         Log.d(LOG_TAG, "Mobile Navi Service start encrypt");
+        startMobileNaviService(true);
     }
 
     /**
      * Stops to encrypt Mobile Navi Service
      */
-    public void stopMobileNaviServiceEncryption() {
-
-        // TODO : Implement logic here
-        Log.d(LOG_TAG, "Mobile Navi Service stop encrypt");
+    public void startMobileNaviNotEncryptedService() {
+        Log.d(LOG_TAG, "Mobile Navi Service start not encrypt");
+        startMobileNaviService(false);
     }
 
     public boolean isProxyReadyForWork() {
@@ -3868,6 +3877,18 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             return false;
         }
         return true;
+    }
+
+    public void startRPCService(final boolean encrypted) {
+        if (isProxyReadyForWork()) {
+            mLogAdapter.logMessage("Should start RPC service", true);
+            mStreamCommandsExecutorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    mBoundProxyService.syncProxyStartRPCService(rpcSession, encrypted);
+                }
+            });
+        }
     }
 
     public void startAudioService(final boolean encrypted) {

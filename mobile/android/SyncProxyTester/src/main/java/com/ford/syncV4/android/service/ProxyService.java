@@ -1382,16 +1382,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onMobileNaviStart() {
+    public void onMobileNaviStart(boolean encrypted, byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, sessionId, encrypted);
         }
     }
 
     @Override
-    public void onAudioServiceStart() {
+    public void onAudioServiceStart(boolean encrypted,byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, sessionId, encrypted);
+        }
+    }
+
+    public void onRPCServiceStart(boolean encrypted,byte sessionId){
+        if (mProxyServiceEvent != null) {
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionId, encrypted);
         }
     }
 
@@ -1488,7 +1494,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSessionStarted(final byte sessionID, final String correlationID) {
         Log.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID, false);
         }
     }
 
@@ -1988,6 +1994,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
+    public void syncProxyStartRPCService(Session session, boolean encrypted) {
+        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
+            if (encrypted) {
+                if (mSyncProxy.getProtocolSecureManager() != null) {
+                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
+                }
+            }
+            mSyncProxy.startRpcService(session, encrypted);
+        }
+    }
+
     public void syncProxyStartAudioService(Session session, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
@@ -1995,7 +2012,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
                 }
             }
-            mSyncProxy.startAudioService(session);
+            mSyncProxy.startAudioService(session, encrypted);
         }
     }
 
@@ -2087,9 +2104,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return 0;
     }
 
-    public void syncProxyStartMobileNavService(Session session) {
+    public void syncProxyStartMobileNavService(Session session, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.startMobileNavService(session);
+            if (encrypted) {
+                if (mSyncProxy.getProtocolSecureManager() != null) {
+                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Mobile_Nav);
+                }
+            }
+            mSyncProxy.startMobileNavService(session, encrypted);
         }
     }
 

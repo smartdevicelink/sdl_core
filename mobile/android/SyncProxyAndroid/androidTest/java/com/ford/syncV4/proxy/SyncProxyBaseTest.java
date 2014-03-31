@@ -138,7 +138,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
                 2,
-                conf, new TestConfig()) {
+                conf, new TestConfig(), false) {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
@@ -189,7 +189,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, VERSION, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, VERSION, "");
-        Mockito.verify(listenerALM, times(1)).onAudioServiceStart();
+        Mockito.verify(listenerALM, times(1)).onAudioServiceStart(false);
     }
 
     public void testAudioServiceRemovedFromPoolOnStopAudioService() throws Exception {
