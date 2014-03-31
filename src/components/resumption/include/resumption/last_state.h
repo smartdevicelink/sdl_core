@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@
 #include <string>
 
 #include "utils/macro.h"
-#include "utils/dict.h"
 #include "utils/singleton.h"
 #include "json/json.h"
 
@@ -45,49 +44,30 @@ namespace resumption {
 class LastState : public utils::Singleton<LastState> {
  public:
 /**
- * @brief Typedef for string-driven dictionary
- */
-  typedef utils::Dictionary<std::string, std::string> Dictionary;
-/**
  * @brief public dictionary
  */
-  Dictionary dictionary;
+  Json::Value dictionary;
 
-  /**
-    * @brief Convert utils::Dictionary<std::string, std::string> to Json
-    * @param dict - input dictionary
-    * @return created Json value
-    */
-  static Json::Value toJson(const Dictionary& dict);
-
-  /**
-    * @brief Convert Json to utils::Dictionary<std::string, std::string>
-    * @param json_val - Json Kson
-    * @return created Dictionary
-    */
-  static Dictionary fromJson(const Json::Value& json_val);
-
-  private:
-
-  /**
-   * @brief File to save Dictionary
-   */
+ private:
+/**
+ * @brief File to save Dictionary
+ */
   static const std::string filename;
-
-  /**
-   * @brief Saving dictionary to filesystem as Json
-   */
+/**
+ * @brief Saving dictionary to filesystem
+ */
   void SaveToFileSystem();
-
-  /**
-   * @brief Load dictionary from filesystem as Json
-   */
+/**
+ * @brief Load dictionary from filesystem
+ */
   void LoadFromFileSystem();
-
- /**
+/**
  * @brief Private default constructor
  */
   LastState();
+/**
+ * @brief Private destructor
+ */
   ~LastState();
 
 

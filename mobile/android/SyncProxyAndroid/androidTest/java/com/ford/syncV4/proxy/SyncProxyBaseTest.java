@@ -7,6 +7,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
@@ -20,7 +21,7 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.TCPTransportConfig;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -535,7 +536,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
-                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null);
+                Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null, new DeviceInfo());
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);

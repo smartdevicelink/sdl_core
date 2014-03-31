@@ -40,7 +40,9 @@ namespace application_manager {
 
 namespace commands {
 
+#ifdef ENABLE_LOG
 extern log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
 /**
  * @brief Class is intended to encapsulate RPC as an object

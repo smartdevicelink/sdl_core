@@ -60,6 +60,7 @@ include_directories (
   ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${default_includes}
 )
 

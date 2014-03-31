@@ -87,8 +87,14 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
         if (message[strings::msg_params].keyExists(
                                             hmi_response::soft_button_capabilities)) {
-          hmi_capabilities.set_soft_button_capabilities(
-            message[strings::msg_params][hmi_response::soft_button_capabilities]);
+          if (message[strings::msg_params][hmi_response::soft_button_capabilities].getType() ==
+              smart_objects::SmartType_Array) {
+            hmi_capabilities.set_soft_button_capabilities(
+              message[strings::msg_params][hmi_response::soft_button_capabilities][0]);
+          } else {
+            hmi_capabilities.set_soft_button_capabilities(
+              message[strings::msg_params][hmi_response::soft_button_capabilities]);
+          }
         }
 
       }

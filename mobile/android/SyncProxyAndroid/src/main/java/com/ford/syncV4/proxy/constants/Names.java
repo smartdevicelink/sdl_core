@@ -460,4 +460,15 @@ public class Names {
     public static final String messageDataResult = "messageDataResult";
     public static final String hashID = "hashID";
     public static final String OnHashChange = "OnHashChange";
+
+    /**
+     * v4_protocol_v3_0_revP
+     */
+    public static final String deviceInfo = "deviceInfo";
+    public static final String hardware = "hardware";
+    public static final String firmwareRev = "firmwareRev";
+    public static final String os = "os";
+    public static final String osVersion = "osVersion";
+    public static final String carrier = "carrier";
+    public static final String maxNumberRFCOMMPorts = "maxNumberRFCOMMPorts";
 }

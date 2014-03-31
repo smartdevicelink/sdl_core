@@ -84,7 +84,28 @@ public class ModuleTest {
 	private static final boolean DISPLAY_PARSER_DEBUG_INFO = false;
 	/** Extension of supported test files. */
 	private static final String TEST_FILEEXT = ".xml";
-	
+
+    /**
+     * Element name defines that this is a test
+     */
+    private static final String TEST_TAG_NAME_TEST = "test";
+    /**
+     * Element name defines that this is a type of the test
+     */
+    private static final String TEST_TAG_NAME_TYPE = "type";
+    /**
+     * Element name defines that this is a result of the test
+     */
+    private static final String TEST_TAG_NAME_RESULT = "result";
+    /**
+     * Element name defines that this is a possibility to show user prompt
+     */
+    private static final String TEST_TAG_NAME_USER_PROMPT = "userPrompt";
+    /**
+     * Element name defines possibility to implement some additional actions
+     */
+    private static final String TEST_TAG_NAME_ACTION = "action";
+
 	/**
 	 * The tag name used to specify where to get binary data from (e.g., for
 	 * PutFile message).
@@ -102,6 +123,18 @@ public class ModuleTest {
 	private final static String TEST_NAME_ATTR = "testName";
 	/** Attribute name that defines the timeout of a &lt;test&gt; or a request. */
 	private final static String PAUSE_ATTR = "pause";
+    /**
+     * Attribute name that defines a type of the test
+     */
+	private final static String INTEGRATION_ATTR = "integration";
+    /**
+     * Attribute name that defines a type of the test
+     */
+    private final static String UNIT_ATTR = "unit";
+    /**
+     * Attribute name that defines a type of the action to be performed
+     */
+    private final static String ACTION_NAME_ATTR = "actionName";
 	/**
 	 * Attribute name that defines if the generated request's JSON should be
 	 * invalid.
@@ -111,11 +144,18 @@ public class ModuleTest {
 	private final static String CUSTOM_JSON_ATTR = "customJSON";
 	/** Attribute name of request's correlation ID. */
 	private final static String CORRELATION_ID_ATTR = "correlationID";
-	
+
 	private static ModuleTest sInstance;
 	private SyncProxyTester mActivityInstance;
 	private LogAdapter mLogAdapter;
-	private static Runnable sThreadContext;
+    /**
+     * Context of the XML Test thread
+     */
+	private static Runnable sXMLTestThreadContext;
+    /**
+     * Context of the XML Test Action thread
+     */
+	private static Runnable sTestActionThreadContext;
 	private Thread mainThread;
 	
 	private boolean integration;
@@ -292,6 +332,7 @@ public class ModuleTest {
                 AcceptedRPC acceptedRPC = new AcceptedRPC();
                 XmlPullParser parser = Xml.newPullParser();
                 RPCRequest rpc;
+                TestActionItem testActionItem = null;
                 try {
                     if (AppPreferencesManager.getDisableLockFlag()) {
                         acquireWakeLock();
@@ -328,7 +369,8 @@ public class ModuleTest {
                                 break;
                             case XmlPullParser.START_TAG:
                                 name = parser.getName();
-                                if (name.equalsIgnoreCase("test")) {
+                                Log.d(TAG, "Start tag:" + name);
+                                if (name.equalsIgnoreCase(TEST_TAG_NAME_TEST)) {
                                     mLogAdapter.logMessage("test " + parser.getAttributeValue(0), true);
 
                                     long pause = 0;
@@ -358,10 +400,10 @@ public class ModuleTest {
                                     } catch (Exception e) {
                                         Log.w(TAG, "Unable to parse number of iterations");
                                     }
-                                } else if (name.equalsIgnoreCase("type")) {
-                                    if (parser.getAttributeValue(0).equalsIgnoreCase("integration"))
+                                } else if (name.equalsIgnoreCase(TEST_TAG_NAME_TYPE)) {
+                                    if (parser.getAttributeValue(0).equalsIgnoreCase(INTEGRATION_ATTR))
                                         integration = true;
-                                    else if (parser.getAttributeValue(0).equalsIgnoreCase("unit"))
+                                    else if (parser.getAttributeValue(0).equalsIgnoreCase(UNIT_ATTR))
                                         integration = false;
                                 } else if (acceptedRPC.isAcceptedRPC(name)) {
                                     //Create correct object
@@ -518,15 +560,31 @@ public class ModuleTest {
                                                 generateInvalidJSON, customJSON);
                                         currentTest.addRequest(wrapper);
                                     }
-                                } else if (name.equalsIgnoreCase("result")) {
+                                } else if (name.equalsIgnoreCase(TEST_TAG_NAME_RESULT)) {
                                     expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
-                                } else if (name.equalsIgnoreCase("userPrompt") && integration) {
+                                } else if (name.equalsIgnoreCase(TEST_TAG_NAME_USER_PROMPT) && integration) {
                                     userPrompt = parser.getAttributeValue(0);
+                                } else if (name.equalsIgnoreCase(TEST_TAG_NAME_ACTION)) {
+                                    String actionName = parser.getAttributeValue(null, ACTION_NAME_ATTR);
+                                    if (actionName != null) {
+                                        testActionItem = new TestActionItem(actionName);
+                                        long pause = 0;
+                                        String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
+                                        if (pauseString != null) {
+                                            try {
+                                                pause = Long.parseLong(pauseString);
+                                            } catch (NumberFormatException e) {
+                                                Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+                                            }
+                                        }
+                                        testActionItem.setDelay(pause);
+                                    }
                                 }
                                 break;
                             case XmlPullParser.END_TAG:
                                 name = parser.getName();
-                                if (name.equalsIgnoreCase("test")) {
+                                Log.d(TAG, "End tag:" + name);
+                                if (name.equalsIgnoreCase(TEST_TAG_NAME_TEST)) {
                                     try {
                                         final String FIELD_SEPARATOR = ", ";
                                         final String EOL = "\n";
@@ -595,6 +653,10 @@ public class ModuleTest {
                                         if (currentTest != null) {
                                             mLogAdapter.logMessage("Test " + currentTest.getName() + " Failed! ", Log.ERROR, e);
                                         }
+                                    }
+                                } else if (name.equalsIgnoreCase(TEST_TAG_NAME_ACTION)) {
+                                    if (testActionItem != null) {
+                                        testAction(testActionItem);
                                     }
                                 }
                                 break;
@@ -840,6 +902,83 @@ public class ModuleTest {
 		logParserDebugInfo("Returning at end of setParams function");
 		return hash;
 	}
+
+    /**
+     * Performs additional actions within Test Cases flow, such as : restore RPC session
+     * @param testActionItem test action item which describes an action to be performed
+     */
+    private void testAction(final TestActionItem testActionItem) {
+
+        Thread newThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sTestActionThreadContext = this;
+
+                if (mProxyService == null && testActionItem == null) {
+                    Log.e(TAG, "Test Action is null");
+                    interruptThread();
+                    return;
+                }
+
+                if (!mProxyService.isSyncProxyConnected()) {
+                    Log.e(TAG, "Test Action - connection - is null");
+                    interruptThread();
+                    return;
+                }
+
+                mProxyService.waiting(true);
+
+                mProxyService.testInitializeSessionRPCOnly();
+
+                long pause = testActionItem.getDelay();
+                if (pause > 0) {
+                    Log.v(TAG, "Pause for " + pause + " ms for " + testActionItem.getActionName());
+                    try {
+                        // delay after the test
+                        synchronized (this) {
+                            this.wait(pause);
+                        }
+                    } catch (InterruptedException e) {
+                        mLogAdapter.logMessage("InterruptedException", true);
+                    }
+                } else {
+                    Log.i(TAG, "No pause for " + pause + " ms for " + testActionItem.getActionName());
+                }
+
+                // wait for incoming messages
+                try {
+                    synchronized (this) {
+                        this.wait(100);
+                    }
+                } catch (InterruptedException e) {
+                    mLogAdapter.logMessage("InterruptedException", true);
+                }
+
+                mProxyService.waiting(false);
+
+                interruptThread();
+            }
+
+            private void interruptThread() {
+                synchronized (sInstance) {
+                    sInstance.notify();
+                }
+                Thread.currentThread().interrupt();
+            }
+        });
+
+        newThread.start();
+
+        try {
+            synchronized (this) {
+                this.wait();
+            }
+        } catch (InterruptedException e) {
+            mLogAdapter.logMessage("InterruptedException", true);
+        }
+
+        newThread.interrupt();
+    }
 	
 	private TestResult xmlTest() {
 
@@ -849,7 +988,7 @@ public class ModuleTest {
 
 			public void run () {
 
-                sThreadContext = this;
+                sXMLTestThreadContext = this;
 
                 if (mProxyService == null && currentTest == null) {
                     Log.e(TAG, "Current test is null");
@@ -875,7 +1014,11 @@ public class ModuleTest {
                     }
                 }
 
-                if (mProxyService.getSessionId() == 0) {
+                // Temporary commit this check point
+
+                /*if (!currentTest.getName().toLowerCase()
+                        .startsWith(Names.UnregisterAppInterface.toLowerCase()) &&
+                        mProxyService.getSessionId() == 0) {
                     Log.e(TAG, "Current test session id 0");
 
                     showInterruptDialog("Warning",
@@ -885,7 +1028,7 @@ public class ModuleTest {
                         interruptThread();
                         return;
                     }
-                }
+                }*/
 
                 int numResponses = expecting.size();
                 if (numResponses > 0) {
@@ -910,6 +1053,13 @@ public class ModuleTest {
                     mProxyService.syncProxySendRPCRequest(rpc);
 
                     // restore the default marshaller
+                    if (currentMarshaller instanceof InvalidJsonRPCMarshaller) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
 
                     long pause = wrapper.getPause();
@@ -962,6 +1112,7 @@ public class ModuleTest {
                 }
 
                 testResult.setTestComplete(true);
+                //Log.d(TAG, "Test case:" + currentTest.getName() + " complete");
 
                 if (!integration) {
                     restoreMarshaller(defaultMarshaller);
@@ -977,8 +1128,8 @@ public class ModuleTest {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         testResult.setTestComplete(true);
-                                        synchronized (sThreadContext) {
-                                            sThreadContext.notify();
+                                        synchronized (sXMLTestThreadContext) {
+                                            sXMLTestThreadContext.notify();
                                         }
                                     }
                                 }
@@ -988,8 +1139,8 @@ public class ModuleTest {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         testResult.setTestComplete(false);
-                                        synchronized (sThreadContext) {
-                                            sThreadContext.notify();
+                                        synchronized (sXMLTestThreadContext) {
+                                            sXMLTestThreadContext.notify();
                                         }
                                     }
                                 }
@@ -1080,10 +1231,20 @@ public class ModuleTest {
 	public static ModuleTest getModuleTestInstance() {
 		return sInstance;
 	}
-	
-	public Runnable getThreadContext() {
-		return sThreadContext;
+
+    /**
+     * @return context of the XML Test thread
+     */
+	public Runnable getXMLTestThreadContext() {
+		return sXMLTestThreadContext;
 	}
+
+    /**
+     * @return context of the XML Test Action thread
+     */
+    public Runnable getTestActionThreadContext() {
+        return sTestActionThreadContext;
+    }
 	
 	/**
 	 * Logs debug information during the XML parsing process. Can be turned

@@ -40,6 +40,8 @@ option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
+option(ENABLE_LOG "Logging feature" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -52,7 +54,7 @@ if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
-    #tests are not supported yet for QNX build 
+    #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
   endif()
 endif()
@@ -105,6 +107,8 @@ cmake_minimum_required(VERSION 2.8.0)
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
+#ADD_DEPENDENCIES(${PROJECT} Policy)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
@@ -146,9 +150,14 @@ if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
 
+if (ENABLE_LOG)
+  add_definitions(-DENABLE_LOG)
+endif()
+
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
 
+# FIXME(DC): weird logic
 IF(CMAKE_C_FLAGS_DEBUG)
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
     add_definitions(-DDEBUG)
@@ -258,13 +267,13 @@ else ()
     add_definitions(-DNO_HMI)
 endif ()
 
-if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "dbus")
 endif()
-if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
-if (HMI STREQUAL "no" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "no" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "mqueue")
 endif()
 
@@ -298,6 +307,9 @@ add_subdirectory(./src/appMain)
 
 # Building tests
 if(BUILD_TESTS)
+    if(BUILD_TESTS_WITH_HMI)
+      add_definitions(-DTESTS_WITH_HMI)
+    endif()
     enable_testing()
     include(Dart)
     # Framework GoogleTest is also integrated together gmock

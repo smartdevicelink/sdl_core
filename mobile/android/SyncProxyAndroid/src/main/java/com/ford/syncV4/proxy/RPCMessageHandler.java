@@ -73,9 +73,8 @@ import com.ford.syncV4.util.DebugTool;
 
 import java.util.Hashtable;
 
-
 /**
- * Created by Andrew Batutin on 2/10/14.
+ * Created by Andrew Batutin on 2/10/14
  */
 public class RPCMessageHandler implements IRPCMessageHandler {
 
@@ -109,8 +108,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 if (syncProxyBase.isCorrelationIDProtected(responseCorrelationID)) {
                     // This is a response generated from an internal message, it can be trapped here
                     // The app should not receive a response for a request it did not send
-                    if (responseCorrelationID ==
-                            syncProxyBase.REGISTER_APP_INTERFACE_CORRELATION_ID &&
+                    if (syncProxyBase.isRegisterAppInterfaceCorrelationIdProtected(responseCorrelationID) &&
                             syncProxyBase.getAdvancedLifecycleManagementEnabled() &&
                             functionName.equals(Names.RegisterAppInterface)) {
                         final RegisterAppInterfaceResponse msg =
@@ -148,10 +146,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         }
 
                         syncProxyBase.processRegisterAppInterfaceResponse(msg);
-                    } else if (
-                            responseCorrelationID == syncProxyBase.POLICIES_CORRELATION_ID &&
-                                    functionName.equals(
-                                            Names.OnEncodedSyncPData)) {
+                    } else if (syncProxyBase.isPolicyCorrelationIdProtected(responseCorrelationID) &&
+                                    functionName.equals(Names.OnEncodedSyncPData)) {
                         // OnEncodedSyncPData
 
                         final OnEncodedSyncPData msg =
@@ -172,8 +168,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
                             handleOffboardSyncTransmissionTread.start();
                         }
-                    } else if ((responseCorrelationID ==
-                            syncProxyBase.UNREGISTER_APP_INTERFACE_CORRELATION_ID) &&
+                    } else if (syncProxyBase.isUnregisterAppInterfaceCorrelationIdProtected(responseCorrelationID) &&
                             functionName.equals(Names.UnregisterAppInterface)) {
                         syncProxyBase.onUnregisterAppInterfaceResponse(hash);
                     }

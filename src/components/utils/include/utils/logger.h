@@ -42,6 +42,10 @@
 
 namespace log4cxx
 {
+
+#ifdef ENABLE_LOG
+    #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
+
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
@@ -64,6 +68,52 @@ namespace log4cxx
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+#else
+    #define LOG4CXX_IS_TRACE_ENABLED(logger) false
+
+    #undef LOG4CXX_INFO
+    #define LOG4CXX_INFO(x,y)
+
+    #undef LOG4CXX_WARN
+    #define LOG4CXX_WARN(x,y)
+
+    #undef LOG4CXX_ERROR
+    #define LOG4CXX_ERROR(x,y)
+
+    #undef LOG4CXX_ERROR_WITH_ERRNO
+    #define LOG4CXX_ERROR_WITH_ERRNO(x,y)
+
+    #undef LOG4CXX_TRACE
+    #define LOG4CXX_TRACE(x,y)
+
+    #undef LOG4CXX_DEBUG
+    #define LOG4CXX_DEBUG(x,y)
+
+    #undef LOG4CXX_FATAL
+    #define LOG4CXX_FATAL(x,y)
+
+    #define LOG4CXX_INFO_EXT(logger, logEvent)
+    #define LOG4CXX_INFO_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_TRACE_EXT(logger, logEvent)
+    #define LOG4CXX_TRACE_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_DEBUG_EXT(logger, logEvent)
+    #define LOG4CXX_DEBUG_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_WARN_EXT(logger, logEvent)
+    #define LOG4CXX_WARN_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_ERROR_EXT(logger, logEvent)
+    #define LOG4CXX_ERROR_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_FATAL_EXT(logger, logEvent)
+    #define LOG4CXX_FATAL_STR_EXT(logger, logEvent)
+
+    #define LOG4CXX_TRACE_ENTER(logger)
+    #define LOG4CXX_TRACE_EXIT(logger)
+
+#endif // ENABLE_LOG
 }
 
 #define LOG4CXXLOGGER_HPP_

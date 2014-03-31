@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -48,7 +49,11 @@ OnTTSStoppedNotification::~OnTTSStoppedNotification() {
 void OnTTSStoppedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnTTSStoppedNotification::Run");
 
-  ApplicationManagerImpl::instance()->Unmute();
+  event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
+  event.set_smart_object(*message_);
+  event.raise();
+  ApplicationManagerImpl::instance()->Unmute(kTTSSessionChanging);
+
 }
 
 }  // namespace commands

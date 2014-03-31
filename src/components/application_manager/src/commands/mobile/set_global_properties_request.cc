@@ -105,21 +105,24 @@ void SetGlobalPropertiesRequest::Run() {
       msg_params.keyExists(hmi_request::keyboard_properties);
 
   // Media-only applications support API v2.1 with less parameters
-  if (!app->allowed_support_navigation() &&
-      (is_keyboard_props_present ||
-       is_menu_icon_present ||
-       is_menu_title_present)
-       ) {
-    const std::string app_type =
-        app->is_media_application() ?  "media" : "non-media";
+  // Code deleted according to APPLINK-6119 APPLINK-6133
+  // Not sure that it is right
 
-    const std::string message =
-        "There are too many parameters for "+app_type+" application.";
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
-                 message.c_str());
-    return;
-  }
+//  if (!app->allowed_support_navigation() &&
+//      (is_keyboard_props_present ||
+//       is_menu_icon_present ||
+//       is_menu_title_present)
+//       ) {
+//    const std::string app_type =
+//        app->is_media_application() ?  "media" : "non-media";
+
+//    const std::string message =
+//        "There are too many parameters for "+app_type+" application.";
+//    SendResponse(false,
+//                 mobile_apis::Result::INVALID_DATA,
+//                 message.c_str());
+//    return;
+//  }
 
   if ((is_vr_help_title_present && is_vr_help_present) ||
       (!is_vr_help_title_present && !is_vr_help_present)) {
@@ -153,16 +156,19 @@ void SetGlobalPropertiesRequest::Run() {
 
       params[hmi_request::menu_title] =
           msg_params[hmi_request::menu_title].asString();
+      app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
     if (is_menu_icon_present) {
 
       params[hmi_request::menu_icon] =
           msg_params[hmi_request::menu_icon];
+      app->set_menu_icon(msg_params[hmi_request::menu_icon]);
     }
     if (is_keyboard_props_present) {
 
       params[hmi_request::keyboard_properties] =
           msg_params[hmi_request::keyboard_properties];
+      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
     }
 
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
@@ -198,16 +204,19 @@ void SetGlobalPropertiesRequest::Run() {
 
       params[hmi_request::menu_title] =
           msg_params[hmi_request::menu_title].asString();
+      app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
     if (is_menu_icon_present) {
 
       params[hmi_request::menu_icon] =
           msg_params[hmi_request::menu_icon];
+      app->set_menu_icon(msg_params[hmi_request::menu_icon]);
     }
     if (is_keyboard_props_present) {
 
       params[hmi_request::keyboard_properties] =
           msg_params[hmi_request::keyboard_properties];
+      app->set_keyboard_props(msg_params[hmi_request::keyboard_properties]);
     }
 
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,

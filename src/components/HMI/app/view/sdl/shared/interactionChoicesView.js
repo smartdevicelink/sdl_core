@@ -253,8 +253,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         SDL.SDLController.VRMove();
         SDL.Keyboard.deactivate();
 
-
-
         switch (result) {
             case "ABORTED":
             {

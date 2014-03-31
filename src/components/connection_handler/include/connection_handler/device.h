@@ -104,7 +104,9 @@ class Device {
     /**
      * \brief For logging.
      */
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 };
 
 /**

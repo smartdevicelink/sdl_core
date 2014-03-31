@@ -51,7 +51,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 field2       : '<field2>',
                 field3       : '<field3>',
                 field4       : '<field4>',
-                mainImage    : 'images/sdl/audio_icon.jpg',
+                mainImage    : SDL.SDLModel.defaultListOfIcons.trackIcon,
                 image        : '',
                 customPresets: [],
                 alignment    : "text-align:center"

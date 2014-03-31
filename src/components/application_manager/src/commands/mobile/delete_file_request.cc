@@ -80,6 +80,11 @@ void DeleteFileRequest::Run() {
 
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
+      const AppFile* file = application->GetFile(sync_file_name);
+      if (file) {
+        SendFileRemovedNotification(file);
+      }
+
       application->DeleteFile(sync_file_name);
       application->increment_delete_file_in_none_count();
       SendResponse(true, mobile_apis::Result::SUCCESS);
@@ -89,6 +94,18 @@ void DeleteFileRequest::Run() {
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
+}
+
+void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+
+    msg_params[strings::app_id] = connection_key();
+    msg_params[strings::file_name] = file->file_name;
+    msg_params[strings::file_type] = file->file_type;
+
+    CreateHMINotification(
+            hmi_apis::FunctionID::BasicCommunication_OnFileRemoved, msg_params);
 }
 
 }  // namespace commands
