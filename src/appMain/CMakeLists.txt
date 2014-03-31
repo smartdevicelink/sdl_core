@@ -32,7 +32,7 @@ set(LIBRARIES
   connectionHandler
   TransportManager
   HMIMessageHandler
-  MessageBroker
+  MessageBroker  
   ${BROKER_LIBRARIES}
   Utils
   encryption
@@ -47,6 +47,7 @@ set(LIBRARIES
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
+  list(APPEND LIBRARIES dl)
 endif()
 
 if (BUILD_BT_SUPPORT)
