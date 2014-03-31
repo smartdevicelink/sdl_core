@@ -404,14 +404,14 @@ public class RPCRequestFactory {
 			String appName, Boolean isMediaApp) {
 		
 		return buildRegisterAppInterface(null, appName, null, null, null, isMediaApp, 
-				null, null, null, null, null, null, false);
+				null, null, null, null, null, null);
 	}
 	
 	public static RegisterAppInterface buildRegisterAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
 			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-			String appID, Integer correlationID, String hashId, boolean isRooted) {
+			String appID, Integer correlationID, String hashId) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {
@@ -458,8 +458,6 @@ public class RPCRequestFactory {
 		msg.setAppType(appHMIType);
 		
 		msg.setAppID(appID);
-
-        msg.setIsRooted(isRooted);
 
         if (hashId != null) {
             msg.setHashID(hashId);

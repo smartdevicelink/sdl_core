@@ -501,17 +501,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                if (AppPreferencesManager.getDoDeviceRootCheck() && RootTools.isRootAvailable()) {
-
-                    getProgressDialog(getString(R.string.init_dialog_title)).dismiss();
-
-                    DialogFragment rootedDeviceAlertView = RootedDeviceAlertView.newInstance();
-                    rootedDeviceAlertView.setCancelable(false);
-                    rootedDeviceAlertView.show(getFragmentManager(), ROOTED_DEVICE_ALERT_DIALOG_TAG);
-
-                    return;
-                }
-
                 if (mBoundProxyService != null) {
                     initProxyService();
                     try {
@@ -545,30 +534,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         });
     }
 
-    /*private void postRootDetectionResult() {
-        setUpReceiver();
-        showProtocolPropertiesInTitle();
-        if (mBoundProxyService != null) {
-            initProxyService();
-            try {
-                mBoundProxyService.syncProxyOpenSession();
-            } catch (SyncException e) {
-                Log.e(LOG_TAG, SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
-            }
-        } else {
-            MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
-                @Override
-                public void onServiceBindComplete() {
-                    Log.d(LOG_TAG, "Service Bind Complete");
-                    getProxyService();
-                    initProxyService();
-
-                    mBoundProxyService.startProxyIfNetworkConnected();
-                }
-            });
-        }
-    }*/
-
     private void setUpReceiver() {
         IntentFilter intentFilter = new IntentFilter();
 
@@ -578,16 +543,25 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(ProxyService.ROOTED_DEVICE_INTENT);
 
         if (mSyncReceiver == null) {
             mSyncReceiver = new SyncReceiver();
 
             mSyncReceiver.setSyncReceiver(new ISyncReceiver() {
+
                 @Override
                 public void onReceive() {
                     if (mBoundProxyService != null) {
                         mBoundProxyService.pauseAnnoyingRepetitiveAudio();
                     }
+                }
+
+                @Override
+                public void onRootedDevice() {
+                    DialogFragment rootedDeviceAlertView = RootedDeviceAlertView.newInstance();
+                    rootedDeviceAlertView.setCancelable(false);
+                    rootedDeviceAlertView.show(getFragmentManager(), ROOTED_DEVICE_ALERT_DIALOG_TAG);
                 }
             });
 

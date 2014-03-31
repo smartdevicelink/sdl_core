@@ -40,7 +40,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig(), false);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.resetProxy();
@@ -65,7 +65,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig(), false);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.closeSession(true);
@@ -85,7 +85,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         SyncProxyALM syncProxy =
                 new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig(), false);
+                        2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
         syncProxy.closeSession(false);

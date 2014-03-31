@@ -136,6 +136,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     static final String TAG = "SyncProxyTester";
 
+    public static final String ROOTED_DEVICE_INTENT = "com.ford.syncV4.android.service.rooted_device";
+
     public static final int HEARTBEAT_INTERVAL = 5000;
     public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
     private Integer autoIncCorrId = 1;
@@ -369,6 +371,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 if (AppPreferencesManager.getIsCustomAppId()) {
                     appID = AppPreferencesManager.getCustomAppId();
                 }
+
+                mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
+
                 mSyncProxy = new SyncProxyALM(this,
                         /*sync proxy configuration resources*/null,
                         /*enable advanced lifecycle management true,*/
@@ -384,12 +389,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-                        config, mTestConfig,
-                        // TODO: Implement in proper way
-                        AppPreferencesManager.getIsDeviceRooted());
+                        config, mTestConfig);
 
             } catch (SyncException e) {
                 Log.e(TAG, e.toString());
+
+                if (e.getSyncExceptionCause() == SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED) {
+                    sendBroadcast(new Intent(ROOTED_DEVICE_INTENT));
+                }
+
                 //error creating proxy, returned proxy = null
                 if (mSyncProxy == null) {
                     stopServiceBySelf();

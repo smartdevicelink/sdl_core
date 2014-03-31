@@ -12,14 +12,6 @@
         android:layout_margin="15dp">
 
         <CheckBox
-            android:visibility="gone"
-            android:id="@+id/register_app_interface_is_rooted_view"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="15dp"
-            android:text="@string/register_app_interface_is_rooted" />
-
-        <CheckBox
             android:id="@+id/registerappinterface_useSyncMsgVersion"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
