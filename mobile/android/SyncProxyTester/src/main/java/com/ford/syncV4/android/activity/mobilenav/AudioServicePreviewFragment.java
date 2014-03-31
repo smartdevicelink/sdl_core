@@ -100,7 +100,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopAudioService();
             mSessionCheckBoxState.setStateOff();
-            mDataStreamingButton.setEnabled(false);
+            //mDataStreamingButton.setEnabled(false);
         }
     }
 
@@ -112,7 +112,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
     public void setAudioServiceStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
-        mDataStreamingButton.setEnabled(true);
+        //mDataStreamingButton.setEnabled(true);
 
         mFileStreamingLogic.setOutputStream(stream);
         mFileStreamingLogic.createStaticFileReader();

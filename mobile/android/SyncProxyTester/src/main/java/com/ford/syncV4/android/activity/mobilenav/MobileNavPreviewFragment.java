@@ -41,10 +41,6 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
 
     public void setMobileNaviStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
-        //Button button = (Button) getView().findViewById(R.id.videobutton);
-        //button.setEnabled(true);
-        mDataStreamingButton.setEnabled(true);
-
         mFileStreamingLogic.setOutputStream(stream);
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
@@ -128,8 +124,6 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavService();
             mSessionCheckBoxState.setStateOff();
-            //Button button = (Button) getView().findViewById(R.id.videobutton);
-            //button.setEnabled(false);
         }
     }
 

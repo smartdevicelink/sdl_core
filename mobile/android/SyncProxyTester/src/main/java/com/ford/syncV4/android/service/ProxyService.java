@@ -1777,7 +1777,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                byte[] bulkData, int correlationId,
                                Boolean doSetPersistent, PutFile putFile) {
         commandPutFile(fileType, syncFileName, bulkData, correlationId,
-                doSetPersistent, null, null, null, putFile);
+                doSetPersistent, null, null, null, putFile, false);
     }
 
     /**
@@ -1797,14 +1797,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                byte[] bulkData, int correlationId,
                                Boolean doSetPersistent, Boolean isSystemFile,
                                Integer length, Integer offset,
-                               PutFile putFile) {
+                               PutFile putFile, boolean cypher) {
         int mCorrelationId = correlationId;
         if (correlationId == -1) {
             mCorrelationId = getNextCorrelationID();
         }
 
         PutFile newPutFile = RPCRequestFactory.buildPutFile();
-
+        newPutFile.setDoEncryption(cypher);
         if (putFile == null) {
             newPutFile.setFileType(fileType);
             newPutFile.setSyncFileName(syncFileName);

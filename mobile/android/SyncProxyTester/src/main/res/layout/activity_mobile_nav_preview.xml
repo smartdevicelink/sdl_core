@@ -42,7 +42,7 @@
         android:text="Start File Streaming"
         android:id="@+id/file_streaming"
         android:layout_below="@+id/service_status_text_view"
-        android:enabled="false"
+        android:enabled="true"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -42,7 +42,7 @@
         android:text="Start File Streaming"
         android:id="@+id/audio_file_streaming"
         android:layout_below="@+id/audio_service_status_text_view"
-        android:enabled="false"
+        android:enabled="true"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

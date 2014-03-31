@@ -124,29 +124,7 @@ public class WiProProtocol extends AbstractProtocol {
         }
         final byte[] data = protocolMessageConverter.getData();
         serviceType = protocolMessageConverter.getSessionType();
-
-
-        if (getProtocolSecureManager() != null) {
-            try {
-                if (protocolMsg.getBulkData() != null) {
-                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(false, data);
-                    processFrameToSend(serviceType, sessionID, false, result);
-                } else {
-                    byte[] result = getProtocolSecureManager().sendDataTOSSLClient(protocolMsg.isEncrypted(), data);
-                    processFrameToSend(serviceType, sessionID, protocolMsg.isEncrypted(), result);
-                }
-            } catch (IOException e) {
-                getProtocolSecureManager().reportAnError(e);
-                DebugTool.logError("Error data coding", e);
-            } catch (InterruptedException e) {
-                getProtocolSecureManager().reportAnError(e);
-                DebugTool.logError("Error data coding", e);
-            }
-        } else {
-            processFrameToSend(serviceType, sessionID, false, data);
-        }
-
-
+        processFrameToSend(serviceType, sessionID, protocolMsg.isEncrypted(), data);
     }
 
     private void processFrameToSend(ServiceType serviceType, byte sessionID, boolean encrypted, byte[] data) {
