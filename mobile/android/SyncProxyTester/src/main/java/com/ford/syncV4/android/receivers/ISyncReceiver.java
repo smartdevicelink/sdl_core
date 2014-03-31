@@ -7,5 +7,11 @@ package com.ford.syncV4.android.receivers;
  * Time: 2:01 PM
  */
 public interface ISyncReceiver {
-    void onReceive();
+
+    public void onReceive();
+
+    /**
+     * Dispatched when SDK detects Rooted Device
+     */
+    public void onRootedDevice();
 }

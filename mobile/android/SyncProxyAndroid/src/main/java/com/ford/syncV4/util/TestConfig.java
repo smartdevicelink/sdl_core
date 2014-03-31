@@ -34,6 +34,11 @@ public class TestConfig {
     private String mCustomHashId;
 
     /**
+     * Allow to skip Root Device check in case of, for example, Android emulator
+     */
+    public boolean mDoRootDeviceCheck;
+
+    /**
      * @return a value of the functionality: whether or not to use parameter
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} when initiating
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance, <b>true</b> | <b>false</b>
@@ -91,5 +96,20 @@ public class TestConfig {
      */
     public void setCustomHashId(String mCustomHashId) {
         this.mCustomHashId = mCustomHashId;
+    }
+
+    /**
+     * @return whether to process Root Device check procedure, boolean value
+     */
+    public boolean isDoRootDeviceCheck() {
+        return mDoRootDeviceCheck;
+    }
+
+    /**
+     * Set whether or not to process Root Device check procedure
+     * @param mDoRootDeviceCheck boolean value
+     */
+    public void setDoRootDeviceCheck(boolean mDoRootDeviceCheck) {
+        this.mDoRootDeviceCheck = mDoRootDeviceCheck;
     }
 }

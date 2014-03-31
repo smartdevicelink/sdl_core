@@ -146,8 +146,8 @@ bool Connection::AddNewService(uint8_t session,
     }
     // Protected services shall not be unprotected or twice protected
     else {
-      LOG4CXX_ERROR(logger_, "Session " << session << " already established"
-                    " service " << service_type);
+      LOG4CXX_ERROR(logger_, "Session " << int(session) <<
+                    " already established  service " << service_type);
       return false;
     }
   } else {

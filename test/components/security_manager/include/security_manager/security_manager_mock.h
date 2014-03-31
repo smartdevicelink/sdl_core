@@ -104,8 +104,9 @@ namespace security_manager_test {
    */
   class CryptoManagerMock: public security_manager::CryptoManager {
   public:
-    MOCK_METHOD5(Init,
+    MOCK_METHOD6(Init,
                  bool (security_manager::Mode mode,
+                       security_manager::Protocol protocol,
                        const std::string& cert_filename,
                        const std::string& key_filename,
                        const std::string& ciphers_list,
@@ -123,17 +124,20 @@ namespace security_manager_test {
   class SSLContextMock: public security_manager::SSLContext {
   public:
     MOCK_CONST_METHOD0(mode, int ());
-    MOCK_METHOD1(StartHandshake,
-                 void* (size_t* out_data_size));
-    MOCK_METHOD3(DoHandshakeStep,
-                 void* (const void* client_data,  size_t client_data_size,
-                        size_t* server_data_size));
-    MOCK_METHOD3(Encrypt,
-                 void* (const void* data,  size_t data_size,
-                        size_t* encrypted_data_size));
-    MOCK_METHOD3(Decrypt,
-                 void* (const void* encrypted_data,  size_t encrypted_data_size,
-                        size_t* data_size));
+    MOCK_METHOD2(StartHandshake,
+                 security_manager::SSLContext::HandshakeResult (
+                   const uint8_t** const, size_t*));
+    MOCK_METHOD4(DoHandshakeStep,
+                 security_manager::SSLContext::HandshakeResult (
+                   const uint8_t* const,  size_t,
+                   const uint8_t** const, size_t*));
+    MOCK_METHOD4(Encrypt,
+                 bool (const uint8_t* const,  size_t,
+                       const uint8_t** const, size_t*));
+    MOCK_METHOD4(Decrypt,
+                 bool (const uint8_t* const,  size_t,
+                       const uint8_t** const, size_t*));
+    MOCK_CONST_METHOD1(get_max_block_size, size_t (size_t));
     MOCK_CONST_METHOD0(IsInitCompleted, bool());
   };
 

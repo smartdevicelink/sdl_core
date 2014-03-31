@@ -103,11 +103,14 @@ namespace security_manager_test {
     * Wrapper for fast emulate recieve Handshake
     */
     void EmulateMobileMessageHandShake(const uint8_t* const data,
-                                       const uint32_t data_size ){
+                                       const uint32_t data_size,
+                                       const int repeat_count = 1){
       const SecurityQuery::QueryHeader header(
             SecurityQuery::NOTIFICATION,
             SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
-      EmulateMobileMessage(header, data, data_size);
+      for (int c = 0; c < repeat_count; ++c) {
+        EmulateMobileMessage(header, data, data_size);
+      }
     }
     ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
@@ -142,7 +145,8 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_NOT_SUPPORTED),is_final)).Times(1);
+                    SecurityQuery::ERROR_NOT_SUPPORTED),is_final)).
+        Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           //It could be any query id
@@ -178,7 +182,8 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).
+        Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
   }
@@ -191,7 +196,8 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).
+        Times(1);
     SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::INVALID_QUERY_ID);
@@ -207,7 +213,8 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)).Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_ID),is_final)).
+        Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
           SecurityQuery::INVALID_QUERY_ID);
@@ -299,7 +306,8 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).Times(1);
+                    SecurityQuery::ERROR_INVALID_QUERY_SIZE),is_final)).
+        Times(1);
     EmulateMobileMessageHandShake(NULL, 0);
   }
   /*
@@ -323,6 +331,17 @@ namespace security_manager_test {
     const uint8_t data[] = {0x1, 0x2};
     EmulateMobileMessageHandShake(data, sizeof(data)/sizeof(data[0]));
   }
+  // Sample data for handshake data emulation
+  namespace {
+      const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
+      const size_t handshake_data_size =
+          sizeof(handshake_data)/sizeof(handshake_data[0]);
+
+      uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
+      uint8_t *handshake_data_out_pointer = handshake_data_out;
+      const size_t handshake_data_out_size =
+          sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+    }
   /*
    * SecurityManger shall send InternallError on getting
    * SEND_HANDSHAKE_DATA from mobile side with invalid handshake
@@ -330,110 +349,143 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
     SetMockCryptoManger();
-    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
-    const size_t handshake_data_size =
-        sizeof(handshake_data)/sizeof(handshake_data[0]);
 
-    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
-    const size_t handshake_data_out_size =
-        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+    //Count handshake calls
+    const int handshake_emulates = 4;
 
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityQuery::ERROR_SSL_INVALID_DATA),is_final)).
-        Times(3);
+        Times(handshake_emulates);
+
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, protocol_handler::kControl)).
-        Times(3).WillRepeatedly(Return(&mock_ssl_context_exists));
+        Times(handshake_emulates).
+        WillRepeatedly(Return(&mock_ssl_context_exists));
+    //Emulate DoHandshakeStep fail logics
     EXPECT_CALL(mock_ssl_context_exists,
-                IsInitCompleted()).
-        Times(3).WillRepeatedly(Return(false));
-    // Expect SSLContext::DoHandshakeStep 3 times
-    // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
-    EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _)).
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_AbnormalFail))).
+         WillOnce(DoAll( SetArgPointee<2>((uint8_t*)NULL),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_AbnormalFail))).
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_AbnormalFail))).
+         WillOnce(DoAll( SetArgPointee<2>((uint8_t*)NULL),
+                         SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_AbnormalFail)));
 
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    // Emulate handshare #handshake_emulates times for 5 cases
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
   }
   /*
    * SecurityManger shall send HandshakeData on
    * getting SEND_HANDSHAKE_DATA from mobile side
    * with correct handshake data
+   * Check Fail and sussecc states
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
     SetMockCryptoManger();
-    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
-    const size_t handshake_data_size =
-        sizeof(handshake_data)/sizeof(handshake_data[0]);
-
-    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
-    const size_t handshake_data_out_size =
-        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+    //Count handshake calls
+    const int handshake_emulates = 2;
 
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   // FIXME : !!!
-                  _, is_final)).Times(1);
+                  _, is_final)).
+        Times(handshake_emulates);
+    EXPECT_CALL(mock_ssl_context_exists,
+                IsInitCompleted()).
+        Times(handshake_emulates).
+        WillRepeatedly(Return(false));
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, protocol_handler::kControl)).
-        WillOnce(Return(&mock_ssl_context_exists));
+        Times(handshake_emulates).
+        WillRepeatedly(Return(&mock_ssl_context_exists));
 
     // Expect SSLContext::DoHandshakeStep
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _)).
+        WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                        SetArgPointee<3>(handshake_data_out_size),
+                        Return(security_manager::SSLContext::
+                               Handshake_Result_Success))).
+        WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                        SetArgPointee<3>(handshake_data_out_size),
+                        Return(security_manager::SSLContext::
+                               Handshake_Result_Fail)));
 
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
   }
   /*
-   * SecurityManger shall scall all listeners on success end handshake
+   * SecurityManger shall call all listeners on success end handshake
+   * and return handshake data
+   * Check Fail and sussecc states
    */
   TEST_F(SecurityManagerTest, ProccessHandshakeData_HandShakeFinished) {
     SetMockCryptoManger();
-    const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
-    const size_t handshake_data_size =
-        sizeof(handshake_data)/sizeof(handshake_data[0]);
-
-    uint8_t handshake_data_out[] = {0x6, 0x7, 0x8};
-    const size_t handshake_data_out_size =
-        sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
+    //Count handshake calls
+    const int handshake_emulates = 6;
 
     // Expect SessionObserver::GetSSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, protocol_handler::kControl)).
-        Times(3).WillRepeatedly(Return(&mock_ssl_context_exists));
+        Times(handshake_emulates).
+        WillRepeatedly(Return(&mock_ssl_context_exists));
     EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
-        Times(3).WillRepeatedly(Return(true));
+        Times(handshake_emulates).
+        WillRepeatedly(Return(true));
     // FIXME (EZamakhov) : add DoHandshakeStep matcher for compare handshake data
     EXPECT_CALL(mock_ssl_context_exists,
-                DoHandshakeStep(_, handshake_data_size, _))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_size),
-                         ReturnNull()))
-        .WillOnce(DoAll( SetArgPointee<2>(0),
-                         Return(handshake_data_out)));
+                DoHandshakeStep(_, handshake_data_size, _, _)).
+        // two states with not null out data
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Success))).
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Fail))).
+        // two states with with null pointer data
+         WillOnce(DoAll( SetArgPointee<2>((uint8_t*)NULL),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Success))).
+         WillOnce(DoAll( SetArgPointee<2>((uint8_t*)NULL),
+                         SetArgPointee<3>(handshake_data_out_size),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Fail))).
+        // two states with with null data size
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Success))).
+         WillOnce(DoAll( SetArgPointee<2>(handshake_data_out_pointer),
+                         SetArgPointee<3>(0),
+                         Return(security_manager::SSLContext::
+                                Handshake_Result_Success)));
+
+    // Expect send two message ( with correct pointer and size data)
+    EXPECT_CALL(mock_protocol_observer,
+                SendMessageToMobileApp(_,is_final)).
+        Times(2);
 
     // Expect NO InternalError with ERROR_ID
-
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
   }
   /*
    * SecurityManger shall not any query on getting

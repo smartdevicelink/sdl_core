@@ -92,7 +92,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig(), false){
+                null, connectionMock, new TestConfig()){
             @Override
             public void setupSecureProxy() {
                 // we don't need secure proxy here.

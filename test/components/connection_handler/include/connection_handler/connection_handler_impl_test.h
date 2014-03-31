@@ -207,7 +207,6 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_FALSE(connection_list_on_end_secure.empty());
   EXPECT_EQ(connection_list_on_end_secure.begin()->first, 0);
 }
-// FIXME (EZamakhov) Add test with create secured services and create kContorl Service
 
 TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {
   //Add virtual device and connection
@@ -322,6 +321,37 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   EXPECT_NE(session_id3, -1);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id3, protocol_handler::kAudio, NULL, true);
+}
+TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
+  AddTestDeviceConnection();
+
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                    protocol_handler::kRpc,
+                                                    false);
+  EXPECT_NE(session_id, -1);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+
+  const int32_t session_id_new =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kRpc,
+                                                    true);
+  EXPECT_EQ(session_id_new, session_id);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, true);
+
+  const int32_t session_id2 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    false);
+  EXPECT_EQ(session_id2, session_id);
+  CheckService(uid, session_id, protocol_handler::kAudio, NULL, false);
+
+  const int32_t session_id3 =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kAudio,
+                                                    true);
+  EXPECT_EQ(session_id3, session_id);
+  CheckService(uid, session_id, protocol_handler::kAudio, NULL, true);
 }
 
 } // connection_handle_test

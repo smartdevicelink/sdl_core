@@ -42,44 +42,73 @@ namespace security_manager {
 log4cxx::LoggerPtr CryptoManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("CryptoManagerImpl"));
 
+int CryptoManagerImpl::instance_count_ = 0;
+
 CryptoManagerImpl::CryptoManagerImpl()
     : context_(NULL),
       mode_(CLIENT) {
-  SSL_load_error_strings();
-  ERR_load_BIO_strings();
-  OpenSSL_add_all_algorithms();
-  SSL_library_init();
 }
 
 bool CryptoManagerImpl::Init(Mode mode,
+                             Protocol protocol,
                              const std::string& cert_filename,
                              const std::string& key_filename,
                              const std::string& ciphers_list,
                              bool verify_peer) {
 
+  if (instance_count_ == 0) {
+    SSL_load_error_strings();
+    ERR_load_BIO_strings();
+    OpenSSL_add_all_algorithms();
+    SSL_library_init();
+  }
+  instance_count_++;
+
   mode_ = mode;
-  if (mode == SERVER) {
-    context_ = SSL_CTX_new(SSLv23_server_method());
-  } else {
-    context_ = SSL_CTX_new(SSLv23_client_method());
+  const SSL_METHOD *method;
+  switch (protocol) {
+    case SSLv3:
+      method = mode == SERVER ?
+          SSLv3_server_method() :
+          SSLv3_client_method();
+      break;
+    case TLSv1_1:
+      method = mode == SERVER ?
+          TLSv1_1_server_method() :
+          TLSv1_1_client_method();
+      break;
+    case TLSv1_2:
+      method = mode == SERVER ?
+          TLSv1_2_server_method() :
+          TLSv1_2_client_method();
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
+      return false;
+  }
+  context_ = SSL_CTX_new(method);
+  if (protocol == SSLv3) {
+    SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
   }
 
+  if (!cert_filename.empty()) {
+    LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
+    if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
+      LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
+      return false;
+    }
 
-  LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
-  if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
-    return false;
-  }
-
-  LOG4CXX_INFO(logger_, "Key path: " << key_filename);
-  if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
-    LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
-    return false;
-  }
-
-  if (!SSL_CTX_check_private_key(context_)) {
-    LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
-    return false;
+    if (!key_filename.empty()) {
+      LOG4CXX_INFO(logger_, "Key path: " << key_filename);
+      if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
+        LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
+        return false;
+      }
+      if (!SSL_CTX_check_private_key(context_)) {
+        LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
+        return false;
+      }
+    }
   }
 
   LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
@@ -90,14 +119,15 @@ bool CryptoManagerImpl::Init(Mode mode,
 
   SSL_CTX_set_verify(context_, verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE, NULL);
 
-  // TODO (EZamakhov): is it legacy?
-  //SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
   return true;
 }
 
 void CryptoManagerImpl::Finish() {
-  EVP_cleanup();
-  ERR_free_strings();
+  SSL_CTX_free(context_);
+  if (--instance_count_== 0) {
+    EVP_cleanup();
+    ERR_free_strings();
+  }
 }
 
 SSLContext * CryptoManagerImpl::CreateSSLContext() {

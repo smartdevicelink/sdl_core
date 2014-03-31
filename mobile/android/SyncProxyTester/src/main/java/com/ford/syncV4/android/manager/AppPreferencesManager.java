@@ -260,21 +260,21 @@ public class AppPreferencesManager {
     }
 
     /**
-     * @return true if devices has been Rooted, false in other cases
+     * @return true if it is necessary to check whether device has been rooted
      */
-    public static boolean getIsDeviceRooted() {
+    public static boolean getDoDeviceRootCheck() {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
-        return sharedPreferences.getBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, RootTools.isRootAvailable());
+        return sharedPreferences.getBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, true);
     }
 
     /**
-     * Set true if devices has been Rooted, false in other cases
+     * Set true if it is necessary to check whether device has been rooted
      * @param value boolean value
      */
-    public static void setIsDeviceRooted(boolean value) {
+    public static void setDoDeviceRootCheck(boolean value) {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(Const.PREF_KEY_IS_DEVICE_ROOTED, value);
+        editor.putBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, value);
         editor.commit();
     }
 

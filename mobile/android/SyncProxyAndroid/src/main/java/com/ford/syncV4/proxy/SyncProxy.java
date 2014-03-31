@@ -39,7 +39,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true,
-				new BTTransportConfig(), new TestConfig(), false);
+				new BTTransportConfig(), new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
 	}
@@ -67,7 +67,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true,
-				new BTTransportConfig(), new TestConfig(), false);
+				new BTTransportConfig(), new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
 	}
@@ -95,7 +95,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread,
-				new BTTransportConfig(), new TestConfig(), false);
+				new BTTransportConfig(), new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
@@ -124,7 +124,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread,
-				new BTTransportConfig(), new TestConfig(), false);
+				new BTTransportConfig(), new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
@@ -154,7 +154,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true,
-				transportConfig, new TestConfig(), false);
+				transportConfig, new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
 	}
@@ -184,7 +184,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				/*callbackToUIThread*/ true,
-				transportConfig, new TestConfig(), false);
+				transportConfig, new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
 	}
@@ -213,7 +213,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread,
-				transportConfig, new TestConfig(), false);
+				transportConfig, new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
@@ -243,7 +243,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*App ID*/null,
 				/*autoActivateID*/null,
 				callbackToUIThread,
-				transportConfig, new TestConfig(), false);
+				transportConfig, new TestConfig());
 		
 		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
 	}
@@ -289,8 +289,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId(),
-                getIsDeviceRooted());
+                getHashId());
 	}
 	
 	/**
