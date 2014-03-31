@@ -235,6 +235,10 @@ const int32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 
+const std::string& Profile::preloaded_pt_file() const {
+  return preloaded_pt_file_;
+}
+
 uint32_t Profile::transport_manager_disconnect_timeout() const {
   return transport_manager_disconnect_timeout_;
 }
@@ -275,17 +279,26 @@ void Profile::UpdateValues() {
   }
 
   *value = '\0';
-  if ((0
-      != ini_read_value(config_file_name_.c_str(), "MAIN", "PoliciesTable",
-                        value)) && ('\0' != *value)) {
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "Policy", "PoliciesTable", value))
+      && ('\0' != *value)) {
     policies_file_name_ = value;
     LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
   }
 
   *value = '\0';
-  if ((0
-      != ini_read_value(config_file_name_.c_str(), "MAIN", "HMICapabilities",
-                        value)) && ('\0' != *value)) {
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "Policy", "PreloadedPT", value))
+      && ('\0' != *value)) {
+    preloaded_pt_file_ = value;
+    LOG4CXX_INFO(logger_, "Set preloaded policy file to "
+                 << preloaded_pt_file_);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "HMICapabilities", value))
+      && ('\0' != *value)) {
     hmi_capabilities_file_name_ = value;
     LOG4CXX_INFO(
         logger_,
@@ -615,6 +628,16 @@ void Profile::UpdateValues() {
 
   (void) ReadIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout,
                       kMainSection, "HeartBeatTimeout");
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+                           "MAIN", "UseLastState", value))
+      && ('\0' != *value)) {
+    if (0 == strcmp("true", value)) {
+      use_last_state_ = true;
+    }
+    LOG4CXX_INFO(logger_, "Set UseLastState to " << value);
+  }
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

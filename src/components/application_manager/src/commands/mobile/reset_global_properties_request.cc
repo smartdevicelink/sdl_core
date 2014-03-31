@@ -145,6 +145,7 @@ void ResetGlobalPropertiesRequest::Run() {
     }
     if (menu_name) {
       msg_params[hmi_request::menu_title] = "";
+      app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
     //TODO(DT): clarify the sending parameter menuIcon
     //if (menu_icon) {

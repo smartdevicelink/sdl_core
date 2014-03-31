@@ -90,12 +90,20 @@ public class AppSetUpDialog extends DialogFragment {
         final Spinner hmiLangSpinner = (Spinner) view.findViewById(R.id.selectprotocol_hmiLang);
         final RadioGroup transportGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupTransport);
-        final EditText ipAddressEditText = (EditText) view.findViewById(R.id.selectprotocol_ipAddr);
+        final EditText ipAddressEditText = (EditText) view.findViewById(R.id.select_protocol_ip_address_edit_view);
         final EditText tcpPortEditText = (EditText) view.findViewById(R.id.selectprotocol_tcpPort);
         final LinearLayout nsdUseLayout = (LinearLayout) view.findViewById(R.id.nsd_use_layout);
         final LinearLayout ipAddressLayout = (LinearLayout) view.findViewById(R.id.ip_address_layout);
         final LinearLayout portLayout = (LinearLayout) view.findViewById(R.id.port_layout);
-        final ToggleButton mNSDUseToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
+        final ToggleButton nsdToggle = (ToggleButton) view.findViewById(R.id.nsd_toggle_btn);
+        nsdToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                ipAddressEditText.setEnabled(!isChecked);
+                TextView ipAddressView = (TextView) view.findViewById(R.id.select_protocol_ip_address_view);
+                ipAddressView.setEnabled(!isChecked);
+            }
+        });
 
         final boolean mIsNSDSupported = Build.VERSION.SDK_INT >= Const.JELLYBEAN_API_LEVEL;
 
@@ -210,7 +218,7 @@ public class AppSetUpDialog extends DialogFragment {
 
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
-        mNSDUseToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
+        nsdToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
         autoSetAppIconCheckBox.setChecked(autoSetAppIcon);
 
         int groupCheck = R.id.selectprotocol_radioUSB;
@@ -262,7 +270,7 @@ public class AppSetUpDialog extends DialogFragment {
                         String ipAddress = ipAddressEditText.getText().toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
-                        boolean mNSDPrefValue = mIsNSDSupported && mNSDUseToggle.isChecked();
+                        boolean mNSDPrefValue = mIsNSDSupported && nsdToggle.isChecked();
                         // save the configs
                         boolean success = prefs
                                 .edit()

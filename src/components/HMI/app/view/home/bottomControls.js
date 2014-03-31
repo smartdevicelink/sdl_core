@@ -83,7 +83,7 @@ SDL.BottomControls = Em.ContainerView.extend( {
         actionDown: function(event) {
 
             if (!SDL.States.settings.active) {
-                SDL.States.goToStates('settings');
+                SDL.States.goToStates(SDL.SettingsController.activeState);
             }
         }
     })

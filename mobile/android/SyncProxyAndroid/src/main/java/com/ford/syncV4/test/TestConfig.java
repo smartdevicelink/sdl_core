@@ -39,6 +39,14 @@ public class TestConfig {
     public boolean mDoRootDeviceCheck;
 
     /**
+     * Indicates whether to keep USB reader thread open when perform session close procedure.
+     * This feature is for the such Test Case as: call
+     * {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} (which will guide to close USB
+     * reader)
+     */
+    private boolean mDoKeepUSBTransportConnected = false;
+
+    /**
      * @return a value of the functionality: whether or not to use parameter
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} when initiating
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance, <b>true</b> | <b>false</b>
@@ -111,5 +119,23 @@ public class TestConfig {
      */
     public void setDoRootDeviceCheck(boolean mDoRootDeviceCheck) {
         this.mDoRootDeviceCheck = mDoRootDeviceCheck;
+    }
+
+    /**
+     * @return whether to keep USB reader thread open when perform session close procedure.
+     */
+    public boolean isDoKeepUSBTransportConnected() {
+        return mDoKeepUSBTransportConnected;
+    }
+
+    /**
+     * Set whether to keep USB reader thread open when perform session close procedure.
+     * <b> When set this value to true it is important to revert it back to false when Test is
+     * complete!</b>
+     *
+     * @param mDoKeepUSBTransportConnected boolean value
+     */
+    public void setDoKeepUSBTransportConnected(boolean mDoKeepUSBTransportConnected) {
+        this.mDoKeepUSBTransportConnected = mDoKeepUSBTransportConnected;
     }
 }

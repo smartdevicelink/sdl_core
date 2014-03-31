@@ -36,8 +36,10 @@
 
 namespace media_manager {
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("FromMicRecorderListener"));
+#endif // ENABLE_LOG
 
 FromMicRecorderListener::FromMicRecorderListener(
   const std::string& file_name)

@@ -22,6 +22,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransport;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.ITransportListener;
@@ -76,6 +77,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private boolean mIsInit = false;
 
     /**
+     * Test Cases fields
+     */
+    /**
+     * This Config object stores all the necessary data for SDK testing
+     */
+    private TestConfig mTestConfig;
+
+    /**
      * Constructor.
      *
      * @param listener Sync connection listener.
@@ -83,6 +92,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public SyncConnection(ISyncConnectionListener listener) {
         mConnectionListener = listener;
         mIsInit = false;
+    }
+
+    /**
+     * Set {@link com.ford.syncV4.test.TestConfig} object
+     * @param mTestConfig {@link com.ford.syncV4.test.TestConfig}
+     */
+    public void setTestConfig(TestConfig mTestConfig) {
+        this.mTestConfig = mTestConfig;
     }
 
     /**
@@ -476,9 +493,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 if (reason.equals(AppInterfaceUnregisteredReason.IGNITION_OFF.toString()) ||
                         reason.equals(AppInterfaceUnregisteredReason.MASTER_RESET.toString()) ||
                         reason.equals(AppInterfaceUnregisteredReason.FACTORY_DEFAULTS.toString())) {
-                    if (_transport != null) {
-                        _transport.stopReading();
-                    }
+                    processTransportStopReading();
                 }
             }
         }
@@ -504,7 +519,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
                 END_PROTOCOL_SERVICE_RPC_LOCK.notifyAll();
             }
-            _transport.stopReading();
+
+            processTransportStopReading();
+
         } else if (_transport != null && serviceType.equals(ServiceType.Mobile_Nav)) {
             synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
                 END_PROTOCOL_SERVICE_VIDEO_LOCK.notifyAll();
@@ -610,5 +627,32 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         Log.d(TAG, "SetSessionId:" + mSessionId);
     }
 
+<<<<<<< HEAD
 
+=======
+    private void processTransportStopReading() {
+        if (_transport == null) {
+            Log.w(TAG, "Process Transport Stop Reading - transport is NULL");
+            return;
+        }
+
+        /**
+         * TODO : For the TestCases
+         */
+        boolean doStopReading = true;
+        if (mTestConfig != null && mTestConfig.isDoKeepUSBTransportConnected()) {
+            doStopReading = false;
+        }
+
+        if (doStopReading) {
+            _transport.stopReading();
+        }
+
+        if (mTestConfig != null) {
+            mTestConfig.setDoKeepUSBTransportConnected(false);
+        }
+
+        //_transport.stopReading();
+    }
+>>>>>>> develop
 }

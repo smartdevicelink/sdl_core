@@ -41,8 +41,10 @@
  */
 namespace connection_handler {
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr Device::logger_ = log4cxx::LoggerPtr(
                                        log4cxx::Logger::getLogger("ConnectionHandler"));
+#endif // ENABLE_LOG
 
 Device::Device(DeviceHandle device_handle,
                const std::string& user_friendly_name,

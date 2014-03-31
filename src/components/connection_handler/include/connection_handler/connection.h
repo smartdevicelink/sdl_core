@@ -259,7 +259,9 @@ class Connection {
   /**
    * \brief For logging.
    */
+#ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 };
 
 }/* namespace connection_handler */

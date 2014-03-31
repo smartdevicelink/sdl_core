@@ -13,6 +13,7 @@ add_subdirectory(./smart_objects)
 # --- AppMgr
 add_subdirectory(./application_manager)
 
+
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)
 
@@ -20,6 +21,8 @@ add_subdirectory(./protocol_handler)
 add_subdirectory(./connection_handler)
 
 add_subdirectory(./hmi_message_handler)
+
+add_subdirectory(./security_manager)
 
 # --- Utils
 add_subdirectory(./utils)
@@ -29,11 +32,6 @@ add_subdirectory(./utils)
 
 # --- Audio Manager
 #add_subdirectory(./media_manager)
-
-add_subdirectory(./security_manager)
-
-# --- policies (Policy Manager)
-add_subdirectory(./policies)
 
 # -- rpc_base
 add_subdirectory(./rpc_base)

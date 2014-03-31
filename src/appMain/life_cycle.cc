@@ -36,12 +36,15 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "resumption/last_state.h"
 
 using threads::Thread;
 
 namespace main_namespace {
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("appMain"));
+#endif // ENABLE_LOG
 
 namespace {
 
@@ -62,7 +65,6 @@ LifeCycle::LifeCycle()
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
-  , policy_manager_(NULL)
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -176,17 +178,9 @@ bool LifeCycle::StartComponents() {
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 
-  policy_manager_ = policies::PolicyManagerImpl::instance();
-  DCHECK(policy_manager_);
-
-  policies::PolicyConfiguration policy_config;
-  policy_config.set_pt_file_name("wp1_policy_table.json");
-  policy_manager_->Init(policy_config);
-
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
-  app_manager_->set_policy_manager(policy_manager_);
 
   return true;
 }
@@ -280,13 +274,13 @@ bool LifeCycle::InitMessageSystem() {
  */
 bool LifeCycle::InitMessageSystem() {
   log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
+                                log4cxx::Logger::getLogger("appMain"));
 
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      dbus_adapter_);
+    dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_INFO(logger, "Cannot init DBus service!");
     return false;
@@ -296,10 +290,10 @@ bool LifeCycle::InitMessageSystem() {
 
   LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
   dbus_adapter_thread_ = new System::Thread(
-      new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
-          *dbus_adapter_,
-          &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
-          NULL));
+    new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
+      *dbus_adapter_,
+      &hmi_message_handler::DBusMessageAdapter::MethodForReceiverThread,
+      NULL));
   dbus_adapter_thread_->Start(false);
 
   return true;
@@ -309,9 +303,9 @@ bool LifeCycle::InitMessageSystem() {
 #ifdef MQUEUE_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
+    hmi_message_handler::HMIMessageHandlerImpl::instance());
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      hmi_message_adapter_);
+    hmi_message_adapter_);
   return true;
 }
 #endif  // MQUEUE_HMIADAPTER
@@ -324,9 +318,6 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   app_manager_->Stop();
   application_manager::ApplicationManagerImpl::destroy();
-
-  LOG4CXX_INFO(logger_, "Destroying Policy Manager.");
-  policies::PolicyManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   transport_manager_->Stop();
@@ -370,29 +361,43 @@ void LifeCycle::StopComponents() {
 #ifdef MESSAGEBROKER_HMIADAPTER
   hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
-  mb_adapter_->unregisterController();
-  mb_adapter_thread_->Stop();
-  mb_adapter_thread_->Join();
-  delete mb_adapter_thread_;
-  mb_adapter_->Close();
-  delete mb_adapter_;
+  if (mb_adapter_) {
+    mb_adapter_->unregisterController();
+    mb_adapter_->Close();
+    delete mb_adapter_;
+  }
+  if (mb_adapter_thread_) {
+    mb_adapter_thread_->Stop();
+    mb_adapter_thread_->Join();
+    delete mb_adapter_thread_;
+  }
+
 #endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
-  mb_server_thread_->Stop();
-  mb_server_thread_->Join();
-  mb_thread_->Stop();
-  mb_thread_->Join();
+  if (mb_server_thread_) {
+    mb_server_thread_->Stop();
+    mb_server_thread_->Join();
+    delete mb_server_thread_;
+  }
+  if (mb_thread_) {
+    mb_thread_->Stop();
+    mb_thread_->Join();
+    delete mb_thread_;
+  }
   message_broker_server_->Close();
+  delete message_broker_server_;
   message_broker_->stopMessageBroker();
-  delete mb_server_thread_;
 
   networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER
 
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
 }
 
 void LifeCycle::StopComponentsOnSignal(int32_t params) {

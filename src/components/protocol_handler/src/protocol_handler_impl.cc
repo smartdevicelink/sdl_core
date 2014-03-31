@@ -42,8 +42,10 @@
 
 namespace protocol_handler {
 
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("ProtocolHandler"));
+#endif // ENABLE_LOG
 
 
 /**
@@ -340,7 +342,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                 message->protocol_version(),
                                                 message->service_type(),
                                                 message->data_size(),
-                                                message->data(), protect_message);
+                                                message->data(), protect_message,
+						final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send single frame message.");
@@ -355,16 +358,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                message->service_type(),
                                                message->data_size(),
                                                message->data(), protect_message,
-                                               maxDataSize);
+                                               maxDataSize, final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send multiframe messages.");
     }
   }
-
-  if (final_message)
-    transport_manager_->Disconnect(connection_handle);
-
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -465,6 +464,30 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
 
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  const ProtocolPacket sent_message(message->connection_key(),
+                                    message->data(),
+                                    message->data_size());
+
+  std::map<uint8_t, uint32_t>::const_iterator it =
+      sessions_last_message_id_.find(sent_message.session_id());
+
+  if (sessions_last_message_id_.end() != it) {
+    uint32_t last_message_id = it->second;
+    sessions_last_message_id_.erase(it);
+    if ((sent_message.message_id() ==  last_message_id) &&
+        ((FRAME_TYPE_SINGLE == sent_message.frame_type()) ||
+        ((FRAME_TYPE_CONSECUTIVE == sent_message.frame_type()) &&
+         (0 == sent_message.frame_data())))) {
+
+      session_observer_->PairFromKey(message->connection_key(),
+                                       &connection_handle,
+                                       &sessionID);
+      transport_manager_->Disconnect(connection_handle);
+    }
+  }
+
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMobileMessageSent(message);
@@ -493,6 +516,7 @@ void ProtocolHandlerImpl::OnConnectionClosed(
 RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
                                            const ProtocolPacket& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
   if (!packet.packet()) {
     LOG4CXX_ERROR(logger_, "Failed to create packet.");
 
@@ -536,7 +560,8 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    size_t data_size, const uint8_t* data, const bool protection_flag) {
+    size_t data_size, const uint8_t* data, const bool protection_flag,
+    const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   //Control service shall not be encrypted
@@ -559,14 +584,13 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   if (2 == protocol_version) {
     versionF = PROTOCOL_VERSION_2;
   }
-
   ProtocolFramePtr ptr (
           new protocol_handler::ProtocolPacket(
             connection_id, versionF, encrypt_message, FRAME_TYPE_SINGLE, service_type, 0,
             session_id, data_size, message_counters_[session_id]++, data));
 
   raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+      impl::RawFordMessageToMobile(ptr, is_final_message));
 
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -576,7 +600,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
     size_t data_size, const uint8_t* data, const bool protection_flag,
-    const size_t maxdata_size) {
+    const size_t maxdata_size, const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   //Control service shall not be encrypted
@@ -660,7 +684,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
           outDataFrame));
 
       raw_ford_messages_to_mobile_.PostMessage(
-          impl::RawFordMessageToMobile(ptr, false));
+          impl::RawFordMessageToMobile(ptr, is_final_message));
     }
   }
 
@@ -1017,6 +1041,12 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
       "Message to mobile app: connection " << int(message->connection_key()) << ";"
       " dataSize: " << message->data_size() << " ;"
       " protocolVersion " << message->protocol_version());
+
+  if (message.is_final) {
+    sessions_last_message_id_.insert(
+        std::pair<uint8_t, uint32_t>(message->session_id(),
+                                     message->message_id()));
+  }
 
   SendFrame(message->connection_key(), (*message.get()));
 }

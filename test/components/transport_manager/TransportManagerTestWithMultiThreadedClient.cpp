@@ -164,7 +164,9 @@ namespace test { namespace components { namespace TransportManager { namespace T
     protected:
         ITransportAdapterListener & mListener;
         IHandleGenerator & mHandleGenerator;
+#ifdef ENABLE_LOG
         static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
     };
 
     /**

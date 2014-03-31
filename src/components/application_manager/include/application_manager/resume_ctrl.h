@@ -85,12 +85,6 @@ class ResumeCtrl: public event_engine::EventObserver {
     void SaveApplication(ApplicationConstSharedPtr application);
 
     /**
-     * @brief Load unregistered applications info from the file system
-     *        You can use this function only if connection handler is ready
-     */
-    void LoadApplications();
-
-    /**
      * @brief Set application HMI Level as saved
      * @param application is application witch HMI Level is need to restore
      * @return true if success, otherwise return false
@@ -121,7 +115,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application info to FileSystem
      */
-    void SavetoFileSystem();
+    void IgnitionOff();
 
     /**
      * @brief Start timer for resumption applications
@@ -173,17 +167,18 @@ class ResumeCtrl: public event_engine::EventObserver {
       ApplicationSharedPtr app;
     };
 
+#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 
     /**
      * @brief Time step to check resumption TIME_OUT
      */
     static const uint32_t kTimeStep = 3;
 
-    /**
-    *@brief Data of applications, that whait for resuming
-    */
-    std::vector<Json::Value> saved_applications_;
+    Json::Value& GetSavedApplications();
+
+    void SetSavedApplication(Json::Value& apps_json);
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
@@ -216,12 +211,13 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     bool ApplicationIsSaved(const uint32_t app_id);
 
-    Json::Value GetApplicationCommands(const uint32_t app_id);
-    Json::Value GetApplicationSubMenus(const uint32_t app_id);
-    Json::Value GetApplicationInteractionChoiseSets(const uint32_t app_id);
-    Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
-    Json::Value GetApplicationSubscriptions(const uint32_t app_id);
-    Json::Value GetApplicationFiles(const uint32_t app_id);
+    Json::Value GetApplicationCommands(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubMenus(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationInteractionChoiseSets(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationGlobalProperties(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubscriptions(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationFiles(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationShow(ApplicationConstSharedPtr application);
 
     Json::Value JsonFromSO(const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
 

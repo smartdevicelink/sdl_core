@@ -7,9 +7,16 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+<<<<<<< HEAD
         android:minWidth="300dp"
         android:orientation="vertical"
         android:layout_margin="15dp">
+=======
+        android:layout_margin="15dp"
+        android:paddingBottom="15dp"
+        android:minWidth="300dp"
+        android:orientation="vertical">
+>>>>>>> develop
 
         <CheckBox
             android:id="@+id/registerappinterface_useSyncMsgVersion"
@@ -156,6 +163,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/registerappinterface_useAppID" />
+<<<<<<< HEAD
 
         <EditText
             android:id="@+id/registerappinterface_appID"
@@ -164,6 +172,127 @@
             android:freezesText="true"
             android:inputType="textCapSentences"
             android:text="@string/registerappinterface_appIDDefault" />
+=======
+
+        <EditText
+            android:id="@+id/registerappinterface_appID"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:freezesText="true"
+            android:inputType="textCapSentences"
+            android:text="@string/registerappinterface_appIDDefault" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginBottom="10dp"
+            android:text="Device Info:" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hardware:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_hardware"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Firmware:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_firmware"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OS:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_os"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OS Version:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_os_ver"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Carrier:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_carrier"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max RFCOMM Ports number:" />
+
+            <EditText
+                android:id="@+id/reg_app_interface_dev_info_max_rf_comm_ports"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"/>
+
+        </LinearLayout>
+>>>>>>> develop
 
     </LinearLayout>
 

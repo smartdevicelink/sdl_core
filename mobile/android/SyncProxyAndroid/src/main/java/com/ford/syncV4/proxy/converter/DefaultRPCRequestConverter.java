@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy.converter;
 
+import android.util.Log;
+
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -17,11 +19,16 @@ import java.util.List;
  * Created by enikolsky on 2014-01-20.
  */
 public class DefaultRPCRequestConverter implements IRPCRequestConverter {
+
+    private static final String TAG = DefaultRPCRequestConverter.class.getSimpleName();
+
     @Override
     public List<ProtocolMessage> getProtocolMessages(RPCRequest request,
                                                      byte sessionID,
                                                      IJsonRPCMarshaller marshaller,
                                                      byte protocolVersion) {
+        Log.d(TAG, "DefaultMarshaller converter: " + marshaller);
+
         byte[] msgBytes = marshaller.marshall(request, protocolVersion);
 
         ProtocolMessage pm = new ProtocolMessage();

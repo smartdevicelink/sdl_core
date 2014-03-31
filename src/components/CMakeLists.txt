@@ -49,6 +49,15 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
+# --- Policy_impl
+add_subdirectory(./policy)
+
+# --- Validated types
+add_subdirectory(./rpc_base)
+
+# --- Security manager
+add_subdirectory(./security_manager)
+
 # --- SmartObjects
 add_subdirectory(./smart_objects)
 
@@ -67,11 +76,6 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
-# --- SecurityManager
-add_subdirectory(./security_manager)
-
-# --- Policies
-add_subdirectory(./policies)
 
 if (${HMI_DBUS_API})
 # --- DBus

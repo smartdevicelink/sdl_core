@@ -98,8 +98,9 @@ void AddCommandRequest::Run() {
       SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
       return;
     }
-    if ((*message_)[strings::msg_params][strings::menu_params].keyExists(
-        hmi_request::parent_id)) {
+    if (((*message_)[strings::msg_params][strings::menu_params].keyExists(
+        hmi_request::parent_id)) && (0 != (*message_)[strings::msg_params]
+       [strings::menu_params][hmi_request::parent_id].asUInt())) {
       if (!CheckCommandParentId(app)) {
         SendResponse(false, mobile_apis::Result::INVALID_ID,
                      "Parent ID doesn't exist");

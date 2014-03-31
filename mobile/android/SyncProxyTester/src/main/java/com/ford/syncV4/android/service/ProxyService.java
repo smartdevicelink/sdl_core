@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.os.IBinder;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -40,6 +41,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -306,6 +308,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
+     * @return an object which contains Testing configuration data
+     */
+    public TestConfig getTestConfig() {
+        return mTestConfig;
+    }
+
+    /**
      * Prepare all necessary parameters to be passed to Sync proxy
      */
     private void prepareTestConfig() {
@@ -372,10 +381,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     appID = AppPreferencesManager.getCustomAppId();
                 }
 
+<<<<<<< HEAD
                 mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
+=======
+                SyncProxyConfigurationResources syncProxyConfigurationResources =
+                        new SyncProxyConfigurationResources();
+                syncProxyConfigurationResources.setTelephonyManager(
+                        (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
+>>>>>>> develop
 
                 mSyncProxy = new SyncProxyALM(this,
-                        /*sync proxy configuration resources*/null,
+                        syncProxyConfigurationResources/*sync proxy configuration resources*/,
                         /*enable advanced lifecycle management true,*/
                         appName,
                         /*ngn media app*/null,
@@ -2063,7 +2079,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
         try {
-            if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface) &&
+                    getSessionId() == 0) {
                 syncProxySendRegisterRequest((RegisterAppInterface) request);
             } else {
                 createDebugMessageForAdapter(request);
@@ -2111,13 +2128,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
-        if (mSyncProxy != null) {
-            // TODO it's seems stupid in order to register send onTransportConnected
-            mSyncProxy.updateRegisterAppInterfaceParameters(msg);
-            if (mSyncProxy.getSyncConnection() != null) {
-                mSyncProxy.getSyncConnection().onTransportConnected();
-            }
+        if (mSyncProxy == null) {
+            return;
         }
+
+        if (mSyncProxy.getSyncConnection() == null) {
+            return;
+        }
+
+        // TODO it's seems stupid in order to register send onTransportConnected
+        mSyncProxy.updateRegisterAppInterfaceParameters(msg);
+
+        mSyncProxy.getSyncConnection().onTransportConnected();
     }
 
     public byte syncProxyGetWiProVersion() {

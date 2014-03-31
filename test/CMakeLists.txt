@@ -8,7 +8,7 @@ find_package(LibXML2 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 #add_subdirectory(./tools)
 
 
@@ -19,7 +19,6 @@ include_directories (
   ../src/thirdPartyLibs/MessageBroker/include
   ../src/appMain
   ../src/components/application_manager/include
-  ../src/components/policies/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
@@ -57,9 +56,10 @@ include_directories (
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
-set(LIBRARIES
-    test_App_Manager
-    ApplicationManager
+if (BUILD_TESTS_WITH_HMI)
+ set(LIBRARIES
+  test_App_Manager
+  ApplicationManager
     MediaManager
     gtest
     gtest_main
@@ -102,7 +102,58 @@ set(LIBRARIES
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
+   )
+else(BUILD_TESTS_WITH_HMI)
+set(LIBRARIES
+    MediaManager
+    ApplicationManager
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    formatters
+    HMI_API
+    v4_protocol_v1_2_no_extra
+    SmartObjects
+    RequestWatchdog
+    #policy
+    ProtocolHandler
+    Utils
+    ConfigProfile
+    #test_JSONHandler_v4_protocol_v2_0_revP
+    #test_json_handler
+    #test_SmartObjectTest
+    #test_FormattersCommandsTest
+    #test_UtilsTest
+    #test_RequestWatchdogTest
+    #test_ProtocolHandlerTest
+    #test_JSONCPPTest
+    #test_MobileMessageHandlerTest
+    connectionHandler
+    MOBILE_API
+    jsoncpp
+#################################################
+    TransportManager
+    HMIMessageHandler
+    MessageBroker
+    MessageBrokerClient
+    MessageBrokerServer
+    encryption
+    bluetooth
+    pthread
+    avahi-client
+    avahi-common
+    ${LibXML2_LIBRARIES} -lxml2
+    # rt
+    # ${GSTREAMER_gstreamer_LIBRARY}
+    Resumption
 )
+endif(BUILD_TESTS_WITH_HMI)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES dl)
+endif()
+
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

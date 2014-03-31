@@ -45,11 +45,7 @@ SDL.SDLController = Em.Object
             if (SDL.AlertPopUp.active) {
                 return 'ALERT';
             }
-            if (SDL.TBTClientStateView.active
-                || SDL.VehicleInfo.active
-                || SDL.DriverDistraction.active
-                || SDL.ExitApp.active
-                || SDL.SliderView.active
+            if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
                 || SDL.AudioPassThruPopUp.activate) {
@@ -60,22 +56,20 @@ SDL.SDLController = Em.Object
                 return 'MENU';
             }
             if (SDL.States.info.nonMedia.active
-                || SDL.States.media.sdlmedia.active) {
+                || SDL.States.media.sdlmedia.active
+                || SDL.States.navigationApp.baseNavigation.active) {
 
                 return 'MAIN';
             } else {
                 return 'MENU';
             }
-        }.property('SDL.DriverDistraction.active',
-            'SDL.OptionsView.active',
+        }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
-            'SDL.TBTClientStateView.active',
-            'SDL.VehicleInfo.active',
             'SDL.States.info.nonMedia.active',
             'SDL.States.media.sdlmedia.active',
-            'SDL.ExitApp.active',
+            'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active',
@@ -171,21 +165,21 @@ SDL.SDLController = Em.Object
          */
         showVRHelpItems: function() {
 
-            if (SDL.SDLAppController.model) {
-                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
-
-                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
-
-                    if (SDL.SDLAppController.model) {
-                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
-                    }
-                } else {
-                    if (SDL.VRHelpListView.active) {
-                        SDL.VRHelpListView.deactivate();
-                    }
-                }
-            }
+//            if (SDL.SDLAppController.model) {
+//                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+//
+//                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+//                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
+//
+//                    if (SDL.SDLAppController.model) {
+//                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+//                    }
+//                } else {
+//                    if (SDL.VRHelpListView.active) {
+//                        SDL.VRHelpListView.deactivate();
+//                    }
+//                }
+//            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -356,6 +350,14 @@ SDL.SDLController = Em.Object
 
             SDL.InteractionChoicesView.deactivate("ABORTED");
         },
+
+        /**
+         * Method to close AlertMeneuverPopUp view
+         */
+        closeAlertMeneuverPopUp: function() {
+
+            SDL.AlertManeuverPopUp.set('activate', false);
+        },
         /**
          * Method to open Turn List view from TBT
          * 
@@ -495,6 +497,7 @@ SDL.SDLController = Em.Object
         onLanguageChangeUI: function() {
 
             FFW.UI.OnLanguageChange(SDL.SDLModel.hmiUILanguage);
+            FFW.BasicCommunication.OnSystemInfoChanged(SDL.SDLModel.hmiUILanguage);
         }.observes('SDL.SDLModel.hmiUILanguage'),
         /**
          * Method to set language for TTS and VR components with parameters sent
@@ -522,6 +525,20 @@ SDL.SDLController = Em.Object
                     deviceName: params.deviceName,
                     appType: params.appType
                 }));
+
+            var exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit",
+                        "position": 0
+                    },
+                    cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
         },
         /**
          * Unregister application
@@ -571,7 +588,9 @@ SDL.SDLController = Em.Object
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
-                            FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            if (str) {
+                                FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            }
                             break;
                         }
                     }
@@ -642,7 +661,7 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            FFW.BasicCommunication.OnAppActivated(element.appID);
+            FFW.BasicCommunication.ActivateApp(element.appID);
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC

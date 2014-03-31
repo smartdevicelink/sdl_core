@@ -294,7 +294,9 @@ class TransportAdapterListenerImpl
   /**
    * \brief For logging.
    */
+#ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
   TransportManagerImpl* transport_manager_impl_;
   TransportAdapter* transport_adapter_;
 };

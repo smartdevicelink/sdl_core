@@ -53,8 +53,10 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+#ifdef ENABLE_LOG
 log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("AudioPassThruThread"));
+#endif // ENABLE_LOG
 
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)

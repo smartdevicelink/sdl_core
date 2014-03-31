@@ -41,6 +41,7 @@ import com.ford.syncV4.proxy.rpc.CreateInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.DisplayCapabilities;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
@@ -108,7 +109,12 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
+<<<<<<< HEAD
 import com.stericson.RootTools.RootTools;
+=======
+import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.DeviceInfoManager;
+>>>>>>> develop
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -162,13 +168,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Lock to access the _currentReconnectTimerTask member.
      */
     private static final Object RECONNECT_TIMER_TASK_LOCK = new Object();
+
     final int HEARTBEAT_CORRELATION_ID = 65531; // TODO: remove
+
     // Protected Correlation IDs
-    public final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529,
-            UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530,
-            POLICIES_CORRELATION_ID = 65535;
+    private static final int REGISTER_APP_INTERFACE_CORRELATION_ID = 65529;
+    private static final int UNREGISTER_APP_INTERFACE_CORRELATION_ID = 65530;
+    private static final int POLICIES_CORRELATION_ID = 65535;
+
     private IRPCMessageHandler rpcMessageHandler;
 
+<<<<<<< HEAD
+=======
+    private int mRegisterAppInterfaceCorrelationId = REGISTER_APP_INTERFACE_CORRELATION_ID;
+    private int mUnregisterAppInterfaceCorrelationId = UNREGISTER_APP_INTERFACE_CORRELATION_ID;
+    private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
+>>>>>>> develop
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -176,7 +191,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // SyncProxy Advanced Lifecycle Management
     protected Boolean _advancedLifecycleManagementEnabled = false;
-
 
     // Proxy State Variables
     protected Boolean _appInterfaceRegisterd = false;
@@ -333,7 +347,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private proxyListenerType _proxyListener = null;
     // Device Info for logging
-    private TraceDeviceInfo _traceDeviceInterrogator = null;
+    private TraceDeviceInfo mTraceDeviceInterrogator = null;
     // Declare Queuing Threads
     private ProxyMessageDispatcher<ProtocolMessage> _incomingProxyMessageDispatcher;
     private ProxyMessageDispatcher<ProtocolMessage> _outgoingProxyMessageDispatcher;
@@ -377,6 +391,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private String mHashId = null;
 
     /**
+     * Describes information about device
+     */
+    private DeviceInfo mDeviceInfo;
+
+    /**
      * Test Cases fields
      */
     /**
@@ -414,6 +433,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void setHashId(String mHashId) {
         this.mHashId = mHashId;
+    }
+
+    protected DeviceInfo getDeviceInfo() {
+        return mDeviceInfo;
+    }
+
+    private void setDeviceInfo(DeviceInfo deviceInfo) {
+        mDeviceInfo = deviceInfo;
     }
 
     public OnLanguageChange getLastLanguageChange() {
@@ -610,12 +637,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Get information from syncProxyConfigurationResources
         setupTelephoneManager(syncProxyConfigurationResources);
         setupMessageDispatchers();
+<<<<<<< HEAD
 
         if (mTestConfig.isDoRootDeviceCheck() && RootTools.isRootAvailable()) {
             throw new SyncException("Rooted device detected.", SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED);
         } else {
             tryInitialiseProxy();
         }
+=======
+        tryInitialiseProxy();
+
+        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+>>>>>>> develop
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
@@ -677,16 +710,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         setupMessageDispatchers();
 
+<<<<<<< HEAD
         if (mTestConfig.isDoRootDeviceCheck() && RootTools.isRootAvailable()) {
             throw new SyncException("Rooted device detected.", SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED);
         } else {
             tryInitialiseProxy();
         }
+=======
+        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+>>>>>>> develop
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
+<<<<<<< HEAD
     private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName,
                                                       String ngnMediaScreenAppName,
                                                       Vector<String> vrSynonyms, Boolean isMediaApp,
@@ -695,6 +733,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                                       Language hmiDisplayLanguageDesired,
                                                       Vector<AppHMIType> appHMIType, String appID,
                                                       String autoActivateID) {
+=======
+    public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
+        _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
+        _applicationName = registerAppInterface.getAppName();
+        _ttsName = registerAppInterface.getTtsName();
+        _ngnMediaScreenAppName = registerAppInterface.getNgnMediaScreenAppName();
+        _vrSynonyms = registerAppInterface.getVrSynonyms();
+        _isMediaApp = registerAppInterface.getIsMediaApplication();
+        _syncLanguageDesired = registerAppInterface.getLanguageDesired();
+        _hmiDisplayLanguageDesired = registerAppInterface.getHmiDisplayLanguageDesired();
+        _appHMIType = registerAppInterface.getAppType();
+        _appID = registerAppInterface.getAppID();
+        setRegisterAppInterfaceCorrelationId(registerAppInterface.getCorrelationID());
+        setDeviceInfo(registerAppInterface.getDeviceInfo());
+        DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), registerAppInterface.getDeviceInfo());
+    }
+
+    private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
+>>>>>>> develop
         _applicationName = appName;
         _ttsName = ttsName;
         _ngnMediaScreenAppName = ngnMediaScreenAppName;
@@ -840,10 +897,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             // Following is not quite thread-safe (because m_traceLogger could notifyOnAppInterfaceUnregistered null twice),
             // so we need to fix this, but vulnerability (i.e. two instances of listener) is
             // likely harmless.
-            if (_traceDeviceInterrogator == null) {
-                _traceDeviceInterrogator = new TraceDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
-            } // end-if
-        } // end-if
+            if (mTraceDeviceInterrogator == null) {
+                mTraceDeviceInterrogator = new TraceDeviceInfo(telephonyManager);
+            }
+        }
     }
 
     private void tryInitialiseProxy() throws SyncException {
@@ -1008,7 +1065,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
 
                 // Send new encodedSyncPDataRequest to SYNC
-                EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesReservedCorrelationID());
+                EncodedSyncPData encodedSyncPDataRequest = RPCRequestFactory.buildEncodedSyncPData(encodedSyncPDataReceived, getPoliciesCorrelationId());
 
                 if (getIsConnected()) {
                     sendRPCRequestPrivate(encodedSyncPDataRequest);
@@ -1107,7 +1164,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 byte[] syncppacket = encodedSyncPDataReceived.firstElement().getBytes();
 
                 // Send new binary syncp data to SYNC
-                SyncPData syncPDataRequest = RPCRequestFactory.buildSyncPData(syncppacket, getPoliciesReservedCorrelationID());
+                SyncPData syncPDataRequest = RPCRequestFactory.buildSyncPData(syncppacket, getPoliciesCorrelationId());
 
                 if (getIsConnected()) {
                     sendRPCRequestPrivate(syncPDataRequest);
@@ -1135,21 +1192,50 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private int getPoliciesReservedCorrelationID() {
-        return POLICIES_CORRELATION_ID;
-    }
-
     // Test correlationID
     protected boolean isCorrelationIDProtected(Integer correlationID) {
-        if (correlationID != null &&
+        return correlationID != null &&
                 (HEARTBEAT_CORRELATION_ID == correlationID
-                        || REGISTER_APP_INTERFACE_CORRELATION_ID == correlationID
-                        || UNREGISTER_APP_INTERFACE_CORRELATION_ID == correlationID
-                        || POLICIES_CORRELATION_ID == correlationID)) {
-            return true;
-        }
+                        || getRegisterAppInterfaceCorrelationId() == correlationID
+                        || getUnregisterAppInterfaceCorrelationId() == correlationID
+                        || getPoliciesCorrelationId() == correlationID);
 
-        return false;
+    }
+
+    private int getRegisterAppInterfaceCorrelationId() {
+        return mRegisterAppInterfaceCorrelationId;
+    }
+
+    private void setRegisterAppInterfaceCorrelationId(int registerAppInterfaceCorrelationId) {
+        mRegisterAppInterfaceCorrelationId = registerAppInterfaceCorrelationId;
+    }
+
+    private int getUnregisterAppInterfaceCorrelationId() {
+        return mUnregisterAppInterfaceCorrelationId;
+    }
+
+    private void setUnregisterAppInterfaceCorrelationId(int unregisterAppInterfaceCorrelationId) {
+        mUnregisterAppInterfaceCorrelationId = unregisterAppInterfaceCorrelationId;
+    }
+
+    private int getPoliciesCorrelationId() {
+        return mPoliciesCorrelationId;
+    }
+
+    private void setPoliciesCorrelationId(int policiesCorrelationId) {
+        mPoliciesCorrelationId = policiesCorrelationId;
+    }
+
+    public boolean isRegisterAppInterfaceCorrelationIdProtected(int correlationId) {
+        return mRegisterAppInterfaceCorrelationId == correlationId;
+    }
+
+    public boolean isUnregisterAppInterfaceCorrelationIdProtected(int correlationId) {
+        return mUnregisterAppInterfaceCorrelationId == correlationId;
+    }
+
+    public boolean isPolicyCorrelationIdProtected(int correlationId) {
+        return mPoliciesCorrelationId == correlationId;
     }
 
     // Protected isConnected method to allow legacy proxy to poll isConnected state
@@ -1208,6 +1294,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             WiProProtocol protocol = (WiProProtocol) mSyncConnection.getWiProProtocol();
             protocol.setVersion(_wiproVersion);
 
+            /**
+             * TODO : Set TestConfig for the Connection
+             */
+            mSyncConnection.setTestConfig(mTestConfig);
+
             mSyncConnection.startTransport();
 
             setupSecureProxy();
@@ -1262,9 +1353,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Should we wait for the interface to be unregistered?
         Boolean waitForInterfaceUnregistered = false;
         synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (_appInterfaceRegisterd == true && mSyncConnection != null && mSyncConnection.getIsConnected()) {
+            if (_appInterfaceRegisterd && mSyncConnection != null && mSyncConnection.getIsConnected()) {
                 waitForInterfaceUnregistered = true;
-                unregisterAppInterfacePrivate(UNREGISTER_APP_INTERFACE_CORRELATION_ID);
+                unregisterAppInterfacePrivate(getUnregisterAppInterfaceCorrelationId());
             }
             // Wait for the app interface to be unregistered
             if (waitForInterfaceUnregistered) {
@@ -1338,7 +1429,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
 
-            _traceDeviceInterrogator = null;
+            mTraceDeviceInterrogator = null;
         } catch (SyncException e) {
             throw e;
         } finally {
@@ -1827,6 +1918,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onUnregisterAppInterfaceResponse(Hashtable hash) {
+        setHashId(null);
         stopAllServices();
         closeSyncConnection(true);
         stopSession();
@@ -1992,6 +2084,30 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void restartRPCProtocolSession() {
         // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
+<<<<<<< HEAD
+=======
+
+            // For the Test Cases
+            Log.d(TAG, "RestartRPCProtocolSession config: " + mTestConfig);
+            if (mTestConfig != null) {
+                Log.d(TAG, "RestartRPCProtocolSession DoCallRegisterAppInterface: " + mTestConfig.isDoCallRegisterAppInterface());
+                if (!mTestConfig.isDoCallRegisterAppInterface()) {
+
+                    Log.d(TAG, "RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
+                    if (mTestConfigCallback != null) {
+                        mTestConfigCallback.onRPCServiceComplete();
+                    }
+
+                    // Revert back a value which has been set for concrete Test Case
+                    mTestConfig.setDoCallRegisterAppInterface(true);
+
+                    return;
+                }
+            }
+
+            DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
+
+>>>>>>> develop
             try {
                 registerAppInterfacePrivate(
                         _syncMsgVersionRequest,
@@ -2004,8 +2120,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _hmiDisplayLanguageDesired, _appHMIType,
                         _appID,
                         _autoActivateIdDesired,
-                        REGISTER_APP_INTERFACE_CORRELATION_ID,
-                        getHashId());
+                        getRegisterAppInterfaceCorrelationId(),
+                        getHashId(), getDeviceInfo());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. Check parameter values given to SyncProxy constructor.", e);
@@ -2676,13 +2792,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
             String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID, String hashId)
-            throws SyncException {
+            String appID, String autoActivateID, Integer correlationID, String hashId,
+            DeviceInfo deviceInfo) throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
+<<<<<<< HEAD
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID,
                 hashId);
+=======
+                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId,
+                deviceInfo);
+>>>>>>> develop
 
         sendRPCRequestPrivate(msg);
 
@@ -3159,6 +3280,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _autoActivateIdReturned;
     }
 
+<<<<<<< HEAD
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
         _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
         _applicationName = registerAppInterface.getAppName();
@@ -3172,6 +3294,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _appID = registerAppInterface.getAppID();
     }
 
+=======
+>>>>>>> develop
     public IRPCMessageHandler getRPCMessageHandler() {
         return rpcMessageHandler;
     }

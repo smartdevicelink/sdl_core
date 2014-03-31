@@ -246,7 +246,12 @@ class Profile : public utils::Singleton<Profile> {
     const int32_t heart_beat_timeout() const;
 
     /*
-     * @brief Timeout in transport manager before disconnect
+     * @brief Path to preloaded policy file
+     */
+    const std::string& preloaded_pt_file() const;
+
+     /*
+      * @brief Timeout in transport manager before disconnect
      */
     uint32_t transport_manager_disconnect_timeout() const;
 
@@ -421,6 +426,7 @@ private:
     uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
+    std::string                     preloaded_pt_file_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;

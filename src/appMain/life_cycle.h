@@ -51,7 +51,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
-#include "policies/policy_manager_impl.h"
+#include "policy/policy_manager_impl.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager.h"
 #include "utils/singleton.h"
@@ -93,7 +93,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // MESSAGEBROKER_HMIADAPTER
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
-    policies::PolicyManagerImpl* policy_manager_;
 
 #ifdef MESSAGEBROKER_HMIADAPTER
     NsMessageBroker::CMessageBroker* message_broker_;
@@ -106,7 +105,9 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
 
+#   ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
+#   endif // ENABLE_LOG
 
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 

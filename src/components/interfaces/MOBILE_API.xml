@@ -4295,7 +4295,8 @@
     </param>
   
    <param name="systemFile" type="Boolean" defvalue="false" mandatory="false" scope="internal">
-     <description>Indicates if the file is meant to be passed thru core to elsewhere on the system. If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area 	 outside of core. If omitted, the value will be set to false.</description> 
+     <description>Indicates if the file is meant to be passed thru core to elsewhere on the system.
+     If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area 	 outside of core. If omitted, the value will be set to false.</description>
    </param>
  
   <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
@@ -4328,7 +4329,10 @@
     </param>
 
     <param name="spaceAvailable" type="Integer" minvalue="0" maxvalue="2000000000">
-          <description>Provides the total local space available on SYNC for the registered app.</description>
+          <description>
+            Provides the total local space available on SYNC for the registered app.
+            If the transfer has systemFile enabled, then the value will be set to 0 automatically.
+          </description>
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">

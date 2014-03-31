@@ -1,3 +1,10 @@
+[CW13]
+* SyncProxyTester | SyncProxyAndroid SDK: In case of RegisterAppInterface command allow to send parameters which are out of API specification
++ SyncProxyTester: Add DeviceInfo object into request command
+* SyncProxyTester: RegisterAppInterface without HashId in case of UnregisterAppInterface have take place
++ SyncProxyTester | SyncProxyAndroid SDK: Add possibility do not close USB connection when perform single UnregisterAppInterface command
++ SyncProxyTester: TCP port configuration with NSD
+
 [CW12]
 + SyncProxyAndroid SDK: Add new field "DeviceInfo" to the RegisterAppInterface request
 + SyncProxyAndroid SDK: Add new structure "DeviceInfo"

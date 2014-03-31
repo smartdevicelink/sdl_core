@@ -1059,6 +1059,51 @@
 
 <!-- End of IVI part-->
 
+<!-- Policies -->
+<enum name="UpdateResult">
+    <element name="UP_TO_DATE"/>
+    <element name="UPDATING" />
+    <element name="UPDATE_NEEDED"/>
+  </enum>
+  <enum name="SystemError">
+    <element name="SYNC_REBOOTED"/>
+    <element name="SYNC_OUT_OF_MEMMORY" />
+  </enum>
+  <enum name="StatisticsType">
+    <element name="iAPP_BUFFER_FULL"/>
+  </enum>
+  <enum name="ConsentSource">
+    <element name="GUI"/>
+    <element name="VUI" />
+  </enum>
+  <struct name="UserFriendlyMessage" scope="internal">
+    <param name="ttsString" type="String" mandatory="false"/>
+    <param name="label" type="String" mandatory="false" />
+    <param name="line1" type="String" mandatory="false"/>
+    <param name="line2" type="String" mandatory="false"/>
+    <param name="textBody" type="String" mandatory="false"/>
+  </struct>
+  <struct name="PermissionItem">
+  <param name="name" type="String" mandatory="true">
+    <description>Code of message of user-friendly text about functional group to be allowed/disallowed</description>
+  </param>
+  <param name="id" type="Integer" mandatory="true">
+    <description>Id of corresponding functional group, needed by SDL.</description>
+  </param>
+  <param name="allowed" type="Boolean" mandatory="false">
+    <description>Specifies whether functionality was allowed/disallowed. If ommited - no information about User Consent is yet found for app.</description>
+  </param>
+  </struct>
+  <struct name="ServiceInfo">
+    <param name="servicyType" type="String" mandatory="true">
+      <description>Get URL based on service type.</description>
+    </param>
+    <param name="policyAppId" type="String" mandatory="false">
+      <description>Used if URL needed are specific for application.</description>
+    </param>
+  </struct>
+<!-- End of Policies -->
+
 <struct name="ButtonCapabilities">
     <description>Contains the information about capabilities of a button.</description>
     <param name="name" type="Common.ButtonName" mandatory="true">
@@ -1426,25 +1471,6 @@
   <param name="id" type="Integer" mandatory="true">
     <description>The ID of the device connected</description>
   </param>
-  <description>Various information about connecting device.</description>
-  <param name="hardware" type="String" maxlength="500" mandatory="false">
-    <description>Device model</description>
-  </param>
-  <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
-    <description>Device firmware revision</description>
-  </param>
-  <param name="os" type="String" maxlength="500" mandatory="false">
-    <description>Device OS</description>
-  </param>
-  <param name="osVersion" type="String" maxlength="500" mandatory="false">
-    <description>Device OS version</description>
-  </param>
-  <param name="carrier" type="String" maxlength="500" mandatory="false">
-    <description>Device mobile carrier (if applicable)</description>
-  </param>
-  <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
-   <description>Omitted if connected not via BT.</description>
-  </param>
 </struct>
 
 <!--IVI part-->
@@ -1800,6 +1826,18 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
+    <function name="OnFileRemoved" messagetype="notification">
+      <description>Notifies HMI in case some application file has been removed</description>
+      <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
+        <description>The name of the removed file</description>
+      </param>
+      <param name="fileType" type="Common.FileType" mandatory="true">
+        <description>The file type. See FileType.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application.</description>
+      </param>
+    </function>
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
@@ -1870,6 +1908,9 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
+      <param name="resume" type="Boolean" mandatory="false">
+        <description>The information about resumption application. </description>
+      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
@@ -1902,33 +1943,12 @@
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
     </function>
     <!-- Policies -->
-    <function name="AllowAllApps" messagetype="request">
-      <description>Initiated by SDL. Results by user/HMI allowing SDL functionality or disallowing access to all mobile apps.</description>
-    </function>
-    <function name="AllowAllApps" messagetype="response">
-      <param name="allowed" type="Boolean" mandatory="true">
-        <description>Must be true if allowed</description>
-      </param>
-    </function>
-    <function name="AllowApp" messagetype="request">
-      <description>Initiated by SDL for requesting the allowance for the application</description>
-      <param name="app" type="Common.HMIApplication" mandatory="true">
-        <description>Information about the application. See HMIApplication. </description>
-      </param>
-      <param name="appPermissions" type="String" array="true" minsize="1" maxsize="100" mandatory="false">
-        <description>List of permissions required by application.</description>
-      </param>
-    </function>
-    <function name="AllowApp" messagetype="response">
-      <param name="allowed" type="Boolean" mandatory="true">
-        <description>Must be true if allowed</description>
-      </param>
-    </function>
+
     <function name="OnSystemRequest" messagetype="notification" >
-	  <description>
+      <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
 	    Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
-	  </description>
+      </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
@@ -1944,12 +1964,71 @@
       <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="false">
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
     </function>
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
     </function>
+
+    <function name="OnPutFile" messagetype="notification" >
+    <description>
+      Notification, that comes to HMI when mobile sents file with systemFile flag
+    </description>
+
+    <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+      <description>Optional offset in bytes for resuming partial data chunks</description>
+    </param>
+    <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+      <description>Optional length in bytes for resuming partial data chunks</description>
+    </param>
+
+    <param name="FileName" type="String" maxlength="255" mandatory="true">
+      <description>File reference name.</description>
+    </param>
+
+    <param name="syncFileName" type="String" maxlength="255" mandatory="true">
+      <description>File reference name.</description>
+    </param>
+
+    <param name="fileType" type="Common.FileType" mandatory="true">
+        <description>Selected file type.</description>
+    </param>
+
+    <param name="persistentFile" type="Boolean" defvalue="false" mandatory="false">
+      <description>
+        Indicates if the file is meant to persist between sessions / ignition cycles.
+        If set to TRUE, then the system will aim to persist this file through session / cycles.
+        While files with this designation will have priority over others, they are subject to deletion by the system at any time.
+        In the event of automatic deletion by the system, the app will receive a rejection and have to resend the file.
+        If omitted, the value will be set to false.
+      </description>
+    </param>
+
+   </function>
+<!-- Policies -->
+  <function name="GetSystemInfo" messagetype="request">
+    <description>Request from SDL to HMI to obtain information about head unit system.</description>
+  </function>
+  <function name="GetSystemInfo" messagetype="response">
+    <param name="ccpu_version" type="String" maxlength="500" mandatory="true">
+      <description>Software version of the module</description>
+    </param>
+    <param name="language" type="Common.Language" mandatory="true">
+      <description>ISO 639-1 combined with ISO 3166 alpha-2 country code (i.e. en-us)</description>
+    </param>
+    <param name="wersCountryCode" type="String" maxlength="500" mandatory="true">
+      <description>Country code from the Ford system WERS (i.e.WAEGB).</description>
+    </param>
+  </function>
+  <function name="OnSystemInfoChanged" messagetype="notification">
+    <description>Issued by system to SDL to notify that some system param has changed. Currently applied for Sync Language.</description>
+    <param name="language" type="Common.Language" mandatory="true"/>
+  </function>
+  <function name="OnIgnitionCycleOver" messagetype="notification">
+    <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
+  </function>
+  <!-- End of Policies -->
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2292,7 +2371,7 @@
   </function>
   <function name="PerformInteraction" messagetype="request">
     <description>Request from SDL for triggering an interaction (e.g. "Permit GPS?" - Yes, no, Always Allow).</description>
-    <param name="initialText" type="Common.TextFieldStruct" mandatory="true">
+    <param name="initialText" type="Common.TextFieldStruct" mandatory="false">
       <description>Uses initialInteractionText. See TextFieldStruct.</description>
     </param>
     <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" mandatory="false">
@@ -2319,7 +2398,7 @@
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>ID of the choice that was selected in response to PerformInteraction.</description>
     </param>
-    <param name="manualTextEntry" type="String" maxlength="500" mandatory="false">
+    <param name="manualTextEntry" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
 	       	Manually entered text selection, e.g. through keyboard
         	Can be returned in lieu of choiceID, depending on trigger source
@@ -3382,5 +3461,130 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
+</interface>
+
+ <!-- Policies -->
+<interface name="SDL" version="1.0" date="2014-03-12">
+<function name="ActivateApp" messagetype="request">
+    <param name="appID" type="Integer" mandatory="true">
+    </param>
+  </function>
+  <function name="ActivateApp" messagetype="response">
+    <param name="isSDLAllowed" type="Boolean" mandatory="true" scope="internal"/>
+    <param name="device" type="Common.DeviceInfo" mandatory="false" scope="internal">
+      <description>If isSDLAllowed is false, consent for sending PT through specified device is required.</description>
+    </param>
+    <param name="isPermissionsConsentNeeded" type="Boolean" mandatory="true"/>
+    <param name="isAppPermissionsRevoked" type="Boolean" mandatory="true"/>
+    <param name="appRevokedPermissions" type="Common.PermissionItem" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description>If app permissions were reduced (isAppPermissionsRevoked == true), then this array specifies list of removed permissions. </description>
+      </param>
+    <param name="isAppRevoked" type="Boolean" mandatory="true"/>
+  </function>
+
+  <function name="GetUserFriendlyMessage" messagetype="request" scope="internal">
+      <description>Request from HMI to SDL to get user friendly messages for UI/TTS info boxes/texts (i.e. for help/dialogs etc) from Policy Table.</description>
+      <param name="messageCodes" type="String" array="true" minsize="1" maxsize="100" maxlength="500" mandatory="true">
+        <description>Id of message to be received according to Policy Table i.e. StatusNeeded, Notifications, DrivingCharacteristics etc.</description>
+      </param>
+      <param name="language" type="Common.Language" mandatory="false">
+        <description>Optional parameter if HMI wants message in some other language then its current one already known to SDL.</description>
+      </param>
+    </function>
+    <function name="GetUserFriendlyMessage" messagetype="response">
+      <param name="messages" type="Common.UserFriendlyMessage" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description>If no message was found in PT for specified message code and for HMI current or specified language, this parameter will be omitted.</description>
+      </param>
+    </function>
+
+    <function name="OnAllowSDLFunctionality" messagetype="notification">
+     <description>Initiated by HMI. Notifies about user/HMI allowing SDL functionality or disallowing access to all mobile apps. Needed if HMI has additional ways of asking user about this (i.e. Settings etc)</description>
+     <param name="device" type="Common.DeviceInfo" mandatory="false">
+        <description>If no device is specified permission counts for SDL functionality in general.</description>
+      </param>
+      <param name="allowed" type="Boolean" mandatory="true">
+        <description>Must be true if allowed</description>
+      </param>
+      <param name="source" type="Common.ConsentSource" mandatory="true"/>
+    </function>
+
+    <function name="GetListOfPermissions"  messagetype="request">
+      <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
+      <param name="appID" type="Integer" mandatory="false"/>
+    </function>
+    <function name="GetListOfPermissions" messagetype="response">
+      <param name="allowedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="0" maxsize="100">
+        <description>If no permissions were specified for application the array will come empty.</description>
+      </param>
+    </function>
+
+    <function name="OnAppPermissionConsent" messagetype="notification">
+      <description>Initiated by HMI for specifying the allowance for the application to perform some functionality. Duplicates functionality of the request, needed if HMI has specific ways to allow/disallow functionality (i.e.Setting Menu)</description>
+      <param name="appID" type="Integer" mandatory="false">
+          <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
+      </param>
+      <param name="consentedFunctions" type="Common.PermissionItem" mandatory="true" array="true" minsize="1" maxsize="100">
+      </param>
+      <param name="source" type="Common.ConsentSource" mandatory="true"/>
+     </function>
+
+     <function name="OnAppPermissionChanged" messagetype="notification">
+      <description>Notification from SDL to HMI. Occurs when app permissions were reduced. If no permission specified means that app was dissallowed and has to be unregitstered.</description>
+      <param name="appID" type="Integer" mandatory="true"/>
+      <param name="isAppPermissionsRevoked" type="Boolean" mandatory="false"/>
+      <param name="appRevokedPermissions" type="Common.PermissionItem" array="true" minsize="1" maxsize="100" mandatory="false">
+        <description>If app permissions were reduced (isAppPermissionsRevoked == true), then this array specifies list of removed permissions. </description>
+      </param>
+      <param name="appRevoked" type="Boolean" mandatory="false">
+        <description>If present then specified application was prohibited to used with Sync.</description>
+      </param>
+      <param name="appPermissionsConsentNeeded" type="Boolean" mandatory="false">
+        <description>If present specifies that permissions were added to application that require User Consent, then HMI can send GetListOfPermissions request to obtain list of permissions.</description>
+      </param>
+      <param name="appUnauthorized" type="Boolean" mandatory="false">
+        <description>When present and set to true (should be if present) then this means that application was not authorized (nickname check failed.)</description>
+      </param>
+    </function>
+
+  <function name="OnSDLConsentNeeded" messagetype="notification">
+    <description>Send from SDL to HMI to notify that data consent is needed for device either because PT update or Retry strategy.</description>
+    <param name="device" type="Common.DeviceInfo" mandatory="true"/>
+  </function>
+
+  <function name="UpdateSDL" messagetype="request">
+      <description>Request from HMI to SDL to start update of Policy Table.</description>
+    </function>
+    <function name="UpdateSDL" messagetype="response">
+      <description>Specify result: no update needed, update was successful/unsuccessful etc</description>
+      <param name="result" type="Common.UpdateResult" mandatory="true"/>
+    </function>
+
+    <function name="GetStatusUpdate" messagetype="request">
+      <description>Request from HMI to SDL to find out current status of PT exchange process.</description>
+    </function>
+    <function name="GetStatusUpdate" messagetype="response">
+      <param name="status" type="Common.UpdateResult" mandatory="true"/>
+    </function>
+    <function name="OnStatusUpdate" messagetype="notification">
+      <description>Notification from SDL to HMI when current status of PT exchange changed (i.e. it Succeded or Failed etc)</description>
+      <param name="status" type="Common.UpdateResult" mandatory="true" />
+    </function>
+
+    <function name="OnSystemError" messagetype="notification">
+      <param name="error" type="Common.SystemError" mandatory="true"/>
+    </function>
+
+    <function name="AddStatisticsInfo" messagetype="notification">
+      <description>Sent by system to record statiscs and error counts. Increases statistics specified by statisticType by one.</description>
+      <param name="statisticType" type="Common.StatisticsType" mandatory="true"/>
+    </function>
+
+    <function name="GetURLS" messagetype="request" scope="internal">
+      <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
+      <param name="service" type="Common.ServiceInfo" mandatory="true"/>
+    </function>
+    <function name="GetURLS" messagetype="response" scope="internal">
+      <param name="urls" type="String" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+    </function>
 </interface>
 </interfaces>
