@@ -129,12 +129,9 @@ check: $(TARGET_LIB)
 etags:
 	etags `find . -name '*.[ch]'`
 
-OBJECTS_gen_test_char = tools/gen_test_char.o $(LOCAL_LIBS)
-SOURCE_gen_test_char = tools/gen_test_char.c
-tools/gen_test_char.o: $(SOURCE_gen_test_char)
-	gcc -c $(SOURCE_gen_test_char) -o $@
+OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
 tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
-	gcc $(OBJECTS_gen_test_char) -o $@
+	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
 
 include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
 	tools/gen_test_char@EXEEXT@ > $@
