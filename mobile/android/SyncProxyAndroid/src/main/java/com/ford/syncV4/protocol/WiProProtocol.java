@@ -25,7 +25,8 @@ public class WiProProtocol extends AbstractProtocol {
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
     public static int HEADER_SIZE = 8;
-    public static int MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
+    private static final int SSL_OVERHEAD = 64;
+    public static int MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE - SSL_OVERHEAD;
     byte _version = 1;
     boolean _haveHeader = false;
     byte[] _headerBuf = new byte[HEADER_SIZE];

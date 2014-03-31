@@ -11,10 +11,12 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
+import com.ford.syncV4.util.DebugTool;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
@@ -78,7 +80,6 @@ public abstract class AbstractProtocol {
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
 
-
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
     // sent to SYNC.
@@ -111,18 +112,28 @@ public abstract class AbstractProtocol {
                 if (offset >= data.length) {
                     throw new IllegalArgumentException("offset should not be more then length");
                 }
-                byte[] dataChunk = null;
+                byte[] dataChunkNotCyphered = null;
                 if (offset + length >= data.length) {
-                    dataChunk = Arrays.copyOfRange(data, offset, data.length);
+                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, data.length);
                 } else {
-                    dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
                 }
 
-                byte[] frameHeader = header.assembleHeaderBytes();
-                byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-                System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-                System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
-                handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+                try {
+                    byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
+                    byte[] frameHeader = header.assembleHeaderBytes();
+                    byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+                    System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+                    System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+                    handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+                } catch (IOException e) {
+                    getProtocolSecureManager().reportAnError(e);
+                    DebugTool.logError("Error data coding", e);
+                } catch (InterruptedException e) {
+                    getProtocolSecureManager().reportAnError(e);
+                    DebugTool.logError("Error data coding", e);
+                }
+
             } else {
                 byte[] frameHeader = header.assembleHeaderBytes();
                 handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
@@ -239,7 +250,7 @@ public abstract class AbstractProtocol {
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol
