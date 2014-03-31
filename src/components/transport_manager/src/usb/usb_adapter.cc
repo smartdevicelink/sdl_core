@@ -1,8 +1,5 @@
-/**
- * \file usb_aoa_adapter.cpp
- * \brief UsbAoaAdapter class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_aoa_adapter.h"
+#include "transport_manager/usb/usb_adapter.h"
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/common.h"
@@ -41,7 +38,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbAoaAdapter::UsbAoaAdapter()
+UsbAdapter::UsbAdapter()
     : TransportAdapterImpl(new UsbDeviceScanner(this),
                            new UsbConnectionFactory(this), 0),
       is_initialised_(false),
@@ -51,15 +48,15 @@ UsbAoaAdapter::UsbAoaAdapter()
       ->SetUsbHandler(usb_handler_);
 }
 
-UsbAoaAdapter::~UsbAoaAdapter() {}
+UsbAdapter::~UsbAdapter() {}
 
-DeviceType UsbAoaAdapter::GetDeviceType() const { return "sdl-usb-aoa"; }
+DeviceType UsbAdapter::GetDeviceType() const { return "sdl-usb-aoa"; }
 
-bool UsbAoaAdapter::IsInitialised() const {
+bool UsbAdapter::IsInitialised() const {
   return is_initialised_ && TransportAdapterImpl::IsInitialised();
 }
 
-TransportAdapter::Error UsbAoaAdapter::Init() {
+TransportAdapter::Error UsbAdapter::Init() {
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
     return error;
@@ -72,7 +69,7 @@ TransportAdapter::Error UsbAoaAdapter::Init() {
   return TransportAdapter::OK;
 }
 
-bool UsbAoaAdapter::ToBeAutoConnected(DeviceSptr device) const {
+bool UsbAdapter::ToBeAutoConnected(DeviceSptr device) const {
   return true;
 }
 

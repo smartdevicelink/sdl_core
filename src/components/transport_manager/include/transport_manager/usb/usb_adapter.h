@@ -1,8 +1,5 @@
-/**
- * \file usb_aoa_adapter.h
- * \brief UsbAoaAdapter class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_ADAPTER_H_
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/common.h"
@@ -42,10 +39,10 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbAoaAdapter : public TransportAdapterImpl {
+class UsbAdapter : public TransportAdapterImpl {
  public:
-  UsbAoaAdapter();
-  virtual ~UsbAoaAdapter();
+  UsbAdapter();
+  virtual ~UsbAdapter();
 
  protected:
   virtual DeviceType GetDeviceType() const;
