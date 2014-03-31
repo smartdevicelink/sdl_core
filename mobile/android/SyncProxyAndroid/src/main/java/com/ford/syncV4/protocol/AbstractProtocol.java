@@ -122,6 +122,7 @@ public abstract class AbstractProtocol {
                 if (getProtocolSecureManager() != null) {
                     try {
                         byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
+                        header.setDataSize(dataChunk.length);
                         sendMessage(header, dataChunk);
                     } catch (IOException e) {
                         getProtocolSecureManager().reportAnError(e);
