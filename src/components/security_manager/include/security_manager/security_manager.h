@@ -82,13 +82,13 @@ public:
    * Overriden ProtocolObserver::OnMessageReceived method
    * \param message Message with supporting params received
    */
-  void OnMessageReceived(const protocol_handler::RawMessagePtr& message) OVERRIDE;
+  void OnMessageReceived(const protocol_handler::RawMessagePtr message) OVERRIDE;
   /**
    * \brief Post message to Mobile Application
    * Empty* overriden ProtocolObserver::OnMessageReceived method
    * \param message Message with supporting params received
    */
-  void OnMobileMessageSent(const protocol_handler::RawMessagePtr&) OVERRIDE;
+  void OnMobileMessageSent(const protocol_handler::RawMessagePtr) OVERRIDE;
 
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
@@ -107,14 +107,26 @@ public:
   void set_crypto_manager(CryptoManager* crypto_manager);
 
   /**
+   * \brief Send Handshake binary data to Mobiel Application
+   * \param connection_key Unique key used by other components as session identifier
+   * \param data pointer to binary data array
+   * \param data_size size of binary data array
+   * \param seq_number resieved from Mobile Application
+   */
+  void SendHandshakeBinData(const int32_t connection_key,
+                            const uint8_t * const data,
+                            const size_t data_size,
+                            const uint32_t seq_number = 0);
+  /**
    * \brief Send InternallError with text message to Mobiel Application
    * \param connection_key Unique key used by other components as session identifier
-   * \param seq_number resieved from Mobile Application
    * \param error_id  unique error identifier
-   * \param error_str internal error trin representation
+   * \param erorr_text SSL impelmentation error text
+   * \param seq_number resieved from Mobile Application
    */
   void SendInternalError(const int32_t connection_key,
                          const int &error_id,
+                         const std::string& erorr_text,
                          const uint32_t seq_number = 0);
 
   /**
@@ -144,11 +156,10 @@ public:
   /**
    * \brief Notifiers for listeners
    * \param connection_key Unique key used by other components as session identifier
-   * \param succecc result of connection protection
+   * \param success result of connection protection
    */
   void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                      const bool succecc);
-  void NotifyListenersOnHandshakeFailed(const uint32_t &connection_key);
+                                      const bool success);
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file

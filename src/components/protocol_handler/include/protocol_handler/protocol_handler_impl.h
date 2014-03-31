@@ -2,7 +2,7 @@
  * \file protocol_handler.h
  * \brief ProtocolHandlerImpl class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ namespace impl {
  * when we have them.
  */
 struct RawFordMessageFromMobile: public ProtocolFramePtr {
-  explicit RawFordMessageFromMobile(const ProtocolFramePtr& message)
+  explicit RawFordMessageFromMobile(const ProtocolFramePtr message)
       : ProtocolFramePtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
@@ -94,7 +94,7 @@ struct RawFordMessageFromMobile: public ProtocolFramePtr {
 };
 
 struct RawFordMessageToMobile: public ProtocolFramePtr {
-  explicit RawFordMessageToMobile(const ProtocolFramePtr& message, bool final_message)
+  explicit RawFordMessageToMobile(const ProtocolFramePtr message, bool final_message)
       : ProtocolFramePtr(message), is_final(final_message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
@@ -169,7 +169,7 @@ class ProtocolHandlerImpl
      * \brief Method for sending message to Mobile Application
      * \param message Message with params to be sent to Mobile App
      */
-    void SendMessageToMobileApp(const RawMessagePtr& message,
+    void SendMessageToMobileApp(const RawMessagePtr message,
                                 bool final_message) OVERRIDE;
 
     /**
@@ -285,7 +285,7 @@ class ProtocolHandlerImpl
      **/
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
-      const RawMessagePtr& message);
+      const RawMessagePtr message);
 
     virtual void OnConnectionEstablished(
         const transport_manager::DeviceInfo& device_info,
@@ -299,7 +299,7 @@ class ProtocolHandlerImpl
      * received from mobile device.
      * @param message Message with already parsed header.
      */
-    void NotifySubscribers(const RawMessagePtr& message);
+    void NotifySubscribers(const RawMessagePtr message);
 
     /**
      * \brief Sends message which size permits to send it in one frame.
@@ -310,7 +310,6 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param protection_flag Protection flag for message to encrypted
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(ConnectionID connection_id,
@@ -318,8 +317,7 @@ class ProtocolHandlerImpl
       uint32_t protocol_version,
       const uint8_t service_type,
       size_t data_size,
-      const uint8_t* data,
-      bool protection_flag);
+      const uint8_t* data);
 
     /**
      * \brief Sends message which size doesn't permit to send it in one frame.
@@ -330,7 +328,6 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param protection_flag Protection flag for message to encrypted
      * \param max_data_size Maximum allowed size of single frame.
      * \return \saRESULT_CODE Status of operation
      */
@@ -340,19 +337,14 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       size_t data_size,
       const uint8_t* data,
-      bool protection_flag,
       const size_t max_data_size);
 
     /**
      * \brief Sends message already containing protocol header.
-     * \param connection_handle Identifier of connection through which message
-     * is to be sent.
-     * \param packet Message with protocol header.
+     * \param packet Message with protocol header
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendFrame(
-      ConnectionID connection_id,
-      const ProtocolPacket& packet);
+    RESULT_CODE SendFrame(const ProtocolFramePtr packet);
 
     /**
      * \brief Handles received message.
@@ -363,7 +355,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
     /**
      * \brief Handles message received in single frame.
@@ -374,7 +366,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleSingleFrameMessage(
         ConnectionID connection_id ,
-        const ProtocolFramePtr& packet);
+        const ProtocolFramePtr packet);
     /**
      * \brief Handles message received in multiple frames. Collects all frames
      * of message.
@@ -385,7 +377,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMultiFrameMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
     /**
      * \brief Handles message received in single frame.
@@ -396,7 +388,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleControlMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
     RESULT_CODE HandleControlMessageEndSession(
       ConnectionID connection_id ,
@@ -423,19 +415,12 @@ class ProtocolHandlerImpl
     // CALLED ON raw_ford_messages_to_mobile_ thread!
     void Handle(const impl::RawFordMessageToMobile& message);
 
-    // FIXME (EZamakhov): add brief
-    RawMessagePtr DecryptMessage(const ConnectionID connection_id,
-        ProtocolPacket &packet);
     /**
      * \brief Encryption/Decryption methodes for SecureSecvice check
+     * \param packet frame of message to encrypted/decrypted
      */
-    RESULT_CODE EncryptData(const int32_t connection_key, const uint8_t service_type,
-                            const uint8_t* const data_in, const size_t data_in_size,
-                            const uint8_t **data_out, size_t *data_out_size);
-    RESULT_CODE DecryptData(const int32_t connection_key, const uint8_t service_type,
-                            const uint8_t* const data_in, const size_t data_in_size,
-                            const uint8_t**  data_out, size_t *data_out_size);
-
+    RESULT_CODE EncryptFrame(ProtocolFramePtr packet);
+    RESULT_CODE DecryptFrame(ProtocolFramePtr packet);
   private:
     /**
      * \brief For logging.
@@ -479,6 +464,7 @@ class ProtocolHandlerImpl
     /**
      *\brief Counter of messages sent in each session.
      */
+    //TODO : set to zero
     std::map<uint8_t, uint32_t> message_counters_;
 
     class IncomingDataHandler;

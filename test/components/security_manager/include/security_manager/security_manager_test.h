@@ -37,6 +37,7 @@
 #include "security_manager/security_manager.h"
 #include "security_manager/security_manager_mock.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_packet.h"
 
 //TODO: add test on get correct/wrong InternalError
 //TODO: check connection_key the same and seq_number

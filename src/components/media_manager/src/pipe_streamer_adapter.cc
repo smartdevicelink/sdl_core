@@ -64,7 +64,7 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
 
 void PipeStreamerAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
   if (application_key != current_application_) {

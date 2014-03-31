@@ -116,7 +116,7 @@ void SocketStreamerAdapter::Init() {
 
 void SocketStreamerAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
 
 
@@ -275,7 +275,7 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
 }
 
 bool SocketStreamerAdapter::Streamer::send(
-  const protocol_handler::RawMessagePtr& msg) {
+  const protocol_handler::RawMessagePtr msg) {
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
     return false;

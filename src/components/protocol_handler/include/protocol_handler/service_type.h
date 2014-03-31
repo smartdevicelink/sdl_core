@@ -3,9 +3,33 @@
 
 #include <stdint.h>
 
-#include "protocol_handler/protocol_packet.h"
-
 namespace protocol_handler {
+
+  /**
+   *\brief Constant: Frame type for HeartBeat
+   */
+  const uint8_t SERVICE_TYPE_CONTROL = 0x00;
+
+  /**
+   *\brief Constant: RPC type of session
+   */
+  const uint8_t SERVICE_TYPE_RPC = 0x07;
+
+  /**
+   *\brief Constant: Raw PCM audio service
+   */
+  const uint8_t SERVICE_TYPE_AUDIO = 0x0A;
+
+  /**
+   * \brief Constant: Mobile Navi type of session for map streaming
+   */
+  const uint8_t SERVICE_TYPE_NAVI = 0x0B;
+
+  /**
+   *\brief Constant: Bulk data type of session (hybrid)
+   */
+  const uint8_t SERVICE_TYPE_BULK = 0x0F;
+
 
 /**
   * \brief Enum describing possible types of sessions: RPC for API messages,
