@@ -378,13 +378,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMessageReceived(const protocol_handler::
-                                   RawMessagePtr& message);
+                                   RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMobileMessageSent(const protocol_handler::
-                                     RawMessagePtr& message);
+                                     RawMessagePtr message);
 
     void OnMessageReceived(
       hmi_message_handler::MessageSharedPointer message);
@@ -532,7 +532,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const protocol_handler::RawMessagePtr& message);
+      const protocol_handler::RawMessagePtr message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);

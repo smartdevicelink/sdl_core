@@ -47,7 +47,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     SocketStreamerAdapter();
     virtual ~SocketStreamerAdapter();
     virtual void SendData(int32_t application_key,
-                          const protocol_handler::RawMessagePtr& message);
+                          const protocol_handler::RawMessagePtr message);
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
@@ -111,7 +111,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
          *
          * @param block Pointer to the data
          */
-        bool send(const protocol_handler::RawMessagePtr& msg);
+        bool send(const protocol_handler::RawMessagePtr msg);
 
       private:
         SocketStreamerAdapter* const server_;

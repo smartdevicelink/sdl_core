@@ -38,7 +38,6 @@
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
-
 #include "connection_handler/connection_test.h"
 #include "connection_handler/heart_beat_monitor_test.h"
 #include "connection_handler/connection_handler_impl_test.h"
@@ -60,7 +59,6 @@
 //#include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
 
-#include "rpc/AdminAppTest.h"
 //#include "smart_objects/smart_object.h"
 //#include "application_manager/smart_object_keys.h"
 //#include "formatters/CSmartFactory.hpp"
@@ -114,10 +112,11 @@ int main(int argc, char **argv) {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
     log4cxx::PropertyConfigurator::configure("log4cxx.properties");
     test::AdminAppTest app;
-
-    app.Run();
-    sleep(5);
   #endif
+
+//  app.Run();
+  sleep(5);
+
   int result = RUN_ALL_TESTS();
 
   #ifdef __cplusplus

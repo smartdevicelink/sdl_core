@@ -4,7 +4,7 @@
  * \Observes TransportManager and ProtocolHandler, stores information regarding connections
  * \and sessions and provides it to AppManager.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,8 +81,7 @@ ConnectionHandlerImpl::~ConnectionHandlerImpl() {
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
-  LOG4CXX_INFO(logger_,
-               "ConnectionHandlerImpl::set_connection_handler_observer()");
+  LOG4CXX_DEBUG(logger_, observer);
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Null pointer to observer.");
     return;
@@ -95,12 +94,12 @@ void ConnectionHandlerImpl::set_protocol_handler(protocol_handler::ProtocolHandl
 }
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(
-    const std::vector<transport_manager::DeviceInfo>& device_info_list) {
+    const std::vector<transport_manager::DeviceInfo>&) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
 }
 
 void ConnectionHandlerImpl::OnDeviceFound(
-    const transport_manager::DeviceInfo& device_info) {
+    const transport_manager::DeviceInfo&) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceFound()");
 }
 
@@ -144,7 +143,7 @@ void ConnectionHandlerImpl::OnScanDevicesFinished() {
 
 void ConnectionHandlerImpl::OnScanDevicesFailed(
     const transport_manager::SearchDeviceError& error) {
-  LOG4CXX_ERROR(logger_, "Failed to Scan devices.");
+  LOG4CXX_WARN(logger_, error.text());
 }
 
 void ConnectionHandlerImpl::OnConnectionEstablished(
@@ -238,8 +237,8 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   if(protectedSpecific.end() != std::find(
        protectedSpecific.begin(), protectedSpecific.end(), service_type)) {
     LOG4CXX_ERROR(
-        logger_, "Service " << service_type << "is "
-        << (is_protected ? "forbidden" : "forced") << " to be protected");
+        logger_, "Service " << int(service_type)
+        << (is_protected ? " is forbidden to" : " shall") << " be protected");
     return -1;
   }
 
@@ -252,7 +251,8 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     }
   } else{
     if (!connection->AddNewService(sessionId, service_type, is_protected)) {
-      LOG4CXX_ERROR(logger_, "Not possible to establish service!");
+      LOG4CXX_ERROR(logger_, "Not possible to establish service "
+                    << int(service_type) << "!");
       return -1;
     }
     new_session_id = sessionId;
@@ -448,7 +448,6 @@ int ConnectionHandlerImpl::SetSSLContext(
 
 security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
     const uint32_t &key, const protocol_handler::ServiceType& service_type) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetSSLContext");
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
@@ -465,7 +464,7 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
 
 void ConnectionHandlerImpl::set_transport_manager(
     transport_manager::TransportManager* transport_mngr) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_transport_manager()");
+  LOG4CXX_DEBUG(logger_, transport_mngr);
   if (!transport_mngr) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;

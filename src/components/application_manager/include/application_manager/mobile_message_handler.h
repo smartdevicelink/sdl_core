@@ -43,10 +43,10 @@ typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 class MobileMessageHandler {
   public:
     static application_manager::Message* HandleIncomingMessageProtocolV1(
-      const protocol_handler::RawMessagePtr& message);
+      const protocol_handler::RawMessagePtr message);
 
     static application_manager::Message* HandleIncomingMessageProtocolV2(
-      const protocol_handler::RawMessagePtr& message);
+      const protocol_handler::RawMessagePtr message);
 
     //! -------------------------------------------------------------
 

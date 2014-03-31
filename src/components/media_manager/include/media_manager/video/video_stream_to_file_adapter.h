@@ -47,7 +47,7 @@ class VideoStreamToFileAdapter : public MediaAdapterImpl {
     explicit VideoStreamToFileAdapter(const std::string& file_name);
     virtual ~VideoStreamToFileAdapter();
     virtual void SendData(int32_t application_key,
-                          const protocol_handler::RawMessagePtr& message);
+                          const protocol_handler::RawMessagePtr message);
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);

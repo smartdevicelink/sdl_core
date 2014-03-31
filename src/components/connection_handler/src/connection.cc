@@ -2,7 +2,7 @@
  * \file Connection.cpp
  * \brief Connection class implementation.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,6 +145,21 @@ bool Connection::AddNewService(uint8_t session,
     // For unproteced service could be start protection
     if(!service.is_protected_ && is_protected) {
       service.is_protected_ = true;
+      // Rpc and bulk shall be protected as one service
+      if(service.service_type == protocol_handler::kRpc) {
+        ServiceListIterator service_Bulk_it = find(service_list.begin(),
+                                                service_list.end(),
+                                                   protocol_handler::kBulk);
+        DCHECK(service_Bulk_it != service_list.end());
+        service_Bulk_it->is_protected_ = true;
+      }
+      else if(service.service_type == protocol_handler::kBulk) {
+        ServiceListIterator service_Rpc_it = find(service_list.begin(),
+                                                  service_list.end(),
+                                                  protocol_handler::kRpc);
+        DCHECK(service_Rpc_it != service_list.end());
+        service_Rpc_it->is_protected_ = true;
+      }
     }
     // Protected services shall not be unprotected or twice protected
     else {

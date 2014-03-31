@@ -71,7 +71,7 @@ namespace test {
         utils::SharedPtr<smart::SmartObject> in_request,
         utils::SharedPtr<smart::SmartObject> in_responce);
 
-    void SendMessageToMobileApp(const protocol_handler::RawMessagePtr& message,
+    void SendMessageToMobileApp(const protocol_handler::RawMessagePtr message,
                                 bool final_message) OVERRIDE;
 
    private:

@@ -102,6 +102,7 @@ if (BUILD_TESTS_WITH_HMI)
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
+    SecurityManager
    )
 else(BUILD_TESTS_WITH_HMI)
 set(LIBRARIES
@@ -147,6 +148,7 @@ set(LIBRARIES
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
+    test_SecurityManager
 )
 endif(BUILD_TESTS_WITH_HMI)
 

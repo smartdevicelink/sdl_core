@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "application_manager/mobile_message_handler.h"
 #include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
+#include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"
 
 #include <stdint.h>
@@ -57,7 +58,7 @@ log4cxx::LoggerPtr MobileMessageHandler::logger_ = log4cxx::LoggerPtr(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
@@ -87,7 +88,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
 

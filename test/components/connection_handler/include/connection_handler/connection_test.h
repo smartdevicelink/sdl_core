@@ -186,15 +186,19 @@ TEST_F(ConnectionTest, Session_AddRPCBulkServices) {
   AddNewService(protocol_handler::kRpc, unencrypted,
                return_result_false,
                expect_service_exist);
+
+  //Bulk shall not be added and shall be unencrypted
+  AddNewService(protocol_handler::kBulk, unencrypted,
+               return_result_false,
+               expect_service_exist);
+
   AddNewService(protocol_handler::kRpc, encrypted,
                return_result_true,
                expect_service_exist);
 
-  AddNewService(protocol_handler::kBulk, unencrypted,
-               return_result_false,
-               expect_service_exist);
+  //Bulk shall not be added and shall be encrypted
   AddNewService(protocol_handler::kBulk, encrypted,
-               return_result_true,
+               return_result_false,
                expect_service_exist);
 }
 TEST_F(ConnectionTest, Session_AddAllOtherService_Unprotected) {

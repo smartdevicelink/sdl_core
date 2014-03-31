@@ -90,7 +90,7 @@ namespace security_manager_test {
   class ProtocoloObserverMock: public protocol_handler::ProtocolHandler {
   public:
     MOCK_METHOD2(SendMessageToMobileApp,
-                 void(const protocol_handler::RawMessagePtr& message,
+                 void(const protocol_handler::RawMessagePtr message,
                       bool final_message));
     MOCK_METHOD1(AddProtocolObserver,
                  void(protocol_handler::ProtocolObserver* observer));
