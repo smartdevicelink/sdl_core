@@ -172,7 +172,6 @@ void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
   }
-
   protocol_observers_.insert(observer);
 }
 
@@ -181,7 +180,6 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
   }
-
   protocol_observers_.erase(observer);
 }
 
@@ -190,7 +188,6 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
     return;
   }
-
   session_observer_ = observer;
 }
 
@@ -210,11 +207,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
-               "SendStartSessionAck() for connection " << connection_id
-               << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id)
-               << " protection " << (encrypted ? "ON" : "OFF"));
+  LOG4CXX_DEBUG(logger_,
+                "SendStartSessionAck() for connection " << connection_id
+                << " for service_type " << static_cast<int32_t>(service_type)
+                << " session_id " << static_cast<int32_t>(session_id)
+                << " protection " << (encrypted ? "ON" : "OFF"));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -233,10 +230,10 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
-               "sendStartSessionNAck() for connection " << connection_id
-               << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id));
+  LOG4CXX_DEBUG(logger_,
+                "sendStartSessionNAck() for connection " << connection_id
+                << " for service_type " << static_cast<int32_t>(service_type)
+                << " session_id " << static_cast<int32_t>(session_id));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -255,9 +252,9 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_, "SendEndSessionNAck() for connection " << connection_id
-               << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id));
+  LOG4CXX_DEBUG(logger_, "SendEndSessionNAck() for connection " << connection_id
+                << " for service_type " << static_cast<int32_t>(service_type)
+                << " session_id " << static_cast<int32_t>(session_id));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -277,10 +274,10 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
-               "SendEndSessionAck() for connection " << connection_id
-               << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id));
+  LOG4CXX_DEBUG(logger_,
+                "SendEndSessionAck() for connection " << connection_id
+                << " for service_type " << static_cast<int32_t>(service_type)
+                << " session_id " << static_cast<int32_t>(session_id));
 
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -435,7 +432,7 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
     const RawMessagePtr message) {
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Sending message " <<
-      message-> data() << " failed.");
+      (void*)message-> data() << " failed: " << error.text());
 }
 
 void ProtocolHandlerImpl::OnConnectionEstablished(
@@ -833,11 +830,11 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
                              0, hash_code_));
       queue_->PostMessage(
             impl::RawFordMessageToMobile(ptr, false));
-      LOG4CXX_INFO(logger_,
-                   "SendStartSessionAck() for connection " << connection_id_
-                   << " for service_type " << static_cast<int32_t>(service_type_)
-                   << " session_id " << static_cast<int32_t>(session_id_)
-                   << " protection " << (success ? "ON" : "OFF"));
+      LOG4CXX_DEBUG(logger_,
+                    "SendStartSessionAck() for connection " << connection_id_
+                    << " for service_type " << static_cast<int32_t>(service_type_)
+                    << " session_id " << static_cast<int32_t>(session_id_)
+                    << " protection " << (success ? "ON" : "OFF"));
       delete this;
       return true;
     }
@@ -896,7 +893,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                          connection_key, packet.service_type(), PROTECTION_ON);
     return RESULT_OK;
   }
-
   // start new SSL at this session
   if(security_manager_->ProtectConnection(connection_key)) {
     security_manager_->AddListener(
@@ -904,6 +900,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
             connection_id, session_id, packet.protocol_version(), connection_key,
             packet.service_type()));
     security_manager_->StartHandshake(connection_key);
+    LOG4CXX_DEBUG(logger_, "Protection established for connection " << connection_key);
     return RESULT_OK;
   }
 
@@ -951,6 +948,10 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
 
 void ProtocolHandlerImpl::set_security_manager(
     security_manager::SecurityManager* security_manager) {
+  if (!security_manager) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to SecurityManager.");
+    return;
+  }
   security_manager_ = security_manager;
 }
 
@@ -977,13 +978,14 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   size_t out_data_size;
   if(!context->Encrypt(packet->data(), packet->data_size(),
                        &out_data, &out_data_size)) {
-    LOG4CXX_ERROR(logger_, "Enryption failed: " << security_manager::LastError());
+    const std::string error_text(security_manager::LastError());
+    LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError( connection_key,
-          security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED);
+          security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED, error_text);
     return RESULT_OK;
   };
-  LOG4CXX_INFO(logger_, "Encrypted " << packet->data_size() << " bytes to "
-               << out_data_size << " bytes");
+  LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
+                << out_data_size << " bytes");
   DCHECK(out_data); DCHECK(out_data_size);
   packet->set_protection_flag(true);
   packet->set_data(out_data, out_data_size);
@@ -1008,23 +1010,25 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
       session_observer_->GetSSLContext(connection_key,
                                        ServiceTypeFromByte(packet->service_type()));
   if(!context || !context->IsInitCompleted()) {
-    LOG4CXX_ERROR(logger_, "Fail decryption for unprotected service "
+    const std::string error_text("Fail decryption for unprotected service ");
+    LOG4CXX_ERROR(logger_, error_text
                   << int(packet->service_type()));
     security_manager_->SendInternalError( connection_key,
-          security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED);
+          security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   }
   const uint8_t * out_data;
   size_t out_data_size;
   if(!context->Decrypt(packet->data(), packet->data_size(),
                        &out_data, &out_data_size)) {
-    LOG4CXX_ERROR(logger_, "Decryption failed: " << security_manager::LastError());
+    const std::string error_text(security_manager::LastError());
+    LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError( connection_key,
-          security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED);
+          security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   };
-  LOG4CXX_INFO(logger_, "Decrypted " << packet->data_size() << " bytes to "
-               << out_data_size << " bytes");
+  LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "
+                << out_data_size << " bytes");
   DCHECK(out_data); DCHECK(out_data_size);
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
