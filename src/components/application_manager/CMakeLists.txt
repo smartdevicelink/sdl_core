@@ -1,3 +1,8 @@
+if (EXTENDED_POLICY_FLAG)
+  add_definitions(-DEXTENDED_POLICY)
+endif()
+
+
 include_directories (
   ./include/
   ../utils/include/
@@ -17,6 +22,7 @@ include_directories (
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
   ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
 )
 
