@@ -531,9 +531,13 @@ SDL.SDLController = Em.Object
          */
         unregisterApplication: function(appID) {
 
-            //this.getApplicationModel(appID).set('unregistered', true);
             this.getApplicationModel(appID).onDeleteApplication(appID);
-            SDL.VRPopUp.DeleteActivateApp(appID);
+            var len = SDL.SDLModel.VRCommands.length;
+            for (var i = len - 1; i >= 0; i--) {
+                if (SDL.SDLModel.VRCommands[i].appID == appID) {
+                    SDL.SDLModel.VRCommands.splice(i, 1);
+                }
+            }
             SDL.SDLAppController.set('model', null);
         },
         /**

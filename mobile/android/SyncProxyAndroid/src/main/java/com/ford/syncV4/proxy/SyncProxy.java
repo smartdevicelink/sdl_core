@@ -9,8 +9,7 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	

@@ -125,17 +125,33 @@ class ResumeCtrl: public event_engine::EventObserver {
 
     /**
      * @brief Start timer for resumption applications
+     *        Restore D1-D5 data
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
     bool StartResumption(ApplicationSharedPtr application, uint32_t hash);
 
     /**
+     * @brief Start timer for resumption applications
+     *        Does not restore D1-D5 data
+     * @param application that is need to be restored
+     * @return true if it was saved, otherwise return false
+     */
+    bool StartResumptionOnlyHMILevel(ApplicationSharedPtr application);
+
+    /**
+     * @brief Check if there are all files need for resumption
+     * @param application that is need to be restored
+     * @return true if it all files exist, otherwise return false
+     */
+    bool CheckPersistenceFilesForResumption(ApplicationSharedPtr application);
+
+    /**
      * @brief Check application hash
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
-    bool CheckApplicationHash(uint32_t app_id, uint32_t hash);
+    bool CheckApplicationHash(std::string mobile_app_id, uint32_t hash);
 
     /**
      * @brief Timer callback function
@@ -182,7 +198,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     *       wait for timer to resume HMI Level
     *
     */
-    std::set<application_timestamp, TimeStampComparator> waiting_for_timer_;
+    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
 
 
     ApplicationManagerImpl* app_mngr_;

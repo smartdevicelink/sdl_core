@@ -97,6 +97,7 @@ import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
+import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
@@ -374,8 +375,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Updated hashID which can be used over connection cycles
     // (i.e. loss of connection, ignition cycles, etc.)
     private String mHashId = null;
-    // This Config object stores all the necessary data for SDK testing
+
+    /**
+     * Test Cases fields
+     */
+    /**
+     * This Config object stores all the necessary data for SDK testing
+     */
     private TestConfig mTestConfig;
+    /**
+     * This is a callback interface for the SDK test cases usage
+     */
+    private ITestConfigCallback mTestConfigCallback;
 
     /**
      * Set hashID which can be used over connection cycles
@@ -1816,7 +1827,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onUnregisterAppInterfaceResponse(Hashtable hash) {
-        getSyncConnection().stopHeartbeatMonitor();
         stopAllServices();
         closeSyncConnection(true);
         stopSession();
@@ -1982,6 +1992,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void restartRPCProtocolSession() {
         // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
+
+            // For the Test Cases
+            Log.d(TAG, "RestartRPCProtocolSession config: " + mTestConfig);
+            if (mTestConfig != null) {
+                Log.d(TAG, "RestartRPCProtocolSession DoCallRegisterAppInterface: " + mTestConfig.isDoCallRegisterAppInterface());
+                if (!mTestConfig.isDoCallRegisterAppInterface()) {
+
+                    Log.d(TAG, "RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
+                    if (mTestConfigCallback != null) {
+                        mTestConfigCallback.onRPCServiceComplete();
+                    }
+
+                    // Revert back a value which has been set for concrete Test Case
+                    mTestConfig.setDoCallRegisterAppInterface(true);
+
+                    return;
+                }
+            }
 
             try {
                 registerAppInterfacePrivate(
@@ -3189,8 +3217,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    // TODO : Hide this method from public when no Test Cases are need
+    /**
+     * Initialize new Session. <b>In production this method MUST be private</b>
+     */
+    public void initializeSession() {
+        // Initialize a start session procedure
+        mSyncConnection.initialiseSession();
+    }
+
     // Private Class to Interface with SyncConnection
     public class SyncInterfaceBroker implements ISyncConnectionListener {
+
+        @Override
+        public void onTransportConnected() {
+            initializeSession();
+        }
 
         @Override
         public void onTransportDisconnected(String info) {
@@ -3262,7 +3304,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
             // Policy Snapshot is coming WITH BulkData and WITH JSON Data
-            if (msg.getData().length > 0 || msg.getBulkData().length > 0) {
+            if ((msg.getData() != null && msg.getData().length > 0) ||
+                    (msg.getBulkData() != null && msg.getBulkData().length > 0)) {
                 queueIncomingMessage(msg);
             }
         }
@@ -3447,5 +3490,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mSecureServiceMessageManager = new SecureServiceMessageManager();
         mSecureServiceMessageCallback = new SecureServiceMessageCallback();
         mSecureServiceMessageManager.setMessageCallback(mSecureServiceMessageCallback);
+    }
+}
+
+    /**
+     * Test Config section
+     */
+
+    /**
+     * Return an instance of the object of {@link com.ford.syncV4.test.TestConfig} type in order to
+     * set or modify configuration necessary to perform SDK testing
+     */
+    public TestConfig getTestConfig() {
+        return mTestConfig;
+    }
+
+    /**
+     * Set a callback to perform test Cases of the SDK
+     *
+     * @param mTestConfigCallback callback function
+     */
+    public void setTestConfigCallback(ITestConfigCallback mTestConfigCallback) {
+        this.mTestConfigCallback = mTestConfigCallback;
     }
 }

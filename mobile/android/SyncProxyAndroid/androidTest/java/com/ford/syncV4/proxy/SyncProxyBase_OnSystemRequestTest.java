@@ -18,7 +18,7 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;

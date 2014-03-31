@@ -58,6 +58,9 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    **/
   virtual ~PerformAudioPassThruRequest();
 
+  /**
+   * @brief Init required by command resources
+   **/
   bool Init();
 
   /**
@@ -76,7 +79,23 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   /*
    * @brief Sends TTS Speak request
    */
-  void SendSpeakRequest(const int32_t app_id);
+  void SendSpeakRequest();
+
+  /*
+   * @brief Sends UI PerformAudioPassThru request
+   */
+  void SendPerformAudioPassThruRequest();
+
+  /*
+   * @brief Sends UI RecordStart notification after TTS Speak response received.
+   * Indicates that capturing mic data should be started
+   */
+  void SendRecordStartNotification();
+
+  /*
+   * @brief Starts microphone recording
+   */
+  void StartMicrophoneRecording();
 
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };

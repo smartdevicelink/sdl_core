@@ -588,7 +588,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "method": "BasicCommunication.OnSystemRequest",
                 "params":{
                     "requestType": "HTTP",
-                    "url": "http://127.0.0.1",
+                    "url": ["http://127.0.0.1"],
                     "fileType": "JSON",
                     "offset": 1000,
                     "length": 10000,

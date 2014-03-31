@@ -44,8 +44,8 @@ namespace commands {
 
 AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message),
-      is_ui_send_(false),
-      is_vr_send_(false),
+      send_ui_(false),
+      send_vr_(false),
       is_ui_received_(false),
       is_vr_received_(false),
       ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
@@ -131,46 +131,52 @@ void AddCommandRequest::Run() {
     return;
   }
 
+  smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     if (!CheckMenuName()) {
       LOG4CXX_ERROR_EXT(logger_, "MenuName is invalid");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::cmd_id] =
+    ui_msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
-    msg_params[strings::menu_params] =
+    ui_msg_params[strings::menu_params] =
         (*message_)[strings::msg_params][strings::menu_params];
 
-    msg_params[strings::app_id] = app->app_id();
+    ui_msg_params[strings::app_id] = app->app_id();
 
     if (    ((*message_)[strings::msg_params].keyExists(strings::cmd_icon))
         &&  ((*message_)[strings::msg_params][strings::cmd_icon].keyExists(strings::value))
         &&  (0 < (*message_)[strings::msg_params][strings::cmd_icon]
                                                  [strings::value].length())) {
-      msg_params[strings::cmd_icon] =
+      ui_msg_params[strings::cmd_icon] =
           (*message_)[strings::msg_params][strings::cmd_icon];
     }
 
-    is_ui_send_ = true;
-
-    SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &msg_params, true);
+    send_ui_ = true;
   }
 
+  smart_objects::SmartObject vr_msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::cmd_id] =
+    vr_msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
-    msg_params[strings::vr_commands] =
+    vr_msg_params[strings::vr_commands] =
         (*message_)[strings::msg_params][strings::vr_commands];
-    msg_params[strings::app_id] = app->app_id();
+    vr_msg_params[strings::app_id] = app->app_id();
 
-    is_vr_send_ = true;
+    vr_msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
-    SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params, true);
+    send_vr_ = true;
+  }
+
+  if (send_ui_) {
+    SendHMIRequest(hmi_apis::FunctionID::UI_AddCommand, &ui_msg_params, true);
+  }
+
+  if (send_vr_) {
+    SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &vr_msg_params, true);
   }
 }
 
@@ -279,6 +285,7 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 
 void AddCommandRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "AddCommandRequest::on_event");
+
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -356,7 +363,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AddCommandRequest::IsPendingResponseExist() {
-  return is_ui_send_ != is_ui_received_ || is_vr_send_ != is_vr_received_;
+  return send_ui_ != is_ui_received_ || send_vr_ != is_vr_received_;
 }
 
 }  // namespace commands

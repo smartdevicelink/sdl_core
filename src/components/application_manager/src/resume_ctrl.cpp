@@ -40,27 +40,27 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;
-  const uint32_t app_id = application->mobile_app_id()->asInt();
+  const std::string& m_app_id = application->mobile_app_id()->asString();
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
             it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == app_id) {
+    if ((*it)[strings::app_id].asString() == m_app_id) {
       json_app = &(*it);
       LOG4CXX_INFO(logger_, "ResumeCtrl Application with this id"
-                            "is already exist ( update info ) " << app_id);
+                            "is already exist ( update info ) " << m_app_id);
       break;
     }
   }
 
   if (json_app == NULL) {
     LOG4CXX_INFO(logger_, "ResumeCtrl Application with this ID does not"
-				 "exist. Add new" << app_id);
+         "exist. Add new" << m_app_id);
     saved_applications_.push_back(Json::Value());
     json_app = &(saved_applications_.back());
   }
   uint32_t hash = application->curHash();
   LOG4CXX_INFO(logger_, " Hash = " << hash);
   uint32_t connection_key = application->app_id();
-  (*json_app)[strings::app_id] = app_id;
+  (*json_app)[strings::app_id] = m_app_id;
   (*json_app)[strings::connection_key] = connection_key;
   (*json_app)[strings::hmi_level] =
       static_cast<int32_t> (application->hmi_level());
@@ -121,8 +121,9 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
       it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
 
       mobile_apis::HMILevel::eType saved_hmi_level;
       mobile_apis::HMILevel::eType restored_hmi_level;
@@ -144,7 +145,7 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       }
       MessageHelper::SendHMIStatusNotification(*(application.get()));
       LOG4CXX_INFO(logger_, "Restore Application "
-                   << (*it)[strings::app_id].asInt()
+                   << saved_m_app_id
                    << " to HMILevel " << restored_hmi_level);
       return true;
     }
@@ -159,8 +160,9 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
 
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
       break;
     }
   }
@@ -178,7 +180,24 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
   Json::Value& global_properties = saved_app[strings::application_global_properties];
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
+  Json::Value& application_files= saved_app[strings::application_files];
 
+  // files
+  for (Json::Value::iterator json_it = application_files.begin();
+      json_it != application_files.end(); ++json_it)  {
+    Json::Value& file_data = *json_it;
+
+    bool is_persistent = file_data[strings::persistent_file].asBool();
+    if (is_persistent) {
+      AppFile file;
+      file.is_persistent = is_persistent;
+      file.is_download_complete = file_data[strings::is_download_complete].asBool();
+      file.file_name = file_data[strings::sync_file_name].asString();
+      file.file_type = static_cast<mobile_apis::FileType::eType> (
+                         file_data[strings::file_type].asInt());
+      application->AddFile(file);
+    }
+  }
 
   //add submenus
   for (Json::Value::iterator json_it = app_submenus.begin();
@@ -289,7 +308,8 @@ bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr applicatio
 
   for (std::vector<Json::Value>::iterator it = saved_applications_.begin();
       it != saved_applications_.end(); ) {
-    if ((*it)[strings::app_id].asInt() == application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id == application->mobile_app_id()->asString()) {
       saved_applications_.erase(it);
       return true;
     } else {
@@ -328,43 +348,129 @@ void ResumeCtrl::SavetoFileSystem() {
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
-
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption");
   DCHECK(application.get());
   LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
-  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id());
+  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
-  sync_primitives::AutoLock auto_lock(queue_lock_);
-
-  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  std::vector<Json::Value>::const_iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() ==
-        application->mobile_app_id()->asInt()) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
 
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
-      LOG4CXX_INFO(logger_, "recived hash = " << hash);
-      LOG4CXX_INFO(logger_, "saved hash = " << saved_hash);
+
       if (hash == saved_hash) {
         RestoreApplicationData(application);
-        application->UpdateHash();
       }
-
-      waiting_for_timer_.insert(std::make_pair(application->app_id(),
-                                               time_stamp));
-      timer_.start(kTimeStep);
+      application->UpdateHash();
+      {
+        sync_primitives::AutoLock auto_lock(queue_lock_);
+        waiting_for_timer_.insert(std::make_pair(application->app_id(),
+                                                 time_stamp));
+        timer_.start(kTimeStep);
+      }
       return true;
     }
   }
-
+  LOG4CXX_INFO(logger_, "ResumeCtrl::Applicaton didn't saved");
   return false;
 }
 
-bool ResumeCtrl::CheckApplicationHash(uint32_t app_id, uint32_t hash) {
+bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
+  LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumptionOnlyHMILevel");
+  DCHECK(application.get());
+
+  LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
+  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
+
+  std::vector<Json::Value>::const_iterator it = saved_applications_.begin();
+  for (; it != saved_applications_.end(); ++it) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
+      uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
+      {
+        sync_primitives::AutoLock auto_lock(queue_lock_);
+        waiting_for_timer_.insert(std::make_pair(application->app_id(),
+                                                 time_stamp));
+        timer_.start(kTimeStep);
+      }
+      return true;
+    }
+  }
+  LOG4CXX_INFO(logger_, "ResumeCtrl::Applicaton didn't saved");
+  return false;
+}
+
+bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr application) {
+  LOG4CXX_INFO(logger_, "RestoreApplicationData");
+  DCHECK(application.get());
+
   std::vector<Json::Value>::iterator it = saved_applications_.begin();
   for (; it != saved_applications_.end(); ++it) {
-    if ((*it)[strings::app_id].asInt() == app_id) {
+    const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id ==
+        application->mobile_app_id()->asString()) {
+      break;
+    }
+  }
+  if (it == saved_applications_.end()) {
+    LOG4CXX_WARN(logger_,"Application not saved");
+    return false;
+  }
+
+  Json::Value& saved_app = *it;
+  MessageHelper::SmartObjectList requests;
+
+  LOG4CXX_INFO(logger_, saved_app.toStyledString());
+  Json::Value& app_commands = saved_app[strings::application_commands];
+  Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
+
+  //add commands
+  for (Json::Value::iterator json_it = app_commands.begin();
+      json_it != app_commands.end(); ++json_it)  {
+    Json::Value& json_command = *json_it;
+    smart_objects::SmartObject message = smart_objects::SmartObject(
+                                         smart_objects::SmartType::SmartType_Map);
+    Formatters::CFormatterJsonBase::jsonValueToObj(json_command, message);
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyImageFiles(message, application);
+    if (verification_result == mobile_apis::Result::INVALID_DATA) {
+      LOG4CXX_WARN(logger_,"app_commands missed icons");
+      return false;
+    }
+  }
+
+  //add choisets
+  for (Json::Value::iterator json_it = app_choise_sets.begin();
+      json_it != app_choise_sets.end(); ++json_it)  {
+    Json::Value& json_choiset = *json_it;
+    smart_objects::SmartObject msg_param = smart_objects::SmartObject(
+                                         smart_objects::SmartType::SmartType_Map);
+    Formatters::CFormatterJsonBase::jsonValueToObj(json_choiset , msg_param);
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyImageFiles(msg_param, application);
+    if (verification_result == mobile_apis::Result::INVALID_DATA) {
+      LOG4CXX_WARN(logger_,"app_choise_sets missed icons");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool ResumeCtrl::CheckApplicationHash(std::string mobile_app_id, uint32_t hash) {
+  std::vector<Json::Value>::iterator it = saved_applications_.begin();
+  for (; it != saved_applications_.end(); ++it) {
+    std::string saved_m_app_id = (*it)[strings::app_id].asString();
+    if (saved_m_app_id == mobile_app_id) {
       uint32_t saved_hash = (*it)[strings::hash_id].asUInt();
+
+      LOG4CXX_INFO(logger_, "recived hash = " << hash);
+      LOG4CXX_INFO(logger_, "saved hash = " << saved_hash);
       if (hash == saved_hash) {
         return true;
       }
@@ -375,13 +481,13 @@ bool ResumeCtrl::CheckApplicationHash(uint32_t app_id, uint32_t hash) {
 }
 
 void ResumeCtrl::onTimer() {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()");
+  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()" << waiting_for_timer_.size());
   sync_primitives::AutoLock auto_lock(queue_lock_);
 
-  std::set<application_timestamp, TimeStampComparator>::iterator it=
+  std::multiset<application_timestamp, TimeStampComparator>::iterator it=
       waiting_for_timer_.begin();
 
-  for (;it != waiting_for_timer_.end(); ++it) {
+  for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
@@ -521,6 +627,7 @@ Json::Value ResumeCtrl::GetApplicationFiles(const uint32_t app_id) {
       file_data[strings::persistent_file] = file.is_persistent;
       file_data[strings::is_download_complete] = file.is_download_complete;
       file_data[strings::sync_file_name] = file.file_name;
+      file_data[strings::file_type] = file.file_type;
       result.append(file_data);
     }
   }

@@ -261,7 +261,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertEquals("should end session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
     }
 
-    // TODO : To be reconsider
+    // TODO : Reconsider this test case as onTransportConnected is now invoke another listener
+
     /*public void testStartSessionWithCorrectId() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.setSessionId(SESSION_ID);

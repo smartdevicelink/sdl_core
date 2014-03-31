@@ -35,6 +35,7 @@
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/logger.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

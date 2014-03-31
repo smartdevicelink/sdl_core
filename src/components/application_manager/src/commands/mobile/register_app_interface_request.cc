@@ -331,17 +331,32 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   uint32_t hash_id = 0;
 
+  const char* add_info = "";
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
 
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-    if (!resumer.CheckApplicationHash((*application->mobile_app_id()).asInt(),
+    const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
+    if (!resumer.CheckApplicationHash(mobile_app_id,
                                       hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Hash does not maches");
+      add_info = "Hash does not maches";
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
+      result = mobile_apis::Result::RESUME_FAILED;
+      LOG4CXX_WARN(logger_, "Persistent data is missed");
+      add_info = "Persistent data is missed";
+    } else {
+      add_info = " Resume Succesed";
     }
   }
 
-  SendResponse(true, result, "", params);
-  resumer.StartResumption(application, hash_id);
+  SendResponse(true, result, add_info, params);
+  if (result != mobile_apis::Result::RESUME_FAILED) {
+    resumer.StartResumption(application, hash_id);
+  } else {
+    resumer.StartResumptionOnlyHMILevel(application);
+  }
+
 }
 
 mobile_apis::Result::eType
@@ -543,7 +558,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
-  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asInt();
+  const std::string& mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asString();
 
   const std::set<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications();
@@ -552,7 +567,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asString()) {
       return true;
     }
   }
