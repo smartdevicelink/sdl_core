@@ -88,6 +88,14 @@ SDL.AppViews = Em.ContainerView.extend( {
 
             FFW.BasicCommunication.OnIgnitionCycleOver();
 
+            FFW.BasicCommunication.disconnect();
+            FFW.UI.disconnect();
+            FFW.VR.disconnect();
+            FFW.VehicleInfo.disconnect();
+            FFW.TTS.disconnect();
+            FFW.Buttons.disconnect();
+            FFW.Navigation.disconnect();
+
             if(confirm('The "ignition off" emulation executed!')){
                 return 'OK, Good Bye then';
             }
