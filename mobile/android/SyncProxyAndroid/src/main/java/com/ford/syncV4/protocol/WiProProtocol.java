@@ -62,7 +62,7 @@ public class WiProProtocol extends AbstractProtocol {
         this._version = version;
         if (version == 2) {
             HEADER_SIZE = 12;
-            MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
+            MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE- SSL_OVERHEAD;
             _headerBuf = new byte[HEADER_SIZE];
         }
     }
@@ -141,7 +141,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 messageID++;
                 ProtocolFrameHeader firstHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType, sessionID, messageID, _version);
-                firstHeader.setEncrypted(encrypted);
+                firstHeader.setEncrypted(false);
                 // Assemble first frame.
                 int frameCount = data.length / MAX_DATA_SIZE;
                 if (data.length % MAX_DATA_SIZE > 0) {
