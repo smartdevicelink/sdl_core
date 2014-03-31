@@ -525,6 +525,20 @@ SDL.SDLController = Em.Object
                     deviceName: params.deviceName,
                     appType: params.appType
                 }));
+
+            var exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit",
+                        "position": 0
+                    },
+                    cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
         },
         /**
          * Unregister application
