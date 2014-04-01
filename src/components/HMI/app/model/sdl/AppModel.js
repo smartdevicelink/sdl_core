@@ -133,15 +133,6 @@ SDL.SDLAppModel = Em.Object.extend({
         turnList: [],
 
         /**
-         * Policies
-         * Array of avaliable permission codes for current app
-         * came from SDLCore in SDL.GetListOfPermissions response
-         *
-         * @type {Array}
-         */
-        allowedFunctions: [],
-
-        /**
          * URL to application Icon
          *
          * @type {String}
@@ -287,9 +278,7 @@ SDL.SDLAppModel = Em.Object.extend({
                 }
 
                 console.log(commands.length);
-                if (request.id >= 0) {
-                    FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-                }
+                FFW.UI.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
             } else {
                 FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Adding more than 1000 item to the top menu or to submenu is not allowed.');
             }
