@@ -88,6 +88,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
 )
