@@ -64,33 +64,41 @@ bool Range<T>::Includes(U val) const {
   return min() <= val && val <= max();
 }
 
-inline PrimitiveType::PrimitiveType(bool initialized, bool valid)
-    : initialized_(initialized), valid_(valid) {
+inline PrimitiveType::PrimitiveType(ValueState value_state)
+    : value_state_(value_state) {
 }
 
 inline bool PrimitiveType::is_initialized() const {
-  return initialized_;
+  return value_state_ != kUninitialized;
 }
 
 inline bool PrimitiveType::is_valid() const {
-  return valid_;
+  return value_state_ == kValid;
+}
+
+inline bool PrimitiveType::is_null() const {
+  return value_state_ == kNull;
+}
+
+inline void PrimitiveType::set_to_null() {
+  value_state_ = kNull;
 }
 
 /*
  * Boolean class
  */
 inline Boolean::Boolean()
-    : PrimitiveType(false, false), value_(false) {
+    : PrimitiveType(kUninitialized),
+      value_(false) {
 }
 
 inline Boolean::Boolean(bool value)
-    : PrimitiveType(true, true), value_(value) {
+    : PrimitiveType(kValid), value_(value) {
 }
 
 inline Boolean& Boolean::operator=(bool new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = true;
+  value_state_ = kValid;
   return *this;
 }
 
@@ -106,21 +114,20 @@ const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(range_.min()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(IntType value)
-    : PrimitiveType(true, range_.Includes(value)),
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(IntType new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = range_.Includes(value_);
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -139,13 +146,13 @@ const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(range_.min()) {
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(double value)
-    : PrimitiveType(true, range_.Includes(value)),
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
       value_(value) {
 }
 
@@ -153,8 +160,7 @@ template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>&
 Float<minnum, maxnum, minden, maxden>::operator=(double new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = range_.Includes(new_val);
+  value_state_ = range_.Includes(new_val) ? kValid : kInvalid;
   return *this;
 }
 
@@ -171,27 +177,26 @@ const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String()
-    : PrimitiveType(false, false) {
+    : PrimitiveType(kUninitialized) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
-    : PrimitiveType(true, length_range_.Includes(value.length())),
+    : PrimitiveType(length_range_.Includes(value.length()) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const char* value)
-    : PrimitiveType(true, true),
+    : PrimitiveType(kUninitialized),
       value_(value) {
-  valid_ = length_range_.Includes(value_.length());
+  value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = length_range_.Includes(new_val.length());
+  value_state_ = length_range_.Includes(new_val.length()) ? kValid : kInvalid;
   return *this;
 }
 
@@ -205,21 +210,20 @@ String<minlen, maxlen>::operator const std::string&() const {
  */
 template<typename T>
 Enum<T>::Enum()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(EnumType()) {
 }
 
 template<typename T>
 Enum<T>::Enum(EnumType value)
-    : PrimitiveType(true, IsValidEnum(value_)),
+    : PrimitiveType(IsValidEnum(value_) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<typename T>
 Enum<T>& Enum<T>::operator=(EnumType new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = IsValidEnum(value_);
+  value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -232,13 +236,15 @@ Enum<T>::operator EnumType() const {
  * Array class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array() {
+Array<T, minsize, maxsize>::Array()
+  : marked_as_null_(false) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
 Array<T, minsize, maxsize>::Array(const U& value)
-    : ArrayType(value.begin(), value.end() ){
+    : ArrayType(value.begin(), value.end()),
+      marked_as_null_(false) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -257,6 +263,9 @@ void Array<T, minsize, maxsize>::push_back(const U& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_valid() const {
+  if (is_null()) {
+    return false;
+  }
   if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
     return false;
   for (typename ArrayType::const_iterator i = this->begin();
@@ -269,19 +278,31 @@ bool Array<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  return is_null() || !this->empty();
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+bool Array<T, minsize, maxsize>::is_null() const {
+  return marked_as_null_;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+void Array<T, minsize, maxsize>::set_to_null() {
+  marked_as_null_ = true;
 }
 
 /*
  * Map class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map() {
+Map<T, minsize, maxsize>::Map()
+    : marked_as_null_(false) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
-Map<T, minsize, maxsize>::Map(const U& value) {
+Map<T, minsize, maxsize>::Map(const U& value)
+    : marked_as_null_(false) {
   for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
       ++i) {
     // Explicitly convert that value to T because all rpc_types have explicit
@@ -312,6 +333,8 @@ void Map<T, minsize, maxsize>::insert(const std::pair<std::string, U>& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_valid() const {
+  if (is_null())
+    return false;
   if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
     return false;
   for (typename Map::const_iterator i = this->begin();
@@ -324,7 +347,17 @@ bool Map<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  return is_null() || !this->empty();
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+bool Map<T, minsize, maxsize>::is_null() const {
+  return marked_as_null_;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+void Map<T, minsize, maxsize>::set_to_null() {
+  marked_as_null_ = true;
 }
 
 /*

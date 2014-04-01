@@ -83,6 +83,13 @@ TEST(ValidatedTypesJson, BooleanFromJsonTest) {
   ASSERT_EQ(readback.asBool(), true);
 }
 
+TEST(ValidatedTypesJson, BooleanNullTest) {
+  Boolean boolean(Value::null);
+  ASSERT_TRUE(boolean.is_initialized());
+  ASSERT_TRUE(boolean.is_null());
+  ASSERT_FALSE(boolean.is_valid());
+}
+
 TEST(ValidatedTypesJson, BooleanFromInvalidJsonTest) {
   Value inv(7);
   Boolean boolean(inv);
@@ -98,6 +105,13 @@ TEST(ValidatedTypesJson, IntegerFromJsonTest) {
   Value readback = integer.ToJsonValue();
   ASSERT_TRUE(readback.isInt());
   ASSERT_EQ(readback.asInt(), 42);
+}
+
+TEST(ValidatedTypesJson, IntegerNullTest) {
+  Integer<int32_t, -5, 192> integer(Value::null);
+  ASSERT_TRUE(integer.is_initialized());
+  ASSERT_TRUE(integer.is_null());
+  ASSERT_FALSE(integer.is_valid());
 }
 
 TEST(ValidatedTypesJson, IntegerFromOverflowingJsonTest) {
@@ -131,6 +145,13 @@ TEST(ValidatedTypesJson, FloatFromJsonTest) {
   ASSERT_EQ(readback.asDouble(), 4.2);
 }
 
+TEST(ValidatedTypesJson, FloatNullTest) {
+  Float<1, 7> flt(Value::null);
+  ASSERT_TRUE(flt.is_initialized());
+  ASSERT_TRUE(flt.is_null());
+  ASSERT_FALSE(flt.is_valid());
+}
+
 TEST(ValidatedTypesJson, FloatFromInvalidJsonTest) {
   Value str_val("Hello");
   Float<-5, 3> flt(str_val);
@@ -146,6 +167,13 @@ TEST(ValidatedTypesJson, StringFromJsonTest) {
   Value readback = str.ToJsonValue();
   ASSERT_TRUE(readback.isString());
   ASSERT_STREQ(readback.asCString(), "Hello");
+}
+
+TEST(ValidatedTypesJson, StringNullTest) {
+  String<1, 42> str(Value::null);
+  ASSERT_TRUE(str.is_initialized());
+  ASSERT_TRUE(str.is_null());
+  ASSERT_FALSE(str.is_valid());
 }
 
 TEST(ValidatedTypesJson, StringFromInvalidJsonTest) {
@@ -172,6 +200,13 @@ TEST(ValidatedTypesJson, EnumFromJsonTest) {
   ASSERT_STREQ(readback.asCString(), "kValue1");
 }
 
+TEST(ValidatedTypesJson, EnumNullTest) {
+  Enum<TestEnum> enm(Value::null);
+  ASSERT_TRUE(enm.is_initialized());
+  ASSERT_TRUE(enm.is_null());
+  ASSERT_FALSE(enm.is_valid());
+}
+
 TEST(ValidatedTypesJson, EnumFromInvalidJsonTest) {
   Value str_value("Random string");
   Enum<TestEnum> enm(str_value);
@@ -189,6 +224,20 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
   Value readback = arr.ToJsonValue();
   ASSERT_TRUE(readback.isArray());
   ASSERT_EQ(readback.size(), array_value.size());
+}
+
+TEST(ValidatedTypesJson, ArrayNullTest) {
+  Array<String<1, 32>, 2, 5> arr(Value::null);
+  ASSERT_TRUE(arr.is_initialized());
+  ASSERT_TRUE(arr.is_null());
+  ASSERT_FALSE(arr.is_valid());
+}
+
+TEST(ValidatedTypesJson, MapNullTest) {
+  Map<String<1, 32>, 2, 5> map(Value::null);
+  ASSERT_TRUE(map.is_initialized());
+  ASSERT_TRUE(map.is_null());
+  ASSERT_FALSE(map.is_valid());
 }
 
 TEST(ValidatedTypesJson, ArrayFromInvalidJsonTest) {

@@ -84,11 +84,20 @@ class PrimitiveType {
  public:
   bool is_initialized() const;
   bool is_valid() const;
+  bool is_null() const;
+  void set_to_null();
  protected:
-  PrimitiveType(bool initialized, bool valid);
+  enum ValueState {
+    kUninitialized,
+    kNull,
+    kInvalid,
+    kValid
+  };
+  PrimitiveType(ValueState value_state);
+  static ValueState InitHelper(const Json::Value* value,
+                               bool (Json::Value::*type_check)() const);
  protected:
-  bool initialized_;
-  bool valid_;
+  ValueState value_state_;
 };
 
 /*
@@ -242,6 +251,10 @@ class Array : public std::vector<T> {
 
   bool is_valid() const;
   bool is_initialized() const;
+  bool is_null() const;
+  void set_to_null();
+ private:
+  bool marked_as_null_;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -266,6 +279,10 @@ class Map : public std::map<std::string, T> {
 
   bool is_valid() const;
   bool is_initialized() const;
+  bool is_null() const;
+  void set_to_null();
+ private:
+  bool marked_as_null_;
 };
 
 template<typename T>
