@@ -38,17 +38,21 @@
 #include "utils/safeformat.h"
 
 using typesafe_format::strmfmt;
+using typesafe_format::format;
 
 namespace codegen {
 
 StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(const Struct* strct)
     : CppStructConstructor(strct->name()),
       strct_(strct) {
-  Add(Parameter("value", "const Json::Value&"));
+  Add(Parameter("value", "const Json::Value*"));
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
-    std::string initializer = "value[\"" + i->name() + "\"]";
+    std::string initializer =
+        format("CompositeType::ValueMember({0}, \"{1}\")",
+               parameters_[0].name,
+               i->name());
     if (i->default_value()) {
       std::string def_value = LiteralGenerator(*i->default_value()).result();
       initializer += (", " + def_value);

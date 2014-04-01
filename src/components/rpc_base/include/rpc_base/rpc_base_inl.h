@@ -433,6 +433,11 @@ bool Optional<T>::is_initialized() const {
   return value_.is_initialized();
 }
 
+template<typename T>
+bool Optional<T>::is_null() const {
+  return value_.is_null();
+}
+
 }  // namespace rpc
 
 

@@ -74,7 +74,7 @@ const char* EnumToJsonString(TestEnum enm) {
 
 TEST(ValidatedTypesJson, BooleanFromJsonTest) {
   Value val(true);
-  Boolean boolean(val);
+  Boolean boolean(&val);
   ASSERT_TRUE(boolean.is_initialized());
   ASSERT_TRUE(boolean.is_valid());
   ASSERT_EQ(boolean, true);
@@ -84,22 +84,30 @@ TEST(ValidatedTypesJson, BooleanFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, BooleanNullTest) {
-  Boolean boolean(Value::null);
+  Boolean boolean(&Value::null);
   ASSERT_TRUE(boolean.is_initialized());
   ASSERT_TRUE(boolean.is_null());
   ASSERT_FALSE(boolean.is_valid());
 }
 
+TEST(ValidatedTypesJson, BooleanAbsentValueTest) {
+  Value* novalue = NULL;
+  Boolean boolean(novalue);
+  ASSERT_FALSE(boolean.is_initialized());
+  ASSERT_FALSE(boolean.is_null());
+  ASSERT_FALSE(boolean.is_valid());
+}
+
 TEST(ValidatedTypesJson, BooleanFromInvalidJsonTest) {
   Value inv(7);
-  Boolean boolean(inv);
+  Boolean boolean(&inv);
   ASSERT_TRUE(boolean.is_initialized());
   ASSERT_FALSE(boolean.is_valid());
 }
 
 TEST(ValidatedTypesJson, IntegerFromJsonTest) {
   Value int_val(42);
-  Integer<int32_t, -5, 192> integer(int_val);
+  Integer<int32_t, -5, 192> integer(&int_val);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_TRUE(integer.is_valid());
   Value readback = integer.ToJsonValue();
@@ -108,36 +116,44 @@ TEST(ValidatedTypesJson, IntegerFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, IntegerNullTest) {
-  Integer<int32_t, -5, 192> integer(Value::null);
+  Integer<int32_t, -5, 192> integer(&Value::null);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_TRUE(integer.is_null());
   ASSERT_FALSE(integer.is_valid());
 }
 
+TEST(ValidatedTypesJson, IntegerAbsentValueTest) {
+  Value* novalue = NULL;
+  Integer<int32_t, -5, 192> integer(novalue);
+  ASSERT_FALSE(integer.is_initialized());
+  ASSERT_FALSE(integer.is_null());
+  ASSERT_FALSE(integer.is_valid());
+}
+
 TEST(ValidatedTypesJson, IntegerFromOverflowingJsonTest) {
   Value int_val(0xFFFFFFFFFFll);
-  Integer<int32_t, -5, 192> integer(int_val);
+  Integer<int32_t, -5, 192> integer(&int_val);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_FALSE(integer.is_valid());
 }
 
 TEST(ValidatedTypesJson, IntegerFromInvalidJsonTest) {
   Value str_val("Hello");
-  Integer<int8_t, -3, 15> integer(str_val);
+  Integer<int8_t, -3, 15> integer(&str_val);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_FALSE(integer.is_valid());
 }
 
 TEST(ValidatedTypesJson, IntegerFromOutOfRangeValueTest) {
   Value big_int_val(500);
-  Integer<int8_t, 0, 100> integer(big_int_val);
+  Integer<int8_t, 0, 100> integer(&big_int_val);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_FALSE(integer.is_valid());
 }
 
 TEST(ValidatedTypesJson, FloatFromJsonTest) {
   Value float_value(4.2);
-  Float<1, 7> flt(float_value);
+  Float<1, 7> flt(&float_value);
   ASSERT_TRUE(flt.is_initialized());
   ASSERT_TRUE(flt.is_valid());
   Value readback = flt.ToJsonValue();
@@ -146,22 +162,30 @@ TEST(ValidatedTypesJson, FloatFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, FloatNullTest) {
-  Float<1, 7> flt(Value::null);
+  Float<1, 7> flt(&Value::null);
   ASSERT_TRUE(flt.is_initialized());
   ASSERT_TRUE(flt.is_null());
   ASSERT_FALSE(flt.is_valid());
 }
 
+TEST(ValidatedTypesJson, FloatAbsentValueTest) {
+  Value* novalue = NULL;
+  Float<1, 7> flt(novalue);
+  ASSERT_FALSE(flt.is_initialized());
+  ASSERT_FALSE(flt.is_null());
+  ASSERT_FALSE(flt.is_valid());
+}
+
 TEST(ValidatedTypesJson, FloatFromInvalidJsonTest) {
   Value str_val("Hello");
-  Float<-5, 3> flt(str_val);
+  Float<-5, 3> flt(&str_val);
   ASSERT_TRUE(flt.is_initialized());
   ASSERT_FALSE(flt.is_valid());
 }
 
 TEST(ValidatedTypesJson, StringFromJsonTest) {
   Value str_val("Hello");
-  String<1, 42> str(str_val);
+  String<1, 42> str(&str_val);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_TRUE(str.is_valid());
   Value readback = str.ToJsonValue();
@@ -170,7 +194,7 @@ TEST(ValidatedTypesJson, StringFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, StringNullTest) {
-  String<1, 42> str(Value::null);
+  String<1, 42> str(&Value::null);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_TRUE(str.is_null());
   ASSERT_FALSE(str.is_valid());
@@ -178,21 +202,29 @@ TEST(ValidatedTypesJson, StringNullTest) {
 
 TEST(ValidatedTypesJson, StringFromInvalidJsonTest) {
   Value int_val(42);
-  String<1, 500> str(int_val);
+  String<1, 500> str(&int_val);
   ASSERT_TRUE(str.is_initialized());
+  ASSERT_FALSE(str.is_valid());
+}
+
+TEST(ValidatedTypesJson, StringAbsentValueTest) {
+  Value* novalue = NULL;
+  String<1, 500> str(novalue);
+  ASSERT_FALSE(str.is_initialized());
+  ASSERT_FALSE(str.is_null());
   ASSERT_FALSE(str.is_valid());
 }
 
 TEST(ValidatedTypesJson, StringFromToLongJsonString) {
   Value str_val("Too long string");
-  String<1, 5> str(str_val);
+  String<1, 5> str(&str_val);
   ASSERT_TRUE(str.is_initialized());
   ASSERT_FALSE(str.is_valid());
 }
 
 TEST(ValidatedTypesJson, EnumFromJsonTest) {
   Value str_enum("kValue1");
-  Enum<TestEnum> enm(str_enum);
+  Enum<TestEnum> enm(&str_enum);
   ASSERT_TRUE(enm.is_initialized());
   ASSERT_TRUE(enm.is_valid());
   Value readback = enm.ToJsonValue();
@@ -201,15 +233,23 @@ TEST(ValidatedTypesJson, EnumFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, EnumNullTest) {
-  Enum<TestEnum> enm(Value::null);
+  Enum<TestEnum> enm(&Value::null);
   ASSERT_TRUE(enm.is_initialized());
   ASSERT_TRUE(enm.is_null());
   ASSERT_FALSE(enm.is_valid());
 }
 
+TEST(ValidatedTypesJson, EnumAbsentValueTest) {
+  Value* novalue = NULL;
+  Enum<TestEnum> enm(novalue);
+  ASSERT_FALSE(enm.is_initialized());
+  ASSERT_FALSE(enm.is_null());
+  ASSERT_FALSE(enm.is_valid());
+}
+
 TEST(ValidatedTypesJson, EnumFromInvalidJsonTest) {
   Value str_value("Random string");
-  Enum<TestEnum> enm(str_value);
+  Enum<TestEnum> enm(&str_value);
   ASSERT_TRUE(enm.is_initialized());
   ASSERT_FALSE(enm.is_valid());
 }
@@ -218,7 +258,7 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
   Value array_value;
   array_value.append(Value("haha"));
   array_value.append(Value("hoho"));
-  Array<String<1, 32>, 2, 5> arr(array_value);
+  Array<String<1, 32>, 2, 5> arr(&array_value);
   ASSERT_TRUE(arr.is_initialized());
   ASSERT_TRUE(arr.is_valid());
   Value readback = arr.ToJsonValue();
@@ -227,24 +267,40 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
 }
 
 TEST(ValidatedTypesJson, ArrayNullTest) {
-  Array<String<1, 32>, 2, 5> arr(Value::null);
+  Array<String<1, 32>, 2, 5> arr(&Value::null);
   ASSERT_TRUE(arr.is_initialized());
   ASSERT_TRUE(arr.is_null());
   ASSERT_FALSE(arr.is_valid());
 }
 
+TEST(ValidatedTypesJson, ArrayAbsentValueTest) {
+  Value* novalue = NULL;
+  Array<String<1, 32>, 2, 5> arr(novalue);
+  ASSERT_FALSE(arr.is_initialized());
+  ASSERT_FALSE(arr.is_null());
+  ASSERT_FALSE(arr.is_valid());
+}
+
 TEST(ValidatedTypesJson, MapNullTest) {
-  Map<String<1, 32>, 2, 5> map(Value::null);
+  Map<String<1, 32>, 2, 5> map(&Value::null);
   ASSERT_TRUE(map.is_initialized());
   ASSERT_TRUE(map.is_null());
   ASSERT_FALSE(map.is_valid());
+}
+
+TEST(ValidatedTypesJson, MapAbsentValueTest) {
+  Value* novalue = NULL;
+  Map<String<1, 32>, 0, 5> map(novalue);
+  ASSERT_FALSE(map.is_initialized());
+  ASSERT_FALSE(map.is_null());
+  ASSERT_TRUE(map.is_valid());
 }
 
 TEST(ValidatedTypesJson, ArrayFromInvalidJsonTest) {
   Value array_value;
   array_value.append(Value("Hello"));
   array_value.append(Value("World"));
-  Array<Integer<int8_t, 0, 32>, 2, 4> int_array(array_value);
+  Array<Integer<int8_t, 0, 32>, 2, 4> int_array(&array_value);
   ASSERT_TRUE(int_array.is_initialized());
   ASSERT_FALSE(int_array.is_valid());
   ASSERT_EQ(int_array.size(), array_value.size());
@@ -253,7 +309,7 @@ TEST(ValidatedTypesJson, ArrayFromInvalidJsonTest) {
 TEST(ValidatedTypesJson, OptionalBoolFromJsonTest) {
   Value bool_value(true);
   Optional< Boolean > optional_bool;
-  *optional_bool = Boolean(bool_value);
+  *optional_bool = Boolean(&bool_value);
   ASSERT_TRUE(optional_bool.is_initialized());
   ASSERT_TRUE(optional_bool.is_valid());
   Value readback = optional_bool->ToJsonValue();
@@ -261,10 +317,38 @@ TEST(ValidatedTypesJson, OptionalBoolFromJsonTest) {
   ASSERT_EQ(readback.asBool(), true);
 }
 
+TEST(ValidatedTypesJson, OptionalBoolFromAbsentValueTest) {
+  Value* none = NULL;
+  Optional< Boolean > optional_bool;
+  *optional_bool = Boolean(none);
+  ASSERT_FALSE(optional_bool.is_null());
+  ASSERT_FALSE(optional_bool.is_initialized());
+  // It is ok for Optional value to be absent
+  ASSERT_TRUE(optional_bool.is_valid());
+}
+
+TEST(ValidatedTypesJson, OptionalBoolFromNullValueTest) {
+  Optional< Boolean > optional_bool;
+  *optional_bool = Boolean(&Value::null);
+  ASSERT_TRUE(optional_bool.is_null());
+  ASSERT_TRUE(optional_bool.is_initialized());
+  // Optional values should not be absent
+  ASSERT_FALSE(optional_bool.is_valid());
+}
+
+TEST(ValidatedTypesJson, MandatoryBoolFromAbsentValueTest) {
+  Value* none = NULL;
+  Mandatory< Boolean > mandatory_bool;
+  mandatory_bool = Boolean(none);
+  ASSERT_FALSE(mandatory_bool.is_null());
+  ASSERT_FALSE(mandatory_bool.is_initialized());
+  ASSERT_FALSE(mandatory_bool.is_valid());
+}
+
 TEST(ValidatedTypesJson, OptionalIntFromJsonTest) {
   Value int_value(42);
   Optional< Integer<int64_t, 42, 43> > optional_int;
-  *optional_int = Integer<int64_t, 42, 43> (int_value);
+  *optional_int = Integer<int64_t, 42, 43> (&int_value);
   ASSERT_TRUE(optional_int.is_initialized());
   ASSERT_TRUE(optional_int.is_valid());
   Value readback = optional_int->ToJsonValue();

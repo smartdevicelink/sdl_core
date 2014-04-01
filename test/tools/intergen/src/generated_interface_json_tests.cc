@@ -7,6 +7,7 @@
 
 namespace test {
 using namespace rpc::test_rpc_interface;
+using Json::Value;
 
 class TestRequestHandlerMock: public request::Handler {
 public:
@@ -28,7 +29,8 @@ class GeneratedInterfaceTests: public ::testing::Test {
 
 TEST_F(GeneratedInterfaceTests, ScrollableMessageTest) {
   const char* org_json = "{\"reason\":\"MASTER_RESET\"}\n";
-  notification::OnAppInterfaceUnregistered oaiu(JsonValue(org_json));
+  Value json_value = JsonValue(org_json);
+  notification::OnAppInterfaceUnregistered oaiu(&json_value);
   ASSERT_TRUE(oaiu.is_initialized());
   ASSERT_TRUE(oaiu.is_valid());
 
@@ -47,7 +49,8 @@ TEST_F(GeneratedInterfaceTests, FunctionWithoutParams) {
 TEST_F(GeneratedInterfaceTests, DefValueTest) {
   const char* org_json = "{\"menuID\":2,\"menuName\":\"Hello\"}";
   const char* awaited_json = "{\"menuID\":2,\"menuName\":\"Hello\",\"position\":1000}\n";
-  request::AddSubMenu aasm(JsonValue(org_json));
+  Value json_value = JsonValue(org_json);
+  request::AddSubMenu aasm(&json_value);
   ASSERT_TRUE(aasm.is_initialized());
   ASSERT_TRUE(aasm.is_valid());
   ASSERT_EQ(aasm.position, 1000);
@@ -90,7 +93,8 @@ TEST_F(GeneratedInterfaceTests, TypedefTest) {
 TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest) {
   const char* input_json =
       "{\"messageData\":[300, 20],\"messageLength\":2,\"targetID\":5}";
-  request::DiagnosticMessage dm(JsonValue(input_json));
+  Value json_value = JsonValue(input_json);
+  request::DiagnosticMessage dm(&json_value);
   ASSERT_TRUE(dm.is_initialized());
   ASSERT_FALSE(dm.is_valid());
 }
@@ -98,7 +102,8 @@ TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest) {
 TEST_F(GeneratedInterfaceTests, OverflowedDiagnosticMessageTest64) {
   const char* input_json =
       "{\"messageData\":[10, 123456789123],\"messageLength\":2,\"targetID\":5}";
-  request::DiagnosticMessage dm(JsonValue(input_json));
+  Value json_value = JsonValue(input_json);
+  request::DiagnosticMessage dm(&json_value);
   ASSERT_TRUE(dm.is_initialized());
   ASSERT_FALSE(dm.is_valid());
 }

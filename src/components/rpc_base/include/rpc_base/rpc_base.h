@@ -105,6 +105,8 @@ class PrimitiveType {
  */
 class CompositeType {
  public:
+  static const Json::Value* ValueMember(const Json::Value* value,
+                                        const char* member_name);
   template<class T, size_t minsize, size_t maxsize>
   static void WriteJsonField(const char* field_name,
                              const Array<T, minsize, maxsize>& field,
@@ -132,10 +134,9 @@ class Boolean : public PrimitiveType {
   // Methods
   Boolean();
   explicit Boolean(bool value);
-  explicit Boolean(const Json::Value& value);
+  explicit Boolean(const Json::Value* value);
   explicit Boolean(dbus::MessageReader* reader);
-  Boolean(const Json::Value& value, bool def_value);
-
+  Boolean(const Json::Value* value, bool def_value);
   Boolean& operator=(bool new_val);
   operator bool() const;
   Json::Value ToJsonValue() const;
@@ -155,9 +156,9 @@ class Integer : public PrimitiveType {
   // Methods
   Integer();
   explicit Integer(IntType value);
-  explicit Integer(const Json::Value& value);
+  explicit Integer(const Json::Value* value);
   explicit Integer(dbus::MessageReader* reader);
-  Integer(const Json::Value& value, IntType def_value);
+  Integer(const Json::Value* value, IntType def_value);
   Integer& operator=(IntType new_val);
   operator IntType() const;
   Json::Value ToJsonValue() const;
@@ -174,9 +175,9 @@ class Float : public PrimitiveType {
   // Methods
   Float();
   explicit Float(double value);
-  explicit Float(const Json::Value& value);
+  explicit Float(const Json::Value* value);
   explicit Float(dbus::MessageReader* reader);
-  Float(const Json::Value& value, double def_value);
+  Float(const Json::Value* value, double def_value);
   Float& operator=(double new_val);
   operator double() const;
   Json::Value ToJsonValue() const;
@@ -194,9 +195,9 @@ class String : public PrimitiveType {
   String();
   explicit String(const std::string& value);
   explicit String(const char* value);
-  explicit String(const Json::Value& value);
+  explicit String(const Json::Value* value);
   explicit String(dbus::MessageReader* reader);
-  String(const Json::Value& value, const std::string& def_value);
+  String(const Json::Value* value, const std::string& def_value);
   String& operator=(const std::string& new_val);
   operator const std::string&() const;
   Json::Value ToJsonValue() const;
@@ -216,9 +217,9 @@ class Enum : public PrimitiveType {
   // Methods
   Enum();
   explicit Enum(EnumType value);
-  explicit Enum(const Json::Value& value);
+  explicit Enum(const Json::Value* value);
   explicit Enum(dbus::MessageReader* reader);
-  Enum(const Json::Value& value, EnumType def_value);
+  Enum(const Json::Value* value, EnumType def_value);
   Enum& operator=(EnumType new_val);
   operator EnumType() const;
   Json::Value ToJsonValue() const;
@@ -237,7 +238,9 @@ class Array : public std::vector<T> {
  public:
   // Methods
   Array();
-  explicit Array(const Json::Value& value);
+  // Need const and non-const versions to beat all-type accepting constructor
+  explicit Array(Json::Value* value);
+  explicit Array(const Json::Value* value);
   explicit Array(dbus::MessageReader* reader);
   template<typename U>
   explicit Array(const U& value);
@@ -265,7 +268,9 @@ class Map : public std::map<std::string, T> {
  public:
   // Methods
   Map();
-  explicit Map(const Json::Value& value);
+  // Need const and non-const versions to beat all-type accepting constructor
+  explicit Map(Json::Value* value);
+  explicit Map(const Json::Value* value);
   explicit Map(dbus::MessageReader* reader);
   template<typename U>
   explicit Map(const U& value);
@@ -293,7 +298,7 @@ class Mandatory : public T {
   template<typename U>
   explicit Mandatory(const U& value);
   template<typename U>
-  Mandatory(const Json::Value& value, const U& def_value);
+  Mandatory(const Json::Value* value, const U& def_value);
   template<typename U>
   Mandatory& operator=(const U& new_val);
 
@@ -309,7 +314,7 @@ class Optional {
   template<typename U>
   explicit Optional(const U& value);
   template<typename U>
-  Optional(const Json::Value& value,const U& def_value);
+  Optional(const Json::Value* value,const U& def_value);
 
   void ToDbusWriter(dbus::MessageWriter* writer) const;
 
@@ -325,6 +330,7 @@ class Optional {
 
   bool is_valid() const;
   bool is_initialized() const;
+  bool is_null() const;
  private:
   T value_;
 };
