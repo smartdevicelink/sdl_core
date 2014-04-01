@@ -53,6 +53,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        TestCommon.setupMocking(this);
         listenerALM = mock(IProxyListenerALM.class);
     }
 
