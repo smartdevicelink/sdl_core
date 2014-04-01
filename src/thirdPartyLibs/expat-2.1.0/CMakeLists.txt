@@ -10,9 +10,9 @@ set(PACKAGE_VERSION "2.1.0")
 set(PACKAGE_STRING "${PACKAGE_NAME} ${PACKAGE_VERSION}")
 set(PACKAGE_TARNAME "${PACKAGE_NAME}")
 
-option(BUILD_tools "build the xmlwf tool for expat library" ON)
-option(BUILD_examples "build the examples for expat library" ON)
-option(BUILD_tests "build the tests for expat library" ON)
+option(BUILD_tools "build the xmlwf tool for expat library" OFF)
+option(BUILD_examples "build the examples for expat library" OFF)
+option(BUILD_tests "build the tests for expat library" OFF)
 option(BUILD_shared "build a shared expat library" ON)
 
 # configuration options
