@@ -8,7 +8,7 @@ find_package(LibXML2 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
+
 #add_subdirectory(./tools)
 
 
@@ -19,6 +19,7 @@ include_directories (
   ../src/thirdPartyLibs/MessageBroker/include
   ../src/appMain
   ../src/components/application_manager/include
+  ../src/components/policies/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
@@ -111,7 +112,7 @@ set(LIBRARIES
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
-    #policy
+    policies
     ProtocolHandler
     Utils
     ConfigProfile
@@ -144,10 +145,6 @@ set(LIBRARIES
     Resumption
 )
 endif(BUILD_TESTS_WITH_HMI)
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES dl)
-endif()
 
 
 if (BUILD_USB_SUPPORT)

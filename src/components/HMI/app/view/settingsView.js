@@ -39,58 +39,15 @@ SDL.SettingsView = Em.ContainerView.create( {
         'SDL.States.settings.active:active_state:inactive_state'
     ],
 
-    /** Settings components */
-    childViews:
-        [
-            'leftMenu',
-            SDL.PoliciesView,
-            SDL.DeviceConfigView,
-            SDL.StatisticsInfoView
-        ],
+    childViews: [
+        'windowText'
+    ],
 
-    /** Left menu */
-    leftMenu: Em.ContainerView.extend( {
-        elementId: 'settings_leftMenu',
+    windowText: SDL.Label.extend( {
 
-        classNameBindings:
-            [
-                'parentView.controller.hiddenLeftMenu:hidden'
-            ],
+        classNames: 'windowText',
 
-        classNames: 'menu-items',
-
-        childViews:
-            [
-                'border',
-                'items'
-            ],
-
-        border: Em.View.extend( {
-            classNames: 'ls_border'
-        } ),
-
-        items: Em.ContainerView.extend( {
-            classNames: 'ls-items',
-
-            childViews:
-                [
-                    'policies'
-                ],
-
-            policies: SDL.Button.extend( {
-                elementId: 'policies_leftMenu',
-                goToState: 'policies',
-                classNames: 'menu-item lsp1_p',
-                classNameBindings:
-                    [
-                        'SDL.States.settings.policies.active:info_active'
-                    ],
-                text: 'Policies',
-                icon: 'images/settings/ico_settings.png',
-                action: 'onState',
-                target: 'SDL.SettingsController'
-            } )
-        } )
-    } )
+        content: 'Settings'
+    })
 
 });

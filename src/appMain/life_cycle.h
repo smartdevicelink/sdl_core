@@ -51,6 +51,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
+#include "policies/policy_manager_impl.h"
 #include "utils/singleton.h"
 
 #ifdef MESSAGEBROKER_HMIADAPTER
@@ -88,6 +89,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // MESSAGEBROKER_HMIADAPTER
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
+    policies::PolicyManagerImpl* policy_manager_;
 
 #ifdef MESSAGEBROKER_HMIADAPTER
     NsMessageBroker::CMessageBroker* message_broker_;

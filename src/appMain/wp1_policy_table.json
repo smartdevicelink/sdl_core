@@ -1,0 +1,198 @@
+{
+   "policy_table" : {
+      "app_policies" : {
+         "789" : {
+            "groups" : [ "Notifications", "Base-4" ],
+            "nicknames" : [ "Music App" ],
+            "priority" : 1
+         },
+         "default" : {
+            "groups" : [ "Base-4" ],
+            "priority" : 1
+         }
+      },
+      "functional_groupings" : {
+         "Base-4" : {
+            "rpcs" : {
+               "AddCommandID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "AddSubMenuID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "AlertID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "AlertManeuverID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ChangeRegistrationID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "CreateInteractionChoiceSetID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteCommandID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteFileID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "DeleteInteractionChoiceSetID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DeleteSubMenuID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "DialNumberID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "DiagnosticMessageID":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },
+               "SystemRequestID":{
+                  "hmi_levels":[
+                     "BACKGROUND",
+                     "FULL",
+                     "LIMITED"
+                  ]
+               },	
+               "EncodedSyncPDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "EndAudioPassThruID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "GenericResponseID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "GetDTCsID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "GetVehicleDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ListFilesID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnAppInterfaceUnregisteredID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnAudioPassThruID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "OnButtonEventID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnButtonPressID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnCommandID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "OnDriverDistractionID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "OnEncodedSyncPDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnHMIStatusID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnLanguageChangeID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnPermissionsChangeID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnSyncPDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "OnTBTClientStateID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "OnVehicleDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "PerformAudioPassThruID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "PerformInteractionID" : {
+                  "hmi_levels" : [ "FULL" ]
+               },
+               "PutFileID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "ReadDIDID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "RegisterAppInterfaceID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "ResetGlobalPropertiesID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ScrollableMessageID" : {
+                  "hmi_levels" : [ "FULL" ]
+               },
+               "SetAppIconID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetDisplayLayoutID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "SetGlobalPropertiesID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SetMediaClockTimerID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "ShowConstantTBTID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "ShowID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SliderID" : {
+                  "hmi_levels" : [ "FULL" ]
+               },
+               "SpeakID" : {
+                  "hmi_levels" : [ "FULL", "LIMITED" ]
+               },
+               "SubscribeButtonID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SubscribeVehicleDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "SyncPDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "UnregisterAppInterfaceID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED", "NONE" ]
+               },
+               "UnsubscribeButtonID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "UnsubscribeVehicleDataID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               },
+               "UpdateTurnListID" : {
+                  "hmi_levels" : [ "BACKGROUND", "FULL", "LIMITED" ]
+               }
+            }
+         }
+      },
+      "module_config" : {
+         "endpoints" : {
+            "0x07" : {
+               "default" : [ "http://applinkqa.trafficmanager.net/api/policies" ]
+            }
+         }
+      }
+   }
+}

@@ -63,7 +63,7 @@ class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
  private:
   void UpdateList();
   void TurnIntoAccessoryMode(PlatformUsbDevice* device);
-  void SupportedDeviceFound(PlatformUsbDevice* device);
+  void GoogleAccessoryFound(PlatformUsbDevice* device);
 
   TransportAdapterController* controller_;
 

@@ -149,7 +149,6 @@ const char audio_pass_thru_capabilities[] = "audioPassThruCapabilities";
 const char sync_file_name[] = "syncFileName";
 const char file_name[] = "fileName";
 const char file_type[] = "fileType";
-const char request_type[] = "requestType";
 const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";
 const char space_available[] = "spaceAvailable";
@@ -237,15 +236,7 @@ const char manual_text_entry[] = "manualTextEntry";
 namespace mobile_notification {
 const char state[] = "state";
 const char syncp_timeout[] = "Timeout";
-const char syncp_url[] = "URL";
 }  // namespace mobile_notification
-
-namespace hmi_levels {
-const char kFull[] = "FULL";
-const char kLimited[] = "LIMITED";
-const char kBackground[] = "BACKGROUND";
-const char kNone[] = "NONE";
-}
 
 namespace hmi_request {
 const char parent_id[] = "parentID";

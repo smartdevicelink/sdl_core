@@ -23,12 +23,6 @@ if (BUILD_BACKTRACE_SUPPORT)
     )
 endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    list(APPEND SOURCES
-    ./src/threads/pulse_thread_delegate.cc
-    )
-endif()
-
 add_library("Utils" ${SOURCES})
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
