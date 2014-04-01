@@ -28,29 +28,22 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- jsoncpp
-add_subdirectory(./jsoncpp)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
+    set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
+  else ()
+    set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  endif ()
 
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
-
-# --- encryption
-add_subdirectory(./encryption)
-
-if (BUILD_USB_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-add_subdirectory(./libusbx-1.0.16)
-endif()
-endif()
-
-# --- libapr-1
-add_subdirectory(apr-1.5.0)
-
-# --- libexpat
-add_subdirectory(expat-2.1.0)
-
-# --- apr-util
-add_subdirectory(apr-util-1.5.3)
-
-# --- log4cxx
-add_subdirectory(apache-log4cxx-0.10.0)
+  add_custom_target(liblog4cxx ALL CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=${CMAKE_INSTALL_PREFIX} --host=${ARCHITECTURE}-nto-qnx --with-apr=${CMAKE_INSTALL_PREFIX} --with-apr-util=${CMAKE_INSTALL_PREFIX}
+    COMMAND make
+    DEPENDS libapr-1
+    DEPENDS apr-util
+  )
+else ()
+  add_custom_target(liblog4cxx ./configure --prefix=${CMAKE_INSTALL_PREFIX}
+    COMMAND make
+    DEPENDS libapr-1
+    DEPENDS apr-util
+  )
+endif ()
