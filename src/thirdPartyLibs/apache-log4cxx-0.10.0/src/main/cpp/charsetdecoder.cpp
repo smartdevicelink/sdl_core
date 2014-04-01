@@ -476,7 +476,7 @@ CharsetDecoderPtr CharsetDecoder::getDecoder(const LogString& charset) {
         StringHelper::equalsIgnoreCase(charset, LOG4CXX_STR("ISO-LATIN-1"), LOG4CXX_STR("iso-latin-1"))) {
         return new ISOLatinCharsetDecoder();
     }
-#if APR_HAS_XLATE || !defined(_WIN32)
+#if APR_HAS_XLATE
     return new APRCharsetDecoder(charset);
 #else    
     throw IllegalArgumentException(charset);

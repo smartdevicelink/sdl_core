@@ -484,7 +484,7 @@ CharsetEncoderPtr CharsetEncoder::getEncoder(const LogString& charset) {
     } else if (StringHelper::equalsIgnoreCase(charset, LOG4CXX_STR("UTF-16LE"), LOG4CXX_STR("utf-16le"))) {
         return new UTF16LECharsetEncoder();
     }
-#if APR_HAS_XLATE || !defined(_WIN32)
+#if APR_HAS_XLATE
     return new APRCharsetEncoder(charset);
 #else    
     throw IllegalArgumentException(charset);

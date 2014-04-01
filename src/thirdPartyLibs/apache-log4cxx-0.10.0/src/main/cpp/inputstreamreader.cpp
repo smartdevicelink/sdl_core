@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+#include <string.h>
 #include <log4cxx/logstring.h>
 #include <log4cxx/helpers/inputstreamreader.h>
 #include <log4cxx/helpers/exception.h>
