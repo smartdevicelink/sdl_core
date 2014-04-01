@@ -94,9 +94,10 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-
+  uint32_t grammar_id = ApplicationManagerImpl::instance()->GetGrammarID();
+  (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
-
+  SendVRAddCommandRequest(app);
   SendResponse(true, result_);
   app->UpdateHash();
 }
@@ -236,6 +237,30 @@ bool CreateInteractionChoiceSetRequest::compareStr(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
 
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
+}
+
+void CreateInteractionChoiceSetRequest::SendVRAddCommandRequest(
+    application_manager::ApplicationSharedPtr const app) {
+
+  smart_objects::SmartObject* choice_set = &(*message_)[strings::msg_params];
+
+  for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+                                              smart_objects::SmartType_Map);
+    msg_params[strings::app_id] = app->app_id();
+    msg_params[strings::cmd_id] =
+        (*choice_set)[strings::choice_set][j][strings::choice_id];
+    msg_params[strings::vr_commands] = smart_objects::SmartObject(
+                                         smart_objects::SmartType_Array);
+    msg_params[strings::vr_commands] =
+        (*choice_set)[strings::choice_set][j][strings::vr_commands];
+
+    msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
+    msg_params[strings::grammar_id] =  (*choice_set)[strings::grammar_id];
+
+    SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
+  }
+
 }
 
 

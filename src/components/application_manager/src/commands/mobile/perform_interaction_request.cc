@@ -155,7 +155,6 @@ void PerformInteractionRequest::Run() {
       }
 
       app->set_perform_interaction_active(correlation_id);
-      SendVRAddCommandRequest(app);
       SendTTSPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -183,7 +182,6 @@ void PerformInteractionRequest::Run() {
 
       // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(correlation_id);
-      SendVRAddCommandRequest(app);
       SendTTSPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -384,44 +382,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   SendResponse(result, result_code, return_info, &(msg_params));
 }
 
-void PerformInteractionRequest::SendVRAddCommandRequest(
-    application_manager::ApplicationSharedPtr const app) {
-  smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  mobile_apis::InteractionMode::eType mode =
-      static_cast<mobile_apis::InteractionMode::eType>(
-      (*message_)[strings::msg_params][strings::interaction_mode].asInt());
-
-  if (mobile_apis::InteractionMode::VR_ONLY == mode) {
-    // TODO(DK): We need subscribe perform interaction with on command
-    // notification
-    /*CreateHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
-     smart_objects::SmartObject(smart_objects::SmartType_Map), true, 1);*/
-  }
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set = app->FindChoiceSet(
-        choice_list[i].asInt());
-
-    if (choice_set) {
-      for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
-        smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
-        msg_params[strings::app_id] = app->app_id();
-        msg_params[strings::cmd_id] =
-            (*choice_set)[strings::choice_set][j][strings::choice_id];
-        msg_params[strings::vr_commands] = smart_objects::SmartObject(
-            smart_objects::SmartType_Array);
-        msg_params[strings::vr_commands] =
-            (*choice_set)[strings::choice_set][j][strings::vr_commands];
-
-        msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-        SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
-      }
-    }
-  }
-}
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {
@@ -532,6 +493,9 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     int32_t index = 0;
+    int32_t grammar_id_index = 0;
+
+    msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
@@ -549,6 +513,9 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
             msg_params[strings::help_prompt][index++] = item;
           }
         }
+         msg_params[strings::grammar_id][grammar_id_index++]= (*choice_set)[strings::grammar_id];
+      } else {
+        LOG4CXX_ERROR(logger_, "Can't found choiset!")
       }
     }
   }
@@ -733,12 +700,6 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 
   if (app->is_perform_interaction_active()) {
     app->set_perform_interaction_active(0);
-
-    if (static_cast<int32_t>(mobile_apis::InteractionMode::MANUAL_ONLY)
-        != app->perform_interaction_mode()) {
-      SendVrDeleteCommand(app);
-    }
-
     app->set_perform_interaction_mode(-1);
     app->DeletePerformInteractionChoiceSetMap();
   }

@@ -36,6 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 

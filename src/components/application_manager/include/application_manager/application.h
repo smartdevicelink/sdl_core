@@ -76,7 +76,7 @@ struct AppFile {
     AppFile() {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
-          mobile_apis::FileType::eType  type)
+          mobile_apis::FileType::eType type)
       : is_persistent(persistent),
         is_download_complete(download_complete),
         file_name(name),

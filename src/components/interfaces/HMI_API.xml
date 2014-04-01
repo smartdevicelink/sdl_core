@@ -950,7 +950,8 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
   </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1920,6 +1921,7 @@
         <description>Must be true if allowed</description>
       </param>
     </function>
+
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
@@ -1942,7 +1944,14 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>File reference name.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
+      </param>
     </function>
+
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
     </function>

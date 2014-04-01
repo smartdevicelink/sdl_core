@@ -60,7 +60,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0) {
-  srand(time(NULL));
 }
 
 ApplicationImpl::~ApplicationImpl() {

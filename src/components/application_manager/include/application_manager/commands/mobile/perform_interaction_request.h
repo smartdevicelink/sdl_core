@@ -129,13 +129,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void ProcessPerformInteractionResponse
   (const smart_objects::SmartObject& message);
 
-  /*
-   * @brief Sends VR AddCommand request to HMI
-   *
-   * @param app_id Application ID
-   *
-   */
-  void SendVRAddCommandRequest(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI

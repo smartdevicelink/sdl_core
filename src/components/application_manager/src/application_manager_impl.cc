@@ -88,6 +88,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     resume_ctrl_(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
+  srand(time(NULL));
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -741,6 +742,10 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
   }
 
   return false;
+}
+
+uint32_t ApplicationManagerImpl::GetGrammarID() {
+  return rand();
 }
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(

@@ -116,10 +116,7 @@ void PutFileRequest::Run() {
   if (offset_exist) {
     offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
   }
-  if ((*message_)[strings::msg_params].keyExists(strings::length)) {
-      length_ =
-            (*message_)[strings::msg_params][strings::length].asInt();
-  }
+
   if ((*message_)[strings::msg_params].
       keyExists(strings::persistent_file)) {
     is_persistent_file_ =
@@ -194,18 +191,8 @@ void PutFileRequest::Run() {
           application->increment_put_file_in_none_count();
         }
       }
-//      For future implementation ( when length will contains file size)
-//      if (offset + binary_data.size() == length) {
-//        LOG4CXX_INFO(logger_, "File is Fully downloaded");
-//        if (!application->UpdateFile(file)) {
-//          // If it is impossible to update file, application doesn't know about existing this file
-//          SendResponse(false, mobile_apis::Result::INVALID_DATA);
-//          return;
-//        }
-//      } else {
-//        //TODO: Maybe need to save in AppFile information about downloading progress
-//      }
-      SendResponse(true, save_result, "File downloaded", &response_params);
+
+      SendResponse(true, save_result, "File is downloaded", &response_params);
       if (is_system_file) {
         SendOnPutFileNotification();
       }
@@ -219,7 +206,7 @@ void PutFileRequest::Run() {
 }
 
 void PutFileRequest::SendOnPutFileNotification() {
-
+  LOG4CXX_INFO(logger_, "SendOnPutFileNotification" );
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -231,13 +218,13 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::app_id] = connection_key();
   message[strings::msg_params][strings::sync_file_name] = sync_file_name_;
   message[strings::msg_params][strings::offset] = offset_;
+  if ( offset_ == 0 ) {
+    message[strings::msg_params][strings::file_size] =
+        (*message_)[strings::msg_params][strings::length];
+  }
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
-
-
-
-
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 

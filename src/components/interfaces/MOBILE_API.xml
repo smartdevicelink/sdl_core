@@ -2063,7 +2063,8 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
   </enum>
 
   <enum name="AppHMIType">
@@ -4783,7 +4784,7 @@
     </param>
     <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
        <description>Optional length in bytes for resuming partial data chunks</description>
-    </param>    
+    </param>
   </function>	
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->

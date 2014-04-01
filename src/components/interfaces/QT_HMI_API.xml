@@ -950,7 +950,8 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
   </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1948,6 +1949,12 @@
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>File reference name.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
 
