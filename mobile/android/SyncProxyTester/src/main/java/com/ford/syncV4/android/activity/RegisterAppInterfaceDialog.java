@@ -18,20 +18,12 @@ import android.widget.Spinner;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
-<<<<<<< HEAD
-import com.ford.syncV4.android.manager.AppPreferencesManager;
-=======
 import com.ford.syncV4.proxy.rpc.DeviceInfo;
->>>>>>> develop
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-<<<<<<< HEAD
-import com.stericson.RootTools.RootTools;
-=======
 import com.ford.syncV4.util.DeviceInfoManager;
->>>>>>> develop
 
 import java.util.Arrays;
 import java.util.Vector;

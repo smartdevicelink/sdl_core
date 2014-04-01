@@ -381,14 +381,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     appID = AppPreferencesManager.getCustomAppId();
                 }
 
-<<<<<<< HEAD
                 mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
-=======
+
                 SyncProxyConfigurationResources syncProxyConfigurationResources =
                         new SyncProxyConfigurationResources();
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
->>>>>>> develop
+
 
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources/*sync proxy configuration resources*/,

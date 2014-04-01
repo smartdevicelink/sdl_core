@@ -627,9 +627,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         Log.d(TAG, "SetSessionId:" + mSessionId);
     }
 
-<<<<<<< HEAD
-
-=======
     private void processTransportStopReading() {
         if (_transport == null) {
             Log.w(TAG, "Process Transport Stop Reading - transport is NULL");
@@ -654,5 +651,5 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         //_transport.stopReading();
     }
->>>>>>> develop
+
 }

@@ -109,13 +109,9 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DebugTool;
-<<<<<<< HEAD
 import com.stericson.RootTools.RootTools;
-=======
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.DeviceInfoManager;
->>>>>>> develop
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -177,13 +173,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private static final int POLICIES_CORRELATION_ID = 65535;
 
     private IRPCMessageHandler rpcMessageHandler;
-
-<<<<<<< HEAD
-=======
     private int mRegisterAppInterfaceCorrelationId = REGISTER_APP_INTERFACE_CORRELATION_ID;
     private int mUnregisterAppInterfaceCorrelationId = UNREGISTER_APP_INTERFACE_CORRELATION_ID;
     private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
->>>>>>> develop
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
         return _advancedLifecycleManagementEnabled;
@@ -637,18 +629,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Get information from syncProxyConfigurationResources
         setupTelephoneManager(syncProxyConfigurationResources);
         setupMessageDispatchers();
-<<<<<<< HEAD
+
 
         if (mTestConfig.isDoRootDeviceCheck() && RootTools.isRootAvailable()) {
             throw new SyncException("Rooted device detected.", SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED);
         } else {
             tryInitialiseProxy();
         }
-=======
-        tryInitialiseProxy();
 
         mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
->>>>>>> develop
+
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
@@ -710,30 +700,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         setupMessageDispatchers();
 
-<<<<<<< HEAD
+
         if (mTestConfig.isDoRootDeviceCheck() && RootTools.isRootAvailable()) {
             throw new SyncException("Rooted device detected.", SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED);
         } else {
             tryInitialiseProxy();
         }
-=======
+
         mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
->>>>>>> develop
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
     }
 
-<<<<<<< HEAD
-    private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName,
-                                                      String ngnMediaScreenAppName,
-                                                      Vector<String> vrSynonyms, Boolean isMediaApp,
-                                                      SyncMsgVersion syncMsgVersion,
-                                                      Language languageDesired,
-                                                      Language hmiDisplayLanguageDesired,
-                                                      Vector<AppHMIType> appHMIType, String appID,
-                                                      String autoActivateID) {
-=======
+
+
+
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
         _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
         _applicationName = registerAppInterface.getAppName();
@@ -751,7 +733,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void updateRegisterAppInterfaceParameters(String appName, Vector<TTSChunk> ttsName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID, String autoActivateID) {
->>>>>>> develop
+
         _applicationName = appName;
         _ttsName = ttsName;
         _ngnMediaScreenAppName = ngnMediaScreenAppName;
@@ -2084,8 +2066,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void restartRPCProtocolSession() {
         // Set Proxy Lifecycle Available
         if (_advancedLifecycleManagementEnabled) {
-<<<<<<< HEAD
-=======
 
             // For the Test Cases
             Log.d(TAG, "RestartRPCProtocolSession config: " + mTestConfig);
@@ -2107,7 +2087,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
 
->>>>>>> develop
             try {
                 registerAppInterfacePrivate(
                         _syncMsgVersionRequest,
@@ -2797,13 +2776,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
-<<<<<<< HEAD
-                languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID,
-                hashId);
-=======
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appID, correlationID, hashId,
                 deviceInfo);
->>>>>>> develop
+
 
         sendRPCRequestPrivate(msg);
 
@@ -3280,22 +3255,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _autoActivateIdReturned;
     }
 
-<<<<<<< HEAD
-    public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
-        _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
-        _applicationName = registerAppInterface.getAppName();
-        _ttsName = registerAppInterface.getTtsName();
-        _ngnMediaScreenAppName = registerAppInterface.getNgnMediaScreenAppName();
-        _vrSynonyms = registerAppInterface.getVrSynonyms();
-        _isMediaApp = registerAppInterface.getIsMediaApplication();
-        _syncLanguageDesired = registerAppInterface.getLanguageDesired();
-        _hmiDisplayLanguageDesired = registerAppInterface.getHmiDisplayLanguageDesired();
-        _appHMIType = registerAppInterface.getAppType();
-        _appID = registerAppInterface.getAppID();
-    }
-
-=======
->>>>>>> develop
     public IRPCMessageHandler getRPCMessageHandler() {
         return rpcMessageHandler;
     }

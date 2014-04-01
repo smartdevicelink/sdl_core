@@ -7,16 +7,11 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-<<<<<<< HEAD
+
         android:minWidth="300dp"
         android:orientation="vertical"
         android:layout_margin="15dp">
-=======
-        android:layout_margin="15dp"
-        android:paddingBottom="15dp"
-        android:minWidth="300dp"
-        android:orientation="vertical">
->>>>>>> develop
+
 
         <CheckBox
             android:id="@+id/registerappinterface_useSyncMsgVersion"
@@ -163,16 +158,6 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/registerappinterface_useAppID" />
-<<<<<<< HEAD
-
-        <EditText
-            android:id="@+id/registerappinterface_appID"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:freezesText="true"
-            android:inputType="textCapSentences"
-            android:text="@string/registerappinterface_appIDDefault" />
-=======
 
         <EditText
             android:id="@+id/registerappinterface_appID"
@@ -292,7 +277,7 @@
                 android:inputType="number"/>
 
         </LinearLayout>
->>>>>>> develop
+
 
     </LinearLayout>
 
