@@ -625,8 +625,7 @@ class CodeGenerator(object):
             item_decl=self._gen_schema_item_decl_code(
                 member.param_type,
                 member.name,
-                member.default_value if type(member)
-                is Model.FunctionParam else None))
+                member.default_value))
 
     def _gen_schema_item_decl_code(self, param, member_name, default_value):
 
@@ -643,34 +642,33 @@ class CodeGenerator(object):
         String with schema item initialization source code.
 
         """
-
         code = u""
         if type(param) is Model.Boolean:
             code = self._impl_code_bool_item_template.substitute(
                 params=self._gen_schema_item_param_values(
-                    [[u"bool", None if default_value is None
-                      else u"true" if default_value is True else u"false"]]))
+                    [[u"bool", None if param.default_value is None
+                      else u"true" if param.default_value is True else u"false"]]))
         elif type(param) is Model.Integer:
             code = self._impl_code_integer_item_template.substitute(
                 type=u"int",
                 params=self._gen_schema_item_param_values(
                     [[u"int", param.min_value],
                      [u"int", param.max_value],
-                     [u"int", default_value]]))
+                     [u"int", param.default_value]]))
         elif type(param) is Model.Double:
             code = self._impl_code_integer_item_template.substitute(
                 type=u"double",
                 params=self._gen_schema_item_param_values(
                     [[u"double", param.min_value],
                      [u"double", param.max_value],
-                     [u"double", default_value]]))
+                     [u"double", param.default_value]]))
         elif type(param) is Model.String:
             code = self._impl_code_string_item_template.substitute(
                 params=self._gen_schema_item_param_values(
                     [[u"size_t", param.min_length],
                      [u"size_t", param.max_length],
                      [u"std::string", u"".join(
-                     [u'"', default_value, u'"']) if default_value
+                     [u'"', param.default_value, u'"']) if param.default_value
                          is not None else u""]]))
         elif type(param) is Model.Array:
             code = self._impl_code_array_item_template.substitute(
