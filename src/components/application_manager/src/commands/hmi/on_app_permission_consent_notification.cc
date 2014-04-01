@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
@@ -47,6 +49,48 @@ OnAppPermissionConsent::~OnAppPermissionConsent() {
 
 void OnAppPermissionConsent::Run() {
   LOG4CXX_INFO(logger_, "OnAppPermissionConsent::Run");
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+
+  policy::PermissionConsent permission_consent;
+  // If user defined group permissions for specific app
+  if (msg_params.keyExists(strings::app_id)) {
+    permission_consent.policy_app_id = msg_params[strings::app_id].asString();
+
+    typedef std::set<ApplicationSharedPtr> ApplicationList;
+    const ApplicationList app_list =
+        application_manager::ApplicationManagerImpl::instance()->applications();
+
+    ApplicationList::const_iterator it_app_list = app_list.begin();
+    ApplicationList::const_iterator it_app_list_end = app_list.end();
+    for (; it_app_list != it_app_list_end; ++it_app_list) {
+      if (permission_consent.policy_app_id.compare(
+            (*it_app_list)->mobile_app_id()->asString()) == 0) {
+        policy::DeviceParams device_params;
+        application_manager::MessageHelper::GetDeviceInfoForHandle(
+              (*it_app_list)->device(),
+              &device_params);
+
+        permission_consent.device_id = device_params.device_mac_address;
+      }
+    }
+  }
+
+  smart_objects::SmartArray* user_consent =
+      msg_params["consentedFunctions"].asArray();
+
+  smart_objects::SmartArray::const_iterator it = user_consent->begin();
+  smart_objects::SmartArray::const_iterator it_end = user_consent->end();
+  for (; it != it_end; ++it) {
+    policy::FunctionalGroupPermission permissions;
+    permissions.group_id = (*it)["id"].asInt();
+    permissions.group_name = (*it)["name"].asString();
+    permissions.is_allowed = (*it)["allowed"].asBool();
+    permission_consent.group_permissions.push_back(permissions);
+  }
+
+  permission_consent.consent_source = msg_params["source"].asString();
+
+  policy::PolicyHandler::instance()->OnAppPermissionConsent(permission_consent);
 }
 
 }  // namespace commands

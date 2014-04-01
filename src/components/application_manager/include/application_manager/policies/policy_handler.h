@@ -148,6 +148,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void SetDeviceInfo(std::string& device_id, const DeviceInfo& device_info);
 
+  /**
+   * @brief Store user-changed permissions consent to DB
+   * @param permissions User-changed group permissions consent
+   */
+  void OnAppPermissionConsent(const PermissionConsent& permissions);
+
  protected:
   /**
    * Starts next retry exchange policy table

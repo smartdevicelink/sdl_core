@@ -230,6 +230,17 @@ void PolicyHandler::SetDeviceInfo(std::string& device_id,
   policy_manager_->SetDeviceInfo(device_id, device_info);
 }
 
+void PolicyHandler::OnAppPermissionConsent(
+    const PermissionConsent& permissions) {
+  LOG4CXX_INFO(logger_, "OnAppPermissionConsent");
+  DCHECK(policy_manager_);
+  if (!permissions.policy_app_id.empty()) {
+    policy_manager_->SetUserConsentForApp(permissions);
+  }
+
+  //TODO(AOleynik): Handle situation for all apps (policy_app_id is empty)
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   const ApplicationList app_list =
