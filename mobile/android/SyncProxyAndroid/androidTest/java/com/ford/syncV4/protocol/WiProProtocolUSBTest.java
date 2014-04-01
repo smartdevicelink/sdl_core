@@ -69,7 +69,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
         requiredMethodCalled = false;
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
-        protocol._version = 2;
+        protocol.mProtocolVersion = 2;
 
         byte[] unregisterAppInterfaceResponse = new byte[]{
                 // first bytes
@@ -153,7 +153,7 @@ public class WiProProtocolUSBTest extends TestCase {
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
-        protocol._version = 2;
+        protocol.mProtocolVersion = 2;
 
         byte[] unregisterAppInterfaceRequest = new byte[]{
                 // first bytes

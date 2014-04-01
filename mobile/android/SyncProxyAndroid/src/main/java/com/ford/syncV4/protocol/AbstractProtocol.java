@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
+
     private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
     protected IProtocolListener _protocolListener = null;
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
@@ -212,10 +213,18 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
     }
 
-    // This method handles the startup of a protocol currentSession. A callback is sent
-    // to the protocol listener.
+    /**
+     * This method handles the startup of a protocol currentSession. A callback is sent to the
+     * protocol listener.
+     *
+     * @param serviceType
+     * @param sessionID
+     * @param version
+     * @param correlationID
+     */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, byte version,
+                                                String correlationID) {
         Session session = Session.createSession(serviceType, sessionID);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }

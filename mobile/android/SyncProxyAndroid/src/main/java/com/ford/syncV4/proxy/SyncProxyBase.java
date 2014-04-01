@@ -15,7 +15,6 @@ import com.ford.syncV4.messageDispatcher.InternalProxyMessageComparitor;
 import com.ford.syncV4.messageDispatcher.OutgoingProtocolMessageComparitor;
 import com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher;
 import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
@@ -317,7 +316,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected Boolean firstTimeFull = true;
-    protected byte _wiproVersion = 1;
 
     SyncConnection mSyncConnection;
 
@@ -580,7 +578,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         mTestConfig = testConfig;
 
-        setWiProVersion((byte) version);
+        //setWiProVersion((byte) version);
+
         setAppInterfacePreRegisterd(preRegister);
 
         setupSyncProxyBaseComponents(callbackToUIThread);
@@ -1159,9 +1158,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 mSyncConnection.init(_transportConfig);
             }
 
-            WiProProtocol protocol = (WiProProtocol) mSyncConnection.getWiProProtocol();
-            protocol.setVersion(_wiproVersion);
-
             /**
              * TODO : Set TestConfig for the Connection
              */
@@ -1416,12 +1412,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             // Dispatching logic
             if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
-                    if (_wiproVersion == 1) {
-                        if (message.getVersion() == 2) setWiProVersion(message.getVersion());
+                    byte protocolVersion = mSyncConnection.getProtocolVersion();
+
+                    if (protocolVersion == 1) {
+                        Log.w(TAG, "Incorrect incoming protocol version, expected min 2 but was 1");
+                        protocolVersion = 2;
                     }
 
                     Hashtable hash = new Hashtable();
-                    if (_wiproVersion == 2) {
+                    if (protocolVersion == 2 || protocolVersion == 3) {
                         Hashtable hashTemp = new Hashtable();
                         hashTemp.put(Names.correlationID, message.getCorrID());
 
@@ -1470,16 +1469,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // TODO handle incoming mobile nav sessions
     }
 
-    public byte getWiProVersion() {
-        return this._wiproVersion;
-    }
-
-    private void setWiProVersion(byte version) {
-        Log.i(TAG, "Setting WiPro version from " + (int) this._wiproVersion + " to " + (int) version);
-        //Log.i(TAG, "setter called from: " + Log.getStackTraceString(new Exception()));
-        this._wiproVersion = version;
-    }
-
     private void handleErrorsFromIncomingMessageDispatcher(String info, Exception e) {
         passErrorToProxyListener(info, e);
     }
@@ -1488,11 +1477,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (mSyncConnection.getIsConnected()) {
             mSyncConnection.sendMessage(message);
         }
-        /*synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (mSyncConnection != null) {
-
-            }
-        }*/
         SyncTrace.logProxyEvent("SyncProxy sending Protocol Message: " + message.toString(), SYNC_LIB_TRACE_KEY);
     }
 
@@ -1598,7 +1582,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             List<ProtocolMessage> protocolMessages =
                     converter.getProtocolMessages(request,
                             currentSession.getSessionId(), _jsonRPCMarshaller,
-                            _wiproVersion);
+                            mSyncConnection.getProtocolVersion());
 
             if (protocolMessages.size() > 0) {
                 queueOutgoingMessage(protocolMessages.get(0));
@@ -3182,9 +3166,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-            if (_wiproVersion == 1) {
-                if (version == 2) setWiProVersion(version);
-            }
             if (session.hasService(ServiceType.RPC)) {
                 startRPCProtocolService(session.getSessionId(), correlationID);
             }
@@ -3214,7 +3195,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
-            if (_wiproVersion == 2) {
+            if (mSyncConnection.getProtocolVersion() == 2) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {

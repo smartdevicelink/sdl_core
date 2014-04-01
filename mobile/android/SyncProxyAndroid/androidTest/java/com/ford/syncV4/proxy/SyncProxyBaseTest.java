@@ -258,7 +258,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -279,7 +279,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -300,7 +300,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -321,7 +321,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
         proxy.currentSession.stopSession();
         proxy.scheduleInitializeProxy();
@@ -334,7 +334,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
         proxy.scheduleInitializeProxy();
         TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
@@ -346,7 +346,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
         proxy.closeSession(false);
         proxy.setSyncConnection(mock(SyncConnection.class));
@@ -360,7 +360,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
         proxy.closeSession(false);
         proxy.setSyncConnection(mock(SyncConnection.class));
@@ -374,7 +374,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), (byte) 2, "");
         proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, (byte) 2, "");
         proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, (byte) 2, "");

@@ -369,17 +369,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onTransportBytesReceived(byte[] receivedBytes,
-                                         int receivedBytesLength) {
+    public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 try {
-                    _protocol.HandleReceivedBytes(receivedBytes,
-                            receivedBytesLength);
+                    _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
                 } catch (OutOfMemoryError e) {
-                    final String info =
-                            "Out of memory while handling incoming message";
+                    final String info = "Out of memory while handling incoming message";
                     if (mConnectionListener != null) {
                         mConnectionListener.onProtocolError(info, e);
                     } else {
@@ -413,6 +410,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol.StartProtocolSession(mSessionId);
             }
         }
+    }
+
+    /**
+     * Return the version of protocol
+     * @return byte value of the protocol version
+     */
+    public byte getProtocolVersion() {
+        return ((WiProProtocol) _protocol).getProtocolVersion();
     }
 
     @Override
@@ -458,7 +463,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         // Unblock USB reader thread by this method
         FunctionID functionID = new FunctionID();
-        if (functionID.getFunctionName(msg.getFunctionID()).equals(Names.OnAppInterfaceUnregistered)) {
+        String functionName = functionID.getFunctionName(msg.getFunctionID());
+        if (functionName == null) {
+            return;
+        }
+        if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
             IJsonRPCMarshaller marshaller = new JsonRPCMarshaller();
             Hashtable<String, Object> hashtable = marshaller.unmarshall(msg.getData());
             if (hashtable.containsKey(Names.reason)) {
@@ -478,7 +487,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolSessionStarted(Session session,
                                          byte version, String correlationID) {
-
         mConnectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
 

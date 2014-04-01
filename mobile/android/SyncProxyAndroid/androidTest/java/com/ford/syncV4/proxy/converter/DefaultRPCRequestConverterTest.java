@@ -53,7 +53,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         WiProProtocol protocol =
                 new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setVersion(PROTOCOL_VERSION);
+        protocol.setProtocolVersion(PROTOCOL_VERSION);
         maxDataSize = WiProProtocol.MAX_DATA_SIZE;
     }
 

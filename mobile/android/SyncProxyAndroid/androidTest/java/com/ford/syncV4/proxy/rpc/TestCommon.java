@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
@@ -72,6 +73,7 @@ public class TestCommon {
             final String functionName, final Hashtable<String, Object> params,
             final byte rpcType, final int corrID) throws JSONException {
         ProtocolMessage pm = new ProtocolMessage();
+        pm.setVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
         pm.setCorrID(corrID);
 
         if (params != null) {

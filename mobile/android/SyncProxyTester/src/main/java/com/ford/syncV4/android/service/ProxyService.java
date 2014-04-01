@@ -2108,8 +2108,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public byte syncProxyGetWiProVersion() {
-        if (mSyncProxy != null) {
-            return mSyncProxy.getWiProVersion();
+        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
+            return mSyncProxy.getSyncConnection().getProtocolVersion();
         }
         return 0;
     }

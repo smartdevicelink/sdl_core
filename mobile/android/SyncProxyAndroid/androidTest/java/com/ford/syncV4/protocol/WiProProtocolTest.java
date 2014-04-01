@@ -133,7 +133,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 callCheck(currentCheckMethod, data, header, offset, length);
             }
         };
-        sut.setVersion((byte) 2);
+        sut.setProtocolVersion((byte) 2);
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
@@ -464,7 +464,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
         protocol.hashID = 0xCDEF1234;
-        protocol._version = 2;
+        protocol.mProtocolVersion = 2;
         protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
     }
 
@@ -620,7 +620,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
@@ -644,7 +644,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -663,7 +663,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -684,7 +684,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
