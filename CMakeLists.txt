@@ -42,6 +42,7 @@ option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
+option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
