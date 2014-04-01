@@ -53,6 +53,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        TestCommon.setupMocking(this);
         listenerALM = mock(IProxyListenerALM.class);
     }
 
@@ -534,9 +535,10 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         vrSynonyms.add("name");
         Vector<AppHMIType> appHMITypeVector = new Vector<AppHMIType>();
         appHMITypeVector.add(AppHMIType.DEFAULT);
+        String mediaAppName = "ngnMediaScreenAppName";
 
         RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
-                syncMsgVersion, "appName", ttsChunkVector, "ngnMediaScreenAppName", vrSynonyms, true,
+                syncMsgVersion, "appName", ttsChunkVector, mediaAppName, vrSynonyms, true,
                 Language.AR_SA, Language.CS_CZ, appHMITypeVector, "appID", 1, null, new DeviceInfo());
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
@@ -546,8 +548,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals(syncMsgVersion, proxy.getSyncMsgVersionRequest());
         assertEquals("appName", proxy.getApplicationName());
         assertEquals(ttsChunkVector, proxy.getTTSName());
-        // screen app name length is limited
-        assertEquals("ngnMe", proxy.getNgnMediaScreenAppName());
+        assertEquals(mediaAppName, proxy.getNgnMediaScreenAppName());
         assertEquals(vrSynonyms, proxy.getVrSynonyms());
         assertEquals((Boolean) true, proxy.getIsMediaApp());
         assertEquals(Language.AR_SA, proxy.getSyncLanguageDesired());
