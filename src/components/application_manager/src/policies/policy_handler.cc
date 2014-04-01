@@ -46,20 +46,20 @@
 #include "config_profile/profile.h"
 
 namespace policy {
-typedef std::set<utils::SharedPtr<application_manager::Application>> ApplicationList;
+typedef std::set<application_manager::Application*> ApplicationList;
 
 PolicyHandler* PolicyHandler::instance_ = NULL;
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 
 log4cxx::LoggerPtr PolicyHandler::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("PolicyHandler"));
+    log4cxx::Logger::getLogger("PolicyHandler"));
 
 PolicyHandler::PolicyHandler()
-  : policy_manager_(0),
-    dl_handle_(0),
-    exchange_handler_(NULL),
-    is_exchange_in_progress_(false),
-    retry_sequence_("RetrySequence", new RetrySequence(this)) {
+    : policy_manager_(0),
+      dl_handle_(0),
+      exchange_handler_(NULL),
+      is_exchange_in_progress_(false),
+      retry_sequence_("RetrySequence", new RetrySequence(this)) {
 }
 
 PolicyHandler::~PolicyHandler() {
@@ -93,7 +93,7 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary(const std::string& path) {
 PolicyManager* PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
   CreateManager create_manager = 0;
-  *(void**)(&create_manager) = dlsym(dl_handle_, "CreateManager");
+  *(void**) (&create_manager) = dlsym(dl_handle_, "CreateManager");
   char* error_string = dlerror();
   if (error_string == NULL) {
     policy_manager_ = (*create_manager)();
@@ -105,7 +105,7 @@ PolicyManager* PolicyHandler::CreateManager() {
 
 bool PolicyHandler::InitPolicyTable() {
   std::string preloaded_file =
-    profile::Profile::instance()->preloaded_pt_file();
+      profile::Profile::instance()->preloaded_pt_file();
   DCHECK(policy_manager_);
   return policy_manager_->LoadPTFromFile(preloaded_file);
 }
@@ -119,7 +119,7 @@ bool PolicyHandler::RevertPolicyTable() {
 uint32_t PolicyHandler::GetAppIdForSending() {
   // Get app.list
   const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+      application_manager::ApplicationManagerImpl::instance()->applications();
 
   if (app_list.empty()) {
     return 0;
@@ -144,7 +144,7 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   }
 
   AppIds& app_ids_to_use =
-    app_ids_preferred.empty() ? app_ids_last_resort : app_ids_preferred;
+      app_ids_preferred.empty() ? app_ids_last_resort : app_ids_preferred;
 
   // Checking, if some of currently known apps was not used already
   std::sort(last_used_app_ids_.begin(), last_used_app_ids_.end());
@@ -164,12 +164,12 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   AppIds::iterator it_apps_to_use_end = app_ids_to_use.end();
 
   AppIds::const_iterator it_last_used_app_ids =
-    last_used_app_ids_.begin();
+      last_used_app_ids_.begin();
   AppIds::const_iterator it_last_used_app_ids_end =
-    last_used_app_ids_.end();
+      last_used_app_ids_.end();
 
   for (; it_last_used_app_ids != it_last_used_app_ids_end;
-       ++it_last_used_app_ids) {
+      ++it_last_used_app_ids) {
 
     std::remove(it_apps_to_use, it_apps_to_use_end,
                 *it_last_used_app_ids);
@@ -178,13 +178,13 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   // Random selection of filtered apps
   std::srand(time(0));
   selected_app_id = *(app_ids_to_use.begin()
-                      + (rand() % app_ids_to_use.size()));
+      + (rand() % app_ids_to_use.size()));
 
   last_used_app_ids_.push_back(selected_app_id);
   return selected_app_id;
 }
 
-DeviceConsent PolicyHandler::GetDeviceForSending(DeviceInfo& device_info) {
+DeviceConsent PolicyHandler::GetDeviceForSending(DeviceParams& device_params) {
   uint32_t app_id = 0;
   uint32_t app_id_previous = 0;
   while (true) {
@@ -205,29 +205,46 @@ DeviceConsent PolicyHandler::GetDeviceForSending(DeviceInfo& device_info) {
     char buffer[16];
     snprintf(buffer, 16, "%d", app_id);
     application_manager::MessageHelper::GetDeviceInfoForApp(std::string(buffer),
-        &device_info);
+                                                            &device_params);
 
     DeviceConsent consent =
-      policy_manager_->GetUserConsentForDevice(device_info.device_mac_address);
+        policy_manager_->GetUserConsentForDevice(device_params.device_mac_address);
     switch (consent) {
-      case kDeviceAllowed:
-        return consent;
-      case kDeviceDisallowed:
-        continue;
-      case kDeviceHasNoConsent:
-        return consent;
-      default:
-        LOG4CXX_WARN(logger_, "Consent result is not impelemented.");
-        return consent;
+    case kDeviceAllowed:
+      return consent;
+    case kDeviceDisallowed:
+      continue;
+    case kDeviceHasNoConsent:
+      return consent;
+    default:
+      LOG4CXX_WARN(logger_, "Consent result is not impelemented.");
+      return consent;
     }
   }
   return kDeviceDisallowed;
 }
 
+void PolicyHandler::SetDeviceInfo(std::string& device_id,
+                                  const DeviceInfo& device_info) {
+  LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  policy_manager_->SetDeviceInfo(device_id, device_info);
+}
+
+void PolicyHandler::OnAppPermissionConsent(
+    const PermissionConsent& permissions) {
+  LOG4CXX_INFO(logger_, "OnAppPermissionConsent");
+  DCHECK(policy_manager_);
+  if (!permissions.policy_app_id.empty()) {
+    policy_manager_->SetUserConsentForApp(permissions);
+  }
+
+  //TODO(AOleynik): Handle situation for all apps (policy_app_id is empty)
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+      application_manager::ApplicationManagerImpl::instance()->applications();
   ApplicationList::const_iterator it = app_list.begin();
   ApplicationList::const_iterator it_end = app_list.end();
   for (; it != it_end; ++it) {
@@ -237,9 +254,9 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
       AppPermissions permissions(atoi(policy_app_id.c_str()));
       permissions.appRevoked = true;
       application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
-        (*it)->app_id(), permissions);
+          (*it)->app_id(), permissions);
       application_manager::ApplicationManagerImpl::instance()
-      ->DeactivateApplication(*it);
+          ->DeactivateApplication(*it);
       (*(*it)).set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
       return;
     }
@@ -257,17 +274,17 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   uint32_t app_id = last_used_app_ids_.back();
   if (policy_manager_) {
     const std::string& mobile_app_id =
-      application_manager::ApplicationManagerImpl::instance()->application(
-        app_id)->mobile_app_id()->asString();
+        application_manager::ApplicationManagerImpl::instance()->application(
+            app_id)->mobile_app_id()->asString();
     url = policy_manager_->GetUpdateUrl(mobile_app_id);
   }
   LOG4CXX_INFO(
-    logger_,
-    "Update url is " << url << " for application " << application_manager::ApplicationManagerImpl::instance()-> application(app_id)->name());
+      logger_,
+      "Update url is " << url << " for application " << application_manager::ApplicationManagerImpl::instance()-> application(app_id)->name());
 
   application_manager::MessageHelper::SendPolicySnapshotNotification(app_id,
-      pt_string,
-      url, 0);
+                                                                     pt_string,
+                                                                     url, 0);
   return true;
 }
 
@@ -287,11 +304,11 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
     retry_sequence_.stop();
     retry_sequence_lock_.Release();
     int32_t correlation_id =
-      application_manager::ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
+        application_manager::ApplicationManagerImpl::instance()
+            ->GetNextHMICorrelationID();
     event_observer_ = new PolicyEventObserver(policy_manager_);
     event_observer_.get()->subscribe_on_event(
-      hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
     // TODO(KKolodiy): when we must reset counter of ignition cyles, update days
     // and kms?
@@ -324,18 +341,18 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
   }
 
   if (!skip_device_selection) {
-    DeviceInfo device_info;
-    DeviceConsent consent = GetDeviceForSending(device_info);
+    DeviceParams device_params;
+    DeviceConsent consent = GetDeviceForSending(device_params);
     switch (consent) {
-      case kDeviceHasNoConsent:
-        // Send OnSDLConsentNeeded to HMI for user consent on device usage
-        pending_device_handles_.push_back(device_info.device_handle);
-        application_manager::MessageHelper::SendOnSDLConsentNeeded(device_info);
-        return;
-      case kDeviceDisallowed:
-        return;
-      default:
-        break;
+    case kDeviceHasNoConsent:
+      // Send OnSDLConsentNeeded to HMI for user consent on device usage
+      pending_device_handles_.push_back(device_params.device_handle);
+      application_manager::MessageHelper::SendOnSDLConsentNeeded(device_params);
+      return;
+    case kDeviceDisallowed:
+      return;
+    default:
+      break;
     }
   }
 
@@ -355,14 +372,14 @@ void PolicyHandler::StartNextRetry() {
 }
 
 void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
-    uint32_t device_id) {
+                                                        uint32_t device_id) {
   LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification");
   if (device_id) {
-    DeviceInfo device_info;
+    DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForHandle(device_id,
-        &device_info);
-    policy_manager_->SetUserConsentForDevice(device_info.device_mac_address,
-        is_allowed);
+                                                               &device_params);
+    policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
+                                             is_allowed);
 
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
@@ -399,7 +416,7 @@ void PolicyHandler::OnAllowAppResponse(PermissionsList& list_of_permissions) {
 }
 
 void PolicyHandler::OnAllowAppNotification(PermissionsList& list_of_permissions,
-    uint32_t appication_id) {
+                                           uint32_t appication_id) {
   // TODO(AOleynik): Implement notification processing for user-defined
   // permissions for applicaiton
 }
@@ -439,7 +456,7 @@ void PolicyHandler::OnActivateApp(const std::string& policy_app_id,
   // - isAppRevoked
 
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
-      correlation_id);
+                                                              correlation_id);
 }
 
 void PolicyHandler::PTExchangeAtIgnition() {
@@ -456,8 +473,8 @@ void PolicyHandler::PTExchangeAtIgnition() {
   // Start update on limits exhaustion, if update wasn't started already by any
   // other event
   LOG4CXX_INFO(
-    logger_,
-    "\nIgnition cycles exceeded: " << std::boolalpha << policy_manager_->ExceededIgnitionCycles() << "\nDays exceeded: " << std::boolalpha << policy_manager_->ExceededDays(days) << "\nStatusUpdateRequired: " << std::boolalpha << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
+      logger_,
+      "\nIgnition cycles exceeded: " << std::boolalpha << policy_manager_->ExceededIgnitionCycles() << "\nDays exceeded: " << std::boolalpha << policy_manager_->ExceededDays(days) << "\nStatusUpdateRequired: " << std::boolalpha << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
   if (policy_manager_->ExceededIgnitionCycles()
       || policy_manager_->ExceededDays(days)
       || policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired) {
@@ -481,9 +498,9 @@ void PolicyHandler::OnPTExchangeNeeded() {
 }
 
 void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-    const Permissions& permissions) {
+                                         const Permissions& permissions) {
   const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+      application_manager::ApplicationManagerImpl::instance()->applications();
 
   // Find appropriate connection_key for application_id
   ApplicationList::const_iterator it_app_list = app_list.begin();
@@ -492,11 +509,11 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
     if (policy_app_id.compare((*it_app_list)->mobile_app_id()->asString())
         == 0) {
       application_manager::MessageHelper::SendOnPermissionsChangeNotification(
-        (*it_app_list)->app_id(), permissions);
+          (*it_app_list)->app_id(), permissions);
 
       LOG4CXX_INFO(
-        logger_,
-        "Notification sent for application_id:" << policy_app_id << " and connection_key " << (*it_app_list)->app_id());
+          logger_,
+          "Notification sent for application_id:" << policy_app_id << " and connection_key " << (*it_app_list)->app_id());
 
       return;
     }
