@@ -255,7 +255,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  ApplicationSharedPtr application(new ApplicationImpl(app_id));
+  smart_objects::SmartObject& params = message[strings::msg_params];
+
+  ApplicationSharedPtr application(new ApplicationImpl(app_id,
+                                                 params[strings::app_id].asString(),
+                                                 NULL));
   if (!application) {
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(

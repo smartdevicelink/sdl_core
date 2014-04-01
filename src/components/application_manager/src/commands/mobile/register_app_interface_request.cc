@@ -624,8 +624,43 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   return result;
 }
 
-mobile_apis::Result::eType
-RegisterAppInterfaceRequest::CheckRestrictions() const {
+void RegisterAppInterfaceRequest::FillDeviceInfo(
+    policy::DeviceInfo* device_info) {
+  const std::string hardware = "hardware";
+  const std::string firmware_rev = "firmwareRev";
+  const std::string os = "os";
+  const std::string os_ver = "osVersion";
+  const std::string carrier = "carrier";
+  const std::string max_number_rfcom_ports = "maxNumberRFCOMMPorts";
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  const smart_objects::SmartObject& device_info_so =
+      msg_params[strings::device_info];
+
+  if (device_info_so.keyExists(hardware)) {
+    device_info->hardware = msg_params[strings::device_info][hardware].asString();
+  }
+  if (device_info_so.keyExists(firmware_rev)) {
+    device_info->firmware_rev = msg_params[strings::device_info][firmware_rev].asString();
+  }
+  if (device_info_so.keyExists(os)) {
+    device_info->os = device_info_so[os].asString();
+  }
+  if (device_info_so.keyExists(os_ver)) {
+    device_info->os_ver = device_info_so[os_ver].asString();
+  }
+  if (device_info_so.keyExists(carrier)) {
+    device_info->carrier = device_info_so[carrier].asString();
+  }
+  if (device_info_so.keyExists(max_number_rfcom_ports)) {
+    device_info->max_number_rfcom_ports =
+        device_info_so[max_number_rfcom_ports].asInt();
+  }
+}
+
+mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckRestrictions() const {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckRestrictions");
 

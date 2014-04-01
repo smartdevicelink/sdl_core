@@ -28,6 +28,7 @@ include_directories (
 
 set (SOURCES
 ./src/application_manager_impl.cc
+./src/usage_statistics.cc
 ./src/message.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
@@ -296,6 +297,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_device_chosen_notification.cc
 ./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/on_allow_sdl_functionality_notification.cc
+./src/commands/hmi/on_app_permission_consent_notification.cc
 ./src/commands/hmi/on_app_registered_notification.cc
 ./src/commands/hmi/on_app_permission_changed_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
@@ -378,8 +380,15 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
+SET (LIBRARIES
+  UsageStatistics
+  log4cxx
+  dl
+)
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+  list(REMOVE_ITEM LIBRARIES dl)
+endif()
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
-target_link_libraries ("ApplicationManager" log4cxx)
-
-#ADD_DEPENDENCIES("ApplicationManager" Policy)
+target_link_libraries ("ApplicationManager" ${LIBRARIES})

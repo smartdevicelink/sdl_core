@@ -184,7 +184,7 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   return selected_app_id;
 }
 
-DeviceConsent PolicyHandler::GetDeviceForSending(DeviceInfo& device_info) {
+DeviceConsent PolicyHandler::GetDeviceForSending(DeviceParams& device_params) {
   uint32_t app_id = 0;
   uint32_t app_id_previous = 0;
   while (true) {
@@ -205,23 +205,29 @@ DeviceConsent PolicyHandler::GetDeviceForSending(DeviceInfo& device_info) {
     char buffer[16];
     snprintf(buffer, 16, "%d", app_id);
     application_manager::MessageHelper::GetDeviceInfoForApp(std::string(buffer),
-        &device_info);
+                                                            &device_params);
 
     DeviceConsent consent =
-      policy_manager_->GetUserConsentForDevice(device_info.device_mac_address);
+        policy_manager_->GetUserConsentForDevice(device_params.device_mac_address);
     switch (consent) {
-      case kDeviceAllowed:
-        return consent;
-      case kDeviceDisallowed:
-        continue;
-      case kDeviceHasNoConsent:
-        return consent;
-      default:
-        LOG4CXX_WARN(logger_, "Consent result is not impelemented.");
-        return consent;
+    case kDeviceAllowed:
+      return consent;
+    case kDeviceDisallowed:
+      continue;
+    case kDeviceHasNoConsent:
+      return consent;
+    default:
+      LOG4CXX_WARN(logger_, "Consent result is not impelemented.");
+      return consent;
     }
   }
   return kDeviceDisallowed;
+}
+
+void PolicyHandler::SetDeviceInfo(std::string& device_id,
+                                  const DeviceInfo& device_info) {
+  LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  policy_manager_->SetDeviceInfo(device_id, device_info);
 }
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
@@ -324,18 +330,18 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
   }
 
   if (!skip_device_selection) {
-    DeviceInfo device_info;
-    DeviceConsent consent = GetDeviceForSending(device_info);
+    DeviceParams device_params;
+    DeviceConsent consent = GetDeviceForSending(device_params);
     switch (consent) {
-      case kDeviceHasNoConsent:
-        // Send OnSDLConsentNeeded to HMI for user consent on device usage
-        pending_device_handles_.push_back(device_info.device_handle);
-        application_manager::MessageHelper::SendOnSDLConsentNeeded(device_info);
-        return;
-      case kDeviceDisallowed:
-        return;
-      default:
-        break;
+    case kDeviceHasNoConsent:
+      // Send OnSDLConsentNeeded to HMI for user consent on device usage
+      pending_device_handles_.push_back(device_params.device_handle);
+      application_manager::MessageHelper::SendOnSDLConsentNeeded(device_params);
+      return;
+    case kDeviceDisallowed:
+      return;
+    default:
+      break;
     }
   }
 
@@ -358,11 +364,11 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     uint32_t device_id) {
   LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification");
   if (device_id) {
-    DeviceInfo device_info;
+    DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForHandle(device_id,
-        &device_info);
-    policy_manager_->SetUserConsentForDevice(device_info.device_mac_address,
-        is_allowed);
+                                                               &device_params);
+    policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
+                                             is_allowed);
 
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),

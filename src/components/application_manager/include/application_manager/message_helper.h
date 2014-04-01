@@ -228,9 +228,9 @@ class MessageHelper {
 
     static void SendActivateAppToHMI(uint32_t const app_id);
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
-                                       policy::DeviceInfo* device_info);
+                                       policy::DeviceParams* device_info);
     static void GetDeviceInfoForApp(const std::string& connection_key,
-                                    policy::DeviceInfo* device_info);
+                                    policy::DeviceParams* device_info);
 
     /**
     * @brief Send SDL_ActivateApp response to HMI
@@ -243,7 +243,7 @@ class MessageHelper {
     * @brief Send OnSDLConsentNeeded to HMI for device data consent by user
     * @param device_info Device info, e.g. mac, handle, name
     */
-    static void SendOnSDLConsentNeeded(const policy::DeviceInfo& device_info);
+    static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info);
 
     /*
      * @brief Sends notification to HMI to start video streaming

@@ -37,7 +37,12 @@
 #include <set>
 #include <vector>
 #include "application_manager/application_data_impl.h"
+#include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+
+namespace usage_statistics {
+class StatisticsManager;
+}  // namespace usage_statistics
 
 namespace application_manager {
 
@@ -46,7 +51,9 @@ namespace mobile_api = mobile_apis;
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
-  explicit ApplicationImpl(uint32_t application_id);
+  ApplicationImpl(uint32_t application_id,
+                  const std::string& global_app_id,
+                  usage_statistics::StatisticsManager* statistics_manager);
   ~ApplicationImpl();
 
   /**
@@ -126,7 +133,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual uint32_t UpdateHash();
 
-
+  ApplicationUsageReport& usage_report();
  protected:
   void CleanupFiles();
 
@@ -158,6 +165,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t> subscribed_vehicle_info_;
+  ApplicationUsageReport usage_report_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

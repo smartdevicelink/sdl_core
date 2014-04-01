@@ -37,6 +37,7 @@
 #include "utils/macro.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
+//#include "application_manager/policies/policy_handler.h"
 #include "application_manager/commands/command_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application.h"
@@ -1222,7 +1223,7 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
 }
 
 void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
-    policy::DeviceInfo* device_info) {
+                                           policy::DeviceParams* device_info) {
   if (!device_info) {
     return;
   }
@@ -1232,7 +1233,7 @@ void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
 }
 
 void MessageHelper::GetDeviceInfoForApp(const std::string& connection_key,
-                                        policy::DeviceInfo* device_info) {
+                                        policy::DeviceParams* device_info) {
   if (!device_info) {
     return;
   }
@@ -1307,7 +1308,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
 
 
 void MessageHelper::SendOnSDLConsentNeeded(
-  const policy::DeviceInfo& device_info) {
+    const policy::DeviceParams& device_info) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {

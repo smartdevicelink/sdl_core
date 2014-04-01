@@ -44,7 +44,10 @@ log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(uint32_t application_id)
+ApplicationImpl::ApplicationImpl(
+    uint32_t application_id,
+    const std::string& global_app_id,
+    usage_statistics::StatisticsManager* statistics_manager)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
@@ -59,8 +62,8 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       is_app_allowed_(true),
       has_been_activated_(false),
       tts_speak_state_(false),
-      device_(0) {
-  srand(time(NULL));
+      device_(0),
+      usage_report_(global_app_id, statistics_manager) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -194,6 +197,7 @@ void ApplicationImpl::set_hmi_level(
   }
 
   hmi_level_ = hmi_level;
+  usage_report_.RecordHmiStateChanged(hmi_level);
 }
 
 void ApplicationImpl::set_hmi_supports_navi_streaming(const bool& supports) {
@@ -321,6 +325,10 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.erase(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size - 1);
+}
+
+ApplicationUsageReport& ApplicationImpl::usage_report() {
+  return usage_report_;
 }
 
 const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {
