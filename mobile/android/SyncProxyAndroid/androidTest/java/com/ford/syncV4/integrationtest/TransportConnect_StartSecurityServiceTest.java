@@ -1,30 +1,18 @@
 package com.ford.syncV4.integrationtest;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
-import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.IProtocolListener;
-import com.ford.syncV4.protocol.ProtocolFrameHeader;
-import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
-import com.ford.syncV4.protocol.ProtocolMessage;
-import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
-import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.TestConfig;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

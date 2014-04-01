@@ -21,8 +21,9 @@ import com.ford.syncV4.test.TestConfig;
 
 import org.mockito.ArgumentCaptor;
 
-import static org.hamcrest.CoreMatchers.containsString;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
