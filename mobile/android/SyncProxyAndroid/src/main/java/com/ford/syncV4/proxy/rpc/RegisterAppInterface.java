@@ -57,7 +57,7 @@ public class RegisterAppInterface extends RPCRequest {
     public Vector<TTSChunk> getTtsName() {
         if (parameters.get(Names.ttsName) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.ttsName);
-            if (list != null) {
+            if (list == null) {
                 return null;
             }
             if (list.size() == 0) {

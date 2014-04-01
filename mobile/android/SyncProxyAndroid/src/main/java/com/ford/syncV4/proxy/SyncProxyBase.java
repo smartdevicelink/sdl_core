@@ -601,7 +601,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         setupMessageDispatchers();
         tryInitialiseProxy();
 
-        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+        if (syncProxyConfigurationResources != null) {
+            mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+        }
 
         // Trace that ctor has fired
         SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
