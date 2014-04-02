@@ -46,7 +46,7 @@ log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
 
 SecurityManager::SecurityManager() :
   security_messages_("SecurityManager::security_messages_", this),
-  crypto_manager_(NULL), session_observer_(NULL), protocol_handler_(NULL) {
+  session_observer_(NULL), crypto_manager_(NULL), protocol_handler_(NULL) {
 }
 
 void SecurityManager::OnMessageReceived(
@@ -105,7 +105,7 @@ void SecurityManager::set_crypto_manager(CryptoManager *crypto_manager) {
 }
 
 void SecurityManager::Handle(const SecurityMessage &message) {
-  DCHECK(message);DCHECK(session_observer_);
+  DCHECK(message);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
   if(!crypto_manager_)  {
     const std::string error_text("Invalid (NULL) CryptoManager.");
@@ -138,7 +138,8 @@ void SecurityManager::Handle(const SecurityMessage &message) {
 
 bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
-  DCHECK(session_observer_); DCHECK(crypto_manager_);
+  DCHECK(session_observer_);
+  DCHECK(crypto_manager_);
 
   if(session_observer_->GetSSLContext(connection_key,
                                       protocol_handler::kControl)) {
@@ -175,6 +176,7 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
 }
 
 void SecurityManager::StartHandshake(uint32_t connection_key) {
+  DCHECK(session_observer_);
   LOG4CXX_INFO(logger_, "StartHandshake: connection_key " << connection_key);
   security_manager::SSLContext* ssl_context =
       session_observer_->GetSSLContext(connection_key,
@@ -183,7 +185,6 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
     const std::string error_text("StartHandshake failed, connection is not protected");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL, error_text);
-    DCHECK(ssl_context);
     return;
   }
 
@@ -223,8 +224,8 @@ void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_
 
 bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
+  DCHECK(inMessage);
   DCHECK(inMessage->get_header().query_id == SecurityQuery::SEND_HANDSHAKE_DATA);
-  DCHECK(inMessage); DCHECK(session_observer_);
   const uint32_t seqNumber = inMessage->get_header().seq_number;
   const uint32_t connection_key = inMessage->get_connection_key();
 
@@ -238,6 +239,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
                       SecurityQuery::ERROR_INVALID_QUERY_SIZE, error_text, seqNumber);
     return false;
   }
+  DCHECK(session_observer_);
   SSLContext * sslContext =
       session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
@@ -296,7 +298,7 @@ bool SecurityManager::ProccessInternalError(const SecurityMessage &inMessage) {
 }
 
 void SecurityManager::SendHandshakeBinData(
-    const int32_t connection_key, const uint8_t * const data,
+    const uint32_t connection_key, const uint8_t * const data,
     const size_t data_size, const uint32_t seq_number){
   const SecurityQuery::QueryHeader header(
         SecurityQuery::NOTIFICATION,
@@ -305,8 +307,8 @@ void SecurityManager::SendHandshakeBinData(
   LOG4CXX_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ")
 }
 
-void SecurityManager::SendInternalError(const int32_t connection_key,
-                                        const int &error_id,
+void SecurityManager::SendInternalError(const uint32_t connection_key,
+                                        const uint8_t &error_id,
                                         const std::string& erorr_text,
                                         const uint32_t seq_number) {
   Json::Value value;
@@ -326,7 +328,7 @@ void SecurityManager::SendInternalError(const int32_t connection_key,
 }
 
 void SecurityManager::SendData(
-    const int32_t connection_key,
+    const uint32_t connection_key,
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
   // FIXME(EZ): move to SecurityQuery class
@@ -342,10 +344,10 @@ void SecurityManager::SendData(
   SendBinaryData(connection_key, &data_sending[0], data_sending.size());
 }
 
-void SecurityManager::SendBinaryData(const int32_t connection_key,
+void SecurityManager::SendBinaryData(const uint32_t connection_key,
                                      const uint8_t * const data,
                                      size_t data_size) {
-  DCHECK(protocol_handler_)
+  DCHECK(protocol_handler_);
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage(connection_key,
                                          protocol_handler::PROTOCOL_VERSION_2,

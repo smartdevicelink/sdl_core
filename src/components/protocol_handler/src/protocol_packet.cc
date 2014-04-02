@@ -46,7 +46,7 @@ ProtocolPacket::ProtocolPacket()
       connection_id_(0)  {
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_key,
+ProtocolPacket::ProtocolPacket(uint8_t connection_id,
                                uint8_t version, bool protection,
                                uint8_t frameType,
                                uint8_t serviceType,
@@ -56,7 +56,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key,
                                uint32_t packet_id)
     : data_offset_(0),
       packet_id_(packet_id),
-      connection_id_(connection_key) {
+      connection_id_(connection_id) {
   packet_header_.version = version;
   packet_header_.protection_flag = protection;
   packet_header_.frameType = frameType;
@@ -69,11 +69,11 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key,
   DCHECK(MAXIMUM_FRAME_DATA_SIZE >= dataSize);
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
                                uint32_t data_size)
   : data_offset_(0),
     packet_id_(0),
-    connection_id_(connection_key) {
+    connection_id_(connection_id) {
     RESULT_CODE result = deserializePacket(data_param, data_size);
     if (result != RESULT_OK) {
       NOTREACHED();

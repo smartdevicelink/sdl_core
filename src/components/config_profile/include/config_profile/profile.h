@@ -243,7 +243,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    const int32_t heart_beat_timeout() const;
+    int32_t heart_beat_timeout() const;
 
     /*
      * @brief Timeout in transport manager before disconnect

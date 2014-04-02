@@ -37,8 +37,6 @@
 #include <memory.h>
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
-#include "security_manager/security_manager_listener.h"
-#include "security_manager/crypto_manager.h"
 
 namespace protocol_handler {
 
@@ -62,10 +60,12 @@ class ProtocolHandlerImpl::IncomingDataHandler {
 
   bool ProcessData(const RawMessagePtr tm_message,
                    std::vector<ProtocolFramePtr>* out_frames) {
-    DCHECK(out_frames);
+    DCHECK(tm_message);
+    DCHECK(out_frames!=NULL);
     const ConnectionID connection_id = tm_message->connection_key();
     const uint8_t* data = tm_message->data();
     const std::size_t size = tm_message->data_size();
+    DCHECK(size > 0); DCHECK(data!=NULL);
     LOG4CXX_TRACE(logger_, "Start of processing incoming data of size "
                                << size << " for connection " << connection_id);
     const uint32_t kBytesForSizeDetection = 8;
@@ -105,7 +105,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
   }
 
   void AddConnection(ConnectionID connection_id) {
-    connections_data_[connection_id];
+    connections_data_[connection_id] = std::vector<uint8_t>();
   }
 
   void RemoveConnection(ConnectionID connection_id) {
@@ -118,7 +118,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
    * expects first bytes of message which will be treated as frame header.
    */
   uint32_t GetPacketSize(unsigned char* received_bytes) {
-    DCHECK(received_bytes);
+    DCHECK(received_bytes!=NULL);
     unsigned char offset = sizeof(uint32_t);
     unsigned char version = received_bytes[0] >> 4u;
     uint32_t frame_body_size = received_bytes[offset++] << 24u;
@@ -150,9 +150,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     : protocol_observers_(),
       session_observer_(0),
       transport_manager_(transport_manager_param),
-      security_manager_(NULL),
       kPeriodForNaviAck(5),
       incoming_data_handler_(new IncomingDataHandler),
+      security_manager_(NULL),
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
@@ -454,8 +454,8 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
     const transport_manager::DataSendError& error,
     const RawMessagePtr message) {
   // TODO(PV): implement
-  LOG4CXX_ERROR(logger_, "Sending message " <<
-      (void*)message-> data() << " failed: " << error.text());
+  LOG4CXX_ERROR(logger_, "Sending message " << message->data_size()
+                << " bytes failed: " << error.text());
 }
 
 void ProtocolHandlerImpl::OnConnectionEstablished(
@@ -646,7 +646,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
-  const int32_t connection_key =
+  const uint32_t connection_key =
       session_observer_->KeyFromPair(connection_id, packet->session_id());
 
   const RawMessagePtr rawMessage(
@@ -723,7 +723,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
       ProtocolFramePtr completePacket = it->second;
 
-      const int32_t connection_key =
+      const uint32_t connection_key =
           session_observer_->KeyFromPair(connection_id, completePacket->session_id());
 
       const RawMessagePtr rawMessage(
@@ -995,6 +995,10 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_WARN(logger_, "No session_observer_ set.");
     return RESULT_FAIL;
   }
+  if (!security_manager_) {
+    LOG4CXX_WARN(logger_, "No security_manager_ set.");
+    return RESULT_FAIL;
+  }
   const uint32_t connection_key =
       session_observer_->KeyFromPair(packet->connection_id(), packet->session_id());
   security_manager::SSLContext* context =
@@ -1033,6 +1037,10 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_WARN(logger_, "No session_observer_ set.");
     return RESULT_FAIL;
   }
+  if (!security_manager_) {
+    LOG4CXX_WARN(logger_, "No security_manager_ set.");
+    return RESULT_FAIL;
+  }
   const uint32_t connection_key =
       session_observer_->KeyFromPair(packet->connection_id(), packet->session_id());
   security_manager::SSLContext* context =
@@ -1042,7 +1050,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     const std::string error_text("Fail decryption for unprotected service ");
     LOG4CXX_ERROR(logger_, error_text
                   << int(packet->service_type()));
-    security_manager_->SendInternalError( connection_key,
+    security_manager_->SendInternalError(connection_key,
           security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   }
@@ -1063,7 +1071,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   return RESULT_OK;
 }
 
-void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
+void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
                                            int32_t number_of_frames) {
   LOG4CXX_INFO(logger_,
                "SendFramesNumber MobileNaviAck for session " << connection_key);
@@ -1089,7 +1097,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
-  for (int i = 0; i < data_size; ++i) {
+  for (size_t i = 0; i < data_size; ++i) {
     if (!std::isprint(text[i], loc)) {
       is_printable_array = false;
       break;

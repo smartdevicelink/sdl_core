@@ -31,7 +31,6 @@
  */
 
 #include "security_manager/crypto_manager_impl.h"
-
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>

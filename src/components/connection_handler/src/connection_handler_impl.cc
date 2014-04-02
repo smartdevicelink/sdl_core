@@ -72,6 +72,7 @@ log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
 ConnectionHandlerImpl::ConnectionHandlerImpl()
     : connection_handler_observer_(NULL),
       transport_manager_(NULL),
+      protocol_handler_(NULL),
       connection_list_deleter_(&connection_list_) {
 }
 

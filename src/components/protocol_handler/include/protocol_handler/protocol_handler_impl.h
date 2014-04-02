@@ -178,7 +178,7 @@ class ProtocolHandlerImpl
      * \param number_of_frames Number of frames processed by
      * streaming server and displayed to user.
      */
-    void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
+    void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames);
 
   protected:
     /**

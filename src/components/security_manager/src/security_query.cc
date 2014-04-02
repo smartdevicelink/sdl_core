@@ -106,7 +106,7 @@ bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
     json_message_.assign(json_data, json_data + header_.json_size);
   }
 
-  const uint32_t bin_data_size = raw_data_size - header_size - header_.json_size;
+  const uint32_t bin_data_size = raw_data_size - (header_size + header_.json_size);
   if(bin_data_size > 0) {
     const char* const bin_data =
         reinterpret_cast<const char*>(raw_data + header_size + header_.json_size);
@@ -137,11 +137,11 @@ const SecurityQuery::QueryHeader &SecurityQuery::get_header() const {
   return header_;
 }
 
-const uint8_t * const SecurityQuery::get_data() const {
-  return data_.data();
+const uint8_t * SecurityQuery::get_data() const {
+  return &data_[0];
 }
 
-const size_t SecurityQuery::get_data_size() const {
+size_t SecurityQuery::get_data_size() const {
   return data_.size();
 }
 
@@ -149,6 +149,6 @@ const std::string &SecurityQuery::get_json_message() const{
   return json_message_;
 }
 
-int32_t SecurityQuery::get_connection_key() const {
+uint32_t SecurityQuery::get_connection_key() const {
   return connection_key_;
 }

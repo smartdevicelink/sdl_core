@@ -150,12 +150,12 @@ public:
    * \brief Get query binary data (without header data)
    * \return const pointer to const binary data
    */
-  const uint8_t* const get_data() const;
+  const uint8_t *get_data() const;
   /**
    * \brief Get query binary data size
    * \return size of binary data
    */
-  size_t const get_data_size() const;
+  size_t get_data_size() const;
   /**
    * \brief Get json string data (without header data)
    * \return const pointer to const binary data
@@ -165,10 +165,10 @@ public:
    * \brief Get connection key
    * \return Unique key used by other components as session identifier
    */
-  int32_t get_connection_key() const;
+  uint32_t get_connection_key() const;
 private:
   QueryHeader header_;
-  int32_t connection_key_;
+  uint32_t connection_key_;
   std::vector<uint8_t> data_;
   std::string json_message_;
 };

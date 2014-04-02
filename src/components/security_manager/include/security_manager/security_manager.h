@@ -90,6 +90,7 @@ public:
    */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr) OVERRIDE;
 
+  // TODO (EZamakhov) : replcare setter by Init methode
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
@@ -113,7 +114,7 @@ public:
    * \param data_size size of binary data array
    * \param seq_number resieved from Mobile Application
    */
-  void SendHandshakeBinData(const int32_t connection_key,
+  void SendHandshakeBinData(const uint32_t connection_key,
                             const uint8_t * const data,
                             const size_t data_size,
                             const uint32_t seq_number = 0);
@@ -124,8 +125,8 @@ public:
    * \param erorr_text SSL impelmentation error text
    * \param seq_number resieved from Mobile Application
    */
-  void SendInternalError(const int32_t connection_key,
-                         const int &error_id,
+  void SendInternalError(const uint32_t connection_key,
+                         const uint8_t &error_id,
                          const std::string& erorr_text,
                          const uint32_t seq_number = 0);
 
@@ -166,6 +167,7 @@ public:
    */
   static const char *ConfigSection();
 private:
+  DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   /**
    * \brief Parse SecurityMessage as HandshakeData request
    * \param inMessage SecurityMessage with binary data of handshake
@@ -185,7 +187,7 @@ private:
    * \param data pointer to binary data array
    * \param data_size size of binary data array
    */
-  void SendData(const int32_t connection_key,
+  void SendData(const uint32_t connection_key,
                 SecurityQuery::QueryHeader header,
                 const uint8_t * const data,
                 const size_t data_size);
@@ -196,7 +198,7 @@ private:
    * \param data_size size of binary data array
    */
   // post income array as park of RawMessage
-  void SendBinaryData(const int32_t connection_key,
+  void SendBinaryData(const uint32_t connection_key,
                       const uint8_t * const data,
                       size_t data_size);
 
@@ -218,7 +220,6 @@ private:
 
   std::list<SecurityManagerListener*> listeners_;
 
-  DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   static log4cxx::LoggerPtr logger_;
 };
 } //security_manager

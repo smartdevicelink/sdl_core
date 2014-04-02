@@ -97,7 +97,7 @@ namespace security_manager_test {
     MOCK_METHOD1(RemoveProtocolObserver,
                  void(protocol_handler::ProtocolObserver* observer));
     MOCK_METHOD2(SendFramesNumber,
-                 void(int32_t connection_key, int32_t number_of_frames));
+                 void(uint32_t connection_key, int32_t number_of_frames));
   };
   /*
    * MOCK implementation of security_manager::SSLContext interface

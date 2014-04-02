@@ -109,7 +109,7 @@ struct Session {
   ServiceList service_list;
   security_manager::SSLContext* ssl_context;
   Session()
-    : ssl_context(NULL) {
+    : service_list(), ssl_context(NULL) {
   }
   Session(const ServiceList& services)
     : service_list(services),
@@ -232,6 +232,11 @@ class Connection {
   void KeepAlive();
 
  private:
+  DISALLOW_COPY_AND_ASSIGN(Connection);
+
+  /**
+   * \brief Current connection handler.
+   */
   ConnectionHandler* connection_handler_;
 
   /**

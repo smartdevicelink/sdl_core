@@ -20,6 +20,7 @@ class SecurityManagerListener {
    */
   virtual bool OnHandshakeDone(const uint32_t &connection_key,
                                bool success)=0;
+  virtual ~SecurityManagerListener() {}
 };
 
 }

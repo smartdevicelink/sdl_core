@@ -52,11 +52,9 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
-
-
 std::string LastError() {
   // TODO (DChmerev): add error on no key files
-  long error = ERR_get_error();
+  const unsigned long error = ERR_get_error();
   const char * reason = ERR_reason_error_string(error);
   if (reason) {
     return reason;
@@ -89,22 +87,22 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
     }
   }
 
-  int ret = SSL_do_handshake(connection_);
-  if (ret == 1) {
+  const int handshake_result = SSL_do_handshake(connection_);
+  if (handshake_result == 1) {
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
-  } else if (ret == 0) {
+  } else if (handshake_result == 0) {
     return SSLContext::Handshake_Result_Fail;
   }
 
-  int pend = BIO_ctrl_pending(bioOut_);
+  const size_t pend = BIO_ctrl_pending(bioOut_);
 
   if (pend) {
     EnsureBufferSizeEnough(pend);
 
-    ret = BIO_read(bioOut_, buffer_, pend);
-    if (ret == pend) {
-      *out_data_size = ret;
+    const int read_count = BIO_read(bioOut_, buffer_, pend);
+    if (read_count  == pend) {
+      *out_data_size = read_count ;
       *out_data =  buffer_;
     } else {
       return SSLContext::Handshake_Result_AbnormalFail;
@@ -125,7 +123,7 @@ Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
   }
 
   BIO_write(bioFilter_, in_data, in_data_size);
-  const int len = BIO_ctrl_pending(bioOut_);
+  const size_t len = BIO_ctrl_pending(bioOut_);
 
   EnsureBufferSizeEnough(len);
   const int read_size = BIO_read(bioOut_, buffer_, len);

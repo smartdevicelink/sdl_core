@@ -33,15 +33,16 @@
 #ifndef CRYPTO_MANAGER_IMPL_H_
 #define CRYPTO_MANAGER_IMPL_H_
 
+#include <stdint.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-
 #include <string>
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/ssl_context.h"
 #include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace security_manager {
   class CryptoManagerImpl : public CryptoManager {
@@ -61,6 +62,7 @@ namespace security_manager {
       virtual size_t get_max_block_size(size_t mtu) const;
       virtual ~SSLContextImpl();
      private:
+      DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);
       void EnsureBufferSizeEnough(size_t size);
       SSL *connection_;
       BIO *bioIn_;
@@ -83,6 +85,7 @@ namespace security_manager {
     virtual SSLContext *CreateSSLContext();
     virtual void ReleaseSSLContext(SSLContext* context);
    private:
+    DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
     SSL_CTX *context_;
     Mode mode_;
     static ::log4cxx::LoggerPtr logger_;

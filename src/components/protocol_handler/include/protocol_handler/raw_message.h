@@ -56,13 +56,13 @@ class RawMessage {
   public:
     /**
      * \brief Constructor
-     * \param connectionKey Identifier of connection within which message
+     * \param connection_key Identifier of connection within which message
      * is transferred
      * \param protocolVersion Version of protocol of the message
      * \param data Message string
      * \param dataSize Message size
      */
-    RawMessage(int32_t connectionKey, uint32_t protocolVersion,
+    RawMessage(uint32_t connection_key, uint32_t protocolVersion,
                const uint8_t * const data_param, uint32_t dataSize,
                uint8_t type = ServiceType::kRpc);
 
@@ -74,7 +74,7 @@ class RawMessage {
     /**
      * \brief Getter for connection identifier
      */
-    int32_t connection_key() const;
+    uint32_t connection_key() const;
 
     void set_connection_key(uint32_t);
 
@@ -114,7 +114,7 @@ class RawMessage {
      * \brief Connection Identifier
      * Obtained from \saCconnection_handler
      */
-    int32_t connection_key_;
+    uint32_t connection_key_;
 
     /**
      * \brief Message string
