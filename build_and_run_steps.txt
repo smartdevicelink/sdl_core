@@ -50,10 +50,10 @@
       Note: verify that you QNX host ip adress is 192.168.243.131 (if not change see step 4.2.1.)
 
   3.4. To make QNX virtual machine from scratch:
-    3.4.2. SSH configuration on QNX server:
-      3.4.1. Download VMware Player https://my.vmware.com/web/vmware/downloads
-      3.4.2. Download the QNX Software Development Platform 6.5.0 bootable iso image from http://www.qnx.com/download/download/21182/qnxsdp-6.5.0-x86-201007091524-nto.iso
-      3.4.3. Create new VMware virtual machine and boot from QNX Software Development Platform bootable iso image
+    3.4.1. SSH configuration on QNX server:
+      3.4.1.1 Download VMware Player https://my.vmware.com/web/vmware/downloads
+      3.4.1.2. Download the QNX Software Development Platform 6.5.0 bootable iso image from http://www.qnx.com/download/download/21182/qnxsdp-6.5.0-x86-201007091524-nto.iso
+      3.4.1.3. Create new VMware virtual machine and boot from QNX Software Development Platform bootable iso image
         Note: it is necessary to obtain license key: either trial or commercial one (Register on http://www.qnx.com/ website, enter 'QNX product evaluation' and apply for a license key).
     3.4.2. SSH configuration on QNX server:
       3.4.2.1. Run “passwd user” and set the new user id (just press enter), group (just press enter) and non-empty password.
