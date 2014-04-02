@@ -59,7 +59,8 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       is_app_allowed_(true),
       has_been_activated_(false),
       tts_speak_state_(false),
-      device_(0) {
+      device_(0),
+      grammar_id_(0) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -246,6 +247,14 @@ void ApplicationImpl::set_app_allowed(const bool& allowed) {
 
 void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_ = device;
+}
+
+uint32_t ApplicationImpl::get_grammar_id() {
+  return grammar_id_;
+}
+
+void ApplicationImpl::set_grammar_id(uint32_t value) {
+  grammar_id_ = value;
 }
 
 bool ApplicationImpl::has_been_activated() const {

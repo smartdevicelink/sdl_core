@@ -453,7 +453,7 @@ class ApplicationManagerImpl : public ApplicationManager,
       */
     ResumeCtrl& resume_controller() { return resume_ctrl_; }
 
-    uint32_t GetGrammarID();
+    uint32_t GenerateGrammarID();
     /*
      * @brief Save binary data to specified directory
      *

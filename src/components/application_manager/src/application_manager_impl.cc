@@ -248,7 +248,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  ApplicationSharedPtr application(new ApplicationImpl(app_id));
+  ApplicationSharedPtr application(new
+                                   ApplicationImpl(app_id));
   if (!application) {
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -264,7 +265,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   application->set_name(name);
   application->set_device(device_id);
-
+  application->set_grammar_id(GenerateGrammarID());
   application->set_language(
     static_cast<mobile_api::Language::eType>(
       message[strings::msg_params][strings::language_desired].asInt()));
@@ -744,7 +745,7 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
   return false;
 }
 
-uint32_t ApplicationManagerImpl::GetGrammarID() {
+uint32_t ApplicationManagerImpl::GenerateGrammarID() {
   return rand();
 }
 

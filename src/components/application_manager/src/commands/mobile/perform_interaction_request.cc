@@ -477,6 +477,21 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject& choice_list =
+    (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
+
+  msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
+  int32_t grammar_id_index = 0;
+  for (uint32_t i = 0; i < choice_list.length(); ++i) {
+    smart_objects::SmartObject* choice_set =
+        app->FindChoiceSet(choice_list[i].asInt());
+    if (!choice_set) {
+      LOG4CXX_WARN(logger_, "Couldn't found choiset");
+      continue;
+    }
+    uint32_t grammar_id = (*choice_set)[strings::grammar_id].asUInt();
+    msg_params[strings::grammar_id][grammar_id_index++]= (*choice_set)[strings::grammar_id];
+  }
 
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
 
@@ -485,17 +500,10 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
 
     DeleteParameterFromTTSChunk(&msg_params[strings::help_prompt]);
   } else {
-
-    smart_objects::SmartObject& choice_list =
-      (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
-
     msg_params[strings::help_prompt] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
 
     int32_t index = 0;
-    int32_t grammar_id_index = 0;
-
-    msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
           app->FindChoiceSet(choice_list[i].asInt());
@@ -513,7 +521,6 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
             msg_params[strings::help_prompt][index++] = item;
           }
         }
-         msg_params[strings::grammar_id][grammar_id_index++]= (*choice_set)[strings::grammar_id];
       } else {
         LOG4CXX_ERROR(logger_, "Can't found choiset!")
       }
