@@ -171,8 +171,6 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         (*cur_set)[strings::choice_set].asArray();
       smart_objects::SmartArray::const_iterator cur_choise_it;
 
-
-
       for (cur_choise_it = choices->begin(); cur_choise_it != choices->end();
            ++cur_choise_it) {
         //vr_commands
