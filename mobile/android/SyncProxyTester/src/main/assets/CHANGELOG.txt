@@ -1,3 +1,6 @@
+[CW14]
++ SyncProxyAndroid SDK: Implement protocol version negotiation
+
 [CW13]
 * SyncProxyTester | SyncProxyAndroid SDK: In case of RegisterAppInterface command allow to send parameters which are out of API specification
 + SyncProxyTester: Add DeviceInfo object into request command
