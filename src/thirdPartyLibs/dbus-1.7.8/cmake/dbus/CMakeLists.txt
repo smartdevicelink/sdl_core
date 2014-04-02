@@ -257,6 +257,8 @@ if(MSVC_IDE)
 	project_source_group(${GROUP_CODE} DBUS_UTIL_SOURCES DBUS_UTIL_SOURCES)
 endif(MSVC_IDE)
 
+set(RUNTIME_LIBRARY "") # none needed these days
+
 ### Client library
 
 add_library(dbus-1 SHARED
@@ -270,7 +272,7 @@ if(WIN32)
         target_link_libraries(dbus-1 ws2_32 advapi32 netapi32 iphlpapi)
     endif(WINCE)
 else(WIN32)
-    target_link_libraries(dbus-1 ${CMAKE_THREAD_LIBS_INIT} rt)
+    target_link_libraries(dbus-1 ${CMAKE_THREAD_LIBS_INIT} ${RUNTIME_LIBRARY})
 endif(WIN32)
 
 install(TARGETS dbus-1 ${INSTALL_TARGETS_DEFAULT_ARGS})
@@ -295,13 +297,13 @@ if(WIN32)
         target_link_libraries(dbus-internal ws2_32 advapi32 netapi32 iphlpapi)
     endif(WINCE)
 else(WIN32)
-    target_link_libraries(dbus-internal ${CMAKE_THREAD_LIBS_INIT} rt)
+    target_link_libraries(dbus-internal ${CMAKE_THREAD_LIBS_INIT} ${RUNTIME_LIBRARY})
 endif(WIN32)
 
 if (DBUS_ENABLE_EMBEDDED_TESTS)
 	set (TESTS_ENVIRONMENT "DBUS_TEST_DATA=${CMAKE_SOURCE_DIR}/test/data DBUS_TEST_HOMEDIR=${CMAKE_BUILD_DIR}/dbus")
 	ADD_EXECUTABLE(dbus-test ${CMAKE_SOURCE_DIR}/../dbus/dbus-test-main.c)
-	target_link_libraries(dbus-test ${DBUS_INTERNAL_LIBRARIES})
+        target_link_libraries(dbus-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
 	add_test(dbus-test ${EXECUTABLE_OUTPUT_PATH}/dbus-test ${CMAKE_SOURCE_DIR}/../test/data)
 	set_target_properties(dbus-test PROPERTIES COMPILE_FLAGS ${DBUS_INTERNAL_CLIENT_DEFINITIONS})
 ENDIF (DBUS_ENABLE_EMBEDDED_TESTS)

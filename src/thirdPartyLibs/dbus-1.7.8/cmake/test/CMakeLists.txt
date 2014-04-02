@@ -47,20 +47,20 @@ set (test-sleep-forever_SOURCES
 )
 
 add_executable(test-service ${test-service_SOURCES})
-target_link_libraries(test-service dbus-testutils)
+target_link_libraries(test-service dbus-testutils ${SOCKET_LIBRARY})
 
 add_executable(test-names ${test-names_SOURCES})
-target_link_libraries(test-names dbus-testutils)
+target_link_libraries(test-names dbus-testutils ${SOCKET_LIBRARY})
 
 add_executable(shell-test ${shell-test_SOURCES})
-target_link_libraries(shell-test ${DBUS_INTERNAL_LIBRARIES})
+target_link_libraries(shell-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
 ADD_TEST(shell-test ${EXECUTABLE_OUTPUT_PATH}/shell-test${EXEEXT})
 
 add_executable(test-shell-service ${test-shell-service_SOURCES})
-target_link_libraries(test-shell-service dbus-testutils)
+target_link_libraries(test-shell-service dbus-testutils ${SOCKET_LIBRARY})
 
 add_executable(spawn-test ${spawn-test_SOURCES})
-target_link_libraries(spawn-test ${DBUS_INTERNAL_LIBRARIES})
+target_link_libraries(spawn-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
 
 add_executable(test-exit ${test-exit_SOURCES})
 target_link_libraries(test-exit ${DBUS_INTERNAL_LIBRARIES})

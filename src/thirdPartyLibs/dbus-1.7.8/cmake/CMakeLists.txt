@@ -491,6 +491,8 @@ endif()
 
 add_definitions(-DHAVE_CONFIG_H=1)
 
+set(SOCKET_LIBRARY socket)
+
 ########### subdirs ###############
 
 add_subdirectory( dbus )

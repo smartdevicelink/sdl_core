@@ -39,9 +39,11 @@ elseif (MEINPROC4_EXECUTABLE)
 	if(WIN32)
 		get_filename_component(_a ${MEINPROC4_EXECUTABLE} PATH)
 		get_filename_component(_meinproc_install_path ${_a} PATH)
+                set(STYLESHEET_MAN "${_meinproc_install_path}/share/apps/ksgmltools2/docbook/xsl/manpages/docbook.xsl")
 		set(STYLESHEET_HTML "${_meinproc_install_path}/share/apps/ksgmltools2/docbook/xsl/html/docbook.xsl")
 	else(WIN32)
-		set(STYLESHEET_HTML file:///usr/share/kde4/apps/ksgmltools2/customization/kde-nochunk.xsl)
+                set(STYLESHEET_MAN "/usr/share/kde4/apps/ksgmltools2/customization/kde-include-man.xsl")
+                set(STYLESHEET_HTML "/usr/share/kde4/apps/ksgmltools2/customization/kde-nochunk.xsl")
 	endif(WIN32)
 endif ()
 
@@ -61,11 +63,18 @@ macro (DOCBOOK _sources _format)
   endif ()
 
   set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_outname})
+
+  if (${_format} STREQUAL "man")
+    set(OUTPUT_SPECIFIED "") # meinproc4 bug
+  else()
+    set(OUTPUT_SPECIFIED "-o" "${_outfile}")
+  endif ()
+
   if (EXISTS ${_sources})
 	  if (MEINPROC4_EXECUTABLE)
 		    ADD_CUSTOM_COMMAND(
 			OUTPUT ${_outfile}
-			COMMAND ${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} -o ${_outfile} ${_infile}
+                        COMMAND ${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} ${OUTPUT_SPECIFIED} ${_infile}
 			DEPENDS ${_infile} ${STYLESHEET} ${_deps}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
