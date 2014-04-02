@@ -60,8 +60,8 @@
 #include "rpc/admin_app_test.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_options.h"
+#include "rpc/test_app_manager.h"
 #endif
-
 
 // #define QT_HMI
 
@@ -72,22 +72,23 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
-  #ifdef TESTS_WITH_HMI
-    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-    log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-    test::AdminAppTest app;
+  profile::Profile::instance()->config_file_name("log4cxx.properties");
+  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
-    app.Run();
-    sleep(5);
-  #endif
+
+#ifdef TESTS_WITH_HMI
+  test::AdminAppTest app;
+
+  app.Run();
+  sleep(5);
+#endif
   int result = RUN_ALL_TESTS();
 
-  #ifdef __cplusplus
-    __gcov_flush();
-  #endif
+#ifdef __cplusplus
+  __gcov_flush();
+#endif
 
   sleep(2);
   return result;
 }
-
 

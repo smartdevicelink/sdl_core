@@ -136,7 +136,7 @@ void PutFileRequest::Run() {
     full_file_path = profile::Profile::instance()->system_files_path();
 
     if (!file_system::CreateDirectoryRecursively(full_file_path)) {
-      LOG4CXX_ERROR(logger_, "Cann't create folder.");
+      LOG4CXX_ERROR(logger_, "Cann't create folder");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
                    "Cann't create folder.",
                    &response_params);
@@ -154,7 +154,7 @@ void PutFileRequest::Run() {
         > file_system::GetAvailableSpaceForApp(application->name())) {
       LOG4CXX_ERROR(logger_, "Out of free app memory.");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY,
-                   "Out of memory.",
+                   "Out of memory",
                    &response_params);
       return;
     }
@@ -170,7 +170,7 @@ void PutFileRequest::Run() {
     case mobile_apis::Result::SUCCESS: {
       AppFile file(sync_file_name_, is_persistent_file_, is_download_compleate,
                    file_type_);
-      if (offset_ == 0) {
+      if (0 == offset_) {
         LOG4CXX_INFO(logger_, "New file downloading");
         if (!application->AddFile(file)) {
           LOG4CXX_INFO(
@@ -199,8 +199,8 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOG4CXX_INFO(logger_, "Save in unsuccesfull result = " << save_result);
-      SendResponse(false, save_result, "Cant' save file", &response_params);
+      LOG4CXX_INFO(logger_, "Save in unsuccesfull. Result = " << save_result);
+      SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }
 }
@@ -218,7 +218,7 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::app_id] = connection_key();
   message[strings::msg_params][strings::sync_file_name] = sync_file_name_;
   message[strings::msg_params][strings::offset] = offset_;
-  if ( offset_ == 0 ) {
+  if (0 == offset_) {
     message[strings::msg_params][strings::file_size] =
         (*message_)[strings::msg_params][strings::length];
   }

@@ -94,7 +94,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  uint32_t grammar_id = ApplicationManagerImpl::instance()->GetGrammarID();
+  uint32_t grammar_id = ApplicationManagerImpl::instance()->GenerateGrammarID();
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
   SendVRAddCommandRequest(app);
@@ -117,6 +117,8 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 
   // Self check of new choice set for params coincidence
   for (; it_array != it_array_end; ++it_array) {
+    const smart_objects::SmartArray* vr_array =
+        (*it_array)[strings::vr_commands].asArray();
 
     CoincidencePredicateChoiceID c((*it_array)[strings::choice_id].asInt());
     if (1 != std::count_if(
@@ -159,9 +161,36 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       return mobile_apis::Result::DUPLICATE_NAME;
     }
 
+    // check dublicate with existing choisets
+
+    for (ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
+         it != app_choice_set_map.end(); ++it) {
+      smart_objects::SmartObject* cur_set = it->second;
+
+      const smart_objects::SmartArray* choices =
+        (*cur_set)[strings::choice_set].asArray();
+      smart_objects::SmartArray::const_iterator cur_choise_it;
+
+
+
+      for (cur_choise_it = choices->begin(); cur_choise_it != choices->end();
+           ++cur_choise_it) {
+        //vr_commands
+        if (true == compareSynonyms((*cur_choise_it),(*it_array))) {
+          LOG4CXX_ERROR(logger_, "Dublicated VR synonyms");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+        // menu_name
+        if((*cur_choise_it)[strings::menu_name].asString() ==
+           (*it_array)[strings::menu_name].asString()) {
+          LOG4CXX_ERROR(logger_, "Dublicated Menu name ");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+
+      }
+    }
+
     // Check coincidence inside the current choice
-    const smart_objects::SmartArray* vr_array =
-        (*it_array)[strings::vr_commands].asArray();
 
     smart_objects::SmartArray::const_iterator it_vr = vr_array->begin();
     smart_objects::SmartArray::const_iterator it_vr_end = vr_array->end();
