@@ -1412,8 +1412,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             // Dispatching logic
             if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
-                    byte protocolVersion = mSyncConnection.getProtocolVersion();
-
+                    byte protocolVersion = message.getVersion();
+                    Log.i(TAG, "Incoming protocol version:" + protocolVersion);
                     if (protocolVersion == 1) {
                         Log.w(TAG, "Incorrect incoming protocol version, expected min 2 but was 1");
                         protocolVersion = 2;
@@ -1497,6 +1497,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
                 } else {
+                    Log.d("TRACE", "Error info:" + msg.getThrowable().toString());
                     _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
