@@ -13,19 +13,34 @@ package com.ford.syncV4.proxy.constants;
 public class ProtocolConstants {
 
     /**
+     * Protocol version 1
+     */
+    public static final byte PROTOCOL_VERSION_ONE = 0x01;
+
+    /**
+     * Protocol version 2
+     */
+    public static final byte PROTOCOL_VERSION_TWO = 0x02;
+
+    /**
+     * Protocol version 3
+     */
+    public static final byte PROTOCOL_VERSION_THREE = 0x03;
+
+    /**
+     * Protocol version 4 (for the Test Cases)
+     */
+    public static final byte PROTOCOL_VERSION_FOUR = 0x04;
+
+    /**
      * Define Protocol minimum support version
      */
-    public static final byte PROTOCOL_VERSION_MIN = (byte) 1;
+    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_ONE;
 
     /**
      * Define Protocol maximum support version
      */
-    public static final byte PROTOCOL_VERSION_MAX = (byte) 2;
-
-    /**
-     * Define Protocol default support version
-     */
-    public static final byte PROTOCOL_VERSION_DEFAULT = PROTOCOL_VERSION_MIN;
+    public static final byte PROTOCOL_VERSION_MAX = PROTOCOL_VERSION_TWO;
 
     /**
      * Size of the message header of the Protocol version 1

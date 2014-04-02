@@ -22,6 +22,7 @@ import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverter;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SyncRPCRequestConverterFactory;
@@ -3196,7 +3197,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
-            if (mSyncConnection.getProtocolVersion() == 2) {
+            if (mSyncConnection.getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {

@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
@@ -342,23 +343,20 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testReadingHashIDFromStartSessionACK() throws Throwable {
         // null as a listener won't work
-        final WiProProtocol protocol =
-                new WiProProtocol(DUMMY_PROTOCOL_LISTENER);
+        final WiProProtocol protocol = new WiProProtocol(DUMMY_PROTOCOL_LISTENER);
+
         final ByteArrayOutputStream StartSessionACKMessageStream =
-                new ByteArrayOutputStream(12);
+                new ByteArrayOutputStream(ProtocolConstants.HEADER_SIZE_V_2);
 
         final byte[] msgFirstBytes = new byte[]{0x20, 0x07, 0x02, 0x00};
         StartSessionACKMessageStream.write(msgFirstBytes);
         final byte[] msgDataSize = new byte[]{0x00, 0x00, 0x00, 0x00};
         StartSessionACKMessageStream.write(msgDataSize);
-        final byte[] msgHashID =
-                new byte[]{0x12, 0x34, (byte) 0xCD, (byte) 0xEF};
+        final byte[] msgHashID = new byte[]{0x12, 0x34, (byte) 0xCD, (byte) 0xEF};
         StartSessionACKMessageStream.write(msgHashID);
 
-        final byte[] StartSessionACKMessage =
-                StartSessionACKMessageStream.toByteArray();
-        protocol.HandleReceivedBytes(StartSessionACKMessage,
-                StartSessionACKMessage.length);
+        final byte[] StartSessionACKMessage = StartSessionACKMessageStream.toByteArray();
+        protocol.HandleReceivedBytes(StartSessionACKMessage, StartSessionACKMessage.length);
         Assert.assertEquals("HashID is incorrect", 0x1234CDEF, protocol.hashID);
     }
 
@@ -464,7 +462,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
         protocol.hashID = 0xCDEF1234;
-        protocol.mProtocolVersion = 2;
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
         protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
     }
 

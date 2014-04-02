@@ -2,10 +2,11 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.util.BitConverter;
 
 public class ProtocolFrameHeader {
-	private byte version = 1;
+	private byte version = ProtocolConstants.PROTOCOL_VERSION_ONE;
 	private boolean compressed = false;
 	private FrameType frameType = FrameType.Control;
 	private ServiceType serviceType = ServiceType.RPC;
@@ -44,7 +45,7 @@ public class ProtocolFrameHeader {
 		int dataSize = BitConverter.intFromByteArray(header, 4);
 		msg.setDataSize(dataSize);
 		
-		if (version == 2) {
+		if (version == ProtocolConstants.PROTOCOL_VERSION_TWO) {
 			int messageID = BitConverter.intFromByteArray(header, 8);
 			msg.setMessageID(messageID);
 		} else msg.setMessageID(0);
@@ -70,13 +71,13 @@ public class ProtocolFrameHeader {
 		header <<= 8;
 		header |= (sessionID & 0xFF);
 		
-		if (version == 1) {
+		if (version == ProtocolConstants.PROTOCOL_VERSION_ONE) {
 			byte[] ret = new byte[8];
 			System.arraycopy(BitConverter.intToByteArray(header), 0, ret, 0, 4);
 			System.arraycopy(BitConverter.intToByteArray(dataSize), 0, ret, 4, 4);
 			
 			return ret;
-		} else if (version == 2) {
+		} else if (version == ProtocolConstants.PROTOCOL_VERSION_TWO) {
 			byte[] ret = new byte[12];
 			System.arraycopy(BitConverter.intToByteArray(header), 0, ret, 0, 4);
 			System.arraycopy(BitConverter.intToByteArray(dataSize), 0, ret, 4, 4);

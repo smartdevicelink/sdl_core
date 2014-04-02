@@ -1,6 +1,7 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
 
 import junit.framework.TestCase;
@@ -69,7 +70,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
         requiredMethodCalled = false;
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
-        protocol.mProtocolVersion = 2;
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
 
         byte[] unregisterAppInterfaceResponse = new byte[]{
                 // first bytes
@@ -153,7 +154,7 @@ public class WiProProtocolUSBTest extends TestCase {
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
-        protocol.mProtocolVersion = 2;
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
 
         byte[] unregisterAppInterfaceRequest = new byte[]{
                 // first bytes

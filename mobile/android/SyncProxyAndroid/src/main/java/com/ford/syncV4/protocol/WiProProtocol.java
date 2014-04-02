@@ -26,7 +26,7 @@ public class WiProProtocol extends AbstractProtocol {
     private final static String FailurePropagating_Msg = "Failure propagating ";
     public static int HEADER_SIZE = ProtocolConstants.HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
-    byte mProtocolVersion = ProtocolConstants.PROTOCOL_VERSION_DEFAULT;
+    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
     boolean _haveHeader = false;
     byte[] _headerBuf = new byte[HEADER_SIZE];
     int _headerBufWritePos = 0;
@@ -53,12 +53,13 @@ public class WiProProtocol extends AbstractProtocol {
     } // end-ctor
 
     public byte getProtocolVersion() {
-        return mProtocolVersion;
+        return mProtocolVersion.getCurrentVersion();
     }
 
     public void setProtocolVersion(byte version) {
-        mProtocolVersion = version;
-        if (mProtocolVersion == 2) {
+        mProtocolVersion.setCurrentVersion(version);
+
+        if (mProtocolVersion.getCurrentVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
             HEADER_SIZE = ProtocolConstants.HEADER_SIZE_V_2;
             MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
             _headerBuf = new byte[HEADER_SIZE];
@@ -199,7 +200,7 @@ public class WiProProtocol extends AbstractProtocol {
                 ", protocol ver:" + getProtocolVersion());
 
         //Check for a version difference
-        if (getProtocolVersion() == 1) {
+        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE) {
             //Nothing has been read into the buffer and version is 2
             if (_headerBufWritePos == 0 && (byte) (receivedBytes[0] >>> 4) == 2) {
                 setProtocolVersion((byte) (receivedBytes[0] >>> 4));
@@ -325,7 +326,7 @@ public class WiProProtocol extends AbstractProtocol {
                 message.setSessionType(header.getServiceType());
                 message.setSessionID(header.getSessionID());
                 //If it is WiPro 2.0 it must have binary header
-                if (getProtocolVersion() == 2) {
+                if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
                     BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
                             parseBinaryHeader(accumulator.toByteArray());
                     message.setVersion(getProtocolVersion());
@@ -407,7 +408,7 @@ public class WiProProtocol extends AbstractProtocol {
                     _messageLocks.put(header.getSessionID(), messageLock);
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
-                if (getProtocolVersion() == 2) {
+                if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
                     hashID = header.getMessageID();
                 }
                 inspectStartServiceACKHeader(header);
@@ -451,7 +452,7 @@ public class WiProProtocol extends AbstractProtocol {
             message.setSessionType(header.getServiceType());
             message.setSessionID(header.getSessionID());
             //If it is WiPro 2.0 it must have binary header
-            if (getProtocolVersion() == 2) {
+            if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
                         parseBinaryHeader(data);
                 message.setVersion(getProtocolVersion());
@@ -487,7 +488,7 @@ public class WiProProtocol extends AbstractProtocol {
     } // end-class
 
     private void handleEndSessionFrame(ProtocolFrameHeader header) {
-        if (getProtocolVersion() == 2) {
+        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (hashID == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
             }
