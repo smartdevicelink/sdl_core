@@ -44,6 +44,15 @@ public class ProtocolVersion {
         mCurrentVersion = negotiateVersion(value);
     }
 
+    /**
+     * Set up current actual protocol version for the Test Cases only,
+     * see {@link com.ford.syncV4.proxy.constants.ProtocolConstants} for more information
+     * @param value version of protocol
+     */
+    public void setTestCurrentVersion(byte value) {
+        mCurrentVersion = value;
+    }
+
     private byte negotiateVersion(byte value) {
         // Check if the value in the byte is numerical
         if ((int) value <= 0 || (int) value > 100) {

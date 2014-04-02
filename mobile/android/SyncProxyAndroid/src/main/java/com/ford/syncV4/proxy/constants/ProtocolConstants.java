@@ -13,6 +13,11 @@ package com.ford.syncV4.proxy.constants;
 public class ProtocolConstants {
 
     /**
+     * Undefined Protocol version
+     */
+    public static final byte PROTOCOL_VERSION_UNDEFINED = 0x00;
+
+    /**
      * Protocol version 1
      */
     public static final byte PROTOCOL_VERSION_ONE = 0x01;
@@ -35,7 +40,7 @@ public class ProtocolConstants {
     /**
      * Define Protocol minimum support version
      */
-    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_ONE;
+    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_TWO;
 
     /**
      * Define Protocol maximum support version

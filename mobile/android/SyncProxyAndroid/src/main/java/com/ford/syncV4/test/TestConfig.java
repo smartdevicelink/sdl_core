@@ -7,6 +7,8 @@ package com.ford.syncV4.test;
  * Time: 9:58 AM
  */
 
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
+
 /**
  * This class stores all the necessary data for SDK testing
  */
@@ -47,6 +49,11 @@ public class TestConfig {
      * reader)
      */
     private boolean mDoKeepUSBTransportConnected = false;
+
+    /**
+     * Version of the protocol
+     */
+    private byte mProtocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
 
     /**
      * @return a value of the functionality: whether or not to use parameter
@@ -146,5 +153,20 @@ public class TestConfig {
      */
     public void setDoKeepUSBTransportConnected(boolean mDoKeepUSBTransportConnected) {
         this.mDoKeepUSBTransportConnected = mDoKeepUSBTransportConnected;
+    }
+
+    /**
+     * @return protocol version
+     */
+    public byte getProtocolVersion() {
+        return mProtocolVersion;
+    }
+
+    /**
+     * Set a version of the protocol
+     * @param mProtocolVersion protocol version int value
+     */
+    public void setProtocolVersion(byte mProtocolVersion) {
+        this.mProtocolVersion = mProtocolVersion;
     }
 }

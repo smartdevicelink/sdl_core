@@ -1156,11 +1156,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
                 //mSyncConnection.setSessionId(currentSession.getSessionId());
 
+                /**
+                 * TODO : Set TestConfig for the Connection
+                 */
+                mSyncConnection.setTestConfig(mTestConfig);
+
                 mSyncConnection.init(_transportConfig);
             }
 
             /**
-             * TODO : Set TestConfig for the Connection
+             * TODO : Set TestConfig for the Connection in case we need to update it.
+             * probably there is better way to do it, but as soon as this is test config
+             * leave it like it is
              */
             mSyncConnection.setTestConfig(mTestConfig);
 
@@ -1898,7 +1905,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         currentSession.setSessionId(sessionID);
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
-        Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -3095,6 +3101,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onTransportConnected() {
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        _proxyListener.onStartSession(currentSession.getSessionId());
+                    }
+                });
+            } else {
+                _proxyListener.onStartSession(currentSession.getSessionId());
+            }
+
             initializeSession();
         }
 
@@ -3169,6 +3187,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
             if (session.hasService(ServiceType.RPC)) {
+                String message = "RPC Session started, sessionId:" + session.getSessionId() +
+                        ", correlationID:" + correlationID +
+                        ", protocol version:" + (int) version +
+                        ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
+                Log.i(TAG, message);
+
                 startRPCProtocolService(session.getSessionId(), correlationID);
             }
         }

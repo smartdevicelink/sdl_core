@@ -43,23 +43,28 @@ public class WiProProtocol extends AbstractProtocol {
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatReceiveInterval_ms = 0;
 
-    // Hide no-arg ctor
-    private WiProProtocol() {
-        super(null);
-    } // end-ctor
-
     public WiProProtocol(IProtocolListener protocolListener) {
         super(protocolListener);
-    } // end-ctor
+        setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
+    }
 
     public byte getProtocolVersion() {
         return mProtocolVersion.getCurrentVersion();
     }
 
+    /**
+     * This method is for the Test Cases only
+     * @param version test protocol version
+     */
+    public void setTestProtocolVersion(byte version) {
+        mProtocolVersion.setTestCurrentVersion(version);
+    }
+
     public void setProtocolVersion(byte version) {
+        Log.d(TAG, "Update Protocol version:" + version);
         mProtocolVersion.setCurrentVersion(version);
 
-        if (mProtocolVersion.getCurrentVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             HEADER_SIZE = ProtocolConstants.HEADER_SIZE_V_2;
             MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
             _headerBuf = new byte[HEADER_SIZE];

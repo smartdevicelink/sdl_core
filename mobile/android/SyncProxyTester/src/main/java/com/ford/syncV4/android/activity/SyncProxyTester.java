@@ -646,12 +646,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     @Override
     public void onServiceStart(ServiceType serviceType, byte sessionId) {
-        mLogAdapter.logMessage("Service '" + serviceType + "' started", true);
+        mLogAdapter.logMessage("Service '" + serviceType + "' started, " +
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
 
         if (mBoundProxyService == null) {
             mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                    "' service can not " +
-                    "start with NULL Proxy Service", Log.WARN);
+                    "' service can not " + "start with NULL Proxy Service", Log.WARN);
             return;
         }
 

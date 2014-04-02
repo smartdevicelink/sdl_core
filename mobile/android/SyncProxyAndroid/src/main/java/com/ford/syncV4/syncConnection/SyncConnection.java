@@ -157,6 +157,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol = null;
             }
             _protocol = new WiProProtocol(this);
+
+            // Apply a value which has been set for the Test Cases
+            if (mTestConfig != null) {
+                ((WiProProtocol) _protocol).setTestProtocolVersion(mTestConfig.getProtocolVersion());
+            }
         }
 
         mIsInit = true;

@@ -1,11 +1,16 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.util.BitConverter;
 
 public class ProtocolFrameHeader {
+
+    private static final String LOG = ProtocolFrameHeader.class.getSimpleName();
+
 	private byte version = ProtocolConstants.PROTOCOL_VERSION_ONE;
 	private boolean compressed = false;
 	private FrameType frameType = FrameType.Control;
@@ -77,14 +82,17 @@ public class ProtocolFrameHeader {
 			System.arraycopy(BitConverter.intToByteArray(dataSize), 0, ret, 4, 4);
 			
 			return ret;
-		} else if (version == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+		} else if (version >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
 			byte[] ret = new byte[12];
 			System.arraycopy(BitConverter.intToByteArray(header), 0, ret, 0, 4);
 			System.arraycopy(BitConverter.intToByteArray(dataSize), 0, ret, 4, 4);
 			System.arraycopy(BitConverter.intToByteArray(messageID), 0, ret, 8, 4);
 			
 			return ret;
-		} else return null;
+		} else {
+            Log.e(LOG, "Assemble Header Bytes with unknown protocol version: " + version);
+            return null;
+        }
 	}
 	
 	public String toString() {

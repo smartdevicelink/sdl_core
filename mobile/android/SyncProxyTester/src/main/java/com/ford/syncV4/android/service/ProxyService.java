@@ -43,6 +43,7 @@ import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -383,6 +384,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         new SyncProxyConfigurationResources();
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
+
+                mTestConfig.setProtocolVersion((byte) AppPreferencesManager.getProtocolVersion());
 
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources/*sync proxy configuration resources*/,
@@ -1528,6 +1531,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createDebugMessageForAdapter(notification);
     }
 
+    @Override
+    public void onStartSession(byte sessionID) {
+        mLogAdapter.logMessage("Session going to start, " +
+                "protocol version: " + syncProxyGetWiProVersion(), true);
+    }
+
     /**
      * ******************************
      * * SYNC AppLink Policies Callback's **
@@ -2111,7 +2120,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             return mSyncProxy.getSyncConnection().getProtocolVersion();
         }
-        return 0;
+        return ProtocolConstants.PROTOCOL_VERSION_UNDEFINED;
     }
 
     public void syncProxyStartMobileNavService(Session session) {

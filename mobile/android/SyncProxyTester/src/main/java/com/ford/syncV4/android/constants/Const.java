@@ -8,6 +8,7 @@ public class Const {
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
 
 	// Protocol properties
+	public static final String PREFS_KEY_PROTOCOL_VERSION = "protocolVersion";
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
     public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
