@@ -3,47 +3,47 @@ project(test)
 add_definitions(${DBUS_INTERNAL_CLIENT_DEFINITIONS})
 
 add_library(dbus-testutils STATIC
-    ${CMAKE_SOURCE_DIR}/../test/test-utils.h
-    ${CMAKE_SOURCE_DIR}/../test/test-utils.c
+    ${DBUS_SOURCE_DIR}/test/test-utils.h
+    ${DBUS_SOURCE_DIR}/test/test-utils.c
 )
 target_link_libraries(dbus-testutils ${DBUS_INTERNAL_LIBRARIES})
 
 add_subdirectory( name-test )
 
 set (test-service_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-service.c
+    ${DBUS_SOURCE_DIR}/test/test-service.c
 )
 
 set (test-names_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-names.c
+    ${DBUS_SOURCE_DIR}/test/test-names.c
 )
 
 set (break_loader_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/break-loader.c
+    ${DBUS_SOURCE_DIR}/test/break-loader.c
 )
 
 set (test-shell-service_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-shell-service.c
+    ${DBUS_SOURCE_DIR}/test/test-shell-service.c
 )
 
 set (shell-test_SOURCES
-        ${CMAKE_SOURCE_DIR}/../test/shell-test.c
+        ${DBUS_SOURCE_DIR}/test/shell-test.c
 )
 
 set (spawn-test_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/spawn-test.c
+    ${DBUS_SOURCE_DIR}/test/spawn-test.c
 )
 
 set (test-exit_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-exit.c
+    ${DBUS_SOURCE_DIR}/test/test-exit.c
 )
 
 set (test-segfault_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-segfault.c
+    ${DBUS_SOURCE_DIR}/test/test-segfault.c
 )
 
 set (test-sleep-forever_SOURCES
-    ${CMAKE_SOURCE_DIR}/../test/test-sleep-forever.c
+    ${DBUS_SOURCE_DIR}/test/test-sleep-forever.c
 )
 
 add_executable(test-service ${test-service_SOURCES})
@@ -104,7 +104,7 @@ set (CONFIG_VERBOSE 0)
 MESSAGE(STATUS "Copying test files to test directory")
 FOREACH(FILE_TYPE *.message *.message-raw *.auth-script *.sha1 *.txt *.conf *.service)
     FOREACH(DIR ${TESTDIRS})
-        FILE(GLOB FILES "${CMAKE_SOURCE_DIR}/../${DIR}/${FILE_TYPE}" )
+        FILE(GLOB FILES "${DBUS_SOURCE_DIR}/${DIR}/${FILE_TYPE}" )
         FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${DIR})
         FOREACH(FILE ${FILES})
             GET_FILENAME_COMPONENT(FILENAME ${FILE} NAME)
@@ -122,7 +122,7 @@ MESSAGE(STATUS "Generating test files from templates into test directory")
 
 FOREACH(FILE_TYPE *.conf.in *.service.in)
   FOREACH(DIR ${TESTDIRS})
-    FILE(GLOB FILES "${CMAKE_SOURCE_DIR}/../${DIR}/${FILE_TYPE}" )
+    FILE(GLOB FILES "${DBUS_SOURCE_DIR}/${DIR}/${FILE_TYPE}" )
     FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${DIR})
     FOREACH(FILE ${FILES})
       GET_FILENAME_COMPONENT(FILENAME ${FILE} NAME)

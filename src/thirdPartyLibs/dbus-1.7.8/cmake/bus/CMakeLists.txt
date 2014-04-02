@@ -3,7 +3,7 @@ project(bus)
 add_definitions(-DDBUS_COMPILATION)
 
 SET(EFENCE "")
-SET(BUS_DIR ${CMAKE_SOURCE_DIR}/../bus)
+SET(BUS_DIR ${DBUS_SOURCE_DIR}/bus)
 
 set (config_DATA
 	session.conf				
@@ -19,7 +19,7 @@ FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/system.d)
 
 # copy services for local daemon start to local service dir data/dbus-1/services
 SET (SERVICE_FILES test/data/valid-service-files)
-FILE(GLOB FILES "${CMAKE_SOURCE_DIR}/../${SERVICE_FILES}/*.service.in" )
+FILE(GLOB FILES "${DBUS_SOURCE_DIR}/${SERVICE_FILES}/*.service.in" )
 FOREACH(FILE ${FILES})	
 	GET_FILENAME_COMPONENT(FILENAME ${FILE} NAME_WE)
 	SET (TARGET ${CMAKE_BINARY_DIR}/data/dbus-1/services/${FILENAME}.service)

@@ -1,10 +1,13 @@
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/modules")
 
 # we do not need to have WIN32 defined
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 
 project(dbus)
+
+set(DBUS_CMAKE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(DBUS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 # we need to be up to date
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4 FATAL_ERROR)
@@ -91,7 +94,7 @@ endif (CYGWIN)
 # search for required packages
 if (WIN32)
     # include local header first to avoid using old installed header
-    set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CMAKE_SOURCE_DIR}/..)
+    set (CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${DBUS_SOURCE_DIR})
 	find_package(LibIconv)
     include(Win32Macros)
     addExplorerWrapper(${CMAKE_PROJECT_NAME})
@@ -115,9 +118,6 @@ add_definitions(-D_GNU_SOURCE)
 
 # do config checks
 INCLUDE(ConfigureChecks.cmake)
-
-# @TODO: how to remove last dir from ${CMAKE_SOURCE_DIR} ?
-SET(DBUS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
 
 # make some more macros available
 include (MacroLibrary)
@@ -223,7 +223,7 @@ endif (WIN32 OR CYGWIN)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 
 # for including config.h and for includes like <dir/foo.h>
-include_directories( ${CMAKE_SOURCE_DIR}/.. ${CMAKE_BINARY_DIR} ${CMAKE_INCLUDE_PATH} )
+include_directories( ${DBUS_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${CMAKE_INCLUDE_PATH} )
 
 # linker search directories
 link_directories(${DBUS_LIB_DIR} ${LIBRARY_OUTPUT_PATH} )

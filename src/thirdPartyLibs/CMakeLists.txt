@@ -54,3 +54,6 @@ add_subdirectory(apr-util-1.5.3)
 
 # --- log4cxx
 add_subdirectory(apache-log4cxx-0.10.0)
+
+# D-Bus
+add_subdirectory(dbus-1.7.8/cmake)

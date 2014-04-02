@@ -1,6 +1,6 @@
 project(dbus-lib)
 
-SET(DBUS_DIR ${CMAKE_SOURCE_DIR}/../dbus)
+SET(DBUS_DIR ${DBUS_SOURCE_DIR}/dbus)
 
 configure_file(${DBUS_DIR}/dbus-arch-deps.h.in ${CMAKE_CURRENT_BINARY_DIR}/dbus-arch-deps.h )
 
@@ -98,7 +98,7 @@ set (DBUS_LIB_HEADERS
 	${DBUS_DIR}/dbus-transport.h
 	${DBUS_DIR}/dbus-transport-protected.h
 	${DBUS_DIR}/dbus-watch.h
-	${CMAKE_BINARY_DIR}/config.h
+        ${DBUS_CMAKE_SOURCE_DIR}/config.h
 )
 if(UNIX)
 	set (DBUS_LIB_HEADERS ${DBUS_LIB_HEADERS} 
@@ -301,10 +301,10 @@ else(WIN32)
 endif(WIN32)
 
 if (DBUS_ENABLE_EMBEDDED_TESTS)
-	set (TESTS_ENVIRONMENT "DBUS_TEST_DATA=${CMAKE_SOURCE_DIR}/test/data DBUS_TEST_HOMEDIR=${CMAKE_BUILD_DIR}/dbus")
-	ADD_EXECUTABLE(dbus-test ${CMAKE_SOURCE_DIR}/../dbus/dbus-test-main.c)
+        set (TESTS_ENVIRONMENT "DBUS_TEST_DATA=${DBUS_CMAKE_SOURCE_DIR}/test/data DBUS_TEST_HOMEDIR=${CMAKE_BUILD_DIR}/dbus")
+        ADD_EXECUTABLE(dbus-test ${DBUS_SOURCE_DIR}/dbus/dbus-test-main.c)
         target_link_libraries(dbus-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
-	add_test(dbus-test ${EXECUTABLE_OUTPUT_PATH}/dbus-test ${CMAKE_SOURCE_DIR}/../test/data)
+        add_test(dbus-test ${EXECUTABLE_OUTPUT_PATH}/dbus-test ${DBUS_SOURCE_DIR}/test/data)
 	set_target_properties(dbus-test PROPERTIES COMPILE_FLAGS ${DBUS_INTERNAL_CLIENT_DEFINITIONS})
 ENDIF (DBUS_ENABLE_EMBEDDED_TESTS)
 

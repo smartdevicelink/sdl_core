@@ -145,7 +145,7 @@ if (DBUS_ENABLE_ABSTRACT_SOCKETS)
 
   try_compile(HAVE_ABSTRACT_SOCKETS
               ${CMAKE_BINARY_DIR}
-              ${CMAKE_SOURCE_DIR}/modules/CheckForAbstractSockets.c)
+              ${DBUS_CMAKE_SOURCE_DIR}/modules/CheckForAbstractSockets.c)
 
 endif(DBUS_ENABLE_ABSTRACT_SOCKETS)
 
