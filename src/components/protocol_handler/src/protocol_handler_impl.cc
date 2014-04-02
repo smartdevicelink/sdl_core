@@ -421,7 +421,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
-  std::map<uint8_t, uint32_t>::const_iterator it =
+  std::map<uint8_t, uint32_t>::iterator it =
       sessions_last_message_id_.find(sent_message.session_id());
 
   if (sessions_last_message_id_.end() != it) {

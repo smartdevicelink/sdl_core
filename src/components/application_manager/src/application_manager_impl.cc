@@ -614,6 +614,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
   }
