@@ -55,15 +55,12 @@ void OnSystemRequestNotification::Run() {
   mobile_apis::RequestType::eType request_type = static_cast<mobile_apis::RequestType::eType>
       ((*message_)[strings::msg_params][strings::request_type].asInt());
 
-  if (false == (*message_)[strings::msg_params].keyExists(strings::file_name)) {
-    return;
-  }
   std::string filename = (*message_)[strings::msg_params][strings::file_name].asString();
 
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
     std::vector<uint8_t> binary_data;
     file_system::ReadBinaryFile(filename, binary_data);
-    (*message_)[strings::msg_params][strings::binary_data] = binary_data;
+    (*message_)[strings::params][strings::binary_data] = binary_data;
   }
 
   SendNotification();
