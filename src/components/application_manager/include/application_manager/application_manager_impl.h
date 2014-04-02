@@ -86,6 +86,12 @@ class Thread;
 }
 class CommandNotificationImpl;
 
+#ifdef TESTS_WITH_HMI
+namespace test {
+  class ApplicationManagerImplTest;
+}
+#endif
+
 namespace application_manager {
 namespace mobile_api = mobile_apis;
 
@@ -604,6 +610,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
+#ifdef TESTS_WITH_HMI
+    friend class test::ApplicationManagerImplTest;
+#endif
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {
