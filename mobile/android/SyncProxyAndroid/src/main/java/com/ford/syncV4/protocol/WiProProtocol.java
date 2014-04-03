@@ -24,11 +24,11 @@ public class WiProProtocol extends AbstractProtocol {
 
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
-    public static int HEADER_SIZE = ProtocolConstants.HEADER_SIZE_DEFAULT;
-    public static int MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
+    public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
+    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
     boolean _haveHeader = false;
-    byte[] _headerBuf = new byte[HEADER_SIZE];
+    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     int _headerBufWritePos = 0;
     ProtocolFrameHeader _currentHeader = null;
     byte[] _dataBuf = null;
@@ -65,9 +65,13 @@ public class WiProProtocol extends AbstractProtocol {
         mProtocolVersion.setCurrentVersion(version);
 
         if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            HEADER_SIZE = ProtocolConstants.HEADER_SIZE_V_2;
-            MAX_DATA_SIZE = MTU_SIZE - HEADER_SIZE;
-            _headerBuf = new byte[HEADER_SIZE];
+
+            // TODO : Incorporate SSL overhead const
+            // Implement here
+
+            PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2;
+            MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
+            _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
         }
     }
 
@@ -151,7 +155,7 @@ public class WiProProtocol extends AbstractProtocol {
                 if (data.length % MAX_DATA_SIZE > 0) {
                     frameCount++;
                 }
-                //byte[] firstFrameData = new byte[HEADER_SIZE];
+                //byte[] firstFrameData = new byte[PROTOCOL_FRAME_HEADER_SIZE];
                 byte[] firstFrameData = new byte[8];
                 // First four bytes are data size.
                 System.arraycopy(BitConverter.intToByteArray(data.length), 0, firstFrameData, 0, 4);
@@ -269,7 +273,7 @@ public class WiProProtocol extends AbstractProtocol {
             _dataBuf = null;
             _dataBufWritePos = 0;
             _haveHeader = false;
-            _headerBuf = new byte[HEADER_SIZE];
+            _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
             _currentHeader = null;
             _headerBufWritePos = 0;
 
@@ -310,7 +314,7 @@ public class WiProProtocol extends AbstractProtocol {
         protected void handleFirstDataFrame(ProtocolFrameHeader header, byte[] data) {
             //The message is new, so let's figure out how big it is.
             hasFirstFrame = true;
-            totalSize = BitConverter.intFromByteArray(data, 0) - HEADER_SIZE;
+            totalSize = BitConverter.intFromByteArray(data, 0) - PROTOCOL_FRAME_HEADER_SIZE;
             framesRemaining = BitConverter.intFromByteArray(data, 4);
             accumulator = new ByteArrayOutputStream(totalSize);
         }

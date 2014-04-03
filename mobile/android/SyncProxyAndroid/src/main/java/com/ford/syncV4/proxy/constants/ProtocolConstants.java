@@ -40,7 +40,7 @@ public class ProtocolConstants {
     /**
      * Define Protocol minimum support version
      */
-    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_TWO;
+    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_ONE;
 
     /**
      * Define Protocol maximum support version
@@ -50,15 +50,15 @@ public class ProtocolConstants {
     /**
      * Size of the message header of the Protocol version 1
      */
-    public static final int HEADER_SIZE_V_1 = 8;
+    public static final int PROTOCOL_FRAME_HEADER_SIZE_V_1 = 8;
 
     /**
      * Size of the message header of the Protocol version 2
      */
-    public static final int HEADER_SIZE_V_2 = 12;
+    public static final int PROTOCOL_FRAME_HEADER_SIZE_V_2 = 12;
 
     /**
      * Size of the message header of the Protocol by default
      */
-    public static final int HEADER_SIZE_DEFAULT = HEADER_SIZE_V_1;
+    public static final int PROTOCOL_FRAME_HEADER_SIZE_DEFAULT = PROTOCOL_FRAME_HEADER_SIZE_V_1;
 }

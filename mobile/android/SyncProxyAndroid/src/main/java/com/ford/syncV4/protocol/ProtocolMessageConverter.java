@@ -37,23 +37,23 @@ public class ProtocolMessageConverter {
         }
         if (mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (_protocolMsg.getBulkData() != null) {
-                _data = new byte[ProtocolConstants.HEADER_SIZE_V_2 + _protocolMsg.getJsonSize() +
+                _data = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize() +
                         _protocolMsg.getBulkData().length];
                 _serviceType = ServiceType.Bulk_Data;
             } else {
-                _data = new byte[ProtocolConstants.HEADER_SIZE_V_2 + _protocolMsg.getJsonSize()];
+                _data = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize()];
             }
             BinaryFrameHeader binFrameHeader =
                     ProtocolFrameHeaderFactory.createBinaryFrameHeader(_protocolMsg.getRPCType(),
                             _protocolMsg.getFunctionID(), _protocolMsg.getCorrID(),
                             _protocolMsg.getJsonSize());
             System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, _data, 0,
-                    ProtocolConstants.HEADER_SIZE_V_2);
-            System.arraycopy(_protocolMsg.getData(), 0, _data, ProtocolConstants.HEADER_SIZE_V_2,
+                    ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
+            System.arraycopy(_protocolMsg.getData(), 0, _data, ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
                     _protocolMsg.getJsonSize());
             if (_protocolMsg.getBulkData() != null) {
                 System.arraycopy(_protocolMsg.getBulkData(), 0, _data,
-                        ProtocolConstants.HEADER_SIZE_V_2 + _protocolMsg.getJsonSize(),
+                        ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize(),
                         _protocolMsg.getBulkData().length);
             }
         } else {

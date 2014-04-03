@@ -36,4 +36,18 @@ public class ProtocolVersionTest extends TestCase {
         protocolVersion.setCurrentVersion((byte) 0xff);
         assertEquals(currentVersion, protocolVersion.getCurrentVersion());
     }
+
+    public void testCreateProtocolVersionNegotiateWithOutOfNegativeBoundValue() {
+        ProtocolVersion protocolVersion = new ProtocolVersion();
+        byte currentVersion = protocolVersion.getCurrentVersion();
+        protocolVersion.setCurrentVersion((byte) -256);
+        assertEquals(currentVersion, protocolVersion.getCurrentVersion());
+    }
+
+    public void testCreateProtocolVersionNegotiateWithOutOfPositiveBoundValue() {
+        ProtocolVersion protocolVersion = new ProtocolVersion();
+        byte currentVersion = protocolVersion.getCurrentVersion();
+        protocolVersion.setCurrentVersion((byte) 256);
+        assertEquals(currentVersion, protocolVersion.getCurrentVersion());
+    }
 }

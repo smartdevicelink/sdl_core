@@ -7,12 +7,17 @@ package com.ford.syncV4.protocol;
  * Time: 13:07
  */
 
+import android.util.Log;
+
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 
 /**
  * This class handle protocol version and version negotiation
  */
 public class ProtocolVersion {
+
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = ProtocolVersion.class.getSimpleName();
 
     /**
      * Current actual version for the SDK to operate with SDL
@@ -53,9 +58,15 @@ public class ProtocolVersion {
         mCurrentVersion = value;
     }
 
+    /**
+     * Negotiate current protocol version according to AppLink protocol
+     * @param value version value to be updated to
+     * @return negotiated version value
+     */
     private byte negotiateVersion(byte value) {
-        // Check if the value in the byte is numerical
-        if ((int) value <= 0 || (int) value > 100) {
+        //Log.d(LOG_TAG, "Negotiate value:" + mCurrentVersion + " to:" + value);
+        // Check the bounds conditions of the
+        if (value <= 0 || value > Byte.MAX_VALUE) {
             return mCurrentVersion;
         }
         if (value < ProtocolConstants.PROTOCOL_VERSION_MIN) {
