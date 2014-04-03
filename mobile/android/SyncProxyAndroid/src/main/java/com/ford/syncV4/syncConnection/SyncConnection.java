@@ -160,7 +160,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
             // Apply a value which has been set for the Test Cases
             if (mTestConfig != null) {
-                ((WiProProtocol) _protocol).setTestProtocolVersion(mTestConfig.getProtocolVersion());
+                ((WiProProtocol) _protocol).set_TEST_ProtocolVersion(mTestConfig.getProtocolVersion());
             }
         }
 

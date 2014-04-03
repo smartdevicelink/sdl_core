@@ -53,11 +53,15 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     /**
-     * This method is for the Test Cases only
+     * <b>This method is for the Test Cases only</b>
      * @param version test protocol version
      */
-    public void setTestProtocolVersion(byte version) {
-        mProtocolVersion.setTestCurrentVersion(version);
+    public void set_TEST_ProtocolVersion(byte version) {
+        ProtocolConstants.PROTOCOL_VERSION_MIN = version;
+        if (ProtocolConstants.PROTOCOL_VERSION_MAX < version) {
+            ProtocolConstants.PROTOCOL_VERSION_MAX = version;
+        }
+        setProtocolVersion(version);
     }
 
     public void setProtocolVersion(byte version) {

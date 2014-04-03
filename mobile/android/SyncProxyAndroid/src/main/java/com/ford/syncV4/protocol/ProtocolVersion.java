@@ -7,8 +7,6 @@ package com.ford.syncV4.protocol;
  * Time: 13:07
  */
 
-import android.util.Log;
-
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 
 /**
@@ -47,15 +45,6 @@ public class ProtocolVersion {
      */
     public void setCurrentVersion(byte value) {
         mCurrentVersion = negotiateVersion(value);
-    }
-
-    /**
-     * Set up current actual protocol version for the Test Cases only,
-     * see {@link com.ford.syncV4.proxy.constants.ProtocolConstants} for more information
-     * @param value version of protocol
-     */
-    public void setTestCurrentVersion(byte value) {
-        mCurrentVersion = value;
     }
 
     /**

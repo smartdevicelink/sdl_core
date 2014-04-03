@@ -40,12 +40,12 @@ public class ProtocolConstants {
     /**
      * Define Protocol minimum support version
      */
-    public static final byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_ONE;
+    public static /*final*/ byte PROTOCOL_VERSION_MIN = PROTOCOL_VERSION_ONE;
 
     /**
      * Define Protocol maximum support version
      */
-    public static final byte PROTOCOL_VERSION_MAX = PROTOCOL_VERSION_TWO;
+    public static /*final*/ byte PROTOCOL_VERSION_MAX = PROTOCOL_VERSION_TWO;
 
     /**
      * Size of the message header of the Protocol version 1
