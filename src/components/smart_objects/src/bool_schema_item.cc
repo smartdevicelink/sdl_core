@@ -57,6 +57,18 @@ bool CBoolSchemaItem::setDefaultValue(SmartObject& Object) {
   return result;
 }
 
+bool CBoolSchemaItem::hasDefaultValue(SmartObject& Object) {
+  bool result = false;
+  bool value = false;
+
+  if (true == mDefaultValue.getValue(value)) {
+    Object = value;
+    result = true;
+  }
+
+  return result;
+}
+
 void CBoolSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
                                           SmartObject& result_object) {
   if (SmartType_Boolean == pattern_object.getType()) {
