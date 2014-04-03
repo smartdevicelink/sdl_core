@@ -111,21 +111,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
                     uint32_t application_id = 0);
 
   /**
-   * @brief Process application permission, which was set by user
-   * @param List of user-defined permissions for application
-   */
-  void OnAllowAppResponse(PermissionsList& list_of_permissions);
-
-  /**
-   * @brief Process application permission, which was set by user
-   * @param List of user-defined permissions for application
-   * @param Unique application id, if omitted - allow/disallow all
-   * applications
-   */
-  void OnAllowAppNotification(PermissionsList& list_of_permissions,
-                              uint32_t appication_id = 0);
-
-  /**
    * @brief Increment counter for ignition cycles
    */
   void OnIgnitionCycleOver();
@@ -153,6 +138,17 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param permissions User-changed group permissions consent
    */
   void OnAppPermissionConsent(const PermissionConsent& permissions);
+
+  /**
+   * @brief Get appropriate message parameters and send them with response
+   * to HMI
+   * @param message_codes RPC message codes
+   * @param language Language
+   * @param correlation_id correlation id of request
+   */
+  void OnGetUserFriendlyMessage(const std::vector<std::string>& message_codes,
+                                const std::string& language,
+                                uint32_t correlation_id);
 
  protected:
   /**

@@ -241,6 +241,17 @@ void PolicyHandler::OnAppPermissionConsent(
   //TODO(AOleynik): Handle situation for all apps (policy_app_id is empty)
 }
 
+void PolicyHandler::OnGetUserFriendlyMessage(
+    const std::vector<std::string>& message_codes, const std::string& language,
+    uint32_t correlation_id) {
+  LOG4CXX_INFO(logger_, "OnGetUserFriendlyMessage");
+  std::vector<UserFriendlyMessage> result =
+      policy_manager_->GetUserFriendlyMessages(message_codes, language);
+  // Send response to HMI with gathered data
+  application_manager::MessageHelper::SendGetUserFriendlyMessageResponse(
+        result, correlation_id);
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   const ApplicationList app_list =
@@ -399,26 +410,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   }
 
   // TODO(AOleynik): Handle situation, if general functionality is concerned
-}
-
-void PolicyHandler::SendAllowApp(const PermissionsList& list_of_permissions,
-                                 uint32_t application_id) {
-  LOG4CXX_INFO(logger_,
-               "Sending allow request for application id:" << application_id);
-  // TODO(PV): change
-  /*application_manager::MessageHelper::SendAllowAppRequest(list_of_permissions,
-   application_id);*/
-}
-
-void PolicyHandler::OnAllowAppResponse(PermissionsList& list_of_permissions) {
-  // TODO(AOleynik): Impelement response processing for user-defined permissions
-  // for application
-}
-
-void PolicyHandler::OnAllowAppNotification(PermissionsList& list_of_permissions,
-    uint32_t appication_id) {
-  // TODO(AOleynik): Implement notification processing for user-defined
-  // permissions for applicaiton
 }
 
 void PolicyHandler::OnIgnitionCycleOver() {

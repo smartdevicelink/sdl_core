@@ -245,6 +245,15 @@ class MessageHelper {
     */
     static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info);
 
+    /**
+     * @brief Send GetUserFriendlyMessage response to HMI
+     * @param msg Appopriate messages params
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetUserFriendlyMessageResponse(
+        const std::vector<policy::UserFriendlyMessage>& msg,
+        uint32_t correlation_id);
+
     /*
      * @brief Sends notification to HMI to start video streaming
      *

@@ -62,6 +62,8 @@ class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
     virtual void Run();
 
   private:
+    std::string CommonLanguageToString(
+        hmi_apis::Common_Language::eType language);
     DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
 };
 

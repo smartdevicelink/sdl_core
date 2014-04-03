@@ -37,7 +37,6 @@
 #include "utils/macro.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-//#include "application_manager/policies/policy_handler.h"
 #include "application_manager/commands/command_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application.h"
@@ -1322,6 +1321,71 @@ void MessageHelper::SendOnSDLConsentNeeded(
 
   (*message)[strings::msg_params]["device"]["id"] = device_info.device_handle;
   (*message)[strings::msg_params]["device"]["name"] = device_info.device_name;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
+void MessageHelper::SendGetUserFriendlyMessageResponse(
+    const std::vector<policy::UserFriendlyMessage>& msg,
+    uint32_t correlation_id) {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::SDL_GetUserFriendlyMessage;
+  (*message)[strings::params][strings::message_type] =
+    MessageType::kResponse;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::params]["code"] = 0;
+
+  // If no any messages found - skip sending of "messages" param
+  if (msg.empty()) {
+    ApplicationManagerImpl::instance()->ManageHMICommand(message);
+  }
+
+  const std::string messages = "messages";
+  (*message)[strings::msg_params][messages] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  smart_objects::SmartObject& user_friendly_messages =
+      (*message)[strings::msg_params][messages];
+
+
+  const std::string tts = "ttsString";
+  const std::string label = "label";
+  const std::string line1 = "line1";
+  const std::string line2 = "line2";
+  const std::string textBody = "textBody";
+
+  std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
+  std::vector<policy::UserFriendlyMessage>::const_iterator it_end = msg.end();
+  for (uint32_t index = 0; it != it_end; ++it, ++index) {
+    user_friendly_messages[index] = smart_objects::SmartObject(
+                                      smart_objects::SmartType_Map);
+
+    smart_objects::SmartObject& msg = user_friendly_messages[index];
+
+    if (!it->tts.empty()) {
+      msg[tts] = it->tts;
+    }
+    if (!it->label.empty()) {
+      msg[label] = it->label;
+    }
+    if (!it->line1.empty()) {
+      msg[line1] = it->line1;
+    }
+    if (!it->line2.empty()) {
+      msg[line2] = it->line2;
+    }
+    if (!it->text_body.empty()) {
+      msg[textBody] = it->text_body;
+    }
+  }
+
+  PrintSmartObject(*message);
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }

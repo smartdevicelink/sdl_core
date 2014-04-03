@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -45,6 +46,10 @@ SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {
 
 void SDLGetUserFriendlyMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "SDLGetUserFriendlyMessageResponse::Run");
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands
