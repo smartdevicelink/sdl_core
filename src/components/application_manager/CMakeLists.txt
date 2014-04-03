@@ -203,8 +203,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
-./src/commands/hmi/tts_perform_interaction_request.cc
-./src/commands/hmi/tts_perform_interaction_response.cc
+./src/commands/hmi/vr_perform_interaction_request.cc
+./src/commands/hmi/vr_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc

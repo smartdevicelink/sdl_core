@@ -145,7 +145,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendTTSPerformInteractionRequest(
+  void SendVRPerformInteractionRequest(
       application_manager::ApplicationSharedPtr const app);
 
   /*

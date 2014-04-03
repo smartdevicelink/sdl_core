@@ -155,7 +155,7 @@ void PerformInteractionRequest::Run() {
       }
 
       app->set_perform_interaction_active(correlation_id);
-      SendTTSPerformInteractionRequest(app);
+      SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -166,7 +166,7 @@ void PerformInteractionRequest::Run() {
       }
 
       app->set_perform_interaction_active(correlation_id);
-      SendTTSPerformInteractionRequest(app);
+      SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -182,7 +182,7 @@ void PerformInteractionRequest::Run() {
 
       // TODO(DK): need to implement timeout
       app->set_perform_interaction_active(correlation_id);
-      SendTTSPerformInteractionRequest(app);
+      SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -221,7 +221,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
-    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+    case hmi_apis::FunctionID::VR_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received TTS_PerformInteraction");
       tts_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
           event.smart_object()[strings::params][hmi_response::code].asInt());
@@ -473,7 +473,7 @@ void PerformInteractionRequest::CreateUIPerformInteraction(
                      &msg_params, true);
 }
 
-void PerformInteractionRequest::SendTTSPerformInteractionRequest(
+void PerformInteractionRequest::SendVRPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -554,7 +554,7 @@ void PerformInteractionRequest::SendTTSPerformInteractionRequest(
     msg_params[strings::timeout] = default_timeout_;
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::TTS_PerformInteraction, &msg_params,
+  SendHMIRequest(hmi_apis::FunctionID::VR_PerformInteraction, &msg_params,
                  true);
 }
 

@@ -29,44 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief TTSPerformInteractionRequest command class
- **/
-class TTSPerformInteractionRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief TTSPerformInteractionRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit TTSPerformInteractionRequest(const MessageSharedPtr& message);
+VRPerformInteractionResponse::VRPerformInteractionResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
+}
 
-    /**
-     * @brief TTSPerformInteractionRequest class destructor
-     **/
-    virtual ~TTSPerformInteractionRequest();
+VRPerformInteractionResponse::~VRPerformInteractionResponse() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionRequest);
-};
+void VRPerformInteractionResponse::Run() {
+  LOG4CXX_INFO(logger_, "VRPerformInteractionResponse::Run");
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
