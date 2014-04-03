@@ -65,7 +65,7 @@ void ShowRequest::Run() {
   if (0 == (*message_)[strings::msg_params].length()) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
-          return;
+    return;
   }
 
   mobile_apis::Result::eType processing_result =
