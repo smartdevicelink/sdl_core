@@ -94,6 +94,7 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
 
 void CObjectSchemaItem::applySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
+
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (Object.keyExists(i->first)) {
@@ -105,6 +106,15 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
 
 void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
+    const std::set<std::string> objectKeys = Object.enumerate();
+    for (std::set<std::string>::const_iterator k = objectKeys.begin();
+         k != objectKeys.end(); ++k) {
+        if (mMembers.end() == mMembers.find(*k)) {
+            // remove fake params
+            Object.erase(*k);
+        }
+    }
+
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (Object.keyExists(i->first)) {
