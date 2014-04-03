@@ -6,5 +6,6 @@
         <item>AUTH_REQUEST</item>
         <item>AUTH_CHALLENGE</item>
         <item>AUTH_ACK</item>
+        <item>PROPRIETARY</item>
     </string-array>
 </resources>

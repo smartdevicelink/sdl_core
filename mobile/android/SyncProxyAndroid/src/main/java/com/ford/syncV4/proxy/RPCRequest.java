@@ -10,7 +10,7 @@ import com.ford.syncV4.proxy.constants.Names;
 public class RPCRequest extends RPCMessage {
 
 	public RPCRequest(String functionName) {
-		super(functionName, "request");
+		super(functionName, Names.request);
 		messageType = Names.request;
 	}
 

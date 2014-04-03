@@ -287,4 +287,7 @@
     <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
     <string name="use_request_type">Use request type</string>
 
+    <string name="system_request_use_file_name">Use file name</string>
+    <string name="system_request_file_name_label">System Request file name:</string>
+
 </resources>
