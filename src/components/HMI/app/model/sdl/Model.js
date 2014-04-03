@@ -933,8 +933,6 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      *            message Object with parameters come from SDLCore
-     * @param {Number}
-     *            performInteractionRequestId Id of current handled request
      */
     uiPerformInteraction: function (message) {
 
@@ -956,10 +954,38 @@ SDL.SDLModel = Em.Object.create({
         SDL.InteractionChoicesView.activate(message);
 
         SDL.SDLController.VRMove();
+    },
 
-        if (message.choiceSet) {
-            SDL.VRPopUp.hideCommands();
+    /**
+     * SDL VR PerformInteraction response handler
+     *
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
+     */
+    vrPerformInteraction: function (message) {
+
+        this.set('performInteractionSession', true);
+
+        if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.vrPerformInteraction) {
+            SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.vrPerformInteraction = message.id;
+        } else {
+            SDL.SDLController.vrInteractionResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
+            return;
         }
+
+        SDL.SDLModel.onPrompt(message.params.initialPrompt);
+
+        SDL.SDLModel.interactionData.helpPrompt = message.params.helpPrompt;
+
+        var message = message;
+
+        setTimeout(function(){
+            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
+                SDL.SDLModel.interactionData.helpPrompt = null;
+            }
+        }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
+
     },
 
     /**

@@ -72,6 +72,16 @@ SDL.SDLAppController = Em.Object.create({
     },
 
     /**
+     * Handeler for VR command button press
+     *
+     * @param element: SDL.Button
+     */
+    VRPerformAction: function (element) {
+
+        SDL.SDLController.vrInteractionResponse(element.appID, SDL.SDLModel.resultCode["SUCCESS"], element.commandID);
+    },
+
+    /**
      * Open commands submenu
      *
      * @param {Number}

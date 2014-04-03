@@ -399,6 +399,17 @@ SDL.SDLController = Em.Object
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
         },
         /**
+         * Method to sent notification ABORTED for VR PerformInteraction
+         */
+        vrInteractionResponse: function(appID, result, choiceID, manualTextEntry) {
+
+            FFW.VR.interactionResponse(SDL.SDLController.getApplicationModel(appID).activeRequests.vrPerformInteraction, result, choiceID, manualTextEntry);
+
+            SDL.SDLController.getApplicationModel(appID).activeRequests.vrPerformInteraction = null;
+
+            SDL.SDLModel.set('VRActive', true);
+        },
+        /**
          * Method to sent notification for Alert
          * 
          * @param {String}

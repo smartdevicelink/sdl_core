@@ -91,11 +91,10 @@ SDL.VRPopUp = Em.ContainerView.create( {
                 } ) );
             }
         } else {
-            var commandType = false;
             for( var j = 0; j < vrCommands.length; j++ ){
 
                 this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onVRCommand',
+                    action: type == 'Command' ? 'onVRCommand' : 'VRPerformAction',
                     target: 'SDL.SDLAppController',
                     appID: appID,
                     commandID: cmdID,
@@ -108,11 +107,6 @@ SDL.VRPopUp = Em.ContainerView.create( {
                             return !SDL.SDLModel.performInteractionSession;
                         }
                     }.property('SDL.SDLModel.performInteractionSession'),
-                    willDestroyElement: function() {
-                        //console.log(this + " destroyed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        //Em.removeObserver(this, SDL.SDLModel.performInteractionSession, this.hideButtons);
-                       // this.destroy();
-                    },
                     classNameBindings: ['this.hideButtons:hide'],
                     classNames: 'list-item',
                     templateName: 'text'

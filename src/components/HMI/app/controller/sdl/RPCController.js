@@ -397,48 +397,6 @@ SDL.RPCController = Em.Object
 
                     return this.resultStruct;
                 },
-                /**
-                 * Validate method for request PerformInteraction
-                 *
-                 * @param {Object}
-                 *            params
-                 */
-                PerformInteraction: function(params) {
-
-                    if (params == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.timeout == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'timeout' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.timeout != 'number') {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'timeout'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-
-                    this.resultStruct = {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-                    };
-
-                    return this.resultStruct;
-                },
 
                 /**
                  * Validate method for request SetGlobalProperties
@@ -2664,6 +2622,67 @@ SDL.RPCController = Em.Object
                  *            params
                  */
                 IsReady: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request PerformInteraction
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                PerformInteraction: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.grammarID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'grammarID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.grammarID.length < 1) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'grammarID'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.timeout == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'timeout' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.timeout != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'timeout'!"
+                        };
+
+                        return this.resultStruct;
+                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
