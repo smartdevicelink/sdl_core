@@ -304,6 +304,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
 ./src/commands/hmi/on_record_start_notification.cc
+./src/commands/hmi/basic_communication_system_request.cc
+./src/commands/hmi/basic_communication_system_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

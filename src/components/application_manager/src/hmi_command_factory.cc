@@ -226,6 +226,8 @@
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 #include "application_manager/commands/hmi/on_sdl_close_notification.h"
 #include "application_manager/commands/hmi/on_record_start_notification.h"
+#include "application_manager/commands/hmi/basic_communication_system_request.h"
+#include "application_manager/commands/hmi/basic_communication_system_response.h"
 
 namespace application_manager {
 
@@ -1887,6 +1889,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_OnRecordStart: {
       command.reset(new commands::OnRecordStartdNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
+      if (is_response) {
+        command.reset(new commands::BasicCommunicationSystemResponse(message));
+      } else {
+        command.reset(new commands::BasicCommunicationSystemRequest(message));
+      }
       break;
     }
   }

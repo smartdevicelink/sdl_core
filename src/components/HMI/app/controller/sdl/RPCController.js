@@ -77,6 +77,58 @@ SDL.RPCController = Em.Object
 
                 resultStruct: {},
 
+	 	/**
+                 * Validate method for request SystemRequest
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                SystemRequest: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.fileName == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'fileName' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.fileName != 'string') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'fileName'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.requestType == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'requestType' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
                 /**
                  * Validate method for request ActivateApp
                  *
