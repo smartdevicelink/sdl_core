@@ -180,6 +180,9 @@ SDL.SDLController = Em.Object
                     }
                 }
             }
+            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
+            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -401,13 +404,13 @@ SDL.SDLController = Em.Object
         /**
          * Method to sent notification ABORTED for VR PerformInteraction
          */
-        vrInteractionResponse: function(appID, result, choiceID, manualTextEntry) {
+        vrInteractionResponse: function(result, choiceID) {
 
-            FFW.VR.interactionResponse(SDL.SDLController.getApplicationModel(appID).activeRequests.vrPerformInteraction, result, choiceID, manualTextEntry);
+            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
 
-            SDL.SDLController.getApplicationModel(appID).activeRequests.vrPerformInteraction = null;
+            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
 
-            SDL.SDLModel.set('VRActive', true);
+            SDL.SDLModel.set('VRActive', false);
         },
         /**
          * Method to sent notification for Alert

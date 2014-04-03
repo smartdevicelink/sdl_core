@@ -406,7 +406,7 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {Boolean}
      */
-    performInteractionSession: false,
+    performInteractionSession: null,
 
     /**
      * List of supported languages
@@ -936,8 +936,6 @@ SDL.SDLModel = Em.Object.create({
      */
     uiPerformInteraction: function (message) {
 
-        this.set('performInteractionSession', true);
-
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
@@ -964,28 +962,31 @@ SDL.SDLModel = Em.Object.create({
      */
     vrPerformInteraction: function (message) {
 
-        this.set('performInteractionSession', true);
-
-        if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.vrPerformInteraction) {
-            SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.vrPerformInteraction = message.id;
+        if (!SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = message.id;
         } else {
             SDL.SDLController.vrInteractionResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
             return;
+        }
+
+        if (message.params.grammarID) {
+
+            this.set('performInteractionSession', message.params.grammarID);
+            SDL.SDLModel.set('VRActive', true);
         }
 
         SDL.SDLModel.onPrompt(message.params.initialPrompt);
 
         SDL.SDLModel.interactionData.helpPrompt = message.params.helpPrompt;
 
-        var message = message;
+        var messageLocal = message;
 
         setTimeout(function(){
             if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
+                SDL.SDLModel.onPrompt(messageLocal.params.timeoutPrompt);
                 SDL.SDLModel.interactionData.helpPrompt = null;
             }
-        }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
-
+        }, messageLocal.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
     },
 
     /**
@@ -1106,12 +1107,12 @@ SDL.SDLModel = Em.Object.create({
 
             if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID == message.appID) {
 
-                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type);
+                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type, message.grammarID);
             }
         } else {
 
             SDL.SDLModel.VRCommands.push(message);
-            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, 0, message.type);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, 0, message.type, message.grammarID);
         }
     },
 

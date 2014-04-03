@@ -37,7 +37,7 @@
 <interface name="Common" version="1.1" date="2013-10-02">
 
 <enum name="Result">
-	<element name="SUCCESS" value="0"/>
+    <element name="SUCCESS" value="0"/>
     <element name="UNSUPPORTED_REQUEST" value="1"/>
     <element name="UNSUPPORTED_RESOURCE" value="2"/>
     <element name="DISALLOWED" value="3"/>
