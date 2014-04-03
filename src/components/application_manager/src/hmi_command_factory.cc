@@ -46,6 +46,10 @@
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/commands/hmi/allow_app_request.h"
 #include "application_manager/commands/hmi/allow_app_response.h"
+#include "application_manager/commands/hmi/sdl_get_list_of_permissions_request.h"
+#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
+#include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
+#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
 #include "application_manager/commands/hmi/update_sdl_request.h"
 #include "application_manager/commands/hmi/update_sdl_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
@@ -291,6 +295,22 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::SDLActivateAppResponse(message));
       } else {
         command.reset(new commands::SDLActivateAppRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetListOfPermissions: {
+      if (is_response) {
+        command.reset(new commands::SDLGetListOfPermissionsResponse(message));
+      } else {
+        command.reset(new commands::SDLGetListOfPermissionsRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetUserFriendlyMessage: {
+      if (is_response) {
+        command.reset(new commands::SDLGetUserFriendlyMessageResponse(message));
+      } else {
+        command.reset(new commands::SDLGetUserFriendlyMessageRequest(message));
       }
       break;
     }
