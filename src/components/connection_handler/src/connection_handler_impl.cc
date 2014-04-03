@@ -441,7 +441,7 @@ int ConnectionHandlerImpl::SetSSLContext(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return security_manager::SecurityQuery::ERROR_CONNECTION_NOT_FOUND;
+    return security_manager::SecurityQuery::ERROR_INTERNAL;
   }
   Connection& connection = *it->second;
   return connection.SetSSLContext(session_id, context);

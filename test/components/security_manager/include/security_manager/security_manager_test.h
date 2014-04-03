@@ -122,6 +122,7 @@ namespace security_manager_test {
     testing::StrictMock<SSLContextMock>        mock_ssl_context_new;
     testing::StrictMock<SSLContextMock>        mock_ssl_context_exists;
     testing::StrictMock<SMListenerMock>        mock_sm_listener;
+    SMListenerMock                             mock_sm_listener2;
     // constants
     const int32_t key = 0x1;
     const int32_t seq_number = 0x2;
@@ -720,7 +721,22 @@ namespace security_manager_test {
     SecurityQuery::QueryHeader header(
           SecurityQuery::NOTIFICATION,
           SecurityQuery::SEND_INTERNAL_ERROR, 0);
-    std::string error("some error");
+    std::string error("JSON wrong string");
+    header.json_size = error.size();
+    EmulateMobileMessage(header,
+                         reinterpret_cast<const uint8_t*>(error.c_str()),
+                         error.size());
+  }
+  /*
+   * Shall not send any query on getting SEND_INTERNAL_ERROR with error string
+   */
+  TEST_F(SecurityManagerTest, GetInternalError_WithErrJSONText) {
+    SetMockCryptoManger();
+
+    SecurityQuery::QueryHeader header(
+          SecurityQuery::NOTIFICATION,
+          SecurityQuery::SEND_INTERNAL_ERROR, 0);
+    std::string error(" { \"id\": 1 } ");
     header.json_size = error.size();
     EmulateMobileMessage(header,
                          reinterpret_cast<const uint8_t*>(error.c_str()),

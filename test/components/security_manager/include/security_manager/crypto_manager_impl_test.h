@@ -169,6 +169,7 @@ TEST_F(SSLTest, Positive) {
                     "abra",
                     4), 0);
 }
+// TODO (EZamakhov) : add test for EnsureBufferSizeEnough
 
 /*
 TEST_F(SSLTest, DISABLED_BadData) {

@@ -298,8 +298,7 @@ bool SecurityManager::ProccessInternalError(const SecurityMessage &inMessage) {
       reader.parse(inMessage->get_json_message(), root );
   if(!parsingSuccessful)
     return false;
-  Json::Value value(inMessage->get_json_message());
-  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << value[err_id].asString());
+  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[err_id].asString() << ", text: " << root[err_text].asString());
   return true;
 }
 

@@ -149,7 +149,7 @@ public:
   void StartHandshake(uint32_t session_key);
 
   /**
-   * \brief Getter/Setter for SecurityManagerListener
+   * \brief Add/Remove for SecurityManagerListener
    */
   void AddListener(SecurityManagerListener* const listener);
   void RemoveListener(SecurityManagerListener* const listener);

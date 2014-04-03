@@ -37,6 +37,7 @@
 #include <fstream>
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
+#include "security_manager/security_query.h"
 
 using namespace connection_handler;
 
@@ -48,7 +49,8 @@ class ConnectionHandlerTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     connection_handler_ = ConnectionHandlerImpl::instance();
-    uid = 0;
+    uid = 1;
+    connection_key = connection_handler_->KeyFromPair(0, 0);
   }
   void TearDown() OVERRIDE {
     ConnectionHandlerImpl::destroy();
@@ -60,9 +62,20 @@ class ConnectionHandlerTest: public ::testing::Test {
           device_handle, std::string("test_address"), std::string("test_name"));
     //Add Device and connection
     connection_handler_->addDeviceConnection(device_info, uid);
+    connection_key = connection_handler_->KeyFromPair(uid, 0);
     //Remove all specifis services
     SetSpecificServices("", "");
   }
+  void AddTestSession() {
+    const int32_t session_id =
+        connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                      protocol_handler::kRpc, false);
+    EXPECT_NE(session_id, -1);
+    connection_key = connection_handler_->KeyFromPair(uid,
+                                                      session_id);
+    CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+  }
+
   //Additional SetUp
   void SetSpecificServices(const std::string& protect,
                            const std::string& not_protect) {
@@ -113,6 +126,7 @@ class ConnectionHandlerTest: public ::testing::Test {
 
   ConnectionHandlerImpl* connection_handler_;
   transport_manager::ConnectionUID uid;
+  uint32_t connection_key;
 };
 
 TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
@@ -161,7 +175,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   EXPECT_NE(session_id, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1);
-  EXPECT_EQ(connection_list.begin()->first, 0);
+  EXPECT_EQ(connection_list.begin()->first, uid);
 
   //start new session with Audio service
   const int32_t session_id_on_start_secure =
@@ -171,7 +185,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_new = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1);
-  EXPECT_EQ(connection_list_new.begin()->first, 0);
+  EXPECT_EQ(connection_list_new.begin()->first, uid);
 }
 
 TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
@@ -186,7 +200,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_NE(session_id, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
-  EXPECT_EQ(connection_list.begin()->first, 0);
+  EXPECT_EQ(connection_list.begin()->first, uid);
 
   //start new session with RPC service
   const int32_t session_id_on_start_secure =
@@ -196,7 +210,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_start_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_start_secure.empty());
-  EXPECT_EQ(connection_list_start_secure.begin()->first, 0);
+  EXPECT_EQ(connection_list_start_secure.begin()->first, uid);
 
   //start new session with RPC service
   const int32_t session_id_on_end_secure =
@@ -205,7 +219,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_EQ(session_id_on_end_secure, session_id);
   ConnectionList& connection_list_on_end_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_on_end_secure.empty());
-  EXPECT_EQ(connection_list_on_end_secure.begin()->first, 0);
+  EXPECT_EQ(connection_list_on_end_secure.begin()->first, uid);
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {
@@ -352,6 +366,38 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
                                                     true);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id, protocol_handler::kAudio, NULL, true);
+}
+TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
+  AddTestDeviceConnection();
+
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, 0,
+                                                    protocol_handler::kRpc,
+                                                    false);
+  EXPECT_NE(session_id, -1);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+
+  const int32_t session_id_new =
+      connection_handler_->OnSessionStartedCallback(uid, session_id,
+                                                    protocol_handler::kBulk,
+                                                    true);
+  EXPECT_EQ(session_id_new, session_id);
+  CheckService(uid, session_id, protocol_handler::kRpc, NULL, true);
+}
+TEST_F(ConnectionHandlerTest, SetSSLContext_) {
+  EXPECT_EQ (::security_manager::SecurityQuery::ERROR_INTERNAL,
+             connection_handler_->SetSSLContext(connection_key, NULL));
+
+  AddTestDeviceConnection();
+
+  EXPECT_EQ (::security_manager::SecurityQuery::ERROR_INTERNAL,
+             connection_handler_->SetSSLContext(connection_key, NULL));
+
+  AddTestSession();
+
+  EXPECT_EQ (::security_manager::SecurityQuery::ERROR_SUCCESS,
+             connection_handler_->SetSSLContext(connection_key, NULL));
+
 }
 
 } // connection_handle_test
