@@ -1,4 +1,5 @@
 [CW14]
++ SyncProxyAndroid SDK: Add new field 'menuTitle' to TextFieldName enum
 * SyncProxyTester | SyncProxyAndroid SDK: Update SystemRequest message with 'file name' and bulk data
 + SyncProxyAndroid SDK: Implement protocol version negotiation
 

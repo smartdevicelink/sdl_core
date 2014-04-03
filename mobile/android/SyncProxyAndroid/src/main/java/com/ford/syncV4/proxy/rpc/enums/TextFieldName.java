@@ -23,7 +23,11 @@ public enum TextFieldName {
     sliderFooter,
     menuName,
     secondaryText,
-    tertiaryText;
+    tertiaryText,
+    /**
+     * Optional text to label an app menu button (for certain touchscreen platforms)
+     */
+    menuTitle;
 
     public static TextFieldName valueForString(String value) {
         return valueOf(value);
