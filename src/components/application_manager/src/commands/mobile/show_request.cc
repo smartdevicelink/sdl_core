@@ -61,6 +61,12 @@ void ShowRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+  //SDLAQ-CRS-494, VC3.1
+  if (0 == (*message_)[strings::msg_params].length()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+          return;
+  }
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
