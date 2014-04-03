@@ -57,9 +57,16 @@ void OnSystemRequestNotification::Run() {
 
   std::string filename = (*message_)[strings::msg_params][strings::file_name].asString();
 
+  std::vector<uint8_t> binary_data;
+  file_system::ReadBinaryFile(filename, binary_data);
+
   if (mobile_apis::RequestType::PROPRIETARY == request_type) {
-    std::vector<uint8_t> binary_data;
-    file_system::ReadBinaryFile(filename, binary_data);
+    (*message_)[strings::params][strings::binary_data] = binary_data;
+    (*message_)[strings::msg_params][strings::file_type] =
+        mobile_apis::FileType::JSON;
+  } else if (mobile_apis::RequestType::HTTP == request_type) {
+    (*message_)[strings::msg_params][strings::file_type] =
+        mobile_apis::FileType::BINARY;
     (*message_)[strings::params][strings::binary_data] = binary_data;
   }
 

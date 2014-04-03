@@ -46,6 +46,8 @@ const char protocol_type[] = "protocol_type";
 const char connection_key[] = "connection_key";
 const char error[] = "error";
 const char error_msg[] = "message";
+const char default_app_id[] = "default";
+
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
