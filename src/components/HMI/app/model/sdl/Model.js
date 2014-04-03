@@ -176,6 +176,7 @@ SDL.SDLModel = Em.Object.create({
             id: 9
         }
     ],
+
     /**
      * List of states for ExitApplication notification
      */
@@ -191,6 +192,36 @@ SDL.SDLModel = Em.Object.create({
         {
             name: "FACTORY_DEFAULTS",
             id  : 2
+        }
+    ],
+
+    /**
+     * List of states for OnSystemRequest notification
+     */
+    systemRequestState: [
+        {
+            name: "HTTP",
+            id  : 0
+        },
+        {
+            name: "FILE_RESUME",
+            id  : 1
+        },
+        {
+            name: "AUTH_REQUEST",
+            id  : 2
+        },
+        {
+            name: "AUTH_CHALLENGE",
+            id  : 3
+        },
+        {
+            name: "AUTH_ACK",
+            id  : 4
+        },
+        {
+            name: "PROPRIETARY",
+            id  : 5
         }
     ],
 

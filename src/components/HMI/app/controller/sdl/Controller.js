@@ -165,21 +165,21 @@ SDL.SDLController = Em.Object
          */
         showVRHelpItems: function() {
 
-//            if (SDL.SDLAppController.model) {
-//                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
-//
-//                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-//                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
-//
-//                    if (SDL.SDLAppController.model) {
-//                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
-//                    }
-//                } else {
-//                    if (SDL.VRHelpListView.active) {
-//                        SDL.VRHelpListView.deactivate();
-//                    }
-//                }
-//            }
+            if (SDL.SDLAppController.model) {
+                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+
+                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
+
+                    if (SDL.SDLAppController.model) {
+                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                    }
+                } else {
+                    if (SDL.VRHelpListView.active) {
+                        SDL.VRHelpListView.deactivate();
+                    }
+                }
+            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -377,6 +377,15 @@ SDL.SDLController = Em.Object
         exitAppViewSelected: function(state) {
 
             FFW.BasicCommunication.ExitAllApplications(state);
+        },
+        /**
+         * Method to sent notification with selected reason of OnSystemRequest
+         *
+         * @param {String}
+         */
+        systemRequestViewSelected: function(state) {
+
+            FFW.BasicCommunication.OnSystemRequest(state);
         },
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise
