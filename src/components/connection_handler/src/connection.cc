@@ -208,7 +208,7 @@ int Connection::SetSSLContext( uint8_t sessionId,
   SessionMap::iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
-    return security_manager::SecurityQuery::ERROR_SESSION_NOT_FOUND;
+    return security_manager::SecurityQuery::ERROR_INTERNAL;
   }
   Session& session = session_it->second;
   session.ssl_context = context;

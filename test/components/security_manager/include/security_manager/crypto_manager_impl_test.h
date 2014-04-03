@@ -59,6 +59,9 @@ class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     crypto_manager = new security_manager::CryptoManagerImpl();
+    // TODO (EZamakhov) : add ASSERT_TRUE check of cert/key exist (for this test correct)
+    // TODO (EZamakhov) : add covarage for SSLv3, TLSv1_1 + check wrong Protocol value
+    // TODO (EZamakhov) : add covarage for wrong cert, key file names and ciphers
     crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false);
 
     client_manager = new security_manager::CryptoManagerImpl();
@@ -97,6 +100,7 @@ TEST(CryptoManagerTest, UsingBeforeInit) {
   security_manager::SSLContext* ctx = crypto_manager->CreateSSLContext();
 
   EXPECT_TRUE(ctx == NULL);
+  delete crypto_manager;
 }
 
 TEST(CryptoManagerTest, ReleaseNull) {
@@ -105,6 +109,7 @@ TEST(CryptoManagerTest, ReleaseNull) {
 
   CryptoManager *cm = new CryptoManagerImpl();
   EXPECT_NO_THROW(cm->ReleaseSSLContext(NULL));
+  delete cm;
 }
 
 TEST_F(SSLTest, Positive) {
@@ -195,6 +200,7 @@ TEST_F(SSLTest, DISABLED_BadData) {
       BIO_write(bioIn, inBuf, inLen);
     }
   }
+  delete[] outBuf;
 
   EXPECT_EQ(res, 1);
 
@@ -221,6 +227,7 @@ TEST_F(SSLTest, DISABLED_BadData) {
 
   EXPECT_FALSE(decryptedText == NULL);
   EXPECT_GT(LastError().length(), 0);
+  delete[] encryptedText;
 }
 
 
@@ -254,6 +261,7 @@ TEST_F(SSLTest, Positive2) {
       BIO_write(bioIn, inBuf, inLen);
     }
   }
+  delete[] outBuf;
 
   EXPECT_EQ(res, 1);
 
@@ -296,6 +304,7 @@ TEST_F(SSLTest, Positive2) {
 
     EXPECT_TRUE(decryptedText != NULL);
     EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
+    delete[] text;
   }
   std::cout << " min = " << min_oh << ", max = " << max_oh << std::endl;
 }

@@ -18,7 +18,7 @@ class SecurityManagerListener {
    * \param success result of connection protection
    * \return \c true on success notification or \c false otherwise
    */
-  virtual bool OnHandshakeDone(const uint32_t &connection_key,
+  virtual bool OnHandshakeDone(uint32_t connection_key,
                                bool success)=0;
   virtual ~SecurityManagerListener() {}
 };

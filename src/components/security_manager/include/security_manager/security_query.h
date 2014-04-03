@@ -77,19 +77,15 @@ public:
     ERROR_SERVICE_ALREADY_PROTECTED  = 0x4,
     ERROR_CREATE_SLL                 = 0x5,
     ERROR_CONNECTION_NOT_FOUND       = 0x6,
-    ERROR_SESSION_NOT_FOUND          = 0x7,
-    ERROR_SERVICE_NOT_PROTECTED      = 0x8, //got handshake for not protected service
-    ERROR_SERVICE_PROTECTION_PENDING = 0x9, //get packet with flag encrypt for not
-    // TODO  (EZamakhov) : add error to send
-    ERROR_DECRYPTION_FAILED          = 0x10, //
-    ERROR_ENCRYPTION_FAILED          = 0x11,
+    ERROR_SERVICE_NOT_PROTECTED      = 0x7, //got handshake for not protected service
+    ERROR_DECRYPTION_FAILED          = 0x09,
+    ERROR_ENCRYPTION_FAILED          = 0x0A,
     ERROR_SSL_INVALID_DATA           = 0xF0,
-    // TODO (EZamakhov) : remove ERROR_SESSION_NOT_FOUND and so with ERROR_INTERNAL
     ERROR_INTERNAL                   = 0xF1,
     ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFF
   };
   /**
-   * \brief InternalErrors is 12 byte header of security query
+   * \brief QueryHeader is 12 byte header of security query
    * Equal Ford Binary Header Definition
    */
   struct QueryHeader {
@@ -167,11 +163,27 @@ public:
    */
   uint32_t get_connection_key() const;
 private:
+  /**
+   *\brief 12 byte header of security query
+   * Equal Ford Binary Header Definition
+   */
   QueryHeader header_;
+  /**
+   *\brief nique key used by other components as session identifier
+   */
   uint32_t connection_key_;
+  /**
+   *\brief Binary data of query (without header info)
+   */
   std::vector<uint8_t> data_;
+  /**
+   *\brief JSON (string) value of query
+   */
   std::string json_message_;
 };
+/**
+*\brief SmartPointer wrapper
+*/
 typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
 }
 #endif // security_query_H

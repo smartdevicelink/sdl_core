@@ -90,7 +90,6 @@ public:
    */
   void OnMobileMessageSent(const protocol_handler::RawMessagePtr) OVERRIDE;
 
-  // TODO (EZamakhov) : replcare setter by Init methode
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
@@ -217,9 +216,13 @@ private:
    *\brief Pointer on instance of class implementing ProtocolHandler
    */
   protocol_handler::ProtocolHandler* protocol_handler_;
-
+  /**
+   *\brief List of listeners for notify handshake done result
+   */
   std::list<SecurityManagerListener*> listeners_;
-
+  /**
+   *\brief Logger
+   */
   static log4cxx::LoggerPtr logger_;
 };
 } //security_manager

@@ -185,6 +185,7 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
     const std::string error_text("StartHandshake failed, connection is not protected");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL, error_text);
+    NotifyListenersOnHandshakeDone(connection_key, false);
     return;
   }
 
@@ -195,6 +196,8 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
         ssl_context->StartHandshake(&data, &data_size);
     DCHECK(result == security_manager::SSLContext::Handshake_Result_Success);
     SendHandshakeBinData(connection_key, data, data_size);
+  } else {
+    NotifyListenersOnHandshakeDone(connection_key, true);
   }
 }
 void SecurityManager::AddListener(SecurityManagerListener * const listener) {
@@ -213,12 +216,15 @@ void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
 }
 void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                                      const bool success) {
-  for(std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-      it != listeners_.end(); ) {
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+  while (it != listeners_.end() ) {
     if((*it)->OnHandshakeDone(connection_key, success)) {
-      RemoveListener(*it);
-      it = listeners_.begin();
+      // On get notification remove listener
+      it = listeners_.erase(it);
     }
+    else {
+      ++it;
+      }
   }
 }
 
@@ -248,6 +254,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, error_text, seqNumber);
+    NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
   size_t out_data_size;
@@ -285,7 +292,6 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 bool SecurityManager::ProccessInternalError(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_,"Recieved InternalError with Json message"
                 << inMessage->get_json_message());
-
   Json::Value root;
   Json::Reader reader;
   const bool parsingSuccessful =

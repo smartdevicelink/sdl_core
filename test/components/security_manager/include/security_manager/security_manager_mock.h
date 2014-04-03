@@ -140,6 +140,15 @@ namespace security_manager_test {
     MOCK_CONST_METHOD1(get_max_block_size, size_t (size_t));
     MOCK_CONST_METHOD0(IsInitCompleted, bool());
   };
+  /*
+   * MOCK implementation of security_manager::SecurityManagerListener
+   */
+  class SMListenerMock: public security_manager::SecurityManagerListener {
+  public:
+    MOCK_METHOD2(OnHandshakeDone,
+                       bool(uint32_t connection_key,
+                            bool success));
+  };
 
   /*
    * Matcher for RawMessages

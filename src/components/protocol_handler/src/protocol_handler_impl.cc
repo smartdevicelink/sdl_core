@@ -842,7 +842,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
        service_type_(service_type),
        queue_(queue){
   }
-  bool OnHandshakeDone(const uint32_t &connection_key,
+  bool OnHandshakeDone(const uint32_t connection_key,
                        const bool success) OVERRIDE {
     if(connection_key==connection_key_) {
       // TODO (EZamakhov) : remove as call of ProtocolHandlerImpl::SendStartSessionAck
@@ -1079,7 +1079,6 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   transport_manager::ConnectionUID   connection_id = 0;
   uint8_t session_id = 0;
   session_observer_->PairFromKey(connection_key, &connection_id, &session_id);
-  // TODO (EZamakhov) : shall be this frame encrypted?
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
       PROTOCOL_VERSION_2, PROTECTION_OFF, FRAME_TYPE_CONTROL,
       SERVICE_TYPE_NAVI, FRAME_DATA_SERVICE_DATA_ACK,

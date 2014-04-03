@@ -199,6 +199,7 @@ class Connection {
   /**
    * \brief Sets crypto context of service
    * \param sessionId Identifier of the session
+   * \param context SSL for connection
    * \return \c true in case of service is protected or \c false otherwise
    */
   int SetSSLContext(uint8_t sessionId,
@@ -221,12 +222,12 @@ class Connection {
    */
   const SessionMap session_map() const;
 
-  /*
+  /**
    * \brief Close this connection and all associated sessions
    */
   void Close();
 
-  /*
+  /**
    * \brief Prevent this connection from being closed by heartbeat timeout
    */
   void KeepAlive();
@@ -256,7 +257,7 @@ class Connection {
 
   mutable sync_primitives::Lock session_map_lock_;
 
-  /*
+  /**
    * \brief monitor that closes connection if there is no traffic over it
    */
   HeartBeatMonitor heartbeat_monitor_;
