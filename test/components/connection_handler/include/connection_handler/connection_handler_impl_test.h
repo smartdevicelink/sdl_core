@@ -38,6 +38,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 #include "security_manager/security_query.h"
+#include "security_manager/security_manager_mock.h"
 
 using namespace connection_handler;
 
@@ -67,13 +68,13 @@ class ConnectionHandlerTest: public ::testing::Test {
     SetSpecificServices("", "");
   }
   void AddTestSession() {
-    const int32_t session_id =
+    start_session_id =
         connection_handler_->OnSessionStartedCallback(uid, 0,
                                                       protocol_handler::kRpc, false);
-    EXPECT_NE(session_id, -1);
+    EXPECT_NE(start_session_id, -1);
     connection_key = connection_handler_->KeyFromPair(uid,
-                                                      session_id);
-    CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
+                                                      start_session_id);
+    CheckService(uid, start_session_id, protocol_handler::kRpc, NULL, false);
   }
 
   //Additional SetUp
@@ -127,6 +128,7 @@ class ConnectionHandlerTest: public ::testing::Test {
   ConnectionHandlerImpl* connection_handler_;
   transport_manager::ConnectionUID uid;
   uint32_t connection_key;
+  uint32_t start_session_id;
 };
 
 TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
@@ -384,22 +386,176 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   EXPECT_EQ(session_id_new, session_id);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, true);
 }
-TEST_F(ConnectionHandlerTest, SetSSLContext_) {
+TEST_F(ConnectionHandlerTest, SetSSLContext_Null) {
+  //No SSLContext on start up
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
   EXPECT_EQ (::security_manager::SecurityQuery::ERROR_INTERNAL,
              connection_handler_->SetSSLContext(connection_key, NULL));
+  //No SSLContext after error
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
 
   AddTestDeviceConnection();
-
   EXPECT_EQ (::security_manager::SecurityQuery::ERROR_INTERNAL,
              connection_handler_->SetSSLContext(connection_key, NULL));
+  //No SSLContext after error
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
 
   AddTestSession();
-
   EXPECT_EQ (::security_manager::SecurityQuery::ERROR_SUCCESS,
              connection_handler_->SetSSLContext(connection_key, NULL));
-
+  //NULL SSLContext after success
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
 }
+TEST_F(ConnectionHandlerTest, SetSSLContext) {
+  //No SSLContext on start up
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
 
+  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  //Error on no connection
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_INTERNAL);
+  //No SSLContext after error
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+
+  AddTestDeviceConnection();
+  //Error on no session
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_INTERNAL);
+  //No SSLContext after error
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+  AddTestSession();
+  //success
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_SUCCESS);
+  //SSLContext set on Success
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             &mock_ssl_context);
+  //Null SSLContext for unprotected services
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kRpc),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kBulk),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kAudio),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kMobileNav),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+}
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
+  //No SSLContext on start up
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+
+  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  AddTestDeviceConnection();
+  AddTestSession();
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_SUCCESS);
+  //kControl service mean - return for all connection
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             &mock_ssl_context);
+
+  //kAudio is not exists yet
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kAudio),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+  //Open kAudio service
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+                                                    protocol_handler::kAudio,
+                                                    true);
+  EXPECT_EQ(session_id, start_session_id);
+  CheckService(uid, start_session_id, protocol_handler::kAudio, &mock_ssl_context, true);
+
+  //kAudio is not exists yet
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kAudio),
+             &mock_ssl_context);
+}
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteRPC) {
+  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  AddTestDeviceConnection();
+  AddTestSession();
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_SUCCESS);
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             &mock_ssl_context);
+
+  //kRpc is not protected
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kRpc),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+
+  //Protect kRpc (Bulk will be protect also)
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+                                                    protocol_handler::kRpc,
+                                                    true);
+  EXPECT_EQ(session_id, start_session_id);
+  CheckService(uid, start_session_id, protocol_handler::kRpc, &mock_ssl_context, true);
+
+  //kRpc is protecte
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kRpc),
+             &mock_ssl_context);
+  //kBulk is protecte
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kBulk),
+             &mock_ssl_context);
+}
+TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteBulk) {
+  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  AddTestDeviceConnection();
+  AddTestSession();
+  EXPECT_EQ (connection_handler_->SetSSLContext(connection_key, &mock_ssl_context),
+             ::security_manager::SecurityQuery::ERROR_SUCCESS);
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kControl),
+             &mock_ssl_context);
+
+  //kRpc is not protected
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kRpc),
+             reinterpret_cast<security_manager::SSLContext *>(NULL));
+
+  //Protect Bulk (kRpc will be protect also)
+  const int32_t session_id =
+      connection_handler_->OnSessionStartedCallback(uid, start_session_id,
+                                                    protocol_handler::kBulk,
+                                                    true);
+  EXPECT_EQ(session_id, start_session_id);
+  CheckService(uid, start_session_id, protocol_handler::kRpc, &mock_ssl_context, true);
+
+  //kRpc is protecte
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kRpc),
+             &mock_ssl_context);
+  //kBulk is protecte
+  EXPECT_EQ (connection_handler_->GetSSLContext(
+               connection_key, protocol_handler::kBulk),
+             &mock_ssl_context);
+}
 } // connection_handle_test
 } // namespace components
 } // namespace test
