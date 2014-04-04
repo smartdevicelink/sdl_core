@@ -18,8 +18,8 @@ import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.trace.enums.Mod;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.util.BitConverter;
-import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.NativeLogTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.sql.Timestamp;
 
@@ -421,7 +421,7 @@ public class SyncTrace {
 				try {
 					localTraceListener.logXmlMsg(msg, KeyStr);
 				} catch (Exception ex) {
-					DebugTool.logError("Failure calling ISTListener: " + ex.toString(), ex);
+					Logger.e("Failure calling ISTListener: " + ex.toString(), ex);
 				} // end-catch
 			} // end-if
 		} catch (Exception ex) {

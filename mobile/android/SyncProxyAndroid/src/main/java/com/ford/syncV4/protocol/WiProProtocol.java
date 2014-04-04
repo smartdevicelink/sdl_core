@@ -13,7 +13,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
@@ -80,7 +80,7 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public void StartProtocolSession(byte sessionId) {
-        DebugTool.logInfo("Protocol session should start: " + sessionId);
+        Logger.i("Protocol session should start: " + sessionId);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
                 sessionId, getProtocolVersion());
         Log.d(TAG, "Start Protocol Session, protocol ver:" + getProtocolVersion());
@@ -98,7 +98,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
         byte sessionId = session.getSessionId();
-        DebugTool.logInfo("Protocol service should start: " + serviceType);
+        Logger.i("Protocol service should start: " + serviceType);
         if (sessionId == 0) {
             throw new IllegalArgumentException("currentSession id 0 should be used to start " +
                     "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
@@ -251,7 +251,7 @@ public class WiProProtocol extends AbstractProtocol {
                 } catch (OutOfMemoryError e) {
                     // TODO - some terrible things is going on. _currentHeader.getDataSize()
                     // returns awfully big number during unregister - register cycle
-                    DebugTool.logError(e.toString() + " No memory - no regrets.");
+                    Logger.e("No memory - no regrets.");
                 }
                 _dataBufWritePos = 0;
             }
@@ -357,7 +357,7 @@ public class WiProProtocol extends AbstractProtocol {
                 try {
                     handleProtocolMessageReceived(message);
                 } catch (Exception excp) {
-                    DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + excp.toString(), excp);
+                    Logger.e(FailurePropagating_Msg + "onProtocolMessageReceived: " + excp.toString(), excp);
                 } // end-catch
 
                 hasFirstFrame = false;
@@ -480,14 +480,14 @@ public class WiProProtocol extends AbstractProtocol {
             _assemblerForMessageID.remove(header.getMessageID());
 
             if (isAppUnregistered(message)) {
-                DebugTool.logInfo("App is unregistered");
+                Logger.i("App is unregistered");
                 handleAppUnregistered();
             }
 
             try {
                 handleProtocolMessageReceived(message);
             } catch (Exception ex) {
-                DebugTool.logError(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
+                Logger.e(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
                 handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
             } // end-catch
         } // end-method

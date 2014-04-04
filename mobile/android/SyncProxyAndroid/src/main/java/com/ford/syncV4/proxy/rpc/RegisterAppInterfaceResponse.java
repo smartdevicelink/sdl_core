@@ -10,7 +10,7 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.PrerecordedSpeech;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class RegisterAppInterfaceResponse extends RPCResponse {
 
@@ -43,7 +43,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.language, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.language, e);
             }
             return theCode;
         }
@@ -63,7 +63,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguage, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguage, e);
             }
             return theCode;
         }
@@ -165,7 +165,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
 	                    try {
 	                        toAdd = HmiZoneCapabilities.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiZoneCapabilities, e);
+	                    	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiZoneCapabilities, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
@@ -197,7 +197,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
 	                    try {
 	                        toAdd = SpeechCapabilities.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.speechCapabilities, e);
+	                    	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.speechCapabilities, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
@@ -232,7 +232,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
                         try {
                             toAdd = PrerecordedSpeech.valueForString(strFormat);
                         } catch (Exception e) {
-                            DebugTool.logError("Failed to parse " +
+                            Logger.e("Failed to parse " +
                                     getClass().getSimpleName() + "." +
                                     Names.prerecordedSpeech, e);
                         }
@@ -271,7 +271,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
 	                    try {
 	                        toAdd = VrCapabilities.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.vrCapabilities, e);
+	                    	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.vrCapabilities, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
@@ -306,7 +306,7 @@ public class RegisterAppInterfaceResponse extends RPCResponse {
                             toAdd = new AudioPassThruCapabilities(
                                     (Hashtable) hashObj);
                         } catch (Exception e) {
-                            DebugTool.logError("Failed to parse " +
+                            Logger.e("Failed to parse " +
                                     getClass().getSimpleName() + "." +
                                     Names.audioPassThruCapabilities, e);
                         }

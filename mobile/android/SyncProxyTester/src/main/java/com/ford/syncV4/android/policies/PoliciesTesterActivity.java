@@ -30,7 +30,6 @@ import com.ford.syncV4.android.service.IProxyServiceConnection;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceBinder;
 import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
-import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 
@@ -824,7 +823,6 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             //	sendRPCRequestPrivate(encodedSyncPDataRequest);
             //}
             //} catch (SyncException e) {
-            //DebugTool.logError("sendEncodedSyncPDataToUrl: Could not get data from JSONObject received.", e);
 
         } catch (JSONException e) {
             Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: JSONException: " + e);

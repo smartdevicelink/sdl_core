@@ -5,7 +5,7 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class AddCommand extends RPCRequest {
 
@@ -34,7 +34,7 @@ public class AddCommand extends RPCRequest {
         	try {
         		return new MenuParams((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.menuParams, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.menuParams, e);
             }
         }
         return null;
@@ -73,7 +73,7 @@ public class AddCommand extends RPCRequest {
         	try {
         		return new Image((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.cmdIcon, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.cmdIcon, e);
             }
         }
         return null;

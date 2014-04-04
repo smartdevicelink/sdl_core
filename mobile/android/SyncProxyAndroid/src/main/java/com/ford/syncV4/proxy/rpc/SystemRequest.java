@@ -3,7 +3,7 @@ package com.ford.syncV4.proxy.rpc;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -40,9 +40,10 @@ public class SystemRequest extends RPCRequest {
             try {
                 theCode = RequestType.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.requestType, e);
+                                Names.requestType, e
+                );
             }
             return theCode;
         }

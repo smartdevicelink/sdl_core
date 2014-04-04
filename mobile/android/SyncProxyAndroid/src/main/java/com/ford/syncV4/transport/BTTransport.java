@@ -14,7 +14,7 @@ import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.DetailLevel;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.trace.enums.Mod;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +53,6 @@ public class BTTransport extends SyncTransport {
 
         // turn on verbose transport logging
         DiagLevel.setLevel(Mod.tran, DetailLevel.VERBOSE);
-        DebugTool.enableDebugTool();
 	} // end-ctor
 	
 	public void openConnection () throws SyncException {
@@ -119,7 +118,7 @@ public class BTTransport extends SyncTransport {
 
     @Override
     public void stopReading() {
-        DebugTool.logInfo("BTTransport: stop reading requested, doing nothing");
+        Logger.i("BTTransport: stop reading requested, doing nothing");
     }
 
     /**
@@ -149,7 +148,7 @@ public class BTTransport extends SyncTransport {
 				_transportReader = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to stop transport reader thread.", e);
+			Logger.e("Failed to stop transport reader thread.", e);
 		} // end-catch	
 		
 		try {
@@ -158,7 +157,7 @@ public class BTTransport extends SyncTransport {
 				_bluetoothAdapterMonitor = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to stop adapter monitor thread.", e);
+			Logger.e("Failed to stop adapter monitor thread.", e);
 		}
 		
 		try {
@@ -167,7 +166,7 @@ public class BTTransport extends SyncTransport {
 				_serverSocket = null;
 			} 
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close serverSocket", e);
+			Logger.e("Failed to close serverSocket", e);
 		} // end-catch
 		
 		try {
@@ -176,7 +175,7 @@ public class BTTransport extends SyncTransport {
 				_activeSocket = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close activeSocket", e);
+			Logger.e("Failed to close activeSocket", e);
 		} // end-catch
 		
 		try {
@@ -185,7 +184,7 @@ public class BTTransport extends SyncTransport {
 				_input = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close input stream", e);
+			Logger.e("Failed to close input stream", e);
 		} // end-catch
 		
 		try {
@@ -194,7 +193,7 @@ public class BTTransport extends SyncTransport {
 				_output = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close output stream", e);
+			Logger.e("Failed to close output stream", e);
 		} // end-catch
 		
 		if (ex == null) {
@@ -221,7 +220,7 @@ public class BTTransport extends SyncTransport {
             decreaseSpeed();
 			sendResult = true;
 		} catch (Exception ex) {
-			DebugTool.logError("Error writing to Bluetooth socket: " + ex.toString(), ex);
+			Logger.e("Error writing to Bluetooth socket: " + ex.toString(), ex);
 			handleTransportError("Error writing to Bluetooth socket:", ex);
 			sendResult = false;
 		} // end-catch
@@ -329,7 +328,7 @@ public class BTTransport extends SyncTransport {
 					// When bytesRead == -1, it indicates end of stream
 					if (!isHalted) {
 						// Only call disconnect if the thread has not been halted
-						DebugTool.logError("End of stream reached!");
+						Logger.e("End of stream reached!");
 						disconnect("End of stream reached.", null);
 					}
 				}
@@ -337,7 +336,7 @@ public class BTTransport extends SyncTransport {
 				if (!isHalted) {
 					// Only call disconnect if the thread has not been halted
 					String errString = "Failure in BTTransport reader thread: " + excp.toString();
-					DebugTool.logError(errString, excp);
+					Logger.e(errString, excp);
 					disconnect(errString, excp);
 				}
 				return;

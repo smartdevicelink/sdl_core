@@ -2,7 +2,7 @@ package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -31,7 +31,7 @@ public class ReadDIDResponse extends RPCResponse {
                         try {
                             toAdd = new DIDResult((Hashtable) hashObj);
                         } catch (Exception e) {
-                            DebugTool.logError("Failed to parse " +
+                            Logger.e("Failed to parse " +
                                     getClass().getSimpleName() + "." +
                                     Names.didResult, e);
                         }

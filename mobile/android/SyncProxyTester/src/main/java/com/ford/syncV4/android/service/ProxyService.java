@@ -324,8 +324,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private boolean startProxy() {
-        SyncProxyALM.enableDebugTool();
-
         createInfoMessageForAdapter("ProxyService.startProxy()");
         Log.i(TAG, ProxyService.class.getSimpleName() + " Start Proxy");
 

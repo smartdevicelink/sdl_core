@@ -3,7 +3,7 @@ package com.ford.syncV4.transport;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public abstract class SyncTransport {
 	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
@@ -39,7 +39,7 @@ public abstract class SyncTransport {
 				_transportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
 			} // end-if
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg, excp);
 		} // end-catch
     } // end-method
@@ -79,7 +79,7 @@ public abstract class SyncTransport {
 	    	SyncTrace.logTransportEvent("Transport.connected", null, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
 			_transportListener.onTransportConnected();
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
 		} // end-catch
 	} // end-method
@@ -93,7 +93,7 @@ public abstract class SyncTransport {
 	    	SyncTrace.logTransportEvent("Transport.disconnect: " + info, null, InterfaceActivityDirection.Transmit, null, 0, SYNC_LIB_TRACE_KEY);
 			_transportListener.onTransportDisconnected(info);
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
 		} // end-catch
 	} // end-method
 	

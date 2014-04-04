@@ -12,7 +12,7 @@ import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.trace.*;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 /*
  * Responsible for marshalling and unmarshing between RPC Objects and byte streams that are sent
@@ -31,7 +31,7 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
 			
 			SyncTrace.logMarshallingEvent(InterfaceActivityDirection.Transmit, jsonBytes, SYNC_LIB_PRIVATE_KEY);
 		} catch (JSONException e) {
-			DebugTool.logError("Failed to encode messages to JSON.", e);
+            Logger.e("Failed to encode messages to JSON.", e);
 		}
 		return jsonBytes;
 	}
@@ -44,7 +44,7 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
 			JSONObject jsonObject = new JSONObject(jsonString);
 			ret = deserializeJSONObject(jsonObject);
 		} catch (JSONException e) {
-			DebugTool.logError("Failed to parse JSON", e);
+            Logger.e("Failed to parse JSON", e);
 		}
 		return ret;
 	}

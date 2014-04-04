@@ -6,7 +6,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.DriverDistractionState;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class OnDriverDistraction  extends RPCNotification {
 	public OnDriverDistraction() {
@@ -25,7 +25,7 @@ public class OnDriverDistraction  extends RPCNotification {
         	try {
         		theCode = DriverDistractionState.valueForString((String) obj);
         	} catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.state, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.state, e);
             }
         	return theCode;
         }    	
