@@ -53,14 +53,14 @@ PolicyHandler* PolicyHandler::instance_ = NULL;
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 
 log4cxx::LoggerPtr PolicyHandler::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("PolicyHandler"));
+    log4cxx::Logger::getLogger("PolicyHandler"));
 
 PolicyHandler::PolicyHandler()
-  : policy_manager_(0),
-    dl_handle_(0),
-    exchange_handler_(NULL),
-    is_exchange_in_progress_(false),
-    retry_sequence_("RetrySequence", new RetrySequence(this)) {
+    : policy_manager_(0),
+      dl_handle_(0),
+      exchange_handler_(NULL),
+      is_exchange_in_progress_(false),
+      retry_sequence_("RetrySequence", new RetrySequence(this)) {
 }
 
 PolicyHandler::~PolicyHandler() {
@@ -94,7 +94,7 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary(const std::string& path) {
 PolicyManager* PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
   CreateManager create_manager = 0;
-  *(void**)(&create_manager) = dlsym(dl_handle_, "CreateManager");
+  *(void**) (&create_manager) = dlsym(dl_handle_, "CreateManager");
   char* error_string = dlerror();
   if (error_string == NULL) {
     policy_manager_ = (*create_manager)();
@@ -106,7 +106,7 @@ PolicyManager* PolicyHandler::CreateManager() {
 
 bool PolicyHandler::InitPolicyTable() {
   std::string preloaded_file =
-    profile::Profile::instance()->preloaded_pt_file();
+      profile::Profile::instance()->preloaded_pt_file();
   DCHECK(policy_manager_);
   return policy_manager_->LoadPTFromFile(preloaded_file);
 }
@@ -120,7 +120,7 @@ bool PolicyHandler::RevertPolicyTable() {
 uint32_t PolicyHandler::GetAppIdForSending() {
   // Get app.list
   const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+      application_manager::ApplicationManagerImpl::instance()->applications();
 
   if (app_list.empty()) {
     return 0;
@@ -145,7 +145,7 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   }
 
   AppIds& app_ids_to_use =
-    app_ids_preferred.empty() ? app_ids_last_resort : app_ids_preferred;
+      app_ids_preferred.empty() ? app_ids_last_resort : app_ids_preferred;
 
   // Checking, if some of currently known apps was not used already
   std::sort(last_used_app_ids_.begin(), last_used_app_ids_.end());
@@ -168,7 +168,7 @@ uint32_t PolicyHandler::GetAppIdForSending() {
   AppIds::const_iterator it_last_used_app_ids_end = last_used_app_ids_.end();
 
   for (; it_last_used_app_ids != it_last_used_app_ids_end;
-       ++it_last_used_app_ids) {
+      ++it_last_used_app_ids) {
 
     std::remove(it_apps_to_use, it_apps_to_use_end, *it_last_used_app_ids);
   }
@@ -240,46 +240,36 @@ void PolicyHandler::OnGetUserFriendlyMessage(
     const std::vector<std::string>& message_codes, const std::string& language,
     uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnGetUserFriendlyMessage");
-  std::vector<UserFriendlyMessage> result =
-      policy_manager_->GetUserFriendlyMessages(message_codes, language);
+  std::vector<UserFriendlyMessage> result = policy_manager_
+      ->GetUserFriendlyMessages(message_codes, language);
   // Send response to HMI with gathered data
   application_manager::MessageHelper::SendGetUserFriendlyMessageResponse(
-        result, correlation_id);
+      result, correlation_id);
 }
 
 void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
                                            const uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnGetListOfPermissions");
-  // Get policy_app_id
-  std::string policy_app_id;
-  const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
-  ApplicationList::const_iterator it = app_list.begin();
-  ApplicationList::const_iterator it_end = app_list.end();
-  for (; it != it_end; ++it) {
-    if ((*(*it)).app_id() == connection_key) {
-      policy_app_id = (*(*it)).mobile_app_id()->asString();
-      break;
-    }
-  }
+  application_manager::ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key);
 
   DeviceParams device_params;
-  char buffer[16];
-  snprintf(buffer, 16, "%d", connection_key);
-  application_manager::MessageHelper::GetDeviceInfoForApp(std::string(buffer),
+  application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
                                                           &device_params);
   std::vector<FunctionalGroupPermission> group_permissions;
   if (device_params.device_mac_address.empty()) {
     LOG4CXX_WARN(logger_, "Couldn't find device, which hosts application.");
-  } else if (policy_app_id.empty()) {
+  } else if (!app) {
     LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
   } else {
-   policy_manager_->GetUserPermissionsForApp(device_params.device_mac_address,
-                                             policy_app_id, group_permissions);
+    policy_manager_->GetUserPermissionsForApp(device_params.device_mac_address,
+                                              app->mobile_app_id()->asString(),
+                                              group_permissions);
   }
 
   application_manager::MessageHelper::SendGetListOfPermissionsResponse(
-        group_permissions, correlation_id);
+      group_permissions, correlation_id);
 }
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
@@ -486,22 +476,26 @@ void PolicyHandler::KmsChanged(int kms) {
   PTExchangeAtOdometer(kms);
 }
 
-void PolicyHandler::OnActivateApp(const std::string& policy_app_id,
+void PolicyHandler::OnActivateApp(uint32_t connection_key,
                                   uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnActivateApp");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return;
   }
-  // Should be gathered:
-  // - isSDLAllowed, i.e. device data usage consent
+  application_manager::ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
+    return;
+  }
+  std::string policy_app_id = app->mobile_app_id()->asString();
 
   AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
       policy_app_id);
 #if defined(EXTENDED_POLICY)
-  application_manager::UsageStatistics& usage =
-      application_manager::ApplicationManagerImpl::instance()->application(
-          permissions.application_id)->usage_report();
+  application_manager::UsageStatistics& usage = app->usage_report();
 
   usage.RecordAppUserSelection();
 

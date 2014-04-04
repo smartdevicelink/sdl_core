@@ -91,8 +91,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @brief Gather information for application and sends it to HMI
    * @param connection_key Connection key for application
    */
-  void OnActivateApp(const std::string& connection_key,
-                     uint32_t correlation_id);
+  void OnActivateApp(uint32_t connection_key, uint32_t correlation_id);
 
   /**
    * @brief Process user consent on mobile data connection access
