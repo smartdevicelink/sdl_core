@@ -11,7 +11,6 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/MessageBroker/src/
   ${CMAKE_SOURCE_DIR}/test/components/
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (LIBRARIES

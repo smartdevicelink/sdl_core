@@ -88,23 +88,26 @@ void SystemRequest::Run() {
     return;
   }
   full_file_path += "/";
+
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
   } else {
     file_name = "SYNC";
   }
   full_file_path += file_name;
-  mobile_apis::Result::eType save_result;
-  if (binary_data.size()) {
-    save_result = ApplicationManagerImpl::instance()->SaveBinary(
-      binary_data, full_file_path, 0);
-  } else {
-    save_result = file_system::CreateFile(full_file_path);
-  }
 
-  if (save_result != mobile_apis::Result::SUCCESS) {
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    return;
+  if (binary_data.size()) {
+    if (mobile_apis::Result::SUCCESS  !=
+        (ApplicationManagerImpl::instance()->SaveBinary(
+            binary_data, full_file_path, 0))) {
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      return;
+    }
+  } else {
+    if (!(file_system::CreateFile(full_file_path))) {
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      return;
+    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -131,8 +134,8 @@ void SystemRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
       mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asUInt()));
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
       ApplicationSharedPtr application =
