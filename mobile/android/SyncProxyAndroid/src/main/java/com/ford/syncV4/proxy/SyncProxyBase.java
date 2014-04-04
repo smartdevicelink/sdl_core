@@ -3,7 +3,6 @@ package com.ford.syncV4.proxy;
 import android.os.Handler;
 import android.os.Looper;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -99,9 +98,9 @@ import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.CommonUtils;
-import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.DeviceInfoManager;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.OutputStream;
 import java.util.HashSet;
@@ -114,8 +113,6 @@ import java.util.Vector;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
         ISystemRequestProxy {
-    // Used for calls to Android Log class.
-    public static final String TAG = "SyncProxy";
     // Synchronization Objects
     static final Object CONNECTION_REFERENCE_LOCK = new Object(),
             INCOMING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
@@ -822,16 +819,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         SiphonServer.disableSiphonServer();
     }
 
-    // Public method to enable the Debug Tool
-    public static void enableDebugTool() {
-        DebugTool.enableDebugTool();
-    }
-
-    // Public method to disable the Debug Tool
-    public static void disableDebugTool() {
-        DebugTool.disableDebugTool();
-    }
-
     public static void setHeartBeatInterval(int heartBeatInterval) {
         SyncProxyBase.heartBeatInterval = heartBeatInterval;
     }
@@ -865,16 +852,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         if (getIsConnected()) {
                             try {
                                 sendRPCRequestPrivate(rpcRequest);
-                                Log.i(TAG, "Encoded SyncPData sent to SDL");
+                                Logger.i("Encoded SyncPData sent to SDL");
                             } catch (SyncException e) {
-                                Log.i(TAG, "Error sending Encoded SyncPData to SDL:" + e.getMessage());
+                                Logger.i("Error sending Encoded SyncPData to SDL:" + e.getMessage());
                             }
                         }
                     }
 
                     @Override
                     public void onError(String message) {
-                        Log.i(TAG, "Error send Encoded SyncPData to SDL:" + message);
+                        Logger.i("Error send Encoded SyncPData to SDL:" + message);
                     }
                 });
     }
@@ -887,16 +874,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 if (getIsConnected()) {
                     try {
                         sendRPCRequestPrivate(rpcRequest);
-                        Log.i(TAG, "SyncPData sent to SDL");
+                        Logger.i("SyncPData sent to SDL");
                     } catch (SyncException e) {
-                        Log.i(TAG, "Error sending SyncPData to SDL:" + e.getMessage());
+                        Logger.i("Error sending SyncPData to SDL:" + e.getMessage());
                     }
                 }
             }
 
             @Override
             public void onError(String message) {
-                Log.i(TAG, "Error sending SyncPData to SDL:" + message);
+                Logger.i("Error sending SyncPData to SDL:" + message);
             }
         });
     }
@@ -1016,7 +1003,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
 
-            //Log.d(TAG, "Close Sync connection:" + currentSession.getSessionId() + ", " +
+            //Logger.d("Close Sync connection:" + currentSession.getSessionId() + ", " +
             //        "N:" + currentSession.getServicesNumber() + ", keep:" + keepConnection);
 
             mSyncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
@@ -1147,7 +1134,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // Method to cycle the proxy, only called in ALM
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
-        Log.d(TAG, "CycleProxy, disconnectedReason:" + disconnectedReason);
+        Logger.d("CycleProxy, disconnectedReason:" + disconnectedReason);
         try {
             cleanProxy(disconnectedReason, false, true);
             scheduleInitializeProxy();
@@ -1164,7 +1151,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Optionally, closes the transport connection.
      */
     public void closeSession(boolean keepConnection) {
-        Log.d(TAG, "Close Session, keepConnection:" + keepConnection);
+        Logger.d("Close Session, keepConnection:" + keepConnection);
         try {
             cleanProxy(
                     SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, keepConnection, false);
@@ -1194,14 +1181,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void scheduleInitializeProxy() {
-        Log.d(TAG, "Scheduling proxy initialization");
+        Logger.d("Scheduling proxy initialization");
         if (currentSession.isServicesEmpty()) {
-            Log.d(TAG, "Service list is empty. Scheduling proxy initialization canceled");
+            Logger.d("Service list is empty. Scheduling proxy initialization canceled");
             return;
         }
 
         if (getCurrentReconnectTimerTask() != null) {
-            Log.d(TAG, "Current reconnect task is already scheduled, canceling it first");
+            Logger.d("Current reconnect task is already scheduled, canceling it first");
             clearCurrentReconnectTimerTask();
         }
 
@@ -1209,11 +1196,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             @Override
             public void run() {
                 try {
-                    Log.d(TAG, "Reconnect task is running, clearing reference");
+                    Logger.d("Reconnect task is running, clearing reference");
                     setCurrentReconnectTimerTask(null);
                     initializeProxy();
                 } catch (SyncException e) {
-                    Log.e(TAG, "Cycling the proxy failed with SyncException.", e);
+                    Logger.e("Cycling the proxy failed with SyncException.", e);
                     handleCyclingSyncException(e);
                 } catch (Exception e) {
                     notifyProxyClosed("Cycling the proxy failed with Exception.", e);
@@ -1250,8 +1237,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         try {
 
             if (message.getSessionID() != currentSession.getSessionId()) {
-                DebugTool.logWarning("Message is not from current session");
-                Log.w(TAG, "Message is not from current session");
+                Logger.w("Message is not from current session");
                 return;
             }
 
@@ -1259,9 +1245,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (message.getServiceType().equals(ServiceType.RPC)) {
                 try {
                     byte protocolVersion = message.getVersion();
-                    Log.i(TAG, "Incoming protocol version:" + protocolVersion);
+                    Logger.i("Incoming protocol version:" + protocolVersion);
                     if (protocolVersion == 1) {
-                        Log.w(TAG, "Incorrect incoming protocol version, expected min 2 but was 1");
+                        Logger.w("Incorrect incoming protocol version, expected min 2 but was 1");
                         protocolVersion = 2;
                     }
 
@@ -1276,8 +1262,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                 hashTemp.put(Names.parameters, mhash);
                             } else {
                                 String err = "Can't parse JSON: " + new String(message.getData());
-                                DebugTool.logError(err);
-                                Log.e(TAG, err);
+                                Logger.e(err);
                             }
                         }
                         FunctionID functionID = new FunctionID();
@@ -1297,7 +1282,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     }
                     handleRPCMessage(hash);
                 } catch (final Exception excp) {
-                    DebugTool.logError("Failure handling protocol message: " + excp.toString(), excp);
+                    Logger.e("Failure handling protocol message: " + excp.toString(), excp);
                     passErrorToProxyListener("Error handing incoming protocol message.", excp);
                 } // end-catch
             } else {
@@ -1305,13 +1290,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         } catch (final Exception e) {
             // Pass error to application through listener
-            DebugTool.logError("Error handing proxy event.", e);
+            Logger.e("Error handing proxy event.", e);
             passErrorToProxyListener("Error handing incoming protocol message.", e);
         }
     }
 
     protected void handleMobileNavMessage(ProtocolMessage message) {
-        Log.i(TAG, "Mobile Nav Session message received" + message.toString());
+        Logger.i("Mobile Nav Session message received" + message.toString());
         // TODO handle incoming mobile nav sessions
     }
 
@@ -1343,7 +1328,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
                 } else {
-                    Log.d("TRACE", "Error info:" + msg.getThrowable().toString());
+                    Logger.d("TRACE", "Error info:" + msg.getThrowable().toString());
                     _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
@@ -1376,13 +1361,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 // Diagnostics
                 SyncTrace.logProxyEvent("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.", SYNC_LIB_TRACE_KEY);
-                DebugTool.logError("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.");
+                Logger.e("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.");
             }
 
             SyncTrace.logProxyEvent("Proxy fired callback: " + message.getFunctionName(), SYNC_LIB_TRACE_KEY);
         } catch (final Exception e) {
             // Pass error to application through listener
-            DebugTool.logError("Error handing proxy event.", e);
+            Logger.e("Error handing proxy event.", e);
             if (_callbackToUIThread) {
                 // Run in UI thread
                 _mainUIHandler.post(new Runnable() {
@@ -1398,11 +1383,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void handleErrorsFromInternalMessageDispatcher(String info, Exception e) {
-        DebugTool.logError(info, e);
         // This error cannot be passed to the user, as it indicates an error
         // in the communication between the proxy and the application.
 
-        DebugTool.logError("InternalMessageDispatcher failed.", e);
+        Logger.e("InternalMessageDispatcher failed.", e);
 
         // Note, this is the only place where the _proxyListener should be referenced asynchronously,
         // with an error on the internalMessageDispatcher, we have no other reliable way of
@@ -1540,7 +1524,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         request.run();
                     }
                 } else {
-                    Log.w(TAG, "OnSystemRequest HTTP: no urls set");
+                    Logger.w("OnSystemRequest HTTP: no urls set");
                 }
             }
         } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
@@ -1565,8 +1549,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     request.run();
                 }
             } else {
-                Log.w(TAG,
-                        "OnSystemRequest FILE_RESUME: a required parameter is missing");
+                Logger.w("OnSystemRequest FILE_RESUME: a required parameter is missing");
             }
         } else {
             if (_callbackToUIThread) {
@@ -1772,12 +1755,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (_advancedLifecycleManagementEnabled) {
 
             // For the Test Cases
-            Log.d(TAG, "RestartRPCProtocolSession config: " + mTestConfig);
+            Logger.d("RestartRPCProtocolSession config: " + mTestConfig);
             if (mTestConfig != null) {
-                Log.d(TAG, "RestartRPCProtocolSession DoCallRegisterAppInterface: " + mTestConfig.isDoCallRegisterAppInterface());
+                Logger.d("RestartRPCProtocolSession DoCallRegisterAppInterface: " + mTestConfig.isDoCallRegisterAppInterface());
                 if (!mTestConfig.isDoCallRegisterAppInterface()) {
 
-                    Log.d(TAG, "RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
+                    Logger.d("RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
                     if (mTestConfigCallback != null) {
                         mTestConfigCallback.onRPCServiceComplete();
                     }
@@ -1816,7 +1799,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void handleEndServiceAck(final ServiceType serviceType, final byte sessionId, final String correlationID) {
-        Log.i(TAG, "EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
+        Logger.i("EndService Ack received; Session Type " + serviceType.getName() + "; Session ID " + sessionId + "; Correlation ID " + correlationID);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1831,7 +1814,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void handleMobileNavAck(int frameNumberReceived) {
-        Log.i(TAG, "Mobile Nav Ack received = " + frameNumberReceived);
+        Logger.i("Mobile Nav Ack received = " + frameNumberReceived);
         final int fNumber = frameNumberReceived;
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1847,7 +1830,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void handleStartServiceNack(final ServiceType serviceType) {
-        Log.i(TAG, "Service Nack received for " + serviceType);
+        Logger.i("Service Nack received for " + serviceType);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1862,7 +1845,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void startMobileNaviService(byte sessionID, String correlationID) {
-        Log.i(TAG, "Mobile Navi service started " + correlationID);
+        Logger.i("Mobile Navi service started " + correlationID);
         createService(sessionID, ServiceType.Mobile_Nav);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1878,7 +1861,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void startAudioService(byte sessionID, String correlationID) {
-        Log.i(TAG, "Mobile Audio service started  " + sessionID);
+        Logger.i("Mobile Audio service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1903,24 +1886,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void stopMobileNaviService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
-            Log.i(TAG, "Mobile Navi Service is going to stop, " +
+            Logger.i("Mobile Navi Service is going to stop, " +
                     "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
             } catch (NullPointerException e) {
-                Log.e(TAG, e.toString());
+                Logger.e(e.toString());
             }
         }
     }
 
     public void stopAudioService() {
         if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
-            Log.i(TAG, "Mobile Audio service is going to stop, " +
+            Logger.i("Mobile Audio service is going to stop, " +
                     "sesId:" + currentSession.getSessionId());
             try {
                 getSyncConnection().closeAudioService(currentSession.getSessionId());
             } catch (NullPointerException e) {
-                Log.e(TAG, e.toString());
+                Logger.e(e.toString());
             }
         }
     }
@@ -2160,7 +2143,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void encodedSyncPData(Vector<String> data, Integer correlationID)
             throws SyncException {
 
-        Log.i("pt", "encodedSyncPData() giving to sync");
+        Logger.i("pt", "encodedSyncPData() giving to sync");
         EncodedSyncPData msg = RPCRequestFactory.buildEncodedSyncPData(data, correlationID);
         sendRPCRequest(msg);
     }
@@ -2175,7 +2158,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void syncPData(byte[] data, Integer correlationID)
             throws SyncException {
 
-        Log.i("pt", "syncPData() giving to sync");
+        Logger.i("pt", "syncPData() giving to sync");
         SyncPData msg = RPCRequestFactory.buildSyncPData(data, correlationID);
         sendRPCRequest(msg);
     }
@@ -2761,11 +2744,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private boolean clearCurrentReconnectTimerTask() {
         TimerTask task = getCurrentReconnectTimerTask();
         if (task != null) {
-            Log.d(TAG, "Clearing reconnect timer task");
+            Logger.d("Clearing reconnect timer task");
             boolean success = task.cancel();
             setCurrentReconnectTimerTask(null);
             if (!success) {
-                Log.i(TAG, "Can't cancel scheduled reconnect task");
+                Logger.i("Can't cancel scheduled reconnect task");
             }
             return success;
         }
@@ -2775,7 +2758,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private Timer getReconnectTimer() {
         if (_reconnectTimer == null) {
-            Log.d(TAG, "Reconnect timer is null, creating a new one");
+            Logger.d("Reconnect timer is null, creating a new one");
             _reconnectTimer = new Timer("ReconnectTimer", true);
         }
 
@@ -2784,11 +2767,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void clearReconnectTimer() {
         if (_reconnectTimer != null) {
-            Log.d(TAG, "Clearing reconnect timer");
+            Logger.d("Clearing reconnect timer");
             _reconnectTimer.cancel();
             _reconnectTimer = null;
         } else {
-            Log.d(TAG, "Reconnect timer is already null");
+            Logger.d("Reconnect timer is already null");
         }
     }
 
@@ -2969,7 +2952,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onTransportError(String info, Exception e) {
-            DebugTool.logError("Transport failure: " + info, e);
+            Logger.e("Transport failure: " + info, e);
 
             if (_transportConfig != null &&
                     _transportConfig.getTransportType() ==  TransportType.USB) {
@@ -3008,7 +2991,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHeartbeatTimedOut() {
             final String msg = "Heartbeat timeout";
-            DebugTool.logInfo(msg);
+            Logger.e(msg);
             notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
@@ -3029,7 +3012,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         ", correlationID:" + correlationID +
                         ", protocol version:" + (int) version +
                         ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
-                Log.i(TAG, message);
+                Logger.i(message);
 
                 startRPCProtocolService(session.getSessionId(), correlationID);
             }

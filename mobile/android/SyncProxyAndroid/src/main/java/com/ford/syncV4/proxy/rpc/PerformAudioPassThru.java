@@ -8,7 +8,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class PerformAudioPassThru extends RPCRequest {
 
@@ -79,7 +79,7 @@ public class PerformAudioPassThru extends RPCRequest {
             try {
                 theCode = SamplingRate.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.samplingRate, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.samplingRate, e);
             }
             return theCode;
     	}
@@ -111,7 +111,7 @@ public class PerformAudioPassThru extends RPCRequest {
             try {
                 theCode = BitsPerSample.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.bitsPerSample, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.bitsPerSample, e);
             }
             return theCode;
     	}
@@ -133,7 +133,7 @@ public class PerformAudioPassThru extends RPCRequest {
             try {
                 theCode = AudioType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.audioType, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.audioType, e);
             }
             return theCode;
     	}

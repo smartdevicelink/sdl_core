@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AmbientLightStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class HeadLampStatus extends RPCStruct {
 
@@ -32,9 +32,10 @@ public class HeadLampStatus extends RPCStruct {
             try {
                 theCode = AmbientLightStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.ambientLightSensorStatus, e);
+                                Names.ambientLightSensorStatus, e
+                );
             }
             return theCode;
         }

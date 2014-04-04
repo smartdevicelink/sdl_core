@@ -2,7 +2,7 @@ package com.ford.syncV4.proxy.rpc;
 
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -22,9 +22,10 @@ public class ScreenParams extends RPCStruct {
             try {
                 return new ImageResolution((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.resolution, e);
+                                Names.resolution, e
+                );
             }
         }
         return null;
@@ -46,7 +47,7 @@ public class ScreenParams extends RPCStruct {
             try {
                 return new TouchEventCapabilities((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.touchEventAvailable, e);
             }

@@ -14,8 +14,7 @@ import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
-import com.ford.syncV4.util.DebugTool;
-import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -169,17 +168,17 @@ public class PoliciesTest {
             }
             return returnVal;
         } catch (JSONException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: JSONException: ", e);
+            Logger.e("JSONException: ", e);
         } catch (UnsupportedEncodingException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not encode string.", e);
+            Logger.e("Could not encode string.", e);
         } catch (ProtocolException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Could not set request method to post.", e);
+            Logger.e("Could not set request method to post.", e);
         } catch (MalformedURLException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: URL Exception when sending EncodedSyncPData to an external server.", e);
+            Logger.e("URL Exception when sending EncodedSyncPData to an external server.", e);
         } catch (IOException e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: IOException: ", e);
+            Logger.e("IOException: ", e);
         } catch (Exception e) {
-            DebugTool.logError("sendEncodedSyncPDataToUrl: Unexpected Exception: ", e);
+            Logger.e("Unexpected Exception: ", e);
         }
         return null;
     }

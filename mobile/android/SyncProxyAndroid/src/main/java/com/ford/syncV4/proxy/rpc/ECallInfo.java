@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ECallConfirmationStatus;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataNotificationStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ECallInfo extends RPCStruct {
 
@@ -31,7 +31,7 @@ public class ECallInfo extends RPCStruct {
             try {
                 theCode = VehicleDataNotificationStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallNotificationStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallNotificationStatus, e);
             }
             return theCode;
         }
@@ -53,7 +53,7 @@ public class ECallInfo extends RPCStruct {
             try {
                 theCode = VehicleDataNotificationStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.auxECallNotificationStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.auxECallNotificationStatus, e);
             }
             return theCode;
         }
@@ -75,7 +75,7 @@ public class ECallInfo extends RPCStruct {
             try {
                 theCode = ECallConfirmationStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallConfirmationStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallConfirmationStatus, e);
             }
             return theCode;
         }

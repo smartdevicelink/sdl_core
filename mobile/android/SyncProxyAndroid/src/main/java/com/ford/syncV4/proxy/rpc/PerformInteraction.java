@@ -7,7 +7,7 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class PerformInteraction extends RPCRequest {
 
@@ -61,7 +61,7 @@ public class PerformInteraction extends RPCRequest {
             try {
                 theCode = InteractionMode.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.interactionMode, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.interactionMode, e);
             }
             return theCode;
         }
@@ -187,7 +187,7 @@ public class PerformInteraction extends RPCRequest {
             try {
                 theCode = LayoutMode.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.interactionLayout, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.interactionLayout, e);
             }
             return theCode;
         }

@@ -7,7 +7,7 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class RPCResponse extends RPCMessage {
 	
@@ -54,7 +54,7 @@ public class RPCResponse extends RPCMessage {
             try {
                 theCode = Result.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.resultCode, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.resultCode, e);
             }
             return theCode;
         }

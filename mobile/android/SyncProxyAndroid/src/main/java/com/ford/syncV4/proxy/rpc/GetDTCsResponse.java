@@ -1,14 +1,10 @@
 package com.ford.syncV4.proxy.rpc;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.HMILevel;
-import com.ford.syncV4.proxy.rpc.enums.MediaClockFormat;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataResultCode;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class GetDTCsResponse extends RPCResponse {
 
@@ -34,7 +30,7 @@ public class GetDTCsResponse extends RPCResponse {
             try {
                 theCode = new DTC((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.dtcList, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.dtcList, e);
             }
             return theCode;
         }

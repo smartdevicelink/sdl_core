@@ -7,7 +7,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AudioStreamingState;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.SystemContext;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class OnHMIStatus extends RPCNotification {
 	private Boolean firstRun;
@@ -27,7 +27,7 @@ public class OnHMIStatus extends RPCNotification {
             try {
                 theCode = HMILevel.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiLevel, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiLevel, e);
             }
             return theCode;
         }
@@ -47,7 +47,7 @@ public class OnHMIStatus extends RPCNotification {
             try {
                 theCode = AudioStreamingState.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.audioStreamingState, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.audioStreamingState, e);
             }
             return theCode;
         }
@@ -67,7 +67,7 @@ public class OnHMIStatus extends RPCNotification {
             try {
                 theCode = SystemContext.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.systemContext, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.systemContext, e);
             }
             return theCode;
         }

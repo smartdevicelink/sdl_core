@@ -3,7 +3,7 @@ package com.ford.syncV4.proxy.rpc;
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.TouchType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -33,7 +33,7 @@ public class OnTouchEvent extends RPCNotification {
             try {
                 theCode = TouchType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.type, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.type, e);
             }
             return theCode;
         }

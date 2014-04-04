@@ -69,7 +69,7 @@ import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -847,12 +847,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 } else {
                     try {
                         if (syncProxyBase.getSyncMsgVersion() != null) {
-                            DebugTool.logError("Unrecognized response Message: " +
+                            Logger.e("Unrecognized response Message: " +
                                     functionName.toString() +
                                     "SYNC Message Version = " + syncProxyBase.getSyncMsgVersion());
                         } else {
-                            DebugTool.logError("Unrecognized response Message: " +
-                                    functionName.toString());
+                            Logger.e("Unrecognized response Message: " + functionName.toString());
                         }
                     } catch (SyncException e) {
                         e.printStackTrace();
@@ -1162,10 +1161,10 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             } else {
                 try {
                     if (syncProxyBase.getSyncMsgVersion() != null) {
-                        DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString() +
+                        Logger.i("Unrecognized notification Message: " + functionName.toString() +
                                 " connected to SYNC using message version: " + syncProxyBase.getSyncMsgVersion().getMajorVersion() + "." + syncProxyBase.getSyncMsgVersion().getMinorVersion());
                     } else {
-                        DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString());
+                        Logger.i("Unrecognized notification Message: " + functionName.toString());
                     }
                 } catch (SyncException e) {
                     e.printStackTrace();

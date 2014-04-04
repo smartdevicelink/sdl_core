@@ -5,8 +5,6 @@ import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.SystemAction;
-import com.ford.syncV4.util.DebugTool;
 
 public class ScrollableMessage extends RPCRequest {
 

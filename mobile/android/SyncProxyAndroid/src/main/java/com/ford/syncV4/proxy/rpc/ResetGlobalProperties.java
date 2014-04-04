@@ -6,7 +6,7 @@ import java.util.Vector;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ResetGlobalProperties extends RPCRequest {
 
@@ -31,7 +31,7 @@ public class ResetGlobalProperties extends RPCRequest {
 	                    try {
 	                        toAdd = GlobalProperty.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.properties, e);
+                            Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.properties, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);

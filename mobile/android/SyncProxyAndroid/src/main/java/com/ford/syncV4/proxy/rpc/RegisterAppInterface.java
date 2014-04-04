@@ -9,7 +9,7 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class RegisterAppInterface extends RPCRequest {
 
@@ -143,7 +143,7 @@ public class RegisterAppInterface extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.languageDesired, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.languageDesired, e);
             }
             return theCode;
         }
@@ -167,7 +167,7 @@ public class RegisterAppInterface extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguageDesired, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguageDesired, e);
             }
             return theCode;
         }
@@ -202,7 +202,7 @@ public class RegisterAppInterface extends RPCRequest {
                     try {
                         toAdd = AppHMIType.valueForString(strFormat);
                     } catch (Exception e) {
-                        DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
+                        Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
                     }
                     if (toAdd != null) {
                         newList.add(toAdd);

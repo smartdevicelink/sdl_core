@@ -7,8 +7,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.CarModeStatus;
 import com.ford.syncV4.proxy.rpc.enums.PowerModeQualificationStatus;
 import com.ford.syncV4.proxy.rpc.enums.PowerModeStatus;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataNotificationStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ClusterModeStatus extends RPCStruct {
 
@@ -43,7 +42,7 @@ public class ClusterModeStatus extends RPCStruct {
             try {
                 theCode = PowerModeQualificationStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.powerModeQualificationStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.powerModeQualificationStatus, e);
             }
             return theCode;
         }
@@ -65,7 +64,7 @@ public class ClusterModeStatus extends RPCStruct {
             try {
                 theCode = CarModeStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.carModeStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.carModeStatus, e);
             }
             return theCode;
         }
@@ -87,7 +86,7 @@ public class ClusterModeStatus extends RPCStruct {
             try {
                 theCode = PowerModeStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.powerModeStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.powerModeStatus, e);
             }
             return theCode;
         }
