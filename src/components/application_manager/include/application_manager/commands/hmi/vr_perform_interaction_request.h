@@ -30,43 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_PERFORM_INTERACTION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_PERFORM_INTERACTION_REQUEST_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief TTSPerformInteractionResponse command class
+ * @brief VRPerformInteractionRequest command class
  **/
-class TTSPerformInteractionResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief TTSPerformInteractionResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit TTSPerformInteractionResponse(const MessageSharedPtr& message);
+class VRPerformInteractionRequest : public RequestToHMI {
+  public:
+    /**
+     * @brief VRPerformInteractionRequest class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit VRPerformInteractionRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief TTSPerformInteractionResponse class destructor
-   **/
-  virtual ~TTSPerformInteractionResponse();
+    /**
+     * @brief VRPerformInteractionRequest class destructor
+     **/
+    virtual ~VRPerformInteractionRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionResponse);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(VRPerformInteractionRequest);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_VR_PERFORM_INTERACTION_REQUEST_H_

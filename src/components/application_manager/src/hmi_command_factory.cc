@@ -126,8 +126,8 @@
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_request.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_response.h"
-#include "application_manager/commands/hmi/tts_perform_interaction_request.h"
-#include "application_manager/commands/hmi/tts_perform_interaction_response.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_request.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vi_is_ready_request.h"
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
@@ -1855,11 +1855,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+    case hmi_apis::FunctionID::VR_PerformInteraction: {
       if (is_response) {
-        command.reset(new commands::TTSPerformInteractionResponse(message));
+        command.reset(new commands::VRPerformInteractionResponse(message));
       } else {
-        command.reset(new commands::TTSPerformInteractionRequest(message));
+        command.reset(new commands::VRPerformInteractionRequest(message));
       }
       break;
     }

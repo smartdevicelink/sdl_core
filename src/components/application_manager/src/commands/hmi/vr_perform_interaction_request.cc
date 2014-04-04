@@ -30,43 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief TTSPerformInteractionRequest command class
- **/
-class TTSPerformInteractionRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief TTSPerformInteractionRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit TTSPerformInteractionRequest(const MessageSharedPtr& message);
+VRPerformInteractionRequest::VRPerformInteractionRequest(
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-    /**
-     * @brief TTSPerformInteractionRequest class destructor
-     **/
-    virtual ~TTSPerformInteractionRequest();
+VRPerformInteractionRequest::~VRPerformInteractionRequest() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+void VRPerformInteractionRequest::Run() {
+  LOG4CXX_INFO(logger_, "VRPerformInteractionRequest::Run");
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionRequest);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_

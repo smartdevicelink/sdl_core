@@ -236,6 +236,13 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 break;
             }
+            case "VR.PerformInteraction":
+            {
+
+                SDL.SDLModel.vrPerformInteraction(request);
+
+                break;
+            }
             case "VR.GetCapabilities": {
 
                 Em.Logger.log("FFW." + request.method + "Response");
@@ -292,6 +299,51 @@ FFW.VR = FFW.RPCObserver.create( {
             };
             this.client.send(JSONMessage);
         }
+    },
+
+    /**
+     * send notification when command was triggered
+     *
+     * @param {Number} requestID
+     * @param {Number} resultCode
+     * @param {Number} commandID
+     */
+    interactionResponse: function (requestID, resultCode, commandID) {
+
+        Em.Logger.log("FFW.VR.PerformInteractionResponse");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": requestID,
+                "result": {
+                    "code": resultCode,
+                    "method": "VR.PerformInteraction"
+                }
+            };
+
+            if (commandID) {
+                JSONMessage.result.choiceID = commandID;
+            }
+        } else {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": requestID,
+                "error": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "message": "Perform Interaction error response.",
+                    "data": {
+                        "method": "VR.PerformInteraction"
+                    }
+                }
+            };
+        }
+
+        SDL.SDLModel.set('performInteractionSession', null);
+
+        this.client.send(JSONMessage);
     },
 
     /**

@@ -29,28 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/tts_perform_interaction_request.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_response.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSPerformInteractionRequest::TTSPerformInteractionRequest(
+VRPerformInteractionResponse::VRPerformInteractionResponse(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+    : ResponseFromHMI(message) {
 }
 
-TTSPerformInteractionRequest::~TTSPerformInteractionRequest() {
+VRPerformInteractionResponse::~VRPerformInteractionResponse() {
 }
 
-void TTSPerformInteractionRequest::Run() {
-  LOG4CXX_INFO(logger_, "TTSPerformInteractionRequest::Run");
-
-  SendRequest();
+void VRPerformInteractionResponse::Run() {
+  LOG4CXX_INFO(logger_, "VRPerformInteractionResponse::Run");
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

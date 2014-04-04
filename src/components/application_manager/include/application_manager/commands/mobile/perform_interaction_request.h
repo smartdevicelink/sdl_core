@@ -101,7 +101,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param message which should send to mobile side
    *
    */
-  void ProcessVRNotification(const smart_objects::SmartObject& message);
+  void ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /*
    * @brief Function will be called when event AppUnregistered comes
@@ -145,7 +145,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    *
    */
-  void SendTTSPerformInteractionRequest(
+  void SendVRPerformInteractionRequest(
       application_manager::ApplicationSharedPtr const app);
 
   /*
@@ -210,7 +210,11 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   timer::TimerThread<PerformInteractionRequest> timer_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
-  mobile_apis::Result::eType tts_perform_interaction_code_;
+  mobile_apis::Result::eType vr_perform_interaction_code_;
+  mobile_apis::InteractionMode::eType interaction_mode_;
+  bool ui_response_recived;
+  bool vr_response_recived;
+
 };
 
 }  // namespace commands
