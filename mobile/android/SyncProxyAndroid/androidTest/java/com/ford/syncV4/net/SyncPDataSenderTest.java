@@ -1,10 +1,10 @@
 package com.ford.syncV4.net;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -93,13 +93,13 @@ public class SyncPDataSenderTest extends InstrumentationTestCase {
                 builder.append(line);
             }
         } catch (IOException e) {
-            Log.d(LOG_TAG, "Can't open file", e);
+            Logger.d(LOG_TAG + " Can't open file", e);
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Log.e(LOG_TAG, e.toString());
+                    Logger.e(LOG_TAG + e.toString());
                 }
             }
         }

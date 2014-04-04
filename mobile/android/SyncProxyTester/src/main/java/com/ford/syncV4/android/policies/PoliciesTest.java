@@ -1,5 +1,7 @@
 package com.ford.syncV4.android.policies;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -29,8 +31,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-
 public class PoliciesTest {
 
     private static final String TAG = "PoliciesTest";
@@ -52,12 +52,12 @@ public class PoliciesTest {
         try {
             Scanner scanner = new Scanner(new FileReader("/sdcard/policiesRequest.txt"));
             url = scanner.nextLine();
-            Log.e("TestApp", url);
+            Logger.e("TestApp", url);
             while (scanner.hasNextLine()) {
                 jsonData += scanner.nextLine().replaceAll(" ", "");
                 //jsonData += scanner.nextLine();
             }
-            Log.e("TestApp", jsonData);
+            Logger.e("TestApp", jsonData);
             scanner.close();
         } catch (Exception e) {
             sMsgAdapter.logMessage("Error reading policiesRequest.txt", Log.ERROR, e, true);
@@ -116,13 +116,13 @@ public class PoliciesTest {
 
             // If response is null, then return
             if (response == null) {
-                Log.e(TAG, "Response from server returned null: ");
+                Logger.e(TAG, "Response from server returned null: ");
                 return null;
             }
 
             String returnVal;
             if (response.getStatusLine().getStatusCode() == 200) {
-                Log.e(TAG, "Status 200");
+                Logger.e(TAG, "Status 200");
                 // Convert the response to JSON
                 returnVal = EntityUtils.toString(response.getEntity(), "UTF-8");
                 JSONObject jsonResponse = new JSONObject(returnVal);
@@ -138,7 +138,7 @@ public class PoliciesTest {
                 } else if (jsonResponse.get("data") instanceof String) {
                     encodedSyncPDataReceived.add(jsonResponse.getString("data"));
                 } else {
-                    Log.e(TAG, "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+                    Logger.e(TAG, "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
                     // Exit method
                     return null;
                 }

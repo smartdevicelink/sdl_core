@@ -2,7 +2,8 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
+
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +47,7 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
             }
             is.close();
         } catch (IOException e) {
-            Log.e("SyncProxyTester", e.toString());
+            Logger.e("StaticFileReader", e.toString());
         }
     }
 

@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +23,7 @@ import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.util.DeviceInfoManager;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -226,7 +226,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
         try {
             value = Integer.valueOf(maxNumberRFCOMMPortsView.getText().toString());
         } catch (NumberFormatException e) {
-            Log.e(LOG_TAG, RegisterAppInterfaceDialog.class.getSimpleName() + " getDeviceInfoFromView " +
+            Logger.e(LOG_TAG + " getDeviceInfoFromView " +
                     "maxNumberRFCOMMPortsView error:" + e.getMessage());
         }
         deviceInfo.setMaxNumberRFCOMMPorts(value);

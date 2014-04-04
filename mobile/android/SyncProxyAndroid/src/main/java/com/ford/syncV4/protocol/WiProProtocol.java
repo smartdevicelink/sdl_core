@@ -1,7 +1,5 @@
 package com.ford.syncV4.protocol;
 
-import android.util.Log;
-
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
@@ -20,7 +18,7 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    private static final String TAG = "WiProProtocol";
+    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
 
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
@@ -65,7 +63,7 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public void setProtocolVersion(byte version) {
-        Log.d(TAG, "Update Protocol version:" + version);
+        Logger.d(CLASS_NAME + " Update Protocol version:" + version);
         mProtocolVersion.setCurrentVersion(version);
 
         if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
@@ -83,7 +81,7 @@ public class WiProProtocol extends AbstractProtocol {
         Logger.i("Protocol session should start: " + sessionId);
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
                 sessionId, getProtocolVersion());
-        Log.d(TAG, "Start Protocol Session, protocol ver:" + getProtocolVersion());
+        Logger.d(CLASS_NAME + " Start Protocol Session, protocol ver:" + getProtocolVersion());
         sendFrameToTransport(header);
     }
 
@@ -92,7 +90,7 @@ public class WiProProtocol extends AbstractProtocol {
                                              String correlationID) {
         super.handleProtocolSessionStarted(serviceType, sessionID, version, correlationID);
 
-        Log.d(TAG, "Protocol Session Started, protocol ver:" + version);
+        Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
     }
 
@@ -209,7 +207,7 @@ public class WiProProtocol extends AbstractProtocol {
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
 
-        Log.d(TAG, "-> Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength) +
+        Logger.d(CLASS_NAME + " -> Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength) +
                 ", protocol ver:" + getProtocolVersion());
 
         //Check for a version difference
@@ -238,7 +236,7 @@ public class WiProProtocol extends AbstractProtocol {
                 return;
             } else {
                 // If I got the size, allocate the buffer
-                Log.d(TAG, "HeaderBuf:" + _headerBuf.length + ", header pos:" + _headerBufWritePos +
+                Logger.d(CLASS_NAME + " HeaderBuf:" + _headerBuf.length + ", header pos:" + _headerBufWritePos +
                     ", bytes needed:" + headerBytesNeeded);
                 System.arraycopy(receivedBytes, receivedBytesReadPos,
                         _headerBuf, _headerBufWritePos, headerBytesNeeded);
@@ -387,7 +385,7 @@ public class WiProProtocol extends AbstractProtocol {
         } // end-method
 
         protected void handleFrame(ProtocolFrameHeader header, byte[] data) {
-            Log.d(TAG, "Handle frame, type:" + header.getFrameType());
+            Logger.d(CLASS_NAME + " Handle frame, type:" + header.getFrameType());
             if (header.getFrameType().equals(FrameType.Control)) {
                 handleControlFrame(header, data);
             } else {
@@ -430,13 +428,13 @@ public class WiProProtocol extends AbstractProtocol {
             } else if (header.getFrameData() == FrameDataControlFrameType.EndService.getValue()) {
                 handleEndSessionFrame(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceNACK.getValue()) {
-                //Log.d(TAG, "End Service NACK");
+                //Logger.d(CLASS_NAME + " End Service NACK");
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceACK.getValue()) {
                 handleEndSessionFrame(header);
             } else {
-                Log.w(TAG, "Unknown frame data:" + header.getFrameData() + ", service type:" +
+                Logger.w(CLASS_NAME + " Unknown frame data:" + header.getFrameData() + ", service type:" +
                         header.getServiceType());
             }
         } // end-method

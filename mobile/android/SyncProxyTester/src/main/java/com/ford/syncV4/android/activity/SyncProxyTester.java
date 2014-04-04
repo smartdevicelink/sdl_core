@@ -1052,7 +1052,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 		               }
 		            }
 		        } else {
-		        	Logger.i("TAG", "A No Paired devices with the name sync");
+		        	Logger.i("CLASS_NAME", "A No Paired devices with the name sync");
 		        }
 		        
 		        if (isSYNCpaired == true) { 		        	

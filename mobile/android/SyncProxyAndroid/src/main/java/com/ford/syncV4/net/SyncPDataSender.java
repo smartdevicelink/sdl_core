@@ -7,14 +7,12 @@ package com.ford.syncV4.net;
  * Time: 17:11
  */
 
-import android.util.Log;
-
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
-import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -59,7 +57,7 @@ public class SyncPDataSender {
         void onError(String message);
     }
 
-    private static final String TAG = SyncPDataSender.class.getSimpleName();
+    private static final String CLASS_NAME = SyncPDataSender.class.getSimpleName();
 
     private int mPoliciesCorrelationId;
 
@@ -126,7 +124,7 @@ public class SyncPDataSender {
 
     private void send(String url, Vector<String> data, int timeOut, boolean isEncoded,
                       SyncPDataSenderCallback callback) {
-        Log.i(TAG, "Try to send SyncP Data, encoded:" + isEncoded);
+        Logger.i(CLASS_NAME + "Try to send SyncP Data, encoded:" + isEncoded);
         final int CONNECTION_TIMEOUT = timeOut * 1000; // in ms
         try {
             // Form the JSON message to send to the cloud
@@ -134,16 +132,16 @@ public class SyncPDataSender {
             for (String string : data) {
                 jsonArrayOfSyncPPackets.put(string);
             }
-            Log.i(TAG, "SyncP JSONArray length: " + jsonArrayOfSyncPPackets.length());
+            Logger.i(CLASS_NAME + "SyncP JSONArray length: " + jsonArrayOfSyncPPackets.length());
 
             JSONObject jsonObjectToSendToServer = new JSONObject();
             jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
-            Log.i(TAG, "SyncP JSONObject: " + jsonObjectToSendToServer.toString());
+            Logger.i(CLASS_NAME + "SyncP JSONObject: " + jsonObjectToSendToServer.toString());
 
             // Convert a JSON message to bytes array
             String valid_json = jsonObjectToSendToServer.toString().replace("\\", "");
             byte[] bytesToSend = valid_json.getBytes("UTF-8");
-            Log.i(TAG, "SyncP bytes length: " + bytesToSend.length);
+            Logger.i(CLASS_NAME + "SyncP bytes length: " + bytesToSend.length);
 
             // Send the Bytes to the Cloud and get the Response
             HttpParams httpParams = new BasicHttpParams();
@@ -161,17 +159,17 @@ public class SyncPDataSender {
             request.setEntity(new ByteArrayEntity(bytesToSend));
             HttpResponse response = client.execute(request);
 
-            Log.i(TAG, "SyncP data sent and received");
+            Logger.i(CLASS_NAME + "SyncP data sent and received");
 
             // If response is null, then return
             if (response == null) {
-                Log.e(TAG, "SyncP response from server null");
+                Logger.e(CLASS_NAME + "SyncP response from server null");
                 return;
             }
 
             Vector<String> encodedSyncPDataReceived = new Vector<String>();
             int statusCode = response.getStatusLine().getStatusCode();
-            Log.d(TAG, "SyncP response code:" + statusCode);
+            Logger.d(CLASS_NAME + "SyncP response code:" + statusCode);
             if (statusCode == 200) {
                 // Convert the response to JSON
                 JSONObject jsonResponse = new JSONObject(EntityUtils.toString(
@@ -182,14 +180,14 @@ public class SyncPDataSender {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         if (jsonArray.get(i) instanceof String) {
                             encodedSyncPDataReceived.add(jsonArray.getString(i));
-                            //Log.i(TAG, "jsonArray.getString(i): " + jsonArray.getString(i));
+                            //Logger.i(CLASS_NAME + "jsonArray.getString(i): " + jsonArray.getString(i));
                         }
                     }
                 } else if (jsonResponse.get("data") instanceof String) {
                     encodedSyncPDataReceived.add(jsonResponse.getString("data"));
-                    //Log.i(TAG, "jsonResponse.getString(data): " + jsonResponse.getString("data"));
+                    //Logger.i(CLASS_NAME + "jsonResponse.getString(data): " + jsonResponse.getString("data"));
                 } else {
-                    Log.e(TAG, "Data in JSON Object neither an array nor a string.");
+                    Logger.e(CLASS_NAME + "Data in JSON Object neither an array nor a string.");
                     return;
                 }
 
@@ -214,23 +212,23 @@ public class SyncPDataSender {
             }
 
         } catch (JSONException e) {
-            Log.e(TAG, "JSONException: ", e);
+            Logger.e(CLASS_NAME + "JSONException: ", e);
             callback.onError("JSONException:" + e.getMessage());
         } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Could not encode string.", e);
+            Logger.e(CLASS_NAME + "Could not encode string.", e);
             callback.onError("Could not encode string:" + e.getMessage());
         } catch (ProtocolException e) {
-            Log.e(TAG, "Could not set request method to post.", e);
+            Logger.e(CLASS_NAME + "Could not set request method to post.", e);
             callback.onError("Could not set request method to post:" + e.getMessage());
         } catch (MalformedURLException e) {
-            Log.e(TAG, "URL Exception when sending EncodedSyncPData to an external server.", e);
+            Logger.e(CLASS_NAME + "URL Exception when sending EncodedSyncPData to an external server.", e);
             callback.onError("URL Exception when sending EncodedSyncPData to an external server:" +
                     e.getMessage());
         } catch (IOException e) {
-            Log.e(TAG, "IOException: " + e);
+            Logger.e(CLASS_NAME + "IOException: " + e);
             callback.onError("IOException:" + e.getMessage());
         } catch (Exception e) {
-            Log.e(TAG, "Unexpected Exception: ", e);
+            Logger.e(CLASS_NAME + "Unexpected Exception: ", e);
             callback.onError("Unexpected Exception:" + e.getMessage());
         }
     }

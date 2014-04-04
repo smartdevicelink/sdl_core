@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +30,7 @@ import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -263,7 +263,7 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
                                 .commit();
                         if (!success) {
-                            Log.w(LOG_TAG, "Can't save selected protocol properties");
+                            Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
                         setupHeartbeat(isHearBeat);
@@ -310,7 +310,7 @@ public class AppSetUpDialog extends DialogFragment {
         try {
             protocolVersion = Integer.valueOf(protocolVersionString);
         } catch (NumberFormatException e) {
-            Log.w(LOG_TAG, "Can not parse protocol version to int");
+            Logger.w(LOG_TAG + " Can not parse protocol version to int");
         }
         AppPreferencesManager.setProtocolVersion(protocolVersion);
     }

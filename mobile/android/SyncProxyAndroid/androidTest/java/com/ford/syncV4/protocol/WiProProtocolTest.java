@@ -1,7 +1,6 @@
 package com.ford.syncV4.protocol;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
@@ -10,6 +9,7 @@ import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import junit.framework.Assert;
 
@@ -32,9 +32,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 /**
- * Created by Andrew Batutin on 8/21/13.
+ * Created by Andrew Batutin on 8/21/13
  */
 public class WiProProtocolTest extends InstrumentationTestCase {
 
@@ -213,7 +212,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             method.invoke(WiProProtocolTest.this, parameters);
         } catch (IllegalAccessException e) {
-            Log.e("SyncProxyTester", e.toString());
+            Logger.e("WiProProtocolTest", e.toString());
         } catch (InvocationTargetException e) {
             reconstructAssertionError(e);
         }

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
+import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 
@@ -106,9 +106,9 @@ public class SystemRequestDialog extends DialogFragment {
                             byte[] data = AppUtils.contentsOfResource(mSelectedFilePath);
                             systemRequest.setBulkData(data);
                             if (data != null) {
-                                Log.d(LOG_TAG, "SystemRequest data length:" + data.length);
+                                Logger.d(LOG_TAG + " SystemRequest data length:" + data.length);
                             } else {
-                                Log.d(LOG_TAG, "SystemRequest data null");
+                                Logger.d(LOG_TAG + " SystemRequest data null");
                             }
                         }
                         ((SyncProxyTester) getActivity()).onSystemRequestDialogResult(systemRequest);

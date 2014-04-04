@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,6 +31,7 @@ import com.ford.syncV4.android.service.ProxyServiceBinder;
 import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -109,7 +109,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     public static void setHeader(EncodedSyncPDataHeader encodedSyncPDataHeader) {
-        Log.i("syncp", "_encodedSyncPDataHeader = encodedSyncPDataHeader");
+        Logger.i("syncp", "_encodedSyncPDataHeader = encodedSyncPDataHeader");
         _encodedSyncPDataHeader = encodedSyncPDataHeader;
     }
 
@@ -212,40 +212,40 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 
     @Override
     public void onProxyServiceConnected(ProxyServiceBinder service) {
-        Log.i(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " ProxyService connected " +
+        Logger.i(LOG_TAG + " ProxyService connected " +
                 service);
         mBoundProxyService = service.getService();
     }
 
     @Override
     public void onProxyServiceDisconnected() {
-        Log.i(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " ProxyService disconnected");
+        Logger.i(LOG_TAG + " ProxyService disconnected");
         mBoundProxyService = null;
     }
 
     private void bindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
-        Log.i(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " Bind ProxyService," +
+        Logger.i(LOG_TAG + " Bind ProxyService," +
                 "connection proxy: " + connectionProxy);
         context.bindService(new Intent(context, ProxyService.class), connectionProxy, BIND_AUTO_CREATE);
     }
 
     private void unbindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
         if (!connectionProxy.isConnected()) {
-            Log.v(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " ServiceConnection is not" +
+            Logger.d(LOG_TAG + " ServiceConnection is not" +
                     " connected, ignoring unbindService: " + connectionProxy);
             return;
         }
         try {
-            Log.i(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " Unbind Service(), " +
+            Logger.i(LOG_TAG + " Unbind Service(), " +
                     "connection proxy: " + connectionProxy);
             context.unbindService(connectionProxy);
         } catch (IllegalArgumentException iae) {
             // sometimes this exception is still thrown, in spite of isConnected() check above
             // simply ignore this exception
-            Log.w(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " Unbind " +
+            Logger.w(LOG_TAG + " Unbind " +
                     "IllegalArgumentException: " + iae);
         } catch (Exception e) {
-            Log.e(LOG_TAG, PoliciesTesterActivity.class.getSimpleName() + " Error unbinding from " +
+            Logger.e(LOG_TAG + " Error unbinding from " +
                     "connection: " + connectionProxy, e);
         }
     }
@@ -328,13 +328,13 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             EditText editText = (EditText) findViewById(R.id.timeoutInput);
             String editTextStr = editText.getText().toString();
             timeout = Integer.parseInt(editTextStr);
-            Log.i(LOG_TAG, "request #" + requestCounter + " timeout value: " + editTextStr);
+            Logger.i(LOG_TAG, "request #" + requestCounter + " timeout value: " + editTextStr);
 
             //clear keyboard
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 
-            Log.i("dropdown", String.valueOf(spinner4.getSelectedItem()));
+            Logger.i("dropdown", String.valueOf(spinner4.getSelectedItem()));
             if (spinner4.getSelectedItem() == "NA Endpoint URL") {
                 url = "http://applinkdev1.cloudapp.net/api/policies?appid=1234";
             }
@@ -342,7 +342,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                 url = "http://applinkdevap.cloudapp.net/api/policies?appid=1234";
             }
 
-            Log.i("dropdown", String.valueOf(spinner2.getSelectedItem()));
+            Logger.i("dropdown", String.valueOf(spinner2.getSelectedItem()));
             //		final String data = "{\"data\":[\"HwcaAABt2lhQMjIwMEtHAAAABQAAAAUAHRHcxKMmVbBKTj6F3qEH4Wq0/zA=\"]}";
 			/*
 			if (spinner2.getSelectedItem() == "start packet EU"){
@@ -479,7 +479,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             //policies go!
             //policies(timeout, data);
 
-            Log.i("dropdown", String.valueOf(spinner3.getSelectedItem()));
+            Logger.i("dropdown", String.valueOf(spinner3.getSelectedItem()));
             if (spinner3.getSelectedItem() == "send to cloud") {
                 if (data != null) {
                     logMessage("sending request... #" + requestCounter);
@@ -497,13 +497,13 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                 //add text from file to header in ProxyService.java
                 String ptsyncPstring = null;
                 byte[] databytes;
-                Log.i(LOG_TAG, "data: " + data);
+                Logger.i(LOG_TAG, "data: " + data);
                 if (data != null) {
                     if (mBoundProxyService != null && mBoundProxyService.isSyncProxyConnected()) {
                         try {
                             String[] dataspilt4 = data.split("\"");
 
-                            //Log.i("syncp", "dataspilt4: " + dataspilt4[3]);
+                            //Logger.i("syncp", "dataspilt4: " + dataspilt4[3]);
 
                             databytes = dataspilt4[3].getBytes("UTF-8");
 
@@ -515,7 +515,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             byte[] ptPacketforSync = assembleHeader(databytes.length, databytes);
                             ptsyncPstring = Base64.encodeToString(ptPacketforSync, Base64.DEFAULT);
 
-                            Log.i("syncp", "ptsyncPstring: " + ptsyncPstring);
+                            Logger.i("syncp", "ptsyncPstring: " + ptsyncPstring);
 
                             //send to syncs
                             logMessage("sending to SYNC");
@@ -524,17 +524,17 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             syncPData.add(ptsyncPstring);
                             msg.setData(syncPData);
                             msg.setCorrelationID(6001);
-                            Log.i("syncp", "msg: " + msg);
+                            Logger.i("syncp", "msg: " + msg);
 
                             if (mBoundProxyService != null) {
                                 mBoundProxyService.syncProxySendRPCRequest(msg);
                             }
                         } catch (UnsupportedEncodingException e) {
-                            Log.e("SyncProxyTester", e.toString());
+                            Logger.e("SyncProxyTester", e.toString());
                         }
                     }//if proxy is connected
                     else {
-                        Log.i(LOG_TAG, "proxy is not connected");
+                        Logger.i(LOG_TAG, "proxy is not connected");
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 _UImsgAdapter1.add("proxy not connected");
@@ -543,7 +543,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                     }
                 } // if data != null
                 else {
-                    Log.i(LOG_TAG, "data is null");
+                    Logger.i(LOG_TAG, "data is null");
                     runOnUiThread(new Runnable() {
                         public void run() {
                             _UImsgAdapter1.add("can't send to sync, data = null");
@@ -557,7 +557,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     public byte[] assembleHeader(int payloadSize, byte[] payload) {
-        Log.i("syncp", "assembling header");
+        Logger.i("syncp", "assembling header");
         _encodedSyncPDataHeader.setPayloadSize(payloadSize);
         _encodedSyncPDataHeader.setPayload(payload);
         _encodedSyncPDataHeader.setSigned(false);
@@ -575,16 +575,16 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             Scanner scanner = new Scanner(new FileReader(Environment.getExternalStorageDirectory().getPath() + "/policiesRequest.txt"));
 
             jsonData = scanner.nextLine();
-            //Log.e(LOG_TAG, "first line: " + jsonData);
+            //Logger.e(LOG_TAG, "first line: " + jsonData);
             while (scanner.hasNextLine()) {
                 jsonData += scanner.nextLine().replaceAll(" ", "");
                 //jsonData += scanner.nextLine();
             }
-            Log.i(LOG_TAG, "json from file: " + jsonData);
+            Logger.i(LOG_TAG, "json from file: " + jsonData);
             scanner.close();
         } catch (FileNotFoundException e) {
 
-            Log.e(LOG_TAG, "FileNotFoundException " + e);
+            Logger.e(LOG_TAG, "FileNotFoundException " + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("connected to PC? file saved on sdcard?");
@@ -593,8 +593,8 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             return null;
             //_msgAdapter.logMessage("ensure the phone is not connected to PC. unmount sdcard");
         } catch (Exception e) {
-            //_msgAdapter.logMessage("Error reading policiesRequest.txt", Log.ERROR, e, true);
-            Log.e(LOG_TAG, "error " + e);
+            //_msgAdapter.logMessage("Error reading policiesRequest.txt", Logger.ERROR, e, true);
+            Logger.e(LOG_TAG, "error " + e);
         }
         return jsonData;
     }
@@ -614,12 +614,12 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 			Scanner scanner = new Scanner(new FileReader("/sdcard/policiesRequest.txt"));
 			url = scanner.nextLine();
 			
-			Log.i(LOG_TAG, "url from file: " + url);
+			Logger.i(LOG_TAG, "url from file: " + url);
 			while (scanner.hasNextLine()) {
 				//jsonData += scanner.nextLine().replaceAll(" ", "");
 				jsonData += scanner.nextLine();
 			}
-			Log.i(LOG_TAG, "jsondata from file: " + jsonData);
+			Logger.i(LOG_TAG, "jsondata from file: " + jsonData);
 			scanner.close();
 			String data = jsonData;
 			//unlock
@@ -632,9 +632,9 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 			 * byte[] bytesToSend;
 			bytesToSend = data.getBytes("UTF-8");
 			String encodedString = Base64.encodeToString(bytesToSend, Base64.DEFAULT);
-			Log.i(LOG_TAG, "encoded: " + encodedString +"test");
+			Logger.i(LOG_TAG, "encoded: " + encodedString +"test");
 			String[] split = encodedString.split("\r\n");
-			Log.i(LOG_TAG, "split: " + split[0]+"test");*/
+			Logger.i(LOG_TAG, "split: " + split[0]+"test");*/
 
 
         //"http://applinkdev1.cloudapp.net/api/Ford";
@@ -658,17 +658,17 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     public void logMessage(final Object m, Boolean addToUI) {
-        //Log.i(LOG_TAG, m.toString());
+        //Logger.i(LOG_TAG, m.toString());
         addMessageToUI(m);
     }
 
     public void logMessage(final Object m) {
-        //Log.i(LOG_TAG, m.toString());
+        //Logger.i(LOG_TAG, m.toString());
         addMessageToUI(m);
     }
 
     private void addMessageToUI(final Object m) {
-        //Log.i(LOG_TAG, "ui: " +m.toString());
+        //Logger.i(LOG_TAG, "ui: " +m.toString());
         runOnUiThread(new Runnable() {
             public void run() {
                 _UImsgAdapter1.add(m);
@@ -677,7 +677,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     protected void onPostExecute(String encodedSyncPDataReceived, long roundtriptime) {
-        Log.i(LOG_TAG, "response: " + encodedSyncPDataReceived);
+        Logger.i(LOG_TAG, "response: " + encodedSyncPDataReceived);
         if (encodedSyncPDataReceived == "Error 500") {
             logMessage("Error 500");
         } else logMessage("encodedSyncPDataReceived");
@@ -686,7 +686,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     protected void onPostExecute(String encodedSyncPDataReceived) {
-        Log.i(LOG_TAG, "response: " + encodedSyncPDataReceived);
+        Logger.i(LOG_TAG, "response: " + encodedSyncPDataReceived);
         //logMessage("" + encodedSyncPDataReceived, true);
         if (encodedSyncPDataReceived == "Error 500") {
             logMessage("Error 500", true);
@@ -701,19 +701,19 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     private void sendEncodedSyncPDataToUrl(String urlString, String encodedSyncPData, Integer timeout) {
         try {
             final int CONNECTION_TIMEOUT = timeout * 1000; //change to ms
-            Log.i(LOG_TAG, "sendEncodedSyncPDataToUrl timeout: " + CONNECTION_TIMEOUT);
+            Logger.i(LOG_TAG, "sendEncodedSyncPDataToUrl timeout: " + CONNECTION_TIMEOUT);
             Vector<String> encodedSyncPDataReceived = new Vector<String>();
 
             // Form the JSON message to send to the cloud
             //JSONArray jsonArrayOfSyncPPackets = new JSONArray(encodedSyncPData);
             JSONObject jsonObjectToSendToServer = new JSONObject();
             //jsonObjectToSendToServer.put("data", jsonArrayOfSyncPPackets);
-            Log.i(LOG_TAG, "encodedSyncPData: " + encodedSyncPData); //same up to here
+            Logger.i(LOG_TAG, "encodedSyncPData: " + encodedSyncPData); //same up to here
 
             //format packet received from sync?
 			/*
 			 * jsonObjectToSendToServer.put("data", encodedSyncPData);
-			Log.i(LOG_TAG, "sending: "+ jsonObjectToSendToServer.toString()); //same up to here
+			Logger.i(LOG_TAG, "sending: "+ jsonObjectToSendToServer.toString()); //same up to here
 			byte[] bytesToSend = jsonObjectToSendToServer.toString().getBytes("UTF-8");
 			 */
 
@@ -725,7 +725,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
             HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
             HttpClient client = new DefaultHttpClient(httpParams);
-            Log.i(LOG_TAG, "url: " + urlString);
+            Logger.i(LOG_TAG, "url: " + urlString);
             HttpPost request = new HttpPost(urlString);
             request.setHeader("Content-type", "application/json");
             request.setEntity(new ByteArrayEntity(bytesToSend));
@@ -734,12 +734,12 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             HttpResponse response = client.execute(request);
             long AfterTime = System.currentTimeMillis();
             final long roundtriptime = AfterTime - BeforeTime;
-            Log.i(LOG_TAG, "roundtriptime: " + roundtriptime);
+            Logger.i(LOG_TAG, "roundtriptime: " + roundtriptime);
 
             String returnVal = new String();
             // If response is null, then return
             if (response == null) {
-                Log.e(LOG_TAG, "Response from server returned null: ");
+                Logger.e(LOG_TAG, "Response from server returned null: ");
                 //Activity.runOnUiThread(Runnable)
                 runOnUiThread(new Runnable() {
                     public void run() {
@@ -749,11 +749,11 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                 return;
             } else { //response not null
                 returnVal = EntityUtils.toString(response.getEntity(), "UTF-8");
-                Log.i(LOG_TAG, "response: " + returnVal);
+                Logger.i(LOG_TAG, "response: " + returnVal);
 
                 if (response.getStatusLine().getStatusCode() == 200) {
 
-                    Log.i(LOG_TAG, "Status 200");
+                    Logger.i(LOG_TAG, "Status 200");
                     runOnUiThread(new Runnable() {
                         public void run() {
                             _UImsgAdapter1.add("Status 200");
@@ -761,7 +761,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                     });
                     // Convert the response to JSON
                     //returnVal = EntityUtils.toString(response.getEntity(), "UTF-8");
-                    //Log.i(LOG_TAG, "response: "+returnVal);
+                    //Logger.i(LOG_TAG, "response: "+returnVal);
                     JSONObject jsonResponse = new JSONObject(returnVal);
 
 
@@ -784,19 +784,19 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                     } else if (jsonResponse.get("data") instanceof String) {
                         encodedSyncPDataReceived.add(jsonResponse.getString("data"));
                     } else {
-                        Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
+                        Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Data in JSON Object neither an array nor a string.");
                         // Exit method
                         return;
                     }
 
-                    Log.i(LOG_TAG, "sending to sync...");
+                    Logger.i(LOG_TAG, "sending to sync...");
                     //sendToSync(encodedSyncPDataReceived);
 
 
                 } else if (response.getStatusLine().getStatusCode() == 500) {
                     //returnVal = EntityUtils.toString(response.getEntity(), "UTF-8");
                     returnVal = "Error 500";
-                    Log.i(LOG_TAG, "response: Error 500");
+                    Logger.i(LOG_TAG, "response: Error 500");
                     runOnUiThread(new Runnable() {
                         public void run() {
                             _UImsgAdapter1.add("error: 500, round trip time: " + roundtriptime);
@@ -806,7 +806,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                     //logMessage("round trip time: " + roundtriptime + " ms");
                 } else {
                     returnVal = "Unknown Error";
-                    Log.i(LOG_TAG, "response: Unknown Error");
+                    Logger.i(LOG_TAG, "response: Unknown Error");
                     //logMessage("Unknown Error");
                     //logMessage("round trip time: " + roundtriptime + " ms");
                     runOnUiThread(new Runnable() {
@@ -825,42 +825,42 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
             //} catch (SyncException e) {
 
         } catch (JSONException e) {
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: JSONException: " + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: JSONException: " + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("unknown error, JSONException");
                 }
             });
         } catch (UnsupportedEncodingException e) {
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Could not encode string." + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Could not encode string." + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("Could not encode string");
                 }
             });
         } catch (ClientProtocolException e) { //used to be (ProtocolException)
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Could not set request method to post." + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Could not set request method to post." + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("ClientProtocolException");
                 }
             });
         } catch (MalformedURLException e) {
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: URL Exception when sending EncodedSyncPData to an external server." + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: URL Exception when sending EncodedSyncPData to an external server." + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("MalformedURLException");
                 }
             });
         } catch (IOException e) {
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: IOException: " + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: IOException: " + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("IOException, can't reach url?");
                 }
             });
         } catch (Exception e) {
-            Log.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Unexpected Exception: " + e);
+            Logger.e(LOG_TAG, "sendEncodedSyncPDataToUrl: Unexpected Exception: " + e);
             runOnUiThread(new Runnable() {
                 public void run() {
                     _UImsgAdapter1.add("Unexpected Exception");
@@ -876,7 +876,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 			try {
 				ProxyService.getInstance().getProxyInstance().sendRPCRequest(encodedSyncPDataRequest);
 			} catch (SyncException e) {
-				_msgAdapter.logMessage("Error sending message: " + e, Log.ERROR, e);
+				_msgAdapter.logMessage("Error sending message: " + e, Logger.ERROR, e);
 			}
 		}
     }*/

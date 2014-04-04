@@ -2,9 +2,9 @@ package com.ford.syncV4.util;
 
 import android.os.Build;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 
 import com.ford.syncV4.proxy.rpc.DeviceInfo;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -19,7 +19,7 @@ import com.ford.syncV4.proxy.rpc.DeviceInfo;
  */
 public class DeviceInfoManager {
 
-    private static final String LOG_TAG = "DeviceInfoManager";
+    private static final String CLASS_NAME = DeviceInfoManager.class.getSimpleName();
     private static TelephonyManager sTelephonyManager;
 
     /**
@@ -60,7 +60,7 @@ public class DeviceInfoManager {
 
     public static void dumpDeviceInfo(DeviceInfo deviceInfo) {
         if (deviceInfo == null) {
-            Log.w(LOG_TAG, "Device Info is null");
+            Logger.w(CLASS_NAME + " Device Info is null");
             return;
         }
         String info = "DeviceInfo: ";
@@ -70,7 +70,7 @@ public class DeviceInfoManager {
         info += "OSVersion:" + deviceInfo.getOSVersion() + ", ";
         info += "Carrier:" + deviceInfo.getCarrier() + ", ";
         info += "MaxNumberRFCOMMPorts:" + deviceInfo.getMaxNumberRFCOMMPorts() + "}";
-        Log.i(LOG_TAG, info);
+        Logger.i(CLASS_NAME, info);
     }
 
     private static String getOSVersion() {
@@ -118,7 +118,7 @@ public class DeviceInfoManager {
             try {
                 value = sTelephonyManager.getNetworkOperator();
             } catch (Throwable throwable) {
-                Log.e(LOG_TAG, " getDeviceNetworkOperator error", throwable);
+                Logger.e(CLASS_NAME + "  getDeviceNetworkOperator error", throwable);
             }
         }
         return value;
@@ -130,7 +130,7 @@ public class DeviceInfoManager {
             try {
                 value = sTelephonyManager.getNetworkOperatorName();
             } catch (Throwable throwable) {
-                Log.e(LOG_TAG, " getDeviceNetworkOperatorName error", throwable);
+                Logger.e(CLASS_NAME + "  getDeviceNetworkOperatorName error", throwable);
             }
         }
         return value;

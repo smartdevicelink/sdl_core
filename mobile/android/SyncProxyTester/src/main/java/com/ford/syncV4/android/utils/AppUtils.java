@@ -4,7 +4,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Looper;
-import android.util.Log;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.util.logger.ApplicationAdditionalSettings;
@@ -53,7 +52,7 @@ public class AppUtils {
         try {
             return contentsOfResource(new FileInputStream(file));
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "Contents Of Resource exception", e);
+            Logger.e(TAG + " Contents Of Resource exception", e);
         }
         return new byte[0];
     }
@@ -70,7 +69,7 @@ public class AppUtils {
      */
     public static boolean saveDataToFile(byte[] data, String filePath) {
         File mFile = new File(filePath);
-        Log.d(TAG, "Saving data to file '" + filePath + "', exists:" + mFile.exists());
+        Logger.d(TAG + " Saving data to file '" + filePath + "', exists:" + mFile.exists());
         if (mFile.exists()) {
             mFile.delete();
         }
@@ -82,7 +81,7 @@ public class AppUtils {
 
             result = true;
         } catch (IOException e) {
-            Log.e(TAG, "Save Data To File IOException", e);
+            Logger.e(TAG + " Save Data To File IOException", e);
         } finally {
             if (mFileOutputStream != null) {
                 try {
@@ -127,14 +126,14 @@ public class AppUtils {
             }
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            Log.w(TAG, "Can't read file", e);
+            Logger.w(TAG + " Can't read file", e);
             return null;
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, e.toString());
+                    Logger.e(TAG, e.toString());
                 }
             }
         }

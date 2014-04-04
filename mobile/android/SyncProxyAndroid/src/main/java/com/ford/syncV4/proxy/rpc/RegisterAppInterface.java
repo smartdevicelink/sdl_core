@@ -1,7 +1,5 @@
 package com.ford.syncV4.proxy.rpc;
 
-import android.util.Log;
-
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -305,7 +303,7 @@ public class RegisterAppInterface extends RPCRequest {
         } else if (object instanceof Hashtable) {
             return new DeviceInfo((Hashtable) object);
         }
-        Log.w(LOG_TAG, " getDeviceInfo is not a type of DeviceInfo, current value:" + object);
+        Logger.w(LOG_TAG + " getDeviceInfo is not a type of DeviceInfo, current value:" + object);
         return null;
     }
 }
