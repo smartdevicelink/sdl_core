@@ -9,7 +9,7 @@ find_package(LibXML2 REQUIRED)
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
-#add_subdirectory(./tools)
+add_subdirectory(./tools)
 
 
 include_directories (

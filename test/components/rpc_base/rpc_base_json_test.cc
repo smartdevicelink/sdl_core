@@ -86,7 +86,6 @@ TEST(ValidatedTypesJson, BooleanFromJsonTest) {
 TEST(ValidatedTypesJson, BooleanNullTest) {
   Boolean boolean(&Value::null);
   ASSERT_TRUE(boolean.is_initialized());
-  ASSERT_TRUE(boolean.is_null());
   ASSERT_FALSE(boolean.is_valid());
 }
 
@@ -94,7 +93,6 @@ TEST(ValidatedTypesJson, BooleanAbsentValueTest) {
   Value* novalue = NULL;
   Boolean boolean(novalue);
   ASSERT_FALSE(boolean.is_initialized());
-  ASSERT_FALSE(boolean.is_null());
   ASSERT_FALSE(boolean.is_valid());
 }
 
@@ -118,7 +116,6 @@ TEST(ValidatedTypesJson, IntegerFromJsonTest) {
 TEST(ValidatedTypesJson, IntegerNullTest) {
   Integer<int32_t, -5, 192> integer(&Value::null);
   ASSERT_TRUE(integer.is_initialized());
-  ASSERT_TRUE(integer.is_null());
   ASSERT_FALSE(integer.is_valid());
 }
 
@@ -126,7 +123,6 @@ TEST(ValidatedTypesJson, IntegerAbsentValueTest) {
   Value* novalue = NULL;
   Integer<int32_t, -5, 192> integer(novalue);
   ASSERT_FALSE(integer.is_initialized());
-  ASSERT_FALSE(integer.is_null());
   ASSERT_FALSE(integer.is_valid());
 }
 
@@ -164,7 +160,6 @@ TEST(ValidatedTypesJson, FloatFromJsonTest) {
 TEST(ValidatedTypesJson, FloatNullTest) {
   Float<1, 7> flt(&Value::null);
   ASSERT_TRUE(flt.is_initialized());
-  ASSERT_TRUE(flt.is_null());
   ASSERT_FALSE(flt.is_valid());
 }
 
@@ -172,7 +167,6 @@ TEST(ValidatedTypesJson, FloatAbsentValueTest) {
   Value* novalue = NULL;
   Float<1, 7> flt(novalue);
   ASSERT_FALSE(flt.is_initialized());
-  ASSERT_FALSE(flt.is_null());
   ASSERT_FALSE(flt.is_valid());
 }
 
@@ -196,7 +190,6 @@ TEST(ValidatedTypesJson, StringFromJsonTest) {
 TEST(ValidatedTypesJson, StringNullTest) {
   String<1, 42> str(&Value::null);
   ASSERT_TRUE(str.is_initialized());
-  ASSERT_TRUE(str.is_null());
   ASSERT_FALSE(str.is_valid());
 }
 
@@ -211,7 +204,6 @@ TEST(ValidatedTypesJson, StringAbsentValueTest) {
   Value* novalue = NULL;
   String<1, 500> str(novalue);
   ASSERT_FALSE(str.is_initialized());
-  ASSERT_FALSE(str.is_null());
   ASSERT_FALSE(str.is_valid());
 }
 
@@ -235,7 +227,6 @@ TEST(ValidatedTypesJson, EnumFromJsonTest) {
 TEST(ValidatedTypesJson, EnumNullTest) {
   Enum<TestEnum> enm(&Value::null);
   ASSERT_TRUE(enm.is_initialized());
-  ASSERT_TRUE(enm.is_null());
   ASSERT_FALSE(enm.is_valid());
 }
 
@@ -243,7 +234,6 @@ TEST(ValidatedTypesJson, EnumAbsentValueTest) {
   Value* novalue = NULL;
   Enum<TestEnum> enm(novalue);
   ASSERT_FALSE(enm.is_initialized());
-  ASSERT_FALSE(enm.is_null());
   ASSERT_FALSE(enm.is_valid());
 }
 
@@ -321,7 +311,6 @@ TEST(ValidatedTypesJson, OptionalBoolFromAbsentValueTest) {
   Value* none = NULL;
   Optional< Boolean > optional_bool;
   *optional_bool = Boolean(none);
-  ASSERT_FALSE(optional_bool.is_null());
   ASSERT_FALSE(optional_bool.is_initialized());
   // It is ok for Optional value to be absent
   ASSERT_TRUE(optional_bool.is_valid());
@@ -330,7 +319,6 @@ TEST(ValidatedTypesJson, OptionalBoolFromAbsentValueTest) {
 TEST(ValidatedTypesJson, OptionalBoolFromNullValueTest) {
   Optional< Boolean > optional_bool;
   *optional_bool = Boolean(&Value::null);
-  ASSERT_TRUE(optional_bool.is_null());
   ASSERT_TRUE(optional_bool.is_initialized());
   // Optional values should not be absent
   ASSERT_FALSE(optional_bool.is_valid());
@@ -340,9 +328,32 @@ TEST(ValidatedTypesJson, MandatoryBoolFromAbsentValueTest) {
   Value* none = NULL;
   Mandatory< Boolean > mandatory_bool;
   mandatory_bool = Boolean(none);
-  ASSERT_FALSE(mandatory_bool.is_null());
   ASSERT_FALSE(mandatory_bool.is_initialized());
   ASSERT_FALSE(mandatory_bool.is_valid());
+}
+
+TEST(ValidatedTypesJson, NullableIntFromNullValueTest) {
+  Nullable< Integer<int8_t, 1, 15> > nullable_int(&Value::null);
+  ASSERT_TRUE(nullable_int.is_initialized());
+  ASSERT_TRUE(nullable_int.is_valid());
+  ASSERT_TRUE(nullable_int.is_null());
+}
+
+TEST(ValidatedTypesJson, NullableIntFromNonNullValueTest) {
+  Value json(3);
+  Nullable< Integer<int8_t, 1, 15> > nullable_int(&json);
+  ASSERT_TRUE(nullable_int.is_initialized());
+  ASSERT_TRUE(nullable_int.is_valid());
+  ASSERT_FALSE(nullable_int.is_null());
+  ASSERT_EQ(3, nullable_int);
+}
+
+TEST(ValidatedTypesJson, NullableIntFromAbsentValueTest) {
+  Value* noval = NULL;
+  Nullable< Integer<int8_t, 1, 15> > nullable_int(noval);
+  ASSERT_FALSE(nullable_int.is_initialized());
+  ASSERT_FALSE(nullable_int.is_valid());
+  ASSERT_FALSE(nullable_int.is_null());
 }
 
 TEST(ValidatedTypesJson, OptionalIntFromJsonTest) {

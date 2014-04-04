@@ -44,9 +44,6 @@ inline PrimitiveType::ValueState PrimitiveType::InitHelper(
     bool (Json::Value::*type_check)() const) {
   if (!value) {
     return kUninitialized;
-  }
-  if (value->isNull()) {
-    return kNull;
   } else if ((value->*type_check)()) {
     return kValid;
   } else {
@@ -85,6 +82,14 @@ void CompositeType::WriteJsonField(const char* field_name,
   if (field.is_initialized()) {
     (*json_value)[field_name] = field.ToJsonValue();
   }
+}
+
+// static
+template<class T>
+void CompositeType::WriteJsonField(const char* field_name,
+                    const Nullable<T>& field,
+                    Json::Value* json_value) {
+  (*json_value)[field_name] = field.ToJsonValue();
 }
 
 // static
@@ -274,6 +279,9 @@ Array<T, minsize, maxsize>::Array(const Json::Value* value)
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
+  if (is_null()) {
+    return Json::Value::null;
+  }
   Json::Value array(Json::arrayValue);
   array.resize(this->size());
   for (size_t i = 0; i != this->size(); ++i) {
@@ -317,11 +325,38 @@ Map<T, minsize, maxsize>::Map(const Json::Value* value)
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Map<T, minsize, maxsize>::ToJsonValue() const {
+  if (is_null()) {
+    return Json::Value::null;
+  }
   Json::Value map(Json::objectValue);
   for (typename MapType::const_iterator i = this->begin(); i != this->end(); ++i) {
     map[i->first] = i->second.ToJsonValue();
   }
   return map;
+}
+
+template<typename T>
+Nullable<T>::Nullable(const Json::Value* value)
+    : T(value),
+      marked_null_(value != NULL && value->isNull()){
+}
+
+template<typename T>
+Nullable<T>::Nullable(Json::Value* value)
+    : T(value),
+      marked_null_(value != NULL && value->isNull()){
+}
+
+template<typename T>
+template<typename U>
+Nullable<T>::Nullable(const Json::Value* value, const U& def_value)
+    : T(value, def_value),
+      marked_null_(value != NULL && value->isNull()) {
+}
+
+template<typename T>
+inline Json::Value Nullable<T>::ToJsonValue() const {
+  return marked_null_ ? Json::Value::null : T::ToJsonValue();
 }
 
 template<typename T>

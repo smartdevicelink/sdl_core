@@ -76,14 +76,6 @@ inline bool PrimitiveType::is_valid() const {
   return value_state_ == kValid;
 }
 
-inline bool PrimitiveType::is_null() const {
-  return value_state_ == kNull;
-}
-
-inline void PrimitiveType::set_to_null() {
-  value_state_ = kNull;
-}
-
 /*
  * Boolean class
  */
@@ -361,6 +353,48 @@ void Map<T, minsize, maxsize>::set_to_null() {
 }
 
 /*
+ * Nullable class
+ */
+template<typename T>
+Nullable<T>::Nullable()
+    : marked_null_(false) {
+}
+
+template<typename T>
+template<typename U>
+Nullable<T>::Nullable(const U& value)
+    : T(value),
+      marked_null_(false) {
+}
+
+template<typename T>
+template<typename U>
+Nullable<T>& Nullable<T>::operator=(const U& new_val) {
+  this->T::operator=(new_val);
+  return *this;
+}
+
+template<typename T>
+bool Nullable<T>::is_valid() const {
+  return is_null() || T::is_valid();
+}
+
+template<typename T>
+bool Nullable<T>::is_initialized() const {
+  return is_null() || T::is_initialized();
+}
+
+template<typename T>
+bool Nullable<T>::is_null() const {
+  return marked_null_;
+}
+
+template<typename T>
+void Nullable<T>::set_to_null() {
+  marked_null_ = true;
+}
+
+/*
  * Mandatory class
  */
 template<typename T>
@@ -431,11 +465,6 @@ bool Optional<T>::is_valid() const {
 template<typename T>
 bool Optional<T>::is_initialized() const {
   return value_.is_initialized();
-}
-
-template<typename T>
-bool Optional<T>::is_null() const {
-  return value_.is_null();
 }
 
 }  // namespace rpc

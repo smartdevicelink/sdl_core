@@ -80,17 +80,18 @@ bool TypeRegistry::init(const pugi::xml_node& xml) {
 bool TypeRegistry::GetCompositeType(const pugi::xml_node& params, const Type** type) {
   bool is_array = params.attribute("array").as_bool(false);
   bool is_map = params.attribute("map").as_bool(false);
+  bool is_nullable = params.attribute("nullable").as_bool(false);
   if (is_array && is_map) {
     strmfmt(std::cerr, "Entity {0} has both map and array attributes specified",
             params.attribute("name").as_string(""));
     return false;
   }
   if (is_map) {
-    return GetContainer(params, type, false);
+    return GetContainer(params, type, false, is_nullable);
   } else if (is_array) {
-    return GetContainer(params, type, true);
+    return GetContainer(params, type, true, is_nullable);
   } else {
-    return GetNonArray(params, type);
+    return GetNonArray(params, type, is_nullable);
   }
 }
 
@@ -225,9 +226,11 @@ bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
 }
 
 bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
-                                bool get_array) {
+                                bool get_array, bool container_nullable) {
   const Type* element_type = NULL;
-  if (GetNonArray(params, &element_type)) {
+  bool null_values_allowed =
+      params.attribute("null_values_allowed").as_bool(false);
+  if (GetNonArray(params, &element_type, null_values_allowed)) {
     assert(element_type);
     std::string minsize_str = params.attribute("minsize").as_string("0");
     std::string maxsize_str = params.attribute("maxsize").as_string("0");
@@ -241,7 +244,11 @@ bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
         *type = &*maps_.insert(Map(element_type, Map::Range(minsize, maxsize)))
             .first;
       }
-      return true;
+      if (container_nullable) {
+        return GetNullable(*type, type);
+      } else {
+        return true;
+      }
     } else {
       std::cerr << "Incorrect array size range: " << minsize_str << ", "
                 << maxsize_str << std::endl;
@@ -251,26 +258,40 @@ bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
 }
 
 bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
-                               const Type** type) {
+                               const Type** type, bool nullable) {
+  bool type_found = false;
   pugi::xml_attribute type_name = params.attribute("type");
   if (type_name) {
     std::string type_name_str = type_name.value();
     BuiltinTypeRegistry::BuiltInType builtin_type = builtin_type_registry_
         ->BuiltInTypeByName(type_name_str);
     if (BuiltinTypeRegistry::kNotABuiltInType != builtin_type) {
-      return builtin_type_registry_->GetType(builtin_type, params, type);
+      type_found = builtin_type_registry_->GetType(builtin_type, params, type);
     } else if (IsExternalType(type_name_str)) {
-      return GetExternalType(type_name_str, type);
+      type_found = GetExternalType(type_name_str, type);
     } else if (*type = GetType(type_name_str)) {
-      return true;
+      type_found = true;
     } else {
       std::cerr << "Unregistered type: " << type_name_str << std::endl;
-      return false;
+      type_found = false;
     }
   } else {
     std::cerr << "Absent type name" << std::endl;
-    return false;
+    type_found = false;
   }
+
+  if (type_found && nullable) {
+    type_found = GetNullable(*type, type);
+  }
+  return type_found;
+}
+
+bool TypeRegistry::GetNullable(const Type* original_type,
+                               const Type** type) {
+  std::set<NullableType>::const_iterator inserted =
+      nullables_.insert(NullableType(original_type)).first;
+  *type = &*inserted;
+  return true;
 }
 
 bool TypeRegistry::GetEnum(const std::string& name, const Type** type) const {

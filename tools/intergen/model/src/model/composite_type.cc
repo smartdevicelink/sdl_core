@@ -313,6 +313,31 @@ Struct::Field::Field(const Type* type, const std::string& name, bool mandatory,
       platform_(platform){
 }
 
+NullableType::NullableType(const Type* type)
+    : type_(type) {
+}
+
+const Type* NullableType::type() const {
+  return type_;
+}
+
+bool NullableType::operator<(const NullableType& that) const {
+  // Simple pointer comparison should be enough here
+  if (type_ != that.type_) {
+    return type_ < that.type_;
+  }
+}
+
+TypeCodeGenerator* NullableType::Apply(
+    TypeCodeGenerator* code_generator) const {
+  code_generator->GenerateCodeForNullable(this);
+  return code_generator;
+}
+
+const ConstantsCreator* NullableType::SupportsConstants() const {
+  return type_->SupportsConstants();
+}
+
 Typedef::Typedef(const Interface* interface,
                  const std::string& name,
                  const Type* type,
@@ -327,7 +352,6 @@ Typedef::Typedef(const Interface* interface,
 const Description& Typedef::description() const {
   return description_;
 }
-
 
 const Interface& Typedef::interface() const {
   return *interface_;

@@ -119,12 +119,114 @@ TEST_F(GeneratedInterfaceTests, TestHandlerCalled) {
 TEST_F(GeneratedInterfaceTests, TestFactory) {
   testing::StrictMock<TestRequestHandlerMock> mock;
   Json::Value json_value;
-  request::Request* req = request::NewFromJson(json_value, kAddSubMenuID);
+  request::Request* req = request::NewFromJson(&json_value, kAddSubMenuID);
   request::AddSubMenu& add_sub_menu_ref =
       static_cast<request::AddSubMenu&>(*req);
   EXPECT_CALL(mock, HandleAddSubMenu(testing::Ref(add_sub_menu_ref)))
       .Times(1);
   req->HandleWith(&mock);
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullableStructMember) {
+  TestStructWithNullableParam with_nullable;
+  ASSERT_FALSE(with_nullable.is_initialized());
+  ASSERT_FALSE(with_nullable.is_valid());
+  ASSERT_FALSE(with_nullable.nullableInt.is_valid());
+  ASSERT_FALSE(with_nullable.nullableInt.is_null());
+  with_nullable.nullableInt.set_to_null();
+  ASSERT_TRUE(with_nullable.is_valid());
+  ASSERT_TRUE(with_nullable.is_initialized());
+  ASSERT_TRUE(with_nullable.nullableInt.is_null());
+  ASSERT_TRUE(with_nullable.nullableInt.is_valid());
+  ASSERT_TRUE(with_nullable.nullableInt.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullableStructMemberNullInitializationFromJson) {
+  const char* input_json =
+      "{\"nullableInt\":null}\n";
+  Value json_value = JsonValue(input_json);
+  TestStructWithNullableParam with_nullable(&json_value);
+  ASSERT_TRUE(with_nullable.is_initialized());
+  ASSERT_TRUE(with_nullable.is_valid());
+  ASSERT_TRUE(with_nullable.nullableInt.is_null());
+  std::string result = writer.write(with_nullable.ToJsonValue());
+  ASSERT_EQ(input_json, result);
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullableStructMemberInitializationFromJson) {
+  const char* input_json =
+      "{\"nullableInt\":3}\n";
+  Value json_value = JsonValue(input_json);
+  TestStructWithNullableParam with_nullable(&json_value);
+  ASSERT_TRUE(with_nullable.is_initialized());
+  ASSERT_TRUE(with_nullable.is_valid());
+  ASSERT_FALSE(with_nullable.nullableInt.is_null());
+  ASSERT_EQ(3, with_nullable.nullableInt);
+  std::string result = writer.write(with_nullable.ToJsonValue());
+  ASSERT_EQ(input_json, result);
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullableEnumInitialization) {
+  TestStructWithNullableStructParam strct_with_nullable;
+  strct_with_nullable.nullableEnum = IT_DYNAMIC;
+  strct_with_nullable.nonNullableEnum = IT_STATIC;
+  ASSERT_TRUE(strct_with_nullable.is_initialized());
+  ASSERT_TRUE(strct_with_nullable.is_valid());
+  std::string result = writer.write(strct_with_nullable.ToJsonValue());
+  const char* awaited_json1 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":\"DYNAMIC\"}\n";
+  ASSERT_EQ(awaited_json1, result);
+
+  strct_with_nullable.nullableEnum.set_to_null();
+  ASSERT_TRUE(strct_with_nullable.is_initialized());
+  ASSERT_TRUE(strct_with_nullable.is_valid());
+  result = writer.write(strct_with_nullable.ToJsonValue());
+  const char* awaited_json2 = "{\"nonNullableEnum\":\"STATIC\",\"nullableEnum\":null}\n";
+  ASSERT_EQ(awaited_json2, result);
+}
+
+TEST_F(GeneratedInterfaceTests, TestStructWithNullableTypedef) {
+  StructWithNullableTypedef swntd;
+  ASSERT_FALSE(swntd.is_initialized());
+  ASSERT_FALSE(swntd.is_valid());
+  swntd.nullableTdResult = R_SUCCESS;
+  ASSERT_TRUE(swntd.is_initialized());
+  ASSERT_TRUE(swntd.is_valid());
+  ASSERT_EQ(R_SUCCESS, swntd.nullableTdResult);
+
+  swntd.nullableTdResult.set_to_null();
+  const char* awaited_json = "{\"nullableTdResult\":null}\n";
+  std::string result = writer.write(swntd.ToJsonValue());
+  ASSERT_EQ(awaited_json, result);
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullingStructWithNullableMapOfNullableInts) {
+  StructWithNullableMapOfNullableInts nmoni;
+  ASSERT_FALSE(nmoni.is_initialized());
+  ASSERT_FALSE(nmoni.is_valid());
+  ASSERT_FALSE(nmoni.nullableMap.is_null());
+  nmoni.nullableMap.set_to_null();
+  ASSERT_TRUE(nmoni.is_initialized());
+  ASSERT_TRUE(nmoni.is_valid());
+  ASSERT_TRUE(nmoni.nullableMap.is_null());
+  const char* awaited_json = "{\"nullableMap\":null}\n";
+  std::string result = writer.write(nmoni.ToJsonValue());
+  ASSERT_EQ(awaited_json, result);
+}
+
+TEST_F(GeneratedInterfaceTests, TestNullingValueInStructWithNullableMapOfNullableInts) {
+  StructWithNullableMapOfNullableInts nmoni;
+  ASSERT_FALSE(nmoni.is_initialized());
+  ASSERT_FALSE(nmoni.is_valid());
+  ASSERT_FALSE(nmoni.nullableMap.is_null());
+  nmoni.nullableMap["Hello"].set_to_null();
+
+  ASSERT_TRUE(nmoni.is_initialized());
+  ASSERT_TRUE(nmoni.is_valid());
+  ASSERT_FALSE(nmoni.nullableMap.is_null());
+  ASSERT_TRUE(nmoni.nullableMap["Hello"].is_null());
+  const char* awaited_json = "{\"nullableMap\":{\"Hello\":null}}\n";
+  std::string result = writer.write(nmoni.ToJsonValue());
+  ASSERT_EQ(awaited_json, result);
 }
 
 }  // namespace test

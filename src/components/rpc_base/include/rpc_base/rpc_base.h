@@ -59,6 +59,7 @@ template<size_t minlen, size_t maxlen> class String;
 template<typename T> class Enum;
 template<typename T, size_t minsize, size_t maxsize> class Array;
 template<typename T, size_t minsize, size_t maxsize> class Map;
+template<typename T> class Nullable;
 template<typename T> class Mandatory;
 template<typename T> class Optional;
 
@@ -84,12 +85,9 @@ class PrimitiveType {
  public:
   bool is_initialized() const;
   bool is_valid() const;
-  bool is_null() const;
-  void set_to_null();
  protected:
   enum ValueState {
     kUninitialized,
-    kNull,
     kInvalid,
     kValid
   };
@@ -114,6 +112,10 @@ class CompositeType {
   template<class T, size_t minsize, size_t maxsize>
   static void WriteJsonField(const char* field_name,
                              const Map<T, minsize, maxsize>& field,
+                             Json::Value* json_value);
+  template<class T>
+  static void WriteJsonField(const char* field_name,
+                             const Nullable<T>& field,
                              Json::Value* json_value);
   template<class T>
   static void WriteJsonField(const char* field_name, const Optional<T>& field,
@@ -291,6 +293,30 @@ class Map : public std::map<std::string, T> {
 };
 
 template<typename T>
+class Nullable : public T {
+ public:
+  // Methods
+  Nullable();
+  // Need const and non-const versions to beat all-type accepting constructor
+  explicit Nullable(Json::Value* value);
+  explicit Nullable(const Json::Value* value);
+  template<typename U>
+  explicit Nullable(const U& value);
+  template<typename U>
+  Nullable(const Json::Value* value, const U& def_value);
+  template<typename U>
+  Nullable& operator=(const U& new_val);
+  Json::Value ToJsonValue() const;
+
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool is_null() const;
+  void set_to_null();
+ private:
+  bool marked_null_;
+};
+
+template<typename T>
 class Mandatory : public T {
  public:
   // Methods
@@ -330,7 +356,6 @@ class Optional {
 
   bool is_valid() const;
   bool is_initialized() const;
-  bool is_null() const;
  private:
   T value_;
 };
