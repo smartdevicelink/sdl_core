@@ -254,6 +254,15 @@ class MessageHelper {
         const std::vector<policy::UserFriendlyMessage>& msg,
         uint32_t correlation_id);
 
+    /**
+     * @brief Send GetListOfPermissions response to HMI
+     * @param permissions Array of groups permissions
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetListOfPermissionsResponse(
+        std::vector<policy::FunctionalGroupPermission>& permissions,
+        uint32_t correlation_id);
+
     /*
      * @brief Sends notification to HMI to start video streaming
      *

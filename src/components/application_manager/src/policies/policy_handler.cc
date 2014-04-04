@@ -252,6 +252,41 @@ void PolicyHandler::OnGetUserFriendlyMessage(
         result, correlation_id);
 }
 
+void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
+                                           const uint32_t correlation_id) {
+  LOG4CXX_INFO(logger_, "OnGetListOfPermissions");
+  // Get policy_app_id
+  std::string policy_app_id;
+  const ApplicationList app_list =
+    application_manager::ApplicationManagerImpl::instance()->applications();
+  ApplicationList::const_iterator it = app_list.begin();
+  ApplicationList::const_iterator it_end = app_list.end();
+  for (; it != it_end; ++it) {
+    if ((*(*it)).app_id() == connection_key) {
+      policy_app_id = (*(*it)).mobile_app_id()->asString();
+      break;
+    }
+  }
+
+  DeviceParams device_params;
+  char buffer[16];
+  snprintf(buffer, 16, "%d", connection_key);
+  application_manager::MessageHelper::GetDeviceInfoForApp(std::string(buffer),
+                                                          &device_params);
+  std::vector<FunctionalGroupPermission> group_permissions;
+  if (device_params.device_mac_address.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device, which hosts application.");
+  } else if (policy_app_id.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
+  } else {
+   policy_manager_->GetUserPermissionsForApp(device_params.device_mac_address,
+                                             policy_app_id, group_permissions);
+  }
+
+  application_manager::MessageHelper::SendGetListOfPermissionsResponse(
+        group_permissions, correlation_id);
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   const ApplicationList app_list =

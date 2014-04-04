@@ -31,12 +31,14 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_request.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(const MessageSharedPtr& message)
+SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
+    const MessageSharedPtr& message)
     : RequestFromHMI(message) {
 }
 
@@ -45,6 +47,9 @@ SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {
 
 void SDLGetListOfPermissionsRequest::Run() {
   LOG4CXX_INFO(logger_, "SDLGetListOfPermissionsRequest::Run");
+  policy::PolicyHandler::instance()->OnGetListOfPermissions(
+      (*message_)[strings::msg_params][strings::app_id].asUInt(),
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

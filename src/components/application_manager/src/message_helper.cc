@@ -1385,7 +1385,49 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
     }
   }
 
-  PrintSmartObject(*message);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
+void MessageHelper::SendGetListOfPermissionsResponse(
+    std::vector<policy::FunctionalGroupPermission>& permissions,
+    uint32_t correlation_id) {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::SDL_GetListOfPermissions;
+  (*message)[strings::params][strings::message_type] =
+    MessageType::kResponse;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::params]["code"] = 0;
+
+  const std::string allowed_functions = "allowedFunctions";
+  (*message)[strings::msg_params][allowed_functions] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  smart_objects::SmartObject& allowed_functions_array =
+      (*message)[strings::msg_params][allowed_functions];
+
+  std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+      permissions.begin();
+  std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
+      permissions.end();
+  for (uint32_t index = 0; it != it_end; ++it, ++index) {
+    allowed_functions_array[index] = smart_objects::SmartObject(
+                                       smart_objects::SmartType_Map);
+
+    smart_objects::SmartObject& item = allowed_functions_array[index];
+    item[strings::name] = (*it).group_name;
+    item[strings::id] = (*it).group_id;
+    policy::PermissionState permission_state = (*it).state;
+    // If state undefined, 'allowed' parameter should be absent
+    if (policy::kUndefined != permission_state) {
+      item["allowed"] = policy::kAllowed == permission_state;
+    }
+  }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }

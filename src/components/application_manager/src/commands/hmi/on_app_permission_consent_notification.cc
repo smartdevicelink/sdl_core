@@ -84,7 +84,13 @@ void OnAppPermissionConsent::Run() {
     policy::FunctionalGroupPermission permissions;
     permissions.group_id = (*it)["id"].asInt();
     permissions.group_name = (*it)["name"].asString();
-    permissions.is_allowed = (*it)["allowed"].asBool();
+    if ((*it).keyExists("allowed")) {
+      permissions.state = (*it)["allowed"].asBool() ? policy::kAllowed :
+                                                      policy::kDisallowed;
+    } else {
+      permissions.state = policy::kUndefined;
+    }
+
     permission_consent.group_permissions.push_back(permissions);
   }
 

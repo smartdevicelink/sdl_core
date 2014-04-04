@@ -150,6 +150,15 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
                                 const std::string& language,
                                 uint32_t correlation_id);
 
+  /**
+   * @brief Get list of permissions for application/device binded to
+   * connection key from request and send response
+   * @param connection_key Connection key
+   * @param correlation_id Correlation id from request
+   */
+  void OnGetListOfPermissions(const uint32_t connection_key,
+                              const uint32_t correlation_id);
+
  protected:
   /**
    * Starts next retry exchange policy table
