@@ -316,6 +316,8 @@ const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
 const char result[] = "result";
+const char statistic_type[] = "statisticType";
+const char error[] = "error";
 
 }  // namespace hmi_notification
 

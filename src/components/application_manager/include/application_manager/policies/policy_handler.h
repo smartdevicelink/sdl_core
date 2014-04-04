@@ -159,6 +159,18 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnGetListOfPermissions(const uint32_t connection_key,
                               const uint32_t correlation_id);
 
+  /**
+   * Adds statistics info
+   * @param type type of info
+   */
+  void AddStatisticsInfo(int type);
+
+  /**
+   * Handles system error
+   * @param code code of error
+   */
+  void OnSystemError(int code);
+
  protected:
   /**
    * Starts next retry exchange policy table
@@ -169,7 +181,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * Initializes PT exchange at odometer if need
    * @param kilometers value from odometer in kilometers
    */
-  void PTExchangeAtOdometer(int kilometers);  
+  void PTExchangeAtOdometer(int kilometers);
 
  private:
   /**

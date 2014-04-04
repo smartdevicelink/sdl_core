@@ -1146,10 +1146,6 @@ void ApplicationManagerImpl::CreatePoliciesManager() {
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();
-    // TODO(KKolodiy) in fact counter of starts
-    usage_statistics::GlobalCounter count_of_sync_reboots(
-        policy_manager_, usage_statistics::SYNC_REBOOTS);
-    ++count_of_sync_reboots;
   }
 }
 
