@@ -86,6 +86,15 @@ class TEnumSchemaItem : public ISchemaItem {
   virtual bool setDefaultValue(SmartObject& Object);
 
   /**
+   * @brief Check if object has default value.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  virtual bool hasDefaultValue(SmartObject& Object);
+
+  /**
    * @brief Apply schema.
    *
    * This implementation checks if enumeration is represented as string
@@ -207,6 +216,19 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
 // If so, make const or use a pointer.
 template<typename EnumType>
 bool TEnumSchemaItem<EnumType>::setDefaultValue(SmartObject& Object) {
+  bool result = false;
+  EnumType value;
+
+  if (true == mDefaultValue.getValue(value)) {
+    Object = static_cast<int32_t>(value);
+    result = true;
+  }
+
+  return result;
+}
+
+template<typename EnumType>
+bool TEnumSchemaItem<EnumType>::hasDefaultValue(SmartObject& Object) {
   bool result = false;
   EnumType value;
 

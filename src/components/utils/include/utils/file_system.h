@@ -39,6 +39,7 @@
 #include <vector>
 #include <iostream>
 #include "utils/logger.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace file_system {
 
@@ -208,6 +209,14 @@ bool ReadFile(const std::string& name, std::string& result);
   * @return returns converted path.
 */
 const std::string ConvertPathForURL(const std::string& path);
+
+/**
+  * @brief Create empty file
+  *
+  * @param name path to file
+  * @return if result success mobile_apis::Result::SUCCESS.
+*/
+mobile_apis::Result::eType CreateFile(const std::string& path);
 
 }  // namespace file_system
 

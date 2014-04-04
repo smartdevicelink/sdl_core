@@ -239,6 +239,11 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.id,
                         request.method);
                 }
+                if (request.method == "BasicCommunication.SystemRequest") {
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
                     if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {

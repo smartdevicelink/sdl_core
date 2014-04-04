@@ -4,6 +4,8 @@
     <!-- Version 12 is minimum to support the USB Accessory mode -->
     <uses-sdk android:minSdkVersion="12"/>
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <!-- Required to use the USB Accessory mode -->
     <uses-feature android:name="android.hardware.usb.accessory"/>
 

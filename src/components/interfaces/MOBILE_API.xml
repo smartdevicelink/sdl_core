@@ -2064,7 +2064,7 @@
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
     <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+    <element name="PROPRIETARY" />       
   </enum>
 
   <enum name="AppHMIType">
@@ -4536,6 +4536,9 @@
      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
      <param name="requestType" type="RequestType" mandatory="true">
         <description>The type of system request.</description>
+     </param>
+     <param name="fileName" type="String" maxlength="255" mandatory="false">
+        <description>The name of file.</description>
      </param>
   </function>
 

@@ -421,3 +421,13 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
 
   return converted_path;
 }
+
+mobile_apis::Result::eType file_system::CreateFile(const std::string& path) {
+  std::ofstream file(path);
+  if (!(file.is_open())) {
+    return mobile_apis::Result::INVALID_ENUM;
+  } else {
+    file.close();
+    return mobile_apis::Result::SUCCESS;
+  }
+}

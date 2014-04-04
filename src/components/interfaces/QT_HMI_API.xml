@@ -1789,6 +1789,20 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
+    <function name="SystemRequest" messagetype="request">
+      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+        <description>The type of system request.</description>
+      </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>The path to file.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param> 
+     </function>
+     <function name="SystemRequest" messagetype="response">
+     </function>
     <function name="OnFileRemoved" messagetype="notification">
       <description>Notifies HMI in case some application file has been removed</description>
       <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">

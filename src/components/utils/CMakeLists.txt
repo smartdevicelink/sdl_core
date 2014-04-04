@@ -3,6 +3,7 @@ include_directories (
   ../config_profile/include
   ../media_manager/include/
   ../protocol_handler/include/
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES
