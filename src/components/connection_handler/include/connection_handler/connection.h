@@ -81,7 +81,8 @@ struct Service {
     : service_type(protocol_handler::kInvalidServiceType),
       is_protected_(false) {
   }
-  Service(protocol_handler::ServiceType service_type, const bool is_protected = false)
+  Service(protocol_handler::ServiceType service_type,
+          const bool is_protected = false)
     : service_type(service_type), is_protected_(is_protected) {
   }
   bool operator==(const protocol_handler::ServiceType service_type) const {
@@ -111,7 +112,7 @@ struct Session {
   Session()
     : service_list(), ssl_context(NULL) {
   }
-  Session(const ServiceList& services)
+  explicit Session(const ServiceList& services)
     : service_list(services),
       ssl_context(NULL) {
   }
@@ -233,8 +234,6 @@ class Connection {
   void KeepAlive();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(Connection);
-
   /**
    * \brief Current connection handler.
    */
@@ -267,7 +266,8 @@ class Connection {
    */
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
+  DISALLOW_COPY_AND_ASSIGN(Connection);
 };
 
 }/* namespace connection_handler */

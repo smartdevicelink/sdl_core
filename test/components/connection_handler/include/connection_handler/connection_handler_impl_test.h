@@ -271,7 +271,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
 
   //Protection steal FALSE because of APPlink Protocol implementation
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, false);
-  // TODO (EZamakhov) add test - protect kRPC
+  // TODO(EZamakhov)add test - protect kRPC
 }
 TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprotect) {
   AddTestDeviceConnection();
@@ -547,11 +547,11 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteBulk) {
   EXPECT_EQ(session_id, start_session_id);
   CheckService(uid, start_session_id, protocol_handler::kRpc, &mock_ssl_context, true);
 
-  //kRpc is protecte
+  //kRpc is protected
   EXPECT_EQ (connection_handler_->GetSSLContext(
                connection_key, protocol_handler::kRpc),
              &mock_ssl_context);
-  //kBulk is protecte
+  //kBulk is protected
   EXPECT_EQ (connection_handler_->GetSSLContext(
                connection_key, protocol_handler::kBulk),
              &mock_ssl_context);
@@ -559,4 +559,4 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteBulk) {
 } // connection_handle_test
 } // namespace components
 } // namespace test
-#endif // CONNECTION_HANDLER_IMPL_TEST_H
+#endif  // CONNECTION_HANDLER_IMPL_TEST_H

@@ -57,4 +57,4 @@ std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
 } // namespace protocol_handler
 
 
-#endif // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_

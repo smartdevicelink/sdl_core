@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +92,7 @@ RawMessagePtr ProtocolPacket::serializePacket() {
   const uint8_t firstByte =
       ((packet_header_.version << 4) & 0xF0) |
       ((protectionF << 3) & 0x08) |
-      ( packet_header_.frameType & 0x07);
+      (packet_header_.frameType & 0x07);
 
   uint8_t offset = 0;
   uint8_t packet[MAXIMUM_FRAME_DATA_SIZE];
@@ -117,12 +118,12 @@ RawMessagePtr ProtocolPacket::serializePacket() {
   size_t total_packet_size = offset;
   if (packet_data_.data) {
     memcpy(packet + offset, packet_data_.data, packet_data_.totalDataBytes);
-    total_packet_size += packet_data_.totalDataBytes ;
+    total_packet_size += packet_data_.totalDataBytes;
   }
 
   const RawMessagePtr out_message(
         new RawMessage(
-          connection_id(),packet_header_.version,
+          connection_id(), packet_header_.version,
           packet, total_packet_size, packet_header_.serviceType) );
 
   return out_message;
@@ -267,7 +268,7 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
 }
 
 void ProtocolPacket::set_data(
-    const uint8_t * const new_data, const size_t new_data_size){
+    const uint8_t * const new_data, const size_t new_data_size) {
   if (new_data_size && new_data) {
     packet_header_.dataSize = packet_data_.totalDataBytes = new_data_size;
     delete[] packet_data_.data;

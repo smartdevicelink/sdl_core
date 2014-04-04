@@ -36,15 +36,16 @@
 #include "utils/byte_order.h"
 #include "json/json.h"
 
-using namespace security_manager;
+namespace security_manager {
+
 static const char* err_id ="id";
 static const char* err_text ="text";
 
-// TODO (EZamakhov) : add section to log4cxx.properties file
+// TODO(EZamakhov): add section to log4cxx.properties file
 log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("SecurityManager"));
 
-SecurityManager::SecurityManager() :
+SecurityManager::SecurityManager():
   security_messages_("SecurityManager::security_messages_", this),
   session_observer_(NULL), crypto_manager_(NULL), protocol_handler_(NULL) {
 }
@@ -52,7 +53,7 @@ SecurityManager::SecurityManager() :
 void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "OnMessageReceived");
-  if(message->service_type() != protocol_handler::kControl) {
+  if (message->service_type() != protocol_handler::kControl) {
     LOG4CXX_INFO(logger_, "Skipping message; not the under SM handling");
     return;
   }
@@ -60,8 +61,8 @@ void SecurityManager::OnMessageReceived(
   SecurityMessage securityMessagePtr(new SecurityQuery());
   const bool result = securityMessagePtr->ParseQuery(
         message->data(), message->data_size());
-  if(!result) {
-    //result will be false only if data less then query header
+  if (!result) {
+    // result will be false only if data less then query header
     const std::string error_text("Incorrect message received");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(message->connection_key(),
@@ -107,7 +108,7 @@ void SecurityManager::set_crypto_manager(CryptoManager *crypto_manager) {
 void SecurityManager::Handle(const SecurityMessage &message) {
   DCHECK(message);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
-  if(!crypto_manager_)  {
+  if (!crypto_manager_)  {
     const std::string error_text("Invalid (NULL) CryptoManager.");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(message->get_connection_key(),
@@ -116,16 +117,17 @@ void SecurityManager::Handle(const SecurityMessage &message) {
   }
   switch (message->get_header().query_id) {
     case SecurityQuery::SEND_HANDSHAKE_DATA:
-      if(!ProccessHandshakeData(message)) {
+      if (!ProccessHandshakeData(message)) {
         LOG4CXX_ERROR(logger_, "Proccess HandshakeData failed");
       }
       break;
     case SecurityQuery::SEND_INTERNAL_ERROR:
-      if(!ProccessInternalError(message)) {
+      if (!ProccessInternalError(message)) {
         LOG4CXX_ERROR(logger_, "Processing income InternalError failed");
       }
       break;
-    default: { // SecurityQuery::InvalidQuery
+    default: {
+      // SecurityQuery::InvalidQuery
       const std::string error_text("Unknown query identifier.");
       LOG4CXX_ERROR(logger_, error_text);
       SendInternalError(message->get_connection_key(),
@@ -141,7 +143,7 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
 
-  if(session_observer_->GetSSLContext(connection_key,
+  if (session_observer_->GetSSLContext(connection_key,
                                       protocol_handler::kControl)) {
     const std::string error_text("Connection is already protected");
     LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
@@ -152,7 +154,7 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   }
 
   security_manager::SSLContext * newSSLContext = crypto_manager_->CreateSSLContext();
-  if(!newSSLContext) {
+  if (!newSSLContext) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);
     // Generate response query and post to security_messages_
@@ -162,8 +164,8 @@ bool SecurityManager::ProtectConnection(const uint32_t& connection_key) {
   }
 
   const int result = session_observer_->SetSSLContext(connection_key, newSSLContext);
-  if(SecurityQuery::ERROR_SUCCESS != result) {
-    //delete SSLContex on any error
+  if (SecurityQuery::ERROR_SUCCESS != result) {
+    // delete SSLContex on any error
     crypto_manager_->ReleaseSSLContext(newSSLContext);
     SendInternalError(connection_key, result, "");
     NotifyListenersOnHandshakeDone(connection_key, false);
@@ -181,7 +183,7 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
   security_manager::SSLContext* ssl_context =
       session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
-  if(!ssl_context){
+  if (!ssl_context) {
     const std::string error_text("StartHandshake failed, connection is not protected");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL, error_text);
@@ -217,12 +219,11 @@ void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
 void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                                      const bool success) {
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
-  while (it != listeners_.end() ) {
-    if((*it)->OnHandshakeDone(connection_key, success)) {
+  while (it != listeners_.end()) {
+    if ((*it)->OnHandshakeDone(connection_key, success)) {
       // On get notification remove listener
       it = listeners_.erase(it);
-    }
-    else {
+    } else {
       ++it;
       }
   }
@@ -238,7 +239,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_DEBUG(logger_, "Received " << inMessage->get_data_size()
                 << " bytes handshake data ")
 
-  if(!inMessage->get_data_size()) {
+  if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key,
@@ -249,7 +250,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   SSLContext * sslContext =
       session_observer_->GetSSLContext(connection_key,
                                        protocol_handler::kControl);
-  if(!sslContext) {
+  if (!sslContext) {
     const std::string error_text("SendHandshakeData: No ssl context.");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key,
@@ -260,8 +261,8 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
   size_t out_data_size;
   const uint8_t * out_data;
   const SSLContext::HandshakeResult handshake_result =
-      sslContext->DoHandshakeStep( inMessage->get_data(), inMessage->get_data_size(),
-                                   &out_data, &out_data_size);
+      sslContext->DoHandshakeStep(inMessage->get_data(), inMessage->get_data_size(),
+                                  &out_data, &out_data_size);
   if (handshake_result == SSLContext::Handshake_Result_AbnormalFail) {
     // Do not return handshake data on AbnormalFail or null returned values
     const std::string erorr_text(LastError());
@@ -272,16 +273,15 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     // no handshake data to send
     return false;
   }
-  if(sslContext->IsInitCompleted()) {
+  const bool is_init_complete = sslContext->IsInitCompleted();
+  if (is_init_complete) {
     LOG4CXX_DEBUG(logger_, "SSL initialization finished success.");
-    NotifyListenersOnHandshakeDone(connection_key, true);
-  }
-  else if (handshake_result == SSLContext::Handshake_Result_Fail) {
+  } else if (handshake_result == SSLContext::Handshake_Result_Fail) {
     LOG4CXX_WARN(logger_, "SSL initialization finished with fail.");
-    NotifyListenersOnHandshakeDone(connection_key, false);
   }
+  NotifyListenersOnHandshakeDone(connection_key, is_init_complete);
 
-  if(out_data && out_data_size) {
+  if (out_data && out_data_size) {
     // answer with the same seqNumber as income message
     SendHandshakeBinData(connection_key, out_data, out_data_size,
                          seqNumber);
@@ -290,21 +290,22 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
 }
 
 bool SecurityManager::ProccessInternalError(const SecurityMessage &inMessage) {
-  LOG4CXX_INFO(logger_,"Recieved InternalError with Json message"
+  LOG4CXX_INFO(logger_, "Recieved InternalError with Json message"
                 << inMessage->get_json_message());
   Json::Value root;
   Json::Reader reader;
   const bool parsingSuccessful =
-      reader.parse(inMessage->get_json_message(), root );
-  if(!parsingSuccessful)
+      reader.parse(inMessage->get_json_message(), root);
+  if (!parsingSuccessful)
     return false;
-  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[err_id].asString() << ", text: " << root[err_text].asString());
+  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[err_id].asString()
+                << ", text: " << root[err_text].asString());
   return true;
 }
 
 void SecurityManager::SendHandshakeBinData(
     const uint32_t connection_key, const uint8_t * const data,
-    const size_t data_size, const uint32_t seq_number){
+    const size_t data_size, const uint32_t seq_number) {
   const SecurityQuery::QueryHeader header(
         SecurityQuery::NOTIFICATION,
         SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
@@ -343,7 +344,7 @@ void SecurityManager::SendData(
   const size_t header_size = sizeof(header);
   std::vector<uint8_t> data_sending(header_size + data_size);
   memcpy(&data_sending[0], &header, header_size);
-  //TODO (EZamakhov): Fix invalid read (by Valgrind)
+  // TODO(EZamakhov): Fix invalid read (by Valgrind)
   memcpy(&data_sending[header_size], data, data_size);
 
   SendBinaryData(connection_key, &data_sending[0], data_sending.size());
@@ -362,7 +363,7 @@ void SecurityManager::SendBinaryData(const uint32_t connection_key,
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
 }
 
-
 const char *SecurityManager::ConfigSection() {
   return "Security Manager";
 }
+}  // namespace security_manager

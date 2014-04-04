@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SECURE_MANAGER_H
-#define SECURE_MANAGER_H
+#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_H_
+#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_H_
 
 #include <list>
+#include <string>
 
 #include "utils/logger.h"
 
@@ -41,7 +42,6 @@
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/session_observer.h"
 
-#include "utils/message_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
 
@@ -69,161 +69,162 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
  * \brief SecurityManager class implements protocol_handler::ProtocolObserver
  * for handling Security queries from mobiel side
  */
-class SecurityManager :
+  class SecurityManager :
     public protocol_handler::ProtocolObserver,
     public SecurityMessageLoop::Handler {
-public:
-  /**
-   * \brief Constructor
-   */
-  SecurityManager();
-  /**
-   * \brief Add received from Mobile Application message
-   * Overriden ProtocolObserver::OnMessageReceived method
-   * \param message Message with supporting params received
-   */
-  void OnMessageReceived(const protocol_handler::RawMessagePtr message) OVERRIDE;
-  /**
-   * \brief Post message to Mobile Application
-   * Empty* overriden ProtocolObserver::OnMessageReceived method
-   * \param message Message with supporting params received
-   */
-  void OnMobileMessageSent(const protocol_handler::RawMessagePtr) OVERRIDE;
+  public:
+    /**
+     * \brief Constructor
+     */
+    SecurityManager();
+    /**
+     * \brief Add received from Mobile Application message
+     * Overriden ProtocolObserver::OnMessageReceived method
+     * \param message Message with supporting params received
+     */
+    void OnMessageReceived(const protocol_handler::RawMessagePtr message) OVERRIDE;
+    /**
+     * \brief Post message to Mobile Application
+     * Empty* overriden ProtocolObserver::OnMessageReceived method
+     * \param message Message with supporting params received
+     */
+    void OnMobileMessageSent(const protocol_handler::RawMessagePtr) OVERRIDE;
 
-  /**
-   * \brief Sets pointer for Connection Handler layer for managing sessions
-   * \param session_observer pointer to object of the class implementing
-   */
-  void set_session_observer(protocol_handler::SessionObserver* observer);
-/**
-   * \brief Sets pointer for Protocol Handler layer for sending
-   * \param protocol_handler pointer to object of the class implementing
-   */
-  void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
-  /**
-   * \brief Sets pointer for CryptoManager for handling SSLContext
-   * \param crypto_manager pointer to object of the class implementing
-   */
-  void set_crypto_manager(CryptoManager* crypto_manager);
+    /**
+     * \brief Sets pointer for Connection Handler layer for managing sessions
+     * \param session_observer pointer to object of the class implementing
+     */
+    void set_session_observer(protocol_handler::SessionObserver* observer);
+    /**
+     * \brief Sets pointer for Protocol Handler layer for sending
+     * \param protocol_handler pointer to object of the class implementing
+     */
+    void set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler_);
+    /**
+     * \brief Sets pointer for CryptoManager for handling SSLContext
+     * \param crypto_manager pointer to object of the class implementing
+     */
+    void set_crypto_manager(CryptoManager* crypto_manager);
 
-  /**
-   * \brief Send Handshake binary data to Mobiel Application
-   * \param connection_key Unique key used by other components as session identifier
-   * \param data pointer to binary data array
-   * \param data_size size of binary data array
-   * \param seq_number resieved from Mobile Application
-   */
-  void SendHandshakeBinData(const uint32_t connection_key,
-                            const uint8_t * const data,
-                            const size_t data_size,
-                            const uint32_t seq_number = 0);
-  /**
-   * \brief Send InternallError with text message to Mobiel Application
-   * \param connection_key Unique key used by other components as session identifier
-   * \param error_id  unique error identifier
-   * \param erorr_text SSL impelmentation error text
-   * \param seq_number resieved from Mobile Application
-   */
-  void SendInternalError(const uint32_t connection_key,
-                         const uint8_t &error_id,
-                         const std::string& erorr_text,
-                         const uint32_t seq_number = 0);
+    /**
+     * \brief Send Handshake binary data to Mobiel Application
+     * \param connection_key Unique key used by other components as session identifier
+     * \param data pointer to binary data array
+     * \param data_size size of binary data array
+     * \param seq_number resieved from Mobile Application
+     */
+    void SendHandshakeBinData(const uint32_t connection_key,
+                              const uint8_t * const data,
+                              const size_t data_size,
+                              const uint32_t seq_number = 0);
+    /**
+     * \brief Send InternallError with text message to Mobiel Application
+     * \param connection_key Unique key used by other components as session identifier
+     * \param error_id  unique error identifier
+     * \param erorr_text SSL impelmentation error text
+     * \param seq_number resieved from Mobile Application
+     */
+    void SendInternalError(const uint32_t connection_key,
+                           const uint8_t &error_id,
+                           const std::string& erorr_text,
+                           const uint32_t seq_number = 0);
 
-  /**
-   * \brief Handle SecurityMessage from mobile for processing
-   * threads::MessageLoopThread<*>::Handler implementations
-   * CALLED in SecurityMessageLoop thread
-   */
-  void Handle(const SecurityMessage& message) OVERRIDE;
+    /**
+     * \brief Handle SecurityMessage from mobile for processing
+     * threads::MessageLoopThread<*>::Handler implementations
+     * CALLED in SecurityMessageLoop thread
+     */
+    void Handle(const SecurityMessage& message) OVERRIDE;
 
-  /**
-   * \brief Start protection connection
-   * \param connection_key Unique key used by other components as session identifier
-   * @return \c true on success or \c false on any error
-   */
-  bool ProtectConnection(const uint32_t &connection_key);
+    /**
+     * \brief Start protection connection
+     * \param connection_key Unique key used by other components as session identifier
+     * @return \c true on success or \c false on any error
+     */
+    bool ProtectConnection(const uint32_t &connection_key);
 
-  /**
-   * \brief Start handshake as SSL client
-   */
-  void StartHandshake(uint32_t session_key);
+    /**
+     * \brief Start handshake as SSL client
+     */
+    void StartHandshake(uint32_t session_key);
 
-  /**
-   * \brief Add/Remove for SecurityManagerListener
-   */
-  void AddListener(SecurityManagerListener* const listener);
-  void RemoveListener(SecurityManagerListener* const listener);
-  /**
-   * \brief Notifiers for listeners
-   * \param connection_key Unique key used by other components as session identifier
-   * \param success result of connection protection
-   */
-  void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                      const bool success);
-  /**
-   * @brief SecurityConfigSection
-   * @return Session name in config file
-   */
-  static const char *ConfigSection();
-private:
-  DISALLOW_COPY_AND_ASSIGN(SecurityManager);
-  /**
-   * \brief Parse SecurityMessage as HandshakeData request
-   * \param inMessage SecurityMessage with binary data of handshake
-   */
-  bool ProccessHandshakeData(const SecurityMessage &inMessage);
-  /**
-   * \brief Parse InternalError from mobile side
-   * \param inMessage SecurityMessage with binary data of handshake
-   */
-  bool ProccessInternalError(const SecurityMessage &inMessage);
+    /**
+     * \brief Add/Remove for SecurityManagerListener
+     */
+    void AddListener(SecurityManagerListener* const listener);
+    void RemoveListener(SecurityManagerListener* const listener);
+    /**
+     * \brief Notifiers for listeners
+     * \param connection_key Unique key used by other components as session identifier
+     * \param success result of connection protection
+     */
+    void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
+                                        const bool success);
 
-  /**
-   * \brief Send binary data answer with QueryHeader
-   * Create new array as concatenation of header and binary data
-   * \param connection_key Unique key used by other components as session identifier
-   * \param header QueryHeader (equal RPC header format)
-   * \param data pointer to binary data array
-   * \param data_size size of binary data array
-   */
-  void SendData(const uint32_t connection_key,
-                SecurityQuery::QueryHeader header,
-                const uint8_t * const data,
-                const size_t data_size);
-  /**
-   * \brief Send binary data answer
-   * \param connection_key Unique key used by other components as session identifier
-   * \param data pointer to binary data array
-   * \param data_size size of binary data array
-   */
-  // post income array as park of RawMessage
-  void SendBinaryData(const uint32_t connection_key,
-                      const uint8_t * const data,
-                      size_t data_size);
+    /**
+     * @brief SecurityConfigSection
+     * @return Session name in config file
+     */
+    static const char *ConfigSection();
+  private:
+    /**
+     * \brief Parse SecurityMessage as HandshakeData request
+     * \param inMessage SecurityMessage with binary data of handshake
+     */
+    bool ProccessHandshakeData(const SecurityMessage &inMessage);
+    /**
+     * \brief Parse InternalError from mobile side
+     * \param inMessage SecurityMessage with binary data of handshake
+     */
+    bool ProccessInternalError(const SecurityMessage &inMessage);
 
-  // Thread that pumps handshake data
-  SecurityMessageLoop security_messages_;
+    /**
+     * \brief Send binary data answer with QueryHeader
+     * Create new array as concatenation of header and binary data
+     * \param connection_key Unique key used by other components as session identifier
+     * \param header QueryHeader (equal RPC header format)
+     * \param data pointer to binary data array
+     * \param data_size size of binary data array
+     */
+    void SendData(const uint32_t connection_key,
+                  SecurityQuery::QueryHeader header,
+                  const uint8_t * const data,
+                  const size_t data_size);
+    /**
+     * \brief Send binary data answer
+     * \param connection_key Unique key used by other components as session identifier
+     * \param data pointer to binary data array
+     * \param data_size size of binary data array
+     */
+    // post income array as park of RawMessage
+    void SendBinaryData(const uint32_t connection_key,
+                        const uint8_t * const data,
+                        size_t data_size);
 
-  /**
-   *\brief Pointer on instance of class implementing SessionObserver
-   */
-  protocol_handler::SessionObserver* session_observer_;
-  /**
-   *\brief Pointer on instance of class implementing CryptoManager
-   */
-  security_manager::CryptoManager* crypto_manager_;
-  /**
-   *\brief Pointer on instance of class implementing ProtocolHandler
-   */
-  protocol_handler::ProtocolHandler* protocol_handler_;
-  /**
-   *\brief List of listeners for notify handshake done result
-   */
-  std::list<SecurityManagerListener*> listeners_;
-  /**
-   *\brief Logger
-   */
-  static log4cxx::LoggerPtr logger_;
-};
-} //security_manager
-#endif // SECURE_MANAGER_H
+    // Thread that pumps handshake data
+    SecurityMessageLoop security_messages_;
+
+    /**
+     *\brief Pointer on instance of class implementing SessionObserver
+     */
+    protocol_handler::SessionObserver* session_observer_;
+    /**
+     *\brief Pointer on instance of class implementing CryptoManager
+     */
+    security_manager::CryptoManager* crypto_manager_;
+    /**
+     *\brief Pointer on instance of class implementing ProtocolHandler
+     */
+    protocol_handler::ProtocolHandler* protocol_handler_;
+    /**
+     *\brief List of listeners for notify handshake done result
+     */
+    std::list<SecurityManagerListener*> listeners_;
+    /**
+     *\brief Logger
+     */
+    static log4cxx::LoggerPtr logger_;
+    DISALLOW_COPY_AND_ASSIGN(SecurityManager);
+  };
+}  // namespace security_manager
+#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_H_

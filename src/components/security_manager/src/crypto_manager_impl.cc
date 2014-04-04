@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -111,7 +111,7 @@ bool CryptoManagerImpl::Init(Mode mode,
   }
 
   LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
-  if(!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
+  if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
     LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
     return false;
   }
@@ -143,7 +143,7 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   } else {
     SSL_set_connect_state(conn);
   }
-  // TODO (EZamakhov) : add return NULL pointer on no keys
+  // TODO(EZamakhov): add return NULL pointer on no keys
   return new SSLContextImpl(conn, mode_);
 }
 

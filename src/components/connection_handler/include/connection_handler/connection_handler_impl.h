@@ -41,6 +41,7 @@
 #include <map>
 #include <list>
 #include <string>
+#include <vector>
 
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
@@ -254,21 +255,24 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void StartDevicesDiscovery();
 
-    /*
-     * Close all associated sessions and close the connection associated with the key
+    /**
+     * \brief Close all associated sessions and close
+     * the connection associated with the key
      */
     virtual void CloseConnection(uint32_t key);
 
-    /*
-     * Close all associated sessions and close the connection pointed by handle
+    /**
+     * \brief Close all associated sessions and close the
+     * connection pointed by handle
      */
     virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
-    /*
-     * Keep connection associated with the key from being closed by heartbeat monitor
+    /**
+     * \brief Keep connection associated with the key from
+     * being closed by heartbeat monitor
      */
     void KeepConnectionAlive(uint32_t connection_key);
-private:
+ private:
     /**
      * \brief Default class constructor
      */
@@ -312,7 +316,7 @@ private:
      */
     mutable sync_primitives::Lock connection_list_lock_;
 
-    /*
+    /**
      * \brief Cleans connection list on destruction
      */
     utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
@@ -322,20 +326,20 @@ private:
      */
 #ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-    DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
-
-    FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
+#endif  // ENABLE_LOG
 #ifdef BUILD_TESTS
     /*
      * Methods for test usage
      */
-public:
+ public:
     ConnectionList& getConnectionList();
     void addDeviceConnection(
         const transport_manager::DeviceInfo& device_info,
         const transport_manager::ConnectionUID& connection_id);
 #endif
+ private:
+    FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
+    DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

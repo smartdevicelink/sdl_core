@@ -41,7 +41,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
 #include "config_profile/profile.h"
-#include "security_manager/security_query.h"
+#include "security_manager/security_manager.h"
 
 namespace {
 int32_t HeartBeatTimeout() {
@@ -67,7 +67,7 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(
 #ifdef ENABLE_LOG
 log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
     : connection_handler_observer_(NULL),
@@ -90,7 +90,8 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
   connection_handler_observer_ = observer;
 }
 
-void ConnectionHandlerImpl::set_protocol_handler(protocol_handler::ProtocolHandler* protocol_handler) {
+void ConnectionHandlerImpl::set_protocol_handler(
+    protocol_handler::ProtocolHandler*protocol_handler) {
   protocol_handler_ = protocol_handler;
 }
 
@@ -228,19 +229,28 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return -1;
   }
-
-  // Check deliver-specific services (which shall/shall not to be protected)
-  const char * section =
-      is_protected ? "ForceUnprotectedService" : "ForceProtectedService";
-  const std::list<int> protectedSpecific =
-      profile::Profile::instance()->ReadIntContainer("Security Manager", section, NULL);
-  // FIXME(dchmerev@luxoft.com): Tricky logic
-  if(protectedSpecific.end() != std::find(
-       protectedSpecific.begin(), protectedSpecific.end(), service_type)) {
-    LOG4CXX_ERROR(
-        logger_, "Service " << int(service_type)
-        << (is_protected ? " is forbidden to" : " shall") << " be protected");
-    return -1;
+  if (is_protected) {
+    // Check deliver-specific services (which shall not be protected)
+    const std::list<int> protectedSpecific =
+        profile::Profile::instance()->ReadIntContainer(
+          "Security Manager", "ForceUnprotectedService", NULL);
+    if (std::find(protectedSpecific.begin(), protectedSpecific.end(), service_type) !=
+        protectedSpecific.end()) {
+      LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
+                     << " is forbidden to be protected");
+      return -1;
+    }
+  } else {
+    // Check deliver-specific services (which shall be protected)
+    const std::list<int> protectedSpecific =
+        profile::Profile::instance()->ReadIntContainer(
+          "Security Manager", "ForceProtectedService", NULL);
+    if (std::find(protectedSpecific.begin(), protectedSpecific.end(), service_type) !=
+        protectedSpecific.end()) {
+      LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
+                     << " shall be protected");
+      return -1;
+    }
   }
 
   Connection* connection = it->second;
@@ -250,10 +260,10 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
     }
-  } else{
+  } else {
     if (!connection->AddNewService(sessionId, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service "
-                    << int(service_type) << "!");
+                    << static_cast<int>(service_type) << "!");
       return -1;
     }
     new_session_id = sessionId;
@@ -320,9 +330,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle, uint8_t sessionId) {
   int32_t key = connection_handle | (sessionId << 16);
-  LOG4CXX_INFO(
-      logger_,
-      "Key for ConnectionHandle:" << static_cast<int32_t>(connection_handle) << " Session:" << static_cast<int32_t>(sessionId) << " is: " << static_cast<int32_t>(key));
+  LOG4CXX_INFO(logger_, "Key for ConnectionHandle:"
+               << static_cast<int32_t>(connection_handle)
+               << " Session:" << static_cast<int32_t>(sessionId)
+               << " is: " << static_cast<int32_t>(key));
   return key;
 }
 
@@ -331,9 +342,10 @@ void ConnectionHandlerImpl::PairFromKey(uint32_t key,
                                         uint8_t* sessionId) {
   *connection_handle = key & 0xFF00FFFF;
   *sessionId = key >> 16;
-  LOG4CXX_INFO(
-      logger_,
-      "ConnectionHandle:" << static_cast<int32_t>(*connection_handle) << " Session:" << static_cast<int32_t>(*sessionId) << " for key:" << static_cast<int32_t>(key));
+  LOG4CXX_INFO(logger_, "ConnectionHandle:"
+               << static_cast<int32_t>(*connection_handle)
+               << " Session:" << static_cast<int32_t>(*sessionId)
+               << " for key:" << static_cast<int32_t>(key));
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
@@ -373,9 +385,10 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
       *app_id = KeyFromPair(conn_handle, session_id);
     }
 
-    LOG4CXX_INFO(
-        logger_,
-        "Connection " << static_cast<int32_t>(conn_handle) << " has " << connection.session_map().size() << " sessions.");
+    LOG4CXX_INFO(logger_, "Connection "
+                 << static_cast<int32_t>(conn_handle)
+                 << " has " << connection.session_map().size()
+                 << " sessions.");
 
     if (sessions_list) {
       const SessionMap& session_map = connection.session_map();
@@ -480,7 +493,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  //transport_manager_->SearchDevices();
+  // transport_manager_->SearchDevices();
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -567,14 +580,14 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   if (0 != connection_handler_observer_) {
     const Connection* connection = itr->second;
     const SessionMap session_map = connection->session_map();
+
     for (SessionMapConstIterator session_it = session_map.begin(), end =
         session_map.end(); session_it != end; ++session_it) {
-
       uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList& service_list = session_it->second.service_list;
+
       for (ServiceListConstIterator service_it = service_list.begin(), end =
           service_list.end(); service_it != end; ++service_it) {
-
         connection_handler_observer_->OnServiceEndedCallback(
             session_key, service_it->service_type);
       }
@@ -593,9 +606,9 @@ ConnectionList &ConnectionHandlerImpl::getConnectionList() {
 void ConnectionHandlerImpl::addDeviceConnection(
     const transport_manager::DeviceInfo &device_info,
     const transport_manager::ConnectionUID &connection_id) {
-  //Add Device
+  // Add Device
   OnDeviceAdded(device_info);
-  //Add connection
+  // Add connection
   OnConnectionEstablished(device_info, connection_id);
 }
 #endif

@@ -89,16 +89,19 @@ struct RawFordMessageFromMobile: public ProtocolFramePtr {
   explicit RawFordMessageFromMobile(const ProtocolFramePtr message)
       : ProtocolFramePtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
-  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
-      get()->service_type())).OrderingValue(); }
+  size_t PriorityOrder() const {
+    return MessagePriority::FromServiceType(
+          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
 };
 
 struct RawFordMessageToMobile: public ProtocolFramePtr {
-  explicit RawFordMessageToMobile(const ProtocolFramePtr message, bool final_message)
+  explicit RawFordMessageToMobile(const ProtocolFramePtr message,
+                                  bool final_message)
       : ProtocolFramePtr(message), is_final(final_message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
-  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
-      get()->service_type())).OrderingValue(); }
+  size_t PriorityOrder() const {
+    return MessagePriority::FromServiceType(
+          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
   // Signals whether connection to mobile must be closed after processing this message
   bool is_final;
 };
@@ -108,7 +111,7 @@ typedef threads::MessageLoopThread<
                utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
                utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
-}
+}  // namespace impl
 
 /**
  * \class ProtocolHandlerImpl
@@ -193,12 +196,12 @@ class ProtocolHandlerImpl
      * \param service_type Type of session: RPC or BULK Data. RPC by default
      * \param protection Protection flag
      */
-    void SendStartSessionAck( ConnectionID connection_id,
-                              uint8_t session_id,
-                              uint8_t protocol_version,
-                              uint32_t hash_code,
-                              uint8_t service_type,
-                              bool encrypted);
+    void SendStartSessionAck(ConnectionID connection_id,
+                             uint8_t session_id,
+                             uint8_t protocol_version,
+                             uint32_t hash_code,
+                             uint8_t service_type,
+                             bool encrypted);
 
     /**
      * \brief Sends fail of starting session to mobile application
@@ -431,7 +434,7 @@ class ProtocolHandlerImpl
      */
 #ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
     /**
      *\brief Pointer on instance of class implementing IProtocolObserver
@@ -470,7 +473,6 @@ class ProtocolHandlerImpl
     /**
      *\brief Counter of messages sent in each session.
      */
-    //TODO : set to zero
     std::map<uint8_t, uint32_t> message_counters_;
 
     /**

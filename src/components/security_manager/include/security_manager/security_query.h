@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef security_query_H
-#define security_query_H
+#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_
+#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_
 
-#include <cstddef>
 #include <stdint.h>
+#include <cstddef>
 #include <vector>
 #include <string>
 #include "utils/shared_ptr.h"
@@ -45,7 +45,7 @@ namespace security_manager {
  * as security queries
  */
 class SecurityQuery {
-public:
+ public:
   /**
    * \brief QueryType is 1 byte type of income query
    * Equal RPC Type (Ford Binary Header Definition)
@@ -71,12 +71,12 @@ public:
    */
   enum InternalErrors {
     ERROR_SUCCESS                    = 0x00,
-    ERROR_INVALID_QUERY_SIZE         = 0x01, //low size of message or wrong json_size
-    ERROR_INVALID_QUERY_ID           = 0x02, //unknown query id
-    ERROR_NOT_SUPPORTED              = 0x03, //No CryptoManager
+    ERROR_INVALID_QUERY_SIZE         = 0x01,  // wrong size of query data
+    ERROR_INVALID_QUERY_ID           = 0x02,  // unknown query id
+    ERROR_NOT_SUPPORTED              = 0x03,  // No CryptoManager
     ERROR_SERVICE_ALREADY_PROTECTED  = 0x04,
     ERROR_CREATE_SLL                 = 0x05,
-    ERROR_SERVICE_NOT_PROTECTED      = 0x06, //got handshake for not protected service
+    ERROR_SERVICE_NOT_PROTECTED      = 0x06,  // got handshake for not protected service
     ERROR_DECRYPTION_FAILED          = 0x07,
     ERROR_ENCRYPTION_FAILED          = 0x08,
     ERROR_SSL_INVALID_DATA           = 0xF0,
@@ -90,7 +90,7 @@ public:
   struct QueryHeader {
     QueryHeader();
     QueryHeader(uint8_t queryType, uint32_t queryId,
-                uint32_t seqNumber = 0,uint32_t jsonSize= 0);
+                uint32_t seqNumber = 0, uint32_t jsonSize= 0);
     uint32_t query_type:8;
     uint32_t query_id:24;  // API function identifier
     uint32_t seq_number;   // request sequential number
@@ -161,7 +161,8 @@ public:
    * \return Unique key used by other components as session identifier
    */
   uint32_t get_connection_key() const;
-private:
+
+ private:
   /**
    *\brief 12 byte header of security query
    * Equal Ford Binary Header Definition
@@ -184,5 +185,5 @@ private:
 *\brief SmartPointer wrapper
 */
 typedef utils::SharedPtr<SecurityQuery> SecurityQueryPtr;
-}
-#endif // security_query_H
+}  // namespace security_manager
+#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_QUERY_H_

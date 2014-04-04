@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,9 +59,9 @@ class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     crypto_manager = new security_manager::CryptoManagerImpl();
-    // TODO (EZamakhov) : add ASSERT_TRUE check of cert/key exist (for this test correct)
-    // TODO (EZamakhov) : add covarage for SSLv3, TLSv1_1 + check wrong Protocol value
-    // TODO (EZamakhov) : add covarage for wrong cert, key file names and ciphers
+    // TODO(EZamakhov): add ASSERT_TRUE check of cert/key exist (for this test correct)
+    // TODO(EZamakhov): add covarage for SSLv3, TLSv1_1 + check wrong Protocol value
+    // TODO(EZamakhov): add covarage for wrong cert, key file names and ciphers
     crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false);
 
     client_manager = new security_manager::CryptoManagerImpl();
@@ -169,7 +169,7 @@ TEST_F(SSLTest, Positive) {
                     "abra",
                     4), 0);
 }
-// TODO (EZamakhov) : add test for EnsureBufferSizeEnough
+// TODO(EZamakhov): add test for EnsureBufferSizeEnough
 
 /*
 TEST_F(SSLTest, DISABLED_BadData) {

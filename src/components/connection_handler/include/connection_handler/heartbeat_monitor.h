@@ -72,4 +72,4 @@ class HeartBeatMonitor: public threads::SingleThreadSimpleValidator {
 
 } // namespace connection_handler
 
-#endif // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_

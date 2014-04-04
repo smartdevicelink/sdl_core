@@ -358,4 +358,4 @@ namespace security_manager_test {
 } // security_manager_test
 } // namespace components
 } // namespace test
-#endif // SECURITY_QUERY_TEST_H
+#endif  // SECURITY_QUERY_TEST_H

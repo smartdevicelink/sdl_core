@@ -35,8 +35,9 @@
 
 #include "protocol_handler/raw_message.h"
 
-#include "protocol_handler/message_priority.h"
 #include <memory.h>
+
+#include "protocol_handler/message_priority.h"
 
 namespace protocol_handler {
 

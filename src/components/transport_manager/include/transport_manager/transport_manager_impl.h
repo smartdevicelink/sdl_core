@@ -332,7 +332,7 @@ class TransportManagerImpl : public TransportManager {
    */
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
   /**
    * @brief store messages

@@ -15,7 +15,7 @@ set (SOURCES
 )
 
 set(LIBRARIES
-    ConfigProfile
+  ConfigProfile
 )
 
 add_library(connectionHandler ${SOURCES})

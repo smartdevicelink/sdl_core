@@ -1,7 +1,7 @@
 /**
 * \file signals.cc
 * \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ namespace main_namespace {
 #ifdef ENABLE_LOG
 log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("appMain"));
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 namespace {
 
@@ -107,7 +107,8 @@ bool LifeCycle::StartComponents() {
 
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
-        &cert_filename, "mycert.pem", security_manager::SecurityManager::ConfigSection(), "CertificatePath");
+        &cert_filename, "mycert.pem",
+        security_manager::SecurityManager::ConfigSection(), "CertificatePath");
 
   std::string ssl_mode;
   profile::Profile::instance()->ReadStringValue(
@@ -142,7 +143,7 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
-  if(!crypto_manager_->Init(
+  if (!crypto_manager_->Init(
       ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
           protocol,
           cert_filename,
@@ -341,7 +342,7 @@ void LifeCycle::StopComponents() {
   media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  //TODO: (EZamakhov) set_session_observer(NULL) do nothing
+  // TODO(EZamakhov): set_session_observer(NULL) do nothing
   protocol_handler_->set_session_observer(NULL);
   connection_handler::ConnectionHandlerImpl::destroy();
 

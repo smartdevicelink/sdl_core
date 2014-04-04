@@ -38,7 +38,7 @@
     const ::security_manager::SecurityQuery::QueryHeader& q2 ) {
   ::testing::AssertionResult fail_result = ::testing::AssertionFailure();
   fail_result  << "(\"" << m_expr << " and \"" << n_expr << "\") are not equal "
-               << " : different " ;
+               << " : different ";
   if (q1.json_size  != q2.json_size)
     return fail_result << "json_size_1=" << q1.json_size
                        << ", json_size_2=" << q2.json_size;

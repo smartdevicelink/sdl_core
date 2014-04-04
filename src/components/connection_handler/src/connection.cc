@@ -51,7 +51,7 @@ namespace connection_handler {
 #ifdef ENABLE_LOG
 log4cxx::LoggerPtr Connection::logger_ = log4cxx::LoggerPtr(
     log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,
@@ -80,7 +80,7 @@ int32_t findGap(const std::map<unsigned char, T>& map) {
   }
   return 0;
 }
-}
+}  // namespace
 
 
 int32_t Connection::AddNewSession() {
@@ -96,7 +96,7 @@ int32_t Connection::AddNewSession() {
   if (session_id > 0) {
     /* whenever new session created RPC and Bulk services are
     established automatically */
-      //TODO: Dmitriy Trunov + Klimenko
+      // TODO: Dmitriy Trunov + Klimenko
     session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
     session_map_[session_id].service_list.push_back(protocol_handler::kBulk);
 
@@ -123,8 +123,8 @@ int32_t Connection::RemoveSession(uint8_t session) {
 bool Connection::AddNewService(uint8_t session,
                                protocol_handler::ServiceType service_type,
                                const bool is_protected) {
-  //Ignore wrong services
-  if(protocol_handler::kControl == service_type ||
+  // Ignore wrong services
+  if (protocol_handler::kControl == service_type ||
      protocol_handler::kInvalidServiceType == service_type )
     return false;
 
@@ -143,27 +143,24 @@ bool Connection::AddNewService(uint8_t session,
   if (service_it != service_list.end()) {
     Service& service = *service_it;
     // For unproteced service could be start protection
-    if(!service.is_protected_ && is_protected) {
+    if (!service.is_protected_ && is_protected) {
       service.is_protected_ = true;
       // Rpc and bulk shall be protected as one service
-      if(service.service_type == protocol_handler::kRpc) {
+      if (service.service_type == protocol_handler::kRpc) {
         ServiceListIterator service_Bulk_it = find(service_list.begin(),
                                                 service_list.end(),
                                                    protocol_handler::kBulk);
         DCHECK(service_Bulk_it != service_list.end());
         service_Bulk_it->is_protected_ = true;
-      }
-      else if(service.service_type == protocol_handler::kBulk) {
+      } else if (service.service_type == protocol_handler::kBulk) {
         ServiceListIterator service_Rpc_it = find(service_list.begin(),
                                                   service_list.end(),
                                                   protocol_handler::kRpc);
         DCHECK(service_Rpc_it != service_list.end());
         service_Rpc_it->is_protected_ = true;
       }
-    }
-    // Protected services shall not be unprotected or twice protected
-    else {
-      LOG4CXX_ERROR(logger_, "Session " << int(session) <<
+    } else {
+      LOG4CXX_ERROR(logger_, "Session " << static_cast<int>(session) <<
                     " already established  service " << service_type);
       return false;
     }
@@ -176,8 +173,8 @@ bool Connection::AddNewService(uint8_t session,
 
 bool Connection::RemoveService(
     uint8_t session, protocol_handler::ServiceType service_type) {
-  //Ignore wrong and required for Session services
-  if(protocol_handler::kControl == service_type ||
+  // Ignore wrong and required for Session services
+  if (protocol_handler::kControl == service_type ||
      protocol_handler::kInvalidServiceType == service_type ||
      protocol_handler::kRpc  == service_type ||
      protocol_handler::kBulk == service_type )
@@ -202,8 +199,8 @@ bool Connection::RemoveService(
   return true;
 }
 
-int Connection::SetSSLContext( uint8_t sessionId,
-                               security_manager::SSLContext *context){
+int Connection::SetSSLContext(uint8_t sessionId,
+                              security_manager::SSLContext *context) {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
@@ -224,8 +221,8 @@ security_manager::SSLContext* Connection::GetSSLContext(
     return NULL;
   }
   const Session& session = session_it->second;
-  //for control services return current SSLContext value
-  if(protocol_handler::kControl == service_type)
+  // for control services return current SSLContext value
+  if (protocol_handler::kControl == service_type)
     return session.ssl_context;
   const ServiceList& service_list = session_it->second.service_list;
   ServiceList::const_iterator service_it = std::find(service_list.begin(),
@@ -236,7 +233,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
     return NULL;
   }
   const Service& service = *service_it;
-  if(!service.is_protected_)
+  if (!service.is_protected_)
     return NULL;
   return session.ssl_context;
 }

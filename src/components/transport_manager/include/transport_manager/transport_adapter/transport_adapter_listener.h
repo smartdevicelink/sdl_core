@@ -249,4 +249,4 @@ class TransportAdapterListener {
 }  // transport_adapter namespace
 }  // transport_manager namespace
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_LISTENER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_LISTENER

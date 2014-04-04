@@ -159,9 +159,9 @@ class ThreadedSocketConnection : public Connection {
 
 #ifdef ENABLE_LOG
 extern log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION
+#endif  //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION

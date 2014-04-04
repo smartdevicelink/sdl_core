@@ -87,7 +87,7 @@ class ConnectionTest: public ::testing::Test {
         std::find(newServiceList.begin(), newServiceList.end(), service_type);
     const bool found_result = it != newServiceList.end();
     EXPECT_EQ(expect_exist_service, found_result);
-    if(found_result) {
+    if (found_result) {
       const Service& service = *it;
       EXPECT_EQ(service.is_protected_, protection);
       }
@@ -264,4 +264,4 @@ TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected2) {
 } // namespace components
 } // namespace test
 
-#endif // CONNECTION_TEST_H
+#endif  // CONNECTION_TEST_H

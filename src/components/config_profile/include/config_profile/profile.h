@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 
+#include <stdint.h>
 #include <string>
 #include <vector>
 #include <list>
-#include <stdint.h>
 #include "utils/macro.h"
 #include "utils/singleton.h"
 
@@ -339,10 +339,11 @@ class Profile : public utils::Singleton<Profile> {
      * @return container of values or empty continer
      * if could not read the value out of the profile
      */
-    std::list<int> ReadIntContainer( const char * const pSection,
-                                     const char * const pKey,
-                                     bool* out_result) const;
-private:
+    std::list<int> ReadIntContainer(const char * const pSection,
+                                    const char * const pKey,
+                                    bool* out_result) const;
+
+ private:
     /**
      * Default constructor
      *
@@ -426,9 +427,8 @@ private:
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
 
-    DISALLOW_COPY_AND_ASSIGN(Profile);
-
     FRIEND_BASE_SINGLETON_CLASS(Profile);
+    DISALLOW_COPY_AND_ASSIGN(Profile);
 };
 }  //  namespace profile
 

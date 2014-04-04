@@ -157,14 +157,14 @@ namespace security_manager_test {
   MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
              std::string(negation ? "is not" : "is") + " RawMessages ") {
     const size_t arg_data_size = arg->data_size();
-    if(arg_data_size != exp_data_size) {
+    if (arg_data_size != exp_data_size) {
       *result_listener << "Got " << arg_data_size << " bytes "
                       << " expected " << exp_data_size << " bytes";
       return false;
     }
     const uint8_t * arg_data = arg->data();
     for (int i = 0; i < arg_data_size; ++i) {
-      if(arg_data[i] != exp_data[i]) {
+      if (arg_data[i] != exp_data[i]) {
         *result_listener << "Fail in " << i << " byte";
         return false;
       }
@@ -180,14 +180,14 @@ namespace security_manager_test {
             std::string(negation ? "is not" : "is")
             + " InternalError with selected error" ) {
     const size_t header_size = sizeof(security_manager::SecurityQuery::QueryHeader);
-    if(arg->data_size() <= header_size) {
+    if (arg->data_size() <= header_size) {
       *result_listener << "Size " << arg->data_size()
                        << " bytes less or equal sizeof(QueryHeader)="
                        << header_size;
       return false;
     }
     const uint8_t query_type = arg->data()[0];
-    if(security_manager::SecurityQuery::NOTIFICATION != query_type) {
+    if (security_manager::SecurityQuery::NOTIFICATION != query_type) {
       *result_listener << "RawMessage is not notification";
       return false;
     }
@@ -195,7 +195,7 @@ namespace security_manager_test {
     const uint32_t query_id = arg->data()[1] << 16 |
                               arg->data()[2] <<  8 |
                               arg->data()[3];
-    if(security_manager::SecurityQuery::SEND_INTERNAL_ERROR != query_id) {
+    if (security_manager::SecurityQuery::SEND_INTERNAL_ERROR != query_id) {
       *result_listener << "Notification is not InternalError";
       return false;
     }
@@ -203,14 +203,14 @@ namespace security_manager_test {
                                arg->data()[9]  << 16 |
                                arg->data()[10] <<  8 |
                                arg->data()[11];
-    if(header_size + json_size >= arg->data_size()){
+    if (header_size + json_size >= arg->data_size()){
       *result_listener << "InternalError contains only JSON data.";
       return false;
     }
     //Read err_id as bin data number
     const uint8_t* err_id =
         reinterpret_cast<uint8_t*>(arg->data() + header_size + json_size);
-    if(expectedErrorId != *err_id) {
+    if (expectedErrorId != *err_id) {
       *result_listener << "InternalError id " << int(*err_id)
                        << " and not equal error " << expectedErrorId;
       return false;
@@ -228,4 +228,4 @@ namespace security_manager_test {
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2 );
 
-#endif // SECURITY_MANAGER_MOCK_H
+#endif  // SECURITY_MANAGER_MOCK_H

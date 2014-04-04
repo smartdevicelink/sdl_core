@@ -44,7 +44,7 @@
  * \class MessageQueue
  * \brief Wrapper for multithreading queue.
  */
- //TODO: Ezamakhov move to utils namespace
+ //TODO(Ezamakhov): move to utils namespace
 template<typename T, class Q = std::queue<T> > class MessageQueue {
   public:
     typedef Q Queue;

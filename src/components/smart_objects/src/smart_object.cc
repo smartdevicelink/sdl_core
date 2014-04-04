@@ -957,7 +957,7 @@ std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform(
 std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
-  if(m_type == SmartType_Map) {
+  if (m_type == SmartType_Map) {
         std::transform(
             m_data.map_value->begin(),
             m_data.map_value->end(),

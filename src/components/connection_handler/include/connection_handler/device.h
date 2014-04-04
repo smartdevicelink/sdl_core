@@ -3,7 +3,7 @@
  * \brief Device class.
  * Stores device information
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,7 @@ typedef uint32_t DeviceHandle;
 typedef std::vector<int32_t> AppList;
 
 /**
- * \class Device
+ * \class Device
  * \brief Connection class
  */
 class Device {
@@ -106,7 +106,7 @@ class Device {
      */
 #ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 };
 
 /**

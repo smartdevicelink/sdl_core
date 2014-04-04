@@ -35,9 +35,9 @@
 #include "utils/macro.h"
 #include "utils/byte_order.h"
 
-using namespace security_manager;
+namespace security_manager {
 
-SecurityQuery::QueryHeader::QueryHeader() :
+SecurityQuery::QueryHeader::QueryHeader():
   query_type(INVALID_QUERY_TYPE), query_id(INVALID_QUERY_ID),
   seq_number(0), json_size(0) {
 }
@@ -48,7 +48,7 @@ SecurityQuery::QueryHeader::QueryHeader(uint8_t queryType, uint32_t queryId,
   seq_number(seqNumber), json_size(jsonSize) {
 }
 
-SecurityQuery::SecurityQuery() :
+SecurityQuery::SecurityQuery():
   header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
 }
 
@@ -61,7 +61,7 @@ SecurityQuery::SecurityQuery(
 bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
                                const size_t raw_data_size) {
   const size_t header_size = sizeof(QueryHeader);
-  if(raw_data_size < header_size || !raw_data) {
+  if (raw_data_size < header_size || !raw_data) {
     return false;
   }
   const uint8_t guery_type = raw_data[0];
@@ -89,7 +89,7 @@ bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
     case SEND_INTERNAL_ERROR:
       header_.query_id = SEND_INTERNAL_ERROR;
       break;
-    default: // On wrong query id
+    default:  // On wrong query id
       header_.query_id = INVALID_QUERY_ID;
       break;
   }
@@ -97,17 +97,17 @@ bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
   header_.json_size =
       BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
 
-  if(header_.json_size > raw_data_size - header_size)
+  if (header_.json_size > raw_data_size - header_size)
     return false;
 
-  if(header_.json_size > 0) {
+  if (header_.json_size > 0) {
     const char* const json_data =
         reinterpret_cast<const char*>(raw_data + header_size);
     json_message_.assign(json_data, json_data + header_.json_size);
   }
 
   const uint32_t bin_data_size = raw_data_size - (header_size + header_.json_size);
-  if(bin_data_size > 0) {
+  if (bin_data_size > 0) {
     const char* const bin_data =
         reinterpret_cast<const char*>(raw_data + header_size + header_.json_size);
     data_.assign(bin_data, bin_data + bin_data_size);
@@ -145,10 +145,12 @@ size_t SecurityQuery::get_data_size() const {
   return data_.size();
 }
 
-const std::string &SecurityQuery::get_json_message() const{
+const std::string &SecurityQuery::get_json_message() const {
   return json_message_;
 }
 
 uint32_t SecurityQuery::get_connection_key() const {
   return connection_key_;
 }
+
+}  // namespace security_manager
