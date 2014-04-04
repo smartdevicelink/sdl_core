@@ -101,14 +101,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void OnAllowSDLFunctionalityNotification(bool is_allowed, uint32_t device_id =
                                                0);
-  /**
-   * @brief Send request to HMI for requesting the allowance for some
-   * application functionality
-   * @param List of permissions required by application
-   * @param Unique appication id, if omitted - allow/disallow all applications
-   */
-  void SendAllowApp(const PermissionsList& list_of_permissions,
-                    uint32_t application_id = 0);
 
   /**
    * @brief Increment counter for ignition cycles
@@ -120,6 +112,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param policy_app_id Unique identifier of application
    */
   void OnAppRevoked(const std::string& policy_app_id);
+
+  void OnPendingPermissionChange(const std::string& policy_app_id);
 
   /**
    * Initializes PT exchange at ignition if need
@@ -196,7 +190,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param device_info Struct with selected device parameters
    * @return consent status for selected device
    */
-   DeviceConsent GetDeviceForSending(DeviceParams& device_params);
+  DeviceConsent GetDeviceForSending(DeviceParams& device_params);
 
  private:
   PolicyHandler();
@@ -225,8 +219,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   inline PolicyManager* CreateManager();
 
-    DISALLOW_COPY_AND_ASSIGN(PolicyHandler); FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
-    friend class RetrySequence;
+  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
+  friend class RetrySequence;
 };
 
 }  //  namespace policy

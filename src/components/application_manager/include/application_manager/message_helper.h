@@ -226,11 +226,11 @@ class MessageHelper {
     static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
-    static void GetDeviceInfoForHandle(const uint32_t device_handle,
-                                       policy::DeviceParams* device_info);
-    static void GetDeviceInfoForApp(const std::string& connection_key,
-                                    policy::DeviceParams* device_info);
+  static void SendActivateAppToHMI(uint32_t const app_id);
+  static void GetDeviceInfoForHandle(const uint32_t device_handle,
+                                     policy::DeviceParams* device_info);
+  static void GetDeviceInfoForApp(uint32_t connection_key,
+                                  policy::DeviceParams* device_info);
 
     /**
     * @brief Send SDL_ActivateApp response to HMI

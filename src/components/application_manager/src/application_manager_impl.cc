@@ -211,6 +211,20 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
   return result;
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
+    const std::string& policy_app_id) const {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::map<int32_t, ApplicationSharedPtr>::const_iterator it = applications_
+      .begin();
+  for (; applications_.end() != it; ++it) {
+    if (policy_app_id.compare(it->second->mobile_app_id()->asString()) == 0) {
+      return it->second;
+    }
+  }
+  return ApplicationSharedPtr();
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
