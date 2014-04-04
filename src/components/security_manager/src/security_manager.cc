@@ -273,13 +273,15 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
     // no handshake data to send
     return false;
   }
-  const bool is_init_complete = sslContext->IsInitCompleted();
-  if (is_init_complete) {
+  if (sslContext->IsInitCompleted()) {
+    // On handshake success
     LOG4CXX_DEBUG(logger_, "SSL initialization finished success.");
+    NotifyListenersOnHandshakeDone(connection_key, true);
   } else if (handshake_result == SSLContext::Handshake_Result_Fail) {
+    // On handshake fail
     LOG4CXX_WARN(logger_, "SSL initialization finished with fail.");
+    NotifyListenersOnHandshakeDone(connection_key, false);
   }
-  NotifyListenersOnHandshakeDone(connection_key, is_init_complete);
 
   if (out_data && out_data_size) {
     // answer with the same seqNumber as income message
