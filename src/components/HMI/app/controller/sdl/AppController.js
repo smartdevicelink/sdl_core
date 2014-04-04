@@ -47,6 +47,15 @@ SDL.SDLAppController = Em.Object.create({
     model: null,
 
     /**
+     * Function to add application to application list
+     */
+    showAppList: function() {
+
+        SDL.InfoAppsView.showAppList();
+        SDL.AppPermissionsListView.showAppList();
+    }.observes('SDL.SDLModel.registeredApps.@each'),
+
+    /**
      * Handeler for command button press
      *
      * @param element:

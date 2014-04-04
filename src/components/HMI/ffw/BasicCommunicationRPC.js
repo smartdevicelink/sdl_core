@@ -250,14 +250,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 Em.Logger.log("SDL.GetListOfPermissions: Response from SDL!");
 
-                if (response.id in SDL.SDLModel.getListOfPermissionsPull) {
-                    var appID = SDL.SDLModel.getListOfPermissionsPull[response.id];
-                    SDL.SDLController.getApplicationModel(appID).allowedFunctions = response.result.allowedFunctions;
-
-                    SDL.SettingsController.userFriendlyMessagePopUp();
-
-                    SDL.SDLModel.getListOfPermissionsPull.remove(response.id);
-                }
+                SDL.SettingsController.GetListOfPermissionsResponse(response);
             }
 
             if (response.result.method == "SDL.GetStatusUpdate") {
@@ -504,7 +497,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
          *
          * @callback callbackFunc
          */
-        GetUserFriendlyMessage: function(callbackFunc, appID) {
+        GetUserFriendlyMessage: function(callbackFunc, appID, messageCodes) {
 
             var itemIndex = this.client.generateId();
 
@@ -518,10 +511,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                 "id": itemIndex,
                 "method": "SDL.GetUserFriendlyMessage",
                 "params": {
-                    "messageCodes": ["code"],
                     "language": SDL.SDLModel.hmiUILanguage
                 }
             };
+
+            if (messageCodes) {
+                JSONMessage.params.messageCodes = messageCodes;
+            }
+
             this.client.send(JSONMessage);
         },
 
