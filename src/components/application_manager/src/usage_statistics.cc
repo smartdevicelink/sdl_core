@@ -71,7 +71,9 @@ UsageStatistics::UsageStatistics(
                                       RPCS_IN_HMI_NONE),
       count_of_user_selections_(statistics_manager, app_id, USER_SELECTIONS),
       count_of_run_attempts_while_revoked_(statistics_manager, app_id,
-                                           RUN_ATTEMPTS_WHILE_REVOKED) {
+                                           RUN_ATTEMPTS_WHILE_REVOKED),
+      count_of_removals_for_bad_behavior_(statistics_manager, app_id,
+                                          REMOVALS_MISBEHAVED) {
   time_in_hmi_state_.Start(SECONDS_HMI_NONE);
 }
 
@@ -122,6 +124,10 @@ void UsageStatistics::RecordAppUserSelection() {
 
 void UsageStatistics::RecordRunAttemptsWhileRevoked() {
   ++count_of_run_attempts_while_revoked_;
+}
+
+void UsageStatistics::RecordRemovalsForBadBehavior() {
+  ++count_of_removals_for_bad_behavior_;
 }
 
 }  // namespace application_manager

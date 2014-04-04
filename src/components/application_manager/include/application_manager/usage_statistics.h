@@ -52,6 +52,7 @@ class UsageStatistics {
   void RecordPolicyRejectedRpcCall();
   void RecordAppUserSelection();
   void RecordRunAttemptsWhileRevoked();
+  void RecordRemovalsForBadBehavior();
 
  private:
   usage_statistics::AppStopwatch time_in_hmi_state_;
@@ -61,6 +62,7 @@ class UsageStatistics {
   usage_statistics::AppCounter count_of_rpcs_sent_in_hmi_none_;
   usage_statistics::AppCounter count_of_user_selections_;
   usage_statistics::AppCounter count_of_run_attempts_while_revoked_;
+  usage_statistics::AppCounter count_of_removals_for_bad_behavior_;
 };
 
 }  // namespace application_manager

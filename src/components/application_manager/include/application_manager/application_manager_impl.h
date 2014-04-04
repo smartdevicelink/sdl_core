@@ -211,10 +211,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
+     * @param reason reason of unregistering application
      * @param is_resuming describes - is this unregister
      *        is normal or need to be resumed
      */
-    void UnregisterApplication(const uint32_t& app_id, bool is_resuming = false);
+    void UnregisterApplication(const uint32_t& app_id,
+                               mobile_apis::Result::eType reason,
+                               bool is_resuming = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications

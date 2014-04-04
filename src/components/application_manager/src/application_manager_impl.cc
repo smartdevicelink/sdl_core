@@ -258,8 +258,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   smart_objects::SmartObject& params = message[strings::msg_params];
 
   const std::string mobile_app_id = params[strings::app_id].asString();
-  ApplicationSharedPtr application(new ApplicationImpl(app_id, mobile_app_id,
-                                                       policy_manager_));
+  ApplicationSharedPtr application(
+      new ApplicationImpl(app_id, mobile_app_id, policy_manager_));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
         policy_manager_, mobile_app_id,
@@ -826,7 +826,8 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
-      UnregisterApplication(session_key, true);
+      UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
+                            true);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1038,7 +1039,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key,
           mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
 
-        UnregisterApplication(connection_key, true);
+        UnregisterApplication(connection_key,
+                              mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
+                              true);
         return false;
       } else if (result ==
                  request_controller::RequestController::
@@ -1050,7 +1053,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           connection_key, mobile_api::AppInterfaceUnregisteredReason::
           REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
-        UnregisterApplication(connection_key, true);
+        UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
+                              true);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1534,26 +1538,39 @@ void ApplicationManagerImpl::HeadUnitReset(
 }
 
 void ApplicationManagerImpl::UnregisterAllApplications() {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications "  <<
-               unregister_reason_);
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications " <<
+      unregister_reason_);
 
   hmi_cooperating_ = false;
 
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      (*it)->app_id(), unregister_reason_);
+        (*it)->app_id(), unregister_reason_);
 
-    UnregisterApplication((*it)->app_id(), true);
+    UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
+                          true);
     it = application_list_.begin();
   }
   resume_controller().IgnitionOff();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(
-    const uint32_t& app_id, bool is_resuming) {
+    const uint32_t& app_id, mobile_apis::Result::eType reason,
+    bool is_resuming) {
   LOG4CXX_INFO(logger_,
-               "ApplicationManagerImpl::UnregisterApplication " << app_id);
+      "ApplicationManagerImpl::UnregisterApplication " << app_id);
+
+  switch (reason) {
+    case mobile_apis::Result::DISALLOWED:
+    case mobile_apis::Result::USER_DISALLOWED:
+    case mobile_apis::Result::INVALID_CERT:
+    case mobile_apis::Result::EXPIRED_CERT:
+    case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
+      application(app_id)->usage_report().RecordRemovalsForBadBehavior();
+      break;
+    }
+  }
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
@@ -1594,11 +1611,9 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
 void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   protocol_handler::RawMessage* rawMessage = 0;
   if (message->protocol_version() == application_manager::kV1) {
-    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV1(
-                   message);
+    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   } else if (message->protocol_version() == application_manager::kV2) {
-    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV2(
-                   message);
+    rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   } else {
     return;
   }
