@@ -395,6 +395,11 @@ TypeForwardDeclarator::TypeForwardDeclarator(Namespace* ns, const Type* type)
   type->Apply(this);
 }
 
+void TypeForwardDeclarator::GenerateCodeForNullable(
+    const NullableType* nullable) {
+  nullable->type()->Apply(this);
+}
+
 void TypeForwardDeclarator::GenerateCodeForArray(const Array* array) {
   array->type()->Apply(this);
 }
