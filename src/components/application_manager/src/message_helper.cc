@@ -489,7 +489,6 @@ void MessageHelper::SendAppDataToHMI(ApplicationConstSharedPtr app) {
 
   SendGlobalPropertiesToHMI(app);
   SendShowRequestToHMI(app);
-  SendAddCommandRequestToHMI(app);
 }
 
 void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app) {
