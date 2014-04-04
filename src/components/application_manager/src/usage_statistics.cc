@@ -32,6 +32,7 @@
 
 #include "application_manager/usage_statistics.h"
 
+#include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
 #include "usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
@@ -47,7 +48,7 @@ namespace {
 std::string LanguageIdToString(Language::eType lang_id) {
   typedef std::map<Language::eType, std::string> EnumMap;
   const EnumMap& enum_map =
-    TEnumSchemaItem<Language::eType>::getEnumElementsStringRepresentation();
+      TEnumSchemaItem<Language::eType>::getEnumElementsStringRepresentation();
   EnumMap::const_iterator found = enum_map.find(lang_id);
   if (found != enum_map.end()) {
     return found->second;
@@ -58,26 +59,26 @@ std::string LanguageIdToString(Language::eType lang_id) {
 
 }  // namespace
 
-ApplicationUsageReport::ApplicationUsageReport(
+UsageStatistics::UsageStatistics(
     const std::string& app_id,
     usage_statistics::StatisticsManager* statistics_manager)
-  : time_in_hmi_state_(statistics_manager, app_id),
-    app_registration_language_gui_(statistics_manager, app_id,
-                                   LANGUAGE_GUI),
-    app_registration_language_vui_(statistics_manager, app_id,
-                                   LANGUAGE_VUI),
-    count_of_rejected_rpc_calls_(statistics_manager, app_id,
-                              REJECTED_RPC_CALLS),
-    count_of_rpcs_sent_in_hmi_none_(statistics_manager, app_id,
-                              RPCS_IN_HMI_NONE) {
+    : time_in_hmi_state_(statistics_manager, app_id),
+      app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI),
+      app_registration_language_vui_(statistics_manager, app_id, LANGUAGE_VUI),
+      count_of_rejected_rpc_calls_(statistics_manager, app_id,
+                                   REJECTED_RPC_CALLS),
+      count_of_rpcs_sent_in_hmi_none_(statistics_manager, app_id,
+                                      RPCS_IN_HMI_NONE),
+      count_of_user_selections_(statistics_manager, app_id, USER_SELECTIONS),
+      count_of_run_attempts_while_revoked_(statistics_manager, app_id,
+                                           RUN_ATTEMPTS_WHILE_REVOKED) {
   time_in_hmi_state_.Start(SECONDS_HMI_NONE);
 }
 
-void ApplicationUsageReport::RecordHmiStateChanged(
-    mobile_apis::HMILevel::eType new_hmi_level) {
+void UsageStatistics::RecordHmiStateChanged(HMILevel::eType new_hmi_level) {
   using namespace mobile_apis::HMILevel;
   AppStopwatchId next_stopwatch = SECONDS_HMI_NONE;
-  switch(new_hmi_level) {
+  switch (new_hmi_level) {
     case HMI_FULL:
       next_stopwatch = SECONDS_HMI_FULL;
       break;
@@ -91,27 +92,36 @@ void ApplicationUsageReport::RecordHmiStateChanged(
       next_stopwatch = SECONDS_HMI_NONE;
       break;
     default:
-      NOTREACHED();
+      NOTREACHED()
+      ;
   }
   time_in_hmi_state_.Switch(next_stopwatch);
 }
 
-void ApplicationUsageReport::RecordAppRegistrationGuiLanguage(
+void UsageStatistics::RecordAppRegistrationGuiLanguage(
     Language::eType gui_language) {
   app_registration_language_gui_.Update(LanguageIdToString(gui_language));
 }
 
-void ApplicationUsageReport::RecordAppRegistrationVuiLanguage(
-    mobile_apis::Language::eType vui_language) {
+void UsageStatistics::RecordAppRegistrationVuiLanguage(
+    Language::eType vui_language) {
   app_registration_language_gui_.Update(LanguageIdToString(vui_language));
 }
 
-void ApplicationUsageReport::RecordRpcSentInHMINone() {
+void UsageStatistics::RecordRpcSentInHMINone() {
   ++count_of_rpcs_sent_in_hmi_none_;
 }
 
-void ApplicationUsageReport::RecordPolicyRejectedRpcCall() {
+void UsageStatistics::RecordPolicyRejectedRpcCall() {
   ++count_of_rejected_rpc_calls_;
+}
+
+void UsageStatistics::RecordAppUserSelection() {
+  ++count_of_user_selections_;
+}
+
+void UsageStatistics::RecordRunAttemptsWhileRevoked() {
+  ++count_of_run_attempts_while_revoked_;
 }
 
 }  // namespace application_manager

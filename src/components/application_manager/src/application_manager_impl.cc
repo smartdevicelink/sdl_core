@@ -51,6 +51,7 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
+#include "usage_statistics/counter.h"
 
 namespace application_manager {
 
@@ -116,12 +117,11 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Unloading policy library.");
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-    policy_manager_ = NULL;
   }
+  policy_manager_ = NULL;
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
-  policy_manager_ = NULL;
   hmi_so_factory_ = NULL;
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
@@ -257,10 +257,15 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   smart_objects::SmartObject& params = message[strings::msg_params];
 
-  ApplicationSharedPtr application(new ApplicationImpl(app_id,
-                                                 params[strings::app_id].asString(),
-                                                 NULL));
+  const std::string mobile_app_id = params[strings::app_id].asString();
+  ApplicationSharedPtr application(new ApplicationImpl(app_id, mobile_app_id,
+                                                       policy_manager_));
   if (!application) {
+    usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
+        policy_manager_, mobile_app_id,
+        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
+    ++count_of_rejections_sync_out_of_memory;
+
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
         connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
@@ -276,14 +281,19 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->set_name(name);
   application->set_device(device_id);
 
-  application->set_language(
-    static_cast<mobile_api::Language::eType>(
-      message[strings::msg_params][strings::language_desired].asInt()));
+  mobile_api::Language::eType launguage_desired =
+      static_cast<mobile_api::Language::eType>(params[strings::language_desired]
+          .asInt());
+  application->set_language(launguage_desired);
+  application->usage_report().RecordAppRegistrationVuiLanguage(
+      launguage_desired);
 
-  application->set_ui_language(
-    static_cast<mobile_api::Language::eType>(
-      message[strings::msg_params][strings::hmi_display_language_desired]
-      .asInt()));
+  mobile_api::Language::eType hmi_display_language_desired =
+      static_cast<mobile_api::Language::eType>(params[strings::hmi_display_language_desired]
+          .asInt());
+  application->set_ui_language(hmi_display_language_desired);
+  application->usage_report().RecordAppRegistrationGuiLanguage(
+      hmi_display_language_desired);
 
   Version version;
   int32_t min_version =
@@ -967,10 +977,17 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           MessageHelper::StringifiedHMILevel(app->hmi_level()),
           MessageHelper::StringifiedFunctionID(function_id));
 
+      if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE
+          && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
+        app->usage_report().RecordRpcSentInHMINone();
+      }
+
       if (!result.hmi_level_permitted) {
         LOG4CXX_WARN(
           logger_,
           "Request blocked by policies. " << "FunctionID: " << static_cast<int32_t>(function_id) << " Application HMI status: " << static_cast<int32_t>(app->hmi_level()));
+
+        app->usage_report().RecordPolicyRejectedRpcCall();
 
         smart_objects::SmartObject* response =
           MessageHelper::CreateBlockedByPoliciesResponse(function_id,
@@ -1129,6 +1146,10 @@ void ApplicationManagerImpl::CreatePoliciesManager() {
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();
+    // TODO(KKolodiy) in fact counter of starts
+    usage_statistics::GlobalCounter count_of_sync_reboots(
+        policy_manager_, usage_statistics::SYNC_REBOOTS);
+    ++count_of_sync_reboots;
   }
 }
 

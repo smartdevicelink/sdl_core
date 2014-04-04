@@ -327,7 +327,7 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   return (subscribed_vehicle_info_.size() == old_size - 1);
 }
 
-ApplicationUsageReport& ApplicationImpl::usage_report() {
+UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
 

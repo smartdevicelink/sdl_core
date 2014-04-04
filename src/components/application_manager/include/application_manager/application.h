@@ -53,6 +53,8 @@ namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 typedef int32_t ErrorCode;
 
+class UsageStatistics;
+
 enum APIVersion {
   kUnknownAPI = -1,
   kAPIV0 = 0,
@@ -437,6 +439,12 @@ class Application : public virtual InitialApplicationData,
     virtual bool SubscribeToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
+
+    /**
+     * Returns object for recording statistics
+     * @return object for recording statistics
+     */
+    virtual UsageStatistics& usage_report() = 0;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

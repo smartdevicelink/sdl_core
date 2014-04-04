@@ -278,6 +278,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     smart_objects::SmartType_Map);
 
   if (!params) {
+    std::string mobile_app_id =
+        (*message_)[strings::msg_params][strings::app_id].asString();
+    usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
+        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
+        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
+    ++count_of_rejections_sync_out_of_memory;
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
   }
@@ -757,7 +763,8 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
-  const std::string& mobile_app_id = (*message_)[strings::msg_params][strings::app_id].asString();
+  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
+      .asInt();
 
   const std::set<ApplicationSharedPtr>& applications =
     ApplicationManagerImpl::instance()->applications();
@@ -766,7 +773,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (mobile_app_id == (*it)->mobile_app_id()->asString()) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
       return true;
     }
   }

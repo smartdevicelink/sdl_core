@@ -44,6 +44,7 @@
 #include "utils/date_time.h"
 #include "json/value.h"
 #include "config_profile/profile.h"
+#include "application_manager/usage_statistics.h"
 
 namespace policy {
 typedef std::set<utils::SharedPtr<application_manager::Application>> ApplicationList;
@@ -468,8 +469,20 @@ void PolicyHandler::OnActivateApp(const std::string& policy_app_id,
   // - isSDLAllowed, i.e. device data usage consent
 
   AppPermissions permissions(atoi(policy_app_id.c_str()));
+
+  application_manager::UsageStatistics& usage =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          permissions.application_id)->usage_report();
+
+  usage.RecordAppUserSelection();
+
   DeviceConsent consent = GetDeviceForSending(permissions.deviceInfo);
   permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
+  permissions.appRevoked = policy_manager_->IsApplicationRevoked(policy_app_id);
+
+  if (permissions.appRevoked) {
+    usage.RecordRunAttemptsWhileRevoked();
+  }
 
   // If isSDLAllowed is false, we should provide device params for user consent
   if (!permissions.isSDLAllowed) {
