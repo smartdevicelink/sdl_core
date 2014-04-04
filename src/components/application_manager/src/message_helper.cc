@@ -283,16 +283,6 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
 }
 
-void MessageHelper::SendRemoveVrCommandsOnUnregisterApp(ApplicationConstSharedPtr app) {
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
-
-  if (app->vr_synonyms()) {
-    SendRemoveCommandToHMI(
-        static_cast<int32_t>(hmi_apis::FunctionID::VR_DeleteCommand),
-        max_cmd_id + app->app_id(), app->app_id());
-  }
-}
-
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   int32_t connection_key,
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
@@ -931,13 +921,6 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(Appli
   return requsets;
 }
 
-void MessageHelper::RemoveAppDataFromHMI(ApplicationSharedPtr app) {
-  SendDeleteCommandRequestToHMI(app);
-  SendDeleteSubMenuRequestToHMI(app);
-  SendRemoveVrCommandsOnUnregisterApp(app);
-  ResetGlobalproperties(app);
-}
-
 void MessageHelper::SendOnSdlCloseNotificationToHMI() {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -968,96 +951,6 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr ap
   message[strings::msg_params][strings::app_id] = app->app_id();
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
-}
-
-void MessageHelper::SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app) {
-  if (!app) {
-    return;
-  }
-
-  const CommandsMap& commands = app->commands_map();
-  CommandsMap::const_iterator i = commands.begin();
-  for (; commands.end() != i; ++i) {
-    if ((*i->second).keyExists(strings::menu_params)) {
-      SendRemoveCommandToHMI(
-          static_cast<int32_t>(hmi_apis::FunctionID::UI_DeleteCommand),
-          i->first, app->app_id());
-    }
-
-    if ((*i->second).keyExists(strings::vr_commands)) {
-      SendRemoveCommandToHMI(
-          static_cast<int32_t>(hmi_apis::FunctionID::VR_DeleteCommand),
-          i->first, app->app_id());
-    }
-  }
-}
-
-void MessageHelper::SendRemoveCommandToHMI(int32_t function_id, int32_t command_id,
-    uint32_t app_id) {
-  smart_objects::SmartObject* delete_cmd = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-
-  if (!delete_cmd) {
-    return;
-  }
-
-  (*delete_cmd)[strings::params][strings::function_id] = function_id;
-  (*delete_cmd)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*delete_cmd)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*delete_cmd)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*delete_cmd)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  msg_params[strings::cmd_id] = command_id;
-  msg_params[strings::app_id] = app_id;
-  (*delete_cmd)[strings::msg_params] = msg_params;
-  ApplicationManagerImpl::instance()->ManageHMICommand(delete_cmd);
-}
-
-void MessageHelper::SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app) {
-  if (!app) {
-    return;
-  }
-
-  const SubMenuMap& sub_menu = app->sub_menu_map();
-  SubMenuMap::const_iterator i = sub_menu.begin();
-  for (; sub_menu.end() != i; ++i) {
-    smart_objects::SmartObject* delete_sub_menu =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
-
-    if (!delete_sub_menu) {
-      return;
-    }
-
-    (*delete_sub_menu)[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::UI_DeleteSubMenu;
-    (*delete_sub_menu)[strings::params][strings::message_type] =
-      hmi_apis::messageType::request;
-    (*delete_sub_menu)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*delete_sub_menu)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*delete_sub_menu)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
-    msg_params[strings::menu_id] = i->first;
-    msg_params[strings::menu_params][strings::position] =
-      (*i->second)[strings::position];
-    msg_params[strings::menu_params][strings::menu_name] =
-      (*i->second)[strings::menu_name];
-    msg_params[strings::app_id] = app->app_id();
-    (*delete_sub_menu)[strings::msg_params] = msg_params;
-
-    ApplicationManagerImpl::instance()->ManageHMICommand(delete_sub_menu);
-  }
 }
 
 void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {

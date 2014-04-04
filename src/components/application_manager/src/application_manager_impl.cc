@@ -368,7 +368,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
         }
       }
       if (curr_app->IsFullscreen()) {
-        MessageHelper::RemoveAppDataFromHMI(curr_app);
+        MessageHelper::ResetGlobalproperties(curr_app);
       }
     }
   }
@@ -454,7 +454,6 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
 }
 
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
-  MessageHelper::SendDeleteCommandRequestToHMI(app);
   MessageHelper::ResetGlobalproperties(app);
 }
 
@@ -1535,7 +1534,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::RemoveAppDataFromHMI(it->second);
+  MessageHelper::ResetGlobalproperties(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   applications_.erase(it);
   application_list_.erase(app_to_remove);
