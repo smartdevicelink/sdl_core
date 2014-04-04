@@ -48,13 +48,12 @@ EndAudioPassThruRequest::~EndAudioPassThruRequest() {
 
 void EndAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully = ApplicationManagerImpl::instance()->end_audio_pass_thru();
+  bool ended_successfully =
+      ApplicationManagerImpl::instance()->end_audio_pass_thru();
 
   if (ended_successfully) {
     SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
-    int32_t session_key =
-      (*message_)[strings::params][strings::connection_key].asInt();
-    ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
+    ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
   } else {
     SendResponse(false, mobile_apis::Result::REJECTED,
                  "No PerformAudioPassThru is now active");

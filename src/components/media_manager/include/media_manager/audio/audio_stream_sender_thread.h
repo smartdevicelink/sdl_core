@@ -122,7 +122,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     uint32_t session_key_;
     const std::string fileName_;
     int32_t offset_;
-    bool shouldBeStoped_;
+    volatile bool shouldBeStoped_;
     sync_primitives::Lock shouldBeStoped_lock_;
 
     static const int32_t kAudioPassThruTimeout;
