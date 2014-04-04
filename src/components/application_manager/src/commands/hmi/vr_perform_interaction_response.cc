@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_perform_interaction_response.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -45,6 +46,9 @@ VRPerformInteractionResponse::~VRPerformInteractionResponse() {
 
 void VRPerformInteractionResponse::Run() {
   LOG4CXX_INFO(logger_, "VRPerformInteractionResponse::Run");
+  event_engine::Event event(hmi_apis::FunctionID::VR_PerformInteraction);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
