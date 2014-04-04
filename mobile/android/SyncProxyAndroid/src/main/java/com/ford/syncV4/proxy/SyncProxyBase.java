@@ -91,11 +91,8 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
-import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.trace.TraceDeviceInfo;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.test.TestConfig;
@@ -125,9 +122,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * negotiated with the Sync.
      */
     static final int HEARTBEAT_INTERVAL = 5000;
-    protected static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-    /**
-     * Delay between proxy disconnect (e.g., transport error) and another proxy
+    
+    /** Delay between proxy disconnect (e.g., transport error) and another proxy
      * reconnect attempt.
      */
     private static final int PROXY_RECONNECT_DELAY = 5000;
@@ -523,7 +519,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
 
         // Trace that ctor has fired
-        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+        Logger.i("SyncProxy Created, instanceID=" + this.toString());
     }
 
     /**
@@ -586,7 +582,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Trace that ctor has fired
-        SyncTrace.logProxyEvent("SyncProxy Created, instanceID=" + this.toString(), SYNC_LIB_TRACE_KEY);
+        Logger.i("SyncProxy Created, instanceID=" + this.toString());
     }
 
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
@@ -810,14 +806,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     // Public method to enable the siphon transport
-    public static void enableSiphonDebug() {
+    /*public static void enableSiphonDebug() {
         SiphonServer.enableSiphonServer();
-    }
+    }*/
 
     // Public method to disable the Siphon Trace Server
-    public static void disableSiphonDebug() {
+    /*public static void disableSiphonDebug() {
         SiphonServer.disableSiphonServer();
-    }
+    }*/
 
     public static void setHeartBeatInterval(int heartBeatInterval) {
         SyncProxyBase.heartBeatInterval = heartBeatInterval;
@@ -1040,7 +1036,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } catch (SyncException e) {
             throw e;
         } finally {
-            SyncTrace.logProxyEvent("SyncProxy cleaned.", SYNC_LIB_TRACE_KEY);
+            Logger.i("SyncProxy cleaned.");
         }
     }
 
@@ -1092,7 +1088,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         _proxyDisposed = true;
 
-        SyncTrace.logProxyEvent("Application called dispose() method.", SYNC_LIB_TRACE_KEY);
+        Logger.i("Application called dispose() method.");
 
         try {
             // Clean the proxy
@@ -1128,7 +1124,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         } catch (SyncException e) {
             throw e;
         } finally {
-            SyncTrace.logProxyEvent("SyncProxy disposed.", SYNC_LIB_TRACE_KEY);
+            Logger.i("SyncProxy disposed.");
         }
     } // end-method
 
@@ -1308,7 +1304,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (mSyncConnection.getIsConnected()) {
             mSyncConnection.sendMessage(message);
         }
-        SyncTrace.logProxyEvent("SyncProxy sending Protocol Message: " + message.toString(), SYNC_LIB_TRACE_KEY);
+        Logger.i("SyncProxy sending Protocol Message: " + message.toString());
     }
 
     private void handleErrorsFromOutgoingMessageDispatcher(String info, Exception e) {
@@ -1360,11 +1356,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 /****************End Legacy Specific Call-backs************/
             } else {
                 // Diagnostics
-                SyncTrace.logProxyEvent("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.", SYNC_LIB_TRACE_KEY);
+                Logger.i("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.");
                 Logger.e("Unknown RPC Message encountered. Check for an updated version of the SYNC Proxy.");
             }
 
-            SyncTrace.logProxyEvent("Proxy fired callback: " + message.getFunctionName(), SYNC_LIB_TRACE_KEY);
+            Logger.i("Proxy fired callback: " + message.getFunctionName());
         } catch (final Exception e) {
             // Pass error to application through listener
             Logger.e("Error handing proxy event.", e);
@@ -1406,8 +1402,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // FIXME: return to private?
     void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
         try {
-            SyncTrace.logRPCEvent(InterfaceActivityDirection.Transmit, request, SYNC_LIB_TRACE_KEY);
-
             final IRPCRequestConverter converter =
                     rpcRequestConverterFactory.getConverterForRequest(request);
             List<ProtocolMessage> protocolMessages =
@@ -1424,7 +1418,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
         } catch (OutOfMemoryError e) {
-            SyncTrace.logProxyEvent("OutOfMemory exception while sending request " + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
+            Logger.i("OutOfMemory exception while sending request " + request.getFunctionName());
             throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
         }
     }
@@ -1648,18 +1642,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         // Test if request is null
         if (request == null) {
-            SyncTrace.logProxyEvent("Application called sendRPCRequest method with a null RPCRequest.", SYNC_LIB_TRACE_KEY);
+            Logger.i("Application called sendRPCRequest method with a null RPCRequest.");
             throw new IllegalArgumentException("sendRPCRequest cannot be called with a null request.");
         }
 
-        SyncTrace.logProxyEvent("Application called sendRPCRequest method for RPCRequest: ." + request.getFunctionName(), SYNC_LIB_TRACE_KEY);
+        Logger.i("Application called sendRPCRequest method for RPCRequest: ." + request.getFunctionName());
 
         checkSyncConnection();
 
         // Test for illegal correlation ID
         if (isCorrelationIDProtected(request.getCorrelationID())) {
 
-            SyncTrace.logProxyEvent("Application attempted to use the reserved correlation ID, " + request.getCorrelationID(), SYNC_LIB_TRACE_KEY);
+            Logger.i("Application attempted to use the reserved correlation ID, " + request.getCorrelationID());
             throw new SyncException("Invalid correlation ID. The correlation ID, " + request.getCorrelationID()
                     + " , is a reserved correlation ID.", SyncExceptionCause.RESERVED_CORRELATION_ID);
         }
@@ -1667,7 +1661,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Throw exception if RPCRequest is sent when SYNC is unavailable
         if (!_appInterfaceRegisterd && !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
-                SyncTrace.logProxyEvent("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.", SYNC_LIB_TRACE_KEY);
+                Logger.i("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.");
                 throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
             }
         }
@@ -1676,7 +1670,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (request.getFunctionName().equals(Names.RegisterAppInterface)
                     || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
-                    SyncTrace.logProxyEvent("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.", SYNC_LIB_TRACE_KEY);
+                    Logger.i("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.");
                     throw new SyncException("The RPCRequest, " + request.getFunctionName() +
                             ", is unnallowed using the Advanced Lifecycle Management Model.", SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
                 }
@@ -1689,7 +1683,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Test if SyncConnection is null
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null || !mSyncConnection.getIsConnected()) {
-                SyncTrace.logProxyEvent("Application attempted to send and RPCRequest without a connected transport.", SYNC_LIB_TRACE_KEY);
+                Logger.i("Application attempted to send and RPCRequest without a connected transport.");
                 throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
             }
         }
@@ -1711,7 +1705,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void notifyProxyClosed(final String info, final Exception e) {
-        SyncTrace.logProxyEvent("NotifyProxyClose", SYNC_LIB_TRACE_KEY);
+        Logger.i("NotifyProxyClose");
 
         OnProxyClosed message = new OnProxyClosed(info, e);
         queueInternalMessage(message);

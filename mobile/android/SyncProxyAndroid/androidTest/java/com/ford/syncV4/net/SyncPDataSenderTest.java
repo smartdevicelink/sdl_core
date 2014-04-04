@@ -35,7 +35,7 @@ public class SyncPDataSenderTest extends InstrumentationTestCase {
     public void testSendSyncPData() throws SyncException, UnsupportedEncodingException,
             InterruptedException {
 
-        SyncPDataSender syncPDataSender = new SyncPDataSender();
+        SyncPDataSender syncPDataSender = new SyncPDataSender(123);
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         final boolean[] result = {false};

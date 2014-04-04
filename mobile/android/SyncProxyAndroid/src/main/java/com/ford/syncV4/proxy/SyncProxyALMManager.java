@@ -546,14 +546,14 @@ public class SyncProxyALMManager {
 	
 	/************************** Siphon Methods *************************************/
 	// Public method to enable the siphon transport
-	public static void enableSiphonDebug() {
+	/*public static void enableSiphonDebug() {
 		SyncProxyBase.enableSiphonDebug();
-	}
+	}*/
 	
 	// Public method to disable the Siphon Trace Server
-	public static void disableSiphonDebug() {
+	/*public static void disableSiphonDebug() {
 		SyncProxyBase.disableSiphonDebug();
-	}
+	}*/
 	/************************** End Siphon Methods *************************************/
 	
 	/*********************** Expose Public Proxy Methods *******************************/

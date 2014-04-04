@@ -11,8 +11,6 @@ import android.os.ParcelFileDescriptor;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SiphonServer;
 import com.ford.syncV4.transport.SyncTransport;
@@ -44,15 +42,9 @@ public class USBTransport extends SyncTransport {
      */
     public static final String ACTION_USB_ACCESSORY_ATTACHED =
             "com.ford.syncV4.USB_ACCESSORY_ATTACHED";
-    /**
-     * String tag for logging.
-     */
-    private static final String TAG = USBTransport.class.getSimpleName();
-    /**
-     * Key for SyncTrace.
-     */
-    private static final String SYNC_LIB_TRACE_KEY =
-            "42baba60-eb57-11df-98cf-0800200c9a66";
+
+    private static final String CLASS_NAME = USBTransport.class.getSimpleName();
+
     /**
      * Broadcast action: sent when the user has granted access to the USB
      * accessory.
@@ -74,14 +66,7 @@ public class USBTransport extends SyncTransport {
      * accessory_filter.xml to work properly.
      */
     private final static String ACCESSORY_VERSION = "1.0";
-    /**
-     * Prefix string to indicate debug output.
-     */
-    private static final String DEBUG_PREFIX = "DEBUG: ";
-    /**
-     * String to prefix exception output.
-     */
-    private static final String EXCEPTION_STRING = " Exception String: ";
+
     /**
      * Broadcast receiver that receives different USB-related intents: USB
      * accessory connected, disconnected, and permission granted.
@@ -90,21 +75,21 @@ public class USBTransport extends SyncTransport {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Logger.d("USBReceiver Action: " + action);
+            Logger.d(CLASS_NAME + " USBReceiver Action: " + action);
 
             UsbAccessory accessory =
                     intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
             if (accessory != null) {
                 if (ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
-                    Logger.i("Accessory " + accessory + " attached");
+                    Logger.i(CLASS_NAME + " Accessory " + accessory + " attached");
                     if (isAccessorySupported(accessory)) {
                         connectToAccessory(accessory);
                     } else {
-                        Logger.w("Attached accessory is not supported!");
+                        Logger.w(CLASS_NAME + " Attached accessory is not supported!");
                     }
                 } else if (UsbManager.ACTION_USB_ACCESSORY_DETACHED
                         .equals(action)) {
-                    Logger.i("Accessory " + accessory + " detached");
+                    Logger.i(CLASS_NAME + " Accessory " + accessory + " detached");
                     final String msg = "USB accessory has been detached";
                     disconnect(msg, new SyncException(msg,
                             SyncExceptionCause.SYNC_USB_DETACHED));
@@ -112,18 +97,18 @@ public class USBTransport extends SyncTransport {
                     boolean permissionGranted = intent.getBooleanExtra(
                             UsbManager.EXTRA_PERMISSION_GRANTED, false);
                     if (permissionGranted) {
-                        Logger.i("Permission granted for accessory " + accessory);
+                        Logger.i(CLASS_NAME + " Permission granted for accessory " + accessory);
                         openAccessory(accessory);
                     } else {
                         final String msg =
-                                "Permission denied for accessory " + accessory;
-                        Logger.w(msg);
+                                " Permission denied for accessory " + accessory;
+                        Logger.w(CLASS_NAME + msg);
                         disconnect(msg, new SyncException(msg,
                                 SyncExceptionCause.SYNC_USB_PERMISSION_DENIED));
                     }
                 }
             } else {
-                Logger.w("Accessory is null");
+                Logger.w(CLASS_NAME + " Accessory is null");
             }
         }
     };
@@ -199,7 +184,7 @@ public class USBTransport extends SyncTransport {
      * @param state New state
      */
     public synchronized void setState(State state) {
-        Logger.d("Changing state " + mState + " to " + state);
+        Logger.d(CLASS_NAME + " Changing state " + mState + " to " + state);
         mState = state;
         if (mState == State.CONNECTED) {
             handleTransportConnected();
@@ -217,13 +202,10 @@ public class USBTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset,
                                              int length) {
-        //Logger.d("SendBytes: array size " + msgBytes.length + ", offset " + offset +
-        //        ", length " + length);
-
         boolean result = false;
         final State state = getState();
         if (state != State.CONNECTED) {
-            Logger.w("Can't send bytes from " + state + " state");
+            Logger.w(CLASS_NAME + " Can't send bytes from " + state + " state");
             return result;
         }
         if (mOutputStream != null) {
@@ -231,19 +213,15 @@ public class USBTransport extends SyncTransport {
                 mOutputStream.write(msgBytes, offset, length);
                 result = true;
 
-                //Logger.i("Bytes successfully sent");
-                SyncTrace.logTransportEvent(TAG + ": bytes sent",
-                        null, InterfaceActivityDirection.Transmit,
-                        msgBytes, offset, length,
-                        SYNC_LIB_TRACE_KEY);
+                Logger.d(CLASS_NAME + ": " + msgBytes.length + " bytes sent");
             } catch (IOException e) {
-                final String msg = "Failed to send bytes over USB";
-                Logger.w(msg, e);
+                final String msg = " Failed to send bytes over USB";
+                Logger.w(CLASS_NAME + msg, e);
                 handleTransportError(msg, e);
             }
         } else {
-            final String msg = "Can't send bytes when output stream is null";
-            Logger.w(msg);
+            final String msg = " Can't send bytes when output stream is null";
+            Logger.w(CLASS_NAME + msg);
             handleTransportError(msg, null);
         }
 
@@ -259,14 +237,14 @@ public class USBTransport extends SyncTransport {
     public void openConnection() throws SyncException {
         final State state = getState();
         if (state != State.IDLE) {
-            Logger.w("openConnection() called from state " + state + "; doing nothing");
+            Logger.w(CLASS_NAME + " openConnection() called from state " + state + "; doing nothing");
             return;
         }
 
-        Logger.i("openConnection()");
+        Logger.i(CLASS_NAME + " openConnection()");
         setState(State.LISTENING);
 
-        Logger.d("Registering receiver");
+        Logger.d(CLASS_NAME + " Registering receiver");
         try {
             IntentFilter filter = new IntentFilter();
             filter.addAction(ACTION_USB_ACCESSORY_ATTACHED);
@@ -276,8 +254,8 @@ public class USBTransport extends SyncTransport {
 
             initializeAccessory();
         } catch (Exception e) {
-            String msg = "Couldn't start opening connection";
-            Logger.e(msg, e);
+            String msg = " Couldn't start opening connection";
+            Logger.e(CLASS_NAME + msg, e);
             throw new SyncException(msg, e, SyncExceptionCause.SYNC_CONNECTION_FAILED);
         }
     }
@@ -296,17 +274,17 @@ public class USBTransport extends SyncTransport {
      */
     @Override
     public void stopReading() {
-        Logger.i("USBTransport: stop reading requested, doing nothing");
+        Logger.i(CLASS_NAME + " Stop reading requested, doing nothing");
         stopUSBReading();
     }
 
     private void stopUSBReading() {
         final State state = getState();
         if (state != State.CONNECTED) {
-            Logger.w("Stopping reading called from state " + state + "; doing nothing");
+            Logger.w(CLASS_NAME + " Stopping reading called from state " + state + "; doing nothing");
             return;
         }
-        Logger.i("Stopping reading");
+        Logger.i(CLASS_NAME + " Stopping reading");
         stopReaderThread();
     }
 
@@ -315,10 +293,10 @@ public class USBTransport extends SyncTransport {
      */
     private void stopReaderThread() {
         if (mReaderThread != null) {
-            Logger.i("Interrupting USB reader");
+            Logger.i(CLASS_NAME + " Interrupting USB reader");
             mReaderThread.interrupt();
         } else {
-            Logger.d("USB reader is null");
+            Logger.d(CLASS_NAME + " USB reader is null");
         }
     }
 
@@ -331,16 +309,12 @@ public class USBTransport extends SyncTransport {
     private void disconnect(String msg, Exception ex) {
         final State state = getState();
         if (state != State.LISTENING && state != State.CONNECTED) {
-            Logger.w("Disconnect called from state " + state + "; doing nothing");
+            Logger.w(CLASS_NAME + " Disconnect called from state " + state + "; doing nothing");
             return;
         }
 
-        Logger.i("Disconnect from state " + getState() + "; message: " + msg + "; exception: " + ex);
+        Logger.i(CLASS_NAME + " Disconnect from state " + getState() + "; message: " + msg + "; exception: " + ex);
         setState(State.IDLE);
-
-        SyncTrace.logTransportEvent(TAG + ": disconnect", null,
-                InterfaceActivityDirection.None, null, 0,
-                SYNC_LIB_TRACE_KEY);
 
         stopReaderThread();
 
@@ -349,7 +323,7 @@ public class USBTransport extends SyncTransport {
                 try {
                     mOutputStream.close();
                 } catch (IOException e) {
-                    Logger.w("Can't close output stream", e);
+                    Logger.w(CLASS_NAME + " Can't close output stream", e);
                 }
                 mOutputStream = null;
             }
@@ -357,7 +331,7 @@ public class USBTransport extends SyncTransport {
                 try {
                     mInputStream.close();
                 } catch (IOException e) {
-                    Logger.w("Can't close input stream", e);
+                    Logger.w(CLASS_NAME + " Can't close input stream", e);
                 }
                 mInputStream = null;
             }
@@ -365,7 +339,7 @@ public class USBTransport extends SyncTransport {
                 try {
                     mParcelFD.close();
                 } catch (IOException e) {
-                    Logger.w("Can't close file descriptor", e);
+                    Logger.w(CLASS_NAME + " Can't close file descriptor", e);
                 }
                 mParcelFD = null;
             }
@@ -373,11 +347,11 @@ public class USBTransport extends SyncTransport {
             mAccessory = null;
         }
 
-        Logger.d("Unregistering receiver");
+        Logger.d(CLASS_NAME + " Unregistering receiver");
         try {
             getContext().unregisterReceiver(mUSBReceiver);
         } catch (IllegalArgumentException e) {
-            Logger.w("Receiver was already unregistered", e);
+            Logger.w(CLASS_NAME + " Receiver was already unregistered", e);
         }
 
         String disconnectMsg = (msg == null ? "" : msg);
@@ -388,12 +362,12 @@ public class USBTransport extends SyncTransport {
         if (ex == null) {
             // This disconnect was not caused by an error, notify the
             // proxy that the transport has been disconnected.
-            Logger.i("Disconnect is correct. Handling it");
+            Logger.i(CLASS_NAME + " Disconnect is correct. Handling it");
             handleTransportDisconnected(disconnectMsg);
         } else {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
-            Logger.i("Disconnect is incorrect. Handling it as error");
+            Logger.i(CLASS_NAME + " Disconnect is incorrect. Handling it as error");
             handleTransportError(disconnectMsg, ex);
         }
     }
@@ -413,11 +387,11 @@ public class USBTransport extends SyncTransport {
      * Looks for an already connected compatible accessory and connect to it.
      */
     private void initializeAccessory() {
-        Logger.i("Looking for connected accessories");
+        Logger.i(CLASS_NAME + " Looking for connected accessories");
         UsbManager usbManager = getUsbManager();
         UsbAccessory[] accessories = usbManager.getAccessoryList();
         if (accessories != null) {
-            Logger.d("Found total " + accessories.length + " accessories");
+            Logger.d(CLASS_NAME + " Found total " + accessories.length + " accessories");
             for (UsbAccessory accessory : accessories) {
                 if (isAccessorySupported(accessory)) {
                     connectToAccessory(accessory);
@@ -425,7 +399,7 @@ public class USBTransport extends SyncTransport {
                 }
             }
         } else {
-            Logger.i("No connected accessories found");
+            Logger.i(CLASS_NAME + " No connected accessories found");
         }
     }
 
@@ -458,14 +432,10 @@ public class USBTransport extends SyncTransport {
             case LISTENING:
                 UsbManager usbManager = getUsbManager();
                 if (usbManager.hasPermission(accessory)) {
-                    Logger.i("Already have permission to use " + accessory);
+                    Logger.i(CLASS_NAME + " Already have permission to use " + accessory);
                     openAccessory(accessory);
                 } else {
-                    Logger.i("Requesting permission to use " + accessory);
-                    SyncTrace.logTransportEvent(TAG + ": requesting permission",
-                            SyncTrace.getUSBAccessoryInfo(accessory),
-                            InterfaceActivityDirection.None, null, 0,
-                            SYNC_LIB_TRACE_KEY);
+                    Logger.i(CLASS_NAME + " Requesting permission to use " + accessory);
 
                     PendingIntent permissionIntent = PendingIntent
                             .getBroadcast(getContext(), 0,
@@ -476,7 +446,7 @@ public class USBTransport extends SyncTransport {
                 break;
 
             default:
-                Logger.w("connectToAccessory() called from state " + state +
+                Logger.w(CLASS_NAME + " connectToAccessory() called from state " + state +
                         "; doing nothing");
         }
     }
@@ -501,16 +471,16 @@ public class USBTransport extends SyncTransport {
     private void openAccessory(UsbAccessory accessory) {
         final State state = getState();
         if (state != State.LISTENING) {
-            Logger.w("openAccessory() called from state " + state + "; doing nothing");
+            Logger.w(CLASS_NAME + " openAccessory() called from state " + state + "; doing nothing");
             return;
         }
-        Logger.i("Opening accessory " + accessory);
+        Logger.i(CLASS_NAME + " Opening accessory " + accessory);
         mAccessory = accessory;
 
         startReaderThread();
 
         // Initialize the SiphonServer
-        SiphonServer.init();
+        //SiphonServer.init();
     }
 
     private void startReaderThread() {
@@ -580,23 +550,23 @@ public class USBTransport extends SyncTransport {
          */
         @Override
         public void run() {
-            Logger.d("USB reader started!");
+            Logger.d(CLASS_NAME + " USB reader started!");
 
             if (isInterrupted()) {
-                Logger.i("Thread is interrupted, not connecting");
+                Logger.i(CLASS_NAME + " Thread is interrupted, not connecting");
                 return;
             }
 
             final State state = getState();
             if (state != State.LISTENING) {
-                Logger.w("State is:" + state + ", will not try to connect");
+                Logger.w(CLASS_NAME + " State is:" + state + ", will not try to connect");
             }
 
             if (connect()) {
                 readFromTransport();
             }
 
-            Logger.d("USB reader finished!");
+            Logger.d(CLASS_NAME + " USB reader finished!");
         }
 
         /**
@@ -608,16 +578,16 @@ public class USBTransport extends SyncTransport {
             try {
                 mParcelFD = getUsbManager().openAccessory(mAccessory);
             } catch (SecurityException e) {
-                final String msg = "Have no permission to open the accessory";
-                Logger.e(msg, e);
+                final String msg = " Have no permission to open the accessory";
+                Logger.e(CLASS_NAME + msg, e);
                 disconnect(msg, e);
                 return false;
             }
             if (mParcelFD == null) {
                 if (isInterrupted()) {
-                    Logger.w("Can't open accessory, and thread is interrupted");
+                    Logger.w(CLASS_NAME + " Can't open accessory, and thread is interrupted");
                 } else {
-                    Logger.w("Can't open accessory, disconnecting!");
+                    Logger.w(CLASS_NAME + " Can't open accessory, disconnecting!");
                     String msg = "Failed to open USB accessory";
                     disconnect(msg, new SyncException(msg,
                             SyncExceptionCause.SYNC_CONNECTION_FAILED));
@@ -628,11 +598,7 @@ public class USBTransport extends SyncTransport {
             mInputStream = new FileInputStream(fd);
             mOutputStream = new FileOutputStream(fd);
 
-            Logger.i("Accessory opened!");
-            SyncTrace.logTransportEvent(TAG + ": accessory opened",
-                    SyncTrace.getUSBAccessoryInfo(mAccessory),
-                    InterfaceActivityDirection.None, null, 0,
-                    SYNC_LIB_TRACE_KEY);
+            Logger.i(CLASS_NAME + " Accessory opened!");
 
             setState(State.CONNECTED);
 
@@ -654,30 +620,27 @@ public class USBTransport extends SyncTransport {
                     bytesRead = mInputStream.read(buffer);
                     if (bytesRead == -1) {
                         if (isInterrupted()) {
-                            Logger.i("EOF reached, and thread is interrupted");
+                            Logger.i(CLASS_NAME + " EOF reached, and thread is interrupted");
                         } else {
-                            Logger.i("EOF reached, disconnecting!");
+                            Logger.i(CLASS_NAME + " EOF reached, disconnecting!");
                             disconnect("EOF reached", null);
                         }
                         return;
                     }
                 } catch (IOException e) {
                     if (isInterrupted()) {
-                        Logger.w("Can't read data, and thread is interrupted", e);
+                        Logger.w(CLASS_NAME + " Can't read data, and thread is interrupted", e);
                     } else {
-                        Logger.w("Can't read data, disconnecting!", e);
+                        Logger.w(CLASS_NAME + " Can't read data, disconnecting!", e);
                         disconnect("Can't read data from USB", e);
                     }
                     return;
                 }
 
-                //Logger.d("Read " + bytesRead + " bytes");
-                SyncTrace.logTransportEvent(TAG + ": read bytes", null,
-                        InterfaceActivityDirection.Receive, buffer, bytesRead,
-                        SYNC_LIB_TRACE_KEY);
+                Logger.d(CLASS_NAME + " Read " + bytesRead + " bytes");
 
                 if (isInterrupted()) {
-                    Logger.i("Read some data, but thread is interrupted");
+                    Logger.i(CLASS_NAME + " Read some data, but thread is interrupted");
                     return;
                 }
 

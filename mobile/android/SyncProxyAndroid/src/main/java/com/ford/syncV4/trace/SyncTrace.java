@@ -32,6 +32,7 @@ import java.sql.Timestamp;
  */
 
 public class SyncTrace {
+
 	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
 	
 	static boolean canWriteLogs = false;

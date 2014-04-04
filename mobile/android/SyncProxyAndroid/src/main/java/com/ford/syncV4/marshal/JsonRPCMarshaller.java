@@ -10,26 +10,23 @@ import org.json.JSONObject;
 
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCStruct;
-import com.ford.syncV4.trace.*;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.util.logger.Logger;
 
 /*
  * Responsible for marshalling and unmarshing between RPC Objects and byte streams that are sent
  * over transmission
  */
-
 public class JsonRPCMarshaller implements IJsonRPCMarshaller {
 	
-	private static final String SYNC_LIB_PRIVATE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-	
+	private static final String CLASS_NAME = JsonRPCMarshaller.class.getSimpleName();
+
 	public byte[] marshall(RPCMessage msg, byte version) {
 		byte[] jsonBytes = null;
 		try {
 			JSONObject jsonObject = msg.serializeJSON(version);
 			jsonBytes = jsonObject.toString().getBytes();
 			
-			SyncTrace.logMarshallingEvent(InterfaceActivityDirection.Transmit, jsonBytes, SYNC_LIB_PRIVATE_KEY);
+            Logger.d(CLASS_NAME + " transmit " + jsonObject);
 		} catch (JSONException e) {
             Logger.e("Failed to encode messages to JSON.", e);
 		}
@@ -37,7 +34,11 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
 	}
 	
 	public Hashtable<String, Object> unmarshall(byte[] message) {
-		SyncTrace.logMarshallingEvent(InterfaceActivityDirection.Receive, message, SYNC_LIB_PRIVATE_KEY);
+        if (message != null) {
+            Logger.d(CLASS_NAME + " receive " + message.length + " bytes");
+        } else {
+            Logger.w(CLASS_NAME + " receive null bytes");
+        }
 		Hashtable<String, Object> ret = null;
 		try {
 			String jsonString = new String(message);

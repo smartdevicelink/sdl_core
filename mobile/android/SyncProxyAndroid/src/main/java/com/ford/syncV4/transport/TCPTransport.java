@@ -156,7 +156,7 @@ public class TCPTransport extends SyncTransport {
                 mThread.start();
 
                 // Initialize the SiphonServer
-                SiphonServer.init();
+                //SiphonServer.init();
             } catch (Exception e) {
                 logError("TCPTransport: Exception during transport thread starting", e);
                 throw new SyncException(e);
