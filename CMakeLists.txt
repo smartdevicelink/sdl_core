@@ -54,7 +54,7 @@ if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
-    #tests are not supported yet for QNX build 
+    #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
   endif()
 endif()
@@ -107,14 +107,16 @@ cmake_minimum_required(VERSION 2.8.0)
 set (PROJECT smartDeviceLinkCore)
 project (${PROJECT})
 
+#ADD_DEPENDENCIES(${PROJECT} Policy)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
-set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
+set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -265,13 +267,13 @@ else ()
     add_definitions(-DNO_HMI)
 endif ()
 
-if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "dbus")
 endif()
-if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "web" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "messagebroker")
 endif()
-if (HMI STREQUAL "no" AND NOT DEFINED HMIADAPTER) 
+if (HMI STREQUAL "no" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "mqueue")
 endif()
 

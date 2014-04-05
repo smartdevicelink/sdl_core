@@ -123,6 +123,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.Started");
   MessageBrokerController::subscribeTo("VR.Stopped");
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }

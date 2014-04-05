@@ -105,6 +105,7 @@ FFW.RPCClient = Em.Object
          */
         disconnect: function() {
 
+            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
             this.unregisterRPCComponent();
         },
 

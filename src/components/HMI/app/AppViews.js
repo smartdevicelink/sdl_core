@@ -62,6 +62,8 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.BottomControls,
         SDL.TTSPopUp,
         SDL.AlertPopUp,
+        SDL.PopUp,
+        SDL.AlertManeuverPopUp,
         SDL.AudioPassThruPopUp,
         SDL.VRPopUp,
         SDL.VehicleInfo,
@@ -82,5 +84,31 @@ SDL.AppViews = Em.ContainerView.extend( {
         this._super();
 
         SDL.set('appReady', true);
+
+        $(window).bind("beforeunload", function(e) {
+
+            FFW.BasicCommunication.OnIgnitionCycleOver();
+
+            FFW.BasicCommunication.disconnect();
+            FFW.UI.disconnect();
+            FFW.VR.disconnect();
+            FFW.VehicleInfo.disconnect();
+            FFW.TTS.disconnect();
+            FFW.Buttons.disconnect();
+            FFW.Navigation.disconnect();
+
+            if(confirm('The "ignition off" emulation executed!')){
+                return 'OK, Good Bye then';
+            }
+            else {
+                e = e || event;
+                if (e.preventDefault) {
+                    e.preventDefault();
+                }
+                e.returnValue = false;
+                return 'The "ignition off" emulation executed!';
+            }
+        })
+
     }
 });
