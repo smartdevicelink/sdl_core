@@ -2,11 +2,10 @@ package com.ford.syncV4.util;
 
 import android.util.Log;
 
-import com.ford.syncV4.proxy.SyncProxyBase;
-
 public class NativeLogTool {
-	
-	static private boolean logToSystemEnabled = true;
+
+    private static final String TAG = "SyncProxy";
+	private static boolean logToSystemEnabled = true;
 	private static final int ChunkSize = 4000;
 	
 	private enum LogTarget {
@@ -24,7 +23,7 @@ public class NativeLogTool {
 	} // end-method
 	
 	public static void logInfo(String message) {
-		logInfo(SyncProxyBase.TAG, message);
+		logInfo(TAG, message);
 	}
 	
 	public static void logInfo(String tag, String message) {
@@ -34,7 +33,7 @@ public class NativeLogTool {
 	}
 	
 	public static void logWarning(String message) {
-		logWarning(SyncProxyBase.TAG, message);
+		logWarning(TAG, message);
 	}
 	
 	public static void logWarning(String tag, String message) {
@@ -44,7 +43,7 @@ public class NativeLogTool {
 	}
 	
 	public static void logError(String message) {
-		logError(SyncProxyBase.TAG, message);
+		logError(TAG, message);
 	}
 	
 	public static void logError(String tag, String message) {
@@ -54,7 +53,7 @@ public class NativeLogTool {
 	}
 	
 	public static void logError(String message, Throwable t) {
-		logError(SyncProxyBase.TAG, message, t);
+		logError(TAG, message, t);
 	}
 	
 	public static void logError(String tag, String message, Throwable t) {
@@ -90,11 +89,11 @@ public class NativeLogTool {
 						break;
 				} // end-switch
 				if (bytesWritten < chunk.length()) {
-					Log.e(SyncProxyBase.TAG, "Calling Log.e: msg length=" + chunk.length() + ", bytesWritten=" + bytesWritten);
+					Log.e(TAG, "Calling Log.e: msg length=" + chunk.length() + ", bytesWritten=" + bytesWritten);
 				} // end-if
 			} // end-while
 		} catch (Exception ex) {
-			Log.e(SyncProxyBase.TAG, "Failure writing " + ltarg.name() + " fragments to android log:" + ex.toString());
+			Log.e(TAG, "Failure writing " + ltarg.name() + " fragments to android log:" + ex.toString());
 		} // end-catch
 	} // end-method
 }

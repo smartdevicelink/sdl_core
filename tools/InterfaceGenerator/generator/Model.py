@@ -15,9 +15,14 @@ import collections
 
 class Boolean(object):
 
-    """Boolean type."""
+    """Boolean type.
 
-    pass
+    default_value -- default value
+
+    """
+
+    def __init__(self, default_value=None):
+        self.default_value = default_value
 
 
 class Integer(object):
@@ -27,12 +32,14 @@ class Integer(object):
     Instance variables:
     min_value -- minimum allowed value
     max_value -- maximum allowed value
+    default_value -- default value
 
     """
 
-    def __init__(self, min_value=None, max_value=None):
+    def __init__(self, min_value=None, max_value=None, default_value=None):
         self.min_value = min_value
         self.max_value = max_value
+        self.default_value = default_value
 
 
 class Double(object):
@@ -42,13 +49,14 @@ class Double(object):
     Instance variables:
     min_value -- minimum allowed value
     max_value -- maximum allowed value
+    default_value -- default value
 
     """
 
-    def __init__(self, min_value=None, max_value=None):
+    def __init__(self, min_value=None, max_value=None, default_value=None):
         self.min_value = min_value
         self.max_value = max_value
-
+        self.default_value = default_value
 
 class String(object):
 
@@ -57,12 +65,14 @@ class String(object):
     Instance variables:
     min_length -- minimum string length
     max_length -- maximum string length
+    default_value -- default value
 
     """
 
-    def __init__(self, min_length=None, max_length=None):
+    def __init__(self, min_length=None, max_length=None, default_value=None):
         self.min_length = min_length
         self.max_length = max_length
+        self.default_value = default_value
 
 
 class Array(object):
@@ -108,12 +118,13 @@ class InterfaceItemBase(object):
     issues -- list of issues
     todos -- list of string todo elements
     platform -- optional platform (string or None)
+    default_value -- default value
     scope -- optional scope: internal, partner or none (none by defaul, means public)
 
     """
 
     def __init__(self, name, description=None, design_description=None,
-                 issues=None, todos=None, platform=None, scope=None):
+                 issues=None, todos=None, platform=None, default_value=None, scope=None):
         self.name = name
         self.description = description if description is not None else []
         self.design_description = \
@@ -121,6 +132,7 @@ class InterfaceItemBase(object):
         self.issues = issues if issues is not None else []
         self.todos = todos if todos is not None else []
         self.platform = platform
+        self.default_value = default_value
         self.scope = scope
 
 
@@ -211,19 +223,21 @@ class Param(InterfaceItemBase):
     is_mandatory -- boolean value indicating whether
                     this parameter is mandatory
     param_type -- parameter type
+    default_value -- default value
 
     """
 
     def __init__(self, name, param_type, description=None,
                  design_description=None, issues=None, todos=None,
-                 platform=None, is_mandatory=True, scope=None):
+                 platform=None, is_mandatory=True, default_value=None, scope=None):
         super(Param, self).__init__(
             name, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, scope=scope)
+            platform=platform, default_value=default_value, scope=scope)
 
         self.is_mandatory = is_mandatory
         self.param_type = param_type
+        self.default_value = default_value
 
 
 class FunctionParam(Param):
@@ -241,7 +255,7 @@ class FunctionParam(Param):
         super(FunctionParam, self).__init__(
             name, param_type=param_type, description=description,
             design_description=design_description, issues=issues, todos=todos,
-            platform=platform, is_mandatory=is_mandatory, scope=scope)
+            platform=platform, is_mandatory=is_mandatory, default_value=default_value, scope=scope)
 
         self.default_value = default_value
 

@@ -46,6 +46,8 @@ const char protocol_type[] = "protocol_type";
 const char connection_key[] = "connection_key";
 const char error[] = "error";
 const char error_msg[] = "message";
+const char default_app_id[] = "default";
+
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
@@ -101,6 +103,7 @@ const char interaction_choice_set_id[] = "interactionChoiceSetID";
 const char interaction_choice_set_id_list[] = "interactionChoiceSetIDList";
 const char choice_set[] = "choiceSet";
 const char choice_id[] = "choiceID";
+const char grammar_id[] = "grammarID";
 const char navigation_text_1[] = "navigationText1";
 const char navigation_text_2[] = "navigationText2";
 const char alert_text1[] = "alertText1";
@@ -149,6 +152,7 @@ const char audio_pass_thru_capabilities[] = "audioPassThruCapabilities";
 const char sync_file_name[] = "syncFileName";
 const char file_name[] = "fileName";
 const char file_type[] = "fileType";
+const char file_size[] = "fileSize";
 const char request_type[] = "requestType";
 const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";

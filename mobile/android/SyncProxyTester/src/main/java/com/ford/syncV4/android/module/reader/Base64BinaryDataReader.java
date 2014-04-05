@@ -1,8 +1,7 @@
 package com.ford.syncV4.android.module.reader;
 
-import android.util.Log;
-
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 
@@ -45,7 +44,7 @@ public class Base64BinaryDataReader implements BinaryDataReader {
         try {
             return Base64.decode(str);
         } catch (IOException e) {
-            Log.e(TAG, "Can't decode base64 string", e);
+            Logger.e(TAG + " Can't decode base64 string", e);
             return null;
         }
     }

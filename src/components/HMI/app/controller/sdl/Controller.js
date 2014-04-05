@@ -165,21 +165,24 @@ SDL.SDLController = Em.Object
          */
         showVRHelpItems: function() {
 
-//            if (SDL.SDLAppController.model) {
-//                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
-//
-//                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
-//                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
-//
-//                    if (SDL.SDLAppController.model) {
-//                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
-//                    }
-//                } else {
-//                    if (SDL.VRHelpListView.active) {
-//                        SDL.VRHelpListView.deactivate();
-//                    }
-//                }
-//            }
+            if (SDL.SDLAppController.model) {
+                if (SDL.SDLModel.VRActive && SDL.SDLModel.interactionData.vrHelp) {
+
+                    SDL.SDLModel.ShowVrHelp(SDL.SDLModel.interactionData.vrHelpTitle, SDL.SDLModel.interactionData.vrHelp);
+                } else if (SDL.SDLModel.VRActive && !SDL.SDLModel.interactionData.vrHelp && SDL.SDLAppController.model.globalProperties.vrHelp) {
+
+                    if (SDL.SDLAppController.model) {
+                        SDL.SDLModel.ShowVrHelp(SDL.SDLAppController.model.globalProperties.vrHelpTitle, SDL.SDLAppController.model.globalProperties.vrHelp );
+                    }
+                } else {
+                    if (SDL.VRHelpListView.active) {
+                        SDL.VRHelpListView.deactivate();
+                    }
+                }
+            }
+            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
+            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -387,6 +390,15 @@ SDL.SDLController = Em.Object
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
+         * Method to sent notification with selected reason of OnSystemRequest
+         *
+         * @param {String}
+         */
+        systemRequestViewSelected: function(state) {
+
+            FFW.BasicCommunication.OnSystemRequest(state);
+        },
+        /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
         interactionChoiseCloseResponse: function(appID, result, choiceID, manualTextEntry) {
@@ -396,6 +408,17 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('interactionData.vrHelp', null);
 
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
+        },
+        /**
+         * Method to sent notification ABORTED for VR PerformInteraction
+         */
+        vrInteractionResponse: function(result, choiceID) {
+
+            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
+
+            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
+
+            SDL.SDLModel.set('VRActive', false);
         },
         /**
          * Method to sent notification for Alert
@@ -548,6 +571,7 @@ SDL.SDLController = Em.Object
          */
         unregisterApplication: function(appID) {
 
+            this.getApplicationModel(appID).VRCommands = [];
             this.getApplicationModel(appID).onDeleteApplication(appID);
             var len = SDL.SDLModel.VRCommands.length;
             for (var i = len - 1; i >= 0; i--) {

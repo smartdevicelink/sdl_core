@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy;
 
+import android.util.Log;
+
 import com.ford.syncV4.proxy.constants.Names;
 
 import java.util.Hashtable;
@@ -7,7 +9,7 @@ import java.util.Hashtable;
 public class RPCMessage extends RPCStruct {
 
     public RPCMessage(String functionName) {
-        this(functionName, "request");
+        this(functionName, Names.request);
     }
 
     protected RPCMessage(RPCMessage rpcm) {

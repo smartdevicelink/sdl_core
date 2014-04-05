@@ -525,7 +525,7 @@
 	line-height: 48px;
 }
 
-#exitAppView,#tbtClientStateView,#VehicleInfo {
+#exitAppView,#tbtClientStateView,#VehicleInfo,#systemRequestView {
 	opacity: 0;
 	left: 50px;
 	width: 700px;
@@ -539,7 +539,7 @@
 	border: 1px solid white;
 }
 
-#exitAppView .exitAppViewLabel,#tbtClientStateView .tbtClientStateLabel,#VehicleInfo .vehicleInfoLabel
+#exitAppView .exitAppViewLabel,#systemRequestView .systemRequestViewLabel, #tbtClientStateView .tbtClientStateLabel,#VehicleInfo .vehicleInfoLabel
 	{
 	top: 10px;
 	width: 600px;
@@ -549,12 +549,12 @@
 	background: #393939;
 }
 
-#exitAppView.active,#tbtClientStateView.active,#VehicleInfo.active {
+#exitAppView.active,#systemRequestView.active,#tbtClientStateView.active,#VehicleInfo.active {
 	opacity: 1;
 	display: block;
 }
 
-#exitAppView .exitAppViewTitle,#tbtClientStateView .tbtClientState,#VehicleInfo .prndl
+#exitAppView .exitAppViewTitle, #systemRequestView .systemRequestViewTitle, #tbtClientStateView .tbtClientState,#VehicleInfo .prndl
 	{
 	top: 70px;
 	width: 600px;
@@ -564,7 +564,7 @@
 	background: #535353;
 }
 
-#exitAppView .exitAppViewSelect,#tbtClientStateView .tbtClientStateSelect,#VehicleInfo .prndlSelect
+#exitAppView .exitAppViewSelect, #systemRequestView .systemRequestViewSelect, #tbtClientStateView .tbtClientStateSelect,#VehicleInfo .prndlSelect
 	{
 	top: 125px;
 	position: absolute;

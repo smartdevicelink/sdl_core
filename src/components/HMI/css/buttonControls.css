@@ -386,11 +386,13 @@
 	top: 55px !important;
 }
 
-#app_controlButtons .sendData {
+#app_controlButtons .systemRequest {
 	top: 252px !important;
-	left: 1049px !important;
+	left: 1059px !important;
 	width: 80px !important;
 	font-size: 16px !important;
+    text-align: center;
+    line-height: 48px;
 }
 
 #app_controlButtons .btnNotPressed {

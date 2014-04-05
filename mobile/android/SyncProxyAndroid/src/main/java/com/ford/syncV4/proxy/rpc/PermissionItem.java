@@ -4,7 +4,7 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class PermissionItem extends RPCStruct {
 
@@ -30,7 +30,7 @@ public class PermissionItem extends RPCStruct {
         	try {
         		return new HMIPermissions((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiPermissions, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiPermissions, e);
             }
         }
         return null;
@@ -50,7 +50,7 @@ public class PermissionItem extends RPCStruct {
         	try {
         		return new ParameterPermissions((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.parameterPermissions, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.parameterPermissions, e);
             }
         }
         return null;

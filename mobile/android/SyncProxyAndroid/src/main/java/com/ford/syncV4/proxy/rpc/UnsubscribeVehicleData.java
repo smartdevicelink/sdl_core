@@ -1,12 +1,9 @@
 package com.ford.syncV4.proxy.rpc;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
-import com.ford.syncV4.util.DebugTool;
 
 public class UnsubscribeVehicleData extends RPCRequest {
 

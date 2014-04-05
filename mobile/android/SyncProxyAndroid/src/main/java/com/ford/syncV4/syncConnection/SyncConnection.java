@@ -1,7 +1,5 @@
 package com.ford.syncV4.syncConnection;
 
-import android.util.Log;
-
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
@@ -34,6 +32,7 @@ import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,7 +50,7 @@ import java.util.Hashtable;
  */
 public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener,
         IHeartbeatMonitorListener {
-    private static final String TAG = "SyncConnection";
+    private static final String CLASS_NAME = SyncConnection.class.getSimpleName();
     SyncTransport _transport = null;
     AbstractProtocol _protocol = null;
     ISyncConnectionListener mConnectionListener = null;
@@ -157,6 +156,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol = null;
             }
             _protocol = new WiProProtocol(this);
+
+            // Apply a value which has been set for the Test Cases
+            if (mTestConfig != null) {
+                ((WiProProtocol) _protocol).set_TEST_ProtocolVersion(mTestConfig.getProtocolVersion());
+            }
         }
 
         mIsInit = true;
@@ -230,7 +234,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private void stopHeartbeatMonitor() {
         if (_heartbeatMonitor != null) {
-            Log.d(TAG, "Stop HeartBeat");
+            Logger.d(CLASS_NAME + " Stop HeartBeat");
             _heartbeatMonitor.stop();
         }
     }
@@ -297,7 +301,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
-            Log.e(TAG, "Unable to start H.264 streaming:" + e.toString());
+            Logger.e(CLASS_NAME + " Unable to start H.264 streaming:" + e.toString());
         }
         return null;
     }
@@ -316,7 +320,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mAudioPacketizer.start();
             return os;
         } catch (IOException e) {
-            Log.e(TAG, "Unable to start audio streaming:" + e.toString());
+            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
         }
         return null;
     }
@@ -369,21 +373,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onTransportBytesReceived(byte[] receivedBytes,
-                                         int receivedBytesLength) {
+    public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
                 try {
-                    _protocol.HandleReceivedBytes(receivedBytes,
-                            receivedBytesLength);
+                    _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
                 } catch (OutOfMemoryError e) {
-                    final String info =
-                            "Out of memory while handling incoming message";
+                    final String info = " Out of memory while handling incoming message";
                     if (mConnectionListener != null) {
                         mConnectionListener.onProtocolError(info, e);
                     } else {
-                        Log.e(TAG, info, e);
+                        Logger.e(CLASS_NAME + info, e);
                     }
                 }
             }
@@ -409,10 +410,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (_protocol != null) {
-                Log.d(TAG, "StartProtocolSession, id:" + mSessionId);
+                Logger.d(CLASS_NAME + " StartProtocolSession, id:" + mSessionId);
                 _protocol.StartProtocolSession(mSessionId);
             }
         }
+    }
+
+    /**
+     * Return the version of protocol
+     * @return byte value of the protocol version
+     */
+    public byte getProtocolVersion() {
+        return ((WiProProtocol) _protocol).getProtocolVersion();
     }
 
     @Override
@@ -435,7 +444,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onServerSocketInit(int serverSocketPort) {
-        Log.d("SyncConnection", "ServerSocket init: " + serverSocketPort);
+        Logger.d("SyncConnection", "ServerSocket init: " + serverSocketPort);
         mNSDHelper.registerService(serverSocketPort);
         mNSDHelper.discoverServices();
     }
@@ -446,7 +455,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
-                Log.d(TAG, "<- Bytes:" + BitConverter.bytesToHex(msgBytes));
+                Logger.d(CLASS_NAME + " <- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 _transport.sendBytes(msgBytes, offset, length);
             }
         }
@@ -458,7 +467,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
         // Unblock USB reader thread by this method
         FunctionID functionID = new FunctionID();
-        if (functionID.getFunctionName(msg.getFunctionID()).equals(Names.OnAppInterfaceUnregistered)) {
+        String functionName = functionID.getFunctionName(msg.getFunctionID());
+        if (functionName == null) {
+            return;
+        }
+        if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
             IJsonRPCMarshaller marshaller = new JsonRPCMarshaller();
             Hashtable<String, Object> hashtable = marshaller.unmarshall(msg.getData());
             if (hashtable.containsKey(Names.reason)) {
@@ -478,7 +491,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolSessionStarted(Session session,
                                          byte version, String correlationID) {
-
         mConnectionListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
@@ -529,7 +541,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolAppUnregistered() {
-        Log.d(TAG, "onProtocolAppUnregistered");
+        Logger.d(CLASS_NAME + " onProtocolAppUnregistered");
     }
 
     @Override
@@ -566,7 +578,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
-        Log.d(TAG, "Asked to send heartbeat");
+        Logger.d(CLASS_NAME + " Asked to send heartbeat");
         final ProtocolFrameHeader heartbeat =
                 ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat,
                         (byte) 2);
@@ -576,7 +588,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
-        Log.d(TAG, "Heartbeat timeout; closing connection");
+        Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
         _isHeartbeatTimedout = true;
         closeConnection((byte) 0, false, false);
         mConnectionListener.onHeartbeatTimedOut();
@@ -593,12 +605,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public void setSessionId(byte sessionId) {
         mSessionId = sessionId;
-        Log.d(TAG, "SetSessionId:" + mSessionId);
+        Logger.d(CLASS_NAME + " SetSessionId:" + mSessionId);
     }
 
     private void processTransportStopReading() {
         if (_transport == null) {
-            Log.w(TAG, "Process Transport Stop Reading - transport is NULL");
+            Logger.w(CLASS_NAME + " Process Transport Stop Reading - transport is NULL");
             return;
         }
 

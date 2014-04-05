@@ -950,7 +950,8 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
   </enum>
 
 <enum name="ECallConfirmationStatus">
@@ -1788,6 +1789,20 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
+    <function name="SystemRequest" messagetype="request">
+      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+        <description>The type of system request.</description>
+      </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>The path to file.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param> 
+     </function>
+     <function name="SystemRequest" messagetype="response">
+     </function>
     <function name="OnFileRemoved" messagetype="notification">
       <description>Notifies HMI in case some application file has been removed</description>
       <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
@@ -1948,6 +1963,12 @@
         <description>Optional length in bytes for resuming partial data chunks</description>
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>File reference name.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
 

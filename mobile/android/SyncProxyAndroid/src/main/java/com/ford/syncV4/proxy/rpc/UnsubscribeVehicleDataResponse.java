@@ -1,12 +1,10 @@
 package com.ford.syncV4.proxy.rpc;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class UnsubscribeVehicleDataResponse extends RPCResponse {
 
@@ -31,7 +29,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.gps, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.gps, e);
             }
         }
         return null;
@@ -51,7 +49,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.speed, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.speed, e);
             }
         }
         return null;
@@ -71,7 +69,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rpm, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.rpm, e);
             }
         }
         return null;
@@ -91,7 +89,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelLevel, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelLevel, e);
             }
         }
         return null;
@@ -111,7 +109,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelLevel_State, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelLevel_State, e);
             }
         }
         return null;
@@ -131,7 +129,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.instantFuelConsumption, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.instantFuelConsumption, e);
             }
         }
         return null;
@@ -151,7 +149,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.externalTemperature, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.externalTemperature, e);
             }
         }
         return null;
@@ -171,7 +169,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.prndl, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.prndl, e);
             }
         }
         return null;
@@ -191,7 +189,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.tirePressure, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.tirePressure, e);
             }
         }
         return null;
@@ -211,7 +209,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.odometer, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.odometer, e);
             }
         }
         return null;
@@ -231,7 +229,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.beltStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.beltStatus, e);
             }
         }
         return null;
@@ -251,7 +249,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.bodyInformation, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.bodyInformation, e);
             }
         }
         return null;
@@ -271,7 +269,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.deviceStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.deviceStatus, e);
             }
         }
         return null;
@@ -291,7 +289,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverBraking, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.driverBraking, e);
             }
         }
         return null;
@@ -311,7 +309,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.wiperStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.wiperStatus, e);
             }
         }
         return null;
@@ -331,7 +329,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.headLampStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.headLampStatus, e);
             }
         }
         return null;
@@ -351,7 +349,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.batteryVoltage, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.batteryVoltage, e);
             }
         }
         return null;
@@ -371,7 +369,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.engineTorque, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.engineTorque, e);
             }
         }
         return null;
@@ -391,7 +389,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.accPedalPosition, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.accPedalPosition, e);
             }
         }
         return null;
@@ -413,7 +411,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
             try {
                 return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.steeringWheelAngle, e);
             }
@@ -436,7 +434,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallInfo, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.eCallInfo, e);
             }
         }
         return null;
@@ -456,7 +454,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.airbagStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.airbagStatus, e);
             }
         }
         return null;
@@ -476,7 +474,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.emergencyEvent, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.emergencyEvent, e);
             }
         }
         return null;
@@ -496,7 +494,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.clusterModeStatus, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.clusterModeStatus, e);
             }
         }
         return null;
@@ -516,7 +514,7 @@ public class UnsubscribeVehicleDataResponse extends RPCResponse {
         	try {
         		return new VehicleDataResult((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.myKey, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.myKey, e);
             }
         }
         return null;

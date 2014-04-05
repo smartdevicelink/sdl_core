@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SystemAction;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class SoftButton extends RPCStruct {
 
@@ -30,7 +30,7 @@ public class SoftButton extends RPCStruct {
             try {
                 theCode = SoftButtonType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.type, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.type, e);
             }
             return theCode;
         }
@@ -61,7 +61,7 @@ public class SoftButton extends RPCStruct {
         	try {
         		return new Image((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.image, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.image, e);
             }
         }
         return null;
@@ -102,7 +102,7 @@ public class SoftButton extends RPCStruct {
             try {
                 theCode = SystemAction.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.systemAction, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.systemAction, e);
             }
             return theCode;
         }

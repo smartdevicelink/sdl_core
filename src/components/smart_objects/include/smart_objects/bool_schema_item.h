@@ -73,6 +73,15 @@ class CBoolSchemaItem : public ISchemaItem {
   virtual bool setDefaultValue(SmartObject& Object);
 
   /**
+   * @brief Check if object has default value.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  virtual bool hasDefaultValue(SmartObject& Object);
+
+  /**
    * @brief Build smart object by smart schema having copied matched
    *        parameters from pattern smart object
    *

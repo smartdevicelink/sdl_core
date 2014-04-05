@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class PutFile extends RPCRequest {
 
@@ -47,7 +47,7 @@ public class PutFile extends RPCRequest {
             try {
                 theCode = FileType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fileType, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.fileType, e);
             }
             return theCode;
         }

@@ -3,7 +3,7 @@ package com.ford.syncV4.proxy.rpc;
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardEvent;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -29,7 +29,7 @@ public class OnKeyboardInput extends RPCNotification {
             try {
                 theCode = KeyboardEvent.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.keyboardEvent, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.keyboardEvent, e);
             }
             return theCode;
         }

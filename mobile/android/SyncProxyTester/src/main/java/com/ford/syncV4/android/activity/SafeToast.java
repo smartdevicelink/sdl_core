@@ -1,11 +1,11 @@
 package com.ford.syncV4.android.activity;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.utils.AppUtils;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -38,7 +38,7 @@ public class SafeToast {
         if (context == null) {
             context = MainApp.getInstance();
         }
-        Log.d("SafeToast", "- Show toast: " + text);
+        Logger.d("SafeToast", "- Show toast: " + text);
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 }

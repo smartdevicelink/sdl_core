@@ -4,7 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
-import android.util.Log;
+
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * The USBAccessoryAttachmentActivity is a proxy to listen for
@@ -56,7 +57,7 @@ public class USBAccessoryAttachmentActivity extends Activity {
     private void checkUsbAccessoryIntent(String sourceAction) {
         final Intent intent = getIntent();
         String action = intent.getAction();
-        Log.d(TAG, sourceAction + " with action: " + action);
+        Logger.d(TAG + " " + sourceAction + " with action: " + action);
 
         if (UsbManager.ACTION_USB_ACCESSORY_ATTACHED.equals(action)) {
             Intent usbAccessoryAttachedIntent =

@@ -1,14 +1,15 @@
 package com.ford.syncV4.protocol;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import junit.framework.Assert;
 
@@ -31,9 +32,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 /**
- * Created by Andrew Batutin on 8/21/13.
+ * Created by Andrew Batutin on 8/21/13
  */
 public class WiProProtocolTest extends InstrumentationTestCase {
 
@@ -133,7 +133,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 callCheck(currentCheckMethod, data, header, offset, length);
             }
         };
-        sut.setVersion((byte) 2);
+        sut.setProtocolVersion((byte) 2);
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
@@ -212,7 +212,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             method.invoke(WiProProtocolTest.this, parameters);
         } catch (IllegalAccessException e) {
-            Log.e("SyncProxyTester", e.toString());
+            Logger.e("WiProProtocolTest", e.toString());
         } catch (InvocationTargetException e) {
             reconstructAssertionError(e);
         }
@@ -342,23 +342,20 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testReadingHashIDFromStartSessionACK() throws Throwable {
         // null as a listener won't work
-        final WiProProtocol protocol =
-                new WiProProtocol(DUMMY_PROTOCOL_LISTENER);
+        final WiProProtocol protocol = new WiProProtocol(DUMMY_PROTOCOL_LISTENER);
+
         final ByteArrayOutputStream StartSessionACKMessageStream =
-                new ByteArrayOutputStream(12);
+                new ByteArrayOutputStream(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
 
         final byte[] msgFirstBytes = new byte[]{0x20, 0x07, 0x02, 0x00};
         StartSessionACKMessageStream.write(msgFirstBytes);
         final byte[] msgDataSize = new byte[]{0x00, 0x00, 0x00, 0x00};
         StartSessionACKMessageStream.write(msgDataSize);
-        final byte[] msgHashID =
-                new byte[]{0x12, 0x34, (byte) 0xCD, (byte) 0xEF};
+        final byte[] msgHashID = new byte[]{0x12, 0x34, (byte) 0xCD, (byte) 0xEF};
         StartSessionACKMessageStream.write(msgHashID);
 
-        final byte[] StartSessionACKMessage =
-                StartSessionACKMessageStream.toByteArray();
-        protocol.HandleReceivedBytes(StartSessionACKMessage,
-                StartSessionACKMessage.length);
+        final byte[] StartSessionACKMessage = StartSessionACKMessageStream.toByteArray();
+        protocol.HandleReceivedBytes(StartSessionACKMessage, StartSessionACKMessage.length);
         Assert.assertEquals("HashID is incorrect", 0x1234CDEF, protocol.hashID);
     }
 
@@ -464,7 +461,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
         protocol.hashID = 0xCDEF1234;
-        protocol._version = 2;
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
         protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
     }
 
@@ -620,7 +617,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
@@ -644,7 +641,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -663,7 +660,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -684,7 +681,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setVersion((byte) 2);
+        protocol.setProtocolVersion((byte) 2);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);

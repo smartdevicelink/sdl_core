@@ -1,9 +1,8 @@
 package com.ford.syncV4.proxy.rpc;
 
-import android.util.Log;
-
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -22,7 +21,7 @@ public class DeviceInfo extends RPCStruct {
     /**
      * Device Info LOG tag
      */
-    private static final String LOG_TAG = DeviceInfo.class.getSimpleName();
+    private static final String CLASS_NAME = DeviceInfo.class.getSimpleName();
 
     /**
      * Max length of the device model name
@@ -90,7 +89,7 @@ public class DeviceInfo extends RPCStruct {
             }
             return value;
         }
-        Log.w(LOG_TAG, " getHardware is not a String, actual value:" + object);
+        Logger.w(CLASS_NAME + " getHardware is not a String, actual value:" + object);
         return null;
     }
 
@@ -128,7 +127,7 @@ public class DeviceInfo extends RPCStruct {
             }
             return value;
         }
-        Log.w(LOG_TAG, " getFirmwareRev is not a String, actual value:" + object);
+        Logger.w(CLASS_NAME + "  getFirmwareRev is not a String, actual value:" + object);
         return null;
     }
 
@@ -166,7 +165,7 @@ public class DeviceInfo extends RPCStruct {
             }
             return value;
         }
-        Log.w(LOG_TAG, " getOS is not a String, actual value:" + object);
+        Logger.w(CLASS_NAME + "  getOS is not a String, actual value:" + object);
         return null;
     }
 
@@ -204,7 +203,7 @@ public class DeviceInfo extends RPCStruct {
             }
             return value;
         }
-        Log.w(LOG_TAG, " getOSVersion is not a String, actual value:" + object);
+        Logger.w(CLASS_NAME + "  getOSVersion is not a String, actual value:" + object);
         return null;
     }
 
@@ -242,7 +241,7 @@ public class DeviceInfo extends RPCStruct {
             }
             return value;
         }
-        Log.w(LOG_TAG, " getCarrier is not a String, actual value:" + object);
+        Logger.w(CLASS_NAME + "  getCarrier is not a String, actual value:" + object);
         return null;
     }
 
@@ -271,24 +270,24 @@ public class DeviceInfo extends RPCStruct {
     public Integer getMaxNumberRFCOMMPorts() {
         final Object object = store.get(Names.maxNumberRFCOMMPorts);
         if (object == null) {
-            Log.w(LOG_TAG, " getMaxNumberRFCOMMPorts is not a Integer, actual value:" + object);
+            Logger.w(CLASS_NAME + "  getMaxNumberRFCOMMPorts is not a Integer, actual value:" + object);
             return null;
         }
         if (object instanceof Integer) {
             Integer value = (Integer) object;
             if (value < MIN_NUMBER_RF_COMM_PORTS) {
-                Log.w(LOG_TAG, "GetMaxNumberRFCOMMPorts value less then " + MIN_NUMBER_RF_COMM_PORTS +
+                Logger.w(CLASS_NAME + " GetMaxNumberRFCOMMPorts value less then " + MIN_NUMBER_RF_COMM_PORTS +
                         ", return " + MIN_NUMBER_RF_COMM_PORTS);
                 return MIN_NUMBER_RF_COMM_PORTS;
             }
             if (value > MAX_NUMBER_RF_COMM_PORTS) {
-                Log.w(LOG_TAG, "GetMaxNumberRFCOMMPorts value greater then " + MAX_NUMBER_RF_COMM_PORTS +
+                Logger.w(CLASS_NAME + " GetMaxNumberRFCOMMPorts value greater then " + MAX_NUMBER_RF_COMM_PORTS +
                         ", return " + MAX_NUMBER_RF_COMM_PORTS);
                 return MAX_NUMBER_RF_COMM_PORTS;
             }
             return value;
         }
-        Log.w(LOG_TAG, " getMaxNumberRFCOMMPorts is not a Integer, actual value:" + object);
+        Logger.w(CLASS_NAME + "  getMaxNumberRFCOMMPorts is not a Integer, actual value:" + object);
         return null;
     }
 

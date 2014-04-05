@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.CharacterSet;
 import com.ford.syncV4.proxy.rpc.enums.TextFieldName;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class TextField extends RPCStruct {
 
@@ -23,7 +23,7 @@ public class TextField extends RPCStruct {
             try {
                 theCode = TextFieldName.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.name, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.name, e);
             }
             return theCode;
         }
@@ -43,7 +43,7 @@ public class TextField extends RPCStruct {
             try {
                 theCode = CharacterSet.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.characterSet, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.characterSet, e);
             }
             return theCode;
         }

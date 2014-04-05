@@ -77,7 +77,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
         classNames: 'popUp'
     } ),
 
-    AddCommand: function( cmdID, vrCommands, appID, type) {
+    AddCommand: function(cmdID, vrCommands, appID, type, grammarID) {
 
         if (type == "Application") {
             for( var i = 0; i < vrCommands.length; i++ ){
@@ -91,28 +91,25 @@ SDL.VRPopUp = Em.ContainerView.create( {
                 } ) );
             }
         } else {
-            var commandType = false;
             for( var j = 0; j < vrCommands.length; j++ ){
 
                 this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onVRCommand',
+                    action: type == 'Command' ? 'onVRCommand' : 'VRPerformAction',
                     target: 'SDL.SDLAppController',
                     appID: appID,
+                    grammarID: grammarID,
                     commandID: cmdID,
                     text: vrCommands[j],
                     type: type,
                     hideButtons: function() {
-                        if (this.type == "Command") {
-                            return SDL.SDLModel.performInteractionSession;
+                        if (this.type == "Command" && !SDL.SDLModel.performInteractionSession) {
+                            return false;
+                        } else if (SDL.SDLModel.performInteractionSession && this.grammarID == SDL.SDLModel.performInteractionSession) {
+                            return false;
                         } else {
-                            return !SDL.SDLModel.performInteractionSession;
+                            return true;
                         }
                     }.property('SDL.SDLModel.performInteractionSession'),
-                    willDestroyElement: function() {
-                        //console.log(this + " destroyed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        //Em.removeObserver(this, SDL.SDLModel.performInteractionSession, this.hideButtons);
-                       // this.destroy();
-                    },
                     classNameBindings: ['this.hideButtons:hide'],
                     classNames: 'list-item',
                     templateName: 'text'

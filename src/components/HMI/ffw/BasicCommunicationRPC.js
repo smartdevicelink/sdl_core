@@ -40,6 +40,11 @@ FFW.BasicCommunication = FFW.RPCObserver
             componentName: "BasicCommunication"
         }),
 
+
+        //OnPutFile
+
+
+        onPutFileSubscribeRequestID: -1,
 allowSDLFunctionalityRequestID: -1,
 
         onSystemErrorSubscribeRequestID: -1,
@@ -52,6 +57,7 @@ allowSDLFunctionalityRequestID: -1,
         onSDLCloseSubscribeRequestID: -1,
 onSDLConsentNeededSubscribeRequestID: -1,
 
+        onPutFileUnsubscribeRequestID: -1,
 onSystemErrorUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
@@ -66,7 +72,8 @@ onSDLConsentNeededUnsubscribeRequestID: -1,
         onSystemErrorNotification: "SDL.OnSystemError",
         onStatusUpdateNotification: "SDL.OnStatusUpdate",
         onAppPermissionChangedNotification: "SDL.OnAppPermissionChanged",
-onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
+        onPutFileNotification: "BasicCommunication.OnPutFile",
+        onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
@@ -107,6 +114,8 @@ onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
             this._super();
 
             // subscribe to notifications
+            this.onPutFileSubscribeRequestID = this.client
+                .subscribeToNotification(this.onPutFileNotification);
 this.onSystemErrorSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSystemErrorNotification);
             this.onStatusUpdateSubscribeRequestID = this.client
@@ -138,6 +147,8 @@ this.onSDLConsentNeededSubscribeRequestID = this.client
 
             // unsubscribe from notifications
 
+            this.onPutFileUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onPutFileNotification);
 this.onSystemErrorUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSystemErrorNotification);
             this.onStatusUpdateUnsubscribeRequestID = this.client
@@ -368,6 +379,11 @@ if (notification.method == this.onSDLConsentNeededNotification) {
                 }
                 if (request.method == "BasicCommunication.UpdateDeviceList") {
                     SDL.SDLModel.onGetDeviceList(request.params);
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
+                if (request.method == "BasicCommunication.SystemRequest") {
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -1028,7 +1044,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Initiated by HMI.
          */
-        OnSystemRequest: function() {
+        OnSystemRequest: function(type) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
 
@@ -1038,12 +1054,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                 "jsonrpc": "2.0",
                 "method": "BasicCommunication.OnSystemRequest",
                 "params":{
-                    "requestType": "HTTP",
+                    "requestType": type,
                     "url": ["http://127.0.0.1"],
                     "fileType": "JSON",
                     "offset": 1000,
                     "length": 10000,
-                    "timeout": 500
+                    "timeout": 500,
+                    "fileName": document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
+                    "appID": SDL.SDLAppController.model ? SDL.SDLAppController.model.appID : null
                 }
             };
             this.client.send(JSONMessage);

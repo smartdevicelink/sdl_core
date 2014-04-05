@@ -78,7 +78,7 @@ struct AppFile {
     AppFile() {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
-          mobile_apis::FileType::eType  type)
+          mobile_apis::FileType::eType type)
       : is_persistent(persistent),
         is_download_complete(download_complete),
         file_name(name),
@@ -417,6 +417,8 @@ class Application : public virtual InitialApplicationData,
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
+    virtual uint32_t get_grammar_id() = 0;
+    virtual void set_grammar_id(uint32_t value) = 0;
 
     virtual bool AddFile(AppFile& file) = 0;
     virtual const AppFilesMap& getAppFiles() const = 0;

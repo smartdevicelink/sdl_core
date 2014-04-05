@@ -1,3 +1,9 @@
+[CW14]
++ SyncProxyTester | SyncProxyAndroid SDK: Add Logger class to save and send application logs
++ SyncProxyAndroid SDK: Add new field 'menuTitle' to TextFieldName enum
+* SyncProxyTester | SyncProxyAndroid SDK: Update SystemRequest message with 'file name' and bulk data
++ SyncProxyAndroid SDK: Implement protocol version negotiation
+
 [CW13]
 * SyncProxyTester | SyncProxyAndroid SDK: In case of RegisterAppInterface command allow to send parameters which are out of API specification
 + SyncProxyTester: Add DeviceInfo object into request command

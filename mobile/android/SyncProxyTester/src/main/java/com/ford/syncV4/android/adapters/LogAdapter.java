@@ -3,9 +3,12 @@ package com.ford.syncV4.android.adapters;
 import android.app.Activity;
 import android.util.Log;
 
+import com.ford.syncV4.util.logger.Logger;
+
 import java.util.ArrayList;
 
 public class LogAdapter extends MessageAdapter {
+    
     private String logTag;
     boolean fullUIDebug;
     Activity activity;
@@ -30,7 +33,7 @@ public class LogAdapter extends MessageAdapter {
         if (m == null) {
             return;
         }
-        Log.i(logTag, m.toString());
+       Logger.i(logTag, m.toString());
         if (fullUIDebug) {
             addMessageToUI(m);
         }
@@ -40,7 +43,7 @@ public class LogAdapter extends MessageAdapter {
         if (m == null) {
             return;
         }
-        Log.i(logTag, m.toString());
+       Logger.i(logTag, m.toString());
         if (addToUI) {
             addMessageToUI(m);
         }
@@ -50,19 +53,19 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                    Log.d(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.ERROR:
-                    Log.e(logTag, m.toString());
+                   Logger.e(logTag, m.toString());
                     break;
                 case Log.VERBOSE:
-                    Log.v(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.WARN:
-                    Log.w(logTag, m.toString());
+                   Logger.w(logTag, m.toString());
                     break;
                 default:
-                    Log.i(logTag, m.toString());
+                   Logger.i(logTag, m.toString());
                     break;
             }
         }
@@ -75,19 +78,19 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                    Log.d(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.ERROR:
-                    Log.e(logTag, m.toString());
+                   Logger.e(logTag, m.toString());
                     break;
                 case Log.VERBOSE:
-                    Log.v(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.WARN:
-                    Log.w(logTag, m.toString());
+                   Logger.w(logTag, m.toString());
                     break;
                 default:
-                    Log.i(logTag, m.toString());
+                   Logger.i(logTag, m.toString());
                     break;
             }
         }
@@ -100,19 +103,19 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                    Log.d(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.ERROR:
-                    Log.e(logTag, m.toString(), tr);
+                   Logger.e(logTag + " " + m.toString(), tr);
                     break;
                 case Log.VERBOSE:
-                    Log.v(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.WARN:
-                    Log.w(logTag, m.toString());
+                   Logger.w(logTag, m.toString());
                     break;
                 default:
-                    Log.i(logTag, m.toString());
+                   Logger.i(logTag, m.toString());
                     break;
             }
         }
@@ -125,19 +128,19 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                    Log.d(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.ERROR:
-                    Log.e(logTag, m.toString(), tr);
+                   Logger.e(logTag +" " + m.toString(), tr);
                     break;
                 case Log.VERBOSE:
-                    Log.v(logTag, m.toString());
+                   Logger.d(logTag, m.toString());
                     break;
                 case Log.WARN:
-                    Log.w(logTag, m.toString());
+                   Logger.w(logTag, m.toString());
                     break;
                 default:
-                    Log.i(logTag, m.toString());
+                   Logger.i(logTag, m.toString());
                     break;
             }
         }

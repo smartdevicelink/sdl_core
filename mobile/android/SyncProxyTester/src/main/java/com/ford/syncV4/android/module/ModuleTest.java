@@ -75,6 +75,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ModuleTest {
 
@@ -288,7 +289,7 @@ public class ModuleTest {
 						}
 					}
 				} else {
-					Log.w(TAG, "No file chosen");
+					Logger.w(TAG + " No file chosen");
 				}
 			}
 
@@ -369,7 +370,7 @@ public class ModuleTest {
                                 break;
                             case XmlPullParser.START_TAG:
                                 name = parser.getName();
-                                Log.d(TAG, "Start tag:" + name);
+                                Logger.d(TAG + " Start tag:" + name);
                                 if (name.equalsIgnoreCase(TEST_TAG_NAME_TEST)) {
                                     mLogAdapter.logMessage("test " + parser.getAttributeValue(0), true);
 
@@ -379,7 +380,7 @@ public class ModuleTest {
                                         try {
                                             pause = Long.parseLong(pauseString);
                                         } catch (NumberFormatException e) {
-                                            Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+                                            Logger.e(TAG + " Couldn't parse pause number: " + pauseString);
                                         }
                                     }
                                     currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
@@ -393,12 +394,12 @@ public class ModuleTest {
                                                 try {
                                                     numIterations = Integer.parseInt(parser.getAttributeValue(1));
                                                 } catch (Exception e) {
-                                                    Log.w(TAG, "Unable to parse number of iterations");
+                                                    Logger.w(TAG + " Unable to parse number of iterations");
                                                 }
                                             }
                                         }
                                     } catch (Exception e) {
-                                        Log.w(TAG, "Unable to parse number of iterations");
+                                        Logger.w(TAG + " Unable to parse number of iterations");
                                     }
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_TYPE)) {
                                     if (parser.getAttributeValue(0).equalsIgnoreCase(INTEGRATION_ATTR))
@@ -514,7 +515,7 @@ public class ModuleTest {
                                     try {
                                         rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
                                     } catch (NumberFormatException e) {
-                                        Log.e(TAG, "Unable to parse correlation ID");
+                                        Logger.e(TAG + " Unable to parse correlation ID");
                                     }
 
                                     long pause = 0;
@@ -523,7 +524,7 @@ public class ModuleTest {
                                         try {
                                             pause = Long.parseLong(pauseString);
                                         } catch (NumberFormatException e) {
-                                            Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+                                            Logger.e(TAG + " Couldn't parse pause number: " + pauseString);
                                         }
                                     }
 
@@ -545,7 +546,7 @@ public class ModuleTest {
                                                 rpc.setBulkData(new byte[]{});
                                             }
                                         } else {
-                                            Log.d(TAG, "RPC name:" + rpc.getFunctionName() + ", key:" + key + ", val:" + value);
+                                            Logger.d(TAG + " RPC name:" + rpc.getFunctionName() + ", key:" + key + ", val:" + value);
                                             rpc.setParameters((String) key, value);
                                         }
                                     }
@@ -574,7 +575,7 @@ public class ModuleTest {
                                             try {
                                                 pause = Long.parseLong(pauseString);
                                             } catch (NumberFormatException e) {
-                                                Log.e(TAG, "Couldn't parse pause number: " + pauseString);
+                                                Logger.e(TAG + " Couldn't parse pause number: " + pauseString);
                                             }
                                         }
                                         testActionItem.setDelay(pause);
@@ -583,7 +584,7 @@ public class ModuleTest {
                                 break;
                             case XmlPullParser.END_TAG:
                                 name = parser.getName();
-                                Log.d(TAG, "End tag:" + name);
+                                Logger.d(TAG + " End tag:" + name);
                                 if (name.equalsIgnoreCase(TEST_TAG_NAME_TEST)) {
                                     try {
                                         final String FIELD_SEPARATOR = ", ";
@@ -646,7 +647,7 @@ public class ModuleTest {
                                             String resultLine = result.toString();
 
                                             writer.write(resultLine + EOL);
-                                            Log.i(TAG, resultLine);
+                                            Logger.i(TAG + " " + resultLine);
                                             mLogAdapter.logMessage(resultLine, true);
                                         }
                                     } catch (Exception e) {
@@ -688,7 +689,7 @@ public class ModuleTest {
                     }
                     writer.close();
                     errorWriter.close();
-                    Log.d(TAG, "Tests finished");
+                    Logger.d(TAG + " Tests finished");
 
                     currentTest = null;
                 } finally {
@@ -750,7 +751,7 @@ public class ModuleTest {
 						while (eventType != XmlPullParser.START_TAG && !nestedWhileDone) {
 							if (eventType == XmlPullParser.END_TAG) {
 								if (parser.getName().equalsIgnoreCase("Vector")) {
-									Log.e("TESTING", "In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
+									Logger.e("TESTING", "In Vector Loop, nestedWhileDone == true, END_TAG, name: " + name);
 									nestedWhileDone = true;
 								}
 							} else eventType = parser.next();
@@ -773,7 +774,7 @@ public class ModuleTest {
 									if (parser.getAttributeName(0) != null) {
 										//try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));} 
 										try {vector.add(Double.parseDouble(parser.getAttributeValue(0)));} 
-										catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
+										catch (Exception e) {Logger.e(TAG + " Unable to parse Integer");}
 									}
 								} else if (tempName.equalsIgnoreCase("String")) {
 									logParserDebugInfo("In Nested Vector String");
@@ -824,13 +825,13 @@ public class ModuleTest {
 						if (parser.getAttributeName(0) != null) {
 							//try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));} 
 							try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));} 
-							catch (Exception e) {Log.e(TAG, "Unable to parse Integer");}
+							catch (Exception e) {Logger.e(TAG + " Unable to parse Integer");}
 						}
                     } else if (tempName.equalsIgnoreCase(TAG_FLOAT)) {
                         logParserDebugInfo("In " + TAG_FLOAT);
                         if (parser.getAttributeName(0) != null) {
                             try {hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));}
-                            catch (Exception e) {Log.e(TAG, "Unable to parse " + TAG_FLOAT);}
+                            catch (Exception e) {Logger.e(TAG + " Unable to parse " + TAG_FLOAT);}
                         }
 					} else if (tempName.equalsIgnoreCase("Boolean")) {
 						logParserDebugInfo("In Boolean");
@@ -915,13 +916,13 @@ public class ModuleTest {
                 sTestActionThreadContext = this;
 
                 if (mProxyService == null && testActionItem == null) {
-                    Log.e(TAG, "Test Action is null");
+                    Logger.e(TAG + " Test Action is null");
                     interruptThread();
                     return;
                 }
 
                 if (!mProxyService.isSyncProxyConnected()) {
-                    Log.e(TAG, "Test Action - connection - is null");
+                    Logger.e(TAG + " Test Action - connection - is null");
                     interruptThread();
                     return;
                 }
@@ -932,7 +933,7 @@ public class ModuleTest {
 
                 long pause = testActionItem.getDelay();
                 if (pause > 0) {
-                    Log.v(TAG, "Pause for " + pause + " ms for " + testActionItem.getActionName());
+                    Logger.d(TAG + " Pause for " + pause + " ms for " + testActionItem.getActionName());
                     try {
                         // delay after the test
                         synchronized (this) {
@@ -942,7 +943,7 @@ public class ModuleTest {
                         mLogAdapter.logMessage("InterruptedException", true);
                     }
                 } else {
-                    Log.i(TAG, "No pause for " + pause + " ms for " + testActionItem.getActionName());
+                    Logger.i(TAG + " No pause for " + pause + " ms for " + testActionItem.getActionName());
                 }
 
                 // wait for incoming messages
@@ -991,19 +992,19 @@ public class ModuleTest {
                 sXMLTestThreadContext = this;
 
                 if (mProxyService == null && currentTest == null) {
-                    Log.e(TAG, "Current test is null");
+                    Logger.e(TAG + " Current test is null");
                     interruptThread();
                     return;
                 }
 
                 if (currentTest.getRequests() == null) {
-                    Log.e(TAG, "Current test request is null");
+                    Logger.e(TAG + " Current test request is null");
                     interruptThread();
                     return;
                 }
 
                 if (!mProxyService.isSyncProxyConnected()) {
-                    Log.e(TAG, "Current test - connection - is null");
+                    Logger.e(TAG + " Current test - connection - is null");
 
                     showInterruptDialog("Warning",
                             "Connection is lost, would You like to continue run tests?", true);
@@ -1019,7 +1020,7 @@ public class ModuleTest {
                 /*if (!currentTest.getName().toLowerCase()
                         .startsWith(Names.UnregisterAppInterface.toLowerCase()) &&
                         mProxyService.getSessionId() == 0) {
-                    Log.e(TAG, "Current test session id 0");
+                    Log.e(CLASS_NAME, "Current test session id 0");
 
                     showInterruptDialog("Warning",
                             "Current Session Id is 0, would You like to continue run tests?", true);
@@ -1064,7 +1065,7 @@ public class ModuleTest {
 
                     long pause = wrapper.getPause();
                     if (pause > 0) {
-                        Log.v(TAG, "Pause for " + pause + " ms. after " +
+                        Logger.d(TAG + " Pause for " + pause + " ms. after " +
                                 currentTest.getName() + "." + rpc.getFunctionName());
                         try {
                             // delay between requests of one test
@@ -1075,14 +1076,14 @@ public class ModuleTest {
                             mLogAdapter.logMessage("InterruptedException", true);
                         }
                     } else {
-                        Log.i(TAG, "No pause after " + currentTest.getName() +
+                        Logger.i(TAG + " No pause after " + currentTest.getName() +
                                         "." + rpc.getFunctionName());
                     }
                 }
 
                 long pause = currentTest.getPause();
                 if (pause > 0) {
-                    Log.v(TAG, "Pause for " + pause + " ms. after " + currentTest.getName());
+                    Logger.d(TAG + " Pause for " + pause + " ms. after " + currentTest.getName());
                     try {
                         // delay after the test
                         synchronized (this) {
@@ -1092,7 +1093,7 @@ public class ModuleTest {
                         mLogAdapter.logMessage("InterruptedException", true);
                     }
                 } else {
-                    Log.i(TAG, "No pause after " + currentTest.getName());
+                    Logger.i(TAG + " No pause after " + currentTest.getName());
                 }
 
                 // wait for incoming messages
@@ -1112,7 +1113,6 @@ public class ModuleTest {
                 }
 
                 testResult.setTestComplete(true);
-                //Log.d(TAG, "Test case:" + currentTest.getName() + " complete");
 
                 if (!integration) {
                     restoreMarshaller(defaultMarshaller);
@@ -1258,7 +1258,7 @@ public class ModuleTest {
 			return;
 		}
 		
-		Log.d(TAG, s);
+		Logger.d(TAG + " " + s);
 	}
 	
 	private void acquireWakeLock() {
@@ -1276,7 +1276,7 @@ public class ModuleTest {
 			wakeLock.setReferenceCounted(false);
 			wakeLock.acquire();
 		} catch (NullPointerException e) {
-			Log.w(TAG, "Can't acquire wakelock", e);
+			Logger.w(TAG + " Can't acquire wakelock", e);
 			wakeLock = null;
 		}
 	}
@@ -1286,7 +1286,7 @@ public class ModuleTest {
 			wakeLock.release();
 			wakeLock = null;
 		} else {
-			Log.d(TAG, "Can't release wakeLock, it's null");
+			Logger.d(TAG + " Can't release wakeLock, it's null");
 		}
 	}
 }

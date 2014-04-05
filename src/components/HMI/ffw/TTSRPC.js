@@ -203,27 +203,6 @@ FFW.TTS = FFW.RPCObserver.create( {
 
             break;
         }
-        case "TTS.PerformInteraction":
-        {
-
-            SDL.SDLModel.onPrompt(request.params.initialPrompt);
-
-            SDL.SDLModel.interactionData.helpPrompt = request.params.helpPrompt;
-
-            var request = request;
-
-            setTimeout(function(){
-                if (SDL.SDLAppController.model.activeRequests.uiPerformInteraction) {
-                    //FFW.TTS.requestId = request.id;
-                    SDL.SDLModel.onPrompt(request.params.timeoutPrompt);
-                    SDL.SDLModel.interactionData.helpPrompt = null;
-                }
-            }, request.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
-
-            this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "TTS.PerformInteraction");
-
-            break;
-        }
         case "TTS.GetSupportedLanguages": {
 
             Em.Logger.log("FFW." + request.method + "Response");

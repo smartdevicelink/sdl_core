@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ButtonCapabilities extends RPCStruct {
 
@@ -22,7 +22,7 @@ public class ButtonCapabilities extends RPCStruct {
             try {
                 theCode = ButtonName.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.name, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.name, e);
             }
             return theCode;
         }

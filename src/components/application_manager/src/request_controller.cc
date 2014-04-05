@@ -152,13 +152,15 @@ void RequestController::terminateAppRequests(
   {
     AutoLock auto_lock(request_list_lock_);
     std::list<Request>::iterator it = request_list_.begin();
-    for (; request_list_.end() != it; ++it) {
+    while (request_list_.end() != it) {
       const commands::CommandRequestImpl* request_impl =
           static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->connection_key() == app_id) {
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
         it = request_list_.erase(it);
+      } else {
+        ++it;
       }
     }
   }

@@ -8,6 +8,8 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
@@ -27,12 +29,13 @@ import static org.mockito.Mockito.when;
  * Created by enikolsky on 2013-10-29.
  */
 public class TestCommon {
+
     public static JSONObject paramsToRequestObject(JSONObject paramsObject)
             throws JSONException {
         JSONObject jsonObject = new JSONObject();
         JSONObject requestObject = new JSONObject();
-        jsonObject.put("request", requestObject);
-        requestObject.put("parameters", paramsObject);
+        jsonObject.put(Names.request, requestObject);
+        requestObject.put(Names.parameters, paramsObject);
         return jsonObject;
     }
 
@@ -51,8 +54,8 @@ public class TestCommon {
         when(connectionMock.getWiProProtocol()).thenReturn(protocolMock);
 
         return new SyncProxyALM(proxyListener, null, "!", null, null, true,
-                null, null, null, null, null, null, false, false, 2, null,
-                connectionMock, new TestConfig());
+                null, null, null, null, null, null, false, false,
+                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connectionMock, new TestConfig());
     }
 
     public static byte[] getRandomBytes(int dataSize) {
@@ -72,6 +75,7 @@ public class TestCommon {
             final String functionName, final Hashtable<String, Object> params,
             final byte rpcType, final int corrID) throws JSONException {
         ProtocolMessage pm = new ProtocolMessage();
+        pm.setVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
         pm.setCorrID(corrID);
 
         if (params != null) {
