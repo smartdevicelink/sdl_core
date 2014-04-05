@@ -50,6 +50,9 @@
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_request.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
+#include "application_manager/commands/hmi/on_status_update_notification.h"
 #include "application_manager/commands/hmi/update_sdl_request.h"
 #include "application_manager/commands/hmi/update_sdl_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
@@ -314,6 +317,18 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::SDLGetUserFriendlyMessageRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetStatusUpdate: {
+      if (is_response) {
+        command.reset(new commands::SDLGetStatusUpdateResponse(message));
+      } else {
+        command.reset(new commands::SDLGetStatusUpdateRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
+      command.reset(new commands::OnStatusUpdateNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {

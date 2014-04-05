@@ -153,6 +153,18 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
                               const uint32_t correlation_id);
 
   /**
+   * @brief Get current policy table update state and send response
+   * @param correlation_id Correlation id from request
+   */
+  void OnGetStatusUpdate(const uint32_t correlation_id);
+
+  /**
+   * @brief Send notification to HMI with changed policy update status
+   * @param status Current policy update state
+   */
+  void OnUpdateStatusChanged(policy::PolicyTableStatus status);
+
+  /**
    * Adds statistics info
    * @param type type of info
    */
@@ -190,6 +202,13 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @return consent status for selected device
    */
   DeviceConsent GetDeviceForSending(DeviceParams& device_params);
+
+  /**
+   * @brief Convert internal policy update status to appropriate status for HMI
+   * @param status Internal policy update status
+   * @return Converted status for sending to HMI
+   */
+  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
 
  private:
   PolicyHandler();

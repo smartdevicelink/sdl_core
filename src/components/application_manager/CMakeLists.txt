@@ -188,6 +188,9 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/sdl_get_list_of_permissions_response.cc
 ./src/commands/hmi/sdl_get_user_friendly_message_request.cc
 ./src/commands/hmi/sdl_get_user_friendly_message_response.cc
+./src/commands/hmi/sdl_get_status_update_request.cc
+./src/commands/hmi/sdl_get_status_update_response.cc
+./src/commands/hmi/on_status_update_notification.cc
 ./src/commands/hmi/sdl_activate_app_response.cc
 ./src/commands/hmi/sdl_activate_app_request.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc

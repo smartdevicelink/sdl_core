@@ -219,6 +219,18 @@ DeviceConsent PolicyHandler::GetDeviceForSending(DeviceParams& device_params) {
   return kDeviceDisallowed;
 }
 
+const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
+  switch (status) {
+  case policy::StatusUpdatePending:
+    return "UPDATING";
+  case policy::StatusUpdateRequired:
+    return "UPDATE_NEEDED";
+  case policy::StatusUpToDate:
+    return "UP_TO_DATE";
+  }
+  return "UNKNOWN";
+}
+
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
                                   const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
@@ -269,7 +281,20 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   }
 
   application_manager::MessageHelper::SendGetListOfPermissionsResponse(
-      group_permissions, correlation_id);
+        group_permissions, correlation_id);
+}
+
+void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
+  LOG4CXX_INFO(logger_, "OnGetStatusUpdate");
+  policy::PolicyTableStatus status = policy_manager_->GetPolicyTableStatus();
+  application_manager::MessageHelper::SendGetStatusUpdateResponse(
+        ConvertUpdateStatus(status), correlation_id);
+}
+
+void PolicyHandler::OnUpdateStatusChanged(PolicyTableStatus status) {
+  LOG4CXX_INFO(logger_, "OnUpdateStatusChanged");
+  application_manager::MessageHelper::SendOnStatusUpdate(
+        ConvertUpdateStatus(status));
 }
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {

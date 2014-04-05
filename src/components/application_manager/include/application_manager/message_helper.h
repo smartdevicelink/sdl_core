@@ -308,6 +308,21 @@ class MessageHelper {
     static void SendOnAppPermissionsChangedNotification(
       uint32_t connection_key, const policy::AppPermissions& permissions);
 
+    /**
+     * @brief Send GetStatusUpdate response to HMI with current policy update
+     * status
+     * @param status Update status
+     * @param correlation_id Correlation id from request
+     */
+    static void SendGetStatusUpdateResponse(const std::string& status,
+                                            uint32_t correlation_id);
+
+    /**
+     * @brief Send OnStatusUpdate to HMI on policy update status change
+     * @param status Policy table update status
+     */
+    static void SendOnStatusUpdate(const std::string& status);
+
     /*
      * @brief Sends notification to HMI to start audio streaming
      *
