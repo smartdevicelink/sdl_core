@@ -51,6 +51,7 @@ set (POLICIES_MANAGER
 if (EXTENDED_POLICY_FLAG)
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
+    ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
   list(APPEND POLICIES_MANAGER

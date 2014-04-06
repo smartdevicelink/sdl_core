@@ -147,6 +147,7 @@
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
+#include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 
 #ifdef HMI_JSON_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
@@ -250,7 +251,7 @@ namespace application_manager {
 
 #ifdef ENABLE_LOG
 log4cxx::LoggerPtr HMICommandFactory::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
+      log4cxx::Logger::getLogger("ApplicationManager"));
 #endif // ENABLE_LOG
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
@@ -303,6 +304,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::SDLActivateAppRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnAppPermissionChanged: {
+      command.reset(new commands::OnAppPermissionChangedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::SDL_GetListOfPermissions: {
