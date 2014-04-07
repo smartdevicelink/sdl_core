@@ -1061,7 +1061,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                     "length": 10000,
                     "timeout": 500,
                     "fileName": document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
-                    "appID": SDL.SDLAppController.model ? SDL.SDLAppController.model.appID : null
+                    "appID": SDL.SDLAppController.model ? SDL.SDLAppController.model.appID.toString() : "default"
                 }
             };
             this.client.send(JSONMessage);
