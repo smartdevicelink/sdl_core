@@ -249,7 +249,7 @@ void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_ = device;
 }
 
-uint32_t ApplicationImpl::get_grammar_id() {
+uint32_t ApplicationImpl::get_grammar_id() const {
   return grammar_id_;
 }
 

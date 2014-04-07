@@ -85,8 +85,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET),
     media_manager_(NULL),
-    resume_ctrl_(this)
-{
+    resume_ctrl_(this) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   srand(time(NULL));
   if (!policies_manager_.Init()) {
