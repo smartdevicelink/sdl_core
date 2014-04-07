@@ -232,7 +232,7 @@
           "PerformInteraction": {
             "hmi_levels": [
               "FULL",
-			  "LIMITED"
+        "LIMITED"
             ]
           },
           "PutFile": {
@@ -429,18 +429,6 @@
               "BACKGROUND",
               "FULL",
               "LIMITED"
-            ],
-            "parameters": [
-              "engineTorque",
-              "externalTemperature",
-              "fuelLevel",
-              "fuelLevel_State",
-              "headLampStatus",
-              "instantFuelConsumption",
-              "odometer",
-              "tirePressure",
-              "vin",
-              "wiperStatus"
             ]
           },
           "OnVehicleData": {
@@ -448,18 +436,6 @@
               "BACKGROUND",
               "FULL",
               "LIMITED"
-            ],
-            "parameters": [
-              "engineTorque",
-              "externalTemperature",
-              "fuelLevel",
-              "fuelLevel_State",
-              "headLampStatus",
-              "instantFuelConsumption",
-              "odometer",
-              "tirePressure",
-              "vin",
-              "wiperStatus"
             ]
           },
           "SubscribeVehicleData": {
@@ -467,17 +443,6 @@
               "BACKGROUND",
               "FULL",
               "LIMITED"
-            ],
-            "parameters": [
-              "engineTorque",
-              "externalTemperature",
-              "fuelLevel",
-              "fuelLevel_State",
-              "headLampStatus",
-              "instantFuelConsumption",
-              "odometer",
-              "tirePressure",
-              "wiperStatus"
             ]
           },
           "UnsubscribeVehicleData": {
@@ -485,17 +450,6 @@
               "BACKGROUND",
               "FULL",
               "LIMITED"
-            ],
-            "parameters": [
-              "engineTorque",
-              "externalTemperature",
-              "fuelLevel",
-              "fuelLevel_State",
-              "headLampStatus",
-              "instantFuelConsumption",
-              "odometer",
-              "tirePressure",
-              "wiperStatus"
             ]
           }
         }
@@ -1920,7 +1874,9 @@
         "priority": "NONE",
         "default_hmi": "NONE",
         "groups": [
-          "Base-4"
+          "Base-4",
+          "VehicleInfo-3",
+          "PropriataryData-1"
         ]
       },
       "device": {

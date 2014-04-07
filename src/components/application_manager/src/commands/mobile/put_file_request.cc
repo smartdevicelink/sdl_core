@@ -113,8 +113,8 @@ void PutFileRequest::Run() {
     policy::PolicyHandler::instance()->ReceiveMessageFromSDK(binary_data);
   }
 
-  uint32_t offset = 0;
-  bool is_persistent_file = false;
+  offset_ = 0;
+  is_persistent_file_ = false;
   bool is_system_file = false;
   length_ = binary_data.size();
   bool is_download_compleate = true;

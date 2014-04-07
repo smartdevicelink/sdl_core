@@ -1315,22 +1315,23 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   std::string output_string;
   switch (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE)
           .asInt()) {
-    case 0: {
-      if (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt() == 1) {
-        if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
-            output_string)) {
-          LOG4CXX_WARN(logger_, "Failed to serialize smart object");
-          return false;
+    case 0:
+      {
+        if (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt() == 1) {
+          if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
+              output_string)) {
+            LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+            return false;
+          }
+          output.set_protocol_version(application_manager::kV1);
+        } else {
+          if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
+              output_string)) {
+            LOG4CXX_WARN(logger_, "Failed to serialize smart object");
+            return false;
+          }
+          output.set_protocol_version(application_manager::kV2);
         }
-        output.set_protocol_version(application_manager::kV1);
-      } else {
-        if (!formatters::CFormatterJsonSDLRPCv2::toString(message,
-            output_string)) {
-          LOG4CXX_WARN(logger_, "Failed to serialize smart object");
-          return false;
-        }
-        output.set_protocol_version(application_manager::kV2);
-      }
 
       break;
     }
