@@ -3191,7 +3191,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
-            Logger.d( "ProtocolMessageReceived:" + msg);
+            Logger.d("ProtocolMessageReceived:" + msg);
 
             // do not put these messages into queue
             if (msg.getServiceType() == ServiceType.Heartbeat) {
@@ -3209,8 +3209,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-
-
             if (session.hasService(ServiceType.RPC)) {
                 String message = "RPC Session started, sessionId:" + session.getSessionId() +
                         ", correlationID:" + correlationID +
@@ -3226,45 +3224,42 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
 
-            @Override
-            public void onProtocolServiceEnded (ServiceType serviceType,
-            byte sessionID, String correlationID){
-                handleEndServiceAck(serviceType, sessionID, correlationID);
-            }
+        @Override
+        public void onProtocolServiceEnded(ServiceType serviceType,
+                                           byte sessionID, String correlationID) {
+            handleEndServiceAck(serviceType, sessionID, correlationID);
+        }
 
-            @Override
-            public void onProtocolError (String info, Throwable e){
-                passErrorToProxyListener(info, e);
-            }
+        @Override
+        public void onProtocolError(String info, Throwable e) {
+            passErrorToProxyListener(info, e);
+        }
 
-            @Override
-            public void onMobileNavAckReceived ( int frameReceivedNumber){
-                handleMobileNavAck(frameReceivedNumber);
-            }
+        @Override
+        public void onMobileNavAckReceived(int frameReceivedNumber) {
+            handleMobileNavAck(frameReceivedNumber);
+        }
 
-            @Override
-            public void onStartServiceNackReceived (ServiceType serviceType){
-                handleStartServiceNack(serviceType);
-            }
-
-
-            @Override
-            public void onProtocolServiceStarted (ServiceType serviceType,byte sessionID,
-            boolean encrypted, byte version,
-            String correlationID){
-                if (mSyncConnection.getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        @Override
+        public void onStartServiceNackReceived(ServiceType serviceType) {
+            handleStartServiceNack(serviceType);
+        }
 
 
-                    if (getSyncConnection() == null) {
-                        return;
-                    }
-                    if (getSyncConnection().getWiProProtocol() == null) {
-                        return;
-
-                    }
-                    handleServiceStarted(serviceType, sessionID, encrypted, correlationID);
+        @Override
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                             boolean encrypted, byte version,
+                                             String correlationID) {
+            if (mSyncConnection.getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                handleServiceStarted(serviceType, sessionID, encrypted, correlationID);
+                if (getSyncConnection() == null) {
+                    return;
+                }
+                if (getSyncConnection().getWiProProtocol() == null) {
+                    return;
                 }
             }
+        }
 
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {

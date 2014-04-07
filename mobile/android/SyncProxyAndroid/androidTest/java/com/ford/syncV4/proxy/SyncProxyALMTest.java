@@ -163,10 +163,11 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void onMobileNaviServiceStarted(byte sessionID, String correlationID, boolean encrypted) {
-                super.onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
+            protected void startMobileNaviService(byte sessionID, String correlationID, boolean encrypted) {
+                super.startMobileNaviService(sessionID, correlationID, encrypted);
                 assertEquals("Session ID should be equal", currentSession.getSessionId(), (byte) 48);
             }
+
         };
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "");
     }
