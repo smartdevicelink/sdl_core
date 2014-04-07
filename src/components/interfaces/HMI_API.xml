@@ -3555,23 +3555,23 @@
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
 
-    <function name="OnReceivedPolicyUpdate" messagetype="notificatoin">
+    <function name="OnReceivedPolicyUpdate" messagetype="notification">
       <description>
         From: SYNCP Manager
         To: SDL
         Notification sent to SDL when SYNCP Manager receives and decrypts updated policy table
-      </descrtiption>
+      </description>
       <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
         <description>Location of decrypted policy table Json file on target</description>
       </param>
     </function>
 
-    <function name="OnPolicyUpdate" messagetype="notificatoin">
+    <function name="OnPolicyUpdate" messagetype="notification">
       <description>
         From: SYNCP Manager
         To: SDL
         Notifies SDL to supply a new "PolicyUpdate" request with more recent snapshot data
-      </descrtiption>
+      </description>
     </function>
 
     <function name="GetListOfPermissions"  messagetype="request">
@@ -3617,7 +3617,7 @@
     <param name="device" type="Common.DeviceInfo" mandatory="true"/>
   </function>
 
-  <function name="PolicyUpdate" massagetype="request">
+  <function name="PolicyUpdate" messagetype="request">
     <description>
       From: SDL
       To: SYNCP Manager
@@ -3673,7 +3673,7 @@
       <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
 </interface>
 </interfaces>
