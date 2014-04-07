@@ -1096,7 +1096,7 @@
   </param>
   </struct>
   <struct name="ServiceInfo">
-    <param name="servicyType" type="String" mandatory="true">
+    <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="policyAppId" type="String" mandatory="false">
@@ -1953,7 +1953,7 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
-      <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -1967,10 +1967,10 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
-      <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
         <description>File reference name.</description>
       </param>
-      <param name="appID" type="Integer" mandatory="true">
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
         <description>ID of application that requested this RPC.</description>
       </param>
     </function>
@@ -2019,10 +2019,10 @@
     <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
     </param>
-    <param name="fileName" type="String" maxlength="255" mandatory="true">
+    <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
         <description>The path to file.</description>
     </param>
-    <param name="appID" type="Integer" mandatory="false">
+    <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
       <description>ID of application that requested this RPC.</description>
     </param> 
    </function>
@@ -3555,6 +3555,25 @@
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
 
+    <function name="OnReceivedPolicyUpdate" messagetype="notificatoin">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notification sent to SDL when SYNCP Manager receives and decrypts updated policy table
+      </descrtiption>
+      <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>Location of decrypted policy table Json file on target</description>
+      </param>
+    </function>
+
+    <function name="OnPolicyUpdate" messagetype="notificatoin">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notifies SDL to supply a new "PolicyUpdate" request with more recent snapshot data
+      </descrtiption>
+    </function>
+
     <function name="GetListOfPermissions"  messagetype="request">
       <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
       <param name="appID" type="Integer" mandatory="false"/>
@@ -3598,6 +3617,29 @@
     <param name="device" type="Common.DeviceInfo" mandatory="true"/>
   </function>
 
+  <function name="PolicyUpdate" massagetype="request">
+    <description>
+      From: SDL
+      To: SYNCP Manager
+      Asks SYNCP Manager to send given Policy Table snapshot to the backend
+    </description>
+    <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
+      <description>
+        Location of policy table snapshot
+      </description>
+    </param>
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>
+        Send attempt timeout in seconds
+      </description>
+    </param>
+    <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
+      <description>
+        Array of delays to wait after failed atempts
+      </description>
+    </param>
+  </function>
+
   <function name="UpdateSDL" messagetype="request">
       <description>Request from HMI to SDL to start update of Policy Table.</description>
     </function>
@@ -3628,10 +3670,10 @@
 
     <function name="GetURLS" messagetype="request" scope="internal">
       <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Common.ServiceInfo" mandatory="true"/>
+      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="String" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
     </function>
 </interface>
 </interfaces>
