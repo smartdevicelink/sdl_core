@@ -1991,6 +1991,12 @@
       <description>Optional length in bytes for resuming partial data chunks</description>
     </param>
 
+    <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+      <description>Full Size of file. sends in first OnPutFile notification if file is splited
+		     	   into many PutFiles
+	  </description>
+    </param>
+
     <param name="FileName" type="String" maxlength="255" mandatory="true">
       <description>File reference name.</description>
     </param>
@@ -2575,7 +2581,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-  
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2587,7 +2592,6 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
-  
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>

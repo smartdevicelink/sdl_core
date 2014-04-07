@@ -1029,6 +1029,8 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
   if (0 < app_id) {
     msg_params[strings::app_id] = app_id;
   }
+  msg_params[strings::grammar_id] =
+			 ApplicationManagerImpl::instance()->application(app_id)->get_grammar_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
   (*vr_command)[strings::msg_params] = msg_params;

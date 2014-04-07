@@ -104,7 +104,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
-  virtual uint32_t get_grammar_id();
+  virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
 
   bool AddFile(AppFile& file);

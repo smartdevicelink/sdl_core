@@ -63,9 +63,12 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   }
 
   uint32_t hash = application->curHash();
+  uint32_t grammar_id = application->get_grammar_id();
+
   LOG4CXX_INFO(logger_, "Hash = " << hash);
   uint32_t connection_key = application->app_id();
   (*json_app)[strings::app_id] = m_app_id;
+  (*json_app)[strings::grammar_id] = grammar_id;
   (*json_app)[strings::connection_key] = connection_key;
   (*json_app)[strings::hmi_level] =
       static_cast<int32_t> (application->hmi_level());
@@ -162,6 +165,8 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
   Json::Value& application_files= saved_app[strings::application_files];
   Json::Value& application_show= saved_app[strings::application_show];
+  uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
+  application->set_grammar_id(app_grammar_id);
 
   //show
   if (!application_show.isNull()) {
@@ -235,7 +240,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
     Formatters::CFormatterJsonBase::jsonValueToObj(json_choiset , msg_param);
     const int32_t choice_set_id = msg_param
         [strings::interaction_choice_set_id].asInt();
-    uint32_t grammar_id = msg_param[strings::grammar_id].asUInt();
+    uint32_t choice_grammar_id = msg_param[strings::grammar_id].asUInt();
     application->AddChoiceSet(choice_set_id, msg_param);
 
     for (size_t j = 0; j < msg_param[strings::choice_set].length(); ++j) {
@@ -250,8 +255,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
           msg_param[strings::choice_set][j][strings::vr_commands];
 
       choise_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-      choise_params[strings::grammar_id] =  grammar_id;
-
+      choise_params[strings::grammar_id] =  choice_grammar_id;
       SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &choise_params);
     }
   }
