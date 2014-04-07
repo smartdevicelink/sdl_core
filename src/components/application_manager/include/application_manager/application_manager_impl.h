@@ -386,31 +386,21 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-<<<<<<< HEAD
     virtual void OnMessageReceived(const protocol_handler::
                                    RawMessagePtr message);
-=======
-  virtual void OnMessageReceived(
-      const protocol_handler::RawMessagePtr& message);
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-<<<<<<< HEAD
     virtual void OnMobileMessageSent(const protocol_handler::
                                      RawMessagePtr message);
-=======
-  virtual void OnMobileMessageSent(
-      const protocol_handler::RawMessagePtr& message);
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
-  void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
+    void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
-  bool OnServiceStartedCallback(
+    bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key, const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,

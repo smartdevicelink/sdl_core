@@ -108,7 +108,6 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
-<<<<<<< HEAD
   #ifdef TESTS_WITH_HMI
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
     log4cxx::PropertyConfigurator::configure("log4cxx.properties");
@@ -118,18 +117,6 @@ int main(int argc, char **argv) {
 //  app.Run();
   sleep(5);
 
-=======
-  profile::Profile::instance()->config_file_name("log4cxx.properties");
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-
-
-#ifdef TESTS_WITH_HMI
-  test::AdminAppTest app;
-
-  app.Run();
-  sleep(5);
-#endif
->>>>>>> develop
   int result = RUN_ALL_TESTS();
 
 #ifdef __cplusplus

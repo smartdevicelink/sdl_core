@@ -49,16 +49,14 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
-<<<<<<< HEAD
 # --- Security manager
 add_subdirectory(./security_manager)
-=======
+#
 # --- Policy_impl
 add_subdirectory(./policy)
 
 # --- Validated types
 add_subdirectory(./rpc_base)
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
 # --- SmartObjects
 add_subdirectory(./smart_objects)

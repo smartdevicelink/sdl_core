@@ -56,8 +56,6 @@ include_directories (
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 if (BUILD_TESTS_WITH_HMI)
  set(LIBRARIES
   test_App_Manager
@@ -72,7 +70,7 @@ if (BUILD_TESTS_WITH_HMI)
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
-    policies
+    policy
     ProtocolHandler
     Utils
     ConfigProfile
@@ -108,9 +106,6 @@ if (BUILD_TESTS_WITH_HMI)
    )
 else(BUILD_TESTS_WITH_HMI)
 set(LIBRARIES
-=======
- set(LIBRARIES
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     MediaManager
     ApplicationManager
     gtest
@@ -122,11 +117,6 @@ set(LIBRARIES
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
-<<<<<<< HEAD
-    policies
-=======
-    #policy
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     ProtocolHandler
     Utils
     ConfigProfile
@@ -138,17 +128,9 @@ set(LIBRARIES
     #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
-<<<<<<< HEAD
-    #test_MobileMessageHandlerTest
     connectionHandler
     MOBILE_API
     jsoncpp
-#################################################
-=======
-    connectionHandler
-    MOBILE_API
-    jsoncpp
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     TransportManager
     HMIMessageHandler
     MessageBroker
@@ -163,54 +145,8 @@ set(LIBRARIES
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
-<<<<<<< HEAD
-    test_SecurityManager
-=======
-set(LIBRARIES
-  MediaManager
-  ApplicationManager
-  gtest
-  gtest_main
-  gmock
-  gmock_main
-  formatters
-  HMI_API
-  v4_protocol_v1_2_no_extra
-  SmartObjects
-  RequestWatchdog
-  policies
-  ProtocolHandler
-  Utils
-  ConfigProfile
-  #test_JSONHandler_v4_protocol_v2_0_revP
-  #test_json_handler
-  #test_SmartObjectTest
-  #test_FormattersCommandsTest
-  #test_UtilsTest
-  #test_RequestWatchdogTest
-  #test_ProtocolHandlerTest
-  #test_JSONCPPTest
-  connectionHandler
-  MOBILE_API
-  jsoncpp
-  TransportManager
-  HMIMessageHandler
-  MessageBroker
-  MessageBrokerClient
-  MessageBrokerServer
-  encryption
-  bluetooth
-  pthread
-  avahi-client
-  avahi-common
-  ${LibXML2_LIBRARIES} -lxml2
-  # rt
-  # ${GSTREAMER_gstreamer_LIBRARY}
-  Resumption
->>>>>>> develop
-=======
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
-)
+    test_SecurityManager)
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES dl)
@@ -225,15 +161,12 @@ endif()
 
 add_executable("test_suit" "./test_suit.cc")
 
-<<<<<<< HEAD
 file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
 
-=======
 if (BUILD_TESTS_WITH_HMI)
   target_link_libraries("test_suit" test_App_Manager ${LIBRARIES})
 else (BUILD_TESTS_WITH_HMI)
 target_link_libraries("test_suit" ${LIBRARIES})
 endif (BUILD_TESTS_WITH_HMI)
->>>>>>> develop
 
 # vim: set ts=2 sw=2 et:

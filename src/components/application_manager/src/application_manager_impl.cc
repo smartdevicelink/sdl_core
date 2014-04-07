@@ -291,15 +291,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->set_name(name);
   application->set_device(device_id);
   application->set_grammar_id(GenerateGrammarID());
-<<<<<<< HEAD
-  application->set_language(
-      static_cast<mobile_api::Language::eType>(message[strings::msg_params][strings::language_desired]
-          .asInt()));
-
-  application->set_ui_language(
-      static_cast<mobile_api::Language::eType>(message[strings::msg_params][strings::hmi_display_language_desired]
-          .asInt()));
-=======
   mobile_api::Language::eType launguage_desired =
       static_cast<mobile_api::Language::eType>(params[strings::language_desired]
           .asInt());
@@ -313,7 +304,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->set_ui_language(hmi_display_language_desired);
   application->usage_report().RecordAppRegistrationGuiLanguage(
       hmi_display_language_desired);
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
   Version version;
   int32_t min_version =
@@ -1554,14 +1544,8 @@ void ApplicationManagerImpl::HeadUnitReset(
 }
 
 void ApplicationManagerImpl::UnregisterAllApplications() {
-<<<<<<< HEAD
-  LOG4CXX_INFO(
-      logger_,
-      "ApplicationManagerImpl::UnregisterAllApplications " << unregister_reason_);
-=======
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications " <<
       unregister_reason_);
->>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
   hmi_cooperating_ = false;
 
