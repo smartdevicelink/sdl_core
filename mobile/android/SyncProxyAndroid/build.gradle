@@ -21,6 +21,8 @@ android {
     sourceSets {
 
         androidTest {
+            java.exclude 'com/ford/syncV4/integrationtest'
+
             java.srcDirs = ['androidTest/java']
             assets.srcDirs = ['androidTest/assets']
         }
@@ -32,3 +34,5 @@ android {
         abortOnError false
     }
 }
+
+
