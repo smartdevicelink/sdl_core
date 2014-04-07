@@ -56,6 +56,13 @@ SDL.SDLVehicleInfoModel = Em.Object
         ],
 
         /**
+         * Data changed in Odometr Input in VehicleInfo popUp
+         *
+         * @type {String}
+         */
+        odometrInputBinding: 'this.vehicleData.odometer',
+
+        /**
          * PRNDL state value
          * 
          * @type {String}
@@ -207,6 +214,7 @@ SDL.SDLVehicleInfoModel = Em.Object
             'externalTemperature': 40.0,
             'vin': '52-452-52-752',
             'prndl': 'PARK',
+            'odometer': 23,
             'batteryPackVoltage': 12.5,
             'batteryPackCurrent': 7.0,
             'batteryPackTemperature': 30,
@@ -466,5 +474,18 @@ SDL.SDLVehicleInfoModel = Em.Object
                 }
             }
 
-        }.observes('this.vehicleData.prndl')
+        }.observes('this.vehicleData.prndl'),
+
+        /**
+         * Function send all vehicle conditions on FFW.VehicleInfo.OnVehicleData
+         * for notification when data changes
+         */
+        onOdometerDataChanged: function() {
+
+            var jsonData = {};
+
+            jsonData["odometer"] = parseInt(this.odometrInput);
+            FFW.VehicleInfo.OnVehicleData(jsonData);
+
+        }.observes('this.odometrInput')
     });

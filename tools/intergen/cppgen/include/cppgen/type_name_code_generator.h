@@ -72,8 +72,10 @@ class TypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
+  virtual void GenerateCodeForNullable(const NullableType* nullable);
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
+
  private:
   const Interface* interface_;
   const TypePreferences* preferences_;
@@ -117,17 +119,12 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
+  virtual void GenerateCodeForNullable(const NullableType* nullable);
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
-  // Wraps type declaration with "Mandatory" or "Optional" templates
-  // returns true if type name was wrapped (and thus fully generated).
-  bool MaybeWrapWithAvailabilitySpecifier(const Type* type);
-private:
   const Interface* interface_;
   const TypePreferences* preferences_;
-  bool skip_availaiblity_specifier_;
-  bool mandatory_;
   std::stringstream os_;
 };
 
@@ -150,6 +147,7 @@ private:
   virtual void GenerateCodeForEnum(const Enum* enm);
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
+  virtual void GenerateCodeForNullable(const NullableType* nullable);
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
 private:

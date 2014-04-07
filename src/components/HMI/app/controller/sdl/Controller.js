@@ -353,6 +353,14 @@ SDL.SDLController = Em.Object
 
             SDL.InteractionChoicesView.deactivate("ABORTED");
         },
+
+        /**
+         * Method to close AlertMeneuverPopUp view
+         */
+        closeAlertMeneuverPopUp: function() {
+
+            SDL.AlertManeuverPopUp.set('activate', false);
+        },
         /**
          * Method to open Turn List view from TBT
          * 
@@ -512,6 +520,7 @@ SDL.SDLController = Em.Object
         onLanguageChangeUI: function() {
 
             FFW.UI.OnLanguageChange(SDL.SDLModel.hmiUILanguage);
+            FFW.BasicCommunication.OnSystemInfoChanged(SDL.SDLModel.hmiUILanguage);
         }.observes('SDL.SDLModel.hmiUILanguage'),
         /**
          * Method to set language for TTS and VR components with parameters sent
@@ -539,6 +548,20 @@ SDL.SDLController = Em.Object
                     deviceName: params.deviceName,
                     appType: params.appType
                 }));
+
+            var exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit",
+                        "position": 0
+                    },
+                    cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
         },
         /**
          * Unregister application
@@ -662,7 +685,7 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            FFW.BasicCommunication.OnAppActivated(element.appID);
+            FFW.BasicCommunication.ActivateApp(element.appID);
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC

@@ -8,8 +8,8 @@ find_package(LibXML2 REQUIRED)
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
-
-#add_subdirectory(./tools)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
+add_subdirectory(./tools)
 
 
 include_directories (
@@ -19,7 +19,6 @@ include_directories (
   ../src/thirdPartyLibs/MessageBroker/include
   ../src/appMain
   ../src/components/application_manager/include
-  ../src/components/policies/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
@@ -57,6 +56,7 @@ include_directories (
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 if (BUILD_TESTS_WITH_HMI)
  set(LIBRARIES
@@ -108,6 +108,9 @@ if (BUILD_TESTS_WITH_HMI)
    )
 else(BUILD_TESTS_WITH_HMI)
 set(LIBRARIES
+=======
+ set(LIBRARIES
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     MediaManager
     ApplicationManager
     gtest
@@ -119,7 +122,11 @@ set(LIBRARIES
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
+<<<<<<< HEAD
     policies
+=======
+    #policy
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     ProtocolHandler
     Utils
     ConfigProfile
@@ -131,11 +138,17 @@ set(LIBRARIES
     #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
+<<<<<<< HEAD
     #test_MobileMessageHandlerTest
     connectionHandler
     MOBILE_API
     jsoncpp
 #################################################
+=======
+    connectionHandler
+    MOBILE_API
+    jsoncpp
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
     TransportManager
     HMIMessageHandler
     MessageBroker
@@ -150,6 +163,7 @@ set(LIBRARIES
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
+<<<<<<< HEAD
     test_SecurityManager
 =======
 set(LIBRARIES
@@ -194,7 +208,14 @@ set(LIBRARIES
   # ${GSTREAMER_gstreamer_LIBRARY}
   Resumption
 >>>>>>> develop
+=======
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES dl)
+endif()
+
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -211,7 +232,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATI
 if (BUILD_TESTS_WITH_HMI)
   target_link_libraries("test_suit" test_App_Manager ${LIBRARIES})
 else (BUILD_TESTS_WITH_HMI)
-  target_link_libraries("test_suit" ${LIBRARIES})
+target_link_libraries("test_suit" ${LIBRARIES})
 endif (BUILD_TESTS_WITH_HMI)
 >>>>>>> develop
 

@@ -241,7 +241,15 @@ const char manual_text_entry[] = "manualTextEntry";
 namespace mobile_notification {
 const char state[] = "state";
 const char syncp_timeout[] = "Timeout";
+const char syncp_url[] = "URL";
 }  // namespace mobile_notification
+
+namespace hmi_levels {
+const char kFull[] = "FULL";
+const char kLimited[] = "LIMITED";
+const char kBackground[] = "BACKGROUND";
+const char kNone[] = "NONE";
+}
 
 namespace hmi_request {
 const char parent_id[] = "parentID";
@@ -312,6 +320,8 @@ const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
 const char result[] = "result";
+const char statistic_type[] = "statisticType";
+const char error[] = "error";
 
 }  // namespace hmi_notification
 

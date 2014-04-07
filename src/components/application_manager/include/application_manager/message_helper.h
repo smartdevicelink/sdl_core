@@ -39,6 +39,8 @@
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 #include "application_manager/application.h"
+#include "application_manager/vehicle_info_data.h"
+#include "policy/policy_types.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -76,39 +78,6 @@ typedef enum {
   SLIDER_HADER,
   SLIDER_FOOTEER
 } TextFieldName;
-
-/*
- * @brief Typedef for the vehicle data types that can
- * be published and subscribed to
- */
-typedef enum {
-  GPS = 0,
-  SPEED,
-  RPM,
-  FUELLEVEL,
-  FUELLEVEL_STATE,
-  FUELCONSUMPTION,
-  EXTERNTEMP,
-  VIN,
-  PRNDL,
-  TIREPRESSURE,
-  ODOMETER,
-  BELTSTATUS,
-  BODYINFO,
-  DEVICESTATUS,
-  ECALLINFO,
-  AIRBAGSTATUS,
-  EMERGENCYEVENT,
-  CLUSTERMODESTATUS,
-  MYKEY,
-  BRAKING,
-  WIPERSTATUS,
-  HEADLAMPSTATUS,
-  BATTVOLTAGE,
-  ENGINETORQUE,
-  ACCPEDAL,
-  STEERINGWHEEL
-} VehicleDataType;
 
 /*
  * @brief Typedef for VehicleData
@@ -172,6 +141,23 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    /*
+    * @brief Used to obtain string representation of app's
+    * HMI Level.
+    * @param hmi_level Desired HMI Level
+    */
+    static const char* StringifiedHMILevel(
+      mobile_apis::HMILevel::eType hmi_level);
+
+    /*
+    * @brief Used to obtain function name by its id
+    * @param function_id Function ID
+    */
+    static const char* StringifiedFunctionID(
+      mobile_apis::FunctionID::eType function_id);
+
+    static void CreateGetDeviceData(int32_t correlation_id);
+
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,
       mobile_apis::Result::eType result, uint32_t correlation_id,
@@ -231,8 +217,42 @@ class MessageHelper {
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
+  static void SendActivateAppToHMI(uint32_t const app_id);
+  static void GetDeviceInfoForHandle(const uint32_t device_handle,
+                                     policy::DeviceParams* device_info);
+  static void GetDeviceInfoForApp(uint32_t connection_key,
+                                  policy::DeviceParams* device_info);
 
+    /**
+    * @brief Send SDL_ActivateApp response to HMI
+    * @param permissions response parameters
+    */
+    static void SendActivateAppResponse(policy::AppPermissions& permissions,
+                                        uint32_t correlation_id);
+
+    /**
+    * @brief Send OnSDLConsentNeeded to HMI for device data consent by user
+    * @param device_info Device info, e.g. mac, handle, name
+    */
+    static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info);
+
+    /**
+     * @brief Send GetUserFriendlyMessage response to HMI
+     * @param msg Appopriate messages params
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetUserFriendlyMessageResponse(
+        const std::vector<policy::UserFriendlyMessage>& msg,
+        uint32_t correlation_id);
+
+    /**
+     * @brief Send GetListOfPermissions response to HMI
+     * @param permissions Array of groups permissions
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetListOfPermissionsResponse(
+        std::vector<policy::FunctionalGroupPermission>& permissions,
+        uint32_t correlation_id);
 
     /*
      * @brief Sends notification to HMI to start video streaming
@@ -250,6 +270,49 @@ class MessageHelper {
      *
      */
     static void SendNaviStopStream(int32_t connection_key);
+
+    /*
+    * @brief Send notification for Update of Policy Table
+    * with PT Snapshot.
+    * @param connection_key Id of application to send message to
+    * @param policy_data PT Snapshot
+    * @param url If empty string, no URL is provided
+    * @param timeout If -1 no timeout is provdied
+    */
+    static void SendPolicySnapshotNotification(
+      unsigned int connection_key, const std::vector<uint8_t>& policy_data,
+      const std::string& url = "", int timeout = -1);
+
+    /*
+    * @brief Send notification to mobile on application permissions update
+    * @param connection_key Id of application to send message to
+    * @param permissions updated permissions for application
+    */
+    static void SendOnPermissionsChangeNotification(
+      uint32_t connection_key, const policy::Permissions& permissions);
+
+    /*
+    * @brief Send notification to HMI on application permissions update
+    * @param connection_key Id of application to send message to
+    * @param permissions updated permissions for application
+    */
+    static void SendOnAppPermissionsChangedNotification(
+      uint32_t connection_key, const policy::AppPermissions& permissions);
+
+    /**
+     * @brief Send GetStatusUpdate response to HMI with current policy update
+     * status
+     * @param status Update status
+     * @param correlation_id Correlation id from request
+     */
+    static void SendGetStatusUpdateResponse(const std::string& status,
+                                            uint32_t correlation_id);
+
+    /**
+     * @brief Send OnStatusUpdate to HMI on policy update status change
+     * @param status Policy table update status
+     */
+    static void SendOnStatusUpdate(const std::string& status);
 
     /*
      * @brief Sends notification to HMI to start audio streaming
@@ -292,7 +355,7 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImage(smart_objects::SmartObject& image,
-                            ApplicationConstSharedPtr app);
+        ApplicationConstSharedPtr app);
 
     /*
      * @brief Finds "Image" structure in request and verify image file presence
@@ -311,8 +374,8 @@ class MessageHelper {
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
-                                  smart_objects::SmartObject& message_params,
-                                  ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message_params,
+      ApplicationConstSharedPtr app);
 
     static bool PrintSmartObject(const smart_objects::SmartObject& object);
 

@@ -44,7 +44,10 @@ log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(uint32_t application_id)
+ApplicationImpl::ApplicationImpl(
+    uint32_t application_id,
+    const std::string& global_app_id,
+    usage_statistics::StatisticsManager* statistics_manager)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
@@ -60,7 +63,8 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0),
-      grammar_id_(0) {
+      grammar_id_(0),
+      usage_report_(global_app_id, statistics_manager) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -194,6 +198,7 @@ void ApplicationImpl::set_hmi_level(
   }
 
   hmi_level_ = hmi_level;
+  usage_report_.RecordHmiStateChanged(hmi_level);
 }
 
 void ApplicationImpl::set_hmi_supports_navi_streaming(const bool& supports) {
@@ -249,7 +254,7 @@ void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_ = device;
 }
 
-uint32_t ApplicationImpl::get_grammar_id() {
+uint32_t ApplicationImpl::get_grammar_id() const {
   return grammar_id_;
 }
 
@@ -329,6 +334,10 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   size_t old_size = subscribed_vehicle_info_.size();
   subscribed_vehicle_info_.erase(vehicle_info_type_);
   return (subscribed_vehicle_info_.size() == old_size - 1);
+}
+
+UsageStatistics& ApplicationImpl::usage_report() {
+  return usage_report_;
 }
 
 const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {

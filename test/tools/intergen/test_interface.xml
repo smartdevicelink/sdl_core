@@ -184,6 +184,15 @@
     </param>
   </struct>
 
+  <struct name="TestStructWithNullableParam">
+    <param name="nullableInt" nullable="true" type="Integer" minavlue="0" maxvalue="42" />
+  </struct>
+
+  <struct name="TestStructWithNullableStructParam">
+    <param name="nullableEnum" nullable="true" type="ImageType"/>
+    <param name="nonNullableEnum" nullable="true" type="ImageType"/>
+  </struct>
+
   <enum name="FunctionID" internal_scope="base">
     <description>Enumeration linking function names with function IDs in AppLink protocol.</description>
     <description>Assumes enumeration starts at value 0.</description>
@@ -327,6 +336,18 @@
       Test typedef over enum
     </description>
   </typedef>
+
+  <struct name="StructWithNullableTypedef">
+    <description>
+      Test struct having nullable typedef as a param
+    </description>
+    <param name="nullableTdResult" type="TdResult" nullable="true"/>
+  </struct>
+
+  <struct name="StructWithNullableMapOfNullableInts">
+    <param name="nullableMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="1" maxsize="5" nullable="true" null_values_allowed="true" />
+  </struct>
+
   <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">
     <description>
       Test typedef over array

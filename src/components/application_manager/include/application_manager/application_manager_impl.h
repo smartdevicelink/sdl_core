@@ -41,9 +41,9 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
-#include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
+#include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 
@@ -72,6 +72,10 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 #include "utils/singleton.h"
+
+namespace policy {
+class PolicyManager;
+}
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -115,57 +119,64 @@ using namespace threads;
  * when we have them.
  */
 struct MessageFromMobile: public utils::SharedPtr<Message> {
-  explicit MessageFromMobile(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
+  explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
+      : utils::SharedPtr<Message>(message) {
+  }
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
   explicit MessageToMobile(const utils::SharedPtr<Message>& message,
-                           bool final_message):
-    utils::SharedPtr<Message>(message), is_final(final_message) {}
+                           bool final_message)
+      : utils::SharedPtr<Message>(message),
+        is_final(final_message) {
+  }
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
   // Signals if connection to mobile must be closed after sending this message
   bool is_final;
- };
+};
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
-  explicit MessageFromHmi(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
+  explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
+      : utils::SharedPtr<Message>(message) {
+  }
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
-  explicit MessageToHmi(const utils::SharedPtr<Message>& message):
-    utils::SharedPtr<Message>(message) {}
+  explicit MessageToHmi(const utils::SharedPtr<Message>& message)
+      : utils::SharedPtr<Message>(message) {
+  }
   // PrioritizedQueue requres this method to decide which priority to assign
-  size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
+  size_t PriorityOrder() const {
+    return (*this)->Priority().OrderingValue();
+  }
 };
 
 // Short type names for proiritized message queues
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
-typedef threads::MessageLoopThread<
-    utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
 }
 
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
-  public impl::FromMobileQueue::Handler,
-  public impl::ToMobileQueue::Handler,
-  public impl::FromHmiQueue::Handler,
-  public impl::ToHmiQueue::Handler,
+    public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
+    public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
-  friend class ResumeCtrl;
+    friend class ResumeCtrl;
   public:
     ~ApplicationManagerImpl();
 
@@ -184,6 +195,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
     std::vector<ApplicationSharedPtr> applications_with_navi();
+  ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const;
+    /**
+          * @brief Notifies all components interested in Vehicle Data update
+          * i.e. new value of odometer etc and returns list of applications
+          * subscribed for event.
+          * @param vehicle_info Enum value of type of vehicle data
+          * @param new value (for integer values currently) of vehicle data
+          */
+    std::vector<utils::SharedPtr<Application>> IviInfoUpdated(
+      VehicleDataType vehicle_info, int value);
 
     /////////////////////////////////////////////////////
 
@@ -195,10 +217,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Closes application by id
      *
      * @param app_id Application id
+     * @param reason reason of unregistering application
      * @param is_resuming describes - is this unregister
      *        is normal or need to be resumed
      */
-    void UnregisterApplication(const uint32_t& app_id, bool is_resuming = false);
+    void UnregisterApplication(const uint32_t& app_id,
+                               mobile_apis::Result::eType reason,
+                               bool is_resuming = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -207,7 +232,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param reason Describes the reason for HU switching off
      */
     void SetUnregisterAllApplicationsReason(
-        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+      mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Called on Master_reset or Factory_defaults
+     * when User chooses to reset HU.
+     * Resets Policy Table if applicable.
+     */
+  void HeadUnitReset(mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
     /*
      * @brief Closes all registered applications
@@ -331,7 +363,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
-    virtual void set_policy_manager(policies::PolicyManager* policy_manager);
     void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////
@@ -342,7 +373,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     // if |final_message| parameter is set connection to mobile will be closed
     // after processing this message
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::SmartObject>& message, bool final_message = false);
+      const utils::SharedPtr<smart_objects::SmartObject>& message,
+      bool final_message = false);
     bool ManageMobileCommand(
       const utils::SharedPtr<smart_objects::SmartObject>& message);
     void SendMessageToHMI(
@@ -354,24 +386,33 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
+<<<<<<< HEAD
     virtual void OnMessageReceived(const protocol_handler::
                                    RawMessagePtr message);
+=======
+  virtual void OnMessageReceived(
+      const protocol_handler::RawMessagePtr& message);
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
     /*
      * @brief Overriden ProtocolObserver method
      */
+<<<<<<< HEAD
     virtual void OnMobileMessageSent(const protocol_handler::
                                      RawMessagePtr message);
+=======
+  virtual void OnMobileMessageSent(
+      const protocol_handler::RawMessagePtr& message);
+>>>>>>> 22336995d3dc0b0b489407b402b31b5aa7e1cebb
 
-    void OnMessageReceived(
-      hmi_message_handler::MessageSharedPointer message);
+  void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
-    bool OnServiceStartedCallback(const connection_handler::DeviceHandle& device_handle,
-                                  const int32_t& session_key,
-                                  const protocol_handler::ServiceType& type);
+  bool OnServiceStartedCallback(
+      const connection_handler::DeviceHandle& device_handle,
+      const int32_t& session_key, const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
                                 const protocol_handler::ServiceType& type);
 
@@ -415,8 +456,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-    void set_application_id(const int32_t correlation_id,
-                            const uint32_t app_id);
+  void set_application_id(const int32_t correlation_id, const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -451,7 +491,9 @@ class ApplicationManagerImpl : public ApplicationManager,
       * Getter for resume_controller
       * @return Resume Controller
       */
-    ResumeCtrl& resume_controller() { return resume_ctrl_; }
+    ResumeCtrl& resume_controller() {
+      return resume_ctrl_;
+    }
 
     uint32_t GenerateGrammarID();
     /*
@@ -480,7 +522,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager(PoliciesManager* managaer);
+    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
@@ -532,7 +574,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
   private:
 
-
     // members
     ResumeCtrl resume_ctrl_;
 
@@ -576,12 +617,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
-    policies::PolicyManager*                policy_manager_;
     request_controller::RequestController   request_ctrl_;
     HMICapabilities                         hmi_capabilities_;
-
-    // TODO(YS): Remove old implementation
-    policies_manager::PoliciesManager policies_manager_;
+    policy::PolicyManager*                  policy_manager_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
@@ -589,7 +627,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 #   ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
 #   endif // ENABLE_LOG
-
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

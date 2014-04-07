@@ -38,15 +38,10 @@
 #include "connection_handler/connection_handler.h"
 #include "protocol_handler/protocol_handler.h"
 
-namespace policies {
-  class PolicyManager;
-}  // namespace policies
-
 namespace application_manager {
 
 class Application;
 class HMIMatrix;
-class PoliciesManager;
 
 class ApplicationManager {
   public:
@@ -66,12 +61,10 @@ class ApplicationManager {
       protocol_handler::ProtocolHandler* handler) = 0;
     virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
-  virtual void set_policy_manager(
-      policies::PolicyManager* policy_manager) = 0;
 
   protected:
     virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
-    virtual void CreatePoliciesManager(PoliciesManager* managaer) = 0;
+    virtual void CreatePoliciesManager() = 0;
 };
 
 }  // namespace application_manager

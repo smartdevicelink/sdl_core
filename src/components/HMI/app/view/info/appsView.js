@@ -77,7 +77,7 @@ SDL.InfoAppsView = Em.ContainerView
                     }));
             }
 
-        }.observes('SDL.SDLModel.registeredApps.@each'),
+        },
 
         vehicleHealthReport: SDL.Button
             .extend( {

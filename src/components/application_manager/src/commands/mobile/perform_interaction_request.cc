@@ -234,32 +234,31 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
 
-
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
-        if (true == vr_response_recived) {
-          unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
-          DisablePerformInteraction();
-          CommandRequestImpl::onTimeOut();
-        } else {
-          ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-            correlation_id(),
-          default_timeout());
-        }
-        break;
-      }
-    case mobile_apis::InteractionMode::VR_ONLY: {
-        ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-          correlation_id(),
-        default_timeout());
-        break;
-      }
-    case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      if (true == vr_response_recived) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
         CommandRequestImpl::onTimeOut();
-        break;
+      } else {
+        ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                                 correlation_id(),
+                                                                 default_timeout());
       }
+      break;
+    }
+    case mobile_apis::InteractionMode::VR_ONLY: {
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+      break;
+    }
+    case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+      DisablePerformInteraction();
+      CommandRequestImpl::onTimeOut();
+      break;
+    }
   };
 }
 

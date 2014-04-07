@@ -50,7 +50,8 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  app_manager->UnregisterApplication(connection_key());
+  app_manager->UnregisterApplication(connection_key(),
+                                     mobile_apis::Result::SUCCESS);
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

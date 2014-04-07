@@ -172,6 +172,49 @@ SDL.RPCController = Em.Object
                     return this.resultStruct;
                 },
 
+                /**
+                 * Validate method for request AllowSDLFunctionality
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                AllowSDLFunctionality: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.device == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'device' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.device != 'object') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'device'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
 
                 /**
                  * Validate method for request UpdateDeviceList
@@ -242,6 +285,21 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
+                 * Validate method for request GetSystemInfo
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                GetSystemInfo: function(params) {
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
@@ -340,11 +398,38 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.app == null) {
+                    if (params.appPermissions == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Parameter 'app' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appPermissions.length < 1) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appPermissions'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.appID == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'appID' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.appID != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'appID'!"
                         };
 
                         return this.resultStruct;
@@ -2493,7 +2578,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.appID == null) {
+                    /*if (params.appID == null) {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -2510,7 +2595,7 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
-                    }
+                    }*/
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]

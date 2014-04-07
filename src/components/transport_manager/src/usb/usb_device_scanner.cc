@@ -1,8 +1,5 @@
-/**
- * \file usb_device_scanner.cc
- * \brief UsbDeviceScanner class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,15 +51,16 @@ class AoaInitSequence : public UsbControlTransferSequence {
   class AoaTurnIntoAccessoryMode;
 };
 
-bool IsGoogleAccessory(uint16_t vid, uint16_t pid) {
-  return (vid == kAoaVid) && (pid == kAoaPid1 || pid == kAoaPid2);
-}
-
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
-  if (IsGoogleAccessory(device->vendor_id(), device->product_id())) {
-    GoogleAccessoryFound(device);
-  } else {
-    TurnIntoAccessoryMode(device);
+  if (IsAppleDevice(device)) {
+    SupportedDeviceFound(device);
+  }
+  else {
+    if (IsGoogleAccessory(device)) {
+      SupportedDeviceFound(device);
+    } else {
+      TurnIntoAccessoryMode(device);
+    }
   }
 }
 
@@ -160,13 +158,13 @@ void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
   GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
 }
 
-void UsbDeviceScanner::GoogleAccessoryFound(PlatformUsbDevice* device) {
-  LOG4CXX_INFO(logger_, "Google accessory found");
+void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
+  LOG4CXX_INFO(logger_, "Supported device found");
 
   pthread_mutex_lock(&devices_mutex_);
   devices_.push_back(device);
   pthread_mutex_unlock(&devices_mutex_);
-  LOG4CXX_INFO(logger_, "Google accessory (bus number "
+  LOG4CXX_INFO(logger_, "USB device (bus number "
                             << static_cast<int>(device->bus_number())
                             << ", address "
                             << static_cast<int>(device->address())

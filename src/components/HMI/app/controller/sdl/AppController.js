@@ -47,6 +47,15 @@ SDL.SDLAppController = Em.Object.create({
     model: null,
 
     /**
+     * Function to add application to application list
+     */
+    showAppList: function() {
+
+        SDL.InfoAppsView.showAppList();
+        SDL.AppPermissionsListView.showAppList();
+    }.observes('SDL.SDLModel.registeredApps.@each'),
+
+    /**
      * Handeler for command button press
      *
      * @param element:
@@ -54,9 +63,20 @@ SDL.SDLAppController = Em.Object.create({
      */
     onCommand: function (element) {
 
-        // if submenu
-        if (element.menuID >= 0) {
+        if (element.commandID < 0) {
 
+            switch (element.commandID) {
+                case -1: {
+                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID);
+                    break;
+                }
+                default: {
+                    console.log("Unknown command with ID: " + element.commandID);
+                }
+            }
+        } else if (element.menuID >= 0) {
+
+            // if subMenu
             // activate driver destruction if necessary
             if (SDL.SDLModel.driverDistractionState) {
                 SDL.DriverDistraction.activate();
