@@ -349,6 +349,11 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_system_error_notification.cc
 ./src/commands/hmi/basic_communication_system_request.cc
 ./src/commands/hmi/basic_communication_system_response.cc
+./src/commands/hmi/sdl_policy_update.cc
+./src/commands/hmi/sdl_policy_update_response.cc
+./src/commands/hmi/on_received_policy_update.cc
+./src/commands/hmi/on_policy_update.cc
+./src/commands/hmi/get_urls.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

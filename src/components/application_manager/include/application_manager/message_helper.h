@@ -217,11 +217,11 @@ class MessageHelper {
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-  static void SendActivateAppToHMI(uint32_t const app_id);
-  static void GetDeviceInfoForHandle(const uint32_t device_handle,
-                                     policy::DeviceParams* device_info);
-  static void GetDeviceInfoForApp(uint32_t connection_key,
-                                  policy::DeviceParams* device_info);
+    static void SendActivateAppToHMI(uint32_t const app_id);
+    static void GetDeviceInfoForHandle(const uint32_t device_handle,
+                                       policy::DeviceParams* device_info);
+    static void GetDeviceInfoForApp(uint32_t connection_key,
+                                    policy::DeviceParams* device_info);
 
     /**
     * @brief Send SDL_ActivateApp response to HMI
@@ -237,13 +237,24 @@ class MessageHelper {
     static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info);
 
     /**
+      * @brief Send request to SyncP process to read file and send
+      * Policy Table Snapshot using Retry Strategy
+      * @param file_path Path to file with PTS
+      * @param timeout Timeout to wait for PTU
+      * @param retries Seconds between retries
+      */
+    static void SendPolicyUpdate(const std::string& file_path,
+                                 int timeout,
+                                 const std::vector<int>& retries);
+
+    /**
      * @brief Send GetUserFriendlyMessage response to HMI
      * @param msg Appopriate messages params
      * @param correlation_id Correlation id of request
      */
     static void SendGetUserFriendlyMessageResponse(
-        const std::vector<policy::UserFriendlyMessage>& msg,
-        uint32_t correlation_id);
+      const std::vector<policy::UserFriendlyMessage>& msg,
+      uint32_t correlation_id);
 
     /**
      * @brief Send GetListOfPermissions response to HMI
@@ -251,8 +262,8 @@ class MessageHelper {
      * @param correlation_id Correlation id of request
      */
     static void SendGetListOfPermissionsResponse(
-        std::vector<policy::FunctionalGroupPermission>& permissions,
-        uint32_t correlation_id);
+      std::vector<policy::FunctionalGroupPermission>& permissions,
+      uint32_t correlation_id);
 
     /*
      * @brief Sends notification to HMI to start video streaming

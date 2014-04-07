@@ -246,6 +246,12 @@
 #include "application_manager/commands/hmi/on_system_error_notification.h"
 #include "application_manager/commands/hmi/basic_communication_system_request.h"
 #include "application_manager/commands/hmi/basic_communication_system_response.h"
+#include "application_manager/commands/hmi/sdl_policy_update.h"
+#include "application_manager/commands/hmi/sdl_policy_update_response.h"
+#include "application_manager/commands/hmi/on_received_policy_update.h"
+#include "application_manager/commands/hmi/on_policy_update.h"
+#include "application_manager/commands/hmi/get_urls.h"
+//#include "application_manager/commands/hmi/get_urls_response.h"
 
 namespace application_manager {
 
@@ -303,6 +309,22 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::SDLActivateAppResponse(message));
       } else {
         command.reset(new commands::SDLActivateAppRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_PolicyUpdate: {
+      if (is_response) {
+        command.reset(new commands::SDLPolicyUpdateResponse(message));
+      } else {
+        command.reset(new commands::SDLPolicyUpdate(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetURLS: {
+      if (is_response) {
+        //command.reset(new commands::GetUrlsResponse(message));
+      } else {
+        command.reset(new commands::GetUrls(message));
       }
       break;
     }
@@ -1976,6 +1998,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::SDL_OnSystemError: {
       command.reset(new commands::OnSystemErrorNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnReceivedPolicyUpdate: {
+      command.reset(new commands::OnReceivedPolicyUpdate(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnPolicyUpdate: {
+      command.reset(new commands::OnPolicyUpdate(message));
       break;
     }
   }
