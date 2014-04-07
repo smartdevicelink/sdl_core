@@ -1947,6 +1947,12 @@
       <param name="fileName" type="String" maxlength="255" mandatory="true">
         <description>File reference name.</description>
       </param>
+
+      <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+         <description>Full Size of file. sends in first OnPutFile notification if file is splited
+                           into many PutFiles
+         </description>
+      </param>
       <param name="appID" type="String" maxlength="50" minlength="1" mandatory="true">
         <description>ID of application that requested this RPC.</description>
       </param>
