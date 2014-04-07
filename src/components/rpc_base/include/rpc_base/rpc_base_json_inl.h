@@ -65,50 +65,54 @@ inline const Json::Value* CompositeType::ValueMember(const Json::Value* value,
 }
 
 // static
-template<class T, size_t minsize, size_t maxsize>
-void CompositeType::WriteJsonField(const char* field_name,
-                    const Array<T, minsize, maxsize>& field,
-                    Json::Value* json_value) {
-  if (field.is_initialized()) {
-    (*json_value)[field_name] = field.ToJsonValue();
-  }
-}
-
-// static
-template<class T, size_t minsize, size_t maxsize>
-void CompositeType::WriteJsonField(const char* field_name,
-                    const Map<T, minsize, maxsize>& field,
-                    Json::Value* json_value) {
-  if (field.is_initialized()) {
-    (*json_value)[field_name] = field.ToJsonValue();
-  }
-}
-
-// static
 template<class T>
 void CompositeType::WriteJsonField(const char* field_name,
-                    const Nullable<T>& field,
-                    Json::Value* json_value) {
+                           const T& field,
+                           Json::Value* json_value) {
   (*json_value)[field_name] = field.ToJsonValue();
 }
 
 // static
 template<class T>
 void CompositeType::WriteJsonField(const char* field_name,
-                                   const Optional<T>& field,
-                                   Json::Value* json_value) {
-  if (field.is_initialized()) {
-    (*json_value)[field_name] = field->ToJsonValue();
+                           const Nullable<T>& field,
+                           Json::Value* json_value) {
+  if (field.is_null()) {
+    (*json_value)[field_name] = Json::Value::null;
+  } else {
+    const T& non_nulable = field;
+    WriteJsonField(field_name, non_nulable, json_value);
   }
 }
+
 // static
-template<class T>
+template<typename T, size_t minsize, size_t maxsize>
 void CompositeType::WriteJsonField(const char* field_name,
-                                   const Mandatory<T>& field,
-                                   Json::Value* json_value) {
-  (*json_value)[field_name] = field.ToJsonValue();
+                           const Map<T, minsize, maxsize>& field,
+                           Json::Value* json_value) {
+  if (field.is_initialized()) {
+    (*json_value)[field_name] = field.ToJsonValue();
+  }
 }
 
+// static
+template<typename T, size_t minsize, size_t maxsize>
+void CompositeType::WriteJsonField(const char* field_name,
+                           const Array<T, minsize, maxsize>& field,
+                           Json::Value* json_value) {
+  if (field.is_initialized()) {
+    (*json_value)[field_name] = field.ToJsonValue();
+  }
+}
+
+template<class T>
+void CompositeType::WriteJsonField(const char* field_name,
+                           const Optional<T>& field,
+                           Json::Value* json_value) {
+  if (field.is_initialized()) {
+    WriteJsonField(field_name, *field, json_value);
+  }
+}
 
 inline Boolean::Boolean(const Json::Value* value)
     : PrimitiveType(InitHelper(value, &Json::Value::isBool)),
@@ -357,12 +361,6 @@ Nullable<T>::Nullable(const Json::Value* value, const U& def_value)
 template<typename T>
 inline Json::Value Nullable<T>::ToJsonValue() const {
   return marked_null_ ? Json::Value::null : T::ToJsonValue();
-}
-
-template<typename T>
-template<typename U>
-Mandatory<T>::Mandatory(const Json::Value* value, const U& def_value)
-    : T(value, def_value) {
 }
 
 template<typename T>

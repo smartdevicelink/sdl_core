@@ -190,11 +190,11 @@ RpcTypeNameGenerator::RpcTypeNameGenerator(const Interface* interface,
     wrap_with_availability = false;
   }
 
-  if (wrap_with_availability) {
-    os_ << (availability == kMandatory ? "Mandatory< " : "Optional < ");
+  if (wrap_with_availability && (availability == kOptional)) {
+    os_ << "Optional< ";
   }
   type->Apply(this);
-  if (wrap_with_availability) {
+  if (wrap_with_availability && (availability == kOptional)) {
     os_ << " >";
   }
 }
@@ -237,20 +237,20 @@ void RpcTypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
 }
 
 void RpcTypeNameGenerator::GenerateCodeForArray(const Array* array) {
-  os_ << "Array    < ";
+  os_ << "Array< ";
   array->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", array->range().min(), array->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
-  os_ << "Map      < ";
+  os_ << "Map< ";
   map->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", map->range().min(), map->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForNullable(
     const NullableType* nullable) {
-  os_ << "Nullable < ";
+  os_ << "Nullable< ";
   nullable->type()->Apply(this);
   os_ << " >";
 }
