@@ -3,9 +3,9 @@
  */
 package com.ford.syncV4.proxy;
 
-import java.util.Hashtable;
-
 import com.ford.syncV4.proxy.constants.Names;
+
+import java.util.Hashtable;
 
 public class RPCRequest extends RPCMessage {
 
@@ -13,10 +13,6 @@ public class RPCRequest extends RPCMessage {
      * Indicates whether this request going to be encrypted or not
      */
     private boolean doEncryption = false;
-	public RPCRequest(String functionName) {
-		super(functionName, Names.request);
-		messageType = Names.request;
-	}
 
     public RPCRequest(String functionName) {
         super(functionName, Names.request);

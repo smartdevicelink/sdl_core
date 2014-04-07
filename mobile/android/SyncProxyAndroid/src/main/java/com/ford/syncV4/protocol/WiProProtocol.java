@@ -1,5 +1,7 @@
 package com.ford.syncV4.protocol;
 
+import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -7,6 +9,7 @@ import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -101,10 +104,9 @@ public class WiProProtocol extends AbstractProtocol {
 
 
     @Override
-    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionID, byte version,
-                                             String correlationID) {
-        super.handleProtocolSessionStarted(serviceType, sessionID, version, correlationID);
-
+    protected void handleProtocolSessionStarted(ServiceType serviceType,
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
+        super.handleProtocolSessionStarted(serviceType, sessionID, encrypted, version, correlationID);
         Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
     }
@@ -420,6 +422,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 }
             }
+        }
 
         protected void handleMultiFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
             //if (!hasFirstFrame) {
@@ -432,9 +435,9 @@ public class WiProProtocol extends AbstractProtocol {
                         byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByChunk(header.isEncrypted(), data);
                         handleRemainingFrame(header, decipheredData);
                     } catch (IOException e) {
-                        Log.i(TAG, "Decipher error", e);
+                        Logger.i( "Decipher error", e);
                     } catch (InterruptedException e) {
-                        Log.i(TAG, "Decipher error", e);
+                        Logger.i( "Decipher error", e);
                     }
                 } else {
                     handleRemainingFrame(header, data);
@@ -466,9 +469,9 @@ public class WiProProtocol extends AbstractProtocol {
                             byte[] decipheredData = getProtocolSecureManager().sendDataToProxyServerByteByByte(header.isEncrypted(), data);
                             handleSingleFrameMessageFrame(header, decipheredData);
                         } catch (IOException e) {
-                            Log.i(TAG, "Decipher error", e);
+                            Logger.i( "Decipher error", e);
                         } catch (InterruptedException e) {
-                            Log.i(TAG, "Decipher error", e);
+                            Logger.i( "Decipher error", e);
                         }
 
                     } else {

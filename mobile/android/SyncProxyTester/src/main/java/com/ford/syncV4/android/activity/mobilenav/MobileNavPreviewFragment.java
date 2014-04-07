@@ -142,7 +142,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 break;
 
             default:
-                Logger.e(TAG + " Unknown video source " + videoSource);
+                Logger.e(LOG_TAG, " Unknown video source " + videoSource);
                 return;
         }
         startBaseFileStreaming(videoResID);

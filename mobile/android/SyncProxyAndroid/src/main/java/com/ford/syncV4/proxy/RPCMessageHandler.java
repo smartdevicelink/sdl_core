@@ -92,7 +92,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             public void onRecall() {
 
                 // TODO : Implement logic here
-                Log.i(LOG_TAG, "Certificate Recall");
+                Logger.i(LOG_TAG, "Certificate Recall");
 
                 Alert alert = new Alert();
                 alert.setAlertText1("Certificate Recall");
@@ -101,7 +101,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 try {
                     syncProxyBase.sendRPCRequest(alert);
                 } catch (SyncException e) {
-                    Log.e(LOG_TAG, "Alert error:" + e);
+                    Logger.e(LOG_TAG, "Alert error:" + e);
                 }
             }
         });

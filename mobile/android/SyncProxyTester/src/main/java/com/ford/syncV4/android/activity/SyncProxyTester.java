@@ -35,7 +35,6 @@ import android.widget.CheckBox;
 import android.widget.CheckedTextView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -135,7 +134,6 @@ import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
-import com.stericson.RootTools.RootTools;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -3775,12 +3773,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Process a state of the "Start Secure RPC Service" checkbox
      */
     private void processRPCSecureCheckBox() {
-        Log.d(LOG_TAG, "Start Secure RPC service");
+        Logger.d( "Start Secure RPC service");
         startRPCService(true);
     }
 
     private void processRPCNotSecureCheckBox() {
-        Log.d(LOG_TAG, "Start Not Secure RPC service");
+        Logger.d( "Start Not Secure RPC service");
         startRPCService(false);
     }
 
@@ -3788,7 +3786,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Starts to encrypt Audio Service
      */
     public void startAudioServiceEncryption() {
-        Log.d(LOG_TAG, "Audio Service start encrypt");
+        Logger.d( "Audio Service start encrypt");
         startAudioService(true);
     }
 
@@ -3796,7 +3794,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Stops to encrypt Audio Service
      */
     public void startNotSecureAudioService() {
-        Log.d(LOG_TAG, "Audio Service start not encrypt");
+        Logger.d( "Audio Service start not encrypt");
         startAudioService(false);
     }
 
@@ -3804,7 +3802,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Starts to encrypt Mobile Navi Service
      */
     public void startMobileNaviServiceEncryption() {
-        Log.d(LOG_TAG, "Mobile Navi Service start encrypt");
+        Logger.d( "Mobile Navi Service start encrypt");
         startMobileNaviService(true);
     }
 
@@ -3812,7 +3810,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Stops to encrypt Mobile Navi Service
      */
     public void startMobileNaviNotEncryptedService() {
-        Log.d(LOG_TAG, "Mobile Navi Service start not encrypt");
+        Logger.d( "Mobile Navi Service start not encrypt");
         startMobileNaviService(false);
     }
 
@@ -3914,7 +3912,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Exit from Activity
      */
-    private void exitApp() {
+    public void exitApp() {
         Logger.i("Exit " + SyncProxyTester.class.getSimpleName() + "\n\n");
 
         isFirstActivityRun = true;

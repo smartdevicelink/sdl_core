@@ -8,8 +8,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -116,7 +114,7 @@ public abstract class AbstractProtocol {
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
         synchronized (_frameLock) {
-            Log.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
+            Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
             if (data != null) {
                 if (offset >= data.length) {
                     throw new IllegalArgumentException("offset should not be more then length");

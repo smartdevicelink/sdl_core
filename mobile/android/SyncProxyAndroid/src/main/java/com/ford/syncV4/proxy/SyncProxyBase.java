@@ -1840,15 +1840,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         currentSession.setSessionId(sessionID);
         addIfNotExsistRpcServiceToSession();
         mSyncConnection.setSessionId(sessionID);
-        <<<<<<<HEAD
-        Log.i(TAG, "RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
+
+        Logger.i("RPC Session started, sessionId:" + sessionID + ", correlationID:" + correlationID);
         restartRPCProtocolSession();
         notifySessionStarted(currentSession.getSessionId(), correlationID);
     }
 
     private void notifySessionStarted(final byte sessionID, final String correlationID) {
-        =======
-        >>>>>>>develop
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2021,7 +2020,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void onRPCServiceStarted(byte sessionID, String correlationID, final boolean encrypted) {
-        Log.i(TAG, "RPC service started  " + sessionID);
+        Logger.i("RPC service started  " + sessionID);
         createService(sessionID, ServiceType.Audio_Service, encrypted);
         if (protocolSecureManager != null &&
                 protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC) &&
@@ -3192,7 +3191,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
-            Log.d(TAG, "ProtocolMessageReceived:" + msg);
+            Logger.d( "ProtocolMessageReceived:" + msg);
 
             // do not put these messages into queue
             if (msg.getServiceType() == ServiceType.Heartbeat) {
@@ -3219,8 +3218,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
                 Logger.i(message);
 
-                startRPCProtocolService(session.getSessionId(), correlationID);
 
+                if (session.hasService(ServiceType.RPC)) {
+                    onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
+                }
 
             }
         }
@@ -3267,9 +3268,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
-                onMobileNaviServiceStarted(sessionID, correlationID, encrypted);
+                startMobileNaviService(sessionID, correlationID, encrypted);
             } else if (serviceType == ServiceType.Audio_Service) {
-                onAudioServiceStarted(sessionID, correlationID, encrypted);
+                startAudioService(sessionID, correlationID, encrypted);
             } else if (serviceType == ServiceType.RPC) {
                 onRPCServiceStarted(sessionID, correlationID, encrypted);
             }
