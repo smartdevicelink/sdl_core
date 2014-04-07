@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.service.IProxyServiceBinder;
@@ -13,6 +12,7 @@ import com.ford.syncV4.android.service.IProxyServiceConnection;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceBinder;
 import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -22,7 +22,6 @@ import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
  */
 public class MainApp extends Application implements IProxyServiceConnection {
 
-    private static final String LOG_TAG = "SyncProxyTester";
     private static volatile MainApp sInstance = null;
 
     private final ProxyServiceConnectionProxy mProxyServiceConnectionProxy =
@@ -62,13 +61,15 @@ public class MainApp extends Application implements IProxyServiceConnection {
     public void onCreate() {
         super.onCreate();
 
-        Log.i(LOG_TAG, MainApp.class.getSimpleName() + " On Create, processors: " +
+        Logger.initLogger(this);
+
+        Logger.i(MainApp.class.getSimpleName() + " On Create, processors:" +
                 Runtime.getRuntime().availableProcessors());
     }
 
     @Override
     public void onProxyServiceConnected(ProxyServiceBinder service) {
-        Log.i(LOG_TAG, MainApp.class.getSimpleName() + " ProxyService connected " + service);
+        Logger.i(MainApp.class.getSimpleName() + " ProxyService connected " + service);
         mBoundProxyService = service.getService();
         if (mProxyServiceBinder != null) {
             mProxyServiceBinder.onServiceBindComplete();
@@ -77,7 +78,7 @@ public class MainApp extends Application implements IProxyServiceConnection {
 
     @Override
     public void onProxyServiceDisconnected() {
-        Log.i(LOG_TAG, MainApp.class.getSimpleName() + " ProxyService disconnected");
+        Logger.i(MainApp.class.getSimpleName() + " ProxyService disconnected");
         mBoundProxyService = null;
     }
 
@@ -112,7 +113,7 @@ public class MainApp extends Application implements IProxyServiceConnection {
     }
 
     private void bindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
-        Log.i(LOG_TAG, MainApp.class.getSimpleName() + " Bind ProxyService, connection proxy: " +
+        Logger.i(MainApp.class.getSimpleName() + " Bind ProxyService, connection proxy: " +
                 connectionProxy);
         context.bindService(new Intent(context, ProxyService.class), connectionProxy,
                 BIND_AUTO_CREATE);
@@ -120,21 +121,21 @@ public class MainApp extends Application implements IProxyServiceConnection {
 
     private void unbindProxyService(Context context, ProxyServiceConnectionProxy connectionProxy) {
         if (!connectionProxy.isConnected()) {
-            Log.v(LOG_TAG, MainApp.class.getSimpleName() + " ServiceConnection is not connected, " +
+            Logger.w(MainApp.class.getSimpleName() + " ServiceConnection is not connected, " +
                     "ignoring unbindService: " + connectionProxy);
             return;
         }
         try {
-            Log.i(LOG_TAG, MainApp.class.getSimpleName() + " Unbind Service, " +
+            Logger.i(MainApp.class.getSimpleName() + " Unbind Service, " +
                     "connection proxy: " + connectionProxy);
             context.unbindService(connectionProxy);
         } catch (IllegalArgumentException iae) {
             // sometimes this exception is still thrown, in spite of isConnected() check above
             // simply ignore this exception
-            Log.w(LOG_TAG, MainApp.class.getSimpleName() + " Unbind IllegalArgumentException: " +
+            Logger.w(MainApp.class.getSimpleName() + " Unbind IllegalArgumentException: " +
                     iae);
         } catch (Exception e) {
-            Log.e(LOG_TAG, MainApp.class.getSimpleName() + " Error unbinding from connection: " +
+            Logger.e(MainApp.class.getSimpleName() + " Error unbinding from connection: " +
                     connectionProxy, e);
         }
     }

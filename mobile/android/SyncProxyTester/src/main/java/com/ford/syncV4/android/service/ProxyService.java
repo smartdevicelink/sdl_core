@@ -43,6 +43,7 @@ import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
@@ -128,6 +129,8 @@ import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -179,7 +182,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         super.onCreate();
 
         createInfoMessageForAdapter("ProxyService.onCreate()");
-        Log.i(TAG, ProxyService.class.getSimpleName() + " OnCreate, mSyncProxy:" + mSyncProxy);
+        Logger.i(TAG + " OnCreate, mSyncProxy:" + mSyncProxy);
 
         // Init Listener managers (ConnectionListenersManager, etc ...)
         mConnectionListenersManager = new ConnectionListenersManager();
@@ -220,13 +223,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     e.printStackTrace();
                 }
             }
-            Log.d(TAG, "created " + SyncProxyTester.getInstance());
+            Logger.d(TAG, "created " + SyncProxyTester.getInstance());
         }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, ProxyService.class.getSimpleName() + " OnStartCommand");
+        Logger.i(TAG + " OnStartCommand");
         createInfoMessageForAdapter("ProxyService.onStartCommand()");
         return START_STICKY;
     }
@@ -247,9 +250,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (netInfo != null) {
                 for (NetworkInfo ni : netInfo) {
                     if (ni.getTypeName().equalsIgnoreCase("WIFI")) {
-                        Log.d(TAG, ni.getTypeName());
+                        Logger.d(TAG, ni.getTypeName());
                         if (ni.isConnected()) {
-                            Log.d(TAG,
+                            Logger.d(TAG,
                                     "ProxyService().hasWiFiConnection(): wifi conncetion found");
                             result = true;
                         }
@@ -265,10 +268,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         int transportType = prefs.getInt(
                 Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE);
-        Log.i(TAG, "ProxyService. Start Proxy If Network Connected");
+        Logger.i(TAG, "ProxyService. Start Proxy If Network Connected");
         boolean doStartProxy = false;
         if (transportType == Const.Transport.KEY_BLUETOOTH) {
-            Log.i(TAG, "ProxyService. Transport = Bluetooth.");
+            Logger.i(TAG, "ProxyService. Transport = Bluetooth.");
             BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBtAdapter != null) {
                 if (mBtAdapter.isEnabled()) {
@@ -276,15 +279,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }
         } else {
-            Log.i(TAG, "ProxyService. Transport = Default.");
+            Logger.i(TAG, "ProxyService. Transport = Default.");
             //TODO: This code is commented out for simulator purposes
             /*
-            Log.d(TAG, "ProxyService. onStartCommand(). Transport = WiFi.");
+            Logger.d(CLASS_NAME, "ProxyService. onStartCommand(). Transport = WiFi.");
 			if (hasWiFiConnection() == true) {
-				Log.d(TAG, "ProxyService. onStartCommand(). WiFi enabled.");
+				Logger.d(CLASS_NAME, "ProxyService. onStartCommand(). WiFi enabled.");
 				startProxy();
 			} else {
-				Log.w(TAG,
+				Logger.w(CLASS_NAME,
 						"ProxyService. onStartCommand(). WiFi is not enabled.");
 			}
 			*/
@@ -296,12 +299,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             prepareTestConfig();
 
             boolean result = startProxy();
-            Log.i(TAG, ProxyService.class.getSimpleName() + " Proxy complete result:" + result);
+            Logger.i(TAG + " Proxy complete result:" + result);
             /*if (result) {
                 try {
                     mSyncProxy.openSession();
                 } catch (SyncException e) {
-                    Log.e(TAG, "ProxyService - OpenSession", e);
+                    Logger.e(CLASS_NAME, "ProxyService - OpenSession", e);
                 }
             }*/
         }
@@ -324,10 +327,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private boolean startProxy() {
-        SyncProxyALM.enableDebugTool();
-
         createInfoMessageForAdapter("ProxyService.startProxy()");
-        Log.i(TAG, ProxyService.class.getSimpleName() + " Start Proxy");
+        Logger.i(TAG + " Start Proxy");
 
         if (mSyncProxy == null) {
             try {
@@ -346,7 +347,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-                Log.i(TAG, "Using protocol version " + versionNumber);
+                Logger.i(TAG, "Using protocol version " + versionNumber);
                 String ipAddress = settings.getString(
                         Const.Transport.PREFS_KEY_TRANSPORT_IP,
                         Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
@@ -389,6 +390,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
 
 
+                mTestConfig.setProtocolVersion((byte) AppPreferencesManager.getProtocolVersion());
+
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources/*sync proxy configuration resources*/,
                         /*enable advanced lifecycle management true,*/
@@ -413,6 +416,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     sendBroadcast(new Intent(ROOTED_DEVICE_INTENT));
                 }
 
+                Logger.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
                 if (mSyncProxy == null) {
                     stopServiceBySelf();
@@ -427,7 +431,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
 
         createInfoMessageForAdapter("ProxyService.startProxy() complete");
-        Log.i(TAG, ProxyService.class.getSimpleName() + " Start Proxy complete:" + mSyncProxy);
+        Logger.i(TAG + " Start Proxy complete:" + mSyncProxy);
 
         return mSyncProxy != null && mSyncProxy.getIsConnected();
     }
@@ -493,7 +497,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             try {
                 mSyncProxy.dispose();
             } catch (SyncException e) {
-                Log.e(TAG, e.toString());
+                Logger.e(TAG, e.toString());
                 if (mProxyServiceEvent != null) {
                     mProxyServiceEvent.onDisposeError();
                 }
@@ -521,7 +525,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void initialize() {
-        Log.d(TAG, "Initialize predefined view");
+        Logger.d(TAG, "Initialize predefined view");
         playingAudio = true;
         playAnnoyingRepetitiveAudio();
 
@@ -547,7 +551,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void sendPutFileForAppIcon() {
-        Log.d(TAG, "PutFileForAppIcon");
+        Logger.d(TAG, "PutFileForAppIcon");
         mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
         commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
                 mAwaitingInitIconResponseCorrelationID, true);
@@ -628,7 +632,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      */
     public void testInitializeSessionRPCOnly() {
         if (mSyncProxy == null) {
-            Log.e(TAG, "Sync Proxy is null when try to initialize test session");
+            Logger.e(TAG, "Sync Proxy is null when try to initialize test session");
             return;
         }
 
@@ -717,10 +721,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                             }
                         } catch (SyncException e) {
                             if (mLogAdapter == null)
-                                Log.w(TAG, "LogAdapter is null");
+                                Logger.w(TAG, "LogAdapter is null");
                             if (mLogAdapter != null)
                                 mLogAdapter.logMessage("Error sending show", Log.ERROR, e, true);
-                            else Log.e(TAG, "Error sending show", e);
+                            else Logger.e(TAG + " Error sending show", e);
                         }
                     }
                 }
@@ -738,7 +742,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                             sendIconFromResource(R.drawable.turn_forward);
                             sendIconFromResource(R.drawable.action);
                         } catch (SyncException e) {
-                            Log.w(TAG, "Failed to put images", e);
+                            Logger.w(TAG + "Failed to put images", e);
                         }
                     }
                 }
@@ -812,7 +816,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 }
             }
             /*if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
-                mLogAdapter.logMessage("onProxyClosed: " + info, Log.ERROR, e, true);
+                mLogAdapter.logMessage("onProxyClosed: " + info, Logger.ERROR, e, true);
             }*/
         }
     }
@@ -841,7 +845,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Restarting SyncProxyALM. For example after changing transport type
      */
     public void restart() {
-        Log.i(TAG, "ProxyService.Restart SyncProxyALM.");
+        Logger.i(TAG, "ProxyService.Restart SyncProxyALM.");
         disposeSyncProxy();
         startProxyIfNetworkConnected();
     }
@@ -959,7 +963,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
-        Log.i("syncp", "onEncodedSyncPDataResponse: " + response.getInfo() + response.getResultCode() + response.getSuccess());
+        Logger.i("syncp", "onEncodedSyncPDataResponse: " + response.getInfo() + response.getResultCode() + response.getSuccess());
         createDebugMessageForAdapter(response);
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
@@ -1081,7 +1085,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mTesterMain.getXMLTestThreadContext().notify();
             }
         }
-        //Log.d(TAG, "ListFiles:" + response.getFilenames().toString());
+        //Logger.d(CLASS_NAME, "ListFiles:" + response.getFilenames().toString());
     }
 
     @Override
@@ -1487,7 +1491,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onRegisterAppRequest(RegisterAppInterface msg) {
-        Log.i(TAG, "OnRegisterAppRequest: " + msg.toString());
+        Logger.i(TAG, "OnRegisterAppRequest: " + msg.toString());
         createDebugMessageForAdapter(msg);
     }
 
@@ -1530,7 +1534,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onSessionStarted(final byte sessionID, final String correlationID) {
-        Log.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
+        Logger.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID, false);
         }
@@ -1539,6 +1543,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onOnTBTClientState(OnTBTClientState notification) {
         createDebugMessageForAdapter(notification);
+    }
+
+    @Override
+    public void onStartSession(byte sessionID) {
+        mLogAdapter.logMessage("Session going to start, " +
+                "protocol version: " + syncProxyGetWiProVersion(), true);
     }
 
     /**
@@ -1555,7 +1565,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onOnEncodedSyncPData(OnEncodedSyncPData notification) {
-        Log.i("syncp", "MessageType: " + notification.getMessageType());
+        Logger.i("syncp", "MessageType: " + notification.getMessageType());
 
         createDebugMessageForAdapter(notification);
 
@@ -1564,42 +1574,42 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             encodedSyncPDataHeader = EncodedSyncPDataHeader.parseEncodedSyncPDataHeader(
                     Base64.decode(notification.getData().get(0)));
         } catch (IOException e) {
-            Log.e(TAG, "Can't decode base64 string", e);
+            Logger.e(TAG + " Can't decode base64 string", e);
             return;
         }
 
         if (encodedSyncPDataHeader.getServiceType() == 3 && encodedSyncPDataHeader.getCommandType() == 1) {
             saveEncodedSyncPData(encodedSyncPDataHeader.getPayload());
 
-            Log.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
-            Log.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
-            Log.i("EncodedSyncPDataHeader", "High Bandwidth: " + encodedSyncPDataHeader.getHighBandwidth());
-            Log.i("EncodedSyncPDataHeader", "Signed: " + encodedSyncPDataHeader.getSigned());
-            Log.i("EncodedSyncPDataHeader", "Encrypted: " + encodedSyncPDataHeader.getEncrypted());
-            Log.i("EncodedSyncPDataHeader", "Payload Size: " + encodedSyncPDataHeader.getPayloadSize());
-            Log.i("EncodedSyncPDataHeader", "Has ESN: " + encodedSyncPDataHeader.getHasESN());
-            Log.i("EncodedSyncPDataHeader", "Service Type: " + encodedSyncPDataHeader.getServiceType());
-            Log.i("EncodedSyncPDataHeader", "Command Type: " + encodedSyncPDataHeader.getCommandType());
-            Log.i("EncodedSyncPDataHeader", "CPU Destination: " + encodedSyncPDataHeader.getCPUDestination());
-            Log.i("EncodedSyncPDataHeader", "Encryption Key Index: " + encodedSyncPDataHeader.getEncryptionKeyIndex());
+            Logger.i("EncodedSyncPDataHeader", "Protocol Version: " + encodedSyncPDataHeader.getProtocolVersion());
+            Logger.i("EncodedSyncPDataHeader", "Response Required: " + encodedSyncPDataHeader.getResponseRequired());
+            Logger.i("EncodedSyncPDataHeader", "High Bandwidth: " + encodedSyncPDataHeader.getHighBandwidth());
+            Logger.i("EncodedSyncPDataHeader", "Signed: " + encodedSyncPDataHeader.getSigned());
+            Logger.i("EncodedSyncPDataHeader", "Encrypted: " + encodedSyncPDataHeader.getEncrypted());
+            Logger.i("EncodedSyncPDataHeader", "Payload Size: " + encodedSyncPDataHeader.getPayloadSize());
+            Logger.i("EncodedSyncPDataHeader", "Has ESN: " + encodedSyncPDataHeader.getHasESN());
+            Logger.i("EncodedSyncPDataHeader", "Service Type: " + encodedSyncPDataHeader.getServiceType());
+            Logger.i("EncodedSyncPDataHeader", "Command Type: " + encodedSyncPDataHeader.getCommandType());
+            Logger.i("EncodedSyncPDataHeader", "CPU Destination: " + encodedSyncPDataHeader.getCPUDestination());
+            Logger.i("EncodedSyncPDataHeader", "Encryption Key Index: " + encodedSyncPDataHeader.getEncryptionKeyIndex());
 
             byte[] tempESN = encodedSyncPDataHeader.getESN();
             String stringESN = "";
             for (int i = 0; i < 8; i++) stringESN += tempESN[i];
-            Log.i("EncodedSyncPDataHeader", "ESN: " + stringESN);
+            Logger.i("EncodedSyncPDataHeader", "ESN: " + stringESN);
 
             try {
-                Log.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());
+                Logger.i("EncodedSyncPDataHeader", "Module Message ID: " + encodedSyncPDataHeader.getModuleMessageID());
             } catch (Exception e) {
 
             }
             try {
-                Log.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());
+                Logger.i("EncodedSyncPDataHeader", "Server Message ID: " + encodedSyncPDataHeader.getServerMessageID());
             } catch (Exception e) {
 
             }
             try {
-                Log.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());
+                Logger.i("EncodedSyncPDataHeader", "Message Status: " + encodedSyncPDataHeader.getMessageStatus());
             } catch (Exception e) {
 
             }
@@ -1609,34 +1619,34 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 byte[] tempIV = encodedSyncPDataHeader.getIV();
                 String stringIV = "";
                 for (int i = 0; i < 16; i++) stringIV += tempIV[i];
-                Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+                Logger.i("EncodedSyncPDataHeader", "IV: " + stringIV);
 
                 byte[] tempPayload = encodedSyncPDataHeader.getPayload();
                 String stringPayload = "";
                 for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++)
                     stringPayload += tempPayload[i];
-                Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+                Logger.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
 
                 byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
                 String stringSignatureTag = "";
                 for (int i = 0; i < 16; i++) stringSignatureTag += tempSignatureTag[i];
-                Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+                Logger.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
             } else {
                 byte[] tempIV = encodedSyncPDataHeader.getIV();
                 String stringIV = "";
                 for (int i = 0; i < 8; i++) stringIV += tempIV[i];
-                Log.i("EncodedSyncPDataHeader", "IV: " + stringIV);
+                Logger.i("EncodedSyncPDataHeader", "IV: " + stringIV);
 
                 byte[] tempPayload = encodedSyncPDataHeader.getPayload();
                 String stringPayload = "";
                 for (int i = 0; i < encodedSyncPDataHeader.getPayloadSize(); i++)
                     stringPayload += tempPayload[i];
-                Log.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
+                Logger.i("EncodedSyncPDataHeader", "Payload: " + stringPayload);
 
                 byte[] tempSignatureTag = encodedSyncPDataHeader.getSignatureTag();
                 String stringSignatureTag = "";
                 for (int i = 0; i < 8; i++) stringSignatureTag += tempSignatureTag[i];
-                Log.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
+                Logger.i("EncodedSyncPDataHeader", "Signature Tag: " + stringSignatureTag);
             }
 
             encodedSyncPDataHeaderfromGPS = encodedSyncPDataHeader;
@@ -1727,7 +1737,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private void stopServiceBySelf() {
-        Log.i(TAG, ProxyService.class.getSimpleName() + " Stop Service By Self");
+        Logger.i(TAG + " Stop Service By Self");
         stopSelf();
     }
 
@@ -2142,10 +2152,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     public byte syncProxyGetWiProVersion() {
-        if (mSyncProxy != null) {
-            return mSyncProxy.getWiProVersion();
+        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
+            return mSyncProxy.getSyncConnection().getProtocolVersion();
         }
-        return 0;
+        return ProtocolConstants.PROTOCOL_VERSION_UNDEFINED;
     }
 
     public void syncProxyStartMobileNavService(Session session, boolean encrypted) {
@@ -2238,7 +2248,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     private void createErrorMessageForAdapter(Object messageObject, Throwable throwable) {
         if (mLogAdapter == null) {
-            Log.w(TAG, "LogAdapter is null");
+            Logger.w(TAG, "LogAdapter is null");
         }
         if (mLogAdapter != null) {
             if (throwable != null) {
@@ -2248,9 +2258,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         } else {
             if (throwable != null) {
-                Log.e(TAG, messageObject.toString(), throwable);
+                Logger.e(TAG + " " + messageObject.toString(), throwable);
             } else {
-                Log.e(TAG, messageObject.toString());
+                Logger.e(TAG, messageObject.toString());
             }
         }
     }
@@ -2265,15 +2275,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     private void createMessageForAdapter(Object messageObject, Integer type) {
         if (mLogAdapter == null) {
-            Log.w(TAG, "LogAdapter is null");
+            Logger.w(TAG, "LogAdapter is null");
         }
         if (mLogAdapter != null) {
             mLogAdapter.logMessage(messageObject, type, true);
         } else {
             if (type == Log.DEBUG) {
-                Log.d(TAG, messageObject.toString());
+                Logger.d(TAG, messageObject.toString());
             } else if (type == Log.INFO) {
-                Log.i(TAG, messageObject.toString());
+                Logger.i(TAG, messageObject.toString());
             }
         }
     }

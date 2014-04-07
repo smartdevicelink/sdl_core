@@ -2,10 +2,11 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.util.BitConverter;
 
 public class ProtocolMessage {
-    private byte version = 1;
+    private byte version = ProtocolConstants.PROTOCOL_VERSION_MIN;
     private ServiceType _serviceType = ServiceType.RPC;
     private MessageType _messageType = MessageType.UNDEFINED;
     private byte _sessionID = 0;
@@ -16,6 +17,8 @@ public class ProtocolMessage {
     private boolean isEncrypted = false;
     private byte[] _data = null;
     private byte[] _bulkData = null;
+
+
 
     public static byte RPCTYPE_REQUEST = 0x00;
     public static byte RPCTYPE_RESPONSE = 0x01;

@@ -4,7 +4,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.ImageFieldName;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -26,7 +26,7 @@ public class ImageField extends RPCStruct {
             try {
                 theCode = ImageFieldName.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.name, e);
             }
@@ -72,9 +72,10 @@ public class ImageField extends RPCStruct {
             try {
                 return new ImageResolution((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.imageResolution, e);
+                                Names.imageResolution, e
+                );
             }
         }
         return null;

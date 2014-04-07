@@ -472,4 +472,9 @@ public class Names {
     public static final String osVersion = "osVersion";
     public static final String carrier = "carrier";
     public static final String maxNumberRFCOMMPorts = "maxNumberRFCOMMPorts";
+
+    /**
+     * v4_protocol_v3_0_revQ
+     */
+    public static final String fileName = "fileName";
 }

@@ -47,9 +47,6 @@ OnPutFileNotification::~OnPutFileNotification() {
 
 void OnPutFileNotification::Run() {
   LOG4CXX_INFO(logger_, "OnPutFileNotification::Run");
-
-  //(*message_)[strings::params][strings::function_id] =
-  //        static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
   SendNotification();
 }
 

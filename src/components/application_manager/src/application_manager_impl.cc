@@ -88,6 +88,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     resume_ctrl_(this)
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
+  srand(time(NULL));
   if (!policies_manager_.Init()) {
     LOG4CXX_ERROR(logger_, "Policies manager initialization failed.");
     return;
@@ -243,7 +244,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     }
   }
 
-  ApplicationSharedPtr application(new ApplicationImpl(app_id));
+  ApplicationSharedPtr application(new
+                                   ApplicationImpl(app_id));
   if (!application) {
     utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
@@ -259,7 +261,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   application->set_name(name);
   application->set_device(device_id);
-
+  application->set_grammar_id(GenerateGrammarID());
   application->set_language(
       static_cast<mobile_api::Language::eType>(message[strings::msg_params][strings::language_desired]
           .asInt()));
@@ -360,7 +362,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
         }
       }
       if (curr_app->IsFullscreen()) {
-        MessageHelper::RemoveAppDataFromHMI(curr_app);
+        MessageHelper::ResetGlobalproperties(curr_app);
       }
     }
   }
@@ -445,7 +447,6 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
 }
 
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
-  MessageHelper::SendDeleteCommandRequestToHMI(app);
   MessageHelper::ResetGlobalproperties(app);
 }
 
@@ -606,6 +607,7 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
   LOG4CXX_TRACE_ENTER(logger_);
+  sync_primitives::AutoLock lock(audio_pass_thru_lock_);
   if (NULL != media_manager_) {
     media_manager_->StopMicrophoneRecording(application_key);
   }
@@ -738,6 +740,10 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(
   }
 
   return false;
+}
+
+uint32_t ApplicationManagerImpl::GenerateGrammarID() {
+  return rand();
 }
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(
@@ -1516,7 +1522,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::RemoveAppDataFromHMI(it->second);
+  MessageHelper::ResetGlobalproperties(it->second);
   MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
   applications_.erase(it);
   application_list_.erase(app_to_remove);

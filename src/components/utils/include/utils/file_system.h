@@ -209,6 +209,14 @@ bool ReadFile(const std::string& name, std::string& result);
 */
 const std::string ConvertPathForURL(const std::string& path);
 
+/**
+  * @brief Create empty file
+  *
+  * @param name path to file
+  * @return if result success return true
+*/
+bool CreateFile(const std::string& path);
+
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_

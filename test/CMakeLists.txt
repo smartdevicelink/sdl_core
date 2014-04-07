@@ -57,6 +57,7 @@ include_directories (
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
+<<<<<<< HEAD
 if (BUILD_TESTS_WITH_HMI)
  set(LIBRARIES
   test_App_Manager
@@ -150,9 +151,50 @@ set(LIBRARIES
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
     test_SecurityManager
+=======
+set(LIBRARIES
+  MediaManager
+  ApplicationManager
+  gtest
+  gtest_main
+  gmock
+  gmock_main
+  formatters
+  HMI_API
+  v4_protocol_v1_2_no_extra
+  SmartObjects
+  RequestWatchdog
+  policies
+  ProtocolHandler
+  Utils
+  ConfigProfile
+  #test_JSONHandler_v4_protocol_v2_0_revP
+  #test_json_handler
+  #test_SmartObjectTest
+  #test_FormattersCommandsTest
+  #test_UtilsTest
+  #test_RequestWatchdogTest
+  #test_ProtocolHandlerTest
+  #test_JSONCPPTest
+  connectionHandler
+  MOBILE_API
+  jsoncpp
+  TransportManager
+  HMIMessageHandler
+  MessageBroker
+  MessageBrokerClient
+  MessageBrokerServer
+  encryption
+  bluetooth
+  pthread
+  avahi-client
+  avahi-common
+  ${LibXML2_LIBRARIES} -lxml2
+  # rt
+  # ${GSTREAMER_gstreamer_LIBRARY}
+  Resumption
+>>>>>>> develop
 )
-endif(BUILD_TESTS_WITH_HMI)
-
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -161,9 +203,16 @@ endif()
 endif()
 
 add_executable("test_suit" "./test_suit.cc")
-target_link_libraries("test_suit" ${LIBRARIES})
 
+<<<<<<< HEAD
 file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
 
+=======
+if (BUILD_TESTS_WITH_HMI)
+  target_link_libraries("test_suit" test_App_Manager ${LIBRARIES})
+else (BUILD_TESTS_WITH_HMI)
+  target_link_libraries("test_suit" ${LIBRARIES})
+endif (BUILD_TESTS_WITH_HMI)
+>>>>>>> develop
 
 # vim: set ts=2 sw=2 et:

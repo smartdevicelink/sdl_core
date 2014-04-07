@@ -1,9 +1,8 @@
 package com.ford.syncV4.streaming;
 
-import android.util.Log;
-
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
-    public final static String TAG = "H264Packetizer";
+    public final static String CLASS_NAME = "H264Packetizer";
     private byte[] tail = null;
 
     private Thread thread = null;
@@ -56,16 +55,16 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
                     doDataReading();
 
                 } catch (IllegalArgumentException e) {
-                    Log.e(TAG, e.toString());
+                    Logger.e(CLASS_NAME, e.toString());
                     break;
                     //TODO - this NPE is really last hope to save app form crash. We must get sure never have it.
                 } catch (NullPointerException e) {
-                    Log.e(TAG, e.toString());
+                    Logger.e(CLASS_NAME, e.toString());
                     break;
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "H264 error",e);
+            Logger.e(CLASS_NAME + " H264 error",e);
         }
     }
 

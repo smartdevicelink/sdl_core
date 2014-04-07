@@ -6,8 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.CompassDirection;
 import com.ford.syncV4.proxy.rpc.enums.Dimension;
-import com.ford.syncV4.proxy.rpc.enums.DisplayType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class GPSData extends RPCStruct {
 
@@ -111,7 +110,7 @@ public class GPSData extends RPCStruct {
             try {
                 theCode = CompassDirection.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.compassDirection, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.compassDirection, e);
             }
             return theCode;
         }
@@ -183,7 +182,7 @@ public class GPSData extends RPCStruct {
             try {
                 theCode = Dimension.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.dimension, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.dimension, e);
             }
             return theCode;
         }

@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +28,10 @@ import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyBase;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -104,6 +105,8 @@ public class AppSetUpDialog extends DialogFragment {
                 ipAddressView.setEnabled(!isChecked);
             }
         });
+        final EditText protocolVerView = (EditText) view.findViewById(R.id.protocol_ver_view);
+        protocolVerView.setText(String.valueOf(ProtocolConstants.PROTOCOL_VERSION_MIN));
 
         final boolean mIsNSDSupported = Build.VERSION.SDK_INT >= Const.JELLYBEAN_API_LEVEL;
 
@@ -249,6 +252,8 @@ public class AppSetUpDialog extends DialogFragment {
                                     customAppIdEditView.getText().toString().trim());
                         }
 
+                        saveProtocolVersion(view);
+
                         boolean isMedia = mediaCheckBox.isChecked();
                         boolean isNavi = naviCheckBox.isChecked();
                         int videoSource = (videoSourceGroup.getCheckedRadioButtonId() ==
@@ -286,7 +291,7 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
                                 .commit();
                         if (!success) {
-                            Log.w(LOG_TAG, "Can't save selected protocol properties");
+                            Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
                         setupHeartbeat(isHearBeat);
@@ -324,5 +329,17 @@ public class AppSetUpDialog extends DialogFragment {
         } else {
             appIdView.setText(AppIdManager.getAppIdByTransport(AppPreferencesManager.getTransportType()));
         }
+    }
+
+    private void saveProtocolVersion(View view) {
+        final EditText protocolVerView = (EditText) view.findViewById(R.id.protocol_ver_view);
+        String protocolVersionString = protocolVerView.getText().toString().trim();
+        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+        try {
+            protocolVersion = Integer.valueOf(protocolVersionString);
+        } catch (NumberFormatException e) {
+            Logger.w(LOG_TAG + " Can not parse protocol version to int");
+        }
+        AppPreferencesManager.setProtocolVersion(protocolVersion);
     }
 }

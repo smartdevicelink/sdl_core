@@ -61,6 +61,12 @@ void ShowConstantTBTRequest::Run() {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
+  // SDLAQ-CRS-664, VC3.1
+  if (0 == (*message_)[strings::msg_params].length()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);

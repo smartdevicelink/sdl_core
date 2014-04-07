@@ -11,7 +11,6 @@ import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -133,17 +132,16 @@ import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 import com.stericson.RootTools.RootTools;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -164,8 +162,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener,
         IProxyServiceEvent {
 
-    private static final String VERSION = "$Version:$";
-    private static final String LOG_TAG = "SyncProxyTester";
     private static final String ButtonSubscriptions = "ButtonSubscriptions";
     private static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
     /**
@@ -218,6 +214,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_WAKELOCK = 17;
     private final int MNU_SET_UP_POLICY_FILES = 18;
     private final int MNU_HASH_ID_SETUP = 19;
+    private final int MNU_FEEDBACK = 20;
     private ModuleTest mTesterMain;
     private ListView mListView = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
@@ -339,6 +336,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final static String SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG = "SubscriptionVehicleDataDialogTag";
     private final static String REGISTER_APP_INTERFACE_DIALOG_TAG = "RegisterAppInterfaceDialogTag";
     private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
+    private final static String FEEDBACK_DIALOG_TAG = "FeedbackDialogTag";
 
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
@@ -374,7 +372,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LOG_TAG, SyncProxyTester.class.getSimpleName() + " On Create");
+        Logger.d(SyncProxyTester.class.getSimpleName() + " On Create");
 
         _activity = this;
 
@@ -427,7 +425,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         imageTypeAdapter = new ArrayAdapter<ImageType>(this, android.R.layout.simple_spinner_item, ImageType.values());
         imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mLogAdapter = new LogAdapter(LOG_TAG, false, this, R.layout.row, _logMessages);
+        mLogAdapter = new LogAdapter("SyncProxyTester", false, this, R.layout.row, _logMessages);
 
         mListView = (ListView) findViewById(R.id.messageList);
         mListView.setClickable(true);
@@ -494,24 +492,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onSetUpDialogResult() {
 
+
         getProgressDialog(getString(R.string.init_dialog_title)).show();
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+
                 if (mBoundProxyService != null) {
                     initProxyService();
                     try {
                         mBoundProxyService.syncProxyOpenSession();
                     } catch (SyncException e) {
-                        Log.e(LOG_TAG, SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
+                        Logger.e(SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
                     }
                 } else {
                     MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
                         @Override
                         public void onServiceBindComplete() {
-                            Log.d(LOG_TAG, "Service Bind Complete");
+                            Logger.d("Service Bind Complete");
                             getProxyService();
                             initProxyService();
 
@@ -580,7 +580,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     @Override
     public void onBluetoothDeviceRestoreConnection() {
-        Log.i(LOG_TAG, "Bluetooth connection restored");
+        Logger.i("Bluetooth connection restored");
         if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
@@ -592,7 +592,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     @Override
     public void onBluetoothDeviceTurningOff() {
-        Log.i(LOG_TAG, "Bluetooth turning off");
+        Logger.i("Bluetooth turning off");
         if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
@@ -636,7 +636,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     @Override
     public void onDisposeComplete() {
-        Log.d(LOG_TAG, "Dispose Service complete");
+        Logger.d("Dispose Service complete");
 
         if (mBluetoothStopProxyServiceTimeOutHandler != null) {
             mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
@@ -690,7 +690,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mLogAdapter.logMessage("Service '" + serviceType + "' ended");
 
         if (mServicesCounter == null) {
-            Log.w(LOG_TAG, "Service End -> Services counter is NULL");
+            Logger.w("Service End -> Services counter is NULL");
             executeDestroyService();
             return;
         }
@@ -702,13 +702,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
+
     public void onServiceStart(ServiceType serviceType, byte sessionId, final boolean encrypted) {
-        mLogAdapter.logMessage("Service '" + serviceType + "' started", true);
+        mLogAdapter.logMessage("Service '" + serviceType + "' started" +
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
 
         if (mBoundProxyService == null) {
             mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                    "' service can not " +
-                    "start with NULL Proxy Service", Log.WARN);
+                    "' service can not " + "start with NULL Proxy Service", Log.WARN);
             return;
         }
 
@@ -887,7 +888,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(LOG_TAG, SyncProxyTester.class.getSimpleName() + " On Destroy");
+        Logger.d(SyncProxyTester.class.getSimpleName() + " On Destroy");
 
         if (mSyncReceiver != null) {
             unregisterReceiver(mSyncReceiver);
@@ -944,6 +945,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             MenuItem menuitem = menu.add(0, MNU_WAKELOCK, 0, "Lock screen while testing");
             menuitem.setCheckable(true);
             menuitem.setChecked(!AppPreferencesManager.getDisableLockFlag());
+            menu.add(0, MNU_FEEDBACK, 0, "Feedback");
             return true;
         } else {
             return false;
@@ -1040,7 +1042,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 closeSession();
                 return true;
             case MNU_APP_VERSION: {
-                showAppVersion();
+                new AlertDialog.Builder(this)
+                        .setTitle("App version")
+                        .setMessage("Ver:" + AppUtils.getApplicationVersion() +
+                                ", Code:" + String.valueOf(AppUtils.getCodeVersionNumber()) +
+                                "\n" + AppUtils.getBuildInfo() + "\n\nCHANGELOG:\n" + AppUtils.getChangeLog())
+                        .setNeutralButton(android.R.string.ok, null).create().show();
                 break;
             }
             case MNU_CLEAR_FUNCTIONS_USAGE:
@@ -1052,6 +1059,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             case MNU_HASH_ID_SETUP:
                 DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
                 hashIdSetUpDialog.show(getFragmentManager(), HASH_ID_SET_UP_DIALOG_TAG);
+                break;
+            case MNU_FEEDBACK:
+                DialogFragment feedbackDialog = FeedbackDialog.newInstance();
+                feedbackDialog.show(getFragmentManager(), FEEDBACK_DIALOG_TAG);
                 break;
         }
 
@@ -1088,54 +1099,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mTesterMain.restart(filePath);
     }
 
-    private String getAssetsContents(String filename, String defaultString) {
-        StringBuilder builder = new StringBuilder();
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(getAssets().open(
-                    filename)));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                builder.append(line + "\n");
-            }
-        } catch (IOException e) {
-            Log.d(LOG_TAG, "Can't open file with build info", e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, e.toString());
-                }
-            }
-        }
-        return builder.length() > 0 ? builder.toString().trim() : defaultString;
-    }
-
-    private void showAppVersion() {
-        String appVersion;
-        int appCode = 0;
-        try {
-            appVersion = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionName;
-            appCode = getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionCode;
-        } catch (NameNotFoundException e) {
-            Log.d(LOG_TAG, "Can't get package info", e);
-            appVersion = "Unknown";
-        }
-        String buildInfo = getAssetsContents("build.info",
-                "Build info not available");
-        String changelog = getAssetsContents("CHANGELOG.txt",
-                "Changelog not available");
-
-        new AlertDialog.Builder(this)
-                .setTitle("App version")
-                .setMessage("Ver:" + appVersion + ", " + "Code:" + String.valueOf(appCode) + "\n" +
-                        buildInfo + "\n\nCHANGELOG:\n" + changelog)
-                .setNeutralButton(android.R.string.ok, null).create().show();
-    }
-
 /*	public void startSyncProxyService() {
         // Get the local Bluetooth adapter
         BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -1161,7 +1124,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 		               }
 		            }
 		        } else {
-		        	Log.i("TAG", "A No Paired devices with the name sync");
+		        	Logger.i("CLASS_NAME", "A No Paired devices with the name sync");
 		        }
 		        
 		        if (isSYNCpaired == true) { 		        	
@@ -1394,7 +1357,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             mBoundProxyService.syncProxySendRPCRequest(msg);
                                         }
                                         if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
-                                            Log.w(LOG_TAG, "Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
+                                            Logger.w("Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
                                         }
                                         _latestDeleteChoiceSetId = commandSetID;
                                     }
@@ -1767,10 +1730,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     }
 
                                     if (_latestDeleteCommandCmdID != null) {
-                                        Log.w(LOG_TAG,
-                                                "Latest deleteCommand should be null, but it is " +
-                                                        _latestDeleteCommandCmdID
-                                        );
+                                        Logger.w("Latest deleteCommand should be null, but it is " +
+                                                        _latestDeleteCommandCmdID);
                                     }
                                     _latestDeleteCommandCmdID = cmdID;
                                 }
@@ -1907,10 +1868,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
 
                                             if (_latestDeleteSubmenu != null) {
-                                                Log.w(LOG_TAG,
-                                                        "Latest deleteSubmenu should be null, but equals to " +
-                                                                _latestDeleteSubmenu
-                                                );
+                                                Logger.w("Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
+
                                             }
                                             _latestDeleteSubmenu = menu;
                                         }
@@ -3145,11 +3104,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             Method setter = msgClass.getMethod(setterName, Boolean.class);
             setter.invoke(msg, true);
         } catch (NoSuchMethodException e) {
-            Log.e(LOG_TAG, "Can't set vehicle data", e);
+            Logger.e("Can't set vehicle data", e);
         } catch (IllegalAccessException e) {
-            Log.e(LOG_TAG, "Can't set vehicle data", e);
+            Logger.e("Can't set vehicle data", e);
         } catch (InvocationTargetException e) {
-            Log.e(LOG_TAG, "Can't set vehicle data", e);
+            Logger.e("Can't set vehicle data", e);
         }
     }
 
@@ -3229,7 +3188,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             mBoundProxyService.commandAddSubMenuResumable(addSubMenu);
         }
         if (mLatestAddSubmenu != null) {
-            Log.w(LOG_TAG, "Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
+            Logger.w("Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
         }
         mLatestAddSubmenu = syncSubMenu;
     }
@@ -3255,10 +3214,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         }
 
         if (mLatestAddCommand != null) {
-            Log.w(LOG_TAG,
-                    "Latest addCommand should be null, but it is " + mLatestAddCommand.first +
-                            " / " + mLatestAddCommand.second
-            );
+            Logger.w("Latest addCommand should be null, but it is " + mLatestAddCommand.first +
+                            " / " + mLatestAddCommand.second);
+
         }
         Integer parentID = null;
         if (addCommand.getMenuParams() != null) {
@@ -3294,12 +3252,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 // This may happen if "UnregisterAppInterface" command has been sent manually
                 // from the SPT
 
-                Log.w(LOG_TAG, "OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
+                Logger.w("OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
 
                 onSetUpDialogResult();
             }
         } else {
-            Log.w(LOG_TAG, "OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
+            Logger.w("OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
         }
     }
 
@@ -3358,7 +3316,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 if (proxyInstance.getCurrentTransportType() == TransportType.BLUETOOTH) {
                     mBoundProxyService.reset();
                 } else {
-                    Log.e(LOG_TAG, "endSyncProxyInstance. No reset required if transport is TCP");
+                    Logger.e("endSyncProxyInstance. No reset required if transport is TCP");
                 }
                 //if proxy == null create proxy
             } else {
@@ -3420,7 +3378,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             mLatestCreateChoiceSetId = CHOICESETID_UNSET;
         } else {
-            Log.w(LOG_TAG, "Latest createChoiceSetId is unset");
+            Logger.w("Latest createChoiceSetId is unset");
         }
     }
 
@@ -3435,7 +3393,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             _latestDeleteChoiceSetId = CHOICESETID_UNSET;
         } else {
-            Log.w(LOG_TAG, "Latest deleteChoiceSetId is unset");
+            Logger.w("Latest deleteChoiceSetId is unset");
         }
     }
 
@@ -3460,7 +3418,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             _latestDeleteSubmenu = null;
         } else {
-            Log.w(LOG_TAG, "Latest deleteSubMenu is unset");
+            Logger.w("Latest deleteSubMenu is unset");
         }
     }
 
@@ -3475,7 +3433,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             mLatestAddSubmenu = null;
         } else {
-            Log.w(LOG_TAG, "Latest addSubMenu is unset");
+            Logger.w("Latest addSubMenu is unset");
         }
     }
 
@@ -3490,7 +3448,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             mLatestAddCommand = null;
         } else {
-            Log.w(LOG_TAG, "Latest addCommand is null");
+            Logger.w("Latest addCommand is null");
         }
     }
 
@@ -3505,7 +3463,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             _latestDeleteCommandCmdID = null;
         } else {
-            Log.w(LOG_TAG, "Latest deleteCommand is unset");
+            Logger.w("Latest deleteCommand is unset");
         }
     }
 
@@ -3515,10 +3473,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     public void onAudioPassThru(byte[] aptData) {
         if (aptData == null) {
-            Log.w(LOG_TAG, "onAudioPassThru aptData is null");
+            Logger.w("onAudioPassThru aptData is null");
             return;
         }
-        Log.i(LOG_TAG, "data len " + aptData.length);
+        Logger.i("data len " + aptData.length);
 
         File outFile = audioPassThruOutputFile();
         try {
@@ -3572,7 +3530,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             }
             audioPassThruMediaPlayer.start();
         } catch (IOException e) {
-            Log.e(LOG_TAG, e.toString());
+            Logger.e(e.toString());
         }
     }
 
@@ -3611,12 +3569,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     private void closeAudioPassThruStream() {
         if (audioPassThruOutStream != null) {
-            Log.d(LOG_TAG, "closing audioPassThruOutStream");
+            Logger.d("closing audioPassThruOutStream");
             try {
                 audioPassThruOutStream.flush();
                 audioPassThruOutStream.close();
             } catch (IOException e) {
-                Log.w(LOG_TAG, "Can't close output file", e);
+                Logger.w("Can't close output file", e);
             }
             audioPassThruOutStream = null;
         }
@@ -3631,7 +3589,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             audioPassThruMediaPlayer.setOnCompletionListener(new OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    Log.d(LOG_TAG, "mediaPlayer completed");
+                    Logger.d("mediaPlayer completed");
                     audioPassThruMediaPlayer.reset();
                     audioPassThruMediaPlayer.release();
                     audioPassThruMediaPlayer = null;
@@ -3639,7 +3597,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             });
         } else {
             // the player has stopped
-            Log.d(LOG_TAG, "mediaPlayer is stopped");
+            Logger.d("mediaPlayer is stopped");
             audioPassThruMediaPlayer.release();
             audioPassThruMediaPlayer = null;
         }
@@ -3653,7 +3611,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void logToConsoleAndUI(String msg, Throwable thr) {
-        Log.d(LOG_TAG, msg, thr);
+        Logger.d(msg, thr);
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
@@ -3672,7 +3630,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     getCorrelationid());
 
             if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
-                Log.w(LOG_TAG, "Latest createChoiceSetId should be unset, but equals to " +
+                Logger.w("Latest createChoiceSetId should be unset, but equals to " +
                         mLatestCreateChoiceSetId);
             }
             mLatestCreateChoiceSetId = choiceSetID;
@@ -3721,7 +3679,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 break;
 
             default:
-                Log.i(LOG_TAG, "Unknown request code: " + requestCode);
+                Logger.i("Unknown request code: " + requestCode);
                 break;
         }
     }
@@ -3943,7 +3901,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private Runnable mBluetoothStopServicePostDelayedCallback = new Runnable() {
         @Override
         public void run() {
-            Log.w(LOG_TAG, "Bluetooth Stop Service timer callback");
+            Logger.w("Bluetooth Stop Service timer callback");
             mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(mBluetoothStopServicePostDelayedCallback);
             stopService(new Intent(SyncProxyTester.this, ProxyService.class));
         }
@@ -3956,8 +3914,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Exit from Activity
      */
-    public void exitApp() {
-        Log.i(LOG_TAG, "Exit App");
+    private void exitApp() {
+        Logger.i("Exit " + SyncProxyTester.class.getSimpleName() + "\n\n");
+
         isFirstActivityRun = true;
         //stopService(new Intent(this, ProxyService.class));
         super.finish();
@@ -4015,7 +3974,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void run() {
 
-                Log.d(LOG_TAG, "Start Destroy Service");
+                Logger.d("Start Destroy Service");
                 mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
                 mBoundProxyService.destroyService();
@@ -4039,7 +3998,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private Runnable mExitPostDelayedCallback = new Runnable() {
         @Override
         public void run() {
-            Log.w(LOG_TAG, "Exit App timer callback");
+            Logger.w("Exit App timer callback");
             mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
             getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
             exitApp();
@@ -4053,7 +4012,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private Runnable mEndServicesPostDelayedCallback = new Runnable() {
         @Override
         public void run() {
-            Log.w(LOG_TAG, "End Services callback");
+            Logger.w("End Services callback");
             mStopServicesTimeOutHandler.removeCallbacks(mEndServicesPostDelayedCallback);
 
             executeDestroyService();

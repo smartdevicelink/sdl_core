@@ -74,19 +74,21 @@ void AudioStreamSenderThread::threadMain() {
 
   offset_ = 0;
 
-  setShouldBeStopped(false);
-
   while (true) {
     if (getShouldBeStopped()) {
       break;
     }
 
-    sendAudioChunkToMobile();
+    usleep(kAudioPassThruTimeout * 1000000);
 
     if (getShouldBeStopped()) {
       break;
     }
+
+    sendAudioChunkToMobile();
   }
+
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
@@ -95,8 +97,6 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   std::vector<uint8_t> binaryData;
   std::vector<uint8_t>::iterator from;
   std::vector<uint8_t>::iterator to;
-
-  usleep(kAudioPassThruTimeout * 1000000);
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
     LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << fileName_);
@@ -132,6 +132,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
 
 bool AudioStreamSenderThread::getShouldBeStopped() {
   AutoLock auto_lock(shouldBeStoped_lock_);
+
   return shouldBeStoped_;
 }
 

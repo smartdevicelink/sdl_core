@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.ButtonPressMode;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class OnButtonPress extends RPCNotification {
 
@@ -25,7 +25,7 @@ public class OnButtonPress extends RPCNotification {
             try {
                 theCode = ButtonName.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonName, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonName, e);
             }
             return theCode;
         }
@@ -45,7 +45,7 @@ public class OnButtonPress extends RPCNotification {
             try {
                 theCode = ButtonPressMode.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonPressMode, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonPressMode, e);
             }
             return theCode;
         }

@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_SYSTEM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_SYSTEM_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
 
@@ -40,33 +40,33 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief TTSPerformInteractionResponse command class
+ * @brief BasicCommunicationSystemResponse command class
  **/
-class TTSPerformInteractionResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief TTSPerformInteractionResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit TTSPerformInteractionResponse(const MessageSharedPtr& message);
+class BasicCommunicationSystemResponse : public ResponseFromHMI {
+  public:
+    /**
+     * @brief BasicCommunicationSystemResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit BasicCommunicationSystemResponse(const MessageSharedPtr& message);
 
-  /**
-   * @brief TTSPerformInteractionResponse class destructor
-   **/
-  virtual ~TTSPerformInteractionResponse();
+    /**
+     * @brief BasicCommunicationSystemResponse class destructor
+     **/
+    virtual ~BasicCommunicationSystemResponse();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionResponse);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(BasicCommunicationSystemResponse);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_RESPONSE_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_BASIC_COMMUNICATION_SYSTEM_RESPONSE_H_

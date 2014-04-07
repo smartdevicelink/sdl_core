@@ -61,6 +61,15 @@ class ISchemaItem {
   virtual bool setDefaultValue(SmartObject& Object);
 
   /**
+   * @brief Check if object has default value.
+   *
+   * @param Object Object to set default value.
+   *
+   * @return true if default value was successfully set, false otherwise.
+   **/
+  virtual bool hasDefaultValue(SmartObject& Object);
+
+  /**
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.

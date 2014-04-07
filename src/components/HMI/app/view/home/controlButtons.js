@@ -41,10 +41,10 @@ SDL.ControlButtons = Em.ContainerView
             'buttonControls',
             'driverDistractionControl',
             'infoTable',
-            'sendData',
             'vehicleInfo',
             'tbtClientState',
             'ExitApp',
+            'SystemRequest',
             'UILanguages',
             'TTSVRLanguages',
             'UILanguagesLabel',
@@ -157,20 +157,6 @@ SDL.ControlButtons = Em.ContainerView
         }),
 
         /**
-         * Sending data from HMI for processing in SDLCore
-         */
-        sendData: SDL.Button.create( {
-            elementId: 'sendData',
-            classNames: 'sendData btnNotPressed',
-            action: function() {
-
-                FFW.BasicCommunication.OnSystemRequest();
-            },
-            text: 'OnSystemRequest',
-            templateName: 'text'
-        }),
-
-        /**
          * VehicleInfo button
          */
         vehicleInfo: SDL.Button.create( {
@@ -211,6 +197,21 @@ SDL.ControlButtons = Em.ContainerView
 
                 // this._super();
                 SDL.ExitApp.toggleActivity();
+            },
+            templateName: 'text'
+        }),
+
+        /**
+         * Exit Application button opens Exit Application reasons popup
+         */
+        SystemRequest: SDL.Button.create( {
+            elementId: 'systemRequest',
+            classNames: 'systemRequest btn',
+            text: 'System Request',
+            action: function() {
+
+                // this._super();
+                SDL.SystemRequest.toggleActivity();
             },
             templateName: 'text'
         }),

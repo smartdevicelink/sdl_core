@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class Image extends RPCStruct {
 
@@ -39,7 +39,7 @@ public class Image extends RPCStruct {
             try {
                 theCode = ImageType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.imageType, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.imageType, e);
             }
             return theCode;
         }

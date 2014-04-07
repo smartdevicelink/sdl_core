@@ -1,6 +1,9 @@
 package com.ford.syncV4.util;
 
 public class BitConverter {
+
+    private static final String LOG = BitConverter.class.getSimpleName();
+
 	public static String bytesToHex(byte [] bytes) {
         if (bytes == null){
             return "null";
@@ -41,7 +44,7 @@ public class BitConverter {
 		return theBytes;
 	} // end-method
 
-	public static final byte[] intToByteArray(int value) {
+	public static byte[] intToByteArray(int value) {
 		return new byte[] {
 				(byte)(value >>> 24),
 				(byte)(value >>> 16),
@@ -74,7 +77,7 @@ public class BitConverter {
         return ret;
     }
 
-	public static final byte[] shortToByteArray(short value) {
+	public static byte[] shortToByteArray(short value) {
 		return new byte[] {
 				(byte)(value >>> 8),
 				(byte)value};

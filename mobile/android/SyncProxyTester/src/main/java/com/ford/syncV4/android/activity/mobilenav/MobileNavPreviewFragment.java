@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +14,7 @@ import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.OutputStream;
 
@@ -142,7 +142,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 break;
 
             default:
-                Log.e(LOG_TAG, "Unknown video source " + videoSource);
+                Logger.e(TAG + " Unknown video source " + videoSource);
                 return;
         }
         startBaseFileStreaming(videoResID);

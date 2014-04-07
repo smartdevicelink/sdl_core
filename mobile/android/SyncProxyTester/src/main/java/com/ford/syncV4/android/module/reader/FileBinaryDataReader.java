@@ -1,7 +1,8 @@
 package com.ford.syncV4.android.module.reader;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
+
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -59,17 +60,17 @@ public class FileBinaryDataReader implements BinaryDataReader {
 			}
 			return os.toByteArray();
 		} catch (IOException e) {
-			Log.w(TAG, "Can't read file " + input, e);
+			Logger.w(TAG + " Can't read file " + input, e);
 			return null;
 		} catch (OutOfMemoryError e) {
-			Log.e(TAG, "File " + input + " is too big", e);
+			Logger.e(TAG + " File " + input + " is too big", e);
 			return null;
 		} finally {
 			if (is != null) {
 				try {
 					is.close();
 				} catch (IOException e) {
-                    Log.e("SyncProxyTester", e.toString());
+                    Logger.e(TAG, e.toString());
 				}
 			}
 		}

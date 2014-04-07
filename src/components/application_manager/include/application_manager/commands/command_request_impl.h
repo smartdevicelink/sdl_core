@@ -146,6 +146,15 @@ class CommandRequestImpl : public CommandImpl,
   void CreateHMINotification(const hmi_apis::FunctionID::eType& function_id,
                              const NsSmart::SmartObject& msg_params) const;
 
+  /**
+   * @brief Converts HMI result code to Mobile result code
+   *
+   * @param hmi_code HMI result code
+   * @return Mobile result code
+   */
+  mobile_apis::Result::eType GetMobileResultCode(
+      const hmi_apis::Common_Result::eType& hmi_code) const;
+
  protected:
   unsigned int                default_timeout_;
   RequestState                current_state_;

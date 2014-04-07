@@ -37,7 +37,7 @@
 <interface name="Common" version="1.1" date="2013-10-02">
 
 <enum name="Result">
-	<element name="SUCCESS" value="0"/>
+    <element name="SUCCESS" value="0"/>
     <element name="UNSUPPORTED_REQUEST" value="1"/>
     <element name="UNSUPPORTED_RESOURCE" value="2"/>
     <element name="DISALLOWED" value="3"/>
@@ -797,31 +797,31 @@
   <element name="VEHICLEDATA_GPS">
     <description>Notifies GPSData may be subscribed</description>
   </element>
-    <element name="VEHICLEDATA_SPEED" />
-    <element name="VEHICLEDATA_RPM" />
-    <element name="VEHICLEDATA_FUELLEVEL" />
-    <element name="VEHICLEDATA_FUELLEVEL_STATE" />
-    <element name="VEHICLEDATA_FUELCONSUMPTION" />
-    <element name="VEHICLEDATA_EXTERNTEMP" />
-    <element name="VEHICLEDATA_VIN" />
-    <element name="VEHICLEDATA_PRNDL" />
-    <element name="VEHICLEDATA_TIREPRESSURE" />
-    <element name="VEHICLEDATA_ODOMETER" />    
-    <element name="VEHICLEDATA_BELTSTATUS" />
-    <element name="VEHICLEDATA_BODYINFO" />
-    <element name="VEHICLEDATA_DEVICESTATUS" />
-    <element name="VEHICLEDATA_ECALLINFO"/>
-    <element name="VEHICLEDATA_AIRBAGSTATUS"/>
-    <element name="VEHICLEDATA_EMERGENCYEVENT"/>
-    <element name="VEHICLEDATA_CLUSTERMODESTATUS"/>
-    <element name="VEHICLEDATA_MYKEY"/>
-    <element name="VEHICLEDATA_BRAKING" />  
-    <element name="VEHICLEDATA_WIPERSTATUS" />
-    <element name="VEHICLEDATA_HEADLAMPSTATUS" /> 
-    <element name="VEHICLEDATA_BATTVOLTAGE" />
-    <element name="VEHICLEDATA_ENGINETORQUE" />          
-    <element name="VEHICLEDATA_ACCPEDAL" />         
-    <element name="VEHICLEDATA_STEERINGWHEEL" />    
+  <element name="VEHICLEDATA_SPEED" />
+  <element name="VEHICLEDATA_RPM" />
+  <element name="VEHICLEDATA_FUELLEVEL" />
+  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+  <element name="VEHICLEDATA_FUELCONSUMPTION" />
+  <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_PRNDL" />
+  <element name="VEHICLEDATA_TIREPRESSURE" />
+  <element name="VEHICLEDATA_ODOMETER" />
+  <element name="VEHICLEDATA_BELTSTATUS" />
+  <element name="VEHICLEDATA_BODYINFO" />
+  <element name="VEHICLEDATA_DEVICESTATUS" />
+  <element name="VEHICLEDATA_ECALLINFO" />
+  <element name="VEHICLEDATA_AIRBAGSTATUS" />
+  <element name="VEHICLEDATA_EMERGENCYEVENT" />
+  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
+  <element name="VEHICLEDATA_MYKEY" />
+  <element name="VEHICLEDATA_BRAKING" />
+  <element name="VEHICLEDATA_WIPERSTATUS" />
+  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+  <element name="VEHICLEDATA_BATTVOLTAGE" />
+  <element name="VEHICLEDATA_ENGINETORQUE" />
+  <element name="VEHICLEDATA_ACCPEDAL" />
+  <element name="VEHICLEDATA_STEERINGWHEEL" />
 </enum>
 
 <enum name="WiperStatus">
@@ -950,8 +950,9 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
-  </enum>
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
+</enum>
 
 <enum name="ECallConfirmationStatus">
   <description>Reflects the status of the eCall Notification.</description>
@@ -1920,10 +1921,11 @@
         <description>Must be true if allowed</description>
       </param>
     </function>
+
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
-	    Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
+        Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
@@ -1942,7 +1944,14 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
+      <param name="fileName" type="String" maxlength="255" mandatory="true">
+        <description>File reference name.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
+      </param>
     </function>
+
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
     </function>
@@ -1980,8 +1989,22 @@
         If omitted, the value will be set to false.
       </description>
     </param>
+  </function>
 
-   </function>
+  <function name="SystemRequest" messagetype="request">
+    <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+    <param name="requestType" type="Common.RequestType" mandatory="true">
+      <description>The type of system request.</description>
+    </param>
+    <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <description>The path to file.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that requested this RPC.</description>
+    </param> 
+  </function>
+  <function name="SystemRequest" messagetype="response">
+  </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2010,6 +2033,11 @@
     <param name="type" type="Common.VRCommandType" mandatory="true">
       <description>Type of added command. See VRCommandType.</description>
     </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>
+        ID of the specific grammar, whether top-level or choice set.
+      </description>
+    </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
     </param>
@@ -2021,11 +2049,52 @@
     <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>Id of a command (list of strings), previously sent by AddCommand.</description>
     </param>
+    <param name="type" type="Common.VRCommandType" mandatory="true">
+      <description>Type of added command. See VRCommandType.</description>
+    </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>ID of the specific grammar.</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="DeleteCommand" messagetype="response">
+  </function>
+  <function name="PerformInteraction" messagetype="request">
+    <description>
+      Sets some properties for the application initiated request.
+    </description>
+    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        This is the intial prompt spoken to the user at the start of an interaction. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="timeout" type="Integer" mandatory="true">
+      <description>Timeout initiate timeoutPrompt</description>
+    </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="true">
+      <description>
+        IDs of the specific compiled grammars for this voice interaction.
+      </description>
+    </param>
+  </function>
+  <function name="PerformInteraction" messagetype="response">
+    <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      <description>
+        ID of the choice that was selected in response to PerformInteraction.
+      </description>
+    </param>
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notifies SDL about command trigerred via VR</description>
@@ -2103,27 +2172,6 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>Must be true if TTS is present and ready to communicate with SDL.</description>
     </param>
-  </function>
-  <function name="PerformInteraction" messagetype="request">
-    <description>Sets some properties for the application initiated request.</description>
-    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
-    </param>
-    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>
-      	This is the intial prompt spoken to the user at the start of an interaction.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
-      </description>
-    </param>
-    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
-    </param>
-    <param name="timeout" type="Integer" mandatory="true">
-      <description>Timeout initiate timeoutPrompt</description>
-    </param>
-  </function>
-  <function name="PerformInteraction" messagetype="response">
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
@@ -2481,7 +2529,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-  
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2493,7 +2540,6 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
-  
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>

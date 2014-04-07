@@ -1,5 +1,10 @@
 package com.ford.syncV4.util;
 
+import android.content.Context;
+import android.os.Environment;
+
+import java.io.File;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -22,5 +27,32 @@ public class CommonUtils {
         }
         return errorMessage.contains("IOException") && errorMessage.contains("ENODEV") &&
                 errorMessage.contains("No such device");
+    }
+
+    public static boolean externalStorageAvailable() {
+        boolean mExternalStorageAvailable;
+        boolean mExternalStorageWriteable;
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            // We can read and write the media
+            mExternalStorageAvailable = mExternalStorageWriteable = true;
+        } else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            // We can only read the media
+            mExternalStorageAvailable = true;
+            mExternalStorageWriteable = false;
+        } else {
+            // Something else is wrong. It may be one of many other states, but all we need
+            // to know is we can neither read nor write
+            mExternalStorageAvailable = mExternalStorageWriteable = false;
+        }
+        return mExternalStorageAvailable && mExternalStorageWriteable;
+    }
+
+    public static String getExternalStorageDir(Context context) {
+        if (context == null) {
+            return null;
+        }
+        File externalDir = context.getExternalFilesDir(null);
+        return externalDir != null ? externalDir.getAbsolutePath() : null;
     }
 }

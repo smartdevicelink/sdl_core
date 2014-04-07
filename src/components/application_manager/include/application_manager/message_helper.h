@@ -154,12 +154,6 @@ class MessageHelper {
     static void SendHashUpdateNotification(const uint32_t app_id);
 
     /**
-     * @brief Removes Vr Synonyms of application name from HMI
-     * when unregistering application.
-     */
-    static void SendRemoveVrCommandsOnUnregisterApp(ApplicationConstSharedPtr app);
-
-    /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
      *
      *@param connection_key Connection key
@@ -233,11 +227,8 @@ class MessageHelper {
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void RemoveAppDataFromHMI(ApplicationSharedPtr app);
     static void SendOnSdlCloseNotificationToHMI();
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
-    static void SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app);
-    static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
     static void SendActivateAppToHMI(uint32_t const app_id);
@@ -333,8 +324,7 @@ class MessageHelper {
   private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
-    static void SendRemoveCommandToHMI(int32_t function_id, int32_t command_id,
-                                       uint32_t app_id);
+
     MessageHelper();
 
     static const VehicleData vehicle_data_;

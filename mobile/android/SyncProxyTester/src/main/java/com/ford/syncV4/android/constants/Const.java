@@ -8,6 +8,7 @@ public class Const {
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
 
 	// Protocol properties
+	public static final String PREFS_KEY_PROTOCOL_VERSION = "protocolVersion";
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
     public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
@@ -88,6 +89,7 @@ public class Const {
 
     public static final int REQUEST_FILE_OPEN = 50;
     public static final int REQUEST_POLICY_UPDATE_FILE_OPEN = 51;
+    public static final int REQUEST_SYSTEM_REQUEST_FILE_OPEN = 52;
 
     public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
     public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";

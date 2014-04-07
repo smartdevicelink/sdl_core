@@ -79,5 +79,6 @@ add_library("test_App_Manager"
 						"./src/smoke_test_exp_media.cc"
 						"./src/protocol_handler_mockup.cc"
 						"./src/init_start_data.cc"
-						"./src/test_hmi.cc")
+						"./src/test_hmi.cc"
+                                                "./src/application_manager_impl_test.cc")
 						

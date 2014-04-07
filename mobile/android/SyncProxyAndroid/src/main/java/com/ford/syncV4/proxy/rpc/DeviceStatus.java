@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.DeviceLevelStatus;
 import com.ford.syncV4.proxy.rpc.enums.PrimaryAudioSource;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class DeviceStatus extends RPCStruct {
 
@@ -80,7 +80,7 @@ public class DeviceStatus extends RPCStruct {
             try {
                 theCode = DeviceLevelStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.battLevelStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.battLevelStatus, e);
             }
             return theCode;
         }
@@ -122,7 +122,7 @@ public class DeviceStatus extends RPCStruct {
             try {
                 theCode = DeviceLevelStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.signalLevelStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.signalLevelStatus, e);
             }
             return theCode;
         }
@@ -144,7 +144,7 @@ public class DeviceStatus extends RPCStruct {
             try {
                 theCode = PrimaryAudioSource.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.primaryAudioSource, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.primaryAudioSource, e);
             }
             return theCode;
         }

@@ -56,7 +56,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         sut = new SyncConnection(mock(ISyncConnectionListener.class));
         sut.init(config);
         WiProProtocol protocol = (WiProProtocol) sut.getWiProProtocol();
-        protocol.setVersion(VERSION);
+        protocol.setProtocolVersion(VERSION);
     }
 
     public void testSyncConnectionShouldBeCreated() throws Exception {
@@ -109,7 +109,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-        protocol.setVersion(VERSION);
+        protocol.setProtocolVersion(VERSION);
         connection.onTransportBytesReceived(header.assembleHeaderBytes(), header.assembleHeaderBytes().length);
         assertTrue(passed[0]);
     }
@@ -145,7 +145,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-        protocol.setVersion(VERSION);
+        protocol.setProtocolVersion(VERSION);
         connection.closeMobileNaviService(SESSION_ID);
     }
 
@@ -330,7 +330,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         SyncConnection connection = new SyncConnection(connectionListenerMock);
         connection.init(null, mock(SyncTransport.class));
         final WiProProtocol protocol = new WiProProtocol(connection);
-        protocol.setVersion((byte) 0x02);
+        protocol.setProtocolVersion((byte) 0x02);
         connection._protocol = protocol;
 
         final byte maxByte = (byte) 0xFF;

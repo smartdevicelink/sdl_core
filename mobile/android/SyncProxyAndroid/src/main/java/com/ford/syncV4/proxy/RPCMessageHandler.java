@@ -1,7 +1,6 @@
 package com.ford.syncV4.proxy;
 
 import android.os.Handler;
-import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
@@ -68,10 +67,8 @@ import com.ford.syncV4.proxy.rpc.enums.ButtonPressMode;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -81,6 +78,8 @@ import java.util.Hashtable;
 public class RPCMessageHandler implements IRPCMessageHandler {
 
     private static final String LOG_TAG = "RPCMessageHandler";
+
+    private static final String CLASS_NAME = RPCMessageHandler.class.getSimpleName();
 
     private SyncProxyBase syncProxyBase;
     private CertificateRecallProcessor mCertificateRecallProcessor;
@@ -121,7 +120,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
         String messageType = rpcMsg.getMessageType();
 
         if (messageType.equals(Names.response)) {
-            SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCResponse(rpcMsg), SyncProxyBase.SYNC_LIB_TRACE_KEY);
+            Logger.d(CLASS_NAME + " Response");
 
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationID();
@@ -871,12 +870,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 } else {
                     try {
                         if (syncProxyBase.getSyncMsgVersion() != null) {
-                            DebugTool.logError("Unrecognized response Message: " +
+                            Logger.e("Unrecognized response Message: " +
                                     functionName.toString() +
                                     "SYNC Message Version = " + syncProxyBase.getSyncMsgVersion());
                         } else {
-                            DebugTool.logError("Unrecognized response Message: " +
-                                    functionName.toString());
+                            Logger.e("Unrecognized response Message: " + functionName.toString());
                         }
                     } catch (SyncException e) {
                         e.printStackTrace();
@@ -885,11 +883,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
             }
         } else if (messageType.equals(Names.notification)) {
-            SyncTrace.logRPCEvent(InterfaceActivityDirection.Receive, new RPCNotification(rpcMsg), SyncProxyBase.SYNC_LIB_TRACE_KEY);
-
-            // Process incoming data in order to get Certificate recall combination
-            //mCertificateRecallProcessor.process(hash);
-
+            Logger.d(CLASS_NAME + " Notification");
             if (functionName.equals(Names.OnHMIStatus)) {
                 // OnHMIStatus
 
@@ -971,12 +965,10 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 }
             } else if (functionName.equals(Names.OnSyncPData)) {
                 // OnSyncPData
-                Log.i("pt", "functionName.equals(Names.OnEncodedSyncPData)");
                 final OnSyncPData msg = new OnSyncPData(hash);
 
                 // If url is null, then send notification to the app, otherwise, send to URL
                 if (msg.getUrl() == null) {
-                    Log.i("pt", "send syncp to app");
                     if (getCallbackToUIThread()) {
                         // Run in UI thread
                         getMainUIHandler().post(new Runnable() {
@@ -989,7 +981,6 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         getProxyListener().onOnSyncPData(msg);
                     }
                 } else { //url not null, send to url
-                    Log.i("pt", "send syncp to url");
                     // URL has data, attempt to post request to external server
                     Thread handleOffboardSyncTransmissionTread = new Thread() {
                         @Override
@@ -1170,7 +1161,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         if (syncProxyBase.getCurrentTransportType() == TransportType.BLUETOOTH) {
                             syncProxyBase.cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(msg.getReason()));
                         } else {
-                            Log.e(this.getClass().getName(), "HandleRPCMessage. No cycle required if transport is TCP");
+                            Logger.e(CLASS_NAME + " HandleRPCMessage. No cycle required if transport is TCP");
                         }
                         syncProxyBase.notifyOnAppInterfaceUnregistered(msg);
                     }
@@ -1197,10 +1188,10 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             } else {
                 try {
                     if (syncProxyBase.getSyncMsgVersion() != null) {
-                        DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString() +
+                        Logger.i("Unrecognized notification Message: " + functionName.toString() +
                                 " connected to SYNC using message version: " + syncProxyBase.getSyncMsgVersion().getMajorVersion() + "." + syncProxyBase.getSyncMsgVersion().getMinorVersion());
                     } else {
-                        DebugTool.logInfo("Unrecognized notification Message: " + functionName.toString());
+                        Logger.i("Unrecognized notification Message: " + functionName.toString());
                     }
                 } catch (SyncException e) {
                     e.printStackTrace();
@@ -1208,7 +1199,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             }
         }
 
-        SyncTrace.logProxyEvent("Proxy received RPC Message: " + functionName, SyncProxyBase.SYNC_LIB_TRACE_KEY);
+        Logger.i("Proxy received RPC Message: " + functionName);
     }
 
     private Handler getMainUIHandler() {

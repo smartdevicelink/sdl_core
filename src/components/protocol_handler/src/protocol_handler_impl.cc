@@ -202,7 +202,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+<<<<<<< HEAD
       protocol_version, encrypted, FRAME_TYPE_CONTROL,
+=======
+      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+>>>>>>> develop
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -428,7 +432,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
-  std::map<uint8_t, uint32_t>::const_iterator it =
+  std::map<uint8_t, uint32_t>::iterator it =
       sessions_last_message_id_.find(sent_message.session_id());
 
   if (sessions_last_message_id_.end() != it) {

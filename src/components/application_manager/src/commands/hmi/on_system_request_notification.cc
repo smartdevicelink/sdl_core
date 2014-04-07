@@ -53,12 +53,20 @@ void OnSystemRequestNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
           static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
-  std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
-  for (; app_list.end() != it; ++it) {
+  std::string app_id = (*message_)[strings::msg_params][strings::app_id].asString();
+
+  if (0 == app_id.compare(strings::default_app_id)) {
+    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+    const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
+    std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
+    for (; app_list.end() != it; ++it) {
+      (*message_)[strings::params][strings::connection_key] =
+          static_cast<int32_t>((*it)->app_id());
+      SendNotificationToMobile(message_);
+    }
+  } else {
     (*message_)[strings::params][strings::connection_key] =
-      static_cast<int32_t>((*it)->app_id());
+        (*message_)[strings::msg_params][strings::app_id];
     SendNotificationToMobile(message_);
   }
 }

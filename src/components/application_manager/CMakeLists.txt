@@ -204,8 +204,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
-./src/commands/hmi/tts_perform_interaction_request.cc
-./src/commands/hmi/tts_perform_interaction_response.cc
+./src/commands/hmi/vr_perform_interaction_request.cc
+./src/commands/hmi/vr_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
@@ -305,6 +305,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
 ./src/commands/hmi/on_record_start_notification.cc
+./src/commands/hmi/basic_communication_system_request.cc
+./src/commands/hmi/basic_communication_system_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

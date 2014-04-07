@@ -4,9 +4,8 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataNotificationStatus;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class MyKey extends RPCStruct {
 
@@ -31,7 +30,7 @@ public class MyKey extends RPCStruct {
             try {
                 theCode = VehicleDataStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.e911Override, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.e911Override, e);
             }
             return theCode;
         }

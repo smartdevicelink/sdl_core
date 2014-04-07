@@ -416,7 +416,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             throws SyncException, NoSuchFieldException, IllegalAccessException {
         final WiProProtocol protocol =
                 new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setVersion((byte) 0x02);
+        protocol.setProtocolVersion((byte) 0x02);
         final SyncConnection syncConnectionMock = mock(SyncConnection.class);
         when(syncConnectionMock.getWiProProtocol()).thenReturn(protocol);
 

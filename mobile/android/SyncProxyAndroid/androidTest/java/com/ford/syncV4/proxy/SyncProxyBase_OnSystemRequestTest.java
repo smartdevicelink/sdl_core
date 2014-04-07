@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
@@ -79,6 +80,9 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         proxyListenerMock = mock(IProxyListenerALMTesting.class);
         protocolMock = mock(WiProProtocol.class);
         connectionMock = createNewSyncConnectionMock();
+
+        // Set correct version of the Protocol when creates RPC requests at SyncProxyBase
+        when(connectionMock.getProtocolVersion()).thenReturn(ProtocolConstants.PROTOCOL_VERSION_MAX);
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,

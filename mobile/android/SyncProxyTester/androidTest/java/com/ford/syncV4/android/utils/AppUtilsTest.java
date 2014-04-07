@@ -23,7 +23,8 @@ public class AppUtilsTest extends TestCase {
         String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
                 "/policyTableUpdate.json";
         File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
-        assertTrue(mPolicyUpdateFile.exists());
+        assertTrue("File 'policyTableUpdate.json' must be located at SD Card",
+                mPolicyUpdateFile.exists());
         byte[] data = AppUtils.contentsOfResource(mPolicyUpdateFile);
         assertNotNull(data);
     }

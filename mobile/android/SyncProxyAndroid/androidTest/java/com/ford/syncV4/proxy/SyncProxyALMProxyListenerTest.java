@@ -14,8 +14,6 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 
-import junit.framework.TestCase;
-
 import org.json.JSONException;
 import org.mockito.ArgumentCaptor;
 
@@ -24,7 +22,6 @@ import java.util.Vector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Matchers.contains;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -47,7 +44,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         proxyListenerMock = mock(IProxyListenerALM.class);
         proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
     }
 
     public void testOnSystemRequestResponseShouldBeCalledOnResponse()

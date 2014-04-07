@@ -93,8 +93,8 @@ import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
-import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -286,7 +286,7 @@ public class SyncProxyALMManager {
 				
 				speak(textToSpeak, _mainTag, this);
 			} catch (SyncException e) {
-				DebugTool.logError("smartSpeak failed to speak!", e);
+                Logger.e("smartSpeak failed to speak!", e);
 				return;
 			}
 		}
@@ -546,14 +546,14 @@ public class SyncProxyALMManager {
 	
 	/************************** Siphon Methods *************************************/
 	// Public method to enable the siphon transport
-	public static void enableSiphonDebug() {
+	/*public static void enableSiphonDebug() {
 		SyncProxyBase.enableSiphonDebug();
-	}
+	}*/
 	
 	// Public method to disable the Siphon Trace Server
-	public static void disableSiphonDebug() {
+	/*public static void disableSiphonDebug() {
 		SyncProxyBase.disableSiphonDebug();
-	}
+	}*/
 	/************************** End Siphon Methods *************************************/
 	
 	/*********************** Expose Public Proxy Methods *******************************/
@@ -2638,6 +2638,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onSecureServiceStart() {
+
+        }
+
+        @Override
+        public void onStartSession(byte sessionID) {
 
         }
     }

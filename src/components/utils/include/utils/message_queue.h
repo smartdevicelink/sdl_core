@@ -100,6 +100,12 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
      * shutting down
      */
     void Shutdown();
+
+    /**
+      * \brief Clears queue.
+      */
+    void Reset();
+
   private:
 
     /**
@@ -107,11 +113,12 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
      */
     Queue queue_;
     volatile bool shutting_down_;
+
     /**
      *\brief Platform specific syncronisation variable
      */
     mutable sync_primitives::Lock queue_lock_;
-    mutable sync_primitives::ConditionalVariable queue_new_items_;
+    sync_primitives::ConditionalVariable queue_new_items_;
 };
 
 template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
@@ -128,7 +135,7 @@ template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
 
 template<typename T, class Q> void MessageQueue<T, Q>::wait() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
-  while (!shutting_down_ && queue_.empty()) {
+  while ((!shutting_down_) && queue_.empty()) {
     queue_new_items_.Wait(auto_lock);
   }
 }
@@ -176,6 +183,15 @@ template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = true;
   queue_new_items_.Broadcast();
+}
+
+template<typename T, class Q> void MessageQueue<T, Q>::Reset() {
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  shutting_down_ = false;
+  if (!queue_.empty()) {
+    Queue empty_queue;
+    queue_.swap(empty_queue);
+  }
 }
 
 #endif  //  MESSAGE_QUEUE_CLASS

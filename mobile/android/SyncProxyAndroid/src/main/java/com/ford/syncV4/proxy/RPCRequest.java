@@ -13,6 +13,10 @@ public class RPCRequest extends RPCMessage {
      * Indicates whether this request going to be encrypted or not
      */
     private boolean doEncryption = false;
+	public RPCRequest(String functionName) {
+		super(functionName, Names.request);
+		messageType = Names.request;
+	}
 
     public RPCRequest(String functionName) {
         super(functionName, Names.request);

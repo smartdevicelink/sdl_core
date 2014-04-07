@@ -5,16 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
-import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
-import com.ford.syncV4.trace.DiagLevel;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.DetailLevel;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
-import com.ford.syncV4.trace.enums.Mod;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +20,12 @@ import java.util.UUID;
  *
  */
 public class BTTransport extends SyncTransport {
-    private static final String TAG = BTTransport.class.getSimpleName();
+
+    private static final String CLASS_NAME = BTTransport.class.getSimpleName();
 
 	//936DA01F9ABD4D9D80C702AF85C822A8
 	private final static UUID SYNC_V4_MOBILE_APPLICATION_SVC_CLASS = new UUID(0x936DA01F9ABD4D9DL, 0x80C702AF85C822A8L);
 
-	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-	
 	private BluetoothAdapter _adapter = null;
 	private BluetoothSocket _activeSocket = null;
 	private InputStream _input = null;
@@ -60,11 +53,7 @@ public class BTTransport extends SyncTransport {
 
     public BTTransport(ITransportListener transportListener) {
 		super(transportListener);
-
-        // turn on verbose transport logging
-        DiagLevel.setLevel(Mod.tran, DetailLevel.VERBOSE);
-        DebugTool.enableDebugTool();
-	} // end-ctor
+	}
 	
 	public void openConnection () throws SyncException {
         try {
@@ -105,7 +94,7 @@ public class BTTransport extends SyncTransport {
                 throw new SyncException("Could not open connection to SYNC.", SyncExceptionCause.SYNC_CONNECTION_FAILED);
             }
 
-            SyncTrace.logTransportEvent("BTTransport: listening for incoming connect to service ID " + _listeningServiceUUID, null, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
+            Logger.i(CLASS_NAME + " Listening for incoming connect to service ID " + _listeningServiceUUID);
 
             // Setup transportReader thread
             _transportReader = new TransportReaderThread();
@@ -114,11 +103,9 @@ public class BTTransport extends SyncTransport {
             _transportReader.start();
 
             // Initialize the SiphonServer
-            SiphonServer.init();
+            //SiphonServer.init();
         } catch (SyncException e) {
-            // Log
-            Log.e(TAG, e.getMessage());
-
+            Logger.e(CLASS_NAME + " " + e.getMessage());
             throw e;
         }
     } // end-method
@@ -129,7 +116,7 @@ public class BTTransport extends SyncTransport {
 
     @Override
     public void stopReading() {
-        DebugTool.logInfo("BTTransport: stop reading requested, doing nothing");
+        Logger.i(CLASS_NAME + " Stop reading requested, doing nothing");
     }
 
     /**
@@ -151,7 +138,7 @@ public class BTTransport extends SyncTransport {
 			disconnectMsg += ", " + ex.toString();
 		} // end-if
 
-		SyncTrace.logTransportEvent("BTTransport.disconnect: " + disconnectMsg, null, InterfaceActivityDirection.Transmit, null, 0, SYNC_LIB_TRACE_KEY);
+        Logger.i(CLASS_NAME + " Disconnect: " + disconnectMsg);
 
 		try {			
 			if (_transportReader != null) {
@@ -159,7 +146,7 @@ public class BTTransport extends SyncTransport {
 				_transportReader = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to stop transport reader thread.", e);
+			Logger.e(CLASS_NAME + " failed to stop transport reader thread.", e);
 		} // end-catch	
 		
 		try {
@@ -168,7 +155,7 @@ public class BTTransport extends SyncTransport {
 				_bluetoothAdapterMonitor = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to stop adapter monitor thread.", e);
+			Logger.e(CLASS_NAME + " failed to stop adapter monitor thread.", e);
 		}
 		
 		try {
@@ -177,7 +164,7 @@ public class BTTransport extends SyncTransport {
 				_serverSocket = null;
 			} 
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close serverSocket", e);
+			Logger.e(CLASS_NAME + " failed to close serverSocket", e);
 		} // end-catch
 		
 		try {
@@ -186,7 +173,7 @@ public class BTTransport extends SyncTransport {
 				_activeSocket = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close activeSocket", e);
+			Logger.e(CLASS_NAME + " failed to close activeSocket", e);
 		} // end-catch
 		
 		try {
@@ -195,7 +182,7 @@ public class BTTransport extends SyncTransport {
 				_input = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close input stream", e);
+			Logger.e(CLASS_NAME + " failed to close input stream", e);
 		} // end-catch
 		
 		try {
@@ -204,7 +191,7 @@ public class BTTransport extends SyncTransport {
 				_output = null;
 			}
 		} catch (Exception e) {
-			DebugTool.logError("Failed to close output stream", e);
+			Logger.e(CLASS_NAME + " failed to close output stream", e);
 		} // end-catch
 		
 		if (ex == null) {
@@ -231,7 +218,7 @@ public class BTTransport extends SyncTransport {
             decreaseSpeed();
 			sendResult = true;
 		} catch (Exception ex) {
-			DebugTool.logError("Error writing to Bluetooth socket: " + ex.toString(), ex);
+			Logger.e(CLASS_NAME + " error writing to Bluetooth socket: " + ex.toString(), ex);
 			handleTransportError("Error writing to Bluetooth socket:", ex);
 			sendResult = false;
 		} // end-catch
@@ -269,8 +256,8 @@ public class BTTransport extends SyncTransport {
 		}
 		
 		private void acceptConnection() {
-			SyncTrace.logTransportEvent("BTTransport: Waiting for incoming RFCOMM connect", "", InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
-			
+            Logger.i(CLASS_NAME + " Waiting for incoming RFCOMM connect");
+
 			try {
 				// Blocks thread until connection established.
 				_activeSocket = _serverSocket.accept();
@@ -282,8 +269,7 @@ public class BTTransport extends SyncTransport {
 				
 				// Log info of the connected device
 				BluetoothDevice btDevice = _activeSocket.getRemoteDevice();
-				String btDeviceInfoXml = SyncTrace.getBTDeviceInfo(btDevice);
-				SyncTrace.logTransportEvent("BTTransport: RFCOMM Connection Accepted", btDeviceInfoXml, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
+                Logger.i(CLASS_NAME + " RFCOMM Connection Accepted");
 				
 				_output = _activeSocket.getOutputStream();
 				_input = _activeSocket.getInputStream();
@@ -339,7 +325,7 @@ public class BTTransport extends SyncTransport {
 					// When bytesRead == -1, it indicates end of stream
 					if (!isHalted) {
 						// Only call disconnect if the thread has not been halted
-						DebugTool.logError("End of stream reached!");
+						Logger.e("End of stream reached!");
 						disconnect("End of stream reached.", null);
 					}
 				}
@@ -347,7 +333,7 @@ public class BTTransport extends SyncTransport {
 				if (!isHalted) {
 					// Only call disconnect if the thread has not been halted
 					String errString = "Failure in BTTransport reader thread: " + excp.toString();
-					DebugTool.logError(errString, excp);
+					Logger.e(errString, excp);
 					disconnect(errString, excp);
 				}
 				return;

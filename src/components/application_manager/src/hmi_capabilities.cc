@@ -56,14 +56,14 @@ std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
     {"DE_DE", hmi_apis::Common_Language::DE_DE},
     {"ES_ES", hmi_apis::Common_Language::ES_ES},
     {"EN_GB", hmi_apis::Common_Language::EN_GB},
-    {"TR_TR", hmi_apis::Common_Language::RU_RU},
+    {"RU_RU", hmi_apis::Common_Language::RU_RU},
     {"TR_TR", hmi_apis::Common_Language::TR_TR},
     {"PL_PL", hmi_apis::Common_Language::PL_PL},
     {"FR_FR", hmi_apis::Common_Language::FR_FR},
     {"IT_IT", hmi_apis::Common_Language::IT_IT},
     {"SV_SE", hmi_apis::Common_Language::SV_SE},
     {"PT_PT", hmi_apis::Common_Language::PT_PT},
-    {"EN_AU", hmi_apis::Common_Language::NL_NL},
+    {"NL_NL", hmi_apis::Common_Language::NL_NL},
     {"EN_AU", hmi_apis::Common_Language::EN_AU},
     {"ZH_CN", hmi_apis::Common_Language::ZH_CN},
     {"ZH_TW", hmi_apis::Common_Language::ZH_TW},
@@ -556,9 +556,12 @@ bool HMICapabilities::load_capabilities_from_file() {
     Json::Value languages = ui.get("languages", "");
     smart_objects::SmartObject ui_languages =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (int32_t i = 0; i < languages.size(); i++) {
-      ui_languages[i] =
-          languages_enum_values.find(languages[i].asString())->second;
+    for (int32_t i = 0, j = 0; i < languages.size(); i++) {
+      std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator it =
+          languages_enum_values.find(languages[i].asString());
+      if (languages_enum_values.end() != it) {
+        ui_languages[j++] =  it->second;
+      }
     }
     set_ui_supported_languages(ui_languages);
 
@@ -699,11 +702,14 @@ bool HMICapabilities::load_capabilities_from_file() {
     languages = vr.get("languages", "");
     smart_objects::SmartObject vr_languages =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (int32_t i = 0; i < languages.size(); i++) {
-      vr_languages[i] =
-          languages_enum_values.find(languages[i].asString())->second;
+    for (int32_t i = 0, j = 0; i < languages.size(); i++) {
+      std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator it =
+          languages_enum_values.find(languages[i].asString());
+      if (languages_enum_values.end() != it) {
+        vr_languages[j++] = it->second;
+      }
     }
-    set_vr_supported_languages(ui_languages);
+    set_vr_supported_languages(vr_languages);
 
     Json::Value capabilities = vr.get("capabilities", "");
     smart_objects::SmartObject vr_capabilities =
@@ -722,11 +728,15 @@ bool HMICapabilities::load_capabilities_from_file() {
     languages = tts.get("languages", "");
     smart_objects::SmartObject tts_languages =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (int32_t i = 0; i < languages.size(); i++) {
-      tts_languages[i] =
-          languages_enum_values.find(languages[i].asString())->second;
+    for (int32_t i = 0, j = 0; i < languages.size(); i++) {
+      std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator it =
+          languages_enum_values.find(languages[i].asString());
+      if (languages_enum_values.end() != it) {
+        tts_languages[j++] =  it->second;
+      }
     }
-    set_tts_supported_languages(ui_languages);
+    set_tts_supported_languages(tts_languages);
+
     set_speech_capabilities(
         smart_objects::SmartObject(tts.get("capabilities", "").asString()));
 

@@ -30,43 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/basic_communication_system_request.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief TTSPerformInteractionRequest command class
- **/
-class TTSPerformInteractionRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief TTSPerformInteractionRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit TTSPerformInteractionRequest(const MessageSharedPtr& message);
+BasicCommunicationSystemRequest::BasicCommunicationSystemRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
+}
 
-    /**
-     * @brief TTSPerformInteractionRequest class destructor
-     **/
-    virtual ~TTSPerformInteractionRequest();
+BasicCommunicationSystemRequest::~BasicCommunicationSystemRequest() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionRequest);
-};
+void BasicCommunicationSystemRequest::Run() {
+  LOG4CXX_INFO(logger_, "BasicCommunicationSystemRequest::Run");
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_

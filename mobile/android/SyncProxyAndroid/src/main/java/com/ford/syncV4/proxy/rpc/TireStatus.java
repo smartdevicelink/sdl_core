@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.WarningLightStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class TireStatus extends RPCStruct {
 
@@ -31,9 +31,10 @@ public class TireStatus extends RPCStruct {
             try {
                 theCode = WarningLightStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.pressureTelltale, e);
+                                Names.pressureTelltale, e
+                );
             }
             return theCode;
         }
@@ -55,7 +56,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.leftFront, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.leftFront, e);
             }
         }
         return null;
@@ -75,7 +76,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rightFront, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.rightFront, e);
             }
         }
         return null;
@@ -95,7 +96,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.leftRear, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.leftRear, e);
             }
         }
         return null;
@@ -115,7 +116,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rightRear, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.rightRear, e);
             }
         }
         return null;
@@ -135,7 +136,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.innerLeftRear, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.innerLeftRear, e);
             }
         }
         return null;
@@ -155,7 +156,7 @@ public class TireStatus extends RPCStruct {
         	try {
         		return new SingleTireStatus((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.innerRightRear, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.innerRightRear, e);
             }
         }
         return null;

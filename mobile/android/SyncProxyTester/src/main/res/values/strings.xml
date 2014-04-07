@@ -2,7 +2,7 @@
 <resources>
 
     <string name="type_here">Type here:</string>
-    <string name="tester_app_name">RPCSecureSPT</string>
+    <string name="tester_app_name">SyncProxyTester</string>
     <string name="connect">Connect</string>
     <string name="speak">Speak</string>
     <string name="slider_footer">Slider Footer</string>
@@ -292,5 +292,8 @@
     <string name="rpc_service_state">RPC Service State:</string>
     <string name="start_secure_service">Send Start Secure Service</string>
     <string name="start_not_secure_service">Send Start Not Secure Service</string>
+
+    <string name="system_request_use_file_name">Use file name</string>
+    <string name="system_request_file_name_label">System Request file name:</string>
 
 </resources>

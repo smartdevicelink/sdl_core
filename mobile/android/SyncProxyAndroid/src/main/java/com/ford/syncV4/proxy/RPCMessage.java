@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy;
 
+import android.util.Log;
+
 import com.ford.syncV4.proxy.constants.Names;
 
 import java.util.Hashtable;

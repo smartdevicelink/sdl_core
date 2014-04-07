@@ -235,7 +235,25 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
     Formatters::CFormatterJsonBase::jsonValueToObj(json_choiset , msg_param);
     const int32_t choice_set_id = msg_param
         [strings::interaction_choice_set_id].asInt();
+    uint32_t grammar_id = msg_param[strings::grammar_id].asUInt();
     application->AddChoiceSet(choice_set_id, msg_param);
+
+    for (size_t j = 0; j < msg_param[strings::choice_set].length(); ++j) {
+      smart_objects::SmartObject choise_params = smart_objects::SmartObject(
+                                                smart_objects::SmartType_Map);
+      choise_params[strings::app_id] = application->app_id();
+      choise_params[strings::cmd_id] =
+          msg_param[strings::choice_set][j][strings::choice_id];
+      choise_params[strings::vr_commands] = smart_objects::SmartObject(
+                                           smart_objects::SmartType_Array);
+      choise_params[strings::vr_commands] =
+          msg_param[strings::choice_set][j][strings::vr_commands];
+
+      choise_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
+      choise_params[strings::grammar_id] =  grammar_id;
+
+      SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &choise_params);
+    }
   }
 
   //setglobal properties
