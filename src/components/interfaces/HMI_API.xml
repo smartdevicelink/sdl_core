@@ -797,31 +797,31 @@
   <element name="VEHICLEDATA_GPS">
     <description>Notifies GPSData may be subscribed</description>
   </element>
-    <element name="VEHICLEDATA_SPEED" />
-    <element name="VEHICLEDATA_RPM" />
-    <element name="VEHICLEDATA_FUELLEVEL" />
-    <element name="VEHICLEDATA_FUELLEVEL_STATE" />
-    <element name="VEHICLEDATA_FUELCONSUMPTION" />
-    <element name="VEHICLEDATA_EXTERNTEMP" />
-    <element name="VEHICLEDATA_VIN" />
-    <element name="VEHICLEDATA_PRNDL" />
-    <element name="VEHICLEDATA_TIREPRESSURE" />
-    <element name="VEHICLEDATA_ODOMETER" />    
-    <element name="VEHICLEDATA_BELTSTATUS" />
-    <element name="VEHICLEDATA_BODYINFO" />
-    <element name="VEHICLEDATA_DEVICESTATUS" />
-    <element name="VEHICLEDATA_ECALLINFO"/>
-    <element name="VEHICLEDATA_AIRBAGSTATUS"/>
-    <element name="VEHICLEDATA_EMERGENCYEVENT"/>
-    <element name="VEHICLEDATA_CLUSTERMODESTATUS"/>
-    <element name="VEHICLEDATA_MYKEY"/>
-    <element name="VEHICLEDATA_BRAKING" />  
-    <element name="VEHICLEDATA_WIPERSTATUS" />
-    <element name="VEHICLEDATA_HEADLAMPSTATUS" /> 
-    <element name="VEHICLEDATA_BATTVOLTAGE" />
-    <element name="VEHICLEDATA_ENGINETORQUE" />          
-    <element name="VEHICLEDATA_ACCPEDAL" />         
-    <element name="VEHICLEDATA_STEERINGWHEEL" />    
+  <element name="VEHICLEDATA_SPEED" />
+  <element name="VEHICLEDATA_RPM" />
+  <element name="VEHICLEDATA_FUELLEVEL" />
+  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+  <element name="VEHICLEDATA_FUELCONSUMPTION" />
+  <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_PRNDL" />
+  <element name="VEHICLEDATA_TIREPRESSURE" />
+  <element name="VEHICLEDATA_ODOMETER" />
+  <element name="VEHICLEDATA_BELTSTATUS" />
+  <element name="VEHICLEDATA_BODYINFO" />
+  <element name="VEHICLEDATA_DEVICESTATUS" />
+  <element name="VEHICLEDATA_ECALLINFO" />
+  <element name="VEHICLEDATA_AIRBAGSTATUS" />
+  <element name="VEHICLEDATA_EMERGENCYEVENT" />
+  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
+  <element name="VEHICLEDATA_MYKEY" />
+  <element name="VEHICLEDATA_BRAKING" />
+  <element name="VEHICLEDATA_WIPERSTATUS" />
+  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+  <element name="VEHICLEDATA_BATTVOLTAGE" />
+  <element name="VEHICLEDATA_ENGINETORQUE" />
+  <element name="VEHICLEDATA_ACCPEDAL" />
+  <element name="VEHICLEDATA_STEERINGWHEEL" />
 </enum>
 
 <enum name="WiperStatus">
@@ -1925,7 +1925,7 @@
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
-	    Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
+        Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
@@ -1989,22 +1989,22 @@
         If omitted, the value will be set to false.
       </description>
     </param>
-   </function>
+  </function>
 
-   <function name="SystemRequest" messagetype="request">
+  <function name="SystemRequest" messagetype="request">
     <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
     <param name="requestType" type="Common.RequestType" mandatory="true">
-        <description>The type of system request.</description>
+      <description>The type of system request.</description>
     </param>
     <param name="fileName" type="String" maxlength="255" mandatory="true">
-        <description>The path to file.</description>
+      <description>The path to file.</description>
     </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
     </param> 
-   </function>
-   <function name="SystemRequest" messagetype="response">
-   </function>
+  </function>
+  <function name="SystemRequest" messagetype="response">
+  </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
@@ -2529,7 +2529,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-  
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2541,7 +2540,6 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
-  
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>
