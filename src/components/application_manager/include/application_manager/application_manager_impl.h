@@ -565,18 +565,14 @@ class ApplicationManagerImpl : public ApplicationManager,
   private:
 
     // members
-    ResumeCtrl resume_ctrl_;
-
     /**
      * @brief Resume controler is responcible for save and load information
      * about persistent application data on disk, and save session ID for resuming
      * application in case INGITION_OFF or MASTER_RESSET
      */
+    ResumeCtrl resume_ctrl_;
 
-    /**
-     * @brief Map of connection keys and associated applications
-     */
-    std::map<int32_t, ApplicationSharedPtr> applications_;
+
 
     /**
      * @brief List of applications

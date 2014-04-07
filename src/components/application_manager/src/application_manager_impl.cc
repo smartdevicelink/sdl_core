@@ -143,13 +143,14 @@ bool ApplicationManagerImpl::Stop() {
 ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  std::map<int32_t, ApplicationSharedPtr>::const_iterator it =
-    applications_.find(app_id);
-  if (applications_.end() != it) {
-    return it->second;
-  } else {
-    return ApplicationSharedPtr();
+  std::set<ApplicationSharedPtr>::const_iterator it =
+    application_list_.begin();
+  for (; it != application_list_.end(); ++it) {
+    if ((*it)->app_id() == app_id) {
+      return (*it);
+    }
   }
+  return ApplicationSharedPtr();
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
@@ -215,11 +216,12 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
     const std::string& policy_app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  std::map<int32_t, ApplicationSharedPtr>::const_iterator it = applications_
-      .begin();
-  for (; applications_.end() != it; ++it) {
-    if (policy_app_id.compare(it->second->mobile_app_id()->asString()) == 0) {
-      return it->second;
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    if (policy_app_id.compare((*it)->mobile_app_id()->asString()) == 0) {
+      return *it;
     }
   }
   return ApplicationSharedPtr();
@@ -349,7 +351,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  applications_.insert(std::pair<int32_t, ApplicationSharedPtr>(app_id, application));
   application_list_.insert(application);
 
   // TODO(PV): add asking user to allow application
@@ -1593,12 +1594,17 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
-  std::map<int32_t, ApplicationSharedPtr>::iterator it = applications_.find(app_id);
-  if (applications_.end() == it) {
+  ApplicationSharedPtr app_to_remove;
+  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
+  for (;it != application_list_.end(); ++it) {
+    if ((*it)->app_id() == app_id) {
+      app_to_remove = *it;
+    }
+  }
+  if (!app_to_remove) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
   }
-  ApplicationSharedPtr app_to_remove = it->second;
   if (is_resuming) {
     resume_ctrl_.SaveApplication(app_to_remove);
   }
@@ -1608,9 +1614,8 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::ResetGlobalproperties(it->second);
-  MessageHelper::SendOnAppUnregNotificationToHMI(it->second);
-  applications_.erase(it);
+  MessageHelper::ResetGlobalproperties(app_to_remove);
+  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
 
