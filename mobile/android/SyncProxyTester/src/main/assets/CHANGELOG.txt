@@ -1,3 +1,6 @@
+[CW15]
+* SyncProxyAndroid SDK: Modify protocol version negotiation
+
 [CW14]
 + SyncProxyTester | SyncProxyAndroid SDK: Add Logger class to save and send application logs
 + SyncProxyAndroid SDK: Add new field 'menuTitle' to TextFieldName enum
