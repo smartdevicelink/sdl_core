@@ -63,7 +63,8 @@ ApplicationImpl::ApplicationImpl(
       tts_speak_state_(false),
       device_(0),
       grammar_id_(0),
-      usage_report_(global_app_id, statistics_manager) {
+      usage_report_(global_app_id, statistics_manager),
+      protocol_version_(ProtocolVersion::kV3) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -263,6 +264,14 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
 
 bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
+}
+
+void ApplicationImpl::set_protocol_version(ProtocolVersion protocol_version) {
+  protocol_version_ = protocol_version;
+}
+
+ProtocolVersion ApplicationImpl::protocol_version() {
+  return protocol_version_;
 }
 
 bool ApplicationImpl::AddFile(AppFile& file) {

@@ -211,7 +211,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   }
 
   protocol_handler::RawMessage* msgToProtocolHandler =
-    new protocol_handler::RawMessage(message->connection_key(), 2,
+    new protocol_handler::RawMessage(message->connection_key(),
+                                     message->protocol_version(),
                                      dataForSending,
                                      MAX_HEADER_SIZE + jsonSize + binarySize);
 
