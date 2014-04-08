@@ -159,7 +159,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
       application(application_key);
   std::string file_path = profile::Profile::instance()->app_storage_folder();
   file_path += "/";
-  file_path += app->name();
+  file_path += app->folder_name();
   file_system::CreateDirectory(file_path);
 
   file_path += "/";

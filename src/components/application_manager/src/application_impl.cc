@@ -130,6 +130,10 @@ const std::string& ApplicationImpl::name() const {
   return app_name_;
 }
 
+const std::string& ApplicationImpl::folder_name() const {
+  return name() + mobile_app_id()->asString();
+}
+
 bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }

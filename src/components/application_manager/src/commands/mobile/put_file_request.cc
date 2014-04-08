@@ -153,7 +153,7 @@ void PutFileRequest::Run() {
         ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->name()));
 
     file_path = profile::Profile::instance()->app_storage_folder();
-    file_path += "/" + application->name();
+    file_path += "/" + application->folder_name();
 
     if (binary_data.size() >
       ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->name())) {
