@@ -1919,6 +1919,8 @@
         "steal_focus": false,
         "priority": "NONE",
         "default_hmi": "NONE",
+        "memory_kb": 300,
+        "watchdog_timer_ms": 1000,
         "groups": [
           "Base-4"
         ]
@@ -1928,6 +1930,19 @@
         "steal_focus": false,
         "priority": "NONE",
         "default_hmi": "NONE",
+        "memory_kb": 300,
+        "watchdog_timer_ms": 1000,
+        "groups": [
+          "DataConsent-2"
+        ]
+      },
+      "pre_DataConsent": {
+        "keep_context": false,
+        "steal_focus": false,
+        "priority": "NONE",
+        "default_hmi": "NONE",
+        "memory_kb": 300,
+        "watchdog_timer_ms": 1000,
         "groups": [
           "DataConsent-2"
         ]
