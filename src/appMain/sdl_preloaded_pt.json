@@ -32,6 +32,119 @@
       }
     },
     "functional_groupings": {
+	"pre_Base-1": {
+		    "rpcs": {
+		      "ChangeRegistration": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "DeleteFile": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "GenericResponse": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED"
+		        ]
+		      },
+		      "ListFiles": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "OnAppInterfaceUnregistered": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "OnLanguageChange": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "OnPermissionsChange": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "PutFile": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "RegisterAppInterface": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "ResetGlobalProperties": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED"
+		        ]
+		      },
+		      "SetAppIcon": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "SetDisplayLayout": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      },
+		      "SetGlobalProperties": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED"
+		        ]
+		      },
+		      "UnregisterAppInterface": {
+		        "hmi_levels": [
+		          "BACKGROUND",
+		          "FULL",
+		          "LIMITED",
+		          "NONE"
+		        ]
+		      }
+		    }
+		},
       "Base-4": {
         "rpcs": {
          "OnSystemRequest": {
@@ -1944,7 +2057,7 @@
         "memory_kb": 300,
         "watchdog_timer_ms": 1000,
         "groups": [
-          "DataConsent-2"
+          "pre_Base-1"
         ]
       }
     }
