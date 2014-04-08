@@ -334,7 +334,7 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "Policy", "PreloadedPT", value))
       && ('\0' != *value)) {
-    preloaded_pt_file_ = app_config_folder_ + value;
+    preloaded_pt_file_ = app_config_folder_ + '/' + value;
     LOG4CXX_INFO(logger_, "Set preloaded policy file to "
                  << preloaded_pt_file_);
   }
