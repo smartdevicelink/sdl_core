@@ -261,7 +261,6 @@ public class WiProProtocol extends AbstractProtocol {
                 receivedBytesReadPos += headerBytesNeeded;
                 _haveHeader = true;
                 _currentHeader = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
-                Logger.d(CLASS_NAME + " curr header:" + _currentHeader);
                 try {
                     _dataBuf = new byte[_currentHeader.getDataSize()];
                 } catch (OutOfMemoryError e) {
