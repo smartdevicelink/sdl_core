@@ -1,4 +1,5 @@
 [CW15]
+* SyncProxyAndroid SDK: Eliminate defects with HM timeout
 * SyncProxyAndroid SDK: Modify protocol version negotiation
 
 [CW14]
