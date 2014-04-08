@@ -54,8 +54,8 @@ SystemRequest::~SystemRequest() {
 void SystemRequest::Run() {
   LOG4CXX_INFO(logger_, "SystemRequest::Run");
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-      connection_key());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!(application.valid())) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -63,8 +63,9 @@ void SystemRequest::Run() {
     return;
   }
 
-  mobile_apis::RequestType::eType request_type = static_cast<mobile_apis::RequestType::eType>(
-      (*message_)[strings::msg_params][strings::request_type].asInt());
+  mobile_apis::RequestType::eType request_type =
+      static_cast<mobile_apis::RequestType::eType>(
+          (*message_)[strings::msg_params][strings::request_type].asInt());
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
       mobile_apis::RequestType::PROPRIETARY == request_type) {
@@ -75,31 +76,27 @@ void SystemRequest::Run() {
   }
 
   std::vector<uint8_t> binary_data;
-
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
   }
-  std::string full_file_path = profile::Profile::instance()->system_files_path();
-  std::string file_name;
 
-  if (!file_system::CreateDirectoryRecursively(full_file_path)) {
+  std::string file_path = profile::Profile::instance()->system_files_path();
+  if (!file_system::CreateDirectoryRecursively(file_path)) {
     LOG4CXX_ERROR(logger_, "Cann't create folder.");
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
     return;
   }
-  full_file_path += "/";
 
+  std::string file_name = "SYNC";
   if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
-  } else {
-    file_name = "SYNC";
   }
-  full_file_path += file_name;
 
+  std::string full_file_path = file_path + "/" + file_name;
   if (binary_data.size()) {
     if (mobile_apis::Result::SUCCESS  !=
         (ApplicationManagerImpl::instance()->SaveBinary(
-            binary_data, full_file_path, 0))) {
+            binary_data, file_path, file_name, 0))) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
     }

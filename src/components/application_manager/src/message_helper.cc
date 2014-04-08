@@ -1863,16 +1863,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     return mobile_apis::Result::INVALID_DATA;
   }
 
-  std::string relative_file_path;
-  if (file_name.size() > 0 && file_name[0] == '/') {
-    relative_file_path = file_name;
-  } else {
-    relative_file_path = app->name();
-    relative_file_path += "/";
-    relative_file_path += file_name;
-  }
+  std::string full_file_path =
+      profile::Profile::instance()->app_storage_folder() + "/";
 
-  std::string full_file_path = file_system::FullPath(relative_file_path);
+  if (file_name.size() > 0 && file_name[0] == '/' ) {
+    full_file_path += file_name;
+  } else {
+
+    full_file_path += app->name();
+    full_file_path += "/";
+    full_file_path += file_name;
+  }
 
   if (!file_system::FileExists(full_file_path)) {
     return mobile_apis::Result::INVALID_DATA;

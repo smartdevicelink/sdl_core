@@ -33,14 +33,13 @@
 #include <string>
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
-#include "utils/file_system.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
+#include "utils/file_system.h"
 
 namespace {
 log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 }
-
-
 
 namespace application_manager {
 
@@ -268,6 +267,7 @@ bool ApplicationImpl::has_been_activated() const {
 
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
+
     app_files_[file.file_name] = file;
     return true;
   }
@@ -364,11 +364,13 @@ uint32_t ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  std::string directory_name = file_system::FullPath(name());
+  std::string directory_name =
+      profile::Profile::instance()->app_storage_folder();
+  directory_name += "/" + name();
+
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(
             directory_name);
-
     AppFilesMap::const_iterator app_files_it;
 
     for (std::vector<std::string>::const_iterator it = files.begin();
