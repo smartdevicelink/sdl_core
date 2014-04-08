@@ -52,8 +52,8 @@ ListFilesRequest::~ListFilesRequest() {
 void ListFilesRequest::Run() {
   LOG4CXX_INFO(logger_, "ListFilesRequest::Run");
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-        (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,8 +61,9 @@ void ListFilesRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
-      profile::Profile::instance()->list_files_in_none() <= application->list_files_in_none_count()) {
+  if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
+      (profile::Profile::instance()->list_files_in_none() <=
+       application->list_files_in_none_count())) {
       // If application is in the HMI_NONE level the quantity of allowed
       // DeleteFile request is limited by the configuration profile
       LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
@@ -73,16 +74,19 @@ void ListFilesRequest::Run() {
   application->increment_list_files_in_none_count();
 
   (*message_)[strings::msg_params][strings::space_available] =
-        static_cast<int32_t>(file_system::GetAvailableSpaceForApp(application->name()));
+        static_cast<int32_t>(ApplicationManagerImpl::instance()->
+                             GetAvailableSpaceForApp(application->name()));
   int32_t i = 0;
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
        it != app_files.end(); ++it) {
-      (*message_)[strings::msg_params][strings::filenames][i++] = it->second.file_name;
+      (*message_)[strings::msg_params][strings::filenames][i++] =
+          it->second.file_name;
   }
   (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;
-  SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(*message_)[strings::msg_params]);
+  SendResponse(true, mobile_apis::Result::SUCCESS, NULL,
+               &(*message_)[strings::msg_params]);
 }
 
 }  // namespace commands

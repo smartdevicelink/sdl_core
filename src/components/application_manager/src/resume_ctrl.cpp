@@ -40,6 +40,7 @@ void ResumeCtrl::SaveAllApplications() {
 
 void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplication");
+
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;

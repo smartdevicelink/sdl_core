@@ -1,6 +1,7 @@
 include_directories (
   ./include
   ../utils/include/
+  ../config_profile/include/
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
 )
 

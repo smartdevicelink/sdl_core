@@ -1721,34 +1721,34 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
-  const std::vector<uint8_t>& binary_data, const std::string& file_path,
-  const uint32_t offset) {
-  LOG4CXX_INFO(
-    logger_,
-    "SaveBinaryWithOffset  binary_size = " << binary_data.size()
-    << " offset = " << offset);
+    const std::vector<uint8_t>& binary_data, const std::string& file_path,
+    const std::string& file_name, const uint32_t offset) {
+  LOG4CXX_INFO(logger_,
+               "SaveBinaryWithOffset  binary_size = " << binary_data.size()
+               << " offset = " << offset);
 
-  if (binary_data.size() > file_system::GetAvailableDiskSpace()) {
+  if (binary_data.size() > file_system::GetAvailableDiskSpace(file_path)) {
     LOG4CXX_ERROR(logger_, "Out of free disc space.");
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
 
-  uint32_t file_size = file_system::FileSize(file_path);
+  const std::string full_file_path = file_path + "/" + file_name;
+  uint32_t file_size = file_system::FileSize(full_file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
     if (file_size != offset) {
-      LOG4CXX_INFO(
-        logger_,
-        "ApplicationManagerImpl::SaveBinaryWithOffset offset does'n match existing filesize");
+      LOG4CXX_INFO(logger_,
+                   "ApplicationManagerImpl::SaveBinaryWithOffset offset"
+                   << " does'n match existing file size");
       return mobile_apis::Result::INVALID_DATA;
     }
-    file_stream = file_system::Open(file_path, std::ios_base::app);
+    file_stream = file_system::Open(full_file_path, std::ios_base::app);
   } else {
     LOG4CXX_INFO(
       logger_,
       "ApplicationManagerImpl::SaveBinaryWithOffset offset is 0, rewrite");
     // if offset == 0: rewrite file
-    file_stream = file_system::Open(file_path, std::ios_base::out);
+    file_stream = file_system::Open(full_file_path, std::ios_base::out);
   }
 
   if (!file_system::Write(file_stream, binary_data.data(),
@@ -1756,9 +1756,39 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
     file_system::Close(file_stream);
     return mobile_apis::Result::GENERIC_ERROR;
   }
+
   file_system::Close(file_stream);
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
+}
+
+uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
+    const std::string& app_name) {
+  const uint32_t app_quota = profile::Profile::instance()->app_dir_quota();
+  std::string app_storage_path =
+      profile::Profile::instance()->app_storage_folder();
+
+  app_storage_path += "/";
+  app_storage_path += app_name;
+
+  if (file_system::DirectoryExists(app_storage_path)) {
+    uint32_t size_of_directory = file_system::DirectorySize(app_storage_path);
+    if (app_quota < size_of_directory) {
+      return 0;
+    }
+
+    uint32_t current_app_quota = app_quota - size_of_directory;
+    uint32_t available_disk_space =
+        file_system::GetAvailableDiskSpace(app_storage_path);
+
+    if (current_app_quota > available_disk_space) {
+      return available_disk_space;
+    } else {
+      return current_app_quota;
+    }
+  } else {
+    return app_quota;
+  }
 }
 
 bool ApplicationManagerImpl::IsHMICooperating() const {

@@ -46,9 +46,10 @@ namespace file_system {
 /**
  * @brief Get available disc space.
  *
+ * @param path to directory
  * @return free disc space.
  */
-uint64_t GetAvailableDiskSpace();
+uint64_t GetAvailableDiskSpace(const std::string& path);
 
 /*
  * @brief Get size of current directory
@@ -64,14 +65,6 @@ uint32_t DirectorySize(const std::string& path);
  * @return size of file, return 0 if file not exist
  */
 uint32_t FileSize(const std::string& path);
-
-
-/**
- * @brief Get available app space
- * @param name of app
- * @return free app space.
- */
-uint32_t GetAvailableSpaceForApp(const std::string& name);
 
 /**
  * @brief Creates directory
@@ -147,12 +140,12 @@ bool Write(std::ofstream* const file_stream,
 void Close(std::ofstream* file_stream);
 
 /**
-  * @brief Returns full file path
+  * @brief Returns current working directory path
   * If filename begins with "/", return unchanged filename
   * @param name file name
   * @return returns full file path.
   */
-std::string FullPath(const std::string& name);
+std::string CurrentWorkingDirectory();
 
 /**
   * @brief Removes file

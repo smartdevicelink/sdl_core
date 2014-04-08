@@ -31,22 +31,25 @@
  */
 
 #include "resumption/last_state.h"
+#include "config_profile/profile.h"
 #include "utils/file_system.h"
 
 namespace resumption {
 
-const std::string LastState::filename = "LastState.dat";
-
 void LastState::SaveToFileSystem() {
+  const std::string file =
+      profile::Profile::instance()->app_info_storage();
   const std::string& str = dictionary.toStyledString();
   const std::vector<uint8_t> char_vector_pdata(
     str.begin(), str.end());
-  DCHECK(file_system::Write(filename, char_vector_pdata));
+  DCHECK(file_system::Write(file, char_vector_pdata));
 }
 
 void LastState::LoadFromFileSystem() {
+  const std::string file =
+      profile::Profile::instance()->app_info_storage();
   std::string buffer;
-  bool result = file_system::ReadFile(filename,buffer);
+  bool result = file_system::ReadFile(file, buffer);
   if (result) {
     Json::Reader m_reader;
     DCHECK(m_reader.parse(buffer, dictionary));

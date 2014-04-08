@@ -57,6 +57,21 @@ class Profile : public utils::Singleton<Profile> {
     virtual ~Profile();
 
     /**
+      * @brief Returns true if HMI should be started, otherwise false
+      */
+    bool launch_hmi() const;
+
+    /**
+      * @brief Returns application configuration path
+      */
+    const std::string& app_config_folder() const;
+
+    /**
+      * @brief Returns application storage path
+      */
+    const std::string& app_storage_folder() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -65,11 +80,6 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Sets the path to the config file
      */
     void config_file_name(const std::string& fileName);
-
-    /**
-      * @brief Returns true if HMI should be started, otherwise false
-      */
-    bool launch_hmi() const;
 
     /**
      * @brief Returns server address
@@ -355,6 +365,8 @@ class Profile : public utils::Singleton<Profile> {
 
     // Members section
     bool                            launch_hmi_;
+    std::string                     app_config_folder_;
+    std::string                     app_storage_folder_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
