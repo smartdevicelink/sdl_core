@@ -165,6 +165,13 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnUpdateStatusChanged(policy::PolicyTableStatus status);
 
   /**
+   * @brief Update currently used device id in policies manager for given
+   * application
+   * @param policy_app_id Application id
+   */
+  void OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
+
+  /**
    * Adds statistics info
    * @param type type of info
    */

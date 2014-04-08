@@ -664,14 +664,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
          */
         OnAppPermissionConsent: function(consentedFunctions, source, appID) {
 
-            Em.Logger.log("FFW.BasicCommunication.OnAppPermissionConsent");
+            Em.Logger.log("FFW.SDL.OnAppPermissionConsent");
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.OnAppPermissionConsent",
+                "method": "SDL.OnAppPermissionConsent",
                 "params": {
-                    "consentedFunctions": allowed,
+                    "consentedFunctions": consentedFunctions,
                     "source": source
                 }
             };

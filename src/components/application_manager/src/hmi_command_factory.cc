@@ -61,6 +61,7 @@
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/on_allow_sdl_functionality_notification.h"
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
+#include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
 #include "application_manager/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
@@ -358,6 +359,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
       command.reset(new commands::OnStatusUpdateNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnAppPermissionConsent: {
+      command.reset(new commands::OnAppPermissionConsentNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {
