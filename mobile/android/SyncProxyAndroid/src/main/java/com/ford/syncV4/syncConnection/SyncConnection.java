@@ -210,6 +210,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol = null;
             }
         }
+        Logger.d("Close connection:" + keepConnection);
         if (!keepConnection) {
             stopHeartbeatMonitor();
         }

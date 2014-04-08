@@ -357,7 +357,7 @@ public class WiProProtocol extends AbstractProtocol {
                 message.setSessionType(header.getServiceType());
                 message.setSessionID(header.getSessionID());
                 //If it is WiPro 2.0 it must have binary header
-                if (header.getVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                if (header.getVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                     BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
                             parseBinaryHeader(accumulator.toByteArray());
                     message.setVersion(header.getVersion());
@@ -441,7 +441,7 @@ public class WiProProtocol extends AbstractProtocol {
                     _messageLocks.put(header.getSessionID(), messageLock);
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
-                if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                     hashID = header.getMessageID();
                 }
                 inspectStartServiceACKHeader(header);
@@ -485,7 +485,7 @@ public class WiProProtocol extends AbstractProtocol {
             message.setSessionType(header.getServiceType());
             message.setSessionID(header.getSessionID());
             //If it is WiPro 2.0 it must have binary header
-            if (header.getVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            if (header.getVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
                 message.setVersion(header.getVersion());
                 message.setRPCType(binFrameHeader.getRPCType());
@@ -524,7 +524,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndSessionFrame(ProtocolFrameHeader header) {
         Logger.d(CLASS_NAME + " EndServiceACKHeader v:" + header.getVersion());
-        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (hashID == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
             }

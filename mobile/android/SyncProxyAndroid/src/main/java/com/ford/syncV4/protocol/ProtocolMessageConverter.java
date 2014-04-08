@@ -31,7 +31,7 @@ public class ProtocolMessageConverter {
         // TODO - get rid of this ugly if statements. FAST!
         if ((_serviceType == ServiceType.Mobile_Nav ||
                 _serviceType == ServiceType.Audio_Service ) &&
-                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_THREE) {
             _data = _protocolMsg.getData();
             return this;
         }

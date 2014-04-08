@@ -235,7 +235,7 @@ public class TCPTransport extends SyncTransport {
         } else {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
-            Logger.i("Disconnect is incorrect. Handling it as error");
+            Logger.e("Disconnect is incorrect. Handling it as error");
             final String finalDisconnectMsg = disconnectMsg;
             handleTransportError(finalDisconnectMsg, exception);
         }
