@@ -75,7 +75,7 @@ public class TestCommon {
             final String functionName, final Hashtable<String, Object> params,
             final byte rpcType, final int corrID) throws JSONException {
         ProtocolMessage pm = new ProtocolMessage();
-        pm.setVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
+        pm.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         pm.setCorrID(corrID);
 
         if (params != null) {

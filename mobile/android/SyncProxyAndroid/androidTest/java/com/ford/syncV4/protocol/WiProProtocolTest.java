@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
  */
 public class WiProProtocolTest extends InstrumentationTestCase {
 
-    public static final byte VERSION = (byte) 2;
     public static final int MESSAGE_ID = 1;
     public static final byte SESSION_ID = (byte) 48;
     public static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
@@ -133,13 +132,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 callCheck(currentCheckMethod, data, header, offset, length);
             }
         };
-        sut.setProtocolVersion((byte) 2);
+        sut.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(8);
         currentData = generateByteArray(0, 8);
-        currentFrameHeader = ProtocolFrameHeaderFactory.createSingleSendData(ServiceType.Mobile_Nav, SESSION_ID, currentData.length, MESSAGE_ID, VERSION);
+        currentFrameHeader =
+                ProtocolFrameHeaderFactory.createSingleSendData(ServiceType.Mobile_Nav, SESSION_ID,
+                        currentData.length, MESSAGE_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSmallFrame");
         sut.SendMessage(message);
     }
@@ -147,7 +148,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void testSendMobileNavFirstBigFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 2);
         currentData = generateByteArray(0, WiProProtocol.MAX_DATA_SIZE * 2);
-        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(ServiceType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
+        currentFrameHeader =
+                ProtocolFrameHeaderFactory.createMultiSendDataFirst(ServiceType.Mobile_Nav,
+                        SESSION_ID, MESSAGE_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsFirstBigFrame");
         sut.SendMessage(message);
     }
@@ -155,7 +158,10 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void testSendMobileNavConsecutiveBigFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3);
         currentData = generateByteArray(0, WiProProtocol.MAX_DATA_SIZE);
-        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav, SESSION_ID, currentData.length, FRAME_SEQUENCE_NUMBER, MESSAGE_ID, VERSION);
+        currentFrameHeader =
+                ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav,
+                        SESSION_ID, currentData.length, FRAME_SEQUENCE_NUMBER, MESSAGE_ID,
+                        ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSecondBigFrame");
         sut.SendMessage(message);
     }
@@ -163,15 +169,24 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void testSendMobileNavLastBigFrameProtocolMessageSucceed() throws Exception {
         ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3);
         currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 2, WiProProtocol.MAX_DATA_SIZE);
-        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav, SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID, VERSION);
+        currentFrameHeader =
+                ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav,
+                        SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID,
+                        ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastBigFrame");
         sut.SendMessage(message);
     }
 
     public void testSendMobileNabLastUnAlightedBigFrameProtocolMessageSucceed() throws Exception {
-        ProtocolMessage message = generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3 + FRAME_SIZE_SHIFT);
+        ProtocolMessage message =
+                generateMobileNavProtocolMessage(WiProProtocol.MAX_DATA_SIZE * 3 + FRAME_SIZE_SHIFT);
         currentData = generateByteArray(WiProProtocol.MAX_DATA_SIZE * 3, FRAME_SIZE_SHIFT);
-        currentFrameHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav, SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID, VERSION);
+        currentFrameHeader =
+                ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav,
+                        SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID,
+                        ProtocolConstants.PROTOCOL_VERSION_THREE);
+        sut.set_TEST_ProtocolMaxVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        sut.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastUnAlightedBigFrame");
         sut.SendMessage(message);
     }
@@ -189,7 +204,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         byte[] frame = generateByteArray(0, i);
         ProtocolMessage message = new ProtocolMessage();
         message.setData(frame);
-        message.setVersion((byte) 2);
+        message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         message.setSessionID((byte) 48);
         message.setSessionType(ServiceType.Mobile_Nav);
         return message;
@@ -461,7 +476,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
         protocol.hashID = 0xCDEF1234;
-        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MAX);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
     }
 
@@ -584,7 +599,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
         });
-        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, VERSION, "");
+        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID,
+                ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertTrue("test should pass", passed[0]);
     }
 
@@ -612,12 +628,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setProtocolVersion((byte) 2);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
@@ -627,7 +643,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
-        assertEquals(2, versionCaptor.getValue().byteValue());
+        assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
     }
 
@@ -636,12 +652,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setProtocolVersion((byte) 2);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -655,12 +671,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID((byte) 0);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setProtocolVersion((byte) 2);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
@@ -676,12 +692,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Audio_Service);
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setProtocolVersion((byte) 2);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
@@ -691,7 +707,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
         assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
-        assertEquals(2, versionCaptor.getValue().byteValue());
+        assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
         assertEquals("", correlationIdCaptor.getValue());
     }
 
@@ -703,7 +719,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
@@ -717,7 +733,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(ProtocolFrameHeader.FrameDataSingleFrame);
         frameHeader.setFrameType(FrameType.Single);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         byte [] data = new byte[10];
@@ -739,7 +755,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(ProtocolFrameHeader.FrameDataSingleFrame);
         frameHeader.setFrameType(FrameType.Single);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
@@ -754,7 +770,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(ProtocolFrameHeader.FrameDataFinalConsecutiveFrame);
         frameHeader.setFrameType(FrameType.Consecutive);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         byte [] data = new byte[100];
@@ -776,7 +792,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setFrameData(ProtocolFrameHeader.FrameDataFinalConsecutiveFrame);
         frameHeader.setFrameType(FrameType.Consecutive);
         frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion((byte) 2);
+        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
         byte [] data = new byte[100];
