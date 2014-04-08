@@ -40,12 +40,12 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
 		Hashtable<String, Object> ret = null;
+        String jsonString = new String(message);
 		try {
-			String jsonString = new String(message);
 			JSONObject jsonObject = new JSONObject(jsonString);
 			ret = deserializeJSONObject(jsonObject);
 		} catch (JSONException e) {
-            Logger.e("Failed to parse JSON", e);
+            Logger.e("Can't parse JSON: " + jsonString, e);
 		}
 		return ret;
 	}

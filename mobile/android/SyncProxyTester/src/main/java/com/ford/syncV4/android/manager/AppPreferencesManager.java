@@ -260,22 +260,41 @@ public class AppPreferencesManager {
     }
 
     /**
-     * Set protocol version int value
+     * Set protocol minimum supported version int value
      * @param value version of the protocol
      */
-    public static void setProtocolVersion(int value) {
+    public static void setProtocolMinVersion(int value) {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(Const.PREFS_KEY_PROTOCOL_VERSION, value);
+        editor.putInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, value);
         editor.commit();
     }
 
     /**
-     * @return protocol version int value
+     * @return protocol minimum supported version int value
      */
-    public static int getProtocolVersion() {
+    public static int getProtocolMinVersion() {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
-        return sharedPreferences.getInt(Const.PREFS_KEY_PROTOCOL_VERSION, ProtocolConstants.PROTOCOL_VERSION_MIN);
+        return sharedPreferences.getInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, ProtocolConstants.PROTOCOL_VERSION_MIN);
+    }
+
+    /**
+     * Set protocol maximum supported version int value
+     * @param value version of the protocol
+     */
+    public static void setProtocolMaxVersion(int value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, value);
+        editor.commit();
+    }
+
+    /**
+     * @return protocol maximum supported version int value
+     */
+    public static int getProtocolMaxVersion() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, ProtocolConstants.PROTOCOL_VERSION_MIN);
     }
 
     /**

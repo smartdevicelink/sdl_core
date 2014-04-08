@@ -1244,7 +1244,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     Logger.i("Incoming protocol version:" + protocolVersion);
                     if (protocolVersion == 1) {
                         Logger.w("Incorrect incoming protocol version, expected min 2 but was 1");
-                        protocolVersion = 2;
                     }
 
                     Hashtable hash = new Hashtable();
@@ -1256,13 +1255,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             final Hashtable<String, Object> mhash = _jsonRPCMarshaller.unmarshall(message.getData());
                             if (mhash != null) {
                                 hashTemp.put(Names.parameters, mhash);
-                            } else {
-                                String err = "Can't parse JSON: " + new String(message.getData());
-                                Logger.e(err);
                             }
                         }
                         FunctionID functionID = new FunctionID();
-                        hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
+                        String functionName = functionID.getFunctionName(message.getFunctionID());
+                        if (functionName != null) {
+                            hashTemp.put(Names.function_name, functionName);
+                        } else {
+                            Logger.e("Dispatch Incoming Message - function name is null");
+                        }
                         if (message.getRPCType() == ProtocolMessage.RPCTYPE_REQUEST) {
                             hash.put(Names.request, hashTemp);
                         } else if (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) {
@@ -1324,7 +1325,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
                 } else {
-                    Logger.d("TRACE", "Error info:" + msg.getThrowable().toString());
+                    Logger.d("Error info:" + msg.getThrowable().toString());
                     _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/

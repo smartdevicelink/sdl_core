@@ -344,7 +344,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-                Logger.i(TAG, "Using protocol version " + versionNumber);
+                Logger.i(TAG, " Using protocol version " + versionNumber);
                 String ipAddress = settings.getString(
                         Const.Transport.PREFS_KEY_TRANSPORT_IP,
                         Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
@@ -384,7 +384,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
 
-                mTestConfig.setProtocolVersion((byte) AppPreferencesManager.getProtocolVersion());
+                mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
+                mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources/*sync proxy configuration resources*/,
@@ -433,7 +434,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private int getCurrentProtocolVersion() {
-        return Const.PROTOCOL_VERSION_2;
+        return ProtocolConstants.PROTOCOL_VERSION_MIN;
     }
 
     private boolean getAutoSetAppIconFlag() {

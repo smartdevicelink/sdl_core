@@ -51,9 +51,14 @@ public class TestConfig {
     private boolean mDoKeepUSBTransportConnected = false;
 
     /**
-     * Version of the protocol
+     * Min version of the protocol
      */
-    private byte mProtocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+    private byte mProtocolMinVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+
+    /**
+     * Max version of the protocol
+     */
+    private byte mProtocolMaxVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
 
     /**
      * @return a value of the functionality: whether or not to use parameter
@@ -156,17 +161,32 @@ public class TestConfig {
     }
 
     /**
-     * @return protocol version
+     * @return protocol minimum version
      */
-    public byte getProtocolVersion() {
-        return mProtocolVersion;
+    public byte getProtocolMinVersion() {
+        return mProtocolMinVersion;
     }
 
     /**
-     * Set a version of the protocol
+     * Set a minimum version of the protocol
      * @param mProtocolVersion protocol version int value
      */
-    public void setProtocolVersion(byte mProtocolVersion) {
-        this.mProtocolVersion = mProtocolVersion;
+    public void setProtocolMinVersion(byte mProtocolVersion) {
+        this.mProtocolMinVersion = mProtocolVersion;
+    }
+
+    /**
+     * @return protocol maximum version
+     */
+    public byte getProtocolMaxVersion() {
+        return mProtocolMaxVersion;
+    }
+
+    /**
+     * Set a maximum version of the protocol
+     * @param mProtocolVersion protocol version int value
+     */
+    public void setProtocolMaxVersion(byte mProtocolVersion) {
+        this.mProtocolMaxVersion = mProtocolVersion;
     }
 }

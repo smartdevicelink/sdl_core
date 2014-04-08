@@ -35,7 +35,7 @@ public class ProtocolMessageConverter {
             _data = _protocolMsg.getData();
             return this;
         }
-        if (mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (_protocolMsg.getBulkData() != null) {
                 _data = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize() +
                         _protocolMsg.getBulkData().length];
