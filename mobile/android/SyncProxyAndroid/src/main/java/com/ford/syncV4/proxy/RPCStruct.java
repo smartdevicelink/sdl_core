@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 
 public class RPCStruct {
 
@@ -45,7 +46,7 @@ public class RPCStruct {
     }
 
     public JSONObject serializeJSON(byte version) throws JSONException {
-        if (version == 2) {
+        if (version >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             String messageType = getMessageTypeName(store.keySet());
             Hashtable function = (Hashtable) store.get(messageType);
             Hashtable parameters = (Hashtable) function.get(Names.parameters);

@@ -313,7 +313,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
             if (notification.method == this.onStatusUpdateNotification) {
 
-                SDL.PopUp.popupActivate(notification.params.status);
+                SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
             if (notification.method == this.onAppPermissionChangedNotification) {
@@ -399,7 +399,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
-if (request.method == "BasicCommunication.GetSystemInfo") {
+                if (request.method == "BasicCommunication.GetSystemInfo") {
 
                     Em.Logger.log("BasicCommunication.GetSystemInfo Response");
 
