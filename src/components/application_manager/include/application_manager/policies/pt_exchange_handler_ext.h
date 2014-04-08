@@ -39,9 +39,12 @@
 namespace policy {
 class PTExchangeHandlerExt : public PTExchangeHandler {
  public:
-  PTExchangeHandlerExt(PolicyHandler* hanlder);
+  PTExchangeHandlerExt(PolicyHandler* policy_handler);
   ~PTExchangeHandlerExt();
   virtual bool StartExchange();
+ private:
+  static log4cxx::LoggerPtr logger_;
+  PolicyHandler* policy_handler_;
 };
 }  //  namespace policy
 
