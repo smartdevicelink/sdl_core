@@ -64,6 +64,11 @@ const uint8_t PROTOCOL_VERSION_1 = 0x01;
 const uint8_t PROTOCOL_VERSION_2 = 0x02;
 
 /**
+ *\brief Constant: number of protocol version (3).
+ */
+const uint8_t PROTOCOL_VERSION_3 = 0x03;
+
+/**
  *\brief Constant: flag of no compression
  */
 const bool COMPRESS_OFF = false;
