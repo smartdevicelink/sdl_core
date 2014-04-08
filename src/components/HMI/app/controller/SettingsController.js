@@ -38,6 +38,12 @@ SDL.SettingsController = Em.Object.create( {
     hiddenLeftMenu: false,
 
     /**
+     * File name for SDL.OnSystemRequest
+     * Came in SDL.PolicyUpdate request
+     */
+    policyUpdateFile: null,
+
+    /**
      * Data of current requested devices which access will be allowed or disallowed.
      */
     currentDeviceAllowance: null,
