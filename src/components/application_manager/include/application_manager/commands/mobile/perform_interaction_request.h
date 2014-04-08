@@ -113,14 +113,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   (const smart_objects::SmartObject& message);
 
   /*
-   * @brief Sends VRDeleteCommand request to HMI
-   *
-   * @param app_id Application ID
-   *
-   */
-  void SendVrDeleteCommand(ApplicationSharedPtr app);
-
-  /*
    * @brief Sends PerformInteraction response to mobile side
    *
    * @param message which should send to mobile side
