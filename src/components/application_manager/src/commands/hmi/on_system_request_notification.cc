@@ -30,10 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_system_request_notification.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/hmi/on_system_request_notification.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/macro.h"
+
+using policy::PolicyHandler;
 
 namespace application_manager {
 
@@ -50,25 +54,34 @@ OnSystemRequestNotification::~OnSystemRequestNotification() {
 void OnSystemRequestNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemRequestNotification::Run");
 
-  (*message_)[strings::params][strings::function_id] =
+  smart_objects::SmartObject& params = (*message_)[strings::params];
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+
+  params[strings::function_id] =
           static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
-  std::string app_id = (*message_)[strings::msg_params][strings::app_id].asString();
+  std::string app_id = msg_params[strings::app_id].asString();
 
-  if (0 == app_id.compare(strings::default_app_id)) {
-    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-    const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
-    std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
-    for (; app_list.end() != it; ++it) {
-      (*message_)[strings::params][strings::connection_key] =
-          static_cast<int32_t>((*it)->app_id());
-      SendNotificationToMobile(message_);
+  if (strings::default_app_id == app_id) {
+    PolicyHandler* policy_handler = PolicyHandler::instance();
+    int32_t selected_app_id = policy_handler->GetAppIdForSending();
+    if (0 == selected_app_id) {
+      LOG4CXX_WARN(logger_,
+            "Can't select application to forward OnSystemRequestNotification");
+      return;
     }
+    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+    ApplicationSharedPtr selected_app = app_mgr->application(selected_app_id);
+    if(!selected_app.valid()) {
+      LOG4CXX_ERROR(logger_, "PolicyHandler selected invalid app_id");
+      return;
+    }
+    params[strings::connection_key] = static_cast<int32_t>(selected_app_id);
   } else {
-    (*message_)[strings::params][strings::connection_key] =
-        (*message_)[strings::msg_params][strings::app_id];
-    SendNotificationToMobile(message_);
+    params[strings::connection_key] = app_id;
   }
+
+  SendNotificationToMobile(message_);
 }
 
 }  // namespace commands
