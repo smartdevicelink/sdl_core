@@ -169,7 +169,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-    ->set_output_file(relative_file_path);
+    ->set_output_file(file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
     ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
