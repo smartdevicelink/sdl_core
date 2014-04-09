@@ -55,7 +55,6 @@ void Extract(utils::BitStream* bs, ProtocolPayloadHeaderV2* headerv2) {
     utils::Extract(bs, &rpc_type, kRpcTypeBits);
     headerv2->rpc_type = RpcTypeFromByte(rpc_type);
     if (headerv2->rpc_type == kRpcTypeReserved) {
-      printf("&&&&&&&");
       bs->MarkBad();
       return;
     }

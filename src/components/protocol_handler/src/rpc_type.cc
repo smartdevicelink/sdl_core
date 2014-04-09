@@ -56,10 +56,9 @@ RpcType RpcTypeFromByte(uint8_t byte) {
   RpcType type = RpcType(byte);
   bool supported_type = IsSupported(type);
   if (!supported_type) {
-    LOG4CXX_INFO(g_logger, "Invalid service type RPCfromByte: "<<int32_t(byte));
+    LOG4CXX_INFO(g_logger, "Invalid service type: "<<int32_t(byte));
   }
 
-  LOG4CXX_INFO(g_logger, "Service type RPCfromByte: "<<int32_t(byte));
   return supported_type ? type : kRpcTypeReserved;
 }
 
