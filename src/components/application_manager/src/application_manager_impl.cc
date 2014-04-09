@@ -685,8 +685,6 @@ void ApplicationManagerImpl::OnMessageReceived(
     return;
   }
 
-  LOG4CXX_INFO(logger_, "RawMessagePtr service type" << message->service_type());
-
   utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
 
   if (outgoing_message) {
@@ -910,29 +908,25 @@ void ApplicationManagerImpl::SendMessageToMobile(
     return;
   }
 
-  LOG4CXX_INFO(
-      logger_,
-      "Connection key: " <<  (*message)[strings::params][strings::connection_key].asUInt());
-
   ApplicationSharedPtr app = application(
                  (*message)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
      LOG4CXX_ERROR_EXT(logger_,
                        "No application associated with connection key");
-     (*message)[strings::params][strings::protocol_version] =
-         ProtocolVersion::kV3;
-     return;
+     if ((*message)[strings::msg_params].keyExists(strings::result_code) &&
+         ((*message)[strings::msg_params][strings::result_code] ==
+             NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION)) {
+       (*message)[strings::params][strings::protocol_version] =
+                        ProtocolVersion::kV1;
+     } else {
+       (*message)[strings::params][strings::protocol_version] =
+                ProtocolVersion::kV3;
+     }
    } else {
-     LOG4CXX_INFO(logger_,
-           "Protocol version: " <<  app->protocol_version());
-
      (*message)[strings::params][strings::protocol_version] =
            app->protocol_version();
    }
-
-  (*message)[strings::params][strings::protocol_version] =
-      app->protocol_version();
 
   mobile_so_factory().attachSchema(*message);
   LOG4CXX_INFO(
@@ -1245,6 +1239,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
       output[strings::params][strings::connection_key] =
         message.connection_key();
+      output[strings::params][strings::protocol_version] =
+              message.protocol_version();
       if (message.binary_data()) {
         output[strings::params][strings::binary_data] =
           *(message.binary_data());
