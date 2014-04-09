@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/qnx/usb_iap_connection.h"
+#include "transport_manager/mme/iap_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -42,7 +42,7 @@ const char* protocol_name = "com.qnx.eaf";  // TODO(nvaganov@luxoft.com) choose 
 
 }  // anonimous namespace
 
-UsbIAPConnection::UsbIAPConnection(const DeviceUID& device_uid,
+IAPConnection::IAPConnection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
   TransportAdapterController* controller,
   const char* device_path) : device_uid_(device_uid),
@@ -52,7 +52,7 @@ UsbIAPConnection::UsbIAPConnection(const DeviceUID& device_uid,
   session_id_(-1) {
 }
 
-UsbIAPConnection::~UsbIAPConnection() {
+IAPConnection::~IAPConnection() {
 // we cannot stop this thread from Disconnect()
 // because we need it to receive IPOD_EAF_EVENT_SESSION_CLOSE event
 // we cannot stop this thread from OnSessionClosed()
@@ -60,7 +60,7 @@ UsbIAPConnection::~UsbIAPConnection() {
   receiver_thread_->stop();
 }
 
-bool UsbIAPConnection::Init() {
+bool IAPConnection::Init() {
   LOG4CXX_TRACE(logger_, "iAP: connecting to " << device_path_);
   ipod_hdl_ = ipod_connect(device_path_.c_str(), 0);
   if (ipod_hdl_ != 0) {
@@ -78,7 +78,7 @@ bool UsbIAPConnection::Init() {
   return true;
 }
 
-TransportAdapter::Error UsbIAPConnection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
   LOG4CXX_TRACE(logger_, "USB iAP: sending data");
   if (ipod_eaf_send(ipod_hdl_, session_id_, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "USB iAP: data sent successfully");
@@ -92,7 +92,7 @@ TransportAdapter::Error UsbIAPConnection::SendData(RawMessageSptr message) {
   }
 }
 
-TransportAdapter::Error UsbIAPConnection::Disconnect() {
+TransportAdapter::Error IAPConnection::Disconnect() {
   if (ipod_eaf_session_free(ipod_hdl_, session_id_) != -1) {
     return TransportAdapter::OK;
   }
@@ -101,20 +101,20 @@ TransportAdapter::Error UsbIAPConnection::Disconnect() {
   }
 }
 
-void UsbIAPConnection::OnDataReceived(RawMessageSptr message) {
+void IAPConnection::OnDataReceived(RawMessageSptr message) {
   controller_->DataReceiveDone(device_uid_, app_handle_, message);
 }
 
-void UsbIAPConnection::OnReceiveFailed() {
+void IAPConnection::OnReceiveFailed() {
   controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
 }
 
-void UsbIAPConnection::OnSessionOpened(int session_id) {
+void IAPConnection::OnSessionOpened(int session_id) {
   session_id_ = session_id;
   controller_->ConnectDone(device_uid_, app_handle_);
 }
 
-void UsbIAPConnection::OnSessionClosed() {
+void IAPConnection::OnSessionClosed() {
   LOG4CXX_TRACE(logger_, "iAP: disconecting from " << device_path_);
   if (ipod_disconnect(ipod_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: disconnected from " << device_path_);
@@ -126,14 +126,14 @@ void UsbIAPConnection::OnSessionClosed() {
   controller_->DisconnectDone(device_uid_, app_handle_);
 }
 
-UsbIAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
-  ipod_hdl_t* ipod_hdl, UsbIAPConnection* parent) :
+IAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
+  ipod_hdl_t* ipod_hdl, IAPConnection* parent) :
   parent_(parent), ipod_hdl_(ipod_hdl), session_id_(-1) {
 
   ParseEvents(); // parse all events before subscribing to notifications
 }
 
-bool UsbIAPConnection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
+bool IAPConnection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
   LOG4CXX_TRACE(logger_, "Arming for USB iAP event notification");
   if (ipod_notify(ipod_hdl_,
     _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_OBAND | _NOTIFY_COND_INPUT, event) != -1) {
@@ -147,11 +147,11 @@ bool UsbIAPConnection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) 
   }
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::OnPulse() {
+void IAPConnection::ReceiverThreadDelegate::OnPulse() {
   ParseEvents();
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::ParseEvents() {
+void IAPConnection::ReceiverThreadDelegate::ParseEvents() {
   ssize_t nevents = ipod_eaf_getevents(ipod_hdl_, events_, kEventsBufferSize);
   for (ssize_t i = 0; i < nevents; ++i) {
     switch (events_[i].eventtype) {
@@ -171,7 +171,7 @@ void UsbIAPConnection::ReceiverThreadDelegate::ParseEvents() {
   }
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::AcceptSession(uint32_t protocol_id) {
+void IAPConnection::ReceiverThreadDelegate::AcceptSession(uint32_t protocol_id) {
   ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name_, kProtocolNameSize);
   LOG4CXX_INFO(logger_, "iAP: session request on protocol " << protocol_name_);
   if (0 == strcmp(protocol_name, protocol_name_)) {
@@ -185,14 +185,14 @@ void UsbIAPConnection::ReceiverThreadDelegate::AcceptSession(uint32_t protocol_i
   }
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::CloseSession(uint32_t session_id) {
+void IAPConnection::ReceiverThreadDelegate::CloseSession(uint32_t session_id) {
   if (session_id == session_id_) {
     LOG4CXX_INFO(logger_, "iAP: session on protocol " << protocol_name_ << " closed");
     parent_->OnSessionClosed();
   }
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::ReceiveData(uint32_t session_id) {
+void IAPConnection::ReceiverThreadDelegate::ReceiveData(uint32_t session_id) {
   if (session_id == session_id_) {
     LOG4CXX_TRACE(logger_, "USB iAP: receiving data on protocol " << protocol_name_);
     int size = ipod_eaf_recv(ipod_hdl_, session_id_, buffer_, kBufferSize);
@@ -208,7 +208,7 @@ void UsbIAPConnection::ReceiverThreadDelegate::ReceiveData(uint32_t session_id) 
   }
 }
 
-void UsbIAPConnection::ReceiverThreadDelegate::OpenSession(uint32_t protocol_id) {
+void IAPConnection::ReceiverThreadDelegate::OpenSession(uint32_t protocol_id) {
   LOG4CXX_TRACE(logger_, "iAP: opening session on protocol " << protocol_name_);
   session_id_ = ipod_eaf_session_open(ipod_hdl_, protocol_id);
   if (session_id_ != -1) {

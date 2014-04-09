@@ -30,78 +30,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_
 
-#include <ipod/ipod.h>
+#include <mme/mme.h>
 
 #include "utils/threads/thread.h"
 #include "utils/threads/pulse_thread_delegate.h"
 
-#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAPConnection : public Connection {
+class MmeDeviceScanner : public DeviceScanner {
  public:
-  UsbIAPConnection(const DeviceUID& device_uid,
-    const ApplicationHandle& app_handle,
-    TransportAdapterController* controller,
-    const char* device_path);
+  MmeDeviceScanner(TransportAdapterController* controller);
+  virtual ~MmeDeviceScanner();
 
-  ~UsbIAPConnection();
+  virtual TransportAdapter::Error Init();
+  virtual TransportAdapter::Error Scan();
+  virtual void Terminate();
+  virtual bool IsInitialised() const;
 
-  bool Init();
+private:
+  void OnDeviceArrived(uint64_t msid);
+  void OnDeviceLeft(uint64_t msid);
 
- protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
-  virtual TransportAdapter::Error Disconnect();
+  static const char* mme_name;
 
- private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
-  void OnSessionOpened(int session_id);
-  void OnSessionClosed();
+  bool initialised_;
+  mme_hdl_t* mme_hdl_;
+  utils::SharedPtr<threads::Thread> notify_thread_;
 
-  DeviceUID device_uid_;
-  ApplicationHandle app_handle_;
-  TransportAdapterController* controller_;
-  std::string device_path_;
-
-  ipod_hdl_t* ipod_hdl_;
-  int session_id_;
-
-  utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
+  class NotifyThreadDelegate : public threads::PulseThreadDelegate {
    public:
-    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, UsbIAPConnection* parent);
-    virtual bool ArmEvent(struct sigevent* event);
+    NotifyThreadDelegate(mme_hdl_t* mme_hdl, MmeDeviceScanner* parent);
+
+   protected:
+    virtual bool ArmEvent(sigevent* event);
     virtual void OnPulse();
 
    private:
-    static const size_t kBufferSize = 1024;
-    static const size_t kEventsBufferSize = 32;
-    static const int kProtocolNameSize = 256;
-
-    void ParseEvents();
-    void AcceptSession(uint32_t protocol_id);
-    void CloseSession(uint32_t session_id);
-    void ReceiveData(uint32_t session_id);
-    void OpenSession(uint32_t protocol_id);
-
-    UsbIAPConnection* parent_;
-    ipod_hdl_t* ipod_hdl_;
-    int session_id_;
-    uint8_t buffer_[kBufferSize];
-    ipod_eaf_event_t events_[kEventsBufferSize];
-    char protocol_name_[kProtocolNameSize];
+    MmeDeviceScanner* parent_;
+    mme_hdl_t* mme_hdl_;
   };
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_

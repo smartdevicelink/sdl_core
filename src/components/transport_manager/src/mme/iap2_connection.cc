@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/qnx/usb_iap2_connection.h"
+#include "transport_manager/mme/iap2_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-const char* UsbIAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
+const char* IAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
 
-UsbIAP2Connection::UsbIAP2Connection(const DeviceUID& device_uid,
+IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
   TransportAdapterController* controller,
   const char* device_path) : device_uid_(device_uid),
@@ -47,7 +47,7 @@ UsbIAP2Connection::UsbIAP2Connection(const DeviceUID& device_uid,
   device_path_(device_path) {
 }
 
-bool UsbIAP2Connection::Init() {
+bool IAP2Connection::Init() {
   LOG4CXX_TRACE(logger_, "USB iAP2: connecting to " << device_path_);
   iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);
   if (iap2_hdl_ != 0) {
@@ -76,7 +76,7 @@ bool UsbIAP2Connection::Init() {
   return true;
 }
 
-TransportAdapter::Error UsbIAP2Connection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
   LOG4CXX_TRACE(logger_, "USB iAP2: sending data");
   if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "USB iAP2: data sent successfully");
@@ -90,7 +90,7 @@ TransportAdapter::Error UsbIAP2Connection::SendData(RawMessageSptr message) {
   }
 }
 
-TransportAdapter::Error UsbIAP2Connection::Disconnect() {
+TransportAdapter::Error IAP2Connection::Disconnect() {
   TransportAdapter::Error error = TransportAdapter::OK;
 
   receiver_thread_->stop();
@@ -117,20 +117,20 @@ TransportAdapter::Error UsbIAP2Connection::Disconnect() {
   return error;
 }
 
-void UsbIAP2Connection::OnDataReceived(RawMessageSptr message) {
+void IAP2Connection::OnDataReceived(RawMessageSptr message) {
   controller_->DataReceiveDone(device_uid_, app_handle_, message);
 }
 
-void UsbIAP2Connection::OnReceiveFailed() {
+void IAP2Connection::OnReceiveFailed() {
   controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
 }
 
-UsbIAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl,
-  UsbIAP2Connection* parent) :
+IAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl,
+  IAP2Connection* parent) :
   parent_(parent), iap2ea_hdl_(iap2ea_hdl) {
 }
 
-bool UsbIAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
+bool IAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
   LOG4CXX_TRACE(logger_, "Arming for USB iAP2 input notification");
   int arm_result = iap2_eap_event_arm(iap2ea_hdl_, event);
   switch (arm_result) {
@@ -148,11 +148,11 @@ bool UsbIAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event)
   return false;
 }
 
-void UsbIAP2Connection::ReceiverThreadDelegate::OnPulse() {
+void IAP2Connection::ReceiverThreadDelegate::OnPulse() {
   ReceiveData();
 }
 
-void UsbIAP2Connection::ReceiverThreadDelegate::ReceiveData() {
+void IAP2Connection::ReceiverThreadDelegate::ReceiveData() {
   LOG4CXX_TRACE(logger_, "USB iAP2: receiving data");
   int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
   if (size != -1) {

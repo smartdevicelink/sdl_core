@@ -30,61 +30,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/usb/usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_
 
-#if defined(__QNXNTO__)
-#include "transport_manager/usb/qnx/usb_connection.h"
-#else
-#include "transport_manager/usb/libusb/usb_connection.h"
-#endif
+#include <iap2/iap2.h>
+
+#include "utils/threads/thread.h"
+#include "utils/threads/pulse_thread_delegate.h"
+
+#include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbConnectionFactory::UsbConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller), usb_handler_() {}
+class IAP2Connection : public Connection {
+ public:
+  IAP2Connection(const DeviceUID& device_uid,
+    const ApplicationHandle& app_handle,
+    TransportAdapterController* controller,
+    const char* device_path);
 
-TransportAdapter::Error UsbConnectionFactory::Init() {
-  return TransportAdapter::OK;
-}
+  bool Init();
 
-void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
-  usb_handler_ = usb_handler;
-}
+ protected:
+  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error Disconnect();
 
-TransportAdapter::Error UsbConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    return TransportAdapter::BAD_PARAM;
-  }
+ private:
+  void OnDataReceived(RawMessageSptr message);
+  void OnReceiveFailed();
 
-  UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection =
-    new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-      usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
+  DeviceUID device_uid_;
+  ApplicationHandle app_handle_;
+  TransportAdapterController* controller_;
+  std::string device_path_;
 
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  iap2_hdl_t* iap2_hdl_;
+  iap2ea_hdl_t* iap2ea_hdl_;
 
-  if (usb_connection->Init()) {
-    LOG4CXX_INFO(logger_, "USB connection initialised");
-    return TransportAdapter::OK;
-  }
-  else {
-    return TransportAdapter::FAIL;
-  }
-}
+  utils::SharedPtr<threads::Thread> receiver_thread_;
 
-void UsbConnectionFactory::Terminate() {}
+  static const char* protocol;
 
-bool UsbConnectionFactory::IsInitialised() const { return true; }
+  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
+   public:
+    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, IAP2Connection* parent);
 
-UsbConnectionFactory::~UsbConnectionFactory() {}
+   protected:
+    virtual bool ArmEvent(struct sigevent* event);
+    virtual void OnPulse();
+
+   private:
+    static const size_t kBufferSize = 1024;
+
+    void ReceiveData();
+
+    IAP2Connection* parent_;
+    iap2ea_hdl_t* iap2ea_hdl_;
+    uint8_t buffer_[kBufferSize];
+  };
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_

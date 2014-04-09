@@ -30,61 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/usb/usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-
-#if defined(__QNXNTO__)
-#include "transport_manager/usb/qnx/usb_connection.h"
-#else
-#include "transport_manager/usb/libusb/usb_connection.h"
-#endif
+#include "transport_manager/mme/mme_transport_adapter.h"
+#include "transport_manager/mme/mme_device_scanner.h"
+#include "transport_manager/mme/mme_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbConnectionFactory::UsbConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller), usb_handler_() {}
-
-TransportAdapter::Error UsbConnectionFactory::Init() {
-  return TransportAdapter::OK;
+MmeTransportAdapter::MmeTransportAdapter() : TransportAdapterImpl(new MmeDeviceScanner(this), new MmeConnectionFactory(this), 0), initialised_(false) {
 }
 
-void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
-  usb_handler_ = usb_handler;
+DeviceType MmeTransportAdapter::GetDeviceType() const {
+  return "sdl-mme";
 }
 
-TransportAdapter::Error UsbConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    return TransportAdapter::BAD_PARAM;
-  }
-
-  UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection =
-    new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-      usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
-
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-
-  if (usb_connection->Init()) {
-    LOG4CXX_INFO(logger_, "USB connection initialised");
-    return TransportAdapter::OK;
-  }
-  else {
-    return TransportAdapter::FAIL;
-  }
+bool MmeTransportAdapter::IsInitialised() const {
+  return initialised_;
 }
 
-void UsbConnectionFactory::Terminate() {}
-
-bool UsbConnectionFactory::IsInitialised() const { return true; }
-
-UsbConnectionFactory::~UsbConnectionFactory() {}
+TransportAdapter::Error MmeTransportAdapter::Init() {
+  TransportAdapter::Error error = TransportAdapterImpl::Init();
+  if (TransportAdapter::OK == error) {
+    initialised_ = true;
+  }
+  return error;
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

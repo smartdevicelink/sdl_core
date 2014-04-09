@@ -44,6 +44,10 @@
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif
 
+#ifdef MME_SUPPORT
+#include "transport_manager/mme/mme_transport_adapter.h"
+#endif
+
 
 namespace transport_manager {
 
@@ -59,6 +63,9 @@ int TransportManagerDefault::Init() {
   AddTransportAdapter(new transport_adapter::TcpTransportAdapter(kTcpAdapterPort));
 #ifdef USB_SUPPORT
   AddTransportAdapter(new transport_adapter::UsbAoaAdapter);
+#endif
+#ifdef MME_SUPPORT
+  AddTransportAdapter(new transport_adapter::MmeTransportAdapter());
 #endif
 
   return E_SUCCESS;

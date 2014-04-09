@@ -30,61 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/usb/usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_TRANSPORT_ADAPTER_H_
 
-#if defined(__QNXNTO__)
-#include "transport_manager/usb/qnx/usb_connection.h"
-#else
-#include "transport_manager/usb/libusb/usb_connection.h"
-#endif
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbConnectionFactory::UsbConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller), usb_handler_() {}
+class MmeTransportAdapter : public TransportAdapterImpl {
+ public:
+  MmeTransportAdapter();
 
-TransportAdapter::Error UsbConnectionFactory::Init() {
-  return TransportAdapter::OK;
-}
+ protected:
+  virtual DeviceType GetDeviceType() const;
+  virtual bool IsInitialised() const;
+  virtual TransportAdapter::Error Init();
 
-void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
-  usb_handler_ = usb_handler;
-}
-
-TransportAdapter::Error UsbConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    return TransportAdapter::BAD_PARAM;
-  }
-
-  UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection =
-    new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-      usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
-
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-
-  if (usb_connection->Init()) {
-    LOG4CXX_INFO(logger_, "USB connection initialised");
-    return TransportAdapter::OK;
-  }
-  else {
-    return TransportAdapter::FAIL;
-  }
-}
-
-void UsbConnectionFactory::Terminate() {}
-
-bool UsbConnectionFactory::IsInitialised() const { return true; }
-
-UsbConnectionFactory::~UsbConnectionFactory() {}
+ private:
+  bool initialised_;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_TRANSPORT_ADAPTER_H_

@@ -132,6 +132,10 @@ if (BUILD_BT_SUPPORT)
   add_definitions(-DBLUETOOTH_SUPPORT)
 endif()
 
+if (BUILD_MME_SUPPORT)
+  add_definitions(-DMME_SUPPORT)
+endif()
+
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
 # --- Check libavahi-common, libavahi-client availability

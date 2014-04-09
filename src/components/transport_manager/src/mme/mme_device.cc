@@ -30,67 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
-
-#include <iap2/iap2.h>
-
-#include "utils/threads/thread.h"
-#include "utils/threads/pulse_thread_delegate.h"
-
-#include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/mme/mme_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAP2Connection : public Connection {
- public:
-  UsbIAP2Connection(const DeviceUID& device_uid,
-    const ApplicationHandle& app_handle,
-    TransportAdapterController* controller,
-    const char* device_path);
+MmeDevice::MmeDevice(uint64_t msid, const std::string& mount_point, const std::string& name, const DeviceUID& unique_device_id) : Device(name, unique_device_id), msid_(msid), mount_point_(mount_point) {
+}
 
-  bool Init();
+bool MmeDevice::IsSameAs(const Device* other_device) const {
+  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
+  if (other_mme_device) {
+    return (other_mme_device->msid_ == msid_) && (other_mme_device->mount_point_ == mount_point_);
+  }
+  else {
+    return false;
+  }
+}
 
- protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
-  virtual TransportAdapter::Error Disconnect();
-
- private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
-
-  DeviceUID device_uid_;
-  ApplicationHandle app_handle_;
-  TransportAdapterController* controller_;
-  std::string device_path_;
-
-  iap2_hdl_t* iap2_hdl_;
-  iap2ea_hdl_t* iap2ea_hdl_;
-
-  utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  static const char* protocol;
-
-  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
-   public:
-    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
-    virtual bool ArmEvent(struct sigevent* event);
-    virtual void OnPulse();
-
-   private:
-    static const size_t kBufferSize = 1024;
-
-    void ReceiveData();
-
-    UsbIAP2Connection* parent_;
-    iap2ea_hdl_t* iap2ea_hdl_;
-    uint8_t buffer_[kBufferSize];
-  };
-};
+ApplicationList MmeDevice::GetApplicationList() const {
+  ApplicationList app_list;
+  app_list.push_back(1);
+  return app_list;
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
