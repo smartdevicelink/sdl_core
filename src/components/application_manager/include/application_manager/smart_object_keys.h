@@ -236,6 +236,7 @@ const char is_download_complete[] = "is_download_complete";
 const char hash_id[] = "hashID";
 const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
+const char image_type_supported[] = "imageTypeSupported";
 }  // namespace strings
 
 namespace mobile_notification {

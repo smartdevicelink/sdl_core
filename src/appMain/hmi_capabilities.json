@@ -134,7 +134,7 @@
 		"audioPassThruCapabilities":
 		{
 			"samplingRate"	: "44KHZ",
-			"bitsPerSample" : "8_BIT",
+			"bitsPerSample" : "RATE_8_BIT",
 			"audioType"		: "PCM"
 		},
 		"hmiZoneCapabilities":"FRONT",
