@@ -253,7 +253,7 @@
 #include "application_manager/commands/hmi/on_received_policy_update.h"
 #include "application_manager/commands/hmi/on_policy_update.h"
 #include "application_manager/commands/hmi/get_urls.h"
-//#include "application_manager/commands/hmi/get_urls_response.h"
+#include "application_manager/commands/hmi/get_urls_response.h"
 
 namespace application_manager {
 
@@ -324,7 +324,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::SDL_GetURLS: {
       if (is_response) {
-        //command.reset(new commands::GetUrlsResponse(message));
+        command.reset(new commands::GetUrlsResponse(message));
       } else {
         command.reset(new commands::GetUrls(message));
       }

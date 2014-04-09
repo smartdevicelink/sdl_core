@@ -77,11 +77,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void CheckAppPolicyState(const std::string& application_id);
 
   /**
-   * Starts proccess updating policy table
-   */
-  void StartPTExchange(bool skip_device_selection = false);
-
-  /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
    */
@@ -159,6 +154,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnGetStatusUpdate(const uint32_t correlation_id);
 
   /**
+      * @brief Get Urls for service
+      * @param
+      */
+
+
+    /**
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */
@@ -200,6 +201,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param kilometers value from odometer in kilometers
    */
   void PTExchangeAtOdometer(int kilometers);
+
+    /**
+     * Starts proccess updating policy table
+     */
+    void StartPTExchange(bool skip_device_selection = false);
 
  private:
   /**

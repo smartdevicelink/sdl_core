@@ -1235,7 +1235,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
     commands::CommandImpl::hmi_protocol_type_;
   (*message)[strings::params][strings::protocol_version] =
     commands::CommandImpl::protocol_version_;
-  (*message)[strings::params]["code"] = 0;
+  (*message)[strings::params][hmi_response::code] = 0;
 
   bool isSDLAllowed = permissions.isSDLAllowed;
   if (!isSDLAllowed) {
@@ -1341,7 +1341,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
   (*message)[strings::params][strings::correlation_id] = correlation_id;
-  (*message)[strings::params]["code"] = 0;
+  (*message)[strings::params][hmi_response::code] = 0;
 
   // If no any messages found - skip sending of "messages" param
   if (msg.empty()) {
@@ -1404,7 +1404,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
   (*message)[strings::params][strings::correlation_id] = correlation_id;
-  (*message)[strings::params]["code"] = 0;
+  (*message)[strings::params][hmi_response::code] = 0;
 
   const std::string allowed_functions = "allowedFunctions";
   (*message)[strings::msg_params][allowed_functions] =
@@ -1874,7 +1874,7 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
   (*message)[strings::params][strings::message_type] =
     MessageType::kResponse;
   (*message)[strings::params][strings::correlation_id] = correlation_id;
-  (*message)[strings::params]["code"] = 0;
+  (*message)[strings::params][hmi_response::code] = 0;
 
   (*message)[strings::msg_params]["status"] = status;
 

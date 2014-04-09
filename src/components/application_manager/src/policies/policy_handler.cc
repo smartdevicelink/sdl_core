@@ -299,12 +299,12 @@ void PolicyHandler::OnUpdateStatusChanged(PolicyTableStatus status) {
 }
 
 void PolicyHandler::OnCurrentDeviceIdUpdateRequired(
-    const std::string& policy_app_id) {
+  const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnCurrentDeviceIdUpdateRequired");
   // TODO(AOleynik): Get registered device info from SDL
   application_manager::ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application_by_policy_id(policy_app_id);
+    application_manager::ApplicationManagerImpl::instance()
+    ->application_by_policy_id(policy_app_id);
 
   if (!app.valid()) {
     LOG4CXX_WARN(logger_, "Application with id '" << policy_app_id << "' "
@@ -314,7 +314,7 @@ void PolicyHandler::OnCurrentDeviceIdUpdateRequired(
   }
   DeviceParams device_param;
   application_manager::MessageHelper::GetDeviceInfoForApp(app->app_id(),
-                                                          &device_param);
+      &device_param);
   policy_manager_->UpdateCurrentDeviceId(device_param.device_mac_address);
 }
 
@@ -390,22 +390,22 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   uint32_t app_id = last_used_app_ids_.back();
   if (policy_manager_) {
     application_manager::ApplicationSharedPtr app =
-        application_manager::ApplicationManagerImpl::instance()
-        ->application(app_id);
+      application_manager::ApplicationManagerImpl::instance()
+      ->application(app_id);
 
     if (!app.valid()) {
       LOG4CXX_WARN(logger_, "There is no registered application with "
-                   "connection key '"<<app_id<<"'");
+                   "connection key '" << app_id << "'");
       return false;
     }
 
     const std::string& mobile_app_id = app->mobile_app_id()->asString();
     if (!mobile_app_id.empty()) {
-      LOG4CXX_WARN(logger_, "Application with connection key '" <<app_id<<"'"
+      LOG4CXX_WARN(logger_, "Application with connection key '" << app_id << "'"
                    " has no application id.");
       return false;
     }
-    url = policy_manager_->GetUpdateUrl(mobile_app_id);
+    url = policy_manager_->GetUpdateUrl(PolicyServiceTypes::POLICY);
   }
   LOG4CXX_INFO(
     logger_,

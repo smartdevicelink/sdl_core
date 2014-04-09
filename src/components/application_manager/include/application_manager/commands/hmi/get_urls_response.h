@@ -30,47 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/get_urls.h"
-#include "application_manager/message.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_to_hmi.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message)
-  : RequestFromHMI(message) {
-}
+class GetUrlsResponse : public ResponseToHMI {
+  public:
+    /**
+     * @brief GetUrlsResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit GetUrlsResponse(const MessageSharedPtr& message);
 
-GetUrls::~GetUrls() {
-}
+    /**
+     * @brief GetUrlsResponse class destructor
+     **/
+    virtual ~GetUrlsResponse();
 
-void GetUrls::Run() {
-  LOG4CXX_INFO(logger_, "GetUrls::Run");
-  policy::PolicyManager* manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  smart_objects::SmartObject& object = *message_;
-  object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (manager) {
-    policy::EndpointUrls endpoints =
-      manager->GetUpdateUrls(
-        object[strings::msg_params][hmi_request::service].asInt());
-    object[strings::msg_params].erase(hmi_request::service);
-    object[strings::msg_params][hmi_response::urls] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < endpoints.size(); ++i) {
-      object[strings::msg_params][hmi_response::urls][i][strings::url] = endpoints[i].url;
-      if ("default" != endpoints[i].app_id) {
-        object[strings::msg_params][hmi_response::urls][i][hmi_response::policy_app_id] =
-          endpoints[i].app_id;
-      }
-    }
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  } else {
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
-  }
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
-}
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(GetUrlsResponse);
+};
 
 }  // namespace commands
 }  // namespace application_manager
+
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_URLS_RESPONSE_H_

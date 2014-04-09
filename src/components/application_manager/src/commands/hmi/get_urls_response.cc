@@ -30,46 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/get_urls.h"
-#include "application_manager/message.h"
+#include "application_manager/commands/hmi/get_urls_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message)
-  : RequestFromHMI(message) {
+GetUrlsResponse::GetUrlsResponse(
+  const MessageSharedPtr& message): ResponseToHMI(message) {
 }
 
-GetUrls::~GetUrls() {
+GetUrlsResponse::~GetUrlsResponse() {
 }
 
-void GetUrls::Run() {
-  LOG4CXX_INFO(logger_, "GetUrls::Run");
-  policy::PolicyManager* manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  smart_objects::SmartObject& object = *message_;
-  object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (manager) {
-    policy::EndpointUrls endpoints =
-      manager->GetUpdateUrls(
-        object[strings::msg_params][hmi_request::service].asInt());
-    object[strings::msg_params].erase(hmi_request::service);
-    object[strings::msg_params][hmi_response::urls] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < endpoints.size(); ++i) {
-      object[strings::msg_params][hmi_response::urls][i][strings::url] = endpoints[i].url;
-      if ("default" != endpoints[i].app_id) {
-        object[strings::msg_params][hmi_response::urls][i][hmi_response::policy_app_id] =
-          endpoints[i].app_id;
-      }
-    }
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
-  } else {
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
-  }
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+void GetUrlsResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetUrlsResponse::Run");
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands
