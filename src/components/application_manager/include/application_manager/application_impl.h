@@ -81,7 +81,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
   void set_tts_speak_state(bool state_tts_speak);
-  bool tts_speak_state();
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
@@ -102,8 +101,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool DeleteFile(const std::string& file_name);
   virtual const AppFilesMap& getAppFiles() const;
-
-  virtual const AppFile* GetFile(const std::string& file_name);
 
   bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name);
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);

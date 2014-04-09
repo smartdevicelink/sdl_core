@@ -112,47 +112,4 @@ public class RegisterAppInterfaceTest extends TestCase {
         registerAppInterface.setHashID(null);
         assertNull(registerAppInterface.getHashID());
     }
-
-    public void testSetLegalDeviceInfo() {
-        DeviceInfo deviceInfo = DeviceInfoTest.getDeviceInfo();
-
-        RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-        registerAppInterface.setDeviceInfo(deviceInfo);
-        assertEquals(registerAppInterface.getDeviceInfo(), deviceInfo);
-    }
-
-    public void testSetLegalDeviceInfo_WithConstructor() throws JSONException {
-        DeviceInfo deviceInfo = DeviceInfoTest.getDeviceInfo();
-
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Names.deviceInfo, deviceInfo);
-
-        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
-                JsonRPCMarshaller.deserializeJSONObject(
-                        TestCommon.paramsToRequestObject(jsonObject)));
-
-        assertEquals(registerAppInterface.getDeviceInfo(), deviceInfo);
-    }
-
-    public void testRemoveDeviceInfo() {
-        DeviceInfo deviceInfo = DeviceInfoTest.getDeviceInfo();
-
-        RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-        registerAppInterface.setDeviceInfo(deviceInfo);
-        assertEquals(registerAppInterface.getDeviceInfo(), deviceInfo);
-
-        registerAppInterface.setDeviceInfo(null);
-        assertNull(registerAppInterface.getDeviceInfo());
-    }
-
-    public void testSetIllegalDeviceInfo_WithConstructor() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(Names.deviceInfo, 1234567890);
-
-        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
-                JsonRPCMarshaller.deserializeJSONObject(
-                        TestCommon.paramsToRequestObject(jsonObject)));
-
-        assertNull(registerAppInterface.getDeviceInfo());
-    }
 }

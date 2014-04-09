@@ -19,19 +19,19 @@ import android.telephony.TelephonyManager;
 public class TraceDeviceInfo {
 	// http://developer.android.com/guide/topics/data/data-storage.html
 
-	private static TelephonyManager sTelephonyManager;
+	private static TelephonyManager m_telephonyManager;
 	
 	// Constructor
 	public TraceDeviceInfo(TelephonyManager telephonyManager) {
-		sTelephonyManager = telephonyManager;
+		m_telephonyManager = telephonyManager;
 	}
 
 	public static void setTelephonyManager(TelephonyManager telephonyManager) {
-		sTelephonyManager = telephonyManager;
+		m_telephonyManager = telephonyManager;
 	}
 
 	public static TelephonyManager getTelephonyManager() {
-		return sTelephonyManager;
+		return m_telephonyManager;
 	}
 
 	// package scoped
@@ -39,15 +39,15 @@ public class TraceDeviceInfo {
 		// Telephony manager can tell us a few things...
 		String info = "";
 
-		if (sTelephonyManager != null) {
+		if (m_telephonyManager != null) {
 			try { // getDeviceId() requires android.permission.READ_PHONE_STATE
-				info = "<deviceid>" + sTelephonyManager.getDeviceId() + "</deviceid>";
+				info = "<deviceid>" + m_telephonyManager.getDeviceId() + "</deviceid>";
 			} catch (Exception e1) {
 				DebugTool.logError("Failure getting telephony device ID: " + e1.toString(), e1);
 			}
 	
 			info = "<pt>";
-			switch (sTelephonyManager.getPhoneType()) {
+			switch (m_telephonyManager.getPhoneType()) {
 				case TelephonyManager.PHONE_TYPE_NONE:
 					info += "NONE";
 					break;
@@ -63,7 +63,7 @@ public class TraceDeviceInfo {
 	
 			info += "</pt>" + "<nt>";
 	
-			switch (sTelephonyManager.getNetworkType()) {
+			switch (m_telephonyManager.getNetworkType()) {
 				case TelephonyManager.NETWORK_TYPE_UNKNOWN:
 					info += "UKNOWN";
 					break;

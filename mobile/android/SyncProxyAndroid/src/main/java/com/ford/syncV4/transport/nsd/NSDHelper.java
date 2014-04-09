@@ -140,8 +140,6 @@ public class NSDHelper {
     }
 
     public void registerService(int port) {
-        Log.d(TAG, "Register Service, port:" + port + ", name:" + mServiceName + ", " +
-                "type:" + SERVICE_TYPE);
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
         serviceInfo.setServiceName(mServiceName);

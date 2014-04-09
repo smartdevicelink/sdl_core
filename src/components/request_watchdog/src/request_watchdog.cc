@@ -46,10 +46,8 @@ using namespace sync_primitives;
 
 const int32_t RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
-#ifdef ENABLE_LOG
 log4cxx::LoggerPtr RequestWatchdog::logger_ =
   log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
-#endif // ENABLE_LOG
 /*
 Watchdog* RequestWatchdog::instance() {
   static RequestWatchdog instnc;

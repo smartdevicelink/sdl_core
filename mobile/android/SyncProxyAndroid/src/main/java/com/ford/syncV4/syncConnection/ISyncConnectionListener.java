@@ -5,12 +5,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
 
 public interface ISyncConnectionListener {
-
-    /**
-     * Calling this method indicates that the connection via selected transport is established
-     */
-    public void onTransportConnected();
-
 	public void onTransportDisconnected(String info);
 	
 	public void onTransportError(String info, Exception e);

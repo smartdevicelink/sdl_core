@@ -19,7 +19,7 @@ import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.TestConfig;
 
 import org.hamcrest.CoreMatchers;
 import org.json.JSONException;

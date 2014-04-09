@@ -148,7 +148,7 @@ void Close(std::ofstream* file_stream);
 
 /**
   * @brief Returns full file path
-  * If filename begins with "/", return unchanged filename
+  *
   * @param name file name
   * @return returns full file path.
   */

@@ -44,10 +44,6 @@
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr HMICapabilities::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("HMICapabilities"));
-#endif
 std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
 {
     {"EN_US", hmi_apis::Common_Language::EN_US},
@@ -234,23 +230,20 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     app_mngr_(app_mngr),
     prerecorded_speech_(NULL) {
 
-  if (false == load_capabilities_from_file()) {
-    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
-  } else {
-    LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
-  }
   if (false == profile::Profile::instance()->launch_hmi()) {
-    is_vr_ready_response_recieved_ = true;
-    is_tts_ready_response_recieved_ = true;
-    is_ui_ready_response_recieved_ = true;
-    is_navi_ready_response_recieved_ = true;
-    is_ivi_ready_response_recieved_ = true;
+    if (load_capabilities_from_file()) {
+      is_vr_ready_response_recieved_ = true;
+      is_tts_ready_response_recieved_ = true;
+      is_ui_ready_response_recieved_ = true;
+      is_navi_ready_response_recieved_ = true;
+      is_ivi_ready_response_recieved_ = true;
 
-    is_vr_cooperating_ = true;
-    is_tts_cooperating_ = true;
-    is_ui_cooperating_ = true;
-    is_navi_cooperating_ = true;
-    is_ivi_cooperating_ = true;
+      is_vr_cooperating_ = true;
+      is_tts_cooperating_ = true;
+      is_ui_cooperating_ = true;
+      is_navi_cooperating_ = true;
+      is_ivi_cooperating_ = true;
+    }
   }
 }
 

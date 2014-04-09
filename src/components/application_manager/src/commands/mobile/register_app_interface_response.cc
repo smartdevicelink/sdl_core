@@ -62,6 +62,8 @@ void RegisterAppInterfaceResponse::Run() {
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(
             (*message_)[strings::params][strings::connection_key].asInt());
+
+    MessageHelper::SendHMIStatusNotification(*application);
     MessageHelper::SendChangeRegistrationRequestToHMI(application);
   }
 }

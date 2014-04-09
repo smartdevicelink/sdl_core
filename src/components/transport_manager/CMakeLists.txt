@@ -45,7 +45,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   list (APPEND SOURCES
-    ./src/usb/usb_adapter.cc
+    ./src/usb/usb_aoa_adapter.cc
     ./src/usb/usb_connection_factory.cc
     ./src/usb/usb_device_scanner.cc
   )

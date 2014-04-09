@@ -48,8 +48,7 @@ ListFilesResponse::~ListFilesResponse() {
 
 void ListFilesResponse::Run() {
   LOG4CXX_INFO(logger_, "ListFilesResponse::Run");
-
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  SendResponse(true);
 }
 
 }  // namespace commands

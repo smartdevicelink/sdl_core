@@ -156,13 +156,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
       const std::string &newItem_;
     };
 
-  /**
-   * @brief Check request parameters against policy table data
-   * @return SUCCESS if check ok, otherwise return appropriate error code
-   */
-  mobile_apis::Result::eType CheckWithPolicyData();
-
-  std::string response_info_;
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };

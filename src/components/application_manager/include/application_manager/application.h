@@ -55,10 +55,8 @@ typedef int32_t ErrorCode;
 
 enum APIVersion {
   kUnknownAPI = -1,
-  kAPIV0 = 0,
   kAPIV1 = 1,
-  kAPIV2 = 2,
-  kAPIV3 = 3
+  kAPIV2 = 2
 };
 
 struct Version {
@@ -147,8 +145,6 @@ class DynamicApplicationData {
     virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const = 0;
     virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
     virtual const smart_objects::SmartObject* keyboard_props() const = 0;
-    virtual const smart_objects::SmartObject* menu_title() const = 0;
-    virtual const smart_objects::SmartObject* menu_icon() const = 0;
 
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
@@ -166,10 +162,7 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& tbt_show) = 0;
     virtual void set_keyboard_props(
         const smart_objects::SmartObject& keyboard_props) = 0;
-    virtual void set_menu_title(
-        const smart_objects::SmartObject& menu_title) = 0;
-    virtual void set_menu_icon(
-        const smart_objects::SmartObject& menu_icon) = 0;
+
     /*
      * @brief Adds a command to the in application menu
      */
@@ -400,7 +393,6 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
     virtual void set_tts_speak_state(bool state_tts_speak) = 0;
-    virtual bool tts_speak_state() = 0;
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
@@ -428,7 +420,6 @@ class Application : public virtual InitialApplicationData,
      */
     virtual bool UpdateFile(AppFile& file) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
-    virtual const AppFile* GetFile(const std::string& file_name) = 0;
 
     virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;
     virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;

@@ -151,7 +151,7 @@ SDL.SDLAppController = Em.Object.create({
 
         SDL.SDLAppController.onSubMenu('top');
         SDL.SDLAppController.model.set('tbtActivate', false);
-        this.set('model', null);
+        this.model = null;
     },
 
     /**

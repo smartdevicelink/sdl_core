@@ -157,9 +157,7 @@ class ThreadedSocketConnection : public Connection {
   const ApplicationHandle app_handle_;
 };
 
-#ifdef ENABLE_LOG
 extern log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

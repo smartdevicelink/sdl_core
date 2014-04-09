@@ -113,9 +113,7 @@ class HMIMessageHandlerImpl
   // Thread that pumps messages being passed to hmi.
   impl::ToHmiQueue messages_to_hmi_;
 
-#ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
   DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerImpl);
 

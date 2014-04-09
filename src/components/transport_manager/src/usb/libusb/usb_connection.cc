@@ -105,7 +105,7 @@ bool UsbConnection::PostInTransfer() {
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    if (LOG4CXX_IS_TRACE_ENABLED(logger_)) {
+    if (logger_->isTraceEnabled()) {
       std::ostringstream hexdata;
       for (int i = 0; i < transfer->actual_length; ++i) {
         hexdata << " " << std::hex << std::setw(2) << std::setfill('0')

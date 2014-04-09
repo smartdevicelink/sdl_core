@@ -10,14 +10,11 @@ include_directories (
   ../config_profile/include/
   ../request_watchdog/include/
   ../transport_manager/include/
-  ../resumption/include/
-  ../rpc_base/include/
+  ../policies/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/
-  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
 )
 
 set (SOURCES
@@ -35,21 +32,8 @@ set (SOURCES
 )
 
 set (POLICIES_MANAGER
-./src/policies/policy_handler.cc
-./src/policies/policy_event_observer.cc
-./src/policies/policy_retry_sequence.cc
-./src/policies/pt_exchange_handler.cc
+./src/policies_manager/policies_manager.cc
 )
-
-if (EXTENDED_POLICY_FLAG)
-  list(APPEND POLICIES_MANAGER
-    ./src/policies/pt_exchange_handler_ext.cc
-  )
-else ()
-  list(APPEND POLICIES_MANAGER
-    ./src/policies/pt_exchange_handler_impl.cc
-  )
-endif ()
 
 set (EVENT_ENGINE
 ./src/event_engine/event.cc
@@ -69,8 +53,6 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/add_sub_menu_response.cc
 ./src/commands/mobile/alert_request.cc
 ./src/commands/mobile/alert_response.cc
-./src/commands/mobile/alert_maneuver_request.cc
-./src/commands/mobile/alert_maneuver_response.cc
 ./src/commands/mobile/change_registration_request.cc
 ./src/commands/mobile/change_registration_response.cc
 ./src/commands/mobile/create_interaction_choice_set_request.cc
@@ -165,20 +147,14 @@ set (MOBILE_COMMANDS_SOURCES
 set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/request_to_hmi.cc
 ./src/commands/hmi/response_from_hmi.cc
-./src/commands/hmi/request_from_hmi.cc
-./src/commands/hmi/response_to_hmi.cc
 ./src/commands/hmi/notification_to_hmi.cc
 ./src/commands/hmi/notification_from_hmi.cc
 ./src/commands/hmi/allow_all_apps_request.cc
 ./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/allow_app_request.cc
 ./src/commands/hmi/allow_app_response.cc
-./src/commands/hmi/update_sdl_request.cc
-./src/commands/hmi/update_sdl_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
-./src/commands/hmi/sdl_activate_app_response.cc
-./src/commands/hmi/sdl_activate_app_request.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
 ./src/commands/hmi/update_app_list_request.cc
@@ -186,7 +162,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/update_device_list_request.cc
 ./src/commands/hmi/update_device_list_response.cc
-./src/commands/hmi/on_sdl_consent_needed_notification.cc
 ./src/commands/hmi/on_exit_all_applications_notification.cc
 ./src/commands/hmi/on_exit_application_notification.cc
 ./src/commands/hmi/on_start_device_discovery.cc
@@ -279,8 +254,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
-./src/commands/hmi/navi_alert_maneuver_request.cc
-./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_update_turn_list_request.cc
 ./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
@@ -289,13 +262,9 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
 ./src/commands/hmi/on_update_device_list.cc
-./src/commands/hmi/on_allow_sdl_functionality_notification.cc
 ./src/commands/hmi/on_app_registered_notification.cc
-./src/commands/hmi/on_app_permission_changed_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
-./src/commands/hmi/on_ignition_cycle_over_notification.cc
-./src/commands/hmi/on_file_removed_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_tts_started_notification.cc
 ./src/commands/hmi/on_tts_stopped_notification.cc
@@ -324,11 +293,9 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_stop_stream_request.cc
 ./src/commands/hmi/audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
-./src/commands/hmi/on_put_file_notification.cc
 ./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
-./src/commands/hmi/on_record_start_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -372,8 +339,5 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
-
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
 target_link_libraries ("ApplicationManager" log4cxx)
-
-#ADD_DEPENDENCIES("ApplicationManager" Policy)

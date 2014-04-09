@@ -9,7 +9,8 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.TestConfig;
 
 public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	
@@ -288,7 +289,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId(), getDeviceInfo());
+                getHashId());
 	}
 	
 	/**

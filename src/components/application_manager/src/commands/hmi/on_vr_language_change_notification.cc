@@ -72,7 +72,8 @@ void OnVRLanguageChangeNotification::Run() {
     ApplicationSharedPtr app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
-    if (static_cast<int32_t>(app->language())
+    int32_t lang = static_cast<int32_t>(app->language());
+    if (lang
         != (*message_)[strings::msg_params][strings::language].asInt()) {
       app->set_hmi_level(mobile_api::HMILevel::HMI_NONE);
 

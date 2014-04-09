@@ -162,26 +162,6 @@ var StateManager = Em.StateManager.extend({
     /** settings state */
     settings: Em.State.create({
 
-        exit: function () {
-
-            SDL.SettingsController.set('activeState', SDL.States.currentState.get('path'));
-            this._super();
-        },
-
-        policies: Em.State.create({
-            statisticsInfo: Em.State.create({
-
-            }),
-
-            deviceConfig: Em.State.create({
-
-                enter: function () {
-
-                    this._super();
-                    SDL.DeviceConfigView.showDeviceList();
-                }
-            })
-        })
     }),
 
     /** Media state */
@@ -207,7 +187,6 @@ var StateManager = Em.StateManager.extend({
 
                 this._super();
 
-                SDL.SDLModel.stateLimited = SDL.SDLAppController.model.appID;
                 SDL.SDLAppController.deactivateApp();
             }
 
@@ -224,7 +203,6 @@ var StateManager = Em.StateManager.extend({
 
             this._super();
 
-            SDL.SDLModel.stateLimited = SDL.SDLAppController.model.appID;
             SDL.SDLAppController.deactivateApp();
         }
     }),

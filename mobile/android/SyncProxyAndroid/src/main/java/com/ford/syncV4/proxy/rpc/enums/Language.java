@@ -26,13 +26,9 @@ public enum Language {
     PT_BR("PT-BR"),
     CS_CZ("CS-CZ"),
     DA_DK("DA-DK"),
-    NO_NO("NO-NO"),
+    NO_NO("NO-NO");
 
-    // TODO :  For the TEST CASES only
-    NOT_VALID("AA-AA"),
-    EMPTY("");
-
-    private String internalName;
+    String internalName;
     
     private Language(String internalName) {
         this.internalName = internalName;

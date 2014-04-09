@@ -40,7 +40,8 @@ set(LIBRARIES
   ConfigProfile
   RequestWatchdog
   MediaManager
-  Resumption
+  Resumption	
+  policies
   apr-1
   aprutil-1
 )
@@ -75,8 +76,7 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
-  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
-  ../components/resumption/include/
+  ../components/policies/include/
   ../thirdPartyLibs/MessageBroker/include
   ../thirdPartyLibs/encryption/include
   ${CMAKE_SOURCE_DIR}/src/components/
@@ -104,13 +104,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINAR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-if (BUILD_TESTS_WITH_HMI)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_BINARY_DIR}/test/)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_BINARY_DIR}/test/)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_BINARY_DIR}/test/)
-endif()
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if (${QT_HMI})
   set(main_qml "hmi/MainWindow.qml")
@@ -138,7 +132,7 @@ endif ()
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini policy_table.json
-    hmi_capabilities.json sdl_preloaded_pt.json
+    hmi_capabilities.json wp1_policy_table.json
   DESTINATION bin
 )
 if (${WEB_HMI})

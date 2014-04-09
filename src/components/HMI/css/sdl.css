@@ -188,17 +188,15 @@
 #VRPopUp span,#info_apps_deviceList_list .list-content span,#sdl_view_container .list-content span,#sdl_options .list-content span
 	{
 	margin-left: 15px;
-	position: relative;
+	position: absolute;
 	text-overflow: ellipsis;
-	width: 521px;
+	width: 527px;
 	overflow: hidden;
-    float: left;
 }
 
 #sdl_options .list-content .ico {
 	height: 49px;
 	float: left;
-    position: relative;
 }
 
 #info_nonMedia_options_submenu {
@@ -580,35 +578,10 @@
 	background: #393939;
 }
 
-#VehicleInfo .odometrTitle{
-    top: 180px;
-    width: 290px;
-    left: 360px;
-    height: 20px;
-    padding: 10px;
-    background: #535353;
-}
-
-#VehicleInfo .odometrInput{
-    width: 265px;
-    position: absolute;
-    top: 242px;
-    left: 373px;
-    height: 48px;
-    border: 1px solid #333;
-    border-radius: 2px;
-    background: rgba(119, 119, 119, 0.42);
-    cursor: pointer;
-    font-size: 32px;
-    color: #FFF;
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 #VehicleInfo .ecu1Title {
 	top: 180px;
-	width: 290px;
-	left: 30px;
+	width: 600px;
+	left: 40px;
 	height: 20px;
 	padding: 10px;
 	background: #535353;
@@ -632,7 +605,7 @@
 
 #VehicleInfo .ecu1Data {
 	top: 233px;
-	width: 155px;
+	width: 485px;
 	left: 155px;
 	height: 20px;
 	padding: 10px;
@@ -640,65 +613,14 @@
 
 #VehicleInfo .ecu2Data {
 	top: 265px;
-	width: 155px;
+	width: 485px;
 	left: 155px;
 	height: 20px;
 	padding: 10px;
 }
-#PopUp.PopUp{
-    left: 200px;
-    width: 400px;
-    height: 245px;
-    z-index: 2;
-    top: 110px;
-    -webkit-transition: opacity 1s ease-in-out;
-    background-color: black;
-    border: #A6A6A6 solid 2px;
-    border-radius: 6px;
-}
-
-#PopUp .text{
-    top: 41px;
-    left: 5px;
-    width: 390px;
-    height: 120px;
-    line-height: 20px;
-    position: absolute;
-    overflow: hidden;
-    text-align: center;
-    text-overflow: ellipsis;
-}
-
-#PopUp .OkButton{
-    top: 190px;
-    left: 5px;
-    width: 190px;
-    border: 1px solid #393939;
-}
-
-#PopUp .OkButton span{
-    font-size: 20px;
-    line-height: 50px;
-    cursor: pointer;
-    margin-left: 82px;
-}
-
-#PopUp .CancelButton{
-    top: 190px;
-    left: 205px;
-    width: 190px;
-    border: 1px solid #393939;
-}
-
-#PopUp .CancelButton span{
-    font-size: 20px;
-    line-height: 50px;
-    cursor: pointer;
-    margin-left: 65px;
-}
 
 /* Alert, AudioPassThruPopUp popup*/
-#AlertManeuverPopUp.AlertManeuverPopUp,#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
+#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
 	{
 	opacity: 0;
 	left: 200px;
@@ -713,7 +635,7 @@
 	display: none;
 }
 
-#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
+#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
 	{
 	width: 380px;
 	left: 10px;
@@ -785,13 +707,13 @@
 	text-overflow: ellipsis;
 }
 
-#AlertManeuverPopUp.AlertManeuverActive,#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
+#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
 	{
 	opacity: 1;
 	display: block;
 }
 
-#baseNavigation .softButton,#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+#baseNavigation .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
 	{
 	border: 1px solid #393939;
 	border-radius: 3px;
@@ -819,19 +741,13 @@
     position: absolute;
 }
 
-#AlertManeuverPopUp .closeButton {
-	width: 170px;
-	top: 180px;
-	left: 110px;
-}
-
 #AlertPopUp .alertSoftButtons {
 	margin-left: 8px;
 	top: 120px;
 	width: 386px;
 }
 
-#AlertManeuverPopUp .one,#softButton0.one {
+#softButton0.one {
 	margin-top: 42px;
 	width: 362px;
 }

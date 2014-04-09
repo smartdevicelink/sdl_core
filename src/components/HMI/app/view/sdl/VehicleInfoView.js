@@ -52,35 +52,9 @@ SDL.VehicleInfo = Em.ContainerView.create( {
             'ecu1',
             'ecu2',
             'ecu1Data',
-            'ecu2Data',
-            'odometrTitle',
-            'odometrInput'
+            'ecu2Data'
+
         ],
-
-    /**
-     * Title of odometr group of parameters stored data in VehicleInfo model
-     */
-    odometrTitle: SDL.Label.extend( {
-
-        elementId: 'odometrTitle',
-
-        classNames: 'odometrTitle',
-
-        content: 'Odometr'
-    } ),
-
-    /**
-     * Input for odometr value changes
-     */
-    odometrInput: Ember.TextField.extend({
-        elementId: "odometrInput",
-        classNames: "odometrInput",
-        keyUp: function(event, view) {
-            if(event.which == 13){
-                SDL.SDLVehicleInfoModel.set('odometrInput', parseInt(this.value));
-            }
-        }
-    }),
 
     /**
      * Label with stored data in VehicleInfo model
@@ -191,6 +165,7 @@ SDL.VehicleInfo = Em.ContainerView.create( {
      */
     toggleActivity: function() {
         this.set( 'active', !this.active );
+        SDL.SDLController.onSystemContextChange();
     },
     
     /**

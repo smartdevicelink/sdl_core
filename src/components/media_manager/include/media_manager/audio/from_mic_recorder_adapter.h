@@ -59,9 +59,7 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
     std::string output_file_;
     int32_t duration_;
     const int32_t kDefaultDuration;
-#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };
 }  // namespace media_manager

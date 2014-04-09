@@ -85,6 +85,12 @@ class ResumeCtrl: public event_engine::EventObserver {
     void SaveApplication(ApplicationConstSharedPtr application);
 
     /**
+     * @brief Load unregistered applications info from the file system
+     *        You can use this function only if connection handler is ready
+     */
+    void LoadApplications();
+
+    /**
      * @brief Set application HMI Level as saved
      * @param application is application witch HMI Level is need to restore
      * @return true if success, otherwise return false
@@ -115,37 +121,21 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application info to FileSystem
      */
-    void IgnitionOff();
+    void SavetoFileSystem();
 
     /**
      * @brief Start timer for resumption applications
-     *        Restore D1-D5 data
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
     bool StartResumption(ApplicationSharedPtr application, uint32_t hash);
 
     /**
-     * @brief Start timer for resumption applications
-     *        Does not restore D1-D5 data
-     * @param application that is need to be restored
-     * @return true if it was saved, otherwise return false
-     */
-    bool StartResumptionOnlyHMILevel(ApplicationSharedPtr application);
-
-    /**
-     * @brief Check if there are all files need for resumption
-     * @param application that is need to be restored
-     * @return true if it all files exist, otherwise return false
-     */
-    bool CheckPersistenceFilesForResumption(ApplicationSharedPtr application);
-
-    /**
      * @brief Check application hash
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
-    bool CheckApplicationHash(std::string mobile_app_id, uint32_t hash);
+    bool CheckApplicationHash(uint32_t app_id, uint32_t hash);
 
     /**
      * @brief Timer callback function
@@ -167,18 +157,17 @@ class ResumeCtrl: public event_engine::EventObserver {
       ApplicationSharedPtr app;
     };
 
-#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
     /**
      * @brief Time step to check resumption TIME_OUT
      */
     static const uint32_t kTimeStep = 3;
 
-    Json::Value& GetSavedApplications();
-
-    void SetSavedApplication(Json::Value& apps_json);
+    /**
+    *@brief Data of applications, that whait for resuming
+    */
+    std::vector<Json::Value> saved_applications_;
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
@@ -193,7 +182,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     *       wait for timer to resume HMI Level
     *
     */
-    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
+    std::set<application_timestamp, TimeStampComparator> waiting_for_timer_;
 
 
     ApplicationManagerImpl* app_mngr_;
@@ -211,13 +200,12 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     bool ApplicationIsSaved(const uint32_t app_id);
 
-    Json::Value GetApplicationCommands(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationSubMenus(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationInteractionChoiseSets(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationGlobalProperties(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationSubscriptions(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationFiles(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationShow(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationCommands(const uint32_t app_id);
+    Json::Value GetApplicationSubMenus(const uint32_t app_id);
+    Json::Value GetApplicationInteractionChoiseSets(const uint32_t app_id);
+    Json::Value GetApplicationGlobalProperties(const uint32_t app_id);
+    Json::Value GetApplicationSubscriptions(const uint32_t app_id);
+    Json::Value GetApplicationFiles(const uint32_t app_id);
 
     Json::Value JsonFromSO(const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
 

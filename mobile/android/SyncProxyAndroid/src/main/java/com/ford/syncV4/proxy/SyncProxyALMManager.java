@@ -94,7 +94,7 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.util.DebugTool;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.TestConfig;
 
 import java.util.Hashtable;
 import java.util.Iterator;

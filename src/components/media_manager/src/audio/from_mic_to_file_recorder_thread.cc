@@ -36,10 +36,8 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
 log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
-#endif // ENABLE_LOG
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 

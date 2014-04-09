@@ -10,7 +10,7 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.TestConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;

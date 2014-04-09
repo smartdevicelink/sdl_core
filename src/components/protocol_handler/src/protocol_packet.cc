@@ -60,8 +60,6 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key,
       data_offset_(0),
       packet_id_(packet_id),
       connection_key_(connection_key) {
-  packet_header_.messageId = messageID;
-  packet_header_.sessionId = sessionID;
   RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
   if (result != RESULT_OK) {

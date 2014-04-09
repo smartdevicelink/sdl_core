@@ -58,9 +58,7 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
     class A2DPSourcePlayerThread;
 
     std::map<int32_t, threads::Thread*> sources_;
-#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 

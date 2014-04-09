@@ -1,11 +1,7 @@
 ############################## Subfolders #####################################
 # --- Policies table test
 #add_subdirectory(./policies_manager)
-
-if (BUILD_TESTS_WITH_HMI)
-  add_subdirectory(./rpc)
-endif()
-
+add_subdirectory(./rpc)
 ###############################################################################
 
 include_directories (

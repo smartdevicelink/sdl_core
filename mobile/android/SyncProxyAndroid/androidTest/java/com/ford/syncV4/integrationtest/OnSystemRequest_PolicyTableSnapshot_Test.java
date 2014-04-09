@@ -1,6 +1,7 @@
 package com.ford.syncV4.integrationtest;
 
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
@@ -25,7 +26,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.TestConfig;
 
 import org.hamcrest.core.IsNull;
 import org.json.JSONException;

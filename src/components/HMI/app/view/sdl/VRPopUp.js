@@ -77,100 +77,45 @@ SDL.VRPopUp = Em.ContainerView.create( {
         classNames: 'popUp'
     } ),
 
-    AddCommand: function( cmdID, vrCommands, appID, type) {
+    AddCommand: function( commandID, vrCommands, appID ) {
 
-        if (type == "Application") {
-            for( var i = 0; i < vrCommands.length; i++ ){
-                this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onActivateSDLApp',
-                    target: 'SDL.SDLController',
-                    appID: appID,
-                    text: vrCommands[i],
-                    classNames: 'list-item',
-                    templateName: 'text'
-                } ) );
-            }
-        } else {
-            var commandType = false;
-            for( var j = 0; j < vrCommands.length; j++ ){
-
-                this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
-                    action: 'onVRCommand',
-                    target: 'SDL.SDLAppController',
-                    appID: appID,
-                    commandID: cmdID,
-                    text: vrCommands[j],
-                    type: type,
-                    hideButtons: function() {
-                        if (this.type == "Command") {
-                            return SDL.SDLModel.performInteractionSession;
-                        } else {
-                            return !SDL.SDLModel.performInteractionSession;
-                        }
-                    }.property('SDL.SDLModel.performInteractionSession'),
-                    willDestroyElement: function() {
-                        //console.log(this + " destroyed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                        //Em.removeObserver(this, SDL.SDLModel.performInteractionSession, this.hideButtons);
-                       // this.destroy();
-                    },
-                    classNameBindings: ['this.hideButtons:hide'],
-                    classNames: 'list-item',
-                    templateName: 'text'
-                } ) );
-            }
-        }
-    },
-
-    updateVR: function(){
-
-        this.listOfCommands.list.removeAllChildren();
-        this.listOfCommands.list.refresh();
-
-        var len = SDL.SDLModel.VRCommands.length;
-        for (var i = 0; i < len; i++) {
-            this.AddCommand(SDL.SDLModel.VRCommands[i].cmdID, SDL.SDLModel.VRCommands[i].vrCommands, SDL.SDLModel.VRCommands[i].appID, SDL.SDLModel.VRCommands[i].type);
-        }
-
-        if (SDL.SDLAppController.model) {
-
-            len = SDL.SDLAppController.model.VRCommands.length;
-            for (var i = 0; i < len; i++) {
-                this.AddCommand(SDL.SDLAppController.model.VRCommands[i].cmdID,
-                    SDL.SDLAppController.model.VRCommands[i].vrCommands,
-                    SDL.SDLAppController.model.VRCommands[i].appID,
-                    SDL.SDLAppController.model.VRCommands[i].type);
-            }
-        }
-
-        if (SDL.SDLModel.stateLimited) {
-            len = SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands.length;
-            for (var i = 0; i < len; i++) {
-                this.AddCommand(SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].cmdID,
-                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].vrCommands,
-                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].appID,
-                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].type);
-            }
-        }
-
-    }.observes('SDL.SDLAppController.model'),
-
-    DeleteCommand: function(commandID) {
-
-        var t = this.get('listOfCommands.list.childViews').filterProperty('commandID', commandID);
-        for (var i = 0; i < t.length; i++) {
-            t[i].remove();
-            t[i].destroy();
+        for( var j = 0; j < vrCommands.length; j++ ){
+            this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
+                action: 'onVRCommand',
+                target: 'SDL.SDLAppController',
+                appID: appID,
+                commandID: commandID,
+                text: vrCommands[j],
+                classNames: 'list-item',
+                templateName: 'text'
+            } ) );
         }
 
     },
 
-    DeleteActivateApp: function(appID) {
+    DeleteCommand: function( commandID ) {
 
-        var t = this.get('listOfCommands.list.childViews').filterProperty('appID', appID);
-        for (var i = 0; i < t.length; i++) {
-            t[i].remove();
-            t[i].destroy();
-        }
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'commandID', commandID ) );
+
+    },
+
+    AddActivateApp: function( AppName, appID ) {
+
+        this.get( 'listOfCommands.list.childViews' ).pushObject( SDL.Button.create( {
+            action: 'onActivateSDLApp',
+            target: 'SDL.SDLController',
+            appID: appID,
+            text: AppName,
+            classNames: 'list-item',
+            templateName: 'text'
+        } ) );
+
+    },
+
+    DeleteActivateApp: function( appID ) {
+
+        this.get( 'listOfCommands.list.childViews' ).removeObjects( this.get( 'listOfCommands.list.childViews' ).filterProperty( 'appID', appID ) );
+
     },
 
     /**

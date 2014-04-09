@@ -60,7 +60,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       has_been_activated_(false),
       tts_speak_state_(false),
       device_(0) {
-  srand(time(NULL));
+    srand(time(NULL));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -180,10 +180,6 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
   tts_speak_state_ = state_tts_speak;
 }
 
-bool ApplicationImpl::tts_speak_state() {
-  return tts_speak_state_;
-}
-
 void ApplicationImpl::set_hmi_level(
     const mobile_api::HMILevel::eType& hmi_level) {
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
@@ -280,13 +276,6 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
 
 const AppFilesMap& ApplicationImpl::getAppFiles() const {
   return this->app_files_;
-}
-
-const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
-   if (app_files_.find(file_name) != app_files_.end()) {
-     return &(app_files_[file_name]);
-   }
-   return NULL;
 }
 
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {

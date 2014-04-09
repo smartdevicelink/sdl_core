@@ -78,16 +78,16 @@ bool TypeRegistry::init(const pugi::xml_node& xml) {
 }
 
 bool TypeRegistry::GetCompositeType(const pugi::xml_node& params, const Type** type) {
-  bool is_array = params.attribute("array").as_bool(false);
-  bool is_map = params.attribute("map").as_bool(false);
-  if (is_array && is_map) {
+  pugi::xml_attribute array = params.attribute("array");
+  pugi::xml_attribute map = params.attribute("map");
+  if (array && map) {
     strmfmt(std::cerr, "Entity {0} has both map and array attributes specified",
             params.attribute("name").as_string(""));
     return false;
   }
-  if (is_map) {
+  if (map && map.as_bool(false)) {
     return GetContainer(params, type, false);
-  } else if (is_array) {
+  } else if (array && array.as_bool(false)) {
     return GetContainer(params, type, true);
   } else {
     return GetNonArray(params, type);
@@ -169,7 +169,6 @@ bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
     return false;
   }
   Enum* this_enum = NULL;
-  // FunctionID enum is already created, avoid creation of duplicate FunctionID enum
   if (name == Enum::kFunctionIdEnumName) {
     this_enum = function_ids_enum_;
   } else {

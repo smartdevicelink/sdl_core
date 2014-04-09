@@ -69,11 +69,10 @@ void OnAppDeactivatedNotification::Run() {
   }
 
   switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
-    case hmi_apis::Common_DeactivateReason::AUDIO: {
+    case hmi_apis::Common_DeactivateReason::AUDIO:
+    case hmi_apis::Common_DeactivateReason::PHONECALL: {
       if (app->is_media_application()) {
-        if (profile::Profile::instance()->is_mixing_audio_supported() &&
-            (ApplicationManagerImpl::instance()->vr_session_started() ||
-             app->tts_speak_state())) {
+        if (profile::Profile::instance()->is_mixing_audio_supported()) {
           app->set_audio_streaming_state(
               mobile_api::AudioStreamingState::ATTENUATED);
         } else {
@@ -81,13 +80,6 @@ void OnAppDeactivatedNotification::Run() {
               mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
-      ApplicationManagerImpl::instance()->DeactivateApplication(app);
-      app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-      break;
-    }
-    case hmi_apis::Common_DeactivateReason::PHONECALL: {
-      app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
       ApplicationManagerImpl::instance()->DeactivateApplication(app);
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;

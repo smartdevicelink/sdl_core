@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * \file transport_manager_default.cc
+ * \brief TransportManagerDefault class source file.
+ *
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +41,7 @@
 #endif
 
 #ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 #endif
 
 
@@ -55,7 +58,7 @@ int TransportManagerDefault::Init() {
   const uint16_t kTcpAdapterPort = 12345;
   AddTransportAdapter(new transport_adapter::TcpTransportAdapter(kTcpAdapterPort));
 #ifdef USB_SUPPORT
-  AddTransportAdapter(new transport_adapter::UsbAdapter);
+  AddTransportAdapter(new transport_adapter::UsbAoaAdapter);
 #endif
 
   return E_SUCCESS;

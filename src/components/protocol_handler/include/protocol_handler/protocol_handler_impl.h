@@ -305,7 +305,6 @@ class ProtocolHandlerImpl
      * \param data_size Size of message excluding protocol header
      * \param data Message string
      * \param compress Compression flag
-     * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(
@@ -315,8 +314,7 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       const uint32_t data_size,
       const uint8_t* data,
-      const bool compress,
-      const bool is_final_message);
+      const bool compress);
 
     /**
      * \brief Sends message which size doesn't permit to send it in one frame.
@@ -329,7 +327,6 @@ class ProtocolHandlerImpl
      * \param data Message string
      * \param compress Compression flag
      * \param max_data_size Maximum allowed size of single frame.
-     * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendMultiFrameMessage(
@@ -340,8 +337,7 @@ class ProtocolHandlerImpl
       const uint32_t data_size,
       const uint8_t* data,
       const bool compress,
-      const uint32_t max_data_size,
-      const bool is_final_message);
+      const uint32_t max_data_size);
 
     /**
      * \brief Sends message already containing protocol header.
@@ -416,9 +412,7 @@ class ProtocolHandlerImpl
     /**
      * \brief For logging.
      */
-#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
     /**
      *\brief Pointer on instance of class implementing IProtocolObserver
@@ -458,12 +452,6 @@ class ProtocolHandlerImpl
      *\brief Counter of messages sent in each session.
      */
     std::map<uint8_t, uint32_t> message_counters_;
-
-    /**
-     *\brief map for session last message.
-     */
-    std::map<uint8_t, uint32_t> sessions_last_message_id_;
-
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;

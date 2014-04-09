@@ -126,9 +126,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     sync_primitives::Lock shouldBeStoped_lock_;
 
     static const int32_t kAudioPassThruTimeout;
-#ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };

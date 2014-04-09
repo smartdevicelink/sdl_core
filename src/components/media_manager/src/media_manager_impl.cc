@@ -52,10 +52,8 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
 log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
       log4cxx::Logger::getLogger("MediaManagerImpl"));
-#endif // ENABLE_LOG
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)

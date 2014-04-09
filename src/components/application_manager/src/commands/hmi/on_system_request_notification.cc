@@ -31,8 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_system_request_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -52,15 +50,7 @@ void OnSystemRequestNotification::Run() {
 
   (*message_)[strings::params][strings::function_id] =
           static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
-
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
-  std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
-  for (; app_list.end() != it; ++it) {
-    (*message_)[strings::params][strings::connection_key] =
-      static_cast<int32_t>((*it)->app_id());
-    SendNotificationToMobile(message_);
-  }
+  SendNotificationToMobile(message_);
 }
 
 }  // namespace commands

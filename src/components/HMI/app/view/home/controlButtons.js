@@ -235,8 +235,7 @@ SDL.ControlButtons = Em.ContainerView
                     'globalPropertiesLabel',
                     'gpHelpData',
                     'gpTimeoutData',
-                    'gpAUTOCOMPLETE',
-                    'policyURLs'
+                    'gpAUTOCOMPLETE'
                 ],
 
                 globalPropertiesLabel: SDL.Label.extend( {
@@ -245,26 +244,7 @@ SDL.ControlButtons = Em.ContainerView
 
                     classNames: 'sdlGPLabel',
 
-                    content: 'HELP_PROMPT: TIMEOUT_PROMPT: AUTOCOMPLETE_TEXT: POLICY_GetURLS:'
-                }),
-
-                policyURLs: SDL.Label.extend( {
-
-                    elementId: 'policyURLs',
-
-                    classNames: 'sdlGPData',
-
-                    contentBinding: 'this.propertiesData',
-
-                    propertiesData: function() {
-
-                        var str = '';
-                        for (var i = 0; i < SDL.SDLModel.policyURLs.length; i++) {
-                            str += SDL.SDLModel.policyURLs[i] + '; ';
-                        }
-
-                        return str;
-                    }.property('SDL.SDLModel.policyURLs')
+                    content: 'HELP_PROMPT: TIMEOUT_PROMPT: AUTOCOMPLETE_TEXT:'
                 }),
 
                 gpHelpData: SDL.Label.extend( {

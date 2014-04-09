@@ -223,9 +223,7 @@ class Thread {
   ThreadOptions thread_options_;
   bool isThreadRunning_;
 
-#ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Thread);

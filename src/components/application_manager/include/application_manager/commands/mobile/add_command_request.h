@@ -125,8 +125,8 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool IsPendingResponseExist();
 
-  bool send_ui_;
-  bool send_vr_;
+  bool is_ui_send_;
+  bool is_vr_send_;
 
   bool is_ui_received_;
   bool is_vr_received_;
