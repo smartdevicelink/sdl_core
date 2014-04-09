@@ -81,18 +81,19 @@
                         		"imageResolution":
                                          {
                                           	"resolutionWidth":35,
-											"resolutionHeight":35
+                                                "resolutionHeight":35
                                          }
                         	},
-                    "name":"graphic",
--                         		"imageTypeSupported":
--                                	[
--                                	],
--                        		"imageResolution":
--                                         {
--                                          	"resolutionWidth": 35,
--											"resolutionHeight": 35
--                                         }
+                                {
+                                    "name":"graphic",
+                                        "imageTypeSupported":
+                                         [
+                                         ],
+                                        "imageResolution":
+                                         {
+                                                "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
                          	}
                         	
                         ],
