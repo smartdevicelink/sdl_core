@@ -3037,7 +3037,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version,
                                              String correlationID) {
-            if (mSyncConnection.getProtocolVersion() > ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            if (mSyncConnection.getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
                     startMobileNaviService(sessionID, correlationID);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {
