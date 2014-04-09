@@ -326,6 +326,11 @@ class MessageHelper {
      */
     static void SendOnStatusUpdate(const std::string& status);
 
+    /**
+     * @brief Send GetSystemInfo request to HMI
+     */
+    static void SendGetSystemInfoRequest();
+
     /*
      * @brief Sends notification to HMI to start audio streaming
      *

@@ -323,6 +323,18 @@ void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   policy_manager_->SetSystemLanguage(language);
 }
 
+void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
+                                    const std::string& wers_country_code,
+                                    const std::string& language) {
+  LOG4CXX_INFO(logger_, "OnGetSystemInfo");
+  policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
+}
+
+void PolicyHandler::OnSystemInfoUpdateRequired() {
+  LOG4CXX_INFO(logger_, "OnSystemInfoUpdateRequired");
+  application_manager::MessageHelper::SendGetSystemInfoRequest();
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   if (!policy_manager_) {

@@ -1898,6 +1898,27 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status) {
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
+void MessageHelper::SendGetSystemInfoRequest() {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_GetSystemInfo;
+  (*message)[strings::params][strings::message_type] =
+    MessageType::kRequest;
+  (*message)[strings::params][strings::correlation_id] =
+    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  (*message)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*message)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {

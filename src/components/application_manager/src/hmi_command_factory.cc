@@ -69,6 +69,8 @@
 #include "application_manager/commands/hmi/on_put_file_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
+#include "application_manager/commands/hmi/get_system_info_request.h"
+#include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -303,6 +305,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::ActivateAppResponse(message));
       } else {
         command.reset(new commands::ActivateAppRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
+      if (is_response) {
+        command.reset(new commands::GetSystemInfoResponse(message));
+      } else {
+        command.reset(new commands::GetSystemInfoRequest(message));
       }
       break;
     }
@@ -1067,15 +1077,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     command.reset(new commands::UpdateSDLRequest(message));
     }
     break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAppPermissionChanged: {
-    command.reset(new commands::OnAppPermissionChangedNotification(message));
-    break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAllowApp: {
-    command.reset(new commands::OnAllowAppNotification(message));
-    break;
-    }*/
+    */
     case hmi_apis::FunctionID::BasicCommunication_OnIgnitionCycleOver: {
       command.reset(new commands::OnIgnitionCycleOverNotification(message));
       break;

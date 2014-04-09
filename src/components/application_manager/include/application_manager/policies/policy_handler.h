@@ -179,6 +179,21 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnSystemInfoChanged(const std::string& language);
 
   /**
+   * @brief Save data from GetSystemInfo request to policy table
+   * @param ccpu_version CCPU version
+   * @param wers_country_code WERS country code
+   * @param language System language
+   */
+  void OnGetSystemInfo(const std::string& ccpu_version,
+                       const std::string& wers_country_code,
+                       const std::string& language);
+
+  /**
+   * @brief Send request to HMI to get update on system parameters
+   */
+  virtual void OnSystemInfoUpdateRequired();
+
+  /**
    * Adds statistics info
    * @param type type of info
    */
