@@ -16,7 +16,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-               android:text="MIN Version: "
+               android:text="MIN Ver: "
                 android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:text="MAX Version: "
+                android:text="MAX Ver: "
                 android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
