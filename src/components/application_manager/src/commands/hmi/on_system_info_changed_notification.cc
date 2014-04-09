@@ -30,42 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/hmi/on_system_info_changed_notification.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief SDLGetUserFriendlyMessageRequest command class
- **/
-class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
+OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
+}
 
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class destructor
-     **/
-    virtual ~SDLGetUserFriendlyMessageRequest();
+OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+void OnSystemInfoChangedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnSystemInfoChangedNotification::Run");
+  uint32_t lang_code =
+      (*message_)[strings::msg_params][strings::language].asUInt();
+  const std::string language =
+      application_manager::MessageHelper::CommonLanguageToString(
+        static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
-};
+  policy::PolicyHandler::instance()->OnSystemInfoChanged(language);
+}
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+

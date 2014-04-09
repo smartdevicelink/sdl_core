@@ -311,6 +311,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_ignition_cycle_over_notification.cc
+./src/commands/hmi/on_system_info_changed_notification.cc
 ./src/commands/hmi/on_file_removed_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_tts_started_notification.cc

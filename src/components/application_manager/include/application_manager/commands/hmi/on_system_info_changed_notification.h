@@ -30,31 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_
 
-#include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief SDLGetUserFriendlyMessageRequest command class
+ * @brief OnSystemInfoChangedNotification command class
  **/
-class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
+class OnSystemInfoChangedNotification : public NotificationFromHMI {
   public:
     /**
-     * @brief SDLGetUserFriendlyMessageRequest class constructor
+     * @brief OnSystemInfoChangedNotification class constructor
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
+    explicit OnSystemInfoChangedNotification(const MessageSharedPtr& message);
 
     /**
-     * @brief SDLGetUserFriendlyMessageRequest class destructor
+     * @brief OnSystemInfoChangedNotification class destructor
      **/
-    virtual ~SDLGetUserFriendlyMessageRequest();
+    virtual ~OnSystemInfoChangedNotification();
 
     /**
      * @brief Execute command
@@ -62,10 +62,11 @@ class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
     virtual void Run();
 
   private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
+    DISALLOW_COPY_AND_ASSIGN(OnSystemInfoChangedNotification);
 };
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_

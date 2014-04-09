@@ -68,6 +68,7 @@
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
 #include "application_manager/commands/hmi/on_put_file_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
+#include "application_manager/commands/hmi/on_system_info_changed_notification.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -1077,6 +1078,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }*/
     case hmi_apis::FunctionID::BasicCommunication_OnIgnitionCycleOver: {
       command.reset(new commands::OnIgnitionCycleOverNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSystemInfoChanged: {
+      command.reset(new commands::OnSystemInfoChangedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_PlayTone: {

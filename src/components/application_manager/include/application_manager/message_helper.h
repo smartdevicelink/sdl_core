@@ -36,6 +36,7 @@
 #include <map>
 #include <string>
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 #include "application_manager/application.h"
@@ -395,7 +396,14 @@ class MessageHelper {
       return static_cast<To>(input);
     }
 
-  private:
+    /**
+     * @brief Convert common language to string representation
+     * @param language Common language
+     * @return Common language string representation
+     */
+    static std::string CommonLanguageToString(
+        hmi_apis::Common_Language::eType language);
+private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
 

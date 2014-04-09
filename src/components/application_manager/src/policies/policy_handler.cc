@@ -318,6 +318,11 @@ void PolicyHandler::OnCurrentDeviceIdUpdateRequired(
   policy_manager_->UpdateCurrentDeviceId(device_param.device_mac_address);
 }
 
+void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
+  LOG4CXX_INFO(logger_, "OnSystemInfoChanged");
+  policy_manager_->SetSystemLanguage(language);
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   if (!policy_manager_) {

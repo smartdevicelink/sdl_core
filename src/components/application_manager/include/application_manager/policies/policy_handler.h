@@ -172,6 +172,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
 
   /**
+   * @brief Set parameters from OnSystemInfoChanged to policy table
+   * @param language System language
+   */
+  void OnSystemInfoChanged(const std::string& language);
+
+  /**
    * Adds statistics info
    * @param type type of info
    */
