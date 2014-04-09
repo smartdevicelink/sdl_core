@@ -898,9 +898,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         switch (item.getItemId()) {
             case PROXY_START:
-                BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (!mBtAdapter.isEnabled()) {
-                    mBtAdapter.enable();
+                if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
+                    BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (!mBtAdapter.isEnabled()) {
+                        mBtAdapter.enable();
+                    }
+
+                    if (!mBtAdapter.isDiscovering()) {
+                        Intent discoverableIntent = new Intent(
+                                BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                                300);
+                        startActivity(discoverableIntent);
+                    }
                 }
 
                 /*// TODO : To be reconsider
@@ -910,15 +920,28 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     mBoundProxyService.setLogAdapter(mLogAdapter);
                 }*/
 
-                if (mBoundProxyService != null) {
-                    mBoundProxyService.reset();
-                }
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mBoundProxyService != null) {
 
-                if (!mBtAdapter.isDiscovering()) {
-                    Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                    discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                    startActivity(discoverableIntent);
-                }
+                            // We need to set listener to null and then re-init it, unless there will
+                            // be another way to check it at 'reset()' method
+
+                            if (!mBoundProxyService.isSyncProxyConnected()) {
+                                mBoundProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+                            }
+                            mBoundProxyService.setProxyServiceEvent(null);
+
+                            mBoundProxyService.reset();
+
+                            // Re-init listener
+
+                            mBoundProxyService.setProxyServiceEvent(SyncProxyTester.this);
+                        }
+                    }
+                });
                 return true;
 
             case XML_TEST:

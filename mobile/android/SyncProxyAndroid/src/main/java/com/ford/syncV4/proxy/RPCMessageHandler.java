@@ -96,11 +96,12 @@ public class RPCMessageHandler implements IRPCMessageHandler {
         String messageType = rpcMsg.getMessageType();
 
         if (messageType.equals(Names.response)) {
-            Logger.d(CLASS_NAME + " Response");
+            Logger.d(CLASS_NAME + " Response name:" + functionName);
 
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationID();
-            if (!syncProxyBase.handlePartialRPCResponse(response) &&
+
+            if (!syncProxyBase.handlePartialRPCResponse(response, hash) &&
                     !syncProxyBase.handleLastInternalResponse(response)) {
 
                 // Check to ensure response is not from an internal message (reserved correlation ID)
@@ -182,7 +183,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     }
 
                     //_autoActivateIdReturned = msg.getAutoActivateID();
-                /*Place holder for legacy support*/
+                    /*Place holder for legacy support*/
 
                     syncProxyBase.setAutoActivateIdReturned("8675309");
                     syncProxyBase.setButtonCapabilities(msg.getButtonCapabilities());
@@ -557,12 +558,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         getMainUIHandler().post(new Runnable() {
                             @Override
                             public void run() {
-                                getProxyListener().onPutFileResponse(
-                                        (PutFileResponse) msg);
+                                getProxyListener().onPutFileResponse(msg);
                             }
                         });
                     } else {
-                        getProxyListener().onPutFileResponse((PutFileResponse) msg);
+                        getProxyListener().onPutFileResponse(msg);
                     }
                 } else if (functionName.equals(Names.DeleteFile)) {
                     // DeleteFile
@@ -859,7 +859,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
             }
         } else if (messageType.equals(Names.notification)) {
-            Logger.d(CLASS_NAME + " Notification");
+            Logger.d(CLASS_NAME + " Notification name:" + functionName);
             if (functionName.equals(Names.OnHMIStatus)) {
                 // OnHMIStatus
 

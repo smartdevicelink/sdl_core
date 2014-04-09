@@ -34,10 +34,6 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     @Override
     public void onFilesDownloadRequest(final ISystemRequestProxy proxy, List<String> urls,
                                        FileType fileType) {
-        // TODO : Logging to be refactored
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage("files download request", Log.DEBUG, true);
-        }
 
         // Simulate Files downloading request and future processing
         // Then, call appropriate method at provided callback which implement
@@ -63,10 +59,6 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     @Override
     public void onFileResumeRequest(final ISystemRequestProxy proxy, String filename,
                                     final Integer offset, final Integer length, FileType fileType) {
-        // TODO : Logging to be refactored
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage("files resume request", Log.DEBUG, true);
-        }
 
         // Simulate Files download resumption request and future processing
         // Then, call appropriate method at provided callback which implement

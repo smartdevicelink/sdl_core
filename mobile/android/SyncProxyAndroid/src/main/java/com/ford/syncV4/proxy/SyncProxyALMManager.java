@@ -64,6 +64,7 @@ import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
@@ -1953,7 +1954,7 @@ public class SyncProxyALMManager {
 	
 	/************************ Callbacks ************************/
 	// A class which handles all IProxyListenerALM callbacks for the manager
-	private class ALMInterfaceBroker implements IProxyListenerALM{
+	private class ALMInterfaceBroker implements IProxyListenerALM {
 		
 		@Override
 		public void onAddSubMenuResponse(AddSubMenuResponse response) {
@@ -2633,6 +2634,11 @@ public class SyncProxyALMManager {
 
         @Override
         public void onStartSession(byte sessionID) {
+
+        }
+
+        @Override
+        public void onPutFileRequest(PutFile putFile) {
 
         }
     }

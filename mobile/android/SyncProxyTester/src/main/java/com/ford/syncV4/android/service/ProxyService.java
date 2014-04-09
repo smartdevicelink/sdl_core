@@ -824,8 +824,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         try {
             mSyncProxy.resetProxy();
         } catch (SyncException e1) {
-            e1.printStackTrace();
-            //something goes wrong, & the proxy returns as null, stop the service.
+            Logger.e("Reset proxy error:" + e1);
+            //something goes wrong, the proxy returns as null, stop the service.
             //do not want a running service with a null proxy
             if (mSyncProxy == null) {
                 stopServiceBySelf();
@@ -850,8 +850,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     /**
      * ******************************
-     * * SYNC AppLink Base Callback's **
-     * *******************************
+     *  SYNC AppLink Base Callbacks *
+     * ******************************
      */
     @Override
     public void onAddSubMenuResponse(AddSubMenuResponse response) {
@@ -1037,9 +1037,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Soft Button Image Callback's **
-     * *******************************
+     * *******************************************
+     *  SYNC AppLink Soft Button Image Callbacks *
+     * *******************************************
      */
     @Override
     public void onPutFileResponse(PutFileResponse response) {
@@ -1077,7 +1077,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mTesterMain.getXMLTestThreadContext().notify();
             }
         }
-        //Logger.d(CLASS_NAME, "ListFiles:" + response.getFilenames().toString());
     }
 
     @Override
@@ -1117,9 +1116,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Updated Callback's **
-     * *******************************
+     * *********************************
+     *  SYNC AppLink Updated Callbacks *
+     * *********************************
      */
     @Override
     public void onAddCommandResponse(AddCommandResponse response) {
@@ -1186,9 +1185,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink New Callback's **
-     * *******************************
+     * *****************************
+     *  SYNC AppLink New Callbacks *
+     * *****************************
      */
     @Override
     public void onSliderResponse(SliderResponse response) {
@@ -1239,10 +1238,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createDebugMessageForAdapter(notification);
     }
 
+    @Override
+    public void onPutFileRequest(PutFile putFile) {
+        createDebugMessageForAdapter(putFile);
+    }
+
     /**
-     * ******************************
-     * * SYNC AppLink Audio Pass Thru Callback's **
-     * *******************************
+     * *****************************************
+     *  SYNC AppLink Audio Pass Thru Callbacks *
+     * *****************************************
      */
     @Override
     public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
@@ -1298,9 +1302,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Vehicle Data Callback's **
-     * *******************************
+     * **************************************
+     *  SYNC AppLink Vehicle Data Callbacks *
+     * **************************************
      */
     @Override
     public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
@@ -1363,8 +1367,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink TBT Callback's **
+     * *******************************
+     *  SYNC AppLink TBT Callbacks   *
      * *******************************
      */
     @Override
