@@ -36,7 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
-
+#include "application_manager/message_helper.h"
 namespace application_manager {
 
 namespace commands {
@@ -76,6 +76,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::IN_USE);
     return;
   }
+  SendVrDeleteCommand(app);
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -108,6 +109,27 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr
     }
   }
   return false;
+}
+
+void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
+    application_manager::ApplicationSharedPtr app) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
+
+  smart_objects::SmartObject* choice_set =
+                              app->FindChoiceSet((*message_)[strings::msg_params]
+                               [strings::interaction_choice_set_id].asInt());
+
+  if (choice_set) {
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    msg_params[strings::app_id] = app->app_id();
+    msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
+    choice_set = &((*choice_set)[strings::choice_set]);
+    for (uint32_t i = 0; i < (*choice_set).length() ; ++i) {
+      msg_params[strings::cmd_id] = (*choice_set)[i][strings::choice_id];
+      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
+    }
+  }
 }
 
 }  // namespace commands

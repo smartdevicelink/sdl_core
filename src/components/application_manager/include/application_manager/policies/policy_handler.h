@@ -229,9 +229,9 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void PTExchangeAtOdometer(int kilometers);
 
-    /**
+  /**
      * Starts proccess updating policy table
-     */
+   */
     void StartPTExchange(bool skip_device_selection = false);
 
  private:

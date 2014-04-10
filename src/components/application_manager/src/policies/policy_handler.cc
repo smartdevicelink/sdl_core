@@ -402,18 +402,18 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   uint32_t app_id = last_used_app_ids_.back();
   if (policy_manager_) {
     application_manager::ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application(app_id);
+        application_manager::ApplicationManagerImpl::instance()
+        ->application(app_id);
 
     if (!app.valid()) {
       LOG4CXX_WARN(logger_, "There is no registered application with "
-                   "connection key '" << app_id << "'");
+                   "connection key '"<<app_id<<"'");
       return false;
     }
 
     const std::string& mobile_app_id = app->mobile_app_id()->asString();
     if (!mobile_app_id.empty()) {
-      LOG4CXX_WARN(logger_, "Application with connection key '" << app_id << "'"
+      LOG4CXX_WARN(logger_, "Application with connection key '" <<app_id<<"'"
                    " has no application id.");
       return false;
     }
@@ -584,7 +584,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
 #else
   permissions.isSDLAllowed = true;
-#endif  
+#endif
 
   if (permissions.isSDLAllowed &&
       PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {

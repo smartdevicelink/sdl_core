@@ -582,6 +582,11 @@ SDL.SDLController = Em.Object
                     SDL.SDLModel.VRCommands.splice(i, 1);
                 }
             }
+
+            SDL.VRPopUp.DeleteActivateApp(appID);
+            if (SDL.SDLModel.stateLimited == appID) {
+                SDL.SDLModel.set('stateLimited', null);
+            }
             SDL.SDLAppController.set('model', null);
         },
         /**

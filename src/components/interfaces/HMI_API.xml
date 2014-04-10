@@ -806,7 +806,7 @@
     <element name="VEHICLEDATA_VIN" />
     <element name="VEHICLEDATA_PRNDL" />
     <element name="VEHICLEDATA_TIREPRESSURE" />
-    <element name="VEHICLEDATA_ODOMETER" />
+    <element name="VEHICLEDATA_ODOMETER" />    
     <element name="VEHICLEDATA_BELTSTATUS" />
     <element name="VEHICLEDATA_BODYINFO" />
     <element name="VEHICLEDATA_DEVICESTATUS" />
@@ -815,13 +815,13 @@
     <element name="VEHICLEDATA_EMERGENCYEVENT"/>
     <element name="VEHICLEDATA_CLUSTERMODESTATUS"/>
     <element name="VEHICLEDATA_MYKEY"/>
-    <element name="VEHICLEDATA_BRAKING" />
+    <element name="VEHICLEDATA_BRAKING" />  
     <element name="VEHICLEDATA_WIPERSTATUS" />
-    <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+    <element name="VEHICLEDATA_HEADLAMPSTATUS" /> 
     <element name="VEHICLEDATA_BATTVOLTAGE" />
-    <element name="VEHICLEDATA_ENGINETORQUE" />
-    <element name="VEHICLEDATA_ACCPEDAL" />
-    <element name="VEHICLEDATA_STEERINGWHEEL" />
+    <element name="VEHICLEDATA_ENGINETORQUE" />          
+    <element name="VEHICLEDATA_ACCPEDAL" />         
+    <element name="VEHICLEDATA_STEERINGWHEEL" />    
 </enum>
 
 <enum name="WiperStatus">
@@ -946,10 +946,10 @@
 
 <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
+    <element name="HTTP" />   
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
 </enum>
@@ -1436,7 +1436,7 @@
     	Desired keypress mode.
     	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
-  </param>
+  </param> 
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -2046,6 +2046,12 @@
       <description>Optional length in bytes for resuming partial data chunks</description>
     </param>
 
+    <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+      <description>Full Size of file. sends in first OnPutFile notification if file is splited
+		     	   into many PutFiles
+	  </description>
+    </param>
+
     <param name="FileName" type="String" maxlength="255" mandatory="true">
       <description>File reference name.</description>
     </param>
@@ -2616,7 +2622,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2628,7 +2633,6 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
-
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>

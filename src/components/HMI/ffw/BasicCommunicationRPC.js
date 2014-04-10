@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -45,7 +45,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
 
         onPutFileSubscribeRequestID: -1,
-        allowSDLFunctionalityRequestID: -1,
+allowSDLFunctionalityRequestID: -1,
 
         onSystemErrorSubscribeRequestID: -1,
         onStatusUpdateSubscribeRequestID: -1,
@@ -55,10 +55,10 @@ FFW.BasicCommunication = FFW.RPCObserver
         onAppUnregisteredSubscribeRequestID: -1,
         onPlayToneSubscribeRequestID: -1,
         onSDLCloseSubscribeRequestID: -1,
-        onSDLConsentNeededSubscribeRequestID: -1,
+onSDLConsentNeededSubscribeRequestID: -1,
 
         onPutFileUnsubscribeRequestID: -1,
-        onSystemErrorUnsubscribeRequestID: -1,
+onSystemErrorUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
         onFileRemovedUnsubscribeRequestID: -1,
@@ -66,7 +66,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onAppUnregisteredUnsubscribeRequestID: -1,
         onPlayToneUnsubscribeRequestID: -1,
         onSDLCloseUnsubscribeRequestID: -1,
-        onSDLConsentNeededUnsubscribeRequestID: -1,
+onSDLConsentNeededUnsubscribeRequestID: -1,
 
         // const
         onSystemErrorNotification: "SDL.OnSystemError",
@@ -78,7 +78,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
         onSDLCloseNotification: "BasicCommunication.OnSDLClose",
-        onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
+onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
 
         /**
          * init object
@@ -116,7 +116,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             // subscribe to notifications
             this.onPutFileSubscribeRequestID = this.client
                 .subscribeToNotification(this.onPutFileNotification);
-            this.onSystemErrorSubscribeRequestID = this.client
+this.onSystemErrorSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSystemErrorNotification);
             this.onStatusUpdateSubscribeRequestID = this.client
                 .subscribeToNotification(this.onStatusUpdateNotification);
@@ -132,7 +132,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .subscribeToNotification(this.onPlayToneNotification);
             this.onSDLCloseSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSDLCloseNotification);
-            this.onSDLConsentNeededSubscribeRequestID = this.client
+this.onSDLConsentNeededSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSDLConsentNeededNotification);
 
         },
@@ -149,7 +149,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             this.onPutFileUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onPutFileNotification);
-            this.onSystemErrorUnsubscribeRequestID = this.client
+this.onSystemErrorUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSystemErrorNotification);
             this.onStatusUpdateUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onStatusUpdateNotification);
@@ -165,7 +165,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
             this.onSDLCloseUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLCloseNotification);
-            this.onSDLConsentNeededUnsubscribeRequestID = this.client
+this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLConsentNeededNotification);
         },
 
@@ -300,7 +300,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 SDL.SDLModel.onFileRemoved(notification.params);
             }
 
-            if (notification.method == this.onSystemErrorNotification) {
+if (notification.method == this.onSystemErrorNotification) {
 
                 var message = "Undefined";
 
@@ -342,7 +342,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             if (notification.method == this.onSDLCloseNotification) {
                 //notification handler method
             }
-            if (notification.method == this.onSDLConsentNeededNotification) {
+if (notification.method == this.onSDLConsentNeededNotification) {
 
                 //Show popUp
                 SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
@@ -408,7 +408,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
-                if (request.method == "BasicCommunication.GetSystemInfo") {
+if (request.method == "BasicCommunication.GetSystemInfo") {
 
                     Em.Logger.log("BasicCommunication.GetSystemInfo Response");
 
@@ -435,7 +435,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.GetURLS(7); //Service type for policies
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-                }
+            }
             }
         },
 
@@ -580,7 +580,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * send response from onRPCRequest
-         *
+         * 
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -717,7 +717,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * send response from onRPCRequest
-         *
+         * 
          * @param {Number}
          *            id
          * @param {String}
@@ -776,7 +776,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Send request if application was activated
-         *
+         * 
          * @param {number} appID
          */
         OnAppActivated: function(appID) {
@@ -855,7 +855,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Invoked by UI component when user switches to any functionality which
          * is not other mobile application.
-         *
+         * 
          * @params {String}
          * @params {Number}
          */
@@ -895,7 +895,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Used by HMI when User chooses to exit application.
-         *
+         * 
          * @params {Number}
          */
         ExitApplication: function(appID) {
@@ -916,7 +916,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Sent by HMI to SDL to close all registered applications.
-         *
+         * 
          * @params {String}
          */
         ExitAllApplications: function(reason) {
@@ -938,7 +938,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Response with params of the last one supports mixing audio (ie
          * recording TTS command and playing audio).
-         *
+         * 
          * @params {Number}
          */
         MixingAudioSupported: function(attenuatedSupported) {
@@ -962,7 +962,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Response with Results by user/HMI allowing SDL functionality or
          * disallowing access to all mobile apps.
-         *
+         * 
          * @params {Number}
          */
         AllowAllApps: function(allowed) {
@@ -985,7 +985,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Response with result of allowed application
-         *
+         * 
          * @params {Number}
          */
         AllowApp: function(request) {
@@ -1019,7 +1019,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Notifies if device was choosed
-         *
+         * 
          * @param {String}
          *            deviceName
          * @param {Number}
@@ -1045,7 +1045,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Send error response from onRPCRequest
-         *
+         * 
          * @param {Number}
          *            resultCode
          * @param {Number}

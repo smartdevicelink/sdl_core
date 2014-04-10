@@ -234,32 +234,31 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 void PerformInteractionRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
 
-
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
-        if (true == vr_response_recived) {
-          unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
-          DisablePerformInteraction();
-          CommandRequestImpl::onTimeOut();
-        } else {
-          ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-            correlation_id(),
-          default_timeout());
-        }
-        break;
-      }
-    case mobile_apis::InteractionMode::VR_ONLY: {
-        ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-          correlation_id(),
-        default_timeout());
-        break;
-      }
-    case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      if (true == vr_response_recived) {
         unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
         DisablePerformInteraction();
         CommandRequestImpl::onTimeOut();
-        break;
+      } else {
+        ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                                 correlation_id(),
+                                                                 default_timeout());
       }
+      break;
+    }
+    case mobile_apis::InteractionMode::VR_ONLY: {
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+      break;
+    }
+    case mobile_apis::InteractionMode::MANUAL_ONLY: {
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
+      DisablePerformInteraction();
+      CommandRequestImpl::onTimeOut();
+      break;
+    }
   };
 }
 
@@ -363,27 +362,6 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
   }
 }
 
-void PerformInteractionRequest::SendVrDeleteCommand(
-    application_manager::ApplicationSharedPtr const app) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
-
-  const PerformChoiceSetMap& choice_set_map =
-      app->performinteraction_choice_set_map();
-
-  PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-  for (; choice_set_map.end() != it; ++it) {
-    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-        strings::choice_set);
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      msg_params[strings::app_id] = app->app_id();
-      msg_params[strings::cmd_id] = choice_set.getElement(j).getElement(
-          strings::choice_id);
-      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-    }
-  }
-}
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {

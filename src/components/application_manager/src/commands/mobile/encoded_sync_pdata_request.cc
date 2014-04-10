@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
@@ -45,7 +46,7 @@ namespace commands {
 const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FILENAME =
     "policy_sync_data.dat";
 const std::string EncodedSyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME =
-    "policies";
+    profile::Profile::instance()->app_storage_folder() + "/policies";
 
 EncodedSyncPDataRequest::EncodedSyncPDataRequest(
     const MessageSharedPtr& message)
@@ -58,8 +59,8 @@ EncodedSyncPDataRequest::~EncodedSyncPDataRequest() {
 void EncodedSyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "EncodedSyncPDataRequest::Run");
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-      connection_key());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -87,16 +88,14 @@ void EncodedSyncPDataRequest::Run() {
   const std::vector<uint8_t> file_data(string_pdata.begin(),
                                              string_pdata.end());
 
-  std::string relative_file_path = file_system::CreateDirectory(
-          TEMPORARY_HARDCODED_FOLDERNAME);
-  relative_file_path += "/";
-  relative_file_path += sync_file_name;
+  std::string file_path =
+      file_system::CreateDirectory(TEMPORARY_HARDCODED_FOLDERNAME);
 
   mobile_apis::Result::eType save_result =
-      ApplicationManagerImpl::instance()->SaveBinary(
-                                      file_data,
-                                      file_system::FullPath(relative_file_path),
-                                      0);
+      ApplicationManagerImpl::instance()->SaveBinary(file_data,
+                                                     file_path,
+                                                     sync_file_name,
+                                                     0);
 
   switch(save_result) {
     case mobile_apis::Result::SUCCESS:

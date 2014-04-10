@@ -485,20 +485,37 @@ class ApplicationManagerImpl : public ApplicationManager,
       return resume_ctrl_;
     }
 
+    /**
+     * Generate grammar ID
+     *
+     * @return New grammar ID
+     */
     uint32_t GenerateGrammarID();
+
     /*
      * @brief Save binary data to specified directory
      *
      * @param binary data
      * @param path for saving data
+     * @param file_name File name
      * @param offset for saving data to existing file with offset.
      *        If offset is 0 - create new file ( overrite existing )
      *
+     *
      * @return SUCCESS if file was saved, other code otherwise
      */
-    mobile_apis::Result::eType SaveBinary(const std::vector<uint8_t>& binary_data,
-                                          const std::string& file_path,
-                                          const uint32_t offset);
+    mobile_apis::Result::eType SaveBinary(
+        const std::vector<uint8_t>& binary_data,
+        const std::string& file_path,
+        const std::string& file_name,
+        const uint32_t offset);
+
+    /**
+     * @brief Get available app space
+     * @param name of app
+     * @return free app space.
+     */
+    uint32_t GetAvailableSpaceForApp(const std::string& name);
 
     /*
      * @brief returns true if HMI is cooperating

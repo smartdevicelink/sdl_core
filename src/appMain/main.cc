@@ -67,7 +67,7 @@ const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
-const char kApplicationVersion[] = "Develop";
+const char kApplicationVersion[] = "SDL_RB_3.3";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
@@ -219,8 +219,11 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Components initialization
-
-  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  if ((argc > 1)&&(0 != argv)) {
+      profile::Profile::instance()->config_file_name(argv[1]);
+  } else {
+      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  }
 
   main_namespace::LifeCycle::instance()->StartComponents();
 

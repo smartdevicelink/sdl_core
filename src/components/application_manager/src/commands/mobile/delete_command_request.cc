@@ -81,6 +81,7 @@ void DeleteCommandRequest::Run() {
   msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
   msg_params[strings::app_id] = application->app_id();
+  msg_params[strings::grammar_id] = application->get_grammar_id();
 
   // we should specify amount of required responses in the 1st request
   uint32_t chaining_counter = 0;

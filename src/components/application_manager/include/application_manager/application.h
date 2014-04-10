@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
+#include "application_manager/message.h"
 #include <set>
 
 namespace NsSmartDeviceLink {
@@ -417,8 +418,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
-    virtual uint32_t get_grammar_id() = 0;
+    virtual uint32_t get_grammar_id() const = 0 ;
     virtual void set_grammar_id(uint32_t value) = 0;
+
+    virtual void set_protocol_version(ProtocolVersion protocol_version) = 0;
+    virtual ProtocolVersion protocol_version() = 0;
 
     virtual bool AddFile(AppFile& file) = 0;
     virtual const AppFilesMap& getAppFiles() const = 0;
