@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.systemrequest;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 
 /**
  * Interface to communicate back to the SDL about special OnSystemRequest
@@ -42,8 +43,10 @@ public interface ISystemRequestProxy {
      * @param filename the requested file's name
      * @param data     file's contents
      * @param fileType type of the file
+     * @param requestType type of the request
      * @throws SyncException if there is an error during preparations to send the request
      */
-    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType)
+    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType,
+                                         RequestType requestType)
             throws SyncException;
 }

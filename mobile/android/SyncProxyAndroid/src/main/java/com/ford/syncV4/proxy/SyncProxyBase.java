@@ -1527,7 +1527,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         if (requestType == RequestType.HTTP) {
             if (fileType == FileType.BINARY) {
-                processPolicyTableSnapshot(msg.getBulkData(), fileType);
+                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
             } else {
                 final Vector<String> urls = msg.getUrl();
                 if (urls != null) {
@@ -1573,7 +1573,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         } else if (requestType == RequestType.PROPRIETARY) {
             if (fileType == FileType.JSON) {
-                processPolicyTableSnapshot(msg.getBulkData(), fileType);
+                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
             }
         }
     }
@@ -3181,7 +3181,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     @Override
-    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType)
+    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType,
+                                         RequestType requestType)
             throws SyncException {
         final int correlationID = nextCorrelationId();
 
@@ -3192,7 +3193,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             sendRPCRequest(putFile);
         } else if (fileType == FileType.JSON) {
             SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
-                    correlationID);
+                    correlationID, requestType);
 
             sendRPCRequest(systemRequest);
         }
@@ -3226,12 +3227,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param snapshot bytes array of the data
      * @param fileType type of the file
      */
-    private void processPolicyTableSnapshot(final byte[] snapshot, final FileType fileType) {
+    private void processPolicyTableSnapshot(final byte[] snapshot, final FileType fileType,
+                                            final RequestType requestType) {
         Runnable request = new Runnable() {
             @Override
             public void run() {
                 onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
-                        snapshot, fileType);
+                        snapshot, fileType, requestType);
             }
         };
         if (_callbackToUIThread) {

@@ -17,6 +17,7 @@ import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 
 import java.io.File;
@@ -53,7 +54,7 @@ public class PolicyFilesManager {
      * @param logAdapter Log Adapter (TO BE REMOVED)
      */
     public static void sendPolicyTableUpdate(ISystemRequestProxy proxy, FileType fileType,
-                                             LogAdapter logAdapter) {
+                                             RequestType requestType, LogAdapter logAdapter) {
         String mPolicyTableUpdatePath = AppPreferencesManager.getPolicyTableUpdateFilePath();
         //Environment.getExternalStorageDirectory() +
         //        "/policyTableUpdate.json";
@@ -86,7 +87,7 @@ public class PolicyFilesManager {
 
         try {
             String mPolicyTableUpdateFileName = "PolicyTableUpdate";
-            proxy.putPolicyTableUpdateFile(mPolicyTableUpdateFileName, data, fileType);
+            proxy.putPolicyTableUpdateFile(mPolicyTableUpdateFileName, data, fileType, requestType);
             SafeToast.showToastAnyThread("Policy Update sent");
             if (logAdapter != null) {
                 logAdapter.logMessage("Policy Update sent", Log.DEBUG, true);

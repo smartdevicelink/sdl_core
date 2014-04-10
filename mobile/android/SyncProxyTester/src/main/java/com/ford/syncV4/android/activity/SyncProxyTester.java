@@ -122,6 +122,7 @@ import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.LayoutMode;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SoftButtonType;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
@@ -3138,10 +3139,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * This is a callback function for the result of the
      * {@link com.ford.syncV4.android.activity.PolicyFilesSetUpDialog}
      */
-    public void onPolicyFilesSetUpDialogResult_SendUpdate(FileType fileType) {
-        Logger.d("PolicyFilesSetUpDialogResult selected file type:" + fileType);
+    public void onPolicyFilesSetUpDialogResult_SendUpdate(FileType fileType, RequestType requestType) {
+        Logger.d("PolicyFilesSetUpDialogResult fileType:" + fileType + " requestType:" + requestType);
         if (mBoundProxyService != null) {
-            mBoundProxyService.sendPolicyTableUpdate(fileType);
+            mBoundProxyService.sendPolicyTableUpdate(fileType, requestType);
         }
     }
 

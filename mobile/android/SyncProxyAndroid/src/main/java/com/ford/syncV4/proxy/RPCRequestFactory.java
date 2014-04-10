@@ -40,6 +40,7 @@ import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
@@ -391,10 +392,11 @@ public class RPCRequestFactory {
      * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
      */
     public static SystemRequest buildSystemRequest(String fileName, byte[] data,
-                                             Integer correlationID) {
+                                             Integer correlationID, RequestType requestType) {
         SystemRequest systemRequest = new SystemRequest();
         systemRequest.setFileName(fileName);
         systemRequest.setBulkData(data);
+        systemRequest.setRequestType(requestType);
         systemRequest.setCorrelationID(correlationID);
 
         return systemRequest;

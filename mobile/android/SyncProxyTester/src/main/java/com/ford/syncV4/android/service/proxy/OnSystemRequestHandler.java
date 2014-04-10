@@ -11,6 +11,7 @@ import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 
@@ -84,7 +85,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
 
     @Override
     public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data,
-                                             final FileType fileType) {
+                                             final FileType fileType, final RequestType requestType) {
         // TODO : Logging to be refactored
         if (data == null) {
             if (mLogAdapter != null) {
@@ -110,7 +111,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
             @Override
             public void run() {
 
-                PolicyFilesManager.sendPolicyTableUpdate(proxy, fileType, mLogAdapter);
+                PolicyFilesManager.sendPolicyTableUpdate(proxy, fileType, requestType, mLogAdapter);
 
             }
         }, 500);
