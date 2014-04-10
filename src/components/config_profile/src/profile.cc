@@ -44,6 +44,7 @@ namespace {
 const char* kMainSection = "MAIN";
 const char* kPolicySection = "Policy";
 
+const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 // Heartbeat is disabled by default
 const uint32_t kDefaultHeartBeatTimeout = 0;
 }
@@ -82,6 +83,7 @@ Profile::Profile()
       list_files_in_none_(5),
       app_info_storage_("app_info.dat"),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
+      policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
       transport_manager_disconnect_timeout_(0),
       use_last_state_(false),
       supported_diag_modes_(),
@@ -252,6 +254,10 @@ const std::string& Profile::preloaded_pt_file() const {
   return preloaded_pt_file_;
 }
 
+const std::string& Profile::policies_snapshot_file_name() const{
+  return policy_snapshot_file_name_;
+}
+
 uint32_t Profile::transport_manager_disconnect_timeout() const {
   return transport_manager_disconnect_timeout_;
 }
@@ -340,6 +346,12 @@ void Profile::UpdateValues() {
     LOG4CXX_INFO(logger_, "Set preloaded policy file to "
                  << preloaded_pt_file_);
   }
+
+  (void) ReadStringValue(&policy_snapshot_file_name_,
+                         kDefaultPoliciesSnapshotFileName,
+                         kPolicySection, "PathToSnapshot");
+  policy_snapshot_file_name_ = app_config_folder_ +
+                               '/' + policy_snapshot_file_name_;
 
   if ((0
       != ini_read_value(config_file_name_.c_str(), "MAIN", "HMICapabilities",
