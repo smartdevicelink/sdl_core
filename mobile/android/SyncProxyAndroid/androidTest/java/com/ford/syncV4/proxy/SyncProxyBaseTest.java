@@ -21,9 +21,8 @@ import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.util.logger.Logger;
+import com.ford.syncV4.transport.TCPTransportConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -211,7 +210,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
-                session.getSessionId(), falsem ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         Mockito.verify(proxyListenerMock, times(1)).onAudioServiceStart(false, sessionID);
     }
 
@@ -356,7 +355,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.closeSession(false);
         proxy.setSyncConnection(mock(SyncConnection.class));
-        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertFalse(proxy.currentSession.isServicesEmpty());
         assertTrue(proxy.currentSession.hasService(ServiceType.RPC));
     }
@@ -376,7 +375,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC,
                 sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");

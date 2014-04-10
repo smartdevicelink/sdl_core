@@ -402,7 +402,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                                 BitConverter
                                         .intFromByteArray(expectedMsgDataSize,
                                                 0),
-                                BitConverter.intFromByteArray(msgDataSize, 0));
+                                BitConverter.intFromByteArray(msgDataSize, 0)
+                        );
 
                         final byte[] msgMessageID =
                                 extractByteArrayPart(msgBytes, 8, 4);
@@ -410,7 +411,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                                 BitConverter
                                         .intFromByteArray(expectedMsgMessageID,
                                                 0),
-                                BitConverter.intFromByteArray(msgMessageID, 0));
+                                BitConverter.intFromByteArray(msgMessageID, 0)
+                        );
                         break;
 
                     case 1:
@@ -418,8 +420,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                                 extractByteArrayPart(msgBytes, 0, 4);
                         final byte[] expectedMsgData = expectedMsgMessageID;
                         assertEquals("Data should contain hash ID", BitConverter
-                                .intFromByteArray(expectedMsgData, 0),
-                                BitConverter.intFromByteArray(msgData, 0));
+                                        .intFromByteArray(expectedMsgData, 0),
+                                BitConverter.intFromByteArray(msgData, 0)
+                        );
                         break;
 
                     default:
@@ -615,7 +618,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
 
         });
-        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false
+        protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertTrue("test should pass", passed[0]);
     }
@@ -678,8 +681,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        }catch (IllegalArgumentException exp){
-            assertTrue(" should not get here",false);
+        } catch (IllegalArgumentException exp) {
+            assertTrue(" should not get here", false);
         }
     }
 
@@ -697,8 +700,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-            assertTrue(" should not get here",false);
-        }catch (IllegalArgumentException exp){
+            assertTrue(" should not get here", false);
+        } catch (IllegalArgumentException exp) {
             assertNotNull(exp);
         }
     }
@@ -739,10 +742,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-        protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
+        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
         verify(protocolListener).onResetHeartbeat();
     }
-
 
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {
@@ -755,15 +757,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[10];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[10];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 0, data.length);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + data.length];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 0 , expectedResult,frameHeaderArray.length, data.length);
+        byte[] expectedResult = new byte[frameHeaderArray.length + data.length];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 0, expectedResult, frameHeaderArray.length, data.length);
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
 
@@ -792,15 +794,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[100];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[100];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 20, 20);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + 20];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 20 , expectedResult,frameHeaderArray.length, 20);
+        byte[] expectedResult = new byte[frameHeaderArray.length + 20];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 20, expectedResult, frameHeaderArray.length, 20);
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
 
@@ -814,15 +816,15 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[100];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[100];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 90, 20);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + 10];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 90 , expectedResult,frameHeaderArray.length, 10);
+        byte[] expectedResult = new byte[frameHeaderArray.length + 10];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 90, expectedResult, frameHeaderArray.length, 10);
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
 }

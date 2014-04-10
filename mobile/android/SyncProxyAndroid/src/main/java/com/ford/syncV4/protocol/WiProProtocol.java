@@ -193,7 +193,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 messageID++;
 
-                ProtocolFrameHeader firstHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType, sessionID, messageID, protocolVersionToSend);
+                ProtocolFrameHeader firstHeader = ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType, sessionID, messageID, getProtocolVersion());
                 firstHeader.setEncrypted(false);
 
                 // Assemble first frame.
@@ -232,7 +232,7 @@ public class WiProProtocol extends AbstractProtocol {
                     }
 
 
-                    ProtocolFrameHeader consecHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType, sessionID, bytesToWrite, frameSequenceNumber, messageID, protocolVersionToSend);
+                    ProtocolFrameHeader consecHeader = ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType, sessionID, bytesToWrite, frameSequenceNumber, messageID, getProtocolVersion());
                     consecHeader.setEncrypted(encrypted);
 
                     handleProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
@@ -241,7 +241,7 @@ public class WiProProtocol extends AbstractProtocol {
             } else {
                 messageID++;
 
-                ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID, data.length, messageID, protocolVersionToSend);
+                ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID, data.length, messageID, getProtocolVersion());
                 header.setEncrypted(encrypted);
 
                 handleProtocolFrameToSend(header, data, 0, data.length);
