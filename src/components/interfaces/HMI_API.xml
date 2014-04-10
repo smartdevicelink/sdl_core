@@ -1990,6 +1990,30 @@
         <description>ID of application that requested this RPC.</description>
       </param>
     </function>
+    <function name="PolicyUpdate" messagetype="request">
+      <description>
+        From: SDL
+        To: SYNCP Manager
+        Asks SYNCP Manager to send given Policy Table snapshot to the backend
+      </description>
+      <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>
+          Location of policy table snapshot
+        </description>
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Send attempt timeout in seconds
+        </description>
+      </param>
+      <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
+        <description>
+          Array of delays to wait after failed atempts
+        </description>
+      </param>
+    </function>
+    <function name="PolicyUpdate" messagetype="response">
+    </function>
     <!-- End of SyncP RPC-->
 
     <function name="OnSDLClose" messagetype="notification">
@@ -3588,31 +3612,6 @@
       <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
         <description>Location of decrypted policy table Json file on target</description>
       </param>
-    </function>
-
-    <function name="PolicyUpdate" messagetype="request">
-      <description>
-        From: SDL
-        To: SYNCP Manager
-        Asks SYNCP Manager to send given Policy Table snapshot to the backend
-      </description>
-      <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
-        <description>
-          Location of policy table snapshot
-        </description>
-      </param>
-      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
-        <description>
-          Send attempt timeout in seconds
-        </description>
-      </param>
-      <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
-        <description>
-          Array of delays to wait after failed atempts
-        </description>
-      </param>
-    </function>
-    <function name="PolicyUpdate" messagetype="response">
     </function>
 
     <function name="OnPolicyUpdate" messagetype="notification">

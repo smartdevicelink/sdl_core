@@ -80,8 +80,8 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary(const std::string& path) {
     policy_manager_ = CreateManager();
     policy_manager_->set_listener(this);
 #if defined (EXTENDED_POLICY)
-    exchange_handler_ = new PTExchangeHandlerImpl(this);
-    //exchange_handler_ = new PTExchangeHandlerExt(this);
+    //exchange_handler_ = new PTExchangeHandlerImpl(this);
+    exchange_handler_ = new PTExchangeHandlerExt(this);
 #else
     exchange_handler_ = new PTExchangeHandlerImpl(this);
 #endif
@@ -590,6 +590,12 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 #else
   permissions.isSDLAllowed = true;
 #endif
+
+  if (permissions.isSDLAllowed &&
+      PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
+    printf("\n\t\t\t\t\tUpdate is requried\n");
+    StartPTExchange();
+  }
 
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
       correlation_id);

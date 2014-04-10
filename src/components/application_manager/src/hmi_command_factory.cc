@@ -324,7 +324,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::SDL_PolicyUpdate: {
+    case hmi_apis::FunctionID::BasicCommunication_PolicyUpdate: {
       if (is_response) {
         command.reset(new commands::SDLPolicyUpdateResponse(message));
       } else {

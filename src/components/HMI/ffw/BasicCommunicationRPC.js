@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -275,7 +275,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 SDL.SDLModel.set('policyURLs', response.result.urls);
 
-                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDl.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
             }
         },
 
@@ -389,9 +389,9 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
-                    this.OnReceivedPolicyUpdate(SDl.SettingsController.policyUpdateFile);
+                    this.OnReceivedPolicyUpdate(SDL.SettingsController.policyUpdateFile);
 
-                    SDl.SettingsController.policyUpdateFile = null;
+                    SDL.SettingsController.policyUpdateFile = null;
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
@@ -430,8 +430,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                     //TO DO
                     //popUp activation
                 }
-                if (request.method == "SDL.PolicyUpdate") {
-                    SDl.SettingsController.policyUpdateFile = request.params.file;
+                if (request.method == "BasicCommunication.PolicyUpdate") {
+                    SDL.SettingsController.policyUpdateFile = request.params.file;
                     this.GetURLS(7); //Service type for policies
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
@@ -482,9 +482,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "id": this.client.generateId(),
                 "method": "SDL.GetURLS",
                 "params": {
-                    "service": {
-                        "service": type
-                    }
+                    "service": type
                 }
             };
             this.client.send(JSONMessage);
@@ -582,7 +580,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -719,7 +717,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            id
          * @param {String}
@@ -778,7 +776,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Send request if application was activated
-         * 
+         *
          * @param {number} appID
          */
         OnAppActivated: function(appID) {
@@ -857,7 +855,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Invoked by UI component when user switches to any functionality which
          * is not other mobile application.
-         * 
+         *
          * @params {String}
          * @params {Number}
          */
@@ -897,7 +895,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Used by HMI when User chooses to exit application.
-         * 
+         *
          * @params {Number}
          */
         ExitApplication: function(appID) {
@@ -918,7 +916,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Sent by HMI to SDL to close all registered applications.
-         * 
+         *
          * @params {String}
          */
         ExitAllApplications: function(reason) {
@@ -940,7 +938,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Response with params of the last one supports mixing audio (ie
          * recording TTS command and playing audio).
-         * 
+         *
          * @params {Number}
          */
         MixingAudioSupported: function(attenuatedSupported) {
@@ -964,7 +962,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Response with Results by user/HMI allowing SDL functionality or
          * disallowing access to all mobile apps.
-         * 
+         *
          * @params {Number}
          */
         AllowAllApps: function(allowed) {
@@ -987,7 +985,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Response with result of allowed application
-         * 
+         *
          * @params {Number}
          */
         AllowApp: function(request) {
@@ -1021,7 +1019,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Notifies if device was choosed
-         * 
+         *
          * @param {String}
          *            deviceName
          * @param {Number}
@@ -1047,7 +1045,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
         /**
          * Send error response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
