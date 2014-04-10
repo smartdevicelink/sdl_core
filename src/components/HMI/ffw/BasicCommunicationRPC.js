@@ -1078,7 +1078,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         /**
          * Initiated by HMI.
          */
-        OnSystemRequest: function(type, appID, fileName, utl) {
+        OnSystemRequest: function(type, appID, fileName, url) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
 
@@ -1089,13 +1089,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "method": "BasicCommunication.OnSystemRequest",
                 "params":{
                     "requestType": type,
-                    "url": ["http://127.0.0.1"],
+                    "url": url,
                     "fileType": "JSON",
                     "offset": 1000,
                     "length": 10000,
                     "timeout": 500,
                     "fileName": fileName ? fileName : document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
-                    "appID": SDL.SDLAppController.model ? SDL.SDLAppController.model.appID : null
+                    "appID": appID ? appID : "default"
                 }
             };
             this.client.send(JSONMessage);

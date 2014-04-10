@@ -44,8 +44,8 @@ namespace application_manager {
 namespace commands {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+  const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
 OnSystemRequestNotification::~OnSystemRequestNotification() {
@@ -58,7 +58,7 @@ void OnSystemRequestNotification::Run() {
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   params[strings::function_id] =
-          static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+    static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
   std::string app_id = msg_params[strings::app_id].asString();
 
@@ -67,18 +67,24 @@ void OnSystemRequestNotification::Run() {
     int32_t selected_app_id = policy_handler->GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
-            "Can't select application to forward OnSystemRequestNotification");
+                   "Can't select application to forward OnSystemRequestNotification");
       return;
     }
     ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
     ApplicationSharedPtr selected_app = app_mgr->application(selected_app_id);
-    if(!selected_app.valid()) {
+    if (!selected_app.valid()) {
       LOG4CXX_ERROR(logger_, "PolicyHandler selected invalid app_id");
       return;
     }
-    params[strings::connection_key] = static_cast<int32_t>(selected_app_id);
+    params[strings::connection_key] = selected_app_id;
   } else {
-    params[strings::connection_key] = app_id;
+    ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
+    if (!app.valid()) {
+      LOG4CXX_WARN(logger_, "Application with such id is not yet registered.");
+      return;
+    }
+    params[strings::connection_key] = app->app_id();
   }
 
   SendNotificationToMobile(message_);
