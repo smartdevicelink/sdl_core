@@ -532,10 +532,11 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         final String filename = "dummy";
         final List<String> urls = Arrays.asList(filename);
         final FileType fileType = FileType.BINARY;
+        final RequestType requestType = RequestType.HTTP;
         final byte[] data = new byte[2048];
 
         OnSystemRequest onSystemRequest = new OnSystemRequest();
-        onSystemRequest.setRequestType(RequestType.HTTP);
+        onSystemRequest.setRequestType(requestType);
         onSystemRequest.setUrl(new Vector<String>(urls));
         onSystemRequest.setFileType(fileType);
         onSystemRequest.setBulkData(data);
@@ -548,17 +549,18 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
-                notNull(ISystemRequestProxy.class), eq(data), eq(fileType));
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 
     public void testOnSystemRequestPROPRIETARYandJSONTriggerProcessPolicy() throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
         final FileType fileType = FileType.JSON;
+        final RequestType requestType = RequestType.PROPRIETARY;
         final byte[] data = new byte[2048];
 
         OnSystemRequest onSystemRequest = new OnSystemRequest();
-        onSystemRequest.setRequestType(RequestType.PROPRIETARY);
+        onSystemRequest.setRequestType(requestType);
         onSystemRequest.setFileType(fileType);
         onSystemRequest.setBulkData(data);
 
@@ -570,7 +572,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
-                notNull(ISystemRequestProxy.class), eq(data), eq(fileType));
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 
     // TODO other request types
