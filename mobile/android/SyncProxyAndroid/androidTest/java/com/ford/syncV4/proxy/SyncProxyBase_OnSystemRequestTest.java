@@ -56,8 +56,8 @@ import static org.mockito.Mockito.when;
  */
 public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
-    private static final int PUTFILE_FUNCTIONID = 32;
-    private static final int ONSYSTEMREQUEST_FUNCTIONID = 32781;
+    private static final int PUT_FILE_FUNCTION_ID = 32;
+    private static final int ON_SYSTEM_REQUEST_FUNCTION_ID = 32781;
     private static final int WAIT_TIMEOUT = 20;
     private WiProProtocol protocolMock;
     private SyncConnection connectionMock;
@@ -119,7 +119,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -139,7 +139,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -160,7 +160,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setUrl(new Vector<String>(urls));
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -189,7 +189,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -211,7 +211,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setRequestType(RequestType.HTTP);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -232,7 +232,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -256,7 +256,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -281,7 +281,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -307,7 +307,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -333,7 +333,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setOffset(offset);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -359,7 +359,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -393,7 +393,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -415,7 +415,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setRequestType(RequestType.FILE_RESUME);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -441,7 +441,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -467,7 +467,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -495,7 +495,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         verify(connectionMock, times(1)).sendMessage(pmCaptor.capture());
 
         final ProtocolMessage pm = pmCaptor.getValue();
-        assertThat(pm.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        assertThat(pm.getFunctionID(), is(PUT_FILE_FUNCTION_ID));
         checkSystemPutFileJSON(pm.getData(), 0, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
@@ -520,10 +520,57 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         verify(connectionMock, times(1)).sendMessage(pmCaptor.capture());
 
         final ProtocolMessage pm = pmCaptor.getValue();
-        assertThat(pm.getFunctionID(), is(PUTFILE_FUNCTIONID));
+        assertThat(pm.getFunctionID(), is(PUT_FILE_FUNCTION_ID));
         checkSystemPutFileJSON(pm.getData(), offset, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
+    }
+
+    public void testOnSystemRequestHTTPandBINARYTriggerProcessPolicy() throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final String filename = "dummy";
+        final List<String> urls = Arrays.asList(filename);
+        final FileType fileType = FileType.BINARY;
+        final byte[] data = new byte[2048];
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setRequestType(RequestType.HTTP);
+        onSystemRequest.setUrl(new Vector<String>(urls));
+        onSystemRequest.setFileType(fileType);
+        onSystemRequest.setBulkData(data);
+
+        ProtocolMessage protocolMessage = createNotificationProtocolMessage(onSystemRequest,
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
+        protocolMessage.setBulkData(data);
+        emulateIncomingMessage(proxy, protocolMessage);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType));
+    }
+
+    public void testOnSystemRequestPROPRIETARYandJSONTriggerProcessPolicy() throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final FileType fileType = FileType.JSON;
+        final byte[] data = new byte[2048];
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setRequestType(RequestType.PROPRIETARY);
+        onSystemRequest.setFileType(fileType);
+        onSystemRequest.setBulkData(data);
+
+        ProtocolMessage protocolMessage = createNotificationProtocolMessage(onSystemRequest,
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
+        protocolMessage.setBulkData(data);
+        emulateIncomingMessage(proxy, protocolMessage);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType));
     }
 
     // TODO other request types
@@ -536,25 +583,25 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         return connectionMock;
     }
 
-    private ProtocolMessage createNotificationProtocolMessage(
-            RPCNotification notification, int functionID) {
-        ProtocolMessage incomingPM0 = new ProtocolMessage();
-        incomingPM0.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+    private ProtocolMessage createNotificationProtocolMessage(RPCNotification notification,
+                                                              int functionID) {
+        ProtocolMessage protocolMessage = new ProtocolMessage();
+        protocolMessage.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         byte[] msgBytes = marshaller.marshall(notification, ProtocolConstants.PROTOCOL_VERSION_TWO);
-        incomingPM0.setData(msgBytes);
-        incomingPM0.setJsonSize(msgBytes.length);
-        incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
-        incomingPM0.setFunctionID(functionID);
-        incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
-        return incomingPM0;
+        protocolMessage.setData(msgBytes);
+        protocolMessage.setJsonSize(msgBytes.length);
+        protocolMessage.setMessageType(MessageType.RPC);
+        protocolMessage.setSessionType(ServiceType.RPC);
+        protocolMessage.setFunctionID(functionID);
+        protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
+        return protocolMessage;
     }
 
-    private void emulateIncomingMessage(SyncProxyALM proxy, ProtocolMessage pm) {
+    private void emulateIncomingMessage(SyncProxyALM proxy, ProtocolMessage protocolMessage) {
         // synchronous:
-        // proxy.dispatchIncomingMessage(pm);
+        // proxy.dispatchIncomingMessage(protocolMessage);
         // asynchronous, more correct:
-        proxy.getInterfaceBroker().onProtocolMessageReceived(pm);
+        proxy.getInterfaceBroker().onProtocolMessageReceived(protocolMessage);
     }
 
     private void checkSystemPutFileJSON(byte[] data, int offset, int length,

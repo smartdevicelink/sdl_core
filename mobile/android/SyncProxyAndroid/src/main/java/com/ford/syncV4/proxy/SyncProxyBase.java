@@ -3132,8 +3132,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return onSystemRequestHandler;
     }
 
-    public void setOnSystemRequestHandler(
-            IOnSystemRequestHandler onSystemRequestHandler) {
+    public void setOnSystemRequestHandler(IOnSystemRequestHandler onSystemRequestHandler) {
         this.onSystemRequestHandler = onSystemRequestHandler;
     }
 
