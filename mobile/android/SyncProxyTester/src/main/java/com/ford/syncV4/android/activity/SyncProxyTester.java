@@ -116,6 +116,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -3134,11 +3135,13 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     /**
-     *
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.PolicyFilesSetUpDialog}
      */
-    public void onPolicyFilesSetUpDialogResult_SendUpdate() {
+    public void onPolicyFilesSetUpDialogResult_SendUpdate(FileType fileType) {
+        Logger.d("PolicyFilesSetUpDialogResult selected file type:" + fileType);
         if (mBoundProxyService != null) {
-            mBoundProxyService.sendPolicyTableUpdate();
+            mBoundProxyService.sendPolicyTableUpdate(fileType);
         }
     }
 

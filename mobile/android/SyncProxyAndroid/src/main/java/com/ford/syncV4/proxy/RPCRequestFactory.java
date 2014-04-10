@@ -31,6 +31,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
+import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -380,6 +381,23 @@ public class RPCRequestFactory {
     public static PutFile buildPutFile() {
         PutFile putFile = new PutFile();
         return putFile;
+    }
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.PutFile} object
+     * @param fileName      name of the associated file
+     * @param data          bytes array
+     * @param correlationID correlation id of the request
+     * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
+     */
+    public static SystemRequest buildSystemRequest(String fileName, byte[] data,
+                                             Integer correlationID) {
+        SystemRequest systemRequest = new SystemRequest();
+        systemRequest.setFileName(fileName);
+        systemRequest.setBulkData(data);
+        systemRequest.setCorrelationID(correlationID);
+
+        return systemRequest;
     }
 
     /**

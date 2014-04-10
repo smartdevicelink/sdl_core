@@ -1,4 +1,5 @@
 [CW15]
+* SyncProxyAndroid SDK: OnSystemRequest processing logic change
 * SyncProxyTester: Restore connection from 'Proxy Start' command
 * SyncProxyTester | SyncProxyAndroid SDK: OnSystemRequest and every PutFileResponse log into SPT
 * SyncProxyAndroid SDK: Eliminate defects with HM timeout

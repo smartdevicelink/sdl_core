@@ -11,12 +11,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
+import com.ford.syncV4.proxy.rpc.enums.FileType;
+import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 
@@ -27,6 +32,8 @@ import com.lamerman.SelectionMode;
  * Time: 12:14 PM
  */
 public class PolicyFilesSetUpDialog extends DialogFragment {
+
+    private static final String CLASS_NAME = PolicyFilesSetUpDialog.class.getSimpleName();
 
     private EditText mSelectedPolicyUpdateFileNameView;
 
@@ -65,11 +72,31 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
             }
         });
 
+        final Spinner fileTypeView = (Spinner) layout.findViewById(R.id.send_policy_update_file_type);
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        final String[] fileTypesArray = getActivity().getResources().getStringArray(R.array.policy_update_file_type);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.policy_update_file_type, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        fileTypeView.setAdapter(adapter);
+
         Button sendPolicyUpdateView = (Button) layout.findViewById(R.id.send_policy_table_update_btn_view);
         sendPolicyUpdateView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate();
+                // TODO : Reconsider this check point
+                FileType fileType = FileType.JSON;
+                String selectedObjectString = String.valueOf(fileTypeView.getSelectedItem());
+                if (selectedObjectString == null) {
+                    if (selectedObjectString.equalsIgnoreCase(fileTypesArray[0])) {
+                        fileType = FileType.JSON;
+                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[1])) {
+                        fileType = FileType.BINARY;
+                    }
+                }
+                ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate(fileType);
             }
         });
 

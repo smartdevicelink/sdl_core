@@ -83,7 +83,8 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data) {
+    public void onPolicyTableSnapshotRequest(final ISystemRequestProxy proxy, byte[] data,
+                                             final FileType fileType) {
         // TODO : Logging to be refactored
         if (data == null) {
             if (mLogAdapter != null) {
@@ -109,7 +110,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
             @Override
             public void run() {
 
-                PolicyFilesManager.sendPolicyTableUpdate(proxy, mLogAdapter);
+                PolicyFilesManager.sendPolicyTableUpdate(proxy, fileType, mLogAdapter);
 
             }
         }, 500);

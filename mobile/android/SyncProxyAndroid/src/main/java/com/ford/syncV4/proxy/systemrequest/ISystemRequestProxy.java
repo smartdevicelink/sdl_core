@@ -41,8 +41,9 @@ public interface ISystemRequestProxy {
      *
      * @param filename the requested file's name
      * @param data     file's contents
+     * @param fileType type of the file
      * @throws SyncException if there is an error during preparations to send the request
      */
-    public void putPolicyTableUpdateFile(String filename, byte[] data)
+    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType)
             throws SyncException;
 }

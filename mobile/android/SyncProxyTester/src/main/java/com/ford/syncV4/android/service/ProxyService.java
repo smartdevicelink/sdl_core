@@ -460,8 +460,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         super.onDestroy();
     }
 
-    public void sendPolicyTableUpdate() {
-        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, mLogAdapter);
+    public void sendPolicyTableUpdate(FileType fileType) {
+        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, mLogAdapter);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
