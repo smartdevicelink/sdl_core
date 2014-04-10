@@ -45,12 +45,12 @@ public class ProtocolMessageConverter {
         // TODO - get rid of this ugly if statements. FAST!
         if ((mServiceType == ServiceType.Mobile_Nav ||
                 mServiceType == ServiceType.Audio_Service) &&
-                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_THREE) {
             mData = mProtocolMsg.getData();
             return this;
         }
 
-        if (mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
 
             // TODO - Ugly way to create Secure Service payload data (binary frame header + data)
             if (mServiceType == ServiceType.Heartbeat) {

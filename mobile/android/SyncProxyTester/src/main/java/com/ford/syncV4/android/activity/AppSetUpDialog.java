@@ -105,8 +105,11 @@ public class AppSetUpDialog extends DialogFragment {
                 ipAddressView.setEnabled(!isChecked);
             }
         });
-        final EditText protocolVerView = (EditText) view.findViewById(R.id.protocol_ver_view);
-        protocolVerView.setText(String.valueOf(ProtocolConstants.PROTOCOL_VERSION_MIN));
+        final EditText protocolMinVerView = (EditText) view.findViewById(R.id.protocol_min_view);
+        protocolMinVerView.setText(String.valueOf(ProtocolConstants.PROTOCOL_VERSION_MIN));
+
+        final EditText protocolMaxVerView = (EditText) view.findViewById(R.id.protocol_max_view);
+        protocolMaxVerView.setText(String.valueOf(ProtocolConstants.PROTOCOL_VERSION_MAX));
 
         final boolean mIsNSDSupported = Build.VERSION.SDK_INT >= Const.JELLYBEAN_API_LEVEL;
 
@@ -332,14 +335,30 @@ public class AppSetUpDialog extends DialogFragment {
     }
 
     private void saveProtocolVersion(View view) {
-        final EditText protocolVerView = (EditText) view.findViewById(R.id.protocol_ver_view);
-        String protocolVersionString = protocolVerView.getText().toString().trim();
-        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+        final EditText protocolMinVerView = (EditText) view.findViewById(R.id.protocol_min_view);
+        final EditText protocolMaxVerView = (EditText) view.findViewById(R.id.protocol_max_view);
+        String protocolMinVersionString = protocolMinVerView.getText().toString().trim();
+        String protocolMaxVersionString = protocolMaxVerView.getText().toString().trim();
+        int protocolMinVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+        int protocolMaxVersion = ProtocolConstants.PROTOCOL_VERSION_MAX;
         try {
-            protocolVersion = Integer.valueOf(protocolVersionString);
+            protocolMinVersion = Integer.valueOf(protocolMinVersionString);
         } catch (NumberFormatException e) {
-            Logger.w(LOG_TAG + " Can not parse protocol version to int");
+            Logger.w(LOG_TAG + " Can not parse protocol min version to int");
         }
-        AppPreferencesManager.setProtocolVersion(protocolVersion);
+        try {
+            protocolMaxVersion = Integer.valueOf(protocolMaxVersionString);
+        } catch (NumberFormatException e) {
+            Logger.w(LOG_TAG + " Can not parse protocol max version to int");
+        }
+
+        /**
+         * For the Test Cases ONLY
+         */
+        ProtocolConstants.PROTOCOL_VERSION_MAX = (byte) protocolMaxVersion;
+        ProtocolConstants.PROTOCOL_VERSION_MIN = (byte) protocolMinVersion;
+
+        AppPreferencesManager.setProtocolMinVersion(protocolMinVersion);
+        AppPreferencesManager.setProtocolMaxVersion(protocolMaxVersion);
     }
 }

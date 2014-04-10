@@ -347,7 +347,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-                Logger.i(TAG, "Using protocol version " + versionNumber);
+                Logger.i(TAG, " Using protocol version " + versionNumber);
                 String ipAddress = settings.getString(
                         Const.Transport.PREFS_KEY_TRANSPORT_IP,
                         Const.Transport.PREFS_DEFAULT_TRANSPORT_IP);
@@ -389,8 +389,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
 
-
-                mTestConfig.setProtocolVersion((byte) AppPreferencesManager.getProtocolVersion());
+                mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
+                mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources/*sync proxy configuration resources*/,
@@ -446,7 +446,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     private int getCurrentProtocolVersion() {
-        return Const.PROTOCOL_VERSION_2;
+        return ProtocolConstants.PROTOCOL_VERSION_MIN;
     }
 
     private boolean getAutoSetAppIconFlag() {
@@ -832,8 +832,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         try {
             mSyncProxy.resetProxy();
         } catch (SyncException e1) {
-            e1.printStackTrace();
-            //something goes wrong, & the proxy returns as null, stop the service.
+            Logger.e("Reset proxy error:" + e1);
+            //something goes wrong, the proxy returns as null, stop the service.
             //do not want a running service with a null proxy
             if (mSyncProxy == null) {
                 stopServiceBySelf();
@@ -858,8 +858,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * ******************************
-     * * SYNC AppLink Base Callback's **
-     * *******************************
+     *  SYNC AppLink Base Callbacks *
+     * ******************************
      */
     @Override
     public void onAddSubMenuResponse(AddSubMenuResponse response) {
@@ -1045,9 +1045,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Soft Button Image Callback's **
-     * *******************************
+     * *******************************************
+     *  SYNC AppLink Soft Button Image Callbacks *
+     * *******************************************
      */
     @Override
     public void onPutFileResponse(PutFileResponse response) {
@@ -1085,7 +1085,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mTesterMain.getXMLTestThreadContext().notify();
             }
         }
-        //Logger.d(CLASS_NAME, "ListFiles:" + response.getFilenames().toString());
     }
 
     @Override
@@ -1125,9 +1124,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Updated Callback's **
-     * *******************************
+     * *********************************
+     *  SYNC AppLink Updated Callbacks *
+     * *********************************
      */
     @Override
     public void onAddCommandResponse(AddCommandResponse response) {
@@ -1194,9 +1193,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink New Callback's **
-     * *******************************
+     * *****************************
+     *  SYNC AppLink New Callbacks *
+     * *****************************
      */
     @Override
     public void onSliderResponse(SliderResponse response) {
@@ -1247,10 +1246,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(notification);
     }
 
+    @Override
+    public void onPutFileRequest(PutFile putFile) {
+        createDebugMessageForAdapter(putFile);
+    }
+
     /**
-     * ******************************
-     * * SYNC AppLink Audio Pass Thru Callback's **
-     * *******************************
+     * *****************************************
+     *  SYNC AppLink Audio Pass Thru Callbacks *
+     * *****************************************
      */
     @Override
     public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
@@ -1306,9 +1310,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Vehicle Data Callback's **
-     * *******************************
+     * **************************************
+     *  SYNC AppLink Vehicle Data Callbacks *
+     * **************************************
      */
     @Override
     public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
@@ -1371,8 +1375,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink TBT Callback's **
+     * *******************************
+     *  SYNC AppLink TBT Callbacks   *
      * *******************************
      */
     @Override

@@ -8,6 +8,7 @@ package com.ford.syncV4.protocol;
  */
 
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * This class handle protocol version and version negotiation
@@ -45,6 +46,7 @@ public class ProtocolVersion {
      */
     public void setCurrentVersion(byte value) {
         mCurrentVersion = negotiateVersion(value);
+        Logger.d("Negotiated v:" + mCurrentVersion);
     }
 
     /**
@@ -53,7 +55,9 @@ public class ProtocolVersion {
      * @return negotiated version value
      */
     private byte negotiateVersion(byte value) {
-        //Log.d(LOG_TAG, "Negotiate value:" + mCurrentVersion + " to:" + value);
+        Logger.d("Negotiate value:" + mCurrentVersion + " to:" + value +
+                " min:" + ProtocolConstants.PROTOCOL_VERSION_MIN +
+                " max:" + ProtocolConstants.PROTOCOL_VERSION_MAX);
         // Check the bounds conditions of the
         if (value <= 0 || value > Byte.MAX_VALUE) {
             return mCurrentVersion;
@@ -64,6 +68,6 @@ public class ProtocolVersion {
         if (value >= ProtocolConstants.PROTOCOL_VERSION_MAX) {
             return ProtocolConstants.PROTOCOL_VERSION_MAX;
         }
-        return mCurrentVersion;
+        return value;
     }
 }

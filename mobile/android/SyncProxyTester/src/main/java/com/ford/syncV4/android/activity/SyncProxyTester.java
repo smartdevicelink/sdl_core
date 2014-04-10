@@ -70,6 +70,7 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
@@ -863,7 +864,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private void showProtocolPropertiesInTitle() {
         final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        int protocolVersion = getCurrentProtocolVersion();
+        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
         boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
         String transportType = null;
         switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
@@ -878,7 +879,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 transportType = "USB";
                 break;
         }
-        setTitle(getResources().getString(R.string.tester_app_name) + " (v"
+        setTitle(getResources().getString(R.string.tester_app_name) + " (Start protocol v:"
                 + protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
                 + transportType + ")");
     }
@@ -959,10 +960,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return super.onPrepareOptionsMenu(menu);
     }
 
-    private int getCurrentProtocolVersion() {
-        return Const.PROTOCOL_VERSION_2;
-    }
-
     private boolean getIsMedia() {
         return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
                 Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
@@ -973,9 +970,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         switch (item.getItemId()) {
             case PROXY_START:
-                BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-                if (mBtAdapter != null && !mBtAdapter.isEnabled()) {
-                    mBtAdapter.enable();
+                if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
+                    BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+                    if (mBtAdapter != null && !mBtAdapter.isEnabled()) {
+                        mBtAdapter.enable();
+                    }
+
+                    if (!mBtAdapter.isDiscovering()) {
+                        Intent discoverableIntent = new Intent(
+                                BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
+                                300);
+                        startActivity(discoverableIntent);
+                    }
                 }
 
                 /*// TODO : To be reconsider
@@ -985,15 +992,28 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     mBoundProxyService.setLogAdapter(mLogAdapter);
                 }*/
 
-                if (mBoundProxyService != null) {
-                    mBoundProxyService.reset();
-                }
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                executorService.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mBoundProxyService != null) {
 
-                if (mBtAdapter != null && !mBtAdapter.isDiscovering()) {
-                    Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                    discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-                    startActivity(discoverableIntent);
-                }
+                            // We need to set listener to null and then re-init it, unless there will
+                            // be another way to check it at 'reset()' method
+
+                            if (!mBoundProxyService.isSyncProxyConnected()) {
+                                mBoundProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+                            }
+                            mBoundProxyService.setProxyServiceEvent(null);
+
+                            mBoundProxyService.reset();
+
+                            // Re-init listener
+
+                            mBoundProxyService.setProxyServiceEvent(SyncProxyTester.this);
+                        }
+                    }
+                });
                 return true;
 
             case XML_TEST:

@@ -51,6 +51,7 @@ import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.PerformInteraction;
 import com.ford.syncV4.proxy.rpc.PresetBankCapabilities;
 import com.ford.syncV4.proxy.rpc.PutFile;
+import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalProperties;
@@ -322,16 +323,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private ProxyMessageDispatcher<ProtocolMessage> _outgoingProxyMessageDispatcher;
     private ProxyMessageDispatcher<InternalProxyMessage> _internalProxyMessageDispatcher;
 
-    public Boolean getCallbackToUIThread() {
+    public boolean getCallbackToUIThread() {
         return _callbackToUIThread;
     }
 
-    public void setCallbackToUIThread(Boolean callbackToUIThread) {
+    public void setCallbackToUIThread(boolean callbackToUIThread) {
         this._callbackToUIThread = callbackToUIThread;
     }
 
     // Flag indicating if callbacks should be called from UIThread
-    private Boolean _callbackToUIThread = false;
+    private boolean _callbackToUIThread = false;
 
     public Handler getMainUIHandler() {
         return _mainUIHandler;
@@ -1363,7 +1364,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     Logger.i("Incoming protocol version:" + protocolVersion);
                     if (protocolVersion == 1) {
                         Logger.w("Incorrect incoming protocol version, expected min 2 but was 1");
-                        protocolVersion = 2;
                     }
 
                     Hashtable hash = new Hashtable();
@@ -1375,13 +1375,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             final Hashtable<String, Object> mhash = _jsonRPCMarshaller.unmarshall(message.getData());
                             if (mhash != null) {
                                 hashTemp.put(Names.parameters, mhash);
-                            } else {
-                                String err = "Can't parse JSON: " + new String(message.getData());
-                                Logger.e(err);
                             }
                         }
                         FunctionID functionID = new FunctionID();
-                        hashTemp.put(Names.function_name, functionID.getFunctionName(message.getFunctionID()));
+                        String functionName = functionID.getFunctionName(message.getFunctionID());
+                        if (functionName != null) {
+                            hashTemp.put(Names.function_name, functionName);
+                        } else {
+                            Logger.e("Dispatch Incoming Message - function name is null");
+                        }
                         if (message.getRPCType() == ProtocolMessage.RPCTYPE_REQUEST) {
                             hash.put(Names.request, hashTemp);
                         } else if (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) {
@@ -1444,7 +1446,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         }
                     });
                 } else {
-                    Logger.d("TRACE", "Error info:" + msg.getThrowable().toString());
+                    Logger.d("Error info:" + msg.getThrowable().toString());
                     _proxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
@@ -1539,7 +1541,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         } catch (OutOfMemoryError e) {
             Logger.i("OutOfMemory exception while sending request " + request.getFunctionName());
-            throw new SyncException("OutOfMemory exception while sending request " + request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
+            throw new SyncException("OutOfMemory exception while sending request " +
+                    request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
         }
     }
 
@@ -1556,22 +1559,41 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * multiple protocol messages) if it is.
      *
      * @param response response from the SDL
+     * @param hash serialized hashtable of the response
      * @return true if the response has been handled; false when the
      * corresponding request is not partial or in case of an error
      */
-    protected boolean handlePartialRPCResponse(RPCResponse response) {
+    protected boolean handlePartialRPCResponse(final RPCResponse response, Hashtable hash) {
         boolean success = false;
         final Integer responseCorrelationID = response.getCorrelationID();
         if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
             if (Result.SUCCESS == response.getResultCode()) {
-                final ProtocolMessage pm =
-                        protocolMessageHolder.peekNextMessage(
-                                responseCorrelationID);
-                if (pm.getFunctionID() ==
-                        FunctionID.getFunctionID(response.getFunctionName())) {
+                final ProtocolMessage pm = protocolMessageHolder.peekNextMessage(
+                        responseCorrelationID);
+                if (pm.getFunctionID() == FunctionID.getFunctionID(response.getFunctionName())) {
                     protocolMessageHolder.popNextMessage(responseCorrelationID);
-                    queueOutgoingMessage(pm);
 
+                    //
+                    // Send partial response message to the application
+                    //
+
+                    if (response.getFunctionName() != null &&
+                            response.getFunctionName().equals(Names.PutFile)) {
+                        final PutFileResponse putFile = new PutFileResponse(hash);
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    _proxyListener.onPutFileResponse(putFile);
+                                }
+                            });
+                        } else {
+                            _proxyListener.onPutFileResponse(putFile);
+                        }
+                    }
+
+                    queueOutgoingMessage(pm);
                     success = true;
                 }
             } else {
@@ -1593,12 +1615,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     protected boolean handleLastInternalResponse(RPCResponse response) {
         final Integer correlationID = response.getCorrelationID();
-        final boolean contains = internalRequestCorrelationIDs.contains(
-                correlationID);
+        final boolean contains = internalRequestCorrelationIDs.contains(correlationID);
         if (contains) {
             internalRequestCorrelationIDs.remove(correlationID);
         }
-
         return contains;
     }
 
@@ -1608,6 +1628,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected void handleOnSystemRequest(Hashtable hash) {
         final OnSystemRequest msg = new OnSystemRequest(hash);
+
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onOnSystemRequest(msg);
+                }
+            });
+        } else {
+            _proxyListener.onOnSystemRequest(msg);
+        }
+
         if (RequestType.HTTP == msg.getRequestType()) {
             if (msg.getFileType() == FileType.JSON) {
                 Runnable request = new Runnable() {
@@ -1664,18 +1697,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             } else {
                 Logger.w("OnSystemRequest FILE_RESUME: a required parameter is missing");
-            }
-        } else {
-            if (_callbackToUIThread) {
-                // Run in UI thread
-                _mainUIHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        _proxyListener.onOnSystemRequest(msg);
-                    }
-                });
-            } else {
-                _proxyListener.onOnSystemRequest(msg);
             }
         }
     }
@@ -1751,38 +1772,46 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Takes an RPCRequest and sends it to SYNC.  Responses are captured through callback on IProxyListener.
+     * Takes an {@link com.ford.syncV4.proxy.RPCRequest} and sends it to SYNC. Responses are
+     * captured through callback on {@link com.ford.syncV4.proxy.IProxyListener}.
      *
      * @throws SyncException
      */
     public void sendRPCRequest(RPCRequest request) throws SyncException {
         if (_proxyDisposed) {
-            throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+            throw new SyncException("This object has been disposed, it is no long capable of " +
+                    "executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
         }
 
         // Test if request is null
         if (request == null) {
-            Logger.i("Application called sendRPCRequest method with a null RPCRequest.");
-            throw new IllegalArgumentException("sendRPCRequest cannot be called with a null request.");
+            Logger.w("Application called sendRPCRequest method with a null RPCRequest.");
+            throw new IllegalArgumentException("sendRPCRequest cannot be called with a null " +
+                    "request.");
         }
 
-        Logger.i("Application called sendRPCRequest method for RPCRequest: ." + request.getFunctionName());
+        Logger.i("Application called sendRPCRequest method for RPCRequest: ." +
+                request.getFunctionName());
 
         checkSyncConnection();
 
         // Test for illegal correlation ID
         if (isCorrelationIDProtected(request.getCorrelationID())) {
 
-            Logger.i("Application attempted to use the reserved correlation ID, " + request.getCorrelationID());
-            throw new SyncException("Invalid correlation ID. The correlation ID, " + request.getCorrelationID()
+            Logger.w("Application attempted to use the reserved correlation ID, " +
+                    request.getCorrelationID());
+            throw new SyncException("Invalid correlation ID. The correlation ID, " +
+                    request.getCorrelationID()
                     + " , is a reserved correlation ID.", SyncExceptionCause.RESERVED_CORRELATION_ID);
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
         if (!_appInterfaceRegisterd && !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
-                Logger.i("Application attempted to send an RPCRequest (non-registerAppInterface), before the interface was registerd.");
-                throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
+                Logger.w("Application attempted to send an RPCRequest (non-registerAppInterface), " +
+                        "before the interface was registerd.");
+                throw new SyncException("SYNC is currently unavailable. RPC Requests cannot be " +
+                        "sent.", SyncExceptionCause.SYNC_UNAVAILALBE);
             }
         }
 
@@ -1790,21 +1819,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (request.getFunctionName().equals(Names.RegisterAppInterface)
                     || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
-                    Logger.i("Application attempted to send a RegisterAppInterface or UnregisterAppInterface while using ALM.");
+                    Logger.w("Application attempted to send a RegisterAppInterface or " +
+                            "UnregisterAppInterface while using ALM.");
                     throw new SyncException("The RPCRequest, " + request.getFunctionName() +
-                            ", is unnallowed using the Advanced Lifecycle Management Model.", SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
+                            ", is unnallowed using the Advanced Lifecycle Management Model.",
+                            SyncExceptionCause.INCORRECT_LIFECYCLE_MODEL);
                 }
             }
         }
+
         sendRPCRequestPrivate(request);
-    } // end-method
+    }
 
     private void checkSyncConnection() throws SyncException {
         // Test if SyncConnection is null
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null || !mSyncConnection.getIsConnected()) {
                 Logger.i("Application attempted to send and RPCRequest without a connected transport.");
-                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest cannot be called until SYNC has been connected.", SyncExceptionCause.SYNC_UNAVAILALBE);
+                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest " +
+                        "cannot be called until SYNC has been connected.",
+                        SyncExceptionCause.SYNC_UNAVAILALBE);
             }
         }
     }
@@ -1818,10 +1852,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private boolean allowExtraTesting() {
         return _proxyListener instanceof IProxyListenerALMTesting;
-    }
-
-    public void sendRPCRequest(RPCMessage request) throws SyncException {
-        sendRPCRequest(request);
     }
 
     protected void notifyProxyClosed(final String info, final Exception e) {
@@ -3250,7 +3280,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
                                              boolean encrypted, byte version,
                                              String correlationID) {
-            if (mSyncConnection.getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            if (mSyncConnection.getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 handleServiceStarted(serviceType, sessionID, encrypted, correlationID);
                 if (getSyncConnection() == null) {
                     return;
@@ -3364,12 +3394,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                               FileType fileType) throws SyncException {
         final int correlationID = nextCorrelationId();
 
-        PutFile putFile = RPCRequestFactory.buildPutFile(filename, fileType, null, data,
+        final PutFile putFile = RPCRequestFactory.buildPutFile(filename, fileType, null, data,
                 correlationID);
         putFile.setSystemFile(true);
         if (offset != null) {
             putFile.setOffset(offset);
             putFile.setLength(data.length);
+        }
+
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onPutFileRequest(putFile);
+                }
+            });
+        } else {
+            _proxyListener.onPutFileRequest(putFile);
         }
 
         sendRPCRequest(putFile);

@@ -171,7 +171,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatACKReceived() {
-        synchronized (HeartbeatThreadHandler_Lock) {
+        synchronized (Listener_Lock) {
             Logger.d(CLASS_NAME + " ACK received");
             ackReceived = true;
         }

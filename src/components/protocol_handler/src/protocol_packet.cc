@@ -106,12 +106,12 @@ RawMessagePtr ProtocolPacket::serializePacket() {
   packet[offset++] = packet_header_.dataSize >> 8;
   packet[offset++] = packet_header_.dataSize;
 
-  if (packet_header_.version == PROTOCOL_VERSION_2) {
+  if (packet_header_.version != PROTOCOL_VERSION_1) {
     packet[offset++] = packet_header_.messageId >> 24;
     packet[offset++] = packet_header_.messageId >> 16;
     packet[offset++] = packet_header_.messageId >> 8;
     packet[offset++] = packet_header_.messageId;
-    }
+  }
 
   DCHECK((offset + packet_data_.totalDataBytes) <= MAXIMUM_FRAME_DATA_SIZE);
 
@@ -173,7 +173,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_header_.dataSize |= message[offset++] << 8u;
   packet_header_.dataSize |= message[offset++];
 
-  if (packet_header_.version == PROTOCOL_VERSION_2) {
+  if (packet_header_.version != PROTOCOL_VERSION_1) {
     packet_header_.messageId = message[offset++] << 24u;
     packet_header_.messageId |= message[offset++] << 16u;
     packet_header_.messageId |= message[offset++] << 8u;

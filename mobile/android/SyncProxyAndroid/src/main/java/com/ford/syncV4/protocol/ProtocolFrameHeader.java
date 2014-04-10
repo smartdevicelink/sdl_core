@@ -51,10 +51,12 @@ public class ProtocolFrameHeader {
 		int dataSize = BitConverter.intFromByteArray(header, 4);
 		msg.setDataSize(dataSize);
 		
-		if (version == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+		if (version >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
 			int messageID = BitConverter.intFromByteArray(header, 8);
 			msg.setMessageID(messageID);
-		} else msg.setMessageID(0);
+		} else {
+            msg.setMessageID(0);
+        }
 		
 		return msg;
 	}

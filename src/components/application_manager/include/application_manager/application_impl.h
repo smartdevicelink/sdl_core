@@ -78,6 +78,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const Version& version() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
+  const std::string& folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
   const uint32_t put_file_in_none_count() const;
@@ -106,6 +107,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
+
+  virtual void set_protocol_version(ProtocolVersion protocol_version);
+  virtual ProtocolVersion protocol_version();
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
@@ -167,6 +171,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   mobile_api::AudioStreamingState::eType audio_streaming_state_;
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
+
+  ProtocolVersion protocol_version_;
 
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;

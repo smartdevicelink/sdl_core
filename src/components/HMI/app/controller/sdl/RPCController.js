@@ -998,7 +998,7 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("turnIcon" in params
-                        && params.turnIcon.imageType !== "DYNAMIC") {
+                        && (params.turnIcon.imageType !== "DYNAMIC" && params.turnIcon.imageType !== "STATIC")) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1404,7 +1404,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("cmdIcon" in params
-                        && params.cmdIcon.imageType !== "DYNAMIC") {
+                        && (params.cmdIcon.imageType !== "DYNAMIC" && params.cmdIcon.imageType !== "STATIC")) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"

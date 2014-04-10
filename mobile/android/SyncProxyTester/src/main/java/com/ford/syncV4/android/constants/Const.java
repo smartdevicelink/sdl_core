@@ -8,7 +8,8 @@ public class Const {
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
 
 	// Protocol properties
-	public static final String PREFS_KEY_PROTOCOL_VERSION = "protocolVersion";
+	public static final String PREFS_KEY_PROTOCOL_MIN_VERSION = "protocolMinVersion";
+	public static final String PREFS_KEY_PROTOCOL_MAX_VERSION = "protocolMaxVersion";
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
     public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
@@ -32,10 +33,6 @@ public class Const {
 	public static final String PREFS_DEFAULT_HMILANG = Language.EN_US.name();
 	public static final boolean PREFS_DEFAULT_AUTOSETAPPICON = true;
 	public static final boolean PREFS_DEFAULT_DISABLE_LOCK_WHEN_TESTING = false;
-
-    // Protocol version constants
-    public static final int PROTOCOL_VERSION_1 = 1;
-    public static final int PROTOCOL_VERSION_2 = 2;
 
 	// Transport properties
 	public static final class Transport {

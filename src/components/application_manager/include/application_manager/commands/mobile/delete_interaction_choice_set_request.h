@@ -73,6 +73,8 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    */
   bool ChoiceSetInUse(ApplicationConstSharedPtr app);
 
+  void SendVrDeleteCommand(ApplicationSharedPtr app);
+
   DISALLOW_COPY_AND_ASSIGN(DeleteInteractionChoiceSetRequest);
 };
 

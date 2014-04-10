@@ -40,6 +40,7 @@ void ResumeCtrl::SaveAllApplications() {
 
 void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplication");
+
   DCHECK(application.get());
 
   Json::Value* json_app = NULL;
@@ -85,7 +86,6 @@ void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   (*json_app)[strings::application_subscribtions] =
       GetApplicationSubscriptions(application);
   (*json_app)[strings::application_files] = GetApplicationFiles(application);
-  (*json_app)[strings::application_show] = GetApplicationShow(application);
   (*json_app)[strings::time_stamp] = (uint32_t)time(NULL);
   (*json_app)[strings::audio_streaming_state] = application->audio_streaming_state();
 }
@@ -163,23 +163,10 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
   Json::Value& global_properties = saved_app[strings::application_global_properties];
   Json::Value& subscribtions = saved_app[strings::application_subscribtions];
-  Json::Value& application_files= saved_app[strings::application_files];
-  Json::Value& application_show= saved_app[strings::application_show];
+  Json::Value& application_files = saved_app[strings::application_files];
   uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
   application->set_grammar_id(app_grammar_id);
 
-  //show
-  if (!application_show.isNull()) {
-    smart_objects::SmartObject message;
-    Formatters::CFormatterJsonBase::jsonValueToObj(application_show, message);
-    application->set_show_command(message);
-
-    requests = MessageHelper::CreateShowRequestToHMI(application);
-    for (MessageHelper::SmartObjectList::iterator it = requests.begin();
-         it != requests.end(); ++it) {
-      ProcessHMIRequest(*it, true);
-    }
-  }
 
   // files
   for (Json::Value::iterator json_it = application_files.begin();
@@ -494,8 +481,6 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
   LOG4CXX_INFO(logger_, saved_app.toStyledString());
   Json::Value& app_commands = saved_app[strings::application_commands];
   Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
-  Json::Value& application_show = saved_app[strings::application_show];
-
 
   //add commands
   for (Json::Value::iterator json_it = app_commands.begin();
@@ -527,37 +512,6 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
     }
   }
 
-  //show
-  if (!application_show.isNull()) {
-    smart_objects::SmartObject message = smart_objects::SmartObject(
-                                         smart_objects::SmartType::SmartType_Map);
-    Formatters::CFormatterJsonBase::jsonValueToObj(application_show, message);
-
-    mobile_apis::Result::eType processing_result =
-        MessageHelper::ProcessSoftButtons(message, application);
-    if (mobile_apis::Result::SUCCESS != processing_result) {
-      if (mobile_apis::Result::INVALID_DATA == processing_result) {
-        LOG4CXX_ERROR(logger_, "ProcessSoftButtons failed");
-        return false ;
-      }
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-        LOG4CXX_WARN(logger_, "ProcessSoftButtons UNSUPPORTED_RESOURCE!");
-      }
-    }
-
-    mobile_apis::Result::eType verification_result =
-        MessageHelper::VerifyImageFiles(message, application);
-
-    if (mobile_apis::Result::SUCCESS != verification_result) {
-      if (mobile_apis::Result::INVALID_DATA == verification_result) {
-        LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
-        return false;
-      }
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
-        LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
-      }
-    }
-  }
   return true;
 }
 

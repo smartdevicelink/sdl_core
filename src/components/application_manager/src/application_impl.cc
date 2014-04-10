@@ -33,14 +33,13 @@
 #include <string>
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
-#include "utils/file_system.h"
 #include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
+#include "utils/file_system.h"
 
 namespace {
 log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
 }
-
-
 
 namespace application_manager {
 
@@ -64,7 +63,8 @@ ApplicationImpl::ApplicationImpl(
       tts_speak_state_(false),
       device_(0),
       grammar_id_(0),
-      usage_report_(global_app_id, statistics_manager) {
+      usage_report_(global_app_id, statistics_manager),
+      protocol_version_(ProtocolVersion::kV3) {
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -129,6 +129,10 @@ const Version& ApplicationImpl::version() const {
 
 const std::string& ApplicationImpl::name() const {
   return app_name_;
+}
+
+const std::string& ApplicationImpl::folder_name() const {
+  return name() + mobile_app_id()->asString();
 }
 
 bool ApplicationImpl::is_media_application() const {
@@ -266,8 +270,17 @@ bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
 
+void ApplicationImpl::set_protocol_version(ProtocolVersion protocol_version) {
+  protocol_version_ = protocol_version;
+}
+
+ProtocolVersion ApplicationImpl::protocol_version() {
+  return protocol_version_;
+}
+
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
+
     app_files_[file.file_name] = file;
     return true;
   }
@@ -364,11 +377,13 @@ uint32_t ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  std::string directory_name = file_system::FullPath(name());
+  std::string directory_name =
+      profile::Profile::instance()->app_storage_folder();
+  directory_name += "/" + name();
+
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(
             directory_name);
-
     AppFilesMap::const_iterator app_files_it;
 
     for (std::vector<std::string>::const_iterator it = files.begin();

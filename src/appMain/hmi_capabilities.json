@@ -81,9 +81,20 @@
                         		"imageResolution":
                                          {
                                           	"resolutionWidth":35,
-						"resolutionHeight":35
+                                                "resolutionHeight":35
                                          }
-                        	}
+                        	},
+                                {
+                                    "name":"graphic",
+                                        "imageTypeSupported":
+                                         [
+                                         ],
+                                        "imageResolution":
+                                         {
+                                                "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
+                         	}
                         	
                         ],
 			"mediaClockFormats":
@@ -124,7 +135,7 @@
 		"audioPassThruCapabilities":
 		{
 			"samplingRate"	: "44KHZ",
-			"bitsPerSample" : "8_BIT",
+			"bitsPerSample" : "RATE_8_BIT",
 			"audioType"		: "PCM"
 		},
 		"hmiZoneCapabilities":"FRONT",

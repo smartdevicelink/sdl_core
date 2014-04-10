@@ -176,6 +176,9 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void OnSystemError(int code);
 
+  void OnCurrentDeviceIdUpdateRequired(
+      const std::string& policy_app_id) {}
+
  protected:
   /**
    * Starts next retry exchange policy table

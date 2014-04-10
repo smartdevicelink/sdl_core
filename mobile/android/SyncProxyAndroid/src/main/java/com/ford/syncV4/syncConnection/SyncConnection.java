@@ -179,7 +179,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
             // Apply a value which has been set for the Test Cases
             if (mTestConfig != null) {
-                ((WiProProtocol) _protocol).set_TEST_ProtocolVersion(mTestConfig.getProtocolVersion());
+                ((WiProProtocol) _protocol).set_TEST_ProtocolMinVersion(mTestConfig.getProtocolMinVersion());
+                ((WiProProtocol) _protocol).set_TEST_ProtocolMaxVersion(mTestConfig.getProtocolMaxVersion());
             }
         }
 
@@ -229,6 +230,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 _protocol = null;
             }
         }
+        Logger.d("Close connection:" + keepConnection);
         if (!keepConnection) {
             stopHeartbeatMonitor();
         }

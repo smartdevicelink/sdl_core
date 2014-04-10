@@ -298,7 +298,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 SDL.SDLModel.onFileRemoved(notification.params);
             }
 
-if (notification.method == this.onSystemErrorNotification) {
+            if (notification.method == this.onSystemErrorNotification) {
 
                 var message = "Undefined";
 
@@ -313,7 +313,7 @@ if (notification.method == this.onSystemErrorNotification) {
 
             if (notification.method == this.onStatusUpdateNotification) {
 
-                SDL.PopUp.popupActivate(notification.status);
+                SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
             if (notification.method == this.onAppPermissionChangedNotification) {
@@ -338,7 +338,7 @@ if (notification.method == this.onSystemErrorNotification) {
             if (notification.method == this.onSDLCloseNotification) {
                 //notification handler method
             }
-if (notification.method == this.onSDLConsentNeededNotification) {
+            if (notification.method == this.onSDLConsentNeededNotification) {
 
                 //Show popUp
                 SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
@@ -399,7 +399,7 @@ if (notification.method == this.onSDLConsentNeededNotification) {
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
-if (request.method == "BasicCommunication.GetSystemInfo") {
+                if (request.method == "BasicCommunication.GetSystemInfo") {
 
                     Em.Logger.log("BasicCommunication.GetSystemInfo Response");
 

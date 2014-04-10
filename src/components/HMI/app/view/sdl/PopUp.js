@@ -67,7 +67,7 @@ SDL.PopUp = Em.ContainerView.create({
         target: 'parentView',
         buttonAction: true,
         onDown: false,
-        disabledBinding: this.buttons
+        disabledBinding: 'parentView.buttons'
     }),
 
     buttonCancel: SDL.Button.extend( {
@@ -77,7 +77,7 @@ SDL.PopUp = Em.ContainerView.create({
         target: 'parentView',
         buttonAction: false,
         onDown: false,
-        disabledBinding: this.buttons
+        disabledBinding: 'parentView.buttons'
     }),
 
     message: SDL.Label.extend({
@@ -95,11 +95,10 @@ SDL.PopUp = Em.ContainerView.create({
     deactivate: function(event) {
         this.set('active', false);
 
-        if (event) {
+        if (this.callback) {
             this.callback(event.buttonAction);
         }
 
-        SDL.SDLController.onSystemContextChange();
 
         this.set('callback', null);
     },
@@ -109,9 +108,9 @@ SDL.PopUp = Em.ContainerView.create({
 
         if (callback) {
             this.set('callback', callback);
-            this.set('buttons', true);
-        } else {
             this.set('buttons', false);
+        } else {
+            this.set('buttons', true);
             setTimeout(function(){
                 SDL.PopUp.deactivate()
             },
@@ -119,6 +118,5 @@ SDL.PopUp = Em.ContainerView.create({
         }
 
         this.set('content', message);
-        SDL.SDLController.onSystemContextChange();
     }
 });

@@ -362,27 +362,6 @@ void PerformInteractionRequest::ProcessAppUnregisteredNotification
   }
 }
 
-void PerformInteractionRequest::SendVrDeleteCommand(
-    application_manager::ApplicationSharedPtr const app) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::SendVrDeleteCommand");
-
-  const PerformChoiceSetMap& choice_set_map =
-      app->performinteraction_choice_set_map();
-
-  PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-  for (; choice_set_map.end() != it; ++it) {
-    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-        strings::choice_set);
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      msg_params[strings::app_id] = app->app_id();
-      msg_params[strings::cmd_id] = choice_set.getElement(j).getElement(
-          strings::choice_id);
-      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-    }
-  }
-}
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
