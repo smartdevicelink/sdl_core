@@ -32,6 +32,8 @@
 
 #include "transport_manager/mme/mme_connection_factory.h"
 #include "transport_manager/mme/iap_connection.h"
+#include "transport_manager/mme/mme_device.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -47,7 +49,26 @@ TransportAdapter::Error MmeConnectionFactory::Init() {
 TransportAdapter::Error MmeConnectionFactory::CreateConnection(
   const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
 
-  return TransportAdapter::NOT_SUPPORTED;
+  DeviceSptr device = controller_->FindDevice(device_uid);
+  if (!device) {
+    LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
+    return TransportAdapter::BAD_PARAM;
+  }
+  MmeDevicePtr mme_device = DeviceSptr::static_pointer_cast<MmeDevice>(device);
+  std::string mount_point = mme_device->mount_point();
+  IAPConnection* iap_connection = new IAPConnection(device_uid, app_handle, controller_, mount_point);
+  ConnectionSptr connection(iap_connection);
+
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+
+  if (iap_connection->Init()) {
+    LOG4CXX_INFO(logger_, "iAP connection initialised");
+    return TransportAdapter::OK;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Could not initialise iAP connection");
+    return TransportAdapter::FAIL;
+  }
 }
 
 void MmeConnectionFactory::Terminate() {

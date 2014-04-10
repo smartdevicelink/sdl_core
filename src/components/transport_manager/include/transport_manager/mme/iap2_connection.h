@@ -49,7 +49,7 @@ class IAP2Connection : public Connection {
   IAP2Connection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const char* device_path);
+    const std::string& device_path);
 
   bool Init();
 

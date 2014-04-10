@@ -84,7 +84,12 @@ void PulseThreadDelegate::threadMain() {
         }
       }
       else {
-        LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        if (run_) {
+          LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        }
+        else {
+          LOG4CXX_INFO(logger_, "QNX channel " << chid_ << " is apparently destroyed");
+        }
       }
     }
   }
@@ -93,7 +98,7 @@ void PulseThreadDelegate::threadMain() {
 bool PulseThreadDelegate::exitThreadMain() {
   run_ = false;
 
-  LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel" << chid_);
+  LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel " << chid_);
   if (ConnectDetach(coid_) != -1) {
     LOG4CXX_DEBUG(logger_, "Disconnected from QNX channel " << chid_);
   }

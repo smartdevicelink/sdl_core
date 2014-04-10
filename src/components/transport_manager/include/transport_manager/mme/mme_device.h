@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 
+#include "utils/shared_ptr.h"
 #include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
@@ -42,6 +43,10 @@ class MmeDevice : public Device {
  public:
   MmeDevice(uint64_t msid, const std::string& mount_point, const std::string& name, const DeviceUID& unique_device_id);
 
+  const std::string& mount_point() const {
+    return mount_point_;
+  }
+
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
   virtual ApplicationList GetApplicationList() const;
@@ -50,6 +55,8 @@ class MmeDevice : public Device {
   uint64_t msid_;
   std::string mount_point_;
 };
+
+typedef utils::SharedPtr<MmeDevice> MmeDevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

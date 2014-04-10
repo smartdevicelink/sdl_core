@@ -87,6 +87,7 @@ if (BUILD_MME_SUPPORT)
   target_link_libraries ("TransportManager" ipod)
   target_link_libraries ("TransportManager" iap2client)
   target_link_libraries ("TransportManager" mme)
+  target_link_libraries ("TransportManager" qdb)
 endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)

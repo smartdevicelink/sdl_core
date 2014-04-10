@@ -41,7 +41,7 @@ const char* IAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxof
 IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
   TransportAdapterController* controller,
-  const char* device_path) : device_uid_(device_uid),
+  const std::string& device_path) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
   device_path_(device_path) {

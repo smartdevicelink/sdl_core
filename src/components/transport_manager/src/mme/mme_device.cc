@@ -41,7 +41,7 @@ MmeDevice::MmeDevice(uint64_t msid, const std::string& mount_point, const std::s
 bool MmeDevice::IsSameAs(const Device* other_device) const {
   const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
   if (other_mme_device) {
-    return (other_mme_device->msid_ == msid_) && (other_mme_device->mount_point_ == mount_point_);
+    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
   }
   else {
     return false;

@@ -34,12 +34,14 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_
 
 #include <mme/mme.h>
+#include <qdb/qdb.h>
 
 #include "utils/threads/thread.h"
 #include "utils/threads/pulse_thread_delegate.h"
-
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+
+#include "transport_manager/mme/mme_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -55,14 +57,23 @@ class MmeDeviceScanner : public DeviceScanner {
   virtual bool IsInitialised() const;
 
 private:
+  typedef std::set<MmeDevicePtr> DeviceContainer;
+
   void OnDeviceArrived(uint64_t msid);
   void OnDeviceLeft(uint64_t msid);
+  void NotifyDevicesUpdated();
+  bool GetMmeList(std::vector<uint64_t>& msids);
+  bool GetMmeInfo(uint64_t msid, std::string& mount_point);
 
   static const char* mme_name;
+  static const char* qdb_name;
 
+  TransportAdapterController* controller_;
   bool initialised_;
   mme_hdl_t* mme_hdl_;
+  qdb_hdl_t* qdb_hdl_;
   utils::SharedPtr<threads::Thread> notify_thread_;
+  DeviceContainer devices_;
 
   class NotifyThreadDelegate : public threads::PulseThreadDelegate {
    public:

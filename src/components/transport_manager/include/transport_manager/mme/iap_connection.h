@@ -49,9 +49,7 @@ class IAPConnection : public Connection {
   IAPConnection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const char* device_path);
-
-  ~IAPConnection();
+    const std::string& device_path);
 
   bool Init();
 
@@ -63,7 +61,6 @@ class IAPConnection : public Connection {
   void OnDataReceived(RawMessageSptr message);
   void OnReceiveFailed();
   void OnSessionOpened(int session_id);
-  void OnSessionClosed();
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -96,10 +93,8 @@ class IAPConnection : public Connection {
 
     IAPConnection* parent_;
     ipod_hdl_t* ipod_hdl_;
-    int session_id_;
     uint8_t buffer_[kBufferSize];
     ipod_eaf_event_t events_[kEventsBufferSize];
-    char protocol_name_[kProtocolNameSize];
   };
 };
 
