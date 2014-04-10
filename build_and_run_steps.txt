@@ -26,7 +26,10 @@
   3.1.4. Clone git repository with "git clone git@adc.luxoft.com:applink".
     Note: the permissions to download the repository are required. Apply PSavyelyev@luxoft.com on this matter.
   3.1.5. Switch to <Main_Develop> branch: "git checkout <Main_Develop>".
-  3.1.6. Run "sudo ./setup_env.sh -a" to install all mandatory and optional packages.
+  3.1.6. Initialize submodule(s): "git submodule init".
+  3.1.7. Update submodule(s): "git submodule update".
+
+  3.1.8. Run "sudo ./setup_env.sh -a" to install all mandatory and optional packages.
     Note: read the built-in setup environment help ("./setup_env.sh --help") which provides the description of predefined options:
       a) for Web HMI, b) for QML HMI, c) for QNX support.
 
@@ -126,16 +129,18 @@
 7. Common run on QNX host with Qt HMI.
   7.1. Log as root and make sure you are not running Photon
   7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
-  7.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  7.3. Prepare QDB on QNX as described in Additions, p.1 
+  7.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For QML usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
 8. Run Web version on QNX host.
   8.1. Log as root and make sure you are not running Photon
   8.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_WebHMI>/bin/* ./” .
-  8.3. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  8.3. Prepare QDB on QNX as described in Additions, p.1
+  8.4. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
-  8.4. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
+  8.5. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
     Note: in case there is no connection with Web HMI probably it is necessary to add QNX Server IP to "no_proxy" config.
 
 ==========================================================================================================
@@ -148,3 +153,13 @@
     Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/usr/etc/dbus-1/session.conf"
           If not perform steps 4.2 and restart QNX server
   9.5. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
+===========================================================================================================
+Additions: 
+1. QDB preparation on QNX:
+    1.1 Create config file policy.ini with content:
+		  [policy]
+		  Filename=policy.sqlite
+    1.2 Execute following commands with superuser rights:
+		  LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/qnx650/target/qnx6/x86/usr/lib
+          export LD_LIBRARY_PATH
+ 		  /usr/sbin/qdb -c policy.ini
