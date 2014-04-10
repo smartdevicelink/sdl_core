@@ -37,6 +37,7 @@
 #include "utils/macro.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/commands/command_impl.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "application_manager/application.h"
@@ -65,6 +66,26 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
     LOG4CXX_ERROR(g_logger, "Non-convertable language ID");
   }
   return hmi_apis::Common_Language::eType(lang_val);
+}
+
+typedef std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
+CommonAppPriorityMap app_priority_values =
+{
+  {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
+  {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
+  {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
+  {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
+  {"NONE", hmi_apis::Common_AppPriority::NONE},
+  {"VOICE_COMMUNICATION", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
+};
+
+const uint32_t GetPriorityCode(const std::string& priority) {
+  CommonAppPriorityMap::const_iterator it = app_priority_values.find(priority);
+  if (app_priority_values.end() != it) {
+    return static_cast<uint32_t>((*it).second);
+  }
+  return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
 } // namespase
@@ -315,6 +336,12 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   if (application_impl.tts_name()) {
     message[strings::msg_params][strings::tts_name] = *(application_impl
         .tts_name());
+  }
+  std::string priority;
+  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
+        application_impl.mobile_app_id()->asString(), &priority);
+  if (!priority.empty()) {
+    message[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
@@ -1188,6 +1215,18 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   (*message)[strings::msg_params][strings::app_id] = app_id;
 
+  application_manager::ApplicationConstSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()
+      ->application(app_id);
+
+  std::string priority;
+  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
+    app->mobile_app_id()->asString(), &priority);
+
+  if (!priority.empty()) {
+    (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
+  }
+
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
@@ -1265,6 +1304,10 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
   if (permissions.appPermissionsConsentNeeded) {
     (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = permissions
         .appPermissionsConsentNeeded;
+  }
+  if (!permissions.priority.empty()) {
+    (*message)[strings::msg_params]["priority"] = GetPriorityCode(
+                                                    permissions.priority);
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
@@ -1877,6 +1920,10 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (permissions.appUnauthorized) {
     message[strings::msg_params]["appUnauthorized"] = permissions
         .appUnauthorized;
+  }
+  if (!permissions.priority.empty()) {
+    message[strings::msg_params]["priority"] = GetPriorityCode(
+                                                 permissions.priority);
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);

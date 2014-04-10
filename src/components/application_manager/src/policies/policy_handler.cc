@@ -584,7 +584,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
 #else
   permissions.isSDLAllowed = true;
-#endif
+#endif  
 
   if (permissions.isSDLAllowed &&
       PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
