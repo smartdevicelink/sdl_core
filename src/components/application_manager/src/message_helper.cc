@@ -69,8 +69,7 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
 }
 
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
-CommonAppPriorityMap app_priority_values =
-{
+CommonAppPriorityMap app_priority_values = {
   {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
   {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
@@ -339,7 +338,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   }
   std::string priority;
   policy::PolicyHandler::instance()->policy_manager()->GetPriority(
-        application_impl.mobile_app_id()->asString(), &priority);
+    application_impl.mobile_app_id()->asString(), &priority);
   if (!priority.empty()) {
     message[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
@@ -1114,7 +1113,7 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
     msg_params[strings::app_id] = app_id;
   }
   msg_params[strings::grammar_id] =
-			 ApplicationManagerImpl::instance()->application(app_id)->get_grammar_id();
+    ApplicationManagerImpl::instance()->application(app_id)->get_grammar_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
   (*vr_command)[strings::msg_params] = msg_params;
@@ -1218,8 +1217,8 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
   (*message)[strings::msg_params][strings::app_id] = app_id;
 
   application_manager::ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application(app_id);
+    application_manager::ApplicationManagerImpl::instance()
+    ->application(app_id);
 
   std::string priority;
   policy::PolicyHandler::instance()->policy_manager()->GetPriority(
@@ -1309,7 +1308,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
   }
   if (!permissions.priority.empty()) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(
-                                                    permissions.priority);
+          permissions.priority);
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
@@ -1374,7 +1373,7 @@ void MessageHelper::SendPolicyUpdate(
 }
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
-                                          uint32_t correlation_id) {
+    uint32_t correlation_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {
@@ -1758,7 +1757,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     content[strings::msg_params][mobile_notification::syncp_url] = url;
   }
   content[strings::msg_params][strings::file_type] =
-    mobile_apis::FileType::JSON;
+    mobile_apis::FileType::BINARY;
   content[strings::msg_params][strings::request_type] =
     mobile_apis::RequestType::HTTP;
   /*if (-1 != timeout) {
@@ -1925,7 +1924,7 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   }
   if (!permissions.priority.empty()) {
     message[strings::msg_params]["priority"] = GetPriorityCode(
-                                                 permissions.priority);
+          permissions.priority);
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
@@ -2036,9 +2035,9 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   }
 
   std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
+    profile::Profile::instance()->app_storage_folder() + "/";
 
-  if (file_name.size() > 0 && file_name[0] == '/' ) {
+  if (file_name.size() > 0 && file_name[0] == '/') {
     full_file_path += file_name;
   } else {
 
