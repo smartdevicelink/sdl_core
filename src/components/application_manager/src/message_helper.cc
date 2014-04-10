@@ -1328,6 +1328,26 @@ void MessageHelper::SendPolicyUpdate(
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
+void MessageHelper::SendUpdateSDLResponse(const std::string& result,
+                                          uint32_t correlation_id) {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+    smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::SDL_UpdateSDL;
+  (*message)[strings::params][strings::message_type] =
+    MessageType::kResponse;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::params][hmi_response::code] = 0;
+
+  (*message)[strings::msg_params]["result"] = result;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
 void MessageHelper::SendGetUserFriendlyMessageResponse(
   const std::vector<policy::UserFriendlyMessage>& msg,
   uint32_t correlation_id) {

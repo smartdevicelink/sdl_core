@@ -451,8 +451,6 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
     event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
-    // TODO(KKolodiy): when we must reset counter of ignition cyles, update days
-    // and kms?
   }
   return ret;
 }
@@ -497,9 +495,6 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
         break;
     }
   }
-
-  // TODO(KKolodiy): when we must reset counter of ignition cyles,
-  // update days and kms?
 
   retry_sequence_lock_.Ackquire();
   retry_sequence_.stop();
@@ -634,6 +629,17 @@ void PolicyHandler::PTExchangeAtOdometer(int kilometers) {
     LOG4CXX_INFO(logger_, "Enough kilometers passed to send for PT update.");
     StartPTExchange();
   }
+}
+
+void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
+  LOG4CXX_TRACE(logger_, "PT exchange at user request");
+  policy::PolicyTableStatus status = policy_manager_->GetPolicyTableStatus();
+  if (status == policy::StatusUpdateRequired) {
+    OnPTExchangeNeeded();
+    status = policy::StatusUpdatePending;
+  }
+  application_manager::MessageHelper::SendUpdateSDLResponse(
+        ConvertUpdateStatus(status), correlation_id);
 }
 
 void PolicyHandler::OnPTExchangeNeeded() {

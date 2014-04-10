@@ -115,6 +115,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void PTExchangeAtIgnition();
 
   /**
+   * Initializes PT exchange at user request
+   * @param correlation_id correlation id of request
+   */
+  void PTExchangeAtUserRequest(uint32_t correlation_id);
+
+  /**
    * @brief Save device info for specific device to policy table
    * @param device_id Device mac address
    * @param device_info Device params

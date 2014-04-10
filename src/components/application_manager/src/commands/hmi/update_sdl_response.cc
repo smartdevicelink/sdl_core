@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/update_sdl_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -44,6 +45,10 @@ UpdateSDLResponse::~UpdateSDLResponse() {
 
 void UpdateSDLResponse::Run() {
   LOG4CXX_INFO(logger_, "UpdateSDLResponse::Run");
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
+
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
 }
 
 }  // namespace commands

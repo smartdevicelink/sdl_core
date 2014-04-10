@@ -321,6 +321,14 @@ class MessageHelper {
                                             uint32_t correlation_id);
 
     /**
+     * @brief Send UpdateSDL response to HMI with policy update result
+     * @param result Update result
+     * @param correlation_id Correlation id from request
+     */
+    static void SendUpdateSDLResponse(const std::string& result,
+                                            uint32_t correlation_id);
+
+    /**
      * @brief Send OnStatusUpdate to HMI on policy update status change
      * @param status Policy table update status
      */

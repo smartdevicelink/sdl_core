@@ -32,6 +32,7 @@
  */
 
 #include "application_manager/commands/hmi/update_sdl_request.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -47,7 +48,8 @@ UpdateSDLRequest::~UpdateSDLRequest() {
 void UpdateSDLRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
 
-  SendRequest();
+  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
+      (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands

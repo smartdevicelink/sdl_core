@@ -1069,15 +1069,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnSDLConsentNeededNotification(message));
       break;
     }
-    /*
     case hmi_apis::FunctionID::SDL_UpdateSDL: {
-    if (is_response) {
-    command.reset(new commands::UpdateSDLResponse(message));
-    } else {
-    command.reset(new commands::UpdateSDLRequest(message));
+      if (is_response) {
+        command.reset(new commands::UpdateSDLResponse(message));
+      } else {
+        command.reset(new commands::UpdateSDLRequest(message));
+      }
+      break;
     }
-    break;
-    */
     case hmi_apis::FunctionID::BasicCommunication_OnIgnitionCycleOver: {
       command.reset(new commands::OnIgnitionCycleOverNotification(message));
       break;
