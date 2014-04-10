@@ -77,11 +77,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void CheckAppPolicyState(const std::string& application_id);
 
   /**
-   * Starts proccess updating policy table
-   */
-  void StartPTExchange(bool skip_device_selection = false);
-
-  /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
    */
@@ -118,6 +113,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * Initializes PT exchange at ignition if need
    */
   void PTExchangeAtIgnition();
+
+  /**
+   * Initializes PT exchange at user request
+   * @param correlation_id correlation id of request
+   */
+  void PTExchangeAtUserRequest(uint32_t correlation_id);
 
   /**
    * @brief Save device info for specific device to policy table
@@ -159,10 +160,44 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnGetStatusUpdate(const uint32_t correlation_id);
 
   /**
+      * @brief Get Urls for service
+      * @param
+      */
+
+
+    /**
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */
   void OnUpdateStatusChanged(policy::PolicyTableStatus status);
+
+  /**
+   * @brief Update currently used device id in policies manager for given
+   * application
+   * @param policy_app_id Application id
+   */
+  void OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
+
+  /**
+   * @brief Set parameters from OnSystemInfoChanged to policy table
+   * @param language System language
+   */
+  void OnSystemInfoChanged(const std::string& language);
+
+  /**
+   * @brief Save data from GetSystemInfo request to policy table
+   * @param ccpu_version CCPU version
+   * @param wers_country_code WERS country code
+   * @param language System language
+   */
+  void OnGetSystemInfo(const std::string& ccpu_version,
+                       const std::string& wers_country_code,
+                       const std::string& language);
+
+  /**
+   * @brief Send request to HMI to get update on system parameters
+   */
+  virtual void OnSystemInfoUpdateRequired();
 
   /**
    * Adds statistics info
@@ -176,8 +211,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void OnSystemError(int code);
 
-  void OnCurrentDeviceIdUpdateRequired(
-      const std::string& policy_app_id) {}
+  /**
+   * @brief Choose application id to be used for snapshot sending
+   * @return Application id or 0, if there are no applications registered
+   */
+  uint32_t GetAppIdForSending();
 
  protected:
   /**
@@ -191,13 +229,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   void PTExchangeAtOdometer(int kilometers);
 
- private:
   /**
-   * @brief Choose application id to be used for snapshot sending
-   * @return Application id or 0, if there are no applications registered
+     * Starts proccess updating policy table
    */
-  uint32_t GetAppIdForSending();
+    void StartPTExchange(bool skip_device_selection = false);
 
+ private:
   /**
    * @brief Choose device according to app HMI status and user consent for
    * device

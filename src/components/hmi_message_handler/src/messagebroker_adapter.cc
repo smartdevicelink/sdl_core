@@ -124,6 +124,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.Stopped");
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
   MessageBrokerController::subscribeTo("BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemInfoChanged");
+  MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
   MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
   MessageBrokerController::subscribeTo("SDL.OnSystemError");
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");

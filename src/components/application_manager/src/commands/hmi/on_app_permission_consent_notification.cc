@@ -40,38 +40,34 @@ namespace application_manager {
 
 namespace commands {
 
-OnAppPermissionConsent::OnAppPermissionConsent(const MessageSharedPtr& message)
+OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(const MessageSharedPtr& message)
     : NotificationFromHMI(message) {
 }
 
-OnAppPermissionConsent::~OnAppPermissionConsent() {
+OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {
 }
 
-void OnAppPermissionConsent::Run() {
-  LOG4CXX_INFO(logger_, "OnAppPermissionConsent::Run");
+void OnAppPermissionConsentNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnAppPermissionConsentNotification::Run");
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   policy::PermissionConsent permission_consent;
+
   // If user defined group permissions for specific app
   if (msg_params.keyExists(strings::app_id)) {
-    permission_consent.policy_app_id = msg_params[strings::app_id].asString();
+    uint32_t connection_key = msg_params[strings::app_id].asUInt();
+    ApplicationSharedPtr app =
+        application_manager::ApplicationManagerImpl::instance()
+        ->application(connection_key);
 
-    typedef std::set<ApplicationSharedPtr> ApplicationList;
-    const ApplicationList app_list =
-        application_manager::ApplicationManagerImpl::instance()->applications();
+    if (app.valid()) {
+      permission_consent.policy_app_id = app->mobile_app_id()->asString();
+      policy::DeviceParams device_params;
+      application_manager::MessageHelper::GetDeviceInfoForHandle(
+            app->device(),
+            &device_params);
 
-    ApplicationList::const_iterator it_app_list = app_list.begin();
-    ApplicationList::const_iterator it_app_list_end = app_list.end();
-    for (; it_app_list != it_app_list_end; ++it_app_list) {
-      if (permission_consent.policy_app_id.compare(
-            (*it_app_list)->mobile_app_id()->asString()) == 0) {
-        policy::DeviceParams device_params;
-        application_manager::MessageHelper::GetDeviceInfoForHandle(
-              (*it_app_list)->device(),
-              &device_params);
-
-        permission_consent.device_id = device_params.device_mac_address;
-      }
+      permission_consent.device_id = device_params.device_mac_address;
     }
   }
 
@@ -83,7 +79,7 @@ void OnAppPermissionConsent::Run() {
   for (; it != it_end; ++it) {
     policy::FunctionalGroupPermission permissions;
     permissions.group_id = (*it)["id"].asInt();
-    permissions.group_name = (*it)["name"].asString();
+    permissions.group_alias = (*it)["name"].asString();
     if ((*it).keyExists("allowed")) {
       permissions.state = (*it)["allowed"].asBool() ? policy::kAllowed :
                                                       policy::kDisallowed;

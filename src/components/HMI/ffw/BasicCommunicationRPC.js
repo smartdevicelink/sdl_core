@@ -274,6 +274,8 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
             if (response.result.method == "SDL.GetURLS") {
 
                 SDL.SDLModel.set('policyURLs', response.result.urls);
+
+                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
             }
         },
 
@@ -313,6 +315,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
             if (notification.method == this.onStatusUpdateNotification) {
 
+                //SDL.PopUp.popupActivate(notification.status);
                 SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
@@ -384,6 +387,11 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         request.method);
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
+
+                    this.OnReceivedPolicyUpdate(SDL.SettingsController.policyUpdateFile);
+
+                    SDL.SettingsController.policyUpdateFile = null;
+
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -421,6 +429,12 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                     //TO DO
                     //popUp activation
                 }
+                if (request.method == "BasicCommunication.PolicyUpdate") {
+                    SDL.SettingsController.policyUpdateFile = request.params.file;
+                    this.GetURLS(7); //Service type for policies
+
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+            }
             }
         },
 
@@ -455,9 +469,9 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Send request if application was activated
          *
-         * @param {Number} appID
+         * @param {Number} type
          */
-        GetURLS: function(appID) {
+        GetURLS: function(type) {
 
             Em.Logger.log("FFW.SDL.GetURLS: Request from HMI!");
 
@@ -467,10 +481,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 "id": this.client.generateId(),
                 "method": "SDL.GetURLS",
                 "params": {
-                    "service": {
-                        "servicyType": "servicyType",
-                        "policyAppId": "policyAppId"
-                    }
+                    "service": type
                 }
             };
             this.client.send(JSONMessage);
@@ -650,6 +661,28 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
             this.client.send(JSONMessage);
         },
 
+
+        /**
+         * Notification of decrypted policy table available
+         *
+         * @param {String} policyfile
+         */
+        OnReceivedPolicyUpdate: function(policyfile) {
+
+            Em.Logger.log("FFW.SDL.OnReceivedPolicyUpdate");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnReceivedPolicyUpdate",
+                "params": {
+                    "policyfile": policyfile
+                }
+            };
+
+            this.client.send(JSONMessage);
+        },
+
         /**
          * Notifies if functionality was changed
          *
@@ -662,14 +695,14 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
          */
         OnAppPermissionConsent: function(consentedFunctions, source, appID) {
 
-            Em.Logger.log("FFW.BasicCommunication.OnAppPermissionConsent");
+            Em.Logger.log("FFW.SDL.OnAppPermissionConsent");
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.OnAppPermissionConsent",
+                "method": "SDL.OnAppPermissionConsent",
                 "params": {
-                    "consentedFunctions": allowed,
+                    "consentedFunctions": consentedFunctions,
                     "source": source
                 }
             };
@@ -1044,7 +1077,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Initiated by HMI.
          */
-        OnSystemRequest: function(type) {
+        OnSystemRequest: function(type, appID, fileName, url) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
 
@@ -1055,13 +1088,13 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 "method": "BasicCommunication.OnSystemRequest",
                 "params":{
                     "requestType": type,
-                    "url": ["http://127.0.0.1"],
+                    "url": url,
                     "fileType": "JSON",
                     "offset": 1000,
                     "length": 10000,
                     "timeout": 500,
-                    "fileName": document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
-                    "appID": SDL.SDLAppController.model ? SDL.SDLAppController.model.appID.toString() : "default"
+                    "fileName": fileName ? fileName : document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
+                    "appID": appID ? appID : "default"
                 }
             };
             this.client.send(JSONMessage);

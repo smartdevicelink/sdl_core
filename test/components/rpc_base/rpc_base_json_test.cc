@@ -324,14 +324,6 @@ TEST(ValidatedTypesJson, OptionalBoolFromNullValueTest) {
   ASSERT_FALSE(optional_bool.is_valid());
 }
 
-TEST(ValidatedTypesJson, MandatoryBoolFromAbsentValueTest) {
-  Value* none = NULL;
-  Mandatory< Boolean > mandatory_bool;
-  mandatory_bool = Boolean(none);
-  ASSERT_FALSE(mandatory_bool.is_initialized());
-  ASSERT_FALSE(mandatory_bool.is_valid());
-}
-
 TEST(ValidatedTypesJson, NullableIntFromNullValueTest) {
   Nullable< Integer<int8_t, 1, 15> > nullable_int(&Value::null);
   ASSERT_TRUE(nullable_int.is_initialized());

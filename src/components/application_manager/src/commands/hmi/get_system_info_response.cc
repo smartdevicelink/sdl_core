@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -30,29 +29,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/update_sdl_request.h"
+#include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+GetSystemInfoResponse::GetSystemInfoResponse(
+  const MessageSharedPtr& message): ResponseFromHMI(message) {
 }
 
-UpdateSDLRequest::~UpdateSDLRequest() {
+GetSystemInfoResponse::~GetSystemInfoResponse() {
 }
 
-void UpdateSDLRequest::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
+void GetSystemInfoResponse::Run() {
+  LOG4CXX_INFO(logger_, "GetSystemInfoResponse::Run");
+  const std::string ccpu_version =
+      (*message_)[strings::msg_params]["ccpu_version"].asString();
+  const std::string wers_country_code =
+      (*message_)[strings::msg_params]["wersCountryCode"].asString();
+  uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  const std::string language =
+      application_manager::MessageHelper::CommonLanguageToString(
+        static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
+  policy::PolicyHandler::instance()->OnGetSystemInfo(ccpu_version,
+                                                     wers_country_code,
+                                                     language);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

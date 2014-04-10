@@ -105,23 +105,25 @@ class CompositeType {
  public:
   static const Json::Value* ValueMember(const Json::Value* value,
                                         const char* member_name);
-  template<class T, size_t minsize, size_t maxsize>
+  template<class T>
   static void WriteJsonField(const char* field_name,
-                             const Array<T, minsize, maxsize>& field,
-                             Json::Value* json_value);
-  template<class T, size_t minsize, size_t maxsize>
-  static void WriteJsonField(const char* field_name,
-                             const Map<T, minsize, maxsize>& field,
+                             const T& field,
                              Json::Value* json_value);
   template<class T>
   static void WriteJsonField(const char* field_name,
                              const Nullable<T>& field,
                              Json::Value* json_value);
   template<class T>
-  static void WriteJsonField(const char* field_name, const Optional<T>& field,
+  static void WriteJsonField(const char* field_name,
+                             const Optional<T>& field,
                              Json::Value* json_value);
-  template<class T>
-  static void WriteJsonField(const char* field_name, const Mandatory<T>& field,
+  template<typename T, size_t minsize, size_t maxsize>
+  static void WriteJsonField(const char* field_name,
+                             const Map<T, minsize, maxsize>& field,
+                             Json::Value* json_value);
+  template<typename T, size_t minsize, size_t maxsize>
+  static void WriteJsonField(const char* field_name,
+                             const Array<T, minsize, maxsize>& field,
                              Json::Value* json_value);
 };
 
@@ -314,21 +316,6 @@ class Nullable : public T {
   void set_to_null();
  private:
   bool marked_null_;
-};
-
-template<typename T>
-class Mandatory : public T {
- public:
-  // Methods
-  Mandatory();
-  template<typename U>
-  explicit Mandatory(const U& value);
-  template<typename U>
-  Mandatory(const Json::Value* value, const U& def_value);
-  template<typename U>
-  Mandatory& operator=(const U& new_val);
-
-  bool is_valid() const;
 };
 
 template<typename T>

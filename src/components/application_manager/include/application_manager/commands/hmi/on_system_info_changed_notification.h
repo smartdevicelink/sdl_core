@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -31,28 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_sdl_request.h"
-#include "application_manager/policies/policy_handler.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_
+
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+/**
+ * @brief OnSystemInfoChangedNotification command class
+ **/
+class OnSystemInfoChangedNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnSystemInfoChangedNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnSystemInfoChangedNotification(const MessageSharedPtr& message);
 
-UpdateSDLRequest::~UpdateSDLRequest() {
-}
+    /**
+     * @brief OnSystemInfoChangedNotification class destructor
+     **/
+    virtual ~OnSystemInfoChangedNotification();
 
-void UpdateSDLRequest::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
-}
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnSystemInfoChangedNotification);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_INFO_CHANGED_NOTIFICATION_H_

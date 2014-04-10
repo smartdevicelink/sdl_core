@@ -229,4 +229,151 @@ TEST_F(GeneratedInterfaceTests, TestNullingValueInStructWithNullableMapOfNullabl
   ASSERT_EQ(awaited_json, result);
 }
 
+TEST_F(GeneratedInterfaceTests, EmptyStructTests) {
+  EmptyStruct e;
+  ASSERT_TRUE(e.is_valid());
+  ASSERT_FALSE(e.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOptionalEmptyStructFieldTest) {
+  StructWithOptionalEmptyStructField oe;
+  ASSERT_TRUE(oe.is_valid());
+  ASSERT_FALSE(oe.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithMandatoryEmptyStructFieldTest) {
+  StructWithMandatoryEmptyStructField me;
+  ASSERT_TRUE(me.is_valid());
+  ASSERT_FALSE(me.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, EmptyStructJsonTests) {
+  EmptyStruct e;
+  ASSERT_TRUE(e.is_valid());
+  ASSERT_FALSE(e.is_initialized());
+
+  const char* expected_json = "{}\n";
+  ASSERT_EQ(expected_json, writer.write(e.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOptionalEmptyStructFieldJsonTest) {
+  StructWithOptionalEmptyStructField oe;
+  ASSERT_TRUE(oe.is_valid());
+  ASSERT_FALSE(oe.is_initialized());
+  const char* expected_json = "{}\n";
+  ASSERT_EQ(expected_json, writer.write(oe.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithMandatoryEmptyStructFieldJsonTest) {
+  StructWithMandatoryEmptyStructField me;
+  ASSERT_TRUE(me.is_valid());
+  ASSERT_FALSE(me.is_initialized());
+  const char* expected_json = "{\"emptyOne\":{}}\n";
+  ASSERT_EQ(expected_json, writer.write(me.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOneOptionalIntFieldTest) {
+  StructWithOneOptionalIntField soo;
+  ASSERT_TRUE(soo.is_valid());
+  ASSERT_FALSE(soo.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOneOptionalInitializedIntFieldTest) {
+  StructWithOneOptionalIntField soo;
+  *soo.optionalInt = 13;
+  ASSERT_TRUE(soo.is_valid());
+  ASSERT_TRUE(soo.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOneOptionalIntFieldJsonTest) {
+  StructWithOneOptionalIntField soo;
+  ASSERT_TRUE(soo.is_valid());
+  ASSERT_FALSE(soo.is_initialized());
+  const char* expected_json = "{}\n";
+  ASSERT_EQ(expected_json, writer.write(soo.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithOneInitializedOptionalIntFieldJsonTest) {
+  const char* input_json = "{\"optionalInt\":11}\n";
+  Json::Value json_value = JsonValue(input_json);
+  StructWithOneOptionalIntField soo(&json_value);
+  ASSERT_TRUE(soo.is_valid());
+  ASSERT_TRUE(soo.is_initialized());
+  ASSERT_EQ(11, *soo.optionalInt);
+  ASSERT_EQ(input_json, writer.write(soo.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyTest) {
+  StructWithFieldOfStructThatMightBeEmpty sfme;
+  ASSERT_TRUE(sfme.is_valid());
+  ASSERT_FALSE(sfme.is_initialized());
+  *sfme.fieldThatMightBeEmpty.optionalInt = 5;
+  ASSERT_TRUE(sfme.is_valid());
+  ASSERT_TRUE(sfme.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyJsonNoValueTest) {
+  StructWithFieldOfStructThatMightBeEmpty sfme;
+  ASSERT_TRUE(sfme.is_valid());
+  ASSERT_FALSE(sfme.is_initialized());
+  const char* expcected_json = "{\"fieldThatMightBeEmpty\":{}}\n";
+  ASSERT_EQ(expcected_json, writer.write(sfme.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfStructThatMightBeEmptyJsonHasValueTest) {
+  const char* input_json = "{\"fieldThatMightBeEmpty\":{\"optionalInt\":12}}\n";
+  Json::Value json_value = JsonValue(input_json);
+  StructWithFieldOfStructThatMightBeEmpty sfme(&json_value);
+  ASSERT_TRUE(sfme.is_valid());
+  ASSERT_TRUE(sfme.is_initialized());
+  ASSERT_EQ(12, *sfme.fieldThatMightBeEmpty.optionalInt);
+  ASSERT_EQ(input_json, writer.write(sfme.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapTest) {
+  StructWithNullableOptionalMap snom;
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_FALSE(snom.is_initialized());
+  snom.nullableOptionalIntMap["a"] = 5;
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_TRUE(snom.is_initialized());
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapToJsonTest) {
+  StructWithNullableOptionalMap snom;
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_FALSE(snom.is_initialized());
+  const char* expected_json = "{}\n";
+  ASSERT_EQ(expected_json, writer.write(snom.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapNulledToJsonTest) {
+  StructWithNullableOptionalMap snom;
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_FALSE(snom.is_initialized());
+  snom.nullableOptionalIntMap.set_to_null();
+  const char* expected_json = "{\"nullableOptionalIntMap\":null}\n";
+  ASSERT_EQ(expected_json, writer.write(snom.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapNulledInJsonTest) {
+  const char* input_json = "{\"nullableOptionalIntMap\":null}\n";
+  Json::Value json_value = JsonValue(input_json);
+  StructWithNullableOptionalMap snom(&json_value);
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_TRUE(snom.is_initialized());
+  ASSERT_TRUE(snom.nullableOptionalIntMap.is_null());
+  ASSERT_EQ(input_json, writer.write(snom.ToJsonValue()));
+}
+
+TEST_F(GeneratedInterfaceTests, StructWithFieldOfOptionalMapInitializedInJsonTest) {
+  const char* input_json = "{\"nullableOptionalIntMap\":{\"Hello\":2}}\n";
+  Json::Value json_value = JsonValue(input_json);
+  StructWithNullableOptionalMap snom(&json_value);
+  ASSERT_TRUE(snom.is_valid());
+  ASSERT_TRUE(snom.is_initialized());
+  ASSERT_FALSE(snom.nullableOptionalIntMap.is_null());
+  ASSERT_EQ(input_json, writer.write(snom.ToJsonValue()));
+}
+
 }  // namespace test

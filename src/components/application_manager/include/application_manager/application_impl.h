@@ -78,7 +78,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const Version& version() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
-  const std::string& folder_name() const;
+  const std::string folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
   const uint32_t put_file_in_none_count() const;

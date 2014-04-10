@@ -259,6 +259,12 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& preloaded_pt_file() const;
 
+    /**
+     * @brief Path to policies snapshot file
+     * @return file path
+     */
+    const std::string& policies_snapshot_file_name() const;
+
      /*
       * @brief Timeout in transport manager before disconnect
      */
@@ -402,6 +408,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
+    std::string                     policy_snapshot_file_name_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;

@@ -337,11 +337,37 @@
     </description>
   </typedef>
 
+  <struct name="EmptyStruct">
+    <description>
+      Completely empty structure
+    </description>
+  </struct>
+
+  <struct name="StructWithOptionalEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" />
+  </struct>
+
   <struct name="StructWithNullableTypedef">
     <description>
       Test struct having nullable typedef as a param
     </description>
     <param name="nullableTdResult" type="TdResult" nullable="true"/>
+  </struct>
+
+  <struct name="StructWithOneOptionalIntField" nullable="true" >
+    <param name="optionalInt" type="Integer" minvalue="1" maxvalue="42" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithFieldOfStructThatMightBeEmpty">
+    <param name="fieldThatMightBeEmpty" type="StructWithOneOptionalIntField" mandatory="true" />
+  </struct>
+
+  <struct name="StructWithNullableOptionalMap">
+    <param name="nullableOptionalIntMap" type="Integer" map="true" nullable="true" manadatory="false" minsize="0" maxsize="5" minvalue="2" maxvalue="10" />
   </struct>
 
   <struct name="StructWithNullableMapOfNullableInts">

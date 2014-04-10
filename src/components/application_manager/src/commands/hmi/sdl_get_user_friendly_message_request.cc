@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
@@ -66,79 +67,24 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   }
 
   std::string required_language;
-  const std::string language = "language";
-  if ((*message_)[strings::msg_params].keyExists(language)) {
-    uint32_t lang_code = (*message_)[strings::msg_params][language].asUInt();
-    required_language = CommonLanguageToString(
+  if ((*message_)[strings::msg_params].keyExists(strings::language)) {
+    uint32_t lang_code = (*message_)[strings::msg_params][strings::language]
+                         .asUInt();
+    required_language =
+        application_manager::MessageHelper::CommonLanguageToString(
           static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
         application_manager::ApplicationManagerImpl::instance()
         ->hmi_capabilities().active_ui_language();
 
-    required_language = CommonLanguageToString(ui_language);
+    required_language =
+        application_manager::MessageHelper::CommonLanguageToString(ui_language);
   }
 
   policy::PolicyHandler::instance()->OnGetUserFriendlyMessage(
         msg_codes, required_language,
         (*message_)[strings::params][strings::correlation_id].asInt());
-}
-
-std::string SDLGetUserFriendlyMessageRequest::CommonLanguageToString(
-    hmi_apis::Common_Language::eType language) {
-  switch (language) {
-  case hmi_apis::Common_Language::EN_US:
-    return "en-us";
-  case hmi_apis::Common_Language::ES_MX:
-    return "es-mx";
-  case hmi_apis::Common_Language::FR_CA:
-    return "fr-ca";
-  case hmi_apis::Common_Language::DE_DE:
-    return "de-de";
-  case hmi_apis::Common_Language::ES_ES:
-    return "es-es";
-  case hmi_apis::Common_Language::EN_GB:
-    return "en-gb";
-  case hmi_apis::Common_Language::RU_RU:
-    return "ru-ru";
-  case hmi_apis::Common_Language::TR_TR:
-    return "tr-tr";
-  case hmi_apis::Common_Language::PL_PL:
-    return "pl-pl";
-  case hmi_apis::Common_Language::FR_FR:
-    return "fr-fr";
-  case hmi_apis::Common_Language::IT_IT:
-    return "it-it";
-  case hmi_apis::Common_Language::SV_SE:
-    return "sv-se";
-  case hmi_apis::Common_Language::PT_PT:
-    return "pt-pt";
-  case hmi_apis::Common_Language::NL_NL:
-    return "nl-nl";
-  case hmi_apis::Common_Language::EN_AU:
-    return "en-au";
-  case hmi_apis::Common_Language::ZH_CN:
-    return "zh-cn";
-  case hmi_apis::Common_Language::ZH_TW:
-    return "zh-tw";
-  case hmi_apis::Common_Language::JA_JP:
-    return "ja-jp";
-  case hmi_apis::Common_Language::AR_SA:
-    return "as-sa";
-  case hmi_apis::Common_Language::KO_KR:
-    return "ko-kr";
-  case hmi_apis::Common_Language::PT_BR:
-    return "pt-br";
-  case hmi_apis::Common_Language::CS_CZ:
-    return "cs-cz";
-  case hmi_apis::Common_Language::DA_DK:
-    return "da-dk";
-  case hmi_apis::Common_Language::NO_NO:
-    return "no-no";
-  default:
-    LOG4CXX_WARN(logger_, "Language is unknown.");
-    return "";
-  }
 }
 
 }  // namespace commands

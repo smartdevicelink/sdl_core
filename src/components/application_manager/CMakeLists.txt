@@ -185,6 +185,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/update_sdl_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/get_system_info_request.cc
+./src/commands/hmi/get_system_info_response.cc
 ./src/commands/hmi/sdl_get_list_of_permissions_request.cc
 ./src/commands/hmi/sdl_get_list_of_permissions_response.cc
 ./src/commands/hmi/sdl_get_user_friendly_message_request.cc
@@ -311,6 +313,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
 ./src/commands/hmi/on_ignition_cycle_over_notification.cc
+./src/commands/hmi/on_system_info_changed_notification.cc
 ./src/commands/hmi/on_file_removed_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_tts_started_notification.cc
@@ -349,6 +352,12 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_system_error_notification.cc
 ./src/commands/hmi/basic_communication_system_request.cc
 ./src/commands/hmi/basic_communication_system_response.cc
+./src/commands/hmi/sdl_policy_update.cc
+./src/commands/hmi/sdl_policy_update_response.cc
+./src/commands/hmi/on_received_policy_update.cc
+./src/commands/hmi/on_policy_update.cc
+./src/commands/hmi/get_urls.cc
+./src/commands/hmi/get_urls_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

@@ -221,8 +221,7 @@ void RegisterAppInterfaceRequest::Run() {
           app->set_allowed_support_navigation(true);
         }
       }
-    }
-    SendRegisterAppInterfaceResponseToMobile();
+    }    
 
     // Add device to policy table and set device info, if any
     policy::DeviceParams device_params;
@@ -248,6 +247,8 @@ void RegisterAppInterfaceRequest::Run() {
     // Check necessity of policy update for current application
     policy::PolicyHandler::instance()->CheckAppPolicyState(
       msg_params[strings::app_id].asString());
+
+    SendRegisterAppInterfaceResponseToMobile();
   }
 }
 

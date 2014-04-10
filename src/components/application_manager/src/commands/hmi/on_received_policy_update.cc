@@ -1,6 +1,5 @@
-
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,28 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_sdl_request.h"
+#include <string>
+#include "application_manager/commands/hmi/on_received_policy_update.h"
 #include "application_manager/policies/policy_handler.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
-UpdateSDLRequest::~UpdateSDLRequest() {
+OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {
 }
 
-void UpdateSDLRequest::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
-
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
+void OnReceivedPolicyUpdate::Run() {
+  LOG4CXX_INFO(logger_, "OnReceivedPolicyUpdate::Run");
+  const std::string& file_path =
+    (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
+  policy::BinaryMessage file_content;
+  if (!file_system::ReadBinaryFile(file_path, file_content)) {
+    LOG4CXX_ERROR(logger_, "Failed to read Update file.");
+    return;
+  }
+  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_content);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

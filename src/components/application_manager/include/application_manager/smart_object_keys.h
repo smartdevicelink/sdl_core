@@ -276,6 +276,9 @@ const char method_name[] = "methodName";
 const char keyboard_layout[] = "keyboardLayout";
 const char limited_character_list[] = "limitedCharacterList";
 const char auto_complete_text[] = "autoCompleteText";
+const char file[] = "file";
+const char retry[] = "retry";
+const char service[] = "service";
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -313,6 +316,8 @@ const char image_fields[] = "imageFields";
 const char templates_available[] = "templatesAvailable";
 const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
+const char urls[] = "urls";
+const char policy_app_id[] = "policyAppId";
 }  // namespace hmi_response
 
 namespace hmi_notification {
@@ -323,6 +328,7 @@ const char state[] = "state";
 const char result[] = "result";
 const char statistic_type[] = "statisticType";
 const char error[] = "error";
+const char policyfile[] = "policyfile";
 
 }  // namespace hmi_notification
 

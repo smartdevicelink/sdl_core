@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -31,28 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_sdl_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/commands/hmi/get_system_info_request.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+GetSystemInfoRequest::GetSystemInfoRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-UpdateSDLRequest::~UpdateSDLRequest() {
+GetSystemInfoRequest::~GetSystemInfoRequest() {
 }
 
-void UpdateSDLRequest::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
-
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
+void GetSystemInfoRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetSystemInfoRequest::Run");
+  int32_t correlation_id = RequestToHMI::correlation_id();
+  uint32_t app_id = RequestToHMI::application_id();
+  ApplicationManagerImpl::instance()->set_application_id(correlation_id, app_id);
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+
 

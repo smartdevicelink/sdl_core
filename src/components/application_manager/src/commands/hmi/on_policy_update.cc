@@ -1,6 +1,5 @@
-
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,28 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/update_sdl_request.h"
+#include "application_manager/commands/hmi/on_policy_update.h"
 #include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
-
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+OnPolicyUpdate::OnPolicyUpdate(const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
-UpdateSDLRequest::~UpdateSDLRequest() {
+OnPolicyUpdate::~OnPolicyUpdate() {
 }
 
-void UpdateSDLRequest::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLRequest::Run");
-
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
+void OnPolicyUpdate::Run() {
+  LOG4CXX_INFO(logger_, "OnPolicyUpdate::Run");
+  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
 }
 
 }  // namespace commands
-
 }  // namespace application_manager
-

@@ -396,7 +396,10 @@ SDL.SDLController = Em.Object
          */
         systemRequestViewSelected: function(state) {
 
-            FFW.BasicCommunication.OnSystemRequest(state);
+            if (SDL.SDLModel.policyURLs) {
+                this.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            }
+
         },
         /**
          * Method to sent notification ABORTED for PerformInteractionChoise

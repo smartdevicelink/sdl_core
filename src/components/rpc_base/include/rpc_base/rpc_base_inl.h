@@ -395,31 +395,6 @@ void Nullable<T>::set_to_null() {
 }
 
 /*
- * Mandatory class
- */
-template<typename T>
-Mandatory<T>::Mandatory() {
-}
-
-template<typename T>
-template<typename U>
-Mandatory<T>::Mandatory(const U& value)
-    : T(value) {
-}
-
-template<typename T>
-template<typename U>
-Mandatory<T>& Mandatory<T>::operator=(const U& new_val) {
-  this->T::operator=(new_val);
-  return *this;
-}
-
-template<typename T>
-bool Mandatory<T>::is_valid() const {
-  return T::is_initialized() && T::is_valid();
-}
-
-/*
  * Optional class
  */
 template<typename T>

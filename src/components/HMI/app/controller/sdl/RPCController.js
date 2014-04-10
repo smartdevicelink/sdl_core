@@ -77,7 +77,86 @@ SDL.RPCController = Em.Object
 
                 resultStruct: {},
 
-	 	/**
+                /**
+                 * Validate method for request PolicyUpdate
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                PolicyUpdate: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.file == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'file' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.file != 'string') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'file'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.timeout == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'timeout' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (typeof params.timeout != 'number') {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'timeout'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.retry == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'retry' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.retry.length < 1) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'retry'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+	 	        /**
                  * Validate method for request SystemRequest
                  *
                  * @param {Object}
