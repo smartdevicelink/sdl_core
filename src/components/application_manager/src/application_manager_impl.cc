@@ -1026,16 +1026,33 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         app->usage_report().RecordRpcSentInHMINone();
       }
 
-      if (!result.hmi_level_permitted) {
-        LOG4CXX_WARN(
-          logger_,
-          "Request blocked by policies. " << "FunctionID: " << static_cast<int32_t>(function_id) << " Application HMI status: " << static_cast<int32_t>(app->hmi_level()));
+      if (result.hmi_level_permitted != policy::kRpcAllowed) {
+        LOG4CXX_WARN(logger_, "Request blocked by policies. "
+                     << "FunctionID: "
+                     << static_cast<int32_t>(function_id)
+                     << " Application HMI status: "
+                     << static_cast<int32_t>(app->hmi_level()));
 
         app->usage_report().RecordPolicyRejectedRpcCall();
 
+        mobile_apis::Result::eType check_result =
+            mobile_apis::Result::DISALLOWED;
+
+        switch (result.hmi_level_permitted) {
+        case policy::kRpcDisallowed:
+          check_result = mobile_apis::Result::DISALLOWED;
+          break;
+        case policy::kRpcUserDisallowed:
+          check_result = mobile_apis::Result::USER_DISALLOWED;
+          break;
+        default:
+          check_result = mobile_apis::Result::INVALID_ENUM;
+          break;
+        }
+
         smart_objects::SmartObject* response =
           MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-              mobile_apis::Result::REJECTED, correlation_id, connection_key);
+              check_result, correlation_id, connection_key);
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return true;
