@@ -22780,10 +22780,10 @@ if test "${with_expat+set}" = set; then :
     if test "$withval" != "/usr"; then
 
   if test "x$LDFLAGS" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval/lib\""
-    LDFLAGS="-L$withval/lib"
+    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval\""
+    LDFLAGS="-L$withval"
   else
-    apr_addto_bugger="-L$withval/lib"
+    apr_addto_bugger="-L$withval"
     for i in $apr_addto_bugger; do
       apr_addto_duplicate="0"
       for j in $LDFLAGS; do
@@ -22843,10 +22843,10 @@ if test "${with_expat+set}" = set; then :
 
 
   if test "x$APRUTIL_LDFLAGS" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval/lib\""
-    APRUTIL_LDFLAGS="-L$withval/lib"
+    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval\""
+    APRUTIL_LDFLAGS="-L$withval"
   else
-    apr_addto_bugger="-L$withval/lib"
+    apr_addto_bugger="-L$withval"
     for i in $apr_addto_bugger; do
       apr_addto_duplicate="0"
       for j in $APRUTIL_LDFLAGS; do

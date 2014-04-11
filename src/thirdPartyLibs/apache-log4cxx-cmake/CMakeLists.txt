@@ -28,22 +28,30 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+set(LOG4CXX_SOURCE_DIRECTORY ../apache-log4cxx-0.10.0)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
     set (ARCHITECTURE arm) # log4cxx doesn't recognize armv7
   else ()
     set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
   endif ()
-
-  add_custom_target(liblog4cxx ALL CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=${CMAKE_INSTALL_PREFIX} --host=${ARCHITECTURE}-nto-qnx --with-apr=${CMAKE_INSTALL_PREFIX} --with-apr-util=${CMAKE_INSTALL_PREFIX}
-    COMMAND make
+  add_custom_command(OUTPUT ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --host=${ARCHITECTURE}-nto-qnx --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
     DEPENDS libapr-1
     DEPENDS apr-util
+    WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
   )
 else ()
-  add_custom_target(liblog4cxx ./configure --prefix=${CMAKE_INSTALL_PREFIX}
-    COMMAND make
+  add_custom_command(OUTPUT ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
     DEPENDS libapr-1
     DEPENDS apr-util
+    WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
   )
 endif ()
+
+add_custom_target(liblog4cxx ALL make
+  DEPENDS ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
+  WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
+)

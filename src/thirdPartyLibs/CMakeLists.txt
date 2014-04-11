@@ -44,16 +44,16 @@ endif()
 endif()
 
 # --- libapr-1
-add_subdirectory(apr-1.5.0)
+add_subdirectory(apr-cmake)
 
 # --- libexpat
 add_subdirectory(expat-2.1.0)
 
 # --- apr-util
-add_subdirectory(apr-util-1.5.3)
+add_subdirectory(apr-util-cmake)
 
 # --- log4cxx
-add_subdirectory(apache-log4cxx-0.10.0)
+add_subdirectory(apache-log4cxx-cmake)
 
 # D-Bus
 add_subdirectory(dbus-1.7.8/cmake)

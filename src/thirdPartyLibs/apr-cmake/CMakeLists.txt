@@ -28,16 +28,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+set(APR_SOURCE_DIRECTORY ../apr-1.5.0)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  add_custom_target(apr-util ALL CC=${CMAKE_C_COMPILER} ./configure --prefix=${CMAKE_INSTALL_PREFIX} --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx --with-apr=${CMAKE_INSTALL_PREFIX} --with-expat=${CMAKE_INSTALL_PREFIX}
-    COMMAND make
-    DEPENDS libapr-1
-    DEPENDS expat
+  add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_recursive=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=no ac_cv_sizeof_struct_iovec=8
+    WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
   )
 else ()
-  add_custom_target(apr-util ALL ./configure --prefix=${CMAKE_INSTALL_PREFIX}
-    COMMAND make
-    DEPENDS libapr-1
-    DEPENDS expat
+  add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}`
+    WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
   )
 endif ()
+
+add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/include/private
+  COMMAND mkdir include/private
+  WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
+)
+
+add_custom_target(libapr-1 ALL make
+  DEPENDS ${APR_SOURCE_DIRECTORY}/Makefile
+  DEPENDS ${APR_SOURCE_DIRECTORY}/include/private
+  WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
+)
