@@ -61,6 +61,7 @@ class IAPConnection : public Connection {
   void OnDataReceived(RawMessageSptr message);
   void OnReceiveFailed();
   void OnSessionOpened(int session_id);
+  void OnSessionClosed(int session_id);
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -68,7 +69,7 @@ class IAPConnection : public Connection {
   std::string device_path_;
 
   ipod_hdl_t* ipod_hdl_;
-  int session_id_;
+  std::set<int> session_ids_;
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
 

@@ -42,8 +42,7 @@ IAPConnection::IAPConnection(const DeviceUID& device_uid,
   const std::string& device_path) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
-  device_path_(device_path),
-  session_id_(-1) {
+  device_path_(device_path) {
 }
 
 bool IAPConnection::Init() {
@@ -57,7 +56,7 @@ bool IAPConnection::Init() {
     return false;
   }
 
-  receiver_thread_ = new threads::Thread("USB iAP receiver",
+  receiver_thread_ = new threads::Thread("iAP receiver",
     new ReceiverThreadDelegate(ipod_hdl_, this));
   receiver_thread_->start();
 
@@ -65,32 +64,42 @@ bool IAPConnection::Init() {
 }
 
 TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
-  LOG4CXX_TRACE(logger_, "USB iAP: sending data");
-  if (ipod_eaf_send(ipod_hdl_, session_id_, message->data(), message->data_size()) != -1) {
-    LOG4CXX_INFO(logger_, "USB iAP: data sent successfully");
+  if (session_ids_.empty()) {
+    LOG4CXX_WARN(logger_, "iAP: no opened sessions");
+    return TransportAdapter::BAD_STATE;
+  }
+// How is session for sending data chosen?
+  int session_id = *session_ids_.begin();
+  LOG4CXX_TRACE(logger_, "iAP: sending data");
+  if (ipod_eaf_send(ipod_hdl_, session_id, message->data(), message->data_size()) != -1) {
+    LOG4CXX_INFO(logger_, "iAP: data sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "USB iAP: error occured while sending data");
+    LOG4CXX_WARN(logger_, "iAP: error occured while sending data");
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
 }
 
 TransportAdapter::Error IAPConnection::Disconnect() {
+  TransportAdapter::Error error;
+
   receiver_thread_->stop();
 
   LOG4CXX_TRACE(logger_, "iAP: disconecting from " << device_path_);
   if (ipod_disconnect(ipod_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: disconnected from " << device_path_);
-    controller_->DisconnectDone(device_uid_, app_handle_);
-    return TransportAdapter::OK;
+    error = TransportAdapter::OK;
   }
   else {
     LOG4CXX_WARN(logger_, "iAP: could not disconnect from " << device_path_);
-    return TransportAdapter::FAIL;
+    error = TransportAdapter::FAIL;
   }
+
+  controller_->DisconnectDone(device_uid_, app_handle_);
+  return error;
 }
 
 void IAPConnection::OnDataReceived(RawMessageSptr message) {
@@ -102,10 +111,15 @@ void IAPConnection::OnReceiveFailed() {
 }
 
 void IAPConnection::OnSessionOpened(int session_id) {
-  if (-1 == session_id_) {
-    session_id_ = session_id;
+  bool firstSession = session_ids_.empty();
+  session_ids_.insert(session_id);
+  if (firstSession) {
     controller_->ConnectDone(device_uid_, app_handle_);
   }
+}
+
+void IAPConnection::OnSessionClosed(int session_id) {
+  session_ids_.erase(session_id);
 }
 
 IAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
@@ -116,15 +130,15 @@ IAPConnection::ReceiverThreadDelegate::ReceiverThreadDelegate(
 }
 
 bool IAPConnection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
-  LOG4CXX_TRACE(logger_, "Arming for USB iAP event notification");
+  LOG4CXX_TRACE(logger_, "Arming for iAP event notification");
   if (ipod_notify(ipod_hdl_,
     _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_OBAND | _NOTIFY_COND_INPUT, event) != -1) {
 
-    LOG4CXX_DEBUG(logger_, "Successfully armed for USB iAP event notification");
+    LOG4CXX_DEBUG(logger_, "Successfully armed for iAP event notification");
     return true;
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not arm for USB iAP event notification");
+    LOG4CXX_WARN(logger_, "Could not arm for iAP event notification");
     return false;
   }
 }
@@ -174,18 +188,19 @@ void IAPConnection::ReceiverThreadDelegate::CloseSession(uint32_t session_id) {
   else {
     LOG4CXX_WARN(logger_, "iAP: failed to close session " << session_id);
   }
+  parent_->OnSessionClosed(session_id);
 }
 
 void IAPConnection::ReceiverThreadDelegate::ReceiveData(uint32_t session_id) {
-  LOG4CXX_TRACE(logger_, "USB iAP: receiving data on session " << session_id);
+  LOG4CXX_TRACE(logger_, "iAP: receiving data on session " << session_id);
   int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
   if (size != -1) {
-    LOG4CXX_INFO(logger_, "USB iAP: received " << size << " bytes");
+    LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes");
     RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
     parent_->OnDataReceived(message);
   }
   else {
-    LOG4CXX_WARN(logger_, "USB iAP: error occured while receiving data");
+    LOG4CXX_WARN(logger_, "iAP: error occured while receiving data");
     parent_->OnReceiveFailed();
   }
 }

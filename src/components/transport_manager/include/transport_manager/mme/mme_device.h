@@ -41,7 +41,7 @@ namespace transport_adapter {
 
 class MmeDevice : public Device {
  public:
-  MmeDevice(uint64_t msid, const std::string& mount_point, const std::string& name, const DeviceUID& unique_device_id);
+  MmeDevice(const std::string& mount_point, const std::string& name, const DeviceUID& unique_device_id);
 
   const std::string& mount_point() const {
     return mount_point_;
@@ -52,7 +52,6 @@ class MmeDevice : public Device {
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  uint64_t msid_;
   std::string mount_point_;
 };
 

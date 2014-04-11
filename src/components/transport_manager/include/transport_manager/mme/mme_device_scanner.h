@@ -38,6 +38,7 @@
 
 #include "utils/threads/thread.h"
 #include "utils/threads/pulse_thread_delegate.h"
+#include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
@@ -57,13 +58,15 @@ class MmeDeviceScanner : public DeviceScanner {
   virtual bool IsInitialised() const;
 
 private:
-  typedef std::set<MmeDevicePtr> DeviceContainer;
+  typedef uint64_t msid_t;
+  typedef std::vector<msid_t> MsidContainer;
+  typedef std::map<msid_t, MmeDevicePtr> DeviceContainer;
 
-  void OnDeviceArrived(uint64_t msid);
-  void OnDeviceLeft(uint64_t msid);
+  void OnDeviceArrived(msid_t msid);
+  void OnDeviceLeft(msid_t msid);
   void NotifyDevicesUpdated();
-  bool GetMmeList(std::vector<uint64_t>& msids);
-  bool GetMmeInfo(uint64_t msid, std::string& mount_point);
+  bool GetMmeList(MsidContainer& msids);
+  bool GetMmeInfo(msid_t msid, std::string& mount_point);
 
   static const char* mme_name;
   static const char* qdb_name;
@@ -74,6 +77,7 @@ private:
   qdb_hdl_t* qdb_hdl_;
   utils::SharedPtr<threads::Thread> notify_thread_;
   DeviceContainer devices_;
+  sync_primitives::Lock devices_lock_;
 
   class NotifyThreadDelegate : public threads::PulseThreadDelegate {
    public:

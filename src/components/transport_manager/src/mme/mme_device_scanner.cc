@@ -46,15 +46,7 @@ MmeDeviceScanner::~MmeDeviceScanner() {
 }
 
 TransportAdapter::Error MmeDeviceScanner::Init() {
-  LOG4CXX_TRACE(logger_, "Connecting to " << mme_name);
-  mme_hdl_ = mme_connect(mme_name, 0);
-  if (mme_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "Connected to " << mme_name);
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "Could not connect to " << mme_name);
-//  return TransportAdapter::FAIL;
-  }
+  TransportAdapter::Error error = TransportAdapter::OK;
 
   LOG4CXX_TRACE(logger_, "Connecting to " << qdb_name);
   qdb_hdl_ = qdb_connect(qdb_name, 0);
@@ -63,22 +55,43 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
   }
   else {
     LOG4CXX_ERROR(logger_, "Could not connect to " << qdb_name);
+    error = TransportAdapter::FAIL;
   }
 
-  notify_thread_ = new threads::Thread("MME notifier", new NotifyThreadDelegate(mme_hdl_, this));
-//notify_thread_->start();
+  LOG4CXX_TRACE(logger_, "Connecting to " << mme_name);
+  mme_hdl_ = mme_connect(mme_name, 0);
+  if (mme_hdl_ != 0) {
+    LOG4CXX_DEBUG(logger_, "Connected to " << mme_name);
+
+    notify_thread_ = new threads::Thread("MME notifier", new NotifyThreadDelegate(mme_hdl_, this));
+    notify_thread_->start();
+  }
+  else {
+    LOG4CXX_ERROR(logger_, "Could not connect to " << mme_name);
+    error = TransportAdapter::FAIL;
+  }
 
   initialised_ = true;
-  return TransportAdapter::OK;
+  return error;
 }
 
 TransportAdapter::Error MmeDeviceScanner::Scan() {
-  std::vector<uint64_t> msids;
+  MsidContainer msids;
   if (GetMmeList(msids)) {
-    for (std::vector<uint64_t>::const_iterator i = msids.begin(); i != msids.end(); ++i) {
-      uint64_t msid = *i;
-      OnDeviceArrived(msid);
+    DeviceContainer devices;
+    for (MsidContainer::const_iterator i = msids.begin(); i != msids.end(); ++i) {
+      msid_t msid = *i;
+      std::string mount_point;
+      if (GetMmeInfo(msid, mount_point)) {
+// TODO(nvaganov@luxoft.com): get vendor id and product name from database
+        MmeDevicePtr mme_device(new MmeDevice(mount_point, "Apple iPhone", "Apple iPhone"));
+        devices.insert(std::make_pair(msid, mme_device));
+      }
     }
+    devices_lock_.Ackquire();
+    devices_.swap(devices);
+    devices_lock_.Release();
+    NotifyDevicesUpdated();
     return TransportAdapter::OK;
   }
   else {
@@ -87,7 +100,9 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
 }
 
 void MmeDeviceScanner::Terminate() {
-  notify_thread_->stop();
+  if (notify_thread_) {
+    notify_thread_->stop();
+  }
 
   LOG4CXX_TRACE(logger_, "Disconnecting from " << mme_name);
   if (mme_disconnect(mme_hdl_) != -1) {
@@ -110,31 +125,40 @@ bool MmeDeviceScanner::IsInitialised() const {
   return initialised_;
 }
 
-void MmeDeviceScanner::OnDeviceArrived(uint64_t msid) {
+void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
   std::string mount_point;
   if (GetMmeInfo(msid, mount_point)) {
-    MmeDevicePtr mme_device(new MmeDevice(msid, mount_point, "Apple iPhone", "Apple iPhone"));
-    devices_.insert(mme_device);
+// TODO(nvaganov@luxoft.com): get vendor id and product name from database
+    MmeDevicePtr mme_device(new MmeDevice(mount_point, "Apple iPhone", "Apple iPhone"));
+    devices_lock_.Ackquire();
+    devices_.insert(std::make_pair(msid, mme_device));
+    devices_lock_.Release();
     NotifyDevicesUpdated();
-  }
-  else {
   }
 }
 
-void MmeDeviceScanner::OnDeviceLeft(uint64_t msid) {
+void MmeDeviceScanner::OnDeviceLeft(msid_t msid) {
+  devices_lock_.Ackquire();
+  bool erased = devices_.erase(msid) > 0;
+  devices_lock_.Release();
+  if (erased) {
+    NotifyDevicesUpdated();
+  }
 }
 
 void MmeDeviceScanner::NotifyDevicesUpdated() {
   DeviceVector devices;
+  devices_lock_.Ackquire();
   for (DeviceContainer::const_iterator i = devices_.begin(); i != devices_.end(); ++i) {
-    MmeDevicePtr mme_device = *i;
+    MmeDevicePtr mme_device = i->second;
     DeviceSptr device = MmeDevicePtr::static_pointer_cast<Device>(mme_device);
     devices.push_back(device);
   }
+  devices_lock_.Release();
   controller_->SearchDeviceDone(devices);
 }
 
-bool MmeDeviceScanner::GetMmeList(std::vector<uint64_t>& msids) {
+bool MmeDeviceScanner::GetMmeList(MsidContainer& msids) {
   const char query[] = "SELECT msid FROM mediastores";
   LOG4CXX_TRACE(logger_, "Querying " << qdb_name);
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query);
@@ -143,8 +167,8 @@ bool MmeDeviceScanner::GetMmeList(std::vector<uint64_t>& msids) {
     msids.clear();
     int count = qdb_rows(res);
     for (int i = 0; i < count; ++i) {
-      uint64_t* data = (uint64_t*) qdb_cell(res, i, 0);
-      uint64_t msid = *data;
+      msid_t* data = (msid_t*) qdb_cell(res, i, 0);
+      msid_t msid = *data;
       msids.push_back(msid);
     }
     qdb_freeresult(res);
@@ -156,7 +180,8 @@ bool MmeDeviceScanner::GetMmeList(std::vector<uint64_t>& msids) {
   }
 }
 
-bool MmeDeviceScanner::GetMmeInfo(uint64_t msid, std::string& mount_point) {
+// TODO(nvaganov@luxoft.com): get vendor id and product name from database
+bool MmeDeviceScanner::GetMmeInfo(msid_t msid, std::string& mount_point) {
   const char query[] = "SELECT mountpath FROM mediastores WHERE msid=%lld";
   LOG4CXX_TRACE(logger_, "Querying " << qdb_name);
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query, msid);
@@ -197,15 +222,21 @@ void MmeDeviceScanner::NotifyThreadDelegate::OnPulse() {
     switch (mme_event->type) {
       case MME_EVENT_MS_STATECHANGE: {
         mme_ms_statechange_t* mme_ms_statechange = (mme_ms_statechange_t*) (mme_event->data);
-        uint64_t msid = mme_ms_statechange->msid;
+        msid_t msid = mme_ms_statechange->msid;
         uint32_t old_state = mme_ms_statechange->old_state;
         uint32_t new_state = mme_ms_statechange->new_state;
-        LOG4CXX_DEBUG(logger_, "MME event: msid = " << msid << ", old_state = " << old_state << ", new_state = " << new_state);
-        if ((3 != old_state) && (3 == new_state)) {  // XXX
+        LOG4CXX_DEBUG(logger_, "MME event MME_EVENT_MS_STATECHANGE: msid = " << msid << ", old_state = " << old_state << ", new_state = " << new_state);
+// Can't obtain any on documentation on state codes, these are empirical
+        if (3 == old_state) {
+          parent_->OnDeviceLeft(msid);
+        }
+        if (3 == new_state) {
           parent_->OnDeviceArrived(msid);
         }
         break;
       }
+      default:
+        LOG4CXX_DEBUG(logger_, "Not an event of interest");
     }
   }
   else {
