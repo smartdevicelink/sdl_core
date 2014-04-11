@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -388,7 +388,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
-                    this.OnReceivedPolicyUpdate(SDL.SettingsController.policyUpdateFile);
+                    this.OnReceivedPolicyUpdate(request.params.fileName);
 
                     SDL.SettingsController.policyUpdateFile = null;
 
@@ -579,7 +579,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -716,7 +716,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            id
          * @param {String}
@@ -775,7 +775,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Send request if application was activated
-         * 
+         *
          * @param {number} appID
          */
         OnAppActivated: function(appID) {
@@ -854,7 +854,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Invoked by UI component when user switches to any functionality which
          * is not other mobile application.
-         * 
+         *
          * @params {String}
          * @params {Number}
          */
@@ -894,7 +894,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Used by HMI when User chooses to exit application.
-         * 
+         *
          * @params {Number}
          */
         ExitApplication: function(appID) {
@@ -915,7 +915,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Sent by HMI to SDL to close all registered applications.
-         * 
+         *
          * @params {String}
          */
         ExitAllApplications: function(reason) {
@@ -937,7 +937,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Response with params of the last one supports mixing audio (ie
          * recording TTS command and playing audio).
-         * 
+         *
          * @params {Number}
          */
         MixingAudioSupported: function(attenuatedSupported) {
@@ -961,7 +961,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Response with Results by user/HMI allowing SDL functionality or
          * disallowing access to all mobile apps.
-         * 
+         *
          * @params {Number}
          */
         AllowAllApps: function(allowed) {
@@ -984,7 +984,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Response with result of allowed application
-         * 
+         *
          * @params {Number}
          */
         AllowApp: function(request) {
@@ -1018,7 +1018,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Notifies if device was choosed
-         * 
+         *
          * @param {String}
          *            deviceName
          * @param {Number}
@@ -1044,7 +1044,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Send error response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
