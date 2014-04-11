@@ -127,6 +127,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemInfoChanged");
   MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
   MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
+  MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
   MessageBrokerController::subscribeTo("SDL.OnSystemError");
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
 

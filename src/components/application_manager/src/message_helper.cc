@@ -34,16 +34,17 @@
 #include <string>
 #include <algorithm>
 
-#include "utils/macro.h"
+#include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/command_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/commands/command_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "application_manager/application.h"
 #include "config_profile/profile.h"
-#include "utils/file_system.h"
+#include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
+#include "smart_objects/enum_schema_item.h"
+#include "utils/file_system.h"
+#include "utils/macro.h"
 
 namespace {
 
@@ -413,115 +414,21 @@ const char* MessageHelper::StringifiedHMILevel(
   }
 }
 
-const char* MessageHelper::StringifiedFunctionID(
+std::string MessageHelper::StringifiedFunctionID(
   mobile_apis::FunctionID::eType function_id) {
-  switch (function_id) {
-    case mobile_apis::FunctionID::RegisterAppInterfaceID:
-      return "RegisterAppInterface";
-    case mobile_apis::FunctionID::UnregisterAppInterfaceID:
-      return "UnregisterAppInterface";
-    case mobile_apis::FunctionID::SetGlobalPropertiesID:
-      return "SetGlobalProperties";
-    case mobile_apis::FunctionID::ResetGlobalPropertiesID:
-      return "ResetGlobalProperties";
-    case mobile_apis::FunctionID::AddCommandID:
-      return "AddCommand";
-    case mobile_apis::FunctionID::DeleteCommandID:
-      return "DeleteCommand";
-    case mobile_apis::FunctionID::AddSubMenuID:
-      return "AddSubMenu";
-    case mobile_apis::FunctionID::DeleteSubMenuID:
-      return "DeleteSubMenu";
-    case mobile_apis::FunctionID::CreateInteractionChoiceSetID:
-      return "CreateInteractionChoiceSet";
-    case mobile_apis::FunctionID::PerformInteractionID:
-      return "PerformInteraction";
-    case mobile_apis::FunctionID::DeleteInteractionChoiceSetID:
-      return "DeleteInteractionChoiceSet";
-    case mobile_apis::FunctionID::AlertID:
-      return "Alert";
-    case mobile_apis::FunctionID::ShowID:
-      return "Show";
-    case mobile_apis::FunctionID::SpeakID:
-      return "Speak";
-    case mobile_apis::FunctionID::SetMediaClockTimerID:
-      return "SetMediaClockTimer";
-    case mobile_apis::FunctionID::EncodedSyncPDataID:
-      return "EncodedSyncPData";
-    case mobile_apis::FunctionID::SyncPDataID:
-      return "SyncPData";
-    case mobile_apis::FunctionID::PerformAudioPassThruID:
-      return "PerformAudioPassThru";
-    case mobile_apis::FunctionID::EndAudioPassThruID:
-      return "EndAudioPassThru";
-    case mobile_apis::FunctionID::SubscribeButtonID:
-      return "SubscribeButton";
-    case mobile_apis::FunctionID::UnsubscribeButtonID:
-      return "UnsubscribeButton";
-    case mobile_apis::FunctionID::SubscribeVehicleDataID:
-      return "SubscribeVehicleData";
-    case mobile_apis::FunctionID::UnsubscribeVehicleDataID:
-      return "UnsubscribeVehicleData";
-    case mobile_apis::FunctionID::GetVehicleDataID:
-      return "GetVehicleData";
-    case mobile_apis::FunctionID::ReadDIDID:
-      return "ReadDID";
-    case mobile_apis::FunctionID::GetDTCsID:
-      return "GetDTCs";
-    case mobile_apis::FunctionID::ScrollableMessageID:
-      return "ScrollableMessage";
-    case mobile_apis::FunctionID::SliderID:
-      return "Slider";
-    case mobile_apis::FunctionID::ShowConstantTBTID:
-      return "ShowConstantTBT";
-    case mobile_apis::FunctionID::AlertManeuverID:
-      return "AlertManeuver";
-    case mobile_apis::FunctionID::UpdateTurnListID:
-      return "UpdateTurnList";
-    case mobile_apis::FunctionID::ChangeRegistrationID:
-      return "ChangeRegistration";
-    case mobile_apis::FunctionID::GenericResponseID:
-      return "GenericResponse";
-    case mobile_apis::FunctionID::PutFileID:
-      return "PutFile";
-    case mobile_apis::FunctionID::DeleteFileID:
-      return "DeleteFile";
-    case mobile_apis::FunctionID::ListFilesID:
-      return "ListFiles";
-    case mobile_apis::FunctionID::SetAppIconID:
-      return "SetAppIcon";
-    case mobile_apis::FunctionID::SetDisplayLayoutID:
-      return "SetDisplayLayout";
-    case mobile_apis::FunctionID::OnHMIStatusID:
-      return "OnHMIStatus";
-    case mobile_apis::FunctionID::OnAppInterfaceUnregisteredID:
-      return "OnAppInterfaceUnregistered";
-    case mobile_apis::FunctionID::OnButtonEventID:
-      return "OnButtonEvent";
-    case mobile_apis::FunctionID::OnButtonPressID:
-      return "OnButtonPress";
-    case mobile_apis::FunctionID::OnVehicleDataID:
-      return "OnVehicleData";
-    case mobile_apis::FunctionID::OnCommandID:
-      return "OnCommand";
-    case mobile_apis::FunctionID::OnEncodedSyncPDataID:
-      return "OnEncodedSyncPData";
-    case mobile_apis::FunctionID::OnTBTClientStateID:
-      return "OnTBTClientState";
-    case mobile_apis::FunctionID::OnPermissionsChangeID:
-      return "OnPermissionsChange";
-    case mobile_apis::FunctionID::OnAudioPassThruID:
-      return "OnAudioPassThru";
-    case mobile_apis::FunctionID::OnLanguageChangeID:
-      return "OnLanguageChange";
-    case mobile_apis::FunctionID::OnDriverDistractionID:
-      return "OnDriverDistraction";
-    case mobile_apis::FunctionID::OnSyncPDataID:
-      return "OnSyncPData";
-    case mobile_apis::FunctionID::OnSystemRequestID:
-      return "OnSystemRequest";
-    default:
-      return "";
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  typedef std::map<mobile_apis::FunctionID::eType, std::string> EnumMap;
+  const EnumMap& enum_map =
+      TEnumSchemaItem<mobile_apis::FunctionID::eType>::getEnumElementsStringRepresentation();
+  EnumMap::const_iterator found = enum_map.find(function_id);
+  if (found != enum_map.end()) {
+    const std::string& enum_name = found->second;
+    // Strip 'ID' suffix from value name
+    DCHECK(enum_name.length() > 2
+           && enum_name.substr(enum_name.length() - 2) == "ID");
+    return enum_name.substr(0, enum_name.length() - 2);
+  } else {
+    return "";
   }
 }
 

@@ -154,7 +154,7 @@ class MessageHelper {
     * @brief Used to obtain function name by its id
     * @param function_id Function ID
     */
-    static const char* StringifiedFunctionID(
+    static std::string StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
 
     static void CreateGetDeviceData(int32_t correlation_id);
