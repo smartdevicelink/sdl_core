@@ -64,14 +64,15 @@ void OnAppPermissionConsentNotification::Run() {
       permission_consent.policy_app_id = app->mobile_app_id()->asString();
       policy::DeviceParams device_params;
       application_manager::MessageHelper::GetDeviceInfoForHandle(
-            app->device(),
-            &device_params);
+        app->device(),
+        &device_params);
 
       permission_consent.device_id = device_params.device_mac_address;
     }
   }
 
-  smart_objects::SmartArray* user_consent =
+  if (msg_params.keyExists("consentedFunctions")) {
+    smart_objects::SmartArray* user_consent =
       msg_params["consentedFunctions"].asArray();
 
   smart_objects::SmartArray::const_iterator it = user_consent->begin();
@@ -87,12 +88,14 @@ void OnAppPermissionConsentNotification::Run() {
       permissions.state = policy::kUndefined;
     }
 
-    permission_consent.group_permissions.push_back(permissions);
+      permission_consent.group_permissions.push_back(permissions);
+    }
+
+    permission_consent.consent_source = msg_params["source"].asString();
+
+    policy::PolicyHandler::instance()->OnAppPermissionConsent(
+      permission_consent);
   }
-
-  permission_consent.consent_source = msg_params["source"].asString();
-
-  policy::PolicyHandler::instance()->OnAppPermissionConsent(permission_consent);
 }
 
 }  // namespace commands

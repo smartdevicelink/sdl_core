@@ -69,8 +69,7 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
 }
 
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
-CommonAppPriorityMap app_priority_values =
-{
+CommonAppPriorityMap app_priority_values = {
   {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
   {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
@@ -1114,7 +1113,7 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
     msg_params[strings::app_id] = app_id;
   }
   msg_params[strings::grammar_id] =
-			 ApplicationManagerImpl::instance()->application(app_id)->get_grammar_id();
+    ApplicationManagerImpl::instance()->application(app_id)->get_grammar_id();
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
   (*vr_command)[strings::msg_params] = msg_params;
@@ -1370,26 +1369,6 @@ void MessageHelper::SendPolicyUpdate(
   for (size_t i = 0; i < retries.size(); ++i) {
     object[strings::msg_params][hmi_request::retry][i] = retries[i];
   }
-  ApplicationManagerImpl::instance()->ManageHMICommand(message);
-}
-
-void MessageHelper::SendUpdateSDLResponse(const std::string& result,
-                                          uint32_t correlation_id) {
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-  if (!message) {
-    return;
-  }
-
-  (*message)[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::SDL_UpdateSDL;
-  (*message)[strings::params][strings::message_type] =
-    MessageType::kResponse;
-  (*message)[strings::params][strings::correlation_id] = correlation_id;
-  (*message)[strings::params][hmi_response::code] = 0;
-
-  (*message)[strings::msg_params]["result"] = result;
-
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
@@ -1758,7 +1737,7 @@ void MessageHelper::SendPolicySnapshotNotification(
     content[strings::msg_params][mobile_notification::syncp_url] = url;
   }
   content[strings::msg_params][strings::file_type] =
-    mobile_apis::FileType::JSON;
+    mobile_apis::FileType::BINARY;
   content[strings::msg_params][strings::request_type] =
     mobile_apis::RequestType::HTTP;
   /*if (-1 != timeout) {
@@ -1950,6 +1929,27 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
+
+void MessageHelper::SendUpdateSDLResponse(const std::string &result, uint32_t correlation_id) {
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+                                          smart_objects::SmartType_Map);
+  if (!message) {
+    return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::SDL_UpdateSDL;
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kResponse;
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::params][hmi_response::code] = 0;
+
+  (*message)[strings::msg_params]["result"] = result;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
+
 
 void MessageHelper::SendOnStatusUpdate(const std::string& status) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(

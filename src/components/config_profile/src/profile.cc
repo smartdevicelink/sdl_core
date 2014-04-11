@@ -334,7 +334,7 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            kPolicySection, "PoliciesTable", value))
       && ('\0' != *value)) {
-    policies_file_name_ = app_config_folder_ + value;
+    policies_file_name_ = app_config_folder_ + '/' + value;
     LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
   }
 
