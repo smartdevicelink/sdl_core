@@ -46,7 +46,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -176,7 +175,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
                 isNull(FileType.class));
     }
 
-    public void testOnSystemRequestWithRequestTypeHTTPShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeHTTPShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -193,8 +192,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
@@ -209,8 +207,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeHTTPShouldNotCrashWhenHandlerNotSet()
@@ -363,7 +360,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
                 eq(length), isNull(FileType.class));
     }
 
-    public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeFileResumeShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -385,11 +382,10 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
-    public void testOnSystemRequestWithRequestTypeFileResumeWithoutParametersShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeFileResumeWithoutParametersShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -401,8 +397,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCrashWhenHandlerNotSet()
