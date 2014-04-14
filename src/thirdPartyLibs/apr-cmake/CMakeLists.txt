@@ -32,12 +32,12 @@ set(APR_SOURCE_DIRECTORY ../apr-1.5.0)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_recursive=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=no ac_cv_sizeof_struct_iovec=8
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_recursive=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=no ac_cv_sizeof_struct_iovec=8
     WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
   )
 else ()
   add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}`
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure
     WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
   )
 endif ()
@@ -51,4 +51,12 @@ add_custom_target(libapr-1 ALL make
   DEPENDS ${APR_SOURCE_DIRECTORY}/Makefile
   DEPENDS ${APR_SOURCE_DIRECTORY}/include/private
   WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
+)
+
+install(
+  PROGRAMS
+    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so.0.5.0
+    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so.0
+    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
 )

@@ -62,20 +62,15 @@ endif(BUILD_shared)
 
 add_library(expat ${_SHARED} ${expat_SRCS})
 
-install(TARGETS expat RUNTIME DESTINATION bin
-                      LIBRARY DESTINATION lib
-                      ARCHIVE DESTINATION lib)
+install(PROGRAMS libexpat.so
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+)
 
 set(prefix ${CMAKE_INSTALL_PREFIX})
 set(exec_prefix "\${prefix}/bin")
 set(libdir "\${prefix}/lib")
 set(includedir "\${prefix}/include")
 configure_file(expat.pc.in ${CMAKE_CURRENT_BINARY_DIR}/expat.pc)
-
-install(FILES lib/expat.h lib/expat_external.h DESTINATION include)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/expat.pc DESTINATION lib/pkgconfig)
-
-
 
 if(BUILD_tools AND NOT WINCE)
     set(xmlwf_SRCS

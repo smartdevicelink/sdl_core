@@ -28,34 +28,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- jsoncpp
-add_subdirectory(./jsoncpp)
+set(DBUS_SOURCE_DIRECTORY ../dbus-1.7.8)
 
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  add_custom_command(OUTPUT ${DBUS_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx --enable-tests=no
+    WORKING_DIRECTORY ${DBUS_SOURCE_DIRECTORY}
+  )
+else ()
+  add_custom_command(OUTPUT ${DBUS_SOURCE_DIRECTORY}/Makefile
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --enable-tests=no
+    WORKING_DIRECTORY ${DBUS_SOURCE_DIRECTORY}
+  )
+endif ()
 
-# --- encryption
-add_subdirectory(./encryption)
+add_custom_target(dbus ALL make
+  DEPENDS ${DBUS_SOURCE_DIRECTORY}/Makefile
+  WORKING_DIRECTORY ${DBUS_SOURCE_DIRECTORY}
+)
 
-if (BUILD_USB_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-add_subdirectory(./libusbx-1.0.16)
-endif()
-endif()
+install(
+  PROGRAMS ${DBUS_SOURCE_DIRECTORY}/bus/dbus-daemon
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/bin
+)
 
-set(3RD_PARTY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/3rd_party")
-
-# --- libapr-1
-add_subdirectory(apr-cmake)
-
-# --- libexpat
-add_subdirectory(expat-2.1.0)
-
-# --- apr-util
-add_subdirectory(apr-util-cmake)
-
-# --- log4cxx
-add_subdirectory(apache-log4cxx-cmake)
-
-# D-Bus
-add_subdirectory(dbus-cmake)
+install(
+  PROGRAMS
+    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so.3.8.3
+    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so.3
+    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+)

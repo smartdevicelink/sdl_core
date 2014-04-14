@@ -32,14 +32,14 @@ set(APR_UTIL_SOURCE_DIRECTORY ../apr-util-1.5.3)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   add_custom_command(OUTPUT ${APR_UTIL_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx --with-apr=../apr-1.5.0 --with-expat=../expat-2.1.0
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx --with-apr=../apr-1.5.0 --with-expat=../expat-2.1.0
     DEPENDS libapr-1
     DEPENDS expat
     WORKING_DIRECTORY ${APR_UTIL_SOURCE_DIRECTORY}
   )
 else ()
   add_custom_command(OUTPUT ${APR_UTIL_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --with-apr=../apr-1.5.0 --with-expat=../expat-2.1.0
+    COMMAND CC=${CMAKE_C_COMPILER} ./configure --with-apr=../apr-1.5.0 --with-expat=../expat-2.1.0
     DEPENDS libapr-1
     DEPENDS expat
     WORKING_DIRECTORY ${APR_UTIL_SOURCE_DIRECTORY}
@@ -49,4 +49,12 @@ endif ()
 add_custom_target(apr-util ALL make
   DEPENDS ${APR_UTIL_SOURCE_DIRECTORY}/Makefile
   WORKING_DIRECTORY ${APR_UTIL_SOURCE_DIRECTORY}
+)
+
+install(
+  PROGRAMS
+    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so.0.5.3
+    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so.0
+    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
 )

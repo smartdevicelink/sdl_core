@@ -3,6 +3,7 @@
 *.cmake
 !cmake/
 bin
+3rd_party
 build
 CMakeFiles
 *-prefix
@@ -23,6 +24,8 @@ install_manifest.txt
 
 # logs
 *.log
+
+src/thirdPartyLibs/*
 
 # binaries
 src/appMain/hmi_link

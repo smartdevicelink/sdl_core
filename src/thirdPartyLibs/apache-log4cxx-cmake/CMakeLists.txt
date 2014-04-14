@@ -37,14 +37,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     set (ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
   endif ()
   add_custom_command(OUTPUT ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --host=${ARCHITECTURE}-nto-qnx --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --host=${ARCHITECTURE}-nto-qnx --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
     DEPENDS libapr-1
     DEPENDS apr-util
     WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
   )
 else ()
   add_custom_command(OUTPUT ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --prefix=`readlink -f ${CMAKE_INSTALL_PREFIX}` --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
+    COMMAND CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --with-apr=../apr-1.5.0 --with-apr-util=../apr-util-1.5.3
     DEPENDS libapr-1
     DEPENDS apr-util
     WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
@@ -54,4 +54,12 @@ endif ()
 add_custom_target(liblog4cxx ALL make
   DEPENDS ${LOG4CXX_SOURCE_DIRECTORY}/Makefile
   WORKING_DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}
+)
+
+install(
+  PROGRAMS
+    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so.10.0.0
+    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so.10
+    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
 )
