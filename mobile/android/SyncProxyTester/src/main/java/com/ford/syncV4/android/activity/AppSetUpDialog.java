@@ -78,7 +78,7 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
-        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox isHeartBeatBox = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
@@ -216,6 +216,11 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_KEY_AUTOSETAPPICON,
                 Const.PREFS_DEFAULT_AUTOSETAPPICON);
 
+        final boolean isHeartbeat = prefs.getBoolean(
+                Const.PREFS_KEY_HEARTBEAT,
+                Const.PREFS_DEFAULT_HEARTBEAT);
+
+        isHeartBeatBox.setChecked(isHeartbeat);
         mediaCheckBox.setChecked(isMedia);
         naviCheckBox.setChecked(isNavi);
         appNameEditText.setText(appName);
@@ -292,12 +297,13 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
+                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHeartBeatBox.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
-                        setupHeartbeat(isHearBeat);
+                        setupHeartbeat(isHeartBeatBox);
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();

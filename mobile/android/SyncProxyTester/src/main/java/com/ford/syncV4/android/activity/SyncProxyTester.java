@@ -407,7 +407,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         sendSecureError.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                spinner.getSelectedItem();
+
             }
         });
 

@@ -417,7 +417,7 @@ public class WiProProtocol extends AbstractProtocol {
                     message.setData(data);
                 } else {
                     //If it is WiPro 2.0 it must have binary header
-                    if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                    if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                         BinaryFrameHeader binFrameHeader = BinaryFrameHeader.
                                 parseBinaryHeader(data);
 
