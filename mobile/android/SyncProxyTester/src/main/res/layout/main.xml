@@ -38,33 +38,48 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_marginBottom="10dp"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:id="@+id/rpc_secure_checkbox"
+                    android:text="Encrypt RPC"
+                    android:checked="false"
+                    android:layout_below="@+id/rpc_service_state"
+                    android:layout_alignParentLeft="true"/>
 
                 <Button
                     android:id="@+id/rpc_service_secure_button_view"
-                    android:layout_weight="1"
+
                     android:text="@string/secure_service_send_rpc"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rpc_secure_checkbox"
+                    android:layout_alignParentLeft="true"/>
 
                 <Button
                     android:id="@+id/rpc_non_secure_button_view"
-                    android:layout_weight="1"
+
                     android:text="@string/not_secure_service_send_rpc"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rpc_service_secure_button_view"
+                    android:layout_alignParentLeft="true" />
 
                 <TextView
                     android:id="@+id/rpc_service_state"
-                    android:layout_weight="1"
-                    android:layout_width="0dp"
+
+                    android:layout_width="wrap_content"
                     android:text="@string/rpc_service_state"
                     android:layout_height="wrap_content" />
 
-            </LinearLayout>
+            </RelativeLayout>
 
             <TextView
                 android:text="Mobile Service"

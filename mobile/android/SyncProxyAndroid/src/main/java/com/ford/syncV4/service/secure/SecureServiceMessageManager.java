@@ -65,6 +65,4 @@ public class SecureServiceMessageManager {
             mMessageCallback.onHandshakeError(secureServicePayload.getSecureError());
         }
     }
-
-
 }
