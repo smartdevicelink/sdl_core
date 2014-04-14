@@ -247,9 +247,8 @@ Json::Value Enum<T>::ToJsonValue() const {
 
 // Non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array(Json::Value* value)
-    : marked_as_null_(value && value->isNull()) {
-  if (value && !marked_as_null_) {
+Array<T, minsize, maxsize>::Array(Json::Value* value) {
+  if (value) {
     if (value->isArray()) {
       this->reserve(value->size());
       for (Json::Value::iterator i = value->begin(); i != value->end(); ++i) {
@@ -265,9 +264,8 @@ Array<T, minsize, maxsize>::Array(Json::Value* value)
 
 // Const version, must be identical to the non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array(const Json::Value* value)
-    : marked_as_null_(value && value->isNull()) {
-  if (value && !marked_as_null_) {
+Array<T, minsize, maxsize>::Array(const Json::Value* value) {
+  if (value) {
     if (value->isArray()) {
       this->reserve(value->size());
       for (Json::Value::const_iterator i = value->begin(); i != value->end(); ++i) {
@@ -283,9 +281,6 @@ Array<T, minsize, maxsize>::Array(const Json::Value* value)
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
-  if (is_null()) {
-    return Json::Value::null;
-  }
   Json::Value array(Json::arrayValue);
   array.resize(this->size());
   for (size_t i = 0; i != this->size(); ++i) {
@@ -296,9 +291,8 @@ Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
 
 // Non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map(Json::Value* value)
-    : marked_as_null_(value && value->isNull()) {
-  if (value && !marked_as_null_) {
+Map<T, minsize, maxsize>::Map(Json::Value* value) {
+  if (value) {
     if (value->isObject()) {
       for (Json::Value::iterator i = value->begin(); i != value->end(); ++i) {
         this->insert(typename MapType::value_type(i.key().asString(), T(&*i)));
@@ -312,9 +306,8 @@ Map<T, minsize, maxsize>::Map(Json::Value* value)
 }
 
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map(const Json::Value* value)
-    : marked_as_null_(value && value->isNull()) {
-  if (value && !marked_as_null_) {
+Map<T, minsize, maxsize>::Map(const Json::Value* value) {
+  if (value) {
     if (value->isObject()) {
       for (Json::Value::const_iterator i = value->begin(); i != value->end(); ++i) {
         this->insert(typename MapType::value_type(i.key().asString(), T(&*i)));
@@ -329,9 +322,6 @@ Map<T, minsize, maxsize>::Map(const Json::Value* value)
 
 template<typename T, size_t minsize, size_t maxsize>
 Json::Value Map<T, minsize, maxsize>::ToJsonValue() const {
-  if (is_null()) {
-    return Json::Value::null;
-  }
   Json::Value map(Json::objectValue);
   for (typename MapType::const_iterator i = this->begin(); i != this->end(); ++i) {
     map[i->first] = i->second.ToJsonValue();

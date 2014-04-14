@@ -259,7 +259,6 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
 TEST(ValidatedTypesJson, ArrayNullTest) {
   Array<String<1, 32>, 2, 5> arr(&Value::null);
   ASSERT_TRUE(arr.is_initialized());
-  ASSERT_TRUE(arr.is_null());
   ASSERT_FALSE(arr.is_valid());
 }
 
@@ -267,14 +266,12 @@ TEST(ValidatedTypesJson, ArrayAbsentValueTest) {
   Value* novalue = NULL;
   Array<String<1, 32>, 2, 5> arr(novalue);
   ASSERT_FALSE(arr.is_initialized());
-  ASSERT_FALSE(arr.is_null());
   ASSERT_FALSE(arr.is_valid());
 }
 
 TEST(ValidatedTypesJson, MapNullTest) {
   Map<String<1, 32>, 2, 5> map(&Value::null);
   ASSERT_TRUE(map.is_initialized());
-  ASSERT_TRUE(map.is_null());
   ASSERT_FALSE(map.is_valid());
 }
 
@@ -282,7 +279,6 @@ TEST(ValidatedTypesJson, MapAbsentValueTest) {
   Value* novalue = NULL;
   Map<String<1, 32>, 0, 5> map(novalue);
   ASSERT_FALSE(map.is_initialized());
-  ASSERT_FALSE(map.is_null());
   ASSERT_TRUE(map.is_valid());
 }
 

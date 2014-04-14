@@ -60,7 +60,6 @@ template<typename T> class Enum;
 template<typename T, size_t minsize, size_t maxsize> class Array;
 template<typename T, size_t minsize, size_t maxsize> class Map;
 template<typename T> class Nullable;
-template<typename T> class Mandatory;
 template<typename T> class Optional;
 
 template<typename T>
@@ -258,10 +257,6 @@ class Array : public std::vector<T> {
 
   bool is_valid() const;
   bool is_initialized() const;
-  bool is_null() const;
-  void set_to_null();
- private:
-  bool marked_as_null_;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -288,10 +283,6 @@ class Map : public std::map<std::string, T> {
 
   bool is_valid() const;
   bool is_initialized() const;
-  bool is_null() const;
-  void set_to_null();
- private:
-  bool marked_as_null_;
 };
 
 template<typename T>

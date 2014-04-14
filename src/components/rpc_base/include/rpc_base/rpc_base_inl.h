@@ -228,15 +228,13 @@ Enum<T>::operator EnumType() const {
  * Array class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array()
-  : marked_as_null_(false) {
+Array<T, minsize, maxsize>::Array() {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
 Array<T, minsize, maxsize>::Array(const U& value)
-    : ArrayType(value.begin(), value.end()),
-      marked_as_null_(false) {
+    : ArrayType(value.begin(), value.end()) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -255,9 +253,6 @@ void Array<T, minsize, maxsize>::push_back(const U& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_valid() const {
-  if (is_null()) {
-    return false;
-  }
   if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
     return false;
   for (typename ArrayType::const_iterator i = this->begin();
@@ -270,31 +265,19 @@ bool Array<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_initialized() const {
-  return is_null() || !this->empty();
-}
-
-template<typename T, size_t minsize, size_t maxsize>
-bool Array<T, minsize, maxsize>::is_null() const {
-  return marked_as_null_;
-}
-
-template<typename T, size_t minsize, size_t maxsize>
-void Array<T, minsize, maxsize>::set_to_null() {
-  marked_as_null_ = true;
+  return !this->empty();
 }
 
 /*
  * Map class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map()
-    : marked_as_null_(false) {
+Map<T, minsize, maxsize>::Map() {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
-Map<T, minsize, maxsize>::Map(const U& value)
-    : marked_as_null_(false) {
+Map<T, minsize, maxsize>::Map(const U& value) {
   for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
       ++i) {
     // Explicitly convert that value to T because all rpc_types have explicit
@@ -325,8 +308,6 @@ void Map<T, minsize, maxsize>::insert(const std::pair<std::string, U>& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_valid() const {
-  if (is_null())
-    return false;
   if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
     return false;
   for (typename Map::const_iterator i = this->begin();
@@ -339,17 +320,7 @@ bool Map<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_initialized() const {
-  return is_null() || !this->empty();
-}
-
-template<typename T, size_t minsize, size_t maxsize>
-bool Map<T, minsize, maxsize>::is_null() const {
-  return marked_as_null_;
-}
-
-template<typename T, size_t minsize, size_t maxsize>
-void Map<T, minsize, maxsize>::set_to_null() {
-  marked_as_null_ = true;
+  return !this->empty();
 }
 
 /*
