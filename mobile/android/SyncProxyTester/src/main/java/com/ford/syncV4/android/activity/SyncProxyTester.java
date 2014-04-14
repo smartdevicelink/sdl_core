@@ -129,6 +129,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
@@ -391,6 +392,22 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 MessageFilter.setEncrypt(isChecked);
+            }
+        });
+
+        final Spinner spinner = (Spinner) findViewById(R.id.secure_error_spinner);
+        ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(this,
+                android.R.layout.simple_spinner_item, SecurityInternalError.values());
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+
+        Button sendSecureError = (Button) findViewById(R.id.secure_error_msg_button);
+        sendSecureError.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                spinner.getSelectedItem();
             }
         });
 
