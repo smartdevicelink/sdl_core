@@ -55,7 +55,7 @@ namespace test {
 
     //////////////////////////////////////////////
     // Smoke test
-    SmokeTestExpMedia("./components/application_manager/rpc/XmlTests");
+    //SmokeTestExpMedia("./components/application_manager/rpc/XmlTests");
     sleep(5);
   }
 }  // namespace test

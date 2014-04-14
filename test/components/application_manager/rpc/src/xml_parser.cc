@@ -398,8 +398,8 @@ namespace test {
 
     std::vector<uint8_t> binStr;
 
-    std::string fullPatch = "SyncProxyTester/" + msgValue;
-    std::string full_file_path = file_system::FullPath(fullPatch);
+    std::string fullPatch = profile::Profile::instance()->app_storage_folder();
+    std::string full_file_path = fullPatch + "SyncProxyTester/" + msgValue;
 
     if (file_system::ReadBinaryFile(full_file_path, binStr)) {
       (*so)[am::strings::binary_data] = binStr;
@@ -414,8 +414,11 @@ namespace test {
     std::string msgValue(ToString(xmlParam->children->content));
     if (!VerifyString(msgParam)) return;
 
-    std::string fullPatch = "SyncProxyTester/" + msgValue;
-    std::string full_file_path = file_system::FullPath(fullPatch);
+    std::string fullPatch = profile::Profile::instance()->app_storage_folder();
+    std::string full_file_path = fullPatch + "SyncProxyTester/" + msgValue;
+
+    // std::string fullPatch = "SyncProxyTester/" + msgValue;
+    // std::string full_file_path = file_system::FullPath(fullPatch);
 
     (*so)[msgParam] = full_file_path;
   }

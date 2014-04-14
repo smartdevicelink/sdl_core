@@ -134,7 +134,7 @@ void RegApp() {
       mobile_apis::FunctionID::RegisterAppInterfaceID;
   (*AppRegRequest)[jsn::S_PARAMS][am::strings::message_type] =
       mobile_apis::messageType::request;
-
+  (*AppRegRequest)[jsn::S_PARAMS][am::strings::protocol_version] = 2;
   (*AppRegRequest)[jsn::S_PARAMS][am::strings::connection_key] = 65537;
 
   (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_name] =

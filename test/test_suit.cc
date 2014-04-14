@@ -34,6 +34,8 @@
 #include "gmock/gmock.h"
 
 #include "config_profile/profile.h"
+#include "utils/logger.h"
+
 #include "utils/file_system_tests.h"
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
@@ -74,7 +76,6 @@ int main(int argc, char **argv) {
 
   profile::Profile::instance()->config_file_name("log4cxx.properties");
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-
 
 #ifdef TESTS_WITH_HMI
   test::AdminAppTest app;

@@ -46,6 +46,8 @@
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "formatters/formatter_json_rpc.h"
 #include "utils/file_system.h"
+#include "config_profile/ini_file.h"
+#include "config_profile/profile.h"
 
 namespace am = application_manager;
 namespace smart = NsSmartDeviceLink::NsSmartObjects;

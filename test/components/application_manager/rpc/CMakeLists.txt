@@ -25,7 +25,8 @@ include_directories (
   ../../../../src/components/media_manager/include
   ../../../../src/components/formatters/include
   ../../../../src/components/config_profile/include
-  ../../../../src/components/policies/include
+  ../../../../src/components/policy/src/policy/include
+  ../../../../src/components/policy/src/policy/usage_statistics/include
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/
