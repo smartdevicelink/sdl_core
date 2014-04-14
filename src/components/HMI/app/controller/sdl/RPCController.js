@@ -59,9 +59,10 @@ SDL.RPCController = Em.Object
             var error = false;
             if (array instanceof Array) {
                 for ( var i = 0; i < array.length; i++) {
-                    if (array[i].image && array[i].image.imageType !== "DYNAMIC") {
+                    if (array[i].image && 
+                        ((array[i].image.imageType !== "DYNAMIC") && 
+                         (array[i].image.imageType !== "STATIC"))) {
 
-                        error = true;
                     }
                 }
             }
@@ -1077,7 +1078,7 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("turnIcon" in params
-                        && (params.turnIcon.imageType !== "DYNAMIC" && params.turnIcon.imageType !== "STATIC")) {
+                        && ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1086,7 +1087,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("nextTurnIcon" in params
-                        && params.nextTurnIcon.imageType !== "DYNAMIC") {
+                        && ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1170,7 +1171,8 @@ SDL.RPCController = Em.Object
 
                         for ( var i = 0; i < params.turnList.length; i++) {
                             if (params.turnList[i].image
-                                && params.turnList[i].image.imageType !== "DYNAMIC") {
+                                && ((params.turnIcon.imageType !== "DYNAMIC")
+                                &&  (params.turnIcon.imageType !== "STATIC"))) {
 
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1338,7 +1340,8 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("icon" in params && params.icon.imageType !== "DYNAMIC") {
+                    if ("icon" in params &&
+                        ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1413,7 +1416,7 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("graphic" in params
-                        && params.graphic.imageType !== "DYNAMIC") {
+                        && ((params.graphic.imageType !== "DYNAMIC") && (params.graphic.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -2091,7 +2094,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("syncFileName" in params
-                        && params.syncFileName.imageType !== "DYNAMIC") {
+                        && ((params.syncFileName.imageType !== "DYNAMIC") && (params.syncFileName.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"

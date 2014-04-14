@@ -19,107 +19,103 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 public class MessageAdapter extends ArrayAdapter<Object> {
-	private LayoutInflater vi;
-	private ArrayList<Object> items;
 
-	public MessageAdapter(Context context, int textViewResourceId,
-			ArrayList<Object> items) {
-		super(context, textViewResourceId, items);
-		this.vi = (LayoutInflater) context
-				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		this.items = items;
-	}
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = MessageAdapter.class.getSimpleName();
 
-	/** Adds the specified message to the items list and notifies of the change. */
-	public void addMessage(Object m) {
-		add(m);
-	}
+    public MessageAdapter(Context context, int textViewResourceId, ArrayList<Object> items) {
+        super(context, textViewResourceId, items);
+    }
 
-	static class ViewHolder {
-		TextView lblTop;
-		TextView lblBottom;
-	}
+    /**
+     * Adds the specified message to the items list and notifies of the change.
+     */
+    public void addMessage(Object m) {
+        add(m);
+    }
 
-	public View getView(int position, View convertView, ViewGroup parent) {
-		ViewHolder holder = null;
-		TextView lblTop = null;
-		TextView lblBottom = null;
+    static class ViewHolder {
+        TextView lblTop;
+        TextView lblBottom;
+    }
 
-		ViewGroup rowView = (ViewGroup) convertView;
-		if (rowView == null) {
-			rowView = (ViewGroup) vi.inflate(R.layout.row, null);
+    public View getView(int position, View convertView, ViewGroup parent) {
 
-			lblTop = (TextView) rowView.findViewById(R.id.toptext);
-			lblBottom = (TextView) rowView.findViewById(R.id.bottomtext);
+        ViewHolder holder;
+        TextView lblTop;
+        TextView lblBottom;
 
-			holder = new ViewHolder();
-			holder.lblTop = lblTop;
-			holder.lblBottom = lblBottom;
-			rowView.setTag(holder);
-		} else {
-			holder = (ViewHolder) rowView.getTag();
-			lblTop = holder.lblTop;
-			lblBottom = holder.lblBottom;
+        ViewGroup rowView = (ViewGroup) convertView;
+        if (rowView == null) {
+            LayoutInflater layoutInflater =
+                    (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            rowView = (ViewGroup) layoutInflater.inflate(R.layout.row, null);
 
-			lblBottom.setVisibility(View.VISIBLE);
-			lblBottom.setText(null);
-			lblTop.setTextColor(getContext().getResources().getColor(
-					R.color.log_regular_text_color));
-			lblTop.setText(null);
-		}
+            lblTop = (TextView) rowView.findViewById(R.id.toptext);
+            lblBottom = (TextView) rowView.findViewById(R.id.bottomtext);
 
-		Object rpcObj = getItem(position);
-		if (rpcObj != null) {
-			if (rpcObj instanceof String) {
-				lblTop.setText((String) rpcObj);
-				lblBottom.setVisibility(View.GONE);
-			} else if (rpcObj instanceof RPCMessage) {
-				RPCMessage func = (RPCMessage) rpcObj;
-				if (func.getMessageType().equals(Names.request)) {
-					lblTop.setTextColor(Color.CYAN);
-				} else if (func.getMessageType().equals(Names.notification)) {
-					lblTop.setTextColor(Color.YELLOW);
-				} else if (func.getMessageType().equals(Names.response)) {
-					lblTop.setTextColor(Color.argb(255, 32, 161, 32));
-				}
+            holder = new ViewHolder();
+            holder.lblTop = lblTop;
+            holder.lblBottom = lblBottom;
+            rowView.setTag(holder);
+        } else {
+            holder = (ViewHolder) rowView.getTag();
+            lblTop = holder.lblTop;
+            lblBottom = holder.lblBottom;
 
-				lblTop.setText(func.getFunctionName() + " ("
-						+ func.getMessageType() + ")");
+            lblBottom.setVisibility(View.VISIBLE);
+            lblBottom.setText(null);
+            lblTop.setTextColor(getContext().getResources().getColor(R.color.log_regular_text_color));
+            lblTop.setText(null);
+        }
 
-				try {
-					Method getSuccessMethod = rpcObj.getClass().getMethod(
-							"getSuccess");
-					boolean isSuccess = (Boolean) getSuccessMethod.invoke(func);
-					if (isSuccess) {
-						lblTop.setTextColor(Color.GREEN);
-					} else {
-						lblTop.setTextColor(Color.RED);
-					}
-					Method getInfoMethod = rpcObj.getClass().getMethod(
-							"getInfo");
-					Method getResultCodeMethod = rpcObj.getClass().getMethod(
-							"getResultCode");
+        Object rpcObj = getItem(position);
+        if (rpcObj != null) {
+            if (rpcObj instanceof String) {
+                lblTop.setText((String) rpcObj);
+                lblBottom.setVisibility(View.GONE);
+            } else if (rpcObj instanceof RPCMessage) {
+                RPCMessage func = (RPCMessage) rpcObj;
+                if (func.getMessageType().equals(Names.request)) {
+                    lblTop.setTextColor(Color.CYAN);
+                } else if (func.getMessageType().equals(Names.notification)) {
+                    lblTop.setTextColor(Color.YELLOW);
+                } else if (func.getMessageType().equals(Names.response)) {
+                    lblTop.setTextColor(Color.argb(255, 32, 161, 32));
+                }
 
-					String info = (String) getInfoMethod.invoke(rpcObj);
-					Result result = (Result) getResultCodeMethod.invoke(rpcObj);
+                lblTop.setText(func.getFunctionName() + " (" + func.getMessageType() + ")");
 
-					lblBottom.setText(result
-							+ (info != null ? ": " + info : ""));
+                try {
+                    Method getSuccessMethod = rpcObj.getClass().getMethod("getSuccess");
+                    boolean isSuccess = (Boolean) getSuccessMethod.invoke(func);
+                    if (isSuccess) {
+                        lblTop.setTextColor(Color.GREEN);
+                    } else {
+                        lblTop.setTextColor(Color.RED);
+                    }
+                    Method getInfoMethod = rpcObj.getClass().getMethod("getInfo");
+                    Method getResultCodeMethod = rpcObj.getClass().getMethod("getResultCode");
 
-				} catch (NoSuchMethodException e) {
-					lblBottom.setVisibility(View.GONE);
-				} catch (SecurityException e) {
+                    String info = (String) getInfoMethod.invoke(rpcObj);
+                    Result result = (Result) getResultCodeMethod.invoke(rpcObj);
+
+                    lblBottom.setText(result + (info != null ? ": " + info : ""));
+
+                } catch (NoSuchMethodException e) {
+                    lblBottom.setVisibility(View.GONE);
+                } catch (SecurityException e) {
                     Logger.e("MessageAdapter", e.toString());
-				} catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException e) {
                     Logger.e("MessageAdapter", e.toString());
-				} catch (IllegalAccessException e) {
+                } catch (IllegalAccessException e) {
                     Logger.e("MessageAdapter", e.toString());
-				} catch (InvocationTargetException e) {
+                } catch (InvocationTargetException e) {
                     Logger.e("MessageAdapter", e.toString());
-				}
-			}
-		}
+                }
+            }
+        }
 
-		return rowView;
-	}
+        return rowView;
+    }
 }

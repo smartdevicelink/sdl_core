@@ -185,7 +185,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private static final int CHOICESETID_UNSET = -1;
     private static final String MSC_PREFIX = "msc_";
     private static SyncProxyTester _activity;
-    private static ArrayList<Object> _logMessages = new ArrayList<Object>();
     private LogAdapter mLogAdapter;
     private static byte[] _ESN;
     /**
@@ -250,7 +249,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private int autoIncChoiceSetIdCmdId = 1;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
     private boolean[] isButtonSubscribed = null;
-    private ArrayAdapter<VehicleDataType> _vehicleDataType = null;
+    private ArrayAdapter<VehicleDataType> mVehicleDataType = null;
     private boolean[] isVehicleDataSubscribed = null;
     /**
      * List of soft buttons for current function. Passed between
@@ -390,19 +389,21 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         resetAdapters();
 
-        _vehicleDataType = new ArrayAdapter<VehicleDataType>(this,
+        mVehicleDataType = new ArrayAdapter<VehicleDataType>(this,
                 android.R.layout.simple_spinner_item, VehicleDataType.values());
-        _vehicleDataType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mVehicleDataType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        imageTypeAdapter = new ArrayAdapter<ImageType>(this, android.R.layout.simple_spinner_item, ImageType.values());
+        imageTypeAdapter = new ArrayAdapter<ImageType>(this, android.R.layout.simple_spinner_item,
+                ImageType.values());
         imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mLogAdapter = new LogAdapter("SyncProxyTester", false, this, R.layout.row, _logMessages);
+        mLogAdapter = new LogAdapter("SyncProxyTester", false, this, R.layout.row,
+                new ArrayList<Object>());
 
         mListview = (ListView) findViewById(R.id.messageList);
         mListview.setClickable(true);
         mListview.setAdapter(mLogAdapter);
-        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
         mListview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
@@ -1829,7 +1830,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                          */
                         private void sendGetVehicleData() {
                             AlertDialog.Builder builder = new AlertDialog.Builder(adapter.getContext());
-                            builder.setAdapter(_vehicleDataType, new DialogInterface.OnClickListener() {
+                            builder.setAdapter(mVehicleDataType, new DialogInterface.OnClickListener() {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     GetVehicleData msg = new GetVehicleData();

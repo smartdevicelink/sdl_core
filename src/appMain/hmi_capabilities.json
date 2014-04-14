@@ -129,7 +129,8 @@
                         "numCustomPresetsAvailable":8,
 			"imageCapabilities":
 			[
-				"DYNAMIC"
+				"DYNAMIC",
+				"STATIC"
 			]
 		},
 		"audioPassThruCapabilities":

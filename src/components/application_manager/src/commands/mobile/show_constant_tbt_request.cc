@@ -170,8 +170,8 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
 
       mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt()));
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
       if (mobile_apis::Result::INVALID_ENUM != result_) {
