@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Environment;
 
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Created with Android Studio.
@@ -54,5 +55,11 @@ public class CommonUtils {
         }
         File externalDir = context.getExternalFilesDir(null);
         return externalDir != null ? externalDir.getAbsolutePath() : null;
+    }
+
+    public static <T> T[] concat(T[] first, T[] second) {
+        T[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
     }
 }

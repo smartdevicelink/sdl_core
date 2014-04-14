@@ -507,7 +507,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHandshakeDataReceived(byte[] data) {
             ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data);
+                    SecureServiceMessageFactory.buildHandshakeRequest(currentSession.getSessionId(), data, getSyncConnection().getProtocolVersion());
             dispatchOutgoingMessage(protocolMessage);
         }
 

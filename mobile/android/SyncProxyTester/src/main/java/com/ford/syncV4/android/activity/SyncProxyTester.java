@@ -541,18 +541,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             Logger.d("Service Bind Complete");
                             getProxyService();
                             initProxyService();
-
                             mBoundProxyService.startProxyIfNetworkConnected();
                         }
                     });
                 }
-
                 MainApp.getInstance().runInUIThread(new Runnable() {
                     @Override
                     public void run() {
                         setUpReceiver();
                         showProtocolPropertiesInTitle();
-
                         getProgressDialog(getString(R.string.init_dialog_title)).dismiss();
                     }
                 });
@@ -600,7 +597,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 mBluetoothDeviceManager.initState();
                 mSyncReceiver.setBluetoothReceiverCallback(mBluetoothDeviceManager);
             }
-
         }
         registerReceiver(mSyncReceiver, intentFilter);
     }

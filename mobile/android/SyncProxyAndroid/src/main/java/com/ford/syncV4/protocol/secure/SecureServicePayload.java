@@ -103,7 +103,6 @@ public class SecureServicePayload {
                     return SecurityInternalError.ERROR_SSL_INVALID_DATA;
                 case 0xFF:
                     return SecurityInternalError.ERROR_UNKWOWN_INTERNAL_ERROR;
-
             }
         }
         return SecurityInternalError.UNKNOWN;
