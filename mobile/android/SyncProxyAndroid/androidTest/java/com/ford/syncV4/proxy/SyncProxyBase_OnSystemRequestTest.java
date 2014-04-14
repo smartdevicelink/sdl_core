@@ -65,13 +65,14 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
     private IOnSystemRequestHandler handlerMock;
     private IJsonRPCMarshaller marshaller;
     private int maxDataSize;
+    private IProxyListenerALMTesting proxyListenerMock;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         TestCommon.setupMocking(this);
 
-        IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
+        proxyListenerMock = mock(IProxyListenerALMTesting.class);
         protocolMock = mock(WiProProtocol.class);
         connectionMock = createNewSyncConnectionMock();
 
@@ -190,13 +191,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
-    /**
-     *
-     * This test case is good for a production version of the SDK, but, as we do Test version of
-     * the SDK this Test Case is useless
-     *
-     */
-    /*public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 

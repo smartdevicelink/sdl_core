@@ -454,11 +454,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mLogAdapter = new LogAdapter("SyncProxyTester", false, this, R.layout.row,
                 new ArrayList<Object>());
 
-        mListview = (ListView) findViewById(R.id.messageList);
-        mListview.setClickable(true);
-        mListview.setAdapter(mLogAdapter);
-        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-        mListview.setOnItemClickListener(new OnItemClickListener() {
+        mListView = (ListView) findViewById(R.id.messageList);
+        mListView.setClickable(true);
+        mListView.setAdapter(mLogAdapter);
+        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
