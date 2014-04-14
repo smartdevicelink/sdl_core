@@ -55,9 +55,7 @@
 
                 <Button
                     android:id="@+id/rpc_service_secure_button_view"
-
                     android:text="@string/secure_service_send_rpc"
-
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/rpc_secure_checkbox"
@@ -65,7 +63,6 @@
 
                 <Button
                     android:id="@+id/rpc_non_secure_button_view"
-
                     android:text="@string/not_secure_service_send_rpc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
