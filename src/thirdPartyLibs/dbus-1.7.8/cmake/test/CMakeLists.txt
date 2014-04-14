@@ -3,64 +3,64 @@ project(test)
 add_definitions(${DBUS_INTERNAL_CLIENT_DEFINITIONS})
 
 add_library(dbus-testutils STATIC
-    ${DBUS_SOURCE_DIR}/test/test-utils.h
-    ${DBUS_SOURCE_DIR}/test/test-utils.c
+    ${CMAKE_SOURCE_DIR}/../test/test-utils.h
+    ${CMAKE_SOURCE_DIR}/../test/test-utils.c
 )
 target_link_libraries(dbus-testutils ${DBUS_INTERNAL_LIBRARIES})
 
 add_subdirectory( name-test )
 
 set (test-service_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-service.c
+    ${CMAKE_SOURCE_DIR}/../test/test-service.c
 )
 
 set (test-names_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-names.c
+    ${CMAKE_SOURCE_DIR}/../test/test-names.c
 )
 
 set (break_loader_SOURCES
-    ${DBUS_SOURCE_DIR}/test/break-loader.c
+    ${CMAKE_SOURCE_DIR}/../test/break-loader.c
 )
 
 set (test-shell-service_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-shell-service.c
+    ${CMAKE_SOURCE_DIR}/../test/test-shell-service.c
 )
 
 set (shell-test_SOURCES
-        ${DBUS_SOURCE_DIR}/test/shell-test.c
+        ${CMAKE_SOURCE_DIR}/../test/shell-test.c
 )
 
 set (spawn-test_SOURCES
-    ${DBUS_SOURCE_DIR}/test/spawn-test.c
+    ${CMAKE_SOURCE_DIR}/../test/spawn-test.c
 )
 
 set (test-exit_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-exit.c
+    ${CMAKE_SOURCE_DIR}/../test/test-exit.c
 )
 
 set (test-segfault_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-segfault.c
+    ${CMAKE_SOURCE_DIR}/../test/test-segfault.c
 )
 
 set (test-sleep-forever_SOURCES
-    ${DBUS_SOURCE_DIR}/test/test-sleep-forever.c
+    ${CMAKE_SOURCE_DIR}/../test/test-sleep-forever.c
 )
 
 add_executable(test-service ${test-service_SOURCES})
-target_link_libraries(test-service dbus-testutils ${SOCKET_LIBRARY})
+target_link_libraries(test-service dbus-testutils)
 
 add_executable(test-names ${test-names_SOURCES})
-target_link_libraries(test-names dbus-testutils ${SOCKET_LIBRARY})
+target_link_libraries(test-names dbus-testutils)
 
 add_executable(shell-test ${shell-test_SOURCES})
-target_link_libraries(shell-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
+target_link_libraries(shell-test ${DBUS_INTERNAL_LIBRARIES})
 ADD_TEST(shell-test ${EXECUTABLE_OUTPUT_PATH}/shell-test${EXEEXT})
 
 add_executable(test-shell-service ${test-shell-service_SOURCES})
-target_link_libraries(test-shell-service dbus-testutils ${SOCKET_LIBRARY})
+target_link_libraries(test-shell-service dbus-testutils)
 
 add_executable(spawn-test ${spawn-test_SOURCES})
-target_link_libraries(spawn-test ${DBUS_INTERNAL_LIBRARIES} ${SOCKET_LIBRARY})
+target_link_libraries(spawn-test ${DBUS_INTERNAL_LIBRARIES})
 
 add_executable(test-exit ${test-exit_SOURCES})
 target_link_libraries(test-exit ${DBUS_INTERNAL_LIBRARIES})
@@ -104,7 +104,7 @@ set (CONFIG_VERBOSE 0)
 MESSAGE(STATUS "Copying test files to test directory")
 FOREACH(FILE_TYPE *.message *.message-raw *.auth-script *.sha1 *.txt *.conf *.service)
     FOREACH(DIR ${TESTDIRS})
-        FILE(GLOB FILES "${DBUS_SOURCE_DIR}/${DIR}/${FILE_TYPE}" )
+        FILE(GLOB FILES "${CMAKE_SOURCE_DIR}/../${DIR}/${FILE_TYPE}" )
         FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${DIR})
         FOREACH(FILE ${FILES})
             GET_FILENAME_COMPONENT(FILENAME ${FILE} NAME)
@@ -122,7 +122,7 @@ MESSAGE(STATUS "Generating test files from templates into test directory")
 
 FOREACH(FILE_TYPE *.conf.in *.service.in)
   FOREACH(DIR ${TESTDIRS})
-    FILE(GLOB FILES "${DBUS_SOURCE_DIR}/${DIR}/${FILE_TYPE}" )
+    FILE(GLOB FILES "${CMAKE_SOURCE_DIR}/../${DIR}/${FILE_TYPE}" )
     FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/${DIR})
     FOREACH(FILE ${FILES})
       GET_FILENAME_COMPONENT(FILENAME ${FILE} NAME)
