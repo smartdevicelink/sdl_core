@@ -43,8 +43,11 @@ using std::string;
 
 namespace codegen {
 
-StructTypeDefaultConstructor::StructTypeDefaultConstructor(const Struct* strct)
+StructTypeDefaultConstructor::StructTypeDefaultConstructor(
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()) {
+  Add(Initializer(base_class_name, "kUninitialized"));
 }
 
 StructTypeDefaultConstructor::~StructTypeDefaultConstructor() {
@@ -52,8 +55,12 @@ StructTypeDefaultConstructor::~StructTypeDefaultConstructor() {
 
 StructTypeMandatoryConstructor::StructTypeMandatoryConstructor(
     const TypePreferences* preferences,
-    const Struct* strct)
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()) {
+  // Pass kUnitialized to CompositeType constructor
+  // there is no actual difference which value to pick
+  Add(Initializer(base_class_name, "kUninitialized"));
   const Struct::FieldsList& fields = strct->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {

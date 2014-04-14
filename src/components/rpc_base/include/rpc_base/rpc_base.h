@@ -98,32 +98,22 @@ class PrimitiveType {
 };
 
 /*
- * Helper class for all composite types (arrays and all user-defined types)
+ * Base class for all composite types (arrays and all user-defined types)
  */
 class CompositeType {
  public:
-  static const Json::Value* ValueMember(const Json::Value* value,
-                                        const char* member_name);
-  template<class T>
-  static void WriteJsonField(const char* field_name,
-                             const T& field,
-                             Json::Value* json_value);
-  template<class T>
-  static void WriteJsonField(const char* field_name,
-                             const Nullable<T>& field,
-                             Json::Value* json_value);
-  template<class T>
-  static void WriteJsonField(const char* field_name,
-                             const Optional<T>& field,
-                             Json::Value* json_value);
-  template<typename T, size_t minsize, size_t maxsize>
-  static void WriteJsonField(const char* field_name,
-                             const Map<T, minsize, maxsize>& field,
-                             Json::Value* json_value);
-  template<typename T, size_t minsize, size_t maxsize>
-  static void WriteJsonField(const char* field_name,
-                             const Array<T, minsize, maxsize>& field,
-                             Json::Value* json_value);
+  void mark_initialized();
+ protected:
+  enum InitializationState {
+    kUninitialized,
+    kInitialized,
+    kInvalidInitialized
+  };
+  CompositeType(InitializationState init_state);
+  static InitializationState InitHelper(const Json::Value* value,
+                               bool (Json::Value::*type_check)() const);
+ protected:
+  InitializationState initialization_state__;
 };
 
 /*
@@ -234,7 +224,7 @@ class Enum : public PrimitiveType {
 };
 
 template<typename T, size_t minsize, size_t maxsize>
-class Array : public std::vector<T> {
+class Array : public std::vector<T>, public CompositeType {
  public:
   // Types
   typedef std::vector<T> ArrayType;
@@ -260,7 +250,7 @@ class Array : public std::vector<T> {
 };
 
 template<typename T, size_t minsize, size_t maxsize>
-class Map : public std::map<std::string, T> {
+class Map : public std::map<std::string, T>, public CompositeType  {
  public:
   // Types
   typedef std::map<std::string, T> MapType;
@@ -319,6 +309,7 @@ class Optional {
   explicit Optional(const U& value);
   template<typename U>
   Optional(const Json::Value* value,const U& def_value);
+  Json::Value ToJsonValue() const;
 
   void ToDbusWriter(dbus::MessageWriter* writer) const;
 

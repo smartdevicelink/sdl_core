@@ -52,15 +52,27 @@ StructTypeIsInitializedMethod::~StructTypeIsInitializedMethod() {
 }
 
 void StructTypeIsInitializedMethod::DefineBody(std::ostream* os) const {
+  *os << "return (initialization_state__ != kUninitialized) || (!is_empty());\n";
+}
+
+StructTypeIsEmptyMethod::StructTypeIsEmptyMethod(const Struct* strct)
+    : CppFunction(strct->name(), "is_empty", "bool", kConst),
+      strct_(strct) {
+}
+
+StructTypeIsEmptyMethod::~StructTypeIsEmptyMethod() {
+}
+
+void StructTypeIsEmptyMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
   for (size_t i = 0; i != fields.size(); ++i) {
     const Struct::Field& field = fields[i];
-    strmfmt(*os, "if ({0}.is_initialized()) return true;\n", field.name());
+    strmfmt(*os, "if ({0}.is_initialized()) return false;\n", field.name());
     if ((i % 2) == 1) {
       *os << endl;
     }
   }
-  *os << "return false;\n";
+  *os << "return true;\n";
 }
 
 }  // namespace codegen

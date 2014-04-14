@@ -54,13 +54,20 @@ void InterfaceStringIdMethod::DefineBody(std::ostream* os) const {
 MessageInterface::MessageInterface(const Interface* interface,
                                    FunctionMessage::MessageType message_type)
   : CppClass(Capitalize(FunctionMessage::MessageTypeToString(message_type))),
+    constructor_(this, CppClass::kPublic, name(), "", Method::kExplicit),
     handle_with_method_(this, kPublic,
                         "HandleWith", "void",
                         Method::kVirtual|Method::kAbstract),
     interface_string_id_method_(this, interface){
-  Add(Superclass("rpc::" + name() + "Base", kPublic));
+  std::string superclass_name = "rpc::" + name() + "Base";
+  Add(Superclass(superclass_name, kPublic));
+  constructor_.Add(Method::Parameter("init_state", "InitializationState"));
+  constructor_.Add(Method::Initializer(superclass_name, "init_state"));
+
   handle_with_method_.Add(Method::Parameter(
                             "handler", "Handler*"));
+
+  methods_.push_back(&constructor_);
   methods_.push_back(&handle_with_method_);
   methods_.push_back(&interface_string_id_method_);
 }

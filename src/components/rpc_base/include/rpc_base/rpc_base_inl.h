@@ -64,6 +64,10 @@ bool Range<T>::Includes(U val) const {
   return min() <= val && val <= max();
 }
 
+
+/*
+ * PrimitiveType base class
+ */
 inline PrimitiveType::PrimitiveType(ValueState value_state)
     : value_state_(value_state) {
 }
@@ -75,6 +79,18 @@ inline bool PrimitiveType::is_initialized() const {
 inline bool PrimitiveType::is_valid() const {
   return value_state_ == kValid;
 }
+
+/*
+ * CompositeType base class
+ */
+inline void CompositeType::mark_initialized() {
+  initialization_state__ = kInitialized;
+}
+
+inline CompositeType::CompositeType(InitializationState init_state)
+    : initialization_state__(init_state) {
+}
+
 
 /*
  * Boolean class
@@ -228,13 +244,15 @@ Enum<T>::operator EnumType() const {
  * Array class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array() {
+Array<T, minsize, maxsize>::Array()
+    : CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
 Array<T, minsize, maxsize>::Array(const U& value)
-    : ArrayType(value.begin(), value.end()) {
+    : ArrayType(value.begin(), value.end()),
+      CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -253,8 +271,15 @@ void Array<T, minsize, maxsize>::push_back(const U& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_valid() const {
-  if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
+  // Empty array might be valid only if marked initialized
+  if (this->empty() && (initialization_state__ != kInitialized)) {
     return false;
+  }
+  // Array size must be within allowed range
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+    return false;
+  }
+  // All array elements must be valid
   for (typename ArrayType::const_iterator i = this->begin();
       i != this->end(); ++i) {
     if (!i->is_valid())
@@ -265,19 +290,29 @@ bool Array<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  // Array that is not empty is initialized for sure
+  if (!this->empty()) {
+    return true;
+  }
+  // Empty array is initialized if not marked as unitialized
+  if (initialization_state__ != kUninitialized) {
+    return true;
+  }
+  return false;
 }
 
 /*
  * Map class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map() {
+Map<T, minsize, maxsize>::Map()
+    : CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
-Map<T, minsize, maxsize>::Map(const U& value) {
+Map<T, minsize, maxsize>::Map(const U& value)
+    : CompositeType(kUninitialized) {
   for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
       ++i) {
     // Explicitly convert that value to T because all rpc_types have explicit
@@ -308,8 +343,15 @@ void Map<T, minsize, maxsize>::insert(const std::pair<std::string, U>& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_valid() const {
-  if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
+  // Empty map might be valid only if marked initialized
+  if (this->empty() && (initialization_state__ != kInitialized)) {
     return false;
+  }
+  // Maps size must be within allowed range
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+    return false;
+  }
+  // All map elements must be valid
   for (typename Map::const_iterator i = this->begin();
       i != this->end(); ++i) {
     if (!i->second.is_valid())
@@ -320,7 +362,15 @@ bool Map<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  // Map that is not empty is initialized for sure
+  if (!this->empty()) {
+    return true;
+  }
+  // Empty map might be initialized only if not marked as unitialized
+  if (initialization_state__ != kUninitialized) {
+    return true;
+  }
+  return false;
 }
 
 /*

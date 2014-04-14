@@ -75,14 +75,17 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& source_file = module_manager_->SourceForStruct(*strct);
   ostream& o = source_file.types_ns().os();
   o << Comment(format("{0} methods", strct->name())) << endl;
-  StructTypeDefaultConstructor(strct).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(preferences_, strct);
+  const char* base_class_name = "CompositeType";
+  StructTypeDefaultConstructor(strct, base_class_name).Define(&o, false);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                       strct,
+                                                       base_class_name);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(strct->name()).Define(&o, false);
   if (preferences_->generate_json) {
-    StructTypeFromJsonConstructor(strct).Define(&o , false);
+    StructTypeFromJsonConstructor(strct, base_class_name).Define(&o , false);
     StructTypeToJsonMethod(strct).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
@@ -94,6 +97,7 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   }
   StructTypeIsValidMethod(strct).Define(&o, false);
   StructTypeIsInitializedMethod(strct).Define(&o, false);
+  StructTypeIsEmptyMethod(strct).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().types_ns();
@@ -110,14 +114,17 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   CppFile& source_file = module_manager_->SourceForResponse(response);
   ostream& o = source_file.responses_ns().os();
   o << Comment(format("{0} response methods", response.name())) << endl;
-  StructTypeDefaultConstructor(&response).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &response);
+  const char* base_class_name = "Response";
+  StructTypeDefaultConstructor(&response, base_class_name).Define(&o, false);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                       &response,
+                                                       base_class_name);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(response.name()).Define(&o, false);
   if (preferences_->generate_json) {
-    StructTypeFromJsonConstructor(&response).Define(&o , false);
+    StructTypeFromJsonConstructor(&response, base_class_name).Define(&o , false);
     StructTypeToJsonMethod(&response).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
@@ -130,6 +137,7 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   MessageHandleWithMethod(response.name()).Define(&o, false);
   StructTypeIsValidMethod(&response).Define(&o, false);
   StructTypeIsInitializedMethod(&response).Define(&o, false);
+  StructTypeIsEmptyMethod(&response).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().responses_ns();
@@ -141,14 +149,17 @@ void DefinitionGenerator::GenerateCodeForNotification(
   CppFile& source_file = module_manager_->SourceForNotification(notification);
   ostream& o = source_file.notifications_ns().os();
   o << Comment(format("{0} notification methods", notification.name())) << endl;
-  StructTypeDefaultConstructor(&notification).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &notification);
+  const char* base_class_name = "Notification";
+  StructTypeDefaultConstructor(&notification, base_class_name).Define(&o, false);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                       &notification,
+                                                       base_class_name);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(notification.name()).Define(&o, false);
   if (preferences_->generate_json) {
-    StructTypeFromJsonConstructor(&notification).Define(&o , false);
+    StructTypeFromJsonConstructor(&notification, base_class_name).Define(&o , false);
     StructTypeToJsonMethod(&notification).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
@@ -161,6 +172,7 @@ void DefinitionGenerator::GenerateCodeForNotification(
   MessageHandleWithMethod(notification.name()).Define(&o, false);
   StructTypeIsValidMethod(&notification).Define(&o, false);
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
+  StructTypeIsEmptyMethod(&notification).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().notifications_ns();
@@ -172,14 +184,17 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
                                                  CppFile* source_file) {
   ostream& o = source_file->requests_ns().os();
   o << Comment(format("{0} request methods", request.name())) << endl;
-  StructTypeDefaultConstructor(&request).Define(&o, false);
-  StructTypeMandatoryConstructor mandatory_constructor(preferences_, &request);
+  const char* base_class_name = "Request";
+  StructTypeDefaultConstructor(&request, base_class_name).Define(&o, false);
+  StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                       &request,
+                                                       base_class_name);
   if (mandatory_constructor.has_mandatory_parameters()){
     mandatory_constructor.Define(&o, false);
   }
   CppStructDestructor(request.name()).Define(&o, false);
   if (preferences_->generate_json) {
-    StructTypeFromJsonConstructor(&request).Define(&o , false);
+    StructTypeFromJsonConstructor(&request, base_class_name).Define(&o , false);
     StructTypeToJsonMethod(&request).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
@@ -191,6 +206,7 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   }
   StructTypeIsValidMethod(&request).Define(&o, false);
   StructTypeIsInitializedMethod(&request).Define(&o, false);
+  StructTypeIsEmptyMethod(&request).Define(&o, false);
   MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;
 

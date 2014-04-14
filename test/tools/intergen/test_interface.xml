@@ -367,11 +367,27 @@
   </struct>
 
   <struct name="StructWithNullableOptionalMap">
-    <param name="nullableOptionalIntMap" type="Integer" map="true" nullable="true" manadatory="false" minsize="0" maxsize="5" minvalue="2" maxvalue="10" />
+    <param name="nullableOptionalIntMap" type="Integer" map="true" nullable="true" mandatory="false" minsize="0" maxsize="5" minvalue="2" maxvalue="10" />
   </struct>
 
   <struct name="StructWithNullableMapOfNullableInts">
     <param name="nullableMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="1" maxsize="5" nullable="true" null_values_allowed="true" />
+  </struct>
+
+  <struct name="StructWithOptionalIntArray">
+    <param name="optionalIntArray" type="Integer" minvalue="0" maxvalue="42" array="true" minsize="0" maxsize="5" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryIntArray">
+    <param name="mandatoryIntArray" type="Integer" minvalue="0" maxvalue="42" array="true" minsize="0" maxsize="5" />
+  </struct>
+
+  <struct name="StructWithOptionalIntMap">
+    <param name="optionalIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryIntMap">
+    <param name="mandatoryIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" />
   </struct>
 
   <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">

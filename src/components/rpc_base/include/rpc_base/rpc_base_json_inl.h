@@ -51,68 +51,39 @@ inline PrimitiveType::ValueState PrimitiveType::InitHelper(
   }
 }
 
-/*
- * Composite type
- */
-
 // static
-inline const Json::Value* CompositeType::ValueMember(const Json::Value* value,
-                                                     const char* member_name) {
+inline CompositeType::InitializationState CompositeType::InitHelper(
+    const Json::Value* value,
+    bool (Json::Value::*type_check)() const) {
+  if (!value) {
+    return kUninitialized;
+  } else if ((value->*type_check)()) {
+    return kInitialized;
+  } else {
+    return kInvalidInitialized;
+  }
+}
+
+namespace impl {
+// static
+inline const Json::Value* ValueMember(const Json::Value* value,
+                                      const char* member_name) {
   if (value && value->isMember(member_name)) {
     return &(*value)[member_name];
   }
   return NULL;
 }
 
-// static
 template<class T>
-void CompositeType::WriteJsonField(const char* field_name,
+inline void WriteJsonField(const char* field_name,
                            const T& field,
                            Json::Value* json_value) {
-  (*json_value)[field_name] = field.ToJsonValue();
-}
-
-// static
-template<class T>
-void CompositeType::WriteJsonField(const char* field_name,
-                           const Nullable<T>& field,
-                           Json::Value* json_value) {
-  if (field.is_null()) {
-    (*json_value)[field_name] = Json::Value::null;
-  } else {
-    const T& non_nulable = field;
-    WriteJsonField(field_name, non_nulable, json_value);
-  }
-}
-
-// static
-template<typename T, size_t minsize, size_t maxsize>
-void CompositeType::WriteJsonField(const char* field_name,
-                           const Map<T, minsize, maxsize>& field,
-                           Json::Value* json_value) {
   if (field.is_initialized()) {
     (*json_value)[field_name] = field.ToJsonValue();
   }
 }
 
-// static
-template<typename T, size_t minsize, size_t maxsize>
-void CompositeType::WriteJsonField(const char* field_name,
-                           const Array<T, minsize, maxsize>& field,
-                           Json::Value* json_value) {
-  if (field.is_initialized()) {
-    (*json_value)[field_name] = field.ToJsonValue();
-  }
-}
-
-template<class T>
-void CompositeType::WriteJsonField(const char* field_name,
-                           const Optional<T>& field,
-                           Json::Value* json_value) {
-  if (field.is_initialized()) {
-    WriteJsonField(field_name, *field, json_value);
-  }
-}
+}  // namespace impl
 
 inline Boolean::Boolean(const Json::Value* value)
     : PrimitiveType(InitHelper(value, &Json::Value::isBool)),
@@ -247,7 +218,8 @@ Json::Value Enum<T>::ToJsonValue() const {
 
 // Non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array(Json::Value* value) {
+Array<T, minsize, maxsize>::Array(Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isArray)) {
   if (value) {
     if (value->isArray()) {
       this->reserve(value->size());
@@ -255,16 +227,16 @@ Array<T, minsize, maxsize>::Array(Json::Value* value) {
         push_back(&*i);
       }
     } else {
-      // In case of non-array value initialize array with non-initialized value
-      // so it handled as initialized but invalid
-      push_back(T());
+      // Array is empty, empty initialized or uninitialized
+      // depending on InitHelper result
     }
   }
 }
 
 // Const version, must be identical to the non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array(const Json::Value* value) {
+Array<T, minsize, maxsize>::Array(const Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isArray)) {
   if (value) {
     if (value->isArray()) {
       this->reserve(value->size());
@@ -272,9 +244,8 @@ Array<T, minsize, maxsize>::Array(const Json::Value* value) {
         push_back(&*i);
       }
     } else {
-      // In case of non-array value initialize array with non-initialized value
-      // so it handled as initialized but invalid
-      push_back(T());
+      // Array is empty, empty initialized or uninitialized
+      // depending on InitHelper result
     }
   }
 }
@@ -291,31 +262,31 @@ Json::Value Array<T, minsize, maxsize>::ToJsonValue() const {
 
 // Non-const version
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map(Json::Value* value) {
+Map<T, minsize, maxsize>::Map(Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isObject)) {
   if (value) {
     if (value->isObject()) {
       for (Json::Value::iterator i = value->begin(); i != value->end(); ++i) {
         this->insert(typename MapType::value_type(i.key().asString(), T(&*i)));
       }
     } else {
-      // In case of non-array value initialize array with null value
-      // so it handled as initialized but invalid
-      this->insert(typename MapType::value_type("", T()));
+      // Map is empty, empty initialized or uninitialized
+      // depending on InitHelper result
     }
   }
 }
 
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map(const Json::Value* value) {
+Map<T, minsize, maxsize>::Map(const Json::Value* value)
+    : CompositeType(InitHelper(value, &Json::Value::isObject)) {
   if (value) {
     if (value->isObject()) {
       for (Json::Value::const_iterator i = value->begin(); i != value->end(); ++i) {
         this->insert(typename MapType::value_type(i.key().asString(), T(&*i)));
       }
     } else {
-      // In case of non-array value initialize array with null value
-      // so it handled as initialized but invalid
-      this->insert(typename MapType::value_type("", T()));
+      // Map is empty, empty initialized or uninitialized
+      // depending on InitHelper result
     }
   }
 }
@@ -357,6 +328,11 @@ template<typename T>
 template<typename U>
 Optional<T>::Optional(const Json::Value* value, const U& def_value)
     : value_(value, def_value) {
+}
+
+template<typename T>
+inline Json::Value Optional<T>::ToJsonValue() const {
+  return value_.ToJsonValue();
 }
 
 }  // namespace rpc
