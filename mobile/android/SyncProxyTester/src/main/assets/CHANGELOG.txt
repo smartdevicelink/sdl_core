@@ -1,3 +1,6 @@
+[CW16]
++ SyncProxyTester: Do not auto-scroll logs when user scrolling log view
+
 [CW15]
 * SyncProxyAndroid SDK: OnSystemRequest processing logic change
 * SyncProxyTester: Restore connection from 'Proxy Start' command
