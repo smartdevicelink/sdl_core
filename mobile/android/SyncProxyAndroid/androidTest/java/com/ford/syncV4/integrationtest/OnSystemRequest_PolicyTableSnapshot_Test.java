@@ -113,6 +113,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
     public void testOnSystemRequestWithPTS() throws Exception {
         final FileType fileType = FileType.JSON;
+        final RequestType requestType = RequestType.HTTP;
         final int extraDataSize = 10;
         final int dataSize = (maxDataSize * 2) + extraDataSize;
         final byte[] dataSnapshot = TestCommon.getRandomBytes(dataSize);
@@ -131,11 +132,12 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
                 final ISystemRequestProxy proxy =
                         (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putPolicyTableUpdateFile(filename, data);
+                proxy.putPolicyTableUpdateFile(filename, data, fileType, requestType);
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot));
+          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot),
+                  eq(fileType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP

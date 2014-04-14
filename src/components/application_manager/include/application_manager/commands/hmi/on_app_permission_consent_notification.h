@@ -40,21 +40,21 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnAppPermissionConsent command class
+ * @brief OnAppPermissionConsentNotification command class
  **/
-class OnAppPermissionConsent : public NotificationFromHMI {
+class OnAppPermissionConsentNotification : public NotificationFromHMI {
   public:
     /**
-     * @brief OnAppPermissionConsent class constructor
+     * @brief OnAppPermissionConsentNotification class constructor
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnAppPermissionConsent(const MessageSharedPtr& message);
+    explicit OnAppPermissionConsentNotification(const MessageSharedPtr& message);
 
     /**
-     * @brief OnAppPermissionConsent class destructor
+     * @brief OnAppPermissionConsentNotification class destructor
      **/
-    virtual ~OnAppPermissionConsent();
+    virtual ~OnAppPermissionConsentNotification();
 
     /**
      * @brief Execute command
@@ -62,7 +62,7 @@ class OnAppPermissionConsent : public NotificationFromHMI {
     virtual void Run();
 
   private:
-    DISALLOW_COPY_AND_ASSIGN(OnAppPermissionConsent);
+    DISALLOW_COPY_AND_ASSIGN(OnAppPermissionConsentNotification);
 };
 
 }  // namespace commands

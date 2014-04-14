@@ -270,9 +270,9 @@ public class WiProProtocol extends AbstractProtocol {
             byte parsedProtocolVersion = (byte) (receivedBytes[0] >>> 4);
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
-            if (parsedProtocolVersion <= ProtocolConstants.PROTOCOL_VERSION_MAX) {
+            //if (parsedProtocolVersion <= ProtocolConstants.PROTOCOL_VERSION_MAX) {
                 setProtocolVersion(parsedProtocolVersion);
-            }
+            //}
 
             //Nothing has been read into the buffer and version is 2
             if (parsedProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {

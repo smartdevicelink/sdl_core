@@ -17,28 +17,28 @@
   Install libraries:
   sudo apt-get install libbluetooth3
   sudo apt-get install libbluetooth-dev
-  
+
   We are using cmake to create build configurations.
   Install cmake:
   sudo apt-get install cmake
-  
+
   Also, make sure the g++ compiler is installed:
   sudo apt-get install g++
-  
+
   To start web-based HMI we need web-browser with web-socket RFC6455 support.
   For example Google Chromium. Install it using:
   sudo apt-get install chromium-browser
-  
+
   To run InterfaceGenerator some python libraries are required and must be
   installed with following command:
   sudo pip install -r tools/InterfaceGenerator/requirements.txt
-  
+
   For logging Apache log4cxx library is used. Install required packages with the following command:
   sudo apt-get install liblog4cxx10 liblog4cxx10-dev
-  
+
   For installing pulseaudio development files which neededfor audio management fetures run:
   sudo apt-get install libpulse-dev
-  
+
   For installing gstreamer development files which needed for audio management fetures:
   	First add gstreamer repositories to your apt source list (/etc/apt/sources.list):
 	deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu <distributive codename> main
@@ -47,8 +47,22 @@
 	Run:
 	sudo apt-get update
 	and:
-	sudo apt-get install gstreamer1.0*	
- 
+	sudo apt-get install gstreamer1.0*
+
+  Policy
+  =================
+  Policy component is stored in submodule. In order to work with it correctly for the first time after doing
+  git pull --rebase
+  you also need to do
+  git submodule init
+  git submodule update
+  If you have already inited submodule do not forget after each
+  git pull
+  run
+  git submodule update
+  as well.
+
+
 * Build application
   =================
   We support "out of sources" concept for build from R3.0.0
@@ -78,6 +92,8 @@
   cmake -DCMAKE_BUILD_TYPE=Release ../git_repo
   2.3 For Debug configuration with tests, run:
   cmake -DBUILD_TESTS=On ../git_repo
+  2.4 For working with 'extended' (Ford-specific) Policies you have to set
+  EXTENDED_POLICY_FLAG flag to 'ON' (cmake -DEXTENDED_POLICY_FLAG=ON)
 
   3. Make project:
   make

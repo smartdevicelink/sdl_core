@@ -64,6 +64,7 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
+import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
@@ -1641,20 +1642,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _proxyListener.onOnSystemRequest(msg);
         }
 
-        if (RequestType.HTTP == msg.getRequestType()) {
-            if (msg.getFileType() == FileType.JSON) {
-                Runnable request = new Runnable() {
-                    @Override
-                    public void run() {
-                        onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
-                                msg.getBulkData());
-                    }
-                };
-                if (_callbackToUIThread) {
-                    _mainUIHandler.post(request);
-                } else {
-                    request.run();
-                }
+        final FileType fileType = msg.getFileType();
+        final RequestType requestType = msg.getRequestType();
+
+        if (requestType == RequestType.HTTP) {
+            if (fileType == FileType.BINARY) {
+                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
             } else {
                 final Vector<String> urls = msg.getUrl();
                 if (urls != null) {
@@ -1662,7 +1655,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         @Override
                         public void run() {
                             onSystemRequestHandler.onFilesDownloadRequest(
-                                    SyncProxyBase.this, urls, msg.getFileType());
+                                    SyncProxyBase.this, urls, fileType);
                         }
                     };
                     if (_callbackToUIThread) {
@@ -1674,7 +1667,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     Logger.w("OnSystemRequest HTTP: no urls set");
                 }
             }
-        } else if (RequestType.FILE_RESUME == msg.getRequestType()) {
+        } else if (requestType == RequestType.FILE_RESUME) {
             final Vector<String> urls = msg.getUrl();
             final Integer offset = msg.getOffset();
             final Integer length = msg.getLength();
@@ -1686,7 +1679,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     public void run() {
                         onSystemRequestHandler.onFileResumeRequest(
                                 SyncProxyBase.this, urls.get(0), offset, length,
-                                msg.getFileType());
+                                fileType);
                     }
                 };
 
@@ -1697,6 +1690,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             } else {
                 Logger.w("OnSystemRequest FILE_RESUME: a required parameter is missing");
+            }
+        } else if (requestType == RequestType.PROPRIETARY) {
+            if (fileType == FileType.JSON) {
+                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
             }
         }
     }
@@ -3369,8 +3366,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return onSystemRequestHandler;
     }
 
-    public void setOnSystemRequestHandler(
-            IOnSystemRequestHandler onSystemRequestHandler) {
+    public void setOnSystemRequestHandler(IOnSystemRequestHandler onSystemRequestHandler) {
         this.onSystemRequestHandler = onSystemRequestHandler;
     }
 
@@ -3419,13 +3415,23 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     @Override
-    public void putPolicyTableUpdateFile(String filename, byte[] data) throws SyncException {
+    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType,
+                                         RequestType requestType)
+            throws SyncException {
         final int correlationID = nextCorrelationId();
 
-        PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
-                correlationID);
+        if (fileType == FileType.BINARY) {
+            PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
+                    correlationID);
 
-        sendRPCRequest(putFile);
+            sendRPCRequest(putFile);
+        } else if (fileType == FileType.JSON) {
+            SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
+                    correlationID, requestType);
+
+            sendRPCRequest(systemRequest);
+        }
+
         internalRequestCorrelationIDs.add(correlationID);
     }
 
@@ -3455,5 +3461,26 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void setTestConfigCallback(ITestConfigCallback mTestConfigCallback) {
         this.mTestConfigCallback = mTestConfigCallback;
+    }
+
+    /**
+     * Process policy file snapshot request
+     * @param snapshot bytes array of the data
+     * @param fileType type of the file
+     */
+    private void processPolicyTableSnapshot(final byte[] snapshot, final FileType fileType,
+                                            final RequestType requestType) {
+        Runnable request = new Runnable() {
+            @Override
+            public void run() {
+                onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
+                        snapshot, fileType, requestType);
+            }
+        };
+        if (_callbackToUIThread) {
+            _mainUIHandler.post(request);
+        } else {
+            request.run();
+        }
     }
 }

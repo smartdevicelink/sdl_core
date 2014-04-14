@@ -392,7 +392,7 @@ class Application : public virtual InitialApplicationData,
     virtual const Version& version() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
-    virtual const std::string& folder_name() const = 0;
+    virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;

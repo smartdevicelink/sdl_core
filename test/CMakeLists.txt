@@ -23,6 +23,8 @@ include_directories (
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
+  ../src/components/policy/src/policy/include
+  ../src/components/policy/src/policy/usage_statistics/include
   ../src/components/protocol_handler/include
   ../src/components/security_manager/include
   ../src/components/transport_manager/include

@@ -37,20 +37,15 @@ namespace test {
 ApplicationManagerImplTest::ApplicationManagerImplTest()
     : app_(NULL) {
   app_ = am::ApplicationManagerImpl::instance();
-  //app_ = new application_manager::ApplicationManagerImpl;
+  // app_ = new application_manager::ApplicationManagerImpl;
   app_->application_list_;
 }
 
 ApplicationManagerImplTest::~ApplicationManagerImplTest() {
 }
 
-const std::map<int32_t, am::ApplicationSharedPtr>&
-ApplicationManagerImplTest::GetApplications() {
-  return app_->applications_;
-}
-
 const std::set<am::ApplicationSharedPtr>&
-ApplicationManagerImplTest::GetApplicationList() {
+ApplicationManagerImplTest::GetApplications() {
   return app_->application_list_;
 }
 
@@ -104,17 +99,12 @@ ApplicationManagerImplTest::GetProtocolHandler() {
   return app_->protocol_handler_;
 }
 
-const policies::PolicyManager* ApplicationManagerImplTest::GetPolicyManager() {
+const policy::PolicyManager* ApplicationManagerImplTest::GetPolicyManager() {
   return app_->policy_manager_;
 }
 
 const am::HMICapabilities& ApplicationManagerImplTest::GetHmiCapabilities() {
   return app_->hmi_capabilities_;
-}
-
-const am::policies_manager::PoliciesManager&
-ApplicationManagerImplTest::GetPoliciesManager() {
-  return app_->policies_manager_;
 }
 
 const hmi_apis::HMI_API* ApplicationManagerImplTest::GetHmiSoFactory() {
@@ -157,6 +147,69 @@ const am::impl::ToHmiQueue& ApplicationManagerImplTest::GetMessagesToHmi() {
   return app_->messages_to_hmi_;
 }
 
+HMIMessageHandlerInterceptor::HMIMessageHandlerInterceptor() {
+}
+
+HMIMessageHandlerInterceptor::~HMIMessageHandlerInterceptor() {
+}
+
+void HMIMessageHandlerInterceptor::SendMessageToHMI(
+    hmi_message_handler::MessageSharedPointer message) {
+  mas_mess.push_back(message);
+  printf("\n\n message.json = %s\n\n",(*message).json_message().data());
+}
+
+void HMIMessageHandlerInterceptor::OnMessageReceived(
+    utils::SharedPtr<application_manager::Message> message) {
+}
+
+void HMIMessageHandlerInterceptor::OnErrorSending(
+    utils::SharedPtr<application_manager::Message> message) {
+}
+
+void HMIMessageHandlerInterceptor::AddHMIMessageAdapter(
+    hmi_message_handler::HMIMessageAdapter* adapter) {
+}
+
+void HMIMessageHandlerInterceptor::RemoveHMIMessageAdapter(
+    hmi_message_handler::HMIMessageAdapter* adapter) {
+}
+
+std::list<hmi_message_handler::MessageSharedPointer>*
+HMIMessageHandlerInterceptor::GetMasMessage() {
+  return &mas_mess;
+}
+
+ProtocolHandlerInterceptor::ProtocolHandlerInterceptor(
+    transport_manager::TransportManager* transport_manager_param)
+  : ProtocolHandlerImpl(transport_manager_param) {
+}
+
+ProtocolHandlerInterceptor::~ProtocolHandlerInterceptor() {
+}
+
+void ProtocolHandlerInterceptor::SendMessageToMobileApp(
+    const protocol_handler::RawMessagePtr& message,
+    bool final_message) {
+  printf("\n\n in SendMessageToMobileApp \n\n");
+  mas_mess.push_back(message);
+}
+
+std::list<protocol_handler::RawMessagePtr>*
+ProtocolHandlerInterceptor::GetMasRawMessage() {
+  return &mas_mess;
+}
+
+ProtocolHandlerInterceptor::ProtocolHandlerInterceptor(
+    const ProtocolHandlerInterceptor&)
+  : ProtocolHandlerImpl(NULL) {
+}
+
+ProtocolHandlerInterceptor* ProtocolHandlerInterceptor::operator=(
+    const ProtocolHandlerInterceptor&) {
+  return this;
+}
+
 void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest) {
   (*AppRegRequest)[jsn::S_PARAMS][am::strings::function_id] =
   mobile_apis::FunctionID::RegisterAppInterfaceID;
@@ -164,6 +217,7 @@ void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest) {
   mobile_apis::messageType::request;
 
   (*AppRegRequest)[jsn::S_PARAMS][am::strings::connection_key] = 65546;
+  (*AppRegRequest)[jsn::S_PARAMS][am::strings::protocol_version] = 2;
 
   (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_name] =
   "SyncProxyTester";
@@ -174,7 +228,7 @@ void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest) {
                    [am::strings::hmi_display_language_desired] =
                        hmi_apis::Common_Language::EN_US;
 
-  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_id] = "65537";
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_id] = "65546";
   (*AppRegRequest)[jsn::S_MSG_PARAMS]
   [am::strings::sync_msg_version]["majorVersion"] = 2;
   (*AppRegRequest)[jsn::S_MSG_PARAMS]
@@ -204,6 +258,8 @@ utils::SharedPtr<protocol_handler::RawMessage> ConvertSOToRawMess(
   (*message_to_app).set_connection_key(
       (*so)[jsn::S_PARAMS][am::strings::connection_key].asInt());
   (*message_to_app).set_message_type(application_manager::kRequest);
+  (*message_to_app).set_protocol_version(static_cast<am::ProtocolVersion>(
+  (*so)[jsn::S_PARAMS][am::strings::protocol_version].asUInt()));
 
   NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
       toString((*so), str);
@@ -237,6 +293,24 @@ void AddDevice(uint32_t value) {
   connection_handle->OnConnectionEstablished(
       device_info_test,
       connection_id_test);
+}
+
+void RemovedDevice(uint32_t value) {
+  connection_handler::ConnectionHandlerImpl* connection_handle =
+  connection_handler::ConnectionHandlerImpl::instance();
+
+  transport_manager::DeviceHandle device_handler_test = value;
+  std::string mac_address_test = "255.255.255.0";
+  std::string name_test = "test_DeviceInfo";
+
+  transport_manager::ConnectionUID connection_id_test = value;
+
+  transport_manager::DeviceInfo device_info_test(
+      device_handler_test,
+      mac_address_test,
+      name_test);
+
+  connection_handle->OnDeviceRemoved(device_info_test);
 }
 
 /*

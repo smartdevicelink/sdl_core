@@ -120,6 +120,7 @@ import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.test.TestConfig;
@@ -472,8 +473,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         super.onDestroy();
     }
 
-    public void sendPolicyTableUpdate() {
-        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, mLogAdapter);
+    public void sendPolicyTableUpdate(FileType fileType, RequestType requestType) {
+        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, requestType, mLogAdapter);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {

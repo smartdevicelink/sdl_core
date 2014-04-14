@@ -183,6 +183,15 @@ bool IsAccessible(const std::string& name, int32_t how);
 std::vector<std::string> ListFiles(const std::string& directory_name);
 
 /**
+ * @brief Creates or overwrites file with given binary contents
+ * @param name path to the file
+ * @param contents data to be written into the file
+ * @returns true if file write succeeded
+ */
+bool WriteBinaryFile(const std::string& name,
+                     const std::vector<uint8_t>& contents);
+
+/**
   * @brief Reads from file
   *
   * @param name path to file

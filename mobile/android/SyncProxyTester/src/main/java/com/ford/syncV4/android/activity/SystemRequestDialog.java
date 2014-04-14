@@ -56,7 +56,7 @@ public class SystemRequestDialog extends DialogFragment {
         final CheckBox useFileNameCheckBox =
                 (CheckBox) layout.findViewById(R.id.system_request_use_file_name_check_box);
         final Spinner requestTypesSpinner = (Spinner) layout.findViewById(R.id.requestType);
-        String[] requestsTypesData = getResources().getStringArray(R.array.request_type);
+        String[] requestsTypesData = getResources().getStringArray(R.array.policy_update_request_type);
         ArrayAdapter requestTypeAdapter = new ArrayAdapter<String>(
                 getActivity(), android.R.layout.select_dialog_item, requestsTypesData);
         requestTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

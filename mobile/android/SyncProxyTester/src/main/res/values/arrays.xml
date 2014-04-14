@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="request_type">
+    <string-array name="policy_update_file_type">
+        <item>JSON</item>
+        <item>BINARY</item>
+    </string-array>
+    <string-array name="policy_update_request_type">
         <item>HTTP</item>
         <item>FILE_RESUME</item>
         <item>AUTH_REQUEST</item>

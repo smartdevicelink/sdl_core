@@ -34,6 +34,8 @@
 #include "gmock/gmock.h"
 
 #include "config_profile/profile.h"
+#include "utils/logger.h"
+
 #include "utils/file_system_tests.h"
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
@@ -108,11 +110,19 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
+<<<<<<< HEAD
   #ifdef TESTS_WITH_HMI
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
     log4cxx::PropertyConfigurator::configure("log4cxx.properties");
     test::AdminAppTest app;
   #endif
+=======
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+
+#ifdef TESTS_WITH_HMI
+  test::AdminAppTest app;
+>>>>>>> develop
 
 //  app.Run();
   sleep(5);

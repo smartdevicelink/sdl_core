@@ -75,18 +75,18 @@ void DeleteFileRequest::Run() {
 
   std::string full_file_path =
       profile::Profile::instance()->app_storage_folder() + "/";
-  full_file_path += application->name();
+  full_file_path += application->folder_name();
   full_file_path += "/";
   full_file_path += sync_file_name;
 
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
-      const AppFile* file = application->GetFile(sync_file_name);
+      const AppFile* file = application->GetFile(full_file_path);
       if (file) {
         SendFileRemovedNotification(file);
       }
 
-      application->DeleteFile(sync_file_name);
+      application->DeleteFile(full_file_path);
       application->increment_delete_file_in_none_count();
       SendResponse(true, mobile_apis::Result::SUCCESS);
     } else {

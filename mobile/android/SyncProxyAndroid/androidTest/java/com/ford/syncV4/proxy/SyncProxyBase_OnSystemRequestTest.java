@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
@@ -54,16 +55,10 @@ import static org.mockito.Mockito.when;
  * Created by enikolsky on 2014-02-03.
  */
 public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
-    private static final byte PROTOCOL_VERSION = (byte) 2;
-    private static final int PUTFILE_FUNCTIONID = 32;
-    private static final int ONSYSTEMREQUEST_FUNCTIONID = 32781;
-    private static final int WAIT_TIMEOUT = 30;
-    private static final String OFFSET = "offset";
-    private static final String LENGTH = "length";
-    private static final String SYNC_FILENAME = "syncFileName";
-    private static final String SYSTEM_FILE = "systemFile";
-    private static final String FILE_TYPE = "fileType";
-    private IProxyListenerALMTesting proxyListenerMock;
+
+    private static final int PUT_FILE_FUNCTION_ID = 32;
+    private static final int ON_SYSTEM_REQUEST_FUNCTION_ID = 32781;
+    private static final int WAIT_TIMEOUT = 20;
     private WiProProtocol protocolMock;
     private SyncConnection connectionMock;
     private SyncProxyALM proxy;
@@ -76,7 +71,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         super.setUp();
         TestCommon.setupMocking(this);
 
-        proxyListenerMock = mock(IProxyListenerALMTesting.class);
+        IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
         protocolMock = mock(WiProProtocol.class);
         connectionMock = createNewSyncConnectionMock();
 
@@ -84,8 +79,8 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         when(connectionMock.getProtocolVersion()).thenReturn(ProtocolConstants.PROTOCOL_VERSION_MAX);
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
-                false, null, null, null, null, null, null, false, false, 2,
-                null, connectionMock, new TestConfig());
+                false, null, null, null, null, null, null, false, false,
+                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connectionMock, new TestConfig());
         marshaller = proxy.getJsonRPCMarshaller();
 
         handlerMock = mock(IOnSystemRequestHandler.class);
@@ -124,7 +119,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -144,7 +139,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -165,7 +160,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setUrl(new Vector<String>(urls));
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -188,14 +183,20 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
         verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
     }
 
-    public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
+    /**
+     *
+     * This test case is good for a production version of the SDK, but, as we do Test version of
+     * the SDK this Test Case is useless
+     *
+     */
+    /*public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -203,7 +204,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setRequestType(RequestType.HTTP);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -223,7 +224,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setFileType(fileType);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -247,7 +248,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -272,7 +273,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -298,7 +299,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -324,7 +325,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setOffset(offset);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -350,7 +351,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -378,7 +379,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -393,7 +394,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setRequestType(RequestType.FILE_RESUME);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -418,7 +419,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -431,8 +432,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         final String filename0 = "whatchamacallit";
         final String filename1 = "thingamajig";
         final String filename2 = "doohickey";
-        final List<String> urls =
-                Arrays.asList(filename0, filename1, filename2);
+        final List<String> urls = Arrays.asList(filename0, filename1, filename2);
         final FileType fileType = FileType.GRAPHIC_PNG;
         final int offset = 4000;
         final int length = 8800;
@@ -445,7 +445,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         onSysRq.setLength(length);
 
         ProtocolMessage pm = createNotificationProtocolMessage(onSysRq,
-                ONSYSTEMREQUEST_FUNCTIONID);
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -469,14 +469,12 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         // expect the first part of PutFile to be sent
-        ArgumentCaptor<ProtocolMessage> pmCaptor =
-                ArgumentCaptor.forClass(ProtocolMessage.class);
+        ArgumentCaptor<ProtocolMessage> pmCaptor = ArgumentCaptor.forClass(ProtocolMessage.class);
         verify(connectionMock, times(1)).sendMessage(pmCaptor.capture());
 
         final ProtocolMessage pm = pmCaptor.getValue();
-        assertThat(pm.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm.getData(), 0, maxDataSize, filename,
-                fileType);
+        assertThat(pm.getFunctionID(), is(PUT_FILE_FUNCTION_ID));
+        checkSystemPutFileJSON(pm.getData(), 0, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
     }
@@ -496,16 +494,63 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         // expect the first part of PutFile to be sent
-        ArgumentCaptor<ProtocolMessage> pmCaptor =
-                ArgumentCaptor.forClass(ProtocolMessage.class);
+        ArgumentCaptor<ProtocolMessage> pmCaptor = ArgumentCaptor.forClass(ProtocolMessage.class);
         verify(connectionMock, times(1)).sendMessage(pmCaptor.capture());
 
         final ProtocolMessage pm = pmCaptor.getValue();
-        assertThat(pm.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkSystemPutFileJSON(pm.getData(), offset, maxDataSize, filename,
-                fileType);
+        assertThat(pm.getFunctionID(), is(PUT_FILE_FUNCTION_ID));
+        checkSystemPutFileJSON(pm.getData(), offset, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
+    }
+
+    public void testOnSystemRequestHTTPandBINARYTriggerProcessPolicy() throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final String filename = "dummy";
+        final List<String> urls = Arrays.asList(filename);
+        final FileType fileType = FileType.BINARY;
+        final RequestType requestType = RequestType.HTTP;
+        final byte[] data = new byte[2048];
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setRequestType(requestType);
+        onSystemRequest.setUrl(new Vector<String>(urls));
+        onSystemRequest.setFileType(fileType);
+        onSystemRequest.setBulkData(data);
+
+        ProtocolMessage protocolMessage = createNotificationProtocolMessage(onSystemRequest,
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
+        protocolMessage.setBulkData(data);
+        emulateIncomingMessage(proxy, protocolMessage);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
+    }
+
+    public void testOnSystemRequestPROPRIETARYandJSONTriggerProcessPolicy() throws InterruptedException {
+        proxy.setOnSystemRequestHandler(handlerMock);
+
+        final FileType fileType = FileType.JSON;
+        final RequestType requestType = RequestType.PROPRIETARY;
+        final byte[] data = new byte[2048];
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setRequestType(requestType);
+        onSystemRequest.setFileType(fileType);
+        onSystemRequest.setBulkData(data);
+
+        ProtocolMessage protocolMessage = createNotificationProtocolMessage(onSystemRequest,
+                ON_SYSTEM_REQUEST_FUNCTION_ID);
+        protocolMessage.setBulkData(data);
+        emulateIncomingMessage(proxy, protocolMessage);
+
+        Thread.sleep(WAIT_TIMEOUT);
+
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 
     // TODO other request types
@@ -518,44 +563,38 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         return connectionMock;
     }
 
-    private ProtocolMessage createNotificationProtocolMessage(
-            RPCNotification notification, int functionID) {
-        ProtocolMessage incomingPM0 = new ProtocolMessage();
-        incomingPM0.setVersion(PROTOCOL_VERSION);
-        byte[] msgBytes = marshaller.marshall(notification, PROTOCOL_VERSION);
-        incomingPM0.setData(msgBytes);
-        incomingPM0.setJsonSize(msgBytes.length);
-        incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
-        incomingPM0.setFunctionID(functionID);
-        incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
-        return incomingPM0;
+    private ProtocolMessage createNotificationProtocolMessage(RPCNotification notification,
+                                                              int functionID) {
+        ProtocolMessage protocolMessage = new ProtocolMessage();
+        protocolMessage.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        byte[] msgBytes = marshaller.marshall(notification, ProtocolConstants.PROTOCOL_VERSION_TWO);
+        protocolMessage.setData(msgBytes);
+        protocolMessage.setJsonSize(msgBytes.length);
+        protocolMessage.setMessageType(MessageType.RPC);
+        protocolMessage.setSessionType(ServiceType.RPC);
+        protocolMessage.setFunctionID(functionID);
+        protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
+        return protocolMessage;
     }
 
-    private void emulateIncomingMessage(SyncProxyALM proxy,
-                                        ProtocolMessage pm) {
+    private void emulateIncomingMessage(SyncProxyALM proxy, ProtocolMessage protocolMessage) {
         // synchronous:
-//        proxy.dispatchIncomingMessage(pm);
+        // proxy.dispatchIncomingMessage(protocolMessage);
         // asynchronous, more correct:
-        proxy.getInterfaceBroker().onProtocolMessageReceived(pm);
+        proxy.getInterfaceBroker().onProtocolMessageReceived(protocolMessage);
     }
 
     private void checkSystemPutFileJSON(byte[] data, int offset, int length,
-                                        String filename, FileType fileType)
-            throws JSONException {
+                                        String filename, FileType fileType) throws JSONException {
         assertThat("JSON data must not be null", data, notNullValue());
 
-        JSONObject jsonObject =
-                new JSONObject(new String(data, Charset.defaultCharset()));
-        assertThat("offset doesn't match", jsonObject.getInt(OFFSET),
-                is(offset));
-        assertThat("length doesn't match", jsonObject.getInt(LENGTH),
-                is(length));
-        assertThat("filename must be set", jsonObject.getString(SYNC_FILENAME),
+        JSONObject jsonObject = new JSONObject(new String(data, Charset.defaultCharset()));
+        assertThat("offset doesn't match", jsonObject.getInt(Names.offset), is(offset));
+        assertThat("length doesn't match", jsonObject.getInt(Names.length), is(length));
+        assertThat("filename must be set", jsonObject.getString(Names.syncFileName),
                 is(filename));
-        assertThat("systemFile must be true",
-                jsonObject.getBoolean(SYSTEM_FILE), is(true));
-        assertThat("fileType must be set", jsonObject.getString(FILE_TYPE),
+        assertThat("systemFile must be true", jsonObject.getBoolean(Names.systemFile), is(true));
+        assertThat("fileType must be set", jsonObject.getString(Names.fileType),
                 is(fileType.toString()));
     }
 }
