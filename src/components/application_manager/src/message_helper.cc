@@ -1949,7 +1949,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     full_file_path += file_name;
   } else {
 
-    full_file_path += app->name();
+    full_file_path += app->folder_name();
     full_file_path += "/";
     full_file_path += file_name;
   }
