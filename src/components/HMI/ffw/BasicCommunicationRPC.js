@@ -275,7 +275,12 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 SDL.SDLModel.set('policyURLs', response.result.urls);
 
-                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                if (response.result.urls.length) {
+                    this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                } else {
+                    this.OnSystemRequest("PROPRIETARY");
+                }
+
             }
         },
 

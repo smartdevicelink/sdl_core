@@ -396,8 +396,10 @@ SDL.SDLController = Em.Object
          */
         systemRequestViewSelected: function(state) {
 
-            if (SDL.SDLModel.policyURLs) {
-                this.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            if (SDL.SDLModel.policyURLs.length) {
+                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            } else {
+                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
             }
 
         },
