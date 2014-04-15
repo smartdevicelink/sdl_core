@@ -52,9 +52,8 @@ add_custom_target(apr-util ALL make
 )
 
 install(
-  PROGRAMS
-    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so.0.5.3
-    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so.0
-    ${APR_UTIL_SOURCE_DIRECTORY}/.libs/libaprutil-1.so
+  DIRECTORY ${APR_UTIL_SOURCE_DIRECTORY}/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN libaprutil-1.so*
 )

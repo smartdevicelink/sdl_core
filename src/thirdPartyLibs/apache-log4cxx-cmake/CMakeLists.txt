@@ -57,9 +57,8 @@ add_custom_target(liblog4cxx ALL make
 )
 
 install(
-  PROGRAMS
-    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so.10.0.0
-    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so.10
-    ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/liblog4cxx.so
+  DIRECTORY ${LOG4CXX_SOURCE_DIRECTORY}/src/main/cpp/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN liblog4cxx.so*
 )

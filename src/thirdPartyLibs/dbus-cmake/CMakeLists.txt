@@ -53,9 +53,13 @@ install(
 )
 
 install(
-  PROGRAMS
-    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so.3.8.3
-    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so.3
-    ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/libdbus-1.so
+  FILES ${DBUS_SOURCE_DIRECTORY}/bus/session.conf
+  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/etc/dbus-1
+)
+
+install(
+  DIRECTORY ${DBUS_SOURCE_DIRECTORY}/dbus/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN libdbus-1.so*
 )

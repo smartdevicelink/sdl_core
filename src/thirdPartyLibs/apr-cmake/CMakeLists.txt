@@ -54,9 +54,8 @@ add_custom_target(libapr-1 ALL make
 )
 
 install(
-  PROGRAMS
-    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so.0.5.0
-    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so.0
-    ${APR_SOURCE_DIRECTORY}/.libs/libapr-1.so
+  DIRECTORY ${APR_SOURCE_DIRECTORY}/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
+  USE_SOURCE_PERMISSIONS
+  FILES_MATCHING PATTERN libapr-1.so*
 )
