@@ -3,7 +3,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 import android.content.Context;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SyncProxyTester;
@@ -12,6 +11,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.streaming.IStreamListener;
 import com.ford.syncV4.streaming.MobileNaviDataFrame;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,7 +71,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
                     }
                     is.close();
                 } catch (IOException e) {
-                    Log.e("SyncProxyTester", e.toString());
+                    Logger.e("H264PacketizerIntergationTest", e.toString());
                 }
             }
         };
@@ -93,7 +93,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
             }
 
         } catch (IOException e) {
-            Log.e("SyncProxyTester", e.toString());
+            Logger.e("H264PacketizerIntergationTest", e.toString());
         }
         t.interrupt();
 
@@ -127,7 +127,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
                 fos.flush();
             }
         } catch (IOException e) {
-            Log.w("SyncProxyTester", e.toString());
+            Logger.w("H264PacketizerIntergationTest", e.toString());
         }
 
 

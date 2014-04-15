@@ -1,7 +1,5 @@
 package com.ford.syncV4.proxy.rpc;
 
-import android.util.Log;
-
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -9,7 +7,7 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class RegisterAppInterface extends RPCRequest {
 
@@ -57,7 +55,7 @@ public class RegisterAppInterface extends RPCRequest {
     public Vector<TTSChunk> getTtsName() {
         if (parameters.get(Names.ttsName) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.ttsName);
-            if (list != null) {
+            if (list == null) {
                 return null;
             }
             if (list.size() == 0) {
@@ -143,7 +141,7 @@ public class RegisterAppInterface extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.languageDesired, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.languageDesired, e);
             }
             return theCode;
         }
@@ -167,7 +165,7 @@ public class RegisterAppInterface extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguageDesired, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguageDesired, e);
             }
             return theCode;
         }
@@ -202,7 +200,7 @@ public class RegisterAppInterface extends RPCRequest {
                     try {
                         toAdd = AppHMIType.valueForString(strFormat);
                     } catch (Exception e) {
-                        DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
+                        Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.appHMIType, e);
                     }
                     if (toAdd != null) {
                         newList.add(toAdd);
@@ -305,7 +303,7 @@ public class RegisterAppInterface extends RPCRequest {
         } else if (object instanceof Hashtable) {
             return new DeviceInfo((Hashtable) object);
         }
-        Log.w(LOG_TAG, " getDeviceInfo is not a type of DeviceInfo, current value:" + object);
+        Logger.w(LOG_TAG + " getDeviceInfo is not a type of DeviceInfo, current value:" + object);
         return null;
     }
 }

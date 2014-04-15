@@ -46,6 +46,8 @@ const char protocol_type[] = "protocol_type";
 const char connection_key[] = "connection_key";
 const char error[] = "error";
 const char error_msg[] = "message";
+const char default_app_id[] = "default";
+
 
 const char msg_params[] = "msg_params";
 const char info[] = "info";
@@ -101,6 +103,7 @@ const char interaction_choice_set_id[] = "interactionChoiceSetID";
 const char interaction_choice_set_id_list[] = "interactionChoiceSetIDList";
 const char choice_set[] = "choiceSet";
 const char choice_id[] = "choiceID";
+const char grammar_id[] = "grammarID";
 const char navigation_text_1[] = "navigationText1";
 const char navigation_text_2[] = "navigationText2";
 const char alert_text1[] = "alertText1";
@@ -149,6 +152,7 @@ const char audio_pass_thru_capabilities[] = "audioPassThruCapabilities";
 const char sync_file_name[] = "syncFileName";
 const char file_name[] = "fileName";
 const char file_type[] = "fileType";
+const char file_size[] = "fileSize";
 const char request_type[] = "requestType";
 const char persistent_file[] = "persistentFile";
 const char file_data[] = "fileData";
@@ -232,6 +236,7 @@ const char is_download_complete[] = "is_download_complete";
 const char hash_id[] = "hashID";
 const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
+const char image_type_supported[] = "imageTypeSupported";
 }  // namespace strings
 
 namespace mobile_notification {
@@ -271,6 +276,9 @@ const char method_name[] = "methodName";
 const char keyboard_layout[] = "keyboardLayout";
 const char limited_character_list[] = "limitedCharacterList";
 const char auto_complete_text[] = "autoCompleteText";
+const char file[] = "file";
+const char retry[] = "retry";
+const char service[] = "service";
 }  // namespace hmi_request
 
 namespace hmi_response {
@@ -308,6 +316,8 @@ const char image_fields[] = "imageFields";
 const char templates_available[] = "templatesAvailable";
 const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
+const char urls[] = "urls";
+const char policy_app_id[] = "policyAppId";
 }  // namespace hmi_response
 
 namespace hmi_notification {
@@ -316,6 +326,9 @@ const char file_name[] = "file_name";
 const char system_context[] = "systemContext";
 const char state[] = "state";
 const char result[] = "result";
+const char statistic_type[] = "statisticType";
+const char error[] = "error";
+const char policyfile[] = "policyfile";
 
 }  // namespace hmi_notification
 

@@ -70,6 +70,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TBTClientStateView,
         SDL.DriverDistraction,
         SDL.ExitApp,
+        SDL.SystemRequest,
         SDL.ControlButtons
     ],
 
@@ -87,6 +88,14 @@ SDL.AppViews = Em.ContainerView.extend( {
         $(window).bind("beforeunload", function(e) {
 
             FFW.BasicCommunication.OnIgnitionCycleOver();
+
+            FFW.BasicCommunication.disconnect();
+            FFW.UI.disconnect();
+            FFW.VR.disconnect();
+            FFW.VehicleInfo.disconnect();
+            FFW.TTS.disconnect();
+            FFW.Buttons.disconnect();
+            FFW.Navigation.disconnect();
 
             if(confirm('The "ignition off" emulation executed!')){
                 return 'OK, Good Bye then';

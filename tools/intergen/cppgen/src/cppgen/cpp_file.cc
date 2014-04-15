@@ -67,6 +67,7 @@ class IncludeTypeHelper: public TypeCodeGenerator {
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForEnum(const Enum* enm);
+  virtual void GenerateCodeForNullable(const NullableType* nullable);
   virtual void GenerateCodeForStruct(const Struct* strct);
   virtual void GenerateCodeForTypedef(const Typedef* tdef);
  private:
@@ -96,6 +97,10 @@ void IncludeTypeHelper::GenerateCodeForEnum(const Enum *enm) {
   cpp_file_->Include(CppFile::Header(
                        GetTypeInterfaceName(enm) + "/enums.h",
                        true));
+}
+
+void IncludeTypeHelper::GenerateCodeForNullable(const NullableType* nullable) {
+  nullable->type()->Apply(this);
 }
 
 void IncludeTypeHelper::GenerateCodeForStruct(const Struct* strct) {

@@ -64,6 +64,10 @@ void TypeCodeGenerator::GenerateCodeForArray(const Array* array) {
 void TypeCodeGenerator::GenerateCodeForMap(const Map* map) {
 }
 
+void TypeCodeGenerator::GenerateCodeForNullable(
+    const NullableType* nullable) {
+}
+
 void TypeCodeGenerator::GenerateCodeForStruct(const Struct* strct) {
 }
 

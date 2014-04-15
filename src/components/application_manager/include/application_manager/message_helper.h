@@ -36,6 +36,7 @@
 #include <map>
 #include <string>
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 #include "utils/macro.h"
 #include "connection_handler/device.h"
 #include "application_manager/application.h"
@@ -123,12 +124,6 @@ class MessageHelper {
     static void SendHashUpdateNotification(const uint32_t app_id);
 
     /**
-     * @brief Removes Vr Synonyms of application name from HMI
-     * when unregistering application.
-     */
-    static void SendRemoveVrCommandsOnUnregisterApp(ApplicationConstSharedPtr app);
-
-    /**
      * @brief Sends OnAppInterfaceUnregistered notification to mobile
      *
      *@param connection_key Connection key
@@ -159,7 +154,7 @@ class MessageHelper {
     * @brief Used to obtain function name by its id
     * @param function_id Function ID
     */
-    static const char* StringifiedFunctionID(
+    static std::string StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
 
     static void CreateGetDeviceData(int32_t correlation_id);
@@ -219,18 +214,15 @@ class MessageHelper {
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void RemoveAppDataFromHMI(ApplicationSharedPtr app);
     static void SendOnSdlCloseNotificationToHMI();
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
-    static void SendDeleteCommandRequestToHMI(ApplicationConstSharedPtr app);
-    static void SendDeleteSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
     static void SendActivateAppToHMI(uint32_t const app_id);
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
-                                       policy::DeviceInfo* device_info);
-    static void GetDeviceInfoForApp(const std::string& connection_key,
-                                    policy::DeviceInfo* device_info);
+                                       policy::DeviceParams* device_info);
+    static void GetDeviceInfoForApp(uint32_t connection_key,
+                                    policy::DeviceParams* device_info);
 
     /**
     * @brief Send SDL_ActivateApp response to HMI
@@ -243,7 +235,36 @@ class MessageHelper {
     * @brief Send OnSDLConsentNeeded to HMI for device data consent by user
     * @param device_info Device info, e.g. mac, handle, name
     */
-    static void SendOnSDLConsentNeeded(const policy::DeviceInfo& device_info);
+    static void SendOnSDLConsentNeeded(const policy::DeviceParams& device_info);
+
+    /**
+      * @brief Send request to SyncP process to read file and send
+      * Policy Table Snapshot using Retry Strategy
+      * @param file_path Path to file with PTS
+      * @param timeout Timeout to wait for PTU
+      * @param retries Seconds between retries
+      */
+    static void SendPolicyUpdate(const std::string& file_path,
+                                 int timeout,
+                                 const std::vector<int>& retries);
+
+    /**
+     * @brief Send GetUserFriendlyMessage response to HMI
+     * @param msg Appopriate messages params
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetUserFriendlyMessageResponse(
+      const std::vector<policy::UserFriendlyMessage>& msg,
+      uint32_t correlation_id);
+
+    /**
+     * @brief Send GetListOfPermissions response to HMI
+     * @param permissions Array of groups permissions
+     * @param correlation_id Correlation id of request
+     */
+    static void SendGetListOfPermissionsResponse(
+      std::vector<policy::FunctionalGroupPermission>& permissions,
+      uint32_t correlation_id);
 
     /*
      * @brief Sends notification to HMI to start video streaming
@@ -289,6 +310,34 @@ class MessageHelper {
     */
     static void SendOnAppPermissionsChangedNotification(
       uint32_t connection_key, const policy::AppPermissions& permissions);
+
+    /**
+     * @brief Send GetStatusUpdate response to HMI with current policy update
+     * status
+     * @param status Update status
+     * @param correlation_id Correlation id from request
+     */
+    static void SendGetStatusUpdateResponse(const std::string& status,
+                                            uint32_t correlation_id);
+
+    /**
+     * @brief Send UpdateSDL response to HMI with policy update result
+     * @param result Update result
+     * @param correlation_id Correlation id from request
+     */
+    static void SendUpdateSDLResponse(const std::string& result,
+                                            uint32_t correlation_id);
+
+    /**
+     * @brief Send OnStatusUpdate to HMI on policy update status change
+     * @param status Policy table update status
+     */
+    static void SendOnStatusUpdate(const std::string& status);
+
+    /**
+     * @brief Send GetSystemInfo request to HMI
+     */
+    static void SendGetSystemInfoRequest();
 
     /*
      * @brief Sends notification to HMI to start audio streaming
@@ -360,11 +409,17 @@ class MessageHelper {
       return static_cast<To>(input);
     }
 
-  private:
+    /**
+     * @brief Convert common language to string representation
+     * @param language Common language
+     * @return Common language string representation
+     */
+    static std::string CommonLanguageToString(
+        hmi_apis::Common_Language::eType language);
+private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
-    static void SendRemoveCommandToHMI(int32_t function_id, int32_t command_id,
-                                       uint32_t app_id);
+
     MessageHelper();
 
     static const VehicleData vehicle_data_;

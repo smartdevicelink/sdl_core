@@ -2,9 +2,9 @@
 	"UI":
 	{
 		"language":"EN-US",
-	    "languages":
-	    [
-	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
+	    "languages":[ 
+          "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
 	    ],
 	    "displayCapabilities":
 		{
@@ -81,9 +81,20 @@
                         		"imageResolution":
                                          {
                                           	"resolutionWidth":35,
-						"resolutionHeight":35
+                                                "resolutionHeight":35
                                          }
-                        	}
+                        	},
+                                {
+                                    "name":"graphic",
+                                        "imageTypeSupported":
+                                         [
+                                         ],
+                                        "imageResolution":
+                                         {
+                                                "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
+                         	}
                         	
                         ],
 			"mediaClockFormats":
@@ -118,13 +129,14 @@
                         "numCustomPresetsAvailable":8,
 			"imageCapabilities":
 			[
-				"DYNAMIC"
+				"DYNAMIC",
+				"STATIC"
 			]
 		},
 		"audioPassThruCapabilities":
 		{
 			"samplingRate"	: "44KHZ",
-			"bitsPerSample" : "8_BIT",
+			"bitsPerSample" : "RATE_8_BIT",
 			"audioType"		: "PCM"
 		},
 		"hmiZoneCapabilities":"FRONT",
@@ -140,18 +152,20 @@
 	{
 		"capabilities":["TEXT"],
 		"language":"EN-US",
-	    "languages":
-	    [
-	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
-	    ]
-    },
+	    "languages":    
+            [ 
+         "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
+            ]	    
+},
     "TTS":
 	{
 		"capabilities":"TEXT",
 		"language":"EN-US",
 	    "languages":
 	    [
-	    	"EN-US","ES-MX","FR-CA","DE-DE","ES-ES","EN-GB","RU-RU","TR-TR","PL-PL","FR-FR","IT-IT","SV-SE","PT-PT","NL-NL","ZH-TW","JA-JP","AR-SA","KO-KR","PT-BR","CS-CZ","DA-DK","NO-NO"
+	  "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
 	    ]
     },
     "Buttons":

@@ -155,6 +155,11 @@ void TypeNameGenerator::GenerateCodeForMap(const Map* map) {
   os_ << map_decl_end;
 }
 
+void TypeNameGenerator::GenerateCodeForNullable(const NullableType* nullable) {
+  // Just generate a type name without special qualifiers
+  nullable->type()->Apply(this);
+}
+
 void TypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
   const char* struct_decl_begin = prefer_reference_type_ ? "const " : "";
   const char* struct_decl_end = prefer_reference_type_ ? "&" : "";
@@ -176,16 +181,22 @@ RpcTypeNameGenerator::RpcTypeNameGenerator(const Interface* interface,
                                            const Type* type,
                                            Availability availability)
     : interface_(interface),
-      preferences_(preferences),
-      skip_availaiblity_specifier_(availability == kUnspecified),
-      mandatory_(availability == kMandatory) {
-  if (!skip_availaiblity_specifier_) {
-    // Arrays, map and typedefs of arrays and maps doesn't need to be marked as
-    // optional or mandatory because their minimal size indicates whether
-    // container contents is optional
-    skip_availaiblity_specifier_ = TypeProperties(type).is_container();
+      preferences_(preferences) {
+  bool wrap_with_availability = availability != kUnspecified;
+  // Arrays, map and typedefs of arrays and maps doesn't need to be marked as
+  // optional or mandatory because their minimal size indicates whether
+  // container contents is optional
+  if (TypeProperties(type).is_container()) {
+    wrap_with_availability = false;
+  }
+
+  if (wrap_with_availability && (availability == kOptional)) {
+    os_ << "Optional< ";
   }
   type->Apply(this);
+  if (wrap_with_availability && (availability == kOptional)) {
+    os_ << " >";
+  }
 }
 
 RpcTypeNameGenerator::~RpcTypeNameGenerator() {
@@ -196,80 +207,60 @@ std::string RpcTypeNameGenerator::result() const {
 }
 
 void RpcTypeNameGenerator::GenerateCodeForBoolean(const Boolean* boolean) {
-  if (MaybeWrapWithAvailabilitySpecifier(boolean)) {
-  } else {
-    os_ << "Boolean";
-  }
+  os_ << "Boolean";
 }
 
 void RpcTypeNameGenerator::GenerateCodeForInteger(const Integer* integer) {
-  if (!MaybeWrapWithAvailabilitySpecifier(integer)) {
-    const char* int_type = StdIntTypeFromRagne(*preferences_, integer->range());
-    strmfmt(os_, "Integer<{0}, {1}, {2}>", int_type, integer->range().min(),
-            integer->range().max());
-  }
+  const char* int_type = StdIntTypeFromRagne(*preferences_, integer->range());
+  strmfmt(os_, "Integer<{0}, {1}, {2}>", int_type, integer->range().min(),
+          integer->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForFloat(const Float* flt) {
-  if (!MaybeWrapWithAvailabilitySpecifier(flt)) {
-    const Fraction& minval = flt->range().min_fract();
-    const Fraction& maxval = flt->range().max_fract();
-    strmfmt(os_, "Float<{0}, {1}", minval.numer(), maxval.numer());
-    if (minval.denumer() == 1 && maxval.denumer() == 1) {
-      os_ << ">";
-    } else {
-      strmfmt(os_, ", {0}, {1}>", minval.denumer(), maxval.denumer());
-    }
+  const Fraction& minval = flt->range().min_fract();
+  const Fraction& maxval = flt->range().max_fract();
+  strmfmt(os_, "Float<{0}, {1}", minval.numer(), maxval.numer());
+  if (minval.denumer() == 1 && maxval.denumer() == 1) {
+    os_ << ">";
+  } else {
+    strmfmt(os_, ", {0}, {1}>", minval.denumer(), maxval.denumer());
   }
 }
 
 void RpcTypeNameGenerator::GenerateCodeForString(const String* string) {
-  if (!MaybeWrapWithAvailabilitySpecifier(string)) {
-    strmfmt(os_, "String<{0}, {1}>", string->length_range().min(),
-            string->length_range().max());
-  }
+  strmfmt(os_, "String<{0}, {1}>", string->length_range().min(),
+          string->length_range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
-  if (!MaybeWrapWithAvailabilitySpecifier(enm)) {
-    strmfmt(os_, "Enum<{0}>", TypeNamespacePrefix(interface_, enm) + enm->name());
-  }
+  strmfmt(os_, "Enum<{0}>", TypeNamespacePrefix(interface_, enm) + enm->name());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForArray(const Array* array) {
-  os_ << "Array    < ";
+  os_ << "Array< ";
   array->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", array->range().min(), array->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
-  os_ << "Map      < ";
+  os_ << "Map< ";
   map->type()->Apply(this);
   strmfmt(os_, ", {0}, {1} >", map->range().min(), map->range().max());
 }
 
+void RpcTypeNameGenerator::GenerateCodeForNullable(
+    const NullableType* nullable) {
+  os_ << "Nullable< ";
+  nullable->type()->Apply(this);
+  os_ << " >";
+}
+
 void RpcTypeNameGenerator::GenerateCodeForStruct(const Struct* strct) {
-  if (!MaybeWrapWithAvailabilitySpecifier(strct)) {
-    os_ << TypeNamespacePrefix(interface_, strct) + strct->name();
-  }
+  os_ << TypeNamespacePrefix(interface_, strct) + strct->name();
 }
 
 void RpcTypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
-  if (!MaybeWrapWithAvailabilitySpecifier(tdef)) {
-    os_ << TypeNamespacePrefix(interface_, tdef) + tdef->name();
-  }
-}
-
-bool RpcTypeNameGenerator::MaybeWrapWithAvailabilitySpecifier(const Type* type) {
-  if (skip_availaiblity_specifier_) {
-    return false;
-  } else {
-    skip_availaiblity_specifier_ = true;
-    os_ << (mandatory_ ? "Mandatory< " : "Optional < ");
-    type->Apply(this);
-    os_ << " >";
-    return true;
-  }
+  os_ << TypeNamespacePrefix(interface_, tdef) + tdef->name();
 }
 
 TypeProperties::TypeProperties(const Type* type)
@@ -302,6 +293,10 @@ void TypeProperties::GenerateCodeForArray(const Array* array) {
 
 void TypeProperties::GenerateCodeForMap(const Map* map) {
   container_ = true;
+}
+
+void TypeProperties::GenerateCodeForNullable(const NullableType* nullable) {
+  nullable->type()->Apply(this);
 }
 
 void TypeProperties::GenerateCodeForStruct(const Struct* strct) {

@@ -207,9 +207,24 @@ class Struct::Field {
 };
 
 /*
+ *  Nullable type decorator
+ */
+class NullableType : public Type {
+ public:
+  // Methods
+  NullableType(const Type* type);
+  const Type* type() const;
+  bool operator<(const NullableType& that) const;
+  // codegen::Type methods
+  virtual TypeCodeGenerator* Apply(TypeCodeGenerator* code_generator) const;
+  virtual const ConstantsCreator* SupportsConstants() const;
+ private:
+  const Type* type_;
+};
+
+/*
  * Typedef type
  */
-
 class Typedef : public Type {
  public:
   Typedef(const Interface* interface,

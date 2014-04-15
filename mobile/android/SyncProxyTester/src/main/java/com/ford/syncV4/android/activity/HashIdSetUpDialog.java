@@ -6,7 +6,6 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,8 +21,7 @@ import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
-
-import java.util.LinkedHashSet;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -98,7 +96,7 @@ public class HashIdSetUpDialog extends DialogFragment {
                 AppPreferencesManager.getUseCustomHashId());
 
         final EditText customHashIdView = (EditText) layout.findViewById(R.id.hash_id_set_up_custom_id_view);
-        Log.d(LOG_TAG, "GetHashId, hashId:" + AppPreferencesManager.getCustomHashId());
+        Logger.d(LOG_TAG + " GetHashId, hashId:" + AppPreferencesManager.getCustomHashId());
         customHashIdView.setText(AppPreferencesManager.getCustomHashId());
 
         return new AlertDialog.Builder(mContext)
@@ -109,7 +107,7 @@ public class HashIdSetUpDialog extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         final EditText customHashIdView = (EditText) layout.findViewById(
                                 R.id.hash_id_set_up_custom_id_view);
-                        Log.d(LOG_TAG, "SetSelectedHashId on click, hashId:" +
+                       Logger.d(LOG_TAG + " SetSelectedHashId on click, hashId:" +
                                 customHashIdView.getText().toString().trim());
                         AppPreferencesManager.setCustomHashId(
                                 customHashIdView.getText().toString().trim());
@@ -119,7 +117,7 @@ public class HashIdSetUpDialog extends DialogFragment {
     }
 
     private void processUseHashIdCheckBoxEvent(View layout, boolean isChecked) {
-        Log.d(LOG_TAG, "ProcessUseHashIdCheckBoxEvent, checked:" + isChecked);
+       Logger.d(LOG_TAG + " ProcessUseHashIdCheckBoxEvent, checked:" + isChecked);
 
         final TextView customHashIdLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_custom_id_label_view);
         final TextView lastHashIdsLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_last_ids_label_view);
@@ -141,7 +139,7 @@ public class HashIdSetUpDialog extends DialogFragment {
     }
 
     private void processUseCustomHashIdCheckBoxEvent(View layout, boolean isChecked) {
-        Log.d(LOG_TAG, "ProcessUseCustomHashIdCheckBoxEvent, checked:" + isChecked);
+       Logger.d(LOG_TAG + " ProcessUseCustomHashIdCheckBoxEvent, checked:" + isChecked);
 
         final TextView customHashIdLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_custom_id_label_view);
         final TextView lastHashIdsLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_last_ids_label_view);
@@ -160,7 +158,7 @@ public class HashIdSetUpDialog extends DialogFragment {
         final EditText customHashIdView = (EditText) layout.findViewById(R.id.hash_id_set_up_custom_id_view);
         customHashIdView.setText(hashId);
 
-        Log.d(LOG_TAG, "SetSelectedHashId, hashId:" + hashId);
+       Logger.d(LOG_TAG + " SetSelectedHashId, hashId:" + hashId);
         AppPreferencesManager.setCustomHashId(hashId);
     }
 }

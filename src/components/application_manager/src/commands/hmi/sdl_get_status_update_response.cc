@@ -30,43 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief TTSPerformInteractionRequest command class
- **/
-class TTSPerformInteractionRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief TTSPerformInteractionRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit TTSPerformInteractionRequest(const MessageSharedPtr& message);
+SDLGetStatusUpdateResponse::SDLGetStatusUpdateResponse(
+  const MessageSharedPtr& message): ResponseToHMI(message) {
+}
 
-    /**
-     * @brief TTSPerformInteractionRequest class destructor
-     **/
-    virtual ~TTSPerformInteractionRequest();
+SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {
+}
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+void SDLGetStatusUpdateResponse::Run() {
+  LOG4CXX_INFO(logger_, "SDLGetStatusUpdateResponse::Run");
+  (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
+  (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(TTSPerformInteractionRequest);
-};
+  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+}
 
 }  // namespace commands
-
 }  // namespace application_manager
 
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_TTS_PERFORM_INTERACTION_REQUEST_H_
+
+

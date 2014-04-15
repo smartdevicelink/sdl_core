@@ -128,7 +128,7 @@ RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
   packet_[offset++] = dataSize >> 8;
   packet_[offset++] = dataSize;
 
-  if (version == PROTOCOL_VERSION_2) {
+  if (version != PROTOCOL_VERSION_1) {
     packet_[offset++] = messageID >> 24;
     packet_[offset++] = messageID >> 16;
     packet_[offset++] = messageID >> 8;
@@ -204,7 +204,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_header_.dataSize |= message[offset++] << 8u;
   packet_header_.dataSize |= message[offset++];
 
-  if (packet_header_.version == PROTOCOL_VERSION_2) {
+  if (packet_header_.version != PROTOCOL_VERSION_1) {
     packet_header_.messageId = message[offset++] << 24u;
     packet_header_.messageId |= message[offset++] << 16u;
     packet_header_.messageId |= message[offset++] << 8u;

@@ -46,6 +46,13 @@
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
 #include "application_manager/commands/hmi/allow_app_request.h"
 #include "application_manager/commands/hmi/allow_app_response.h"
+#include "application_manager/commands/hmi/sdl_get_list_of_permissions_request.h"
+#include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
+#include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
+#include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_request.h"
+#include "application_manager/commands/hmi/sdl_get_status_update_response.h"
+#include "application_manager/commands/hmi/on_status_update_notification.h"
 #include "application_manager/commands/hmi/update_sdl_request.h"
 #include "application_manager/commands/hmi/update_sdl_response.h"
 #include "application_manager/commands/hmi/activate_app_request.h"
@@ -54,12 +61,16 @@
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 #include "application_manager/commands/hmi/on_allow_sdl_functionality_notification.h"
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
+#include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
 #include "application_manager/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
 #include "application_manager/commands/hmi/on_put_file_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
+#include "application_manager/commands/hmi/on_system_info_changed_notification.h"
+#include "application_manager/commands/hmi/get_system_info_request.h"
+#include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
 #include "application_manager/commands/hmi/close_popup_response.h"
 #include "application_manager/commands/hmi/button_get_capabilities_request.h"
@@ -132,14 +143,15 @@
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_request.h"
 #include "application_manager/commands/hmi/tts_get_capabilities_response.h"
-#include "application_manager/commands/hmi/tts_perform_interaction_request.h"
-#include "application_manager/commands/hmi/tts_perform_interaction_response.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_request.h"
+#include "application_manager/commands/hmi/vr_perform_interaction_response.h"
 #include "application_manager/commands/hmi/vi_is_ready_request.h"
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
 #include "application_manager/commands/hmi/vi_read_did_request.h"
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
+#include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 
 #ifdef HMI_JSON_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request.h"
@@ -234,12 +246,22 @@
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 #include "application_manager/commands/hmi/on_sdl_close_notification.h"
 #include "application_manager/commands/hmi/on_record_start_notification.h"
+#include "application_manager/commands/hmi/add_statistics_info_notification.h"
+#include "application_manager/commands/hmi/on_system_error_notification.h"
+#include "application_manager/commands/hmi/basic_communication_system_request.h"
+#include "application_manager/commands/hmi/basic_communication_system_response.h"
+#include "application_manager/commands/hmi/sdl_policy_update.h"
+#include "application_manager/commands/hmi/sdl_policy_update_response.h"
+#include "application_manager/commands/hmi/on_received_policy_update.h"
+#include "application_manager/commands/hmi/on_policy_update.h"
+#include "application_manager/commands/hmi/get_urls.h"
+#include "application_manager/commands/hmi/get_urls_response.h"
 
 namespace application_manager {
 
 #ifdef ENABLE_LOG
 log4cxx::LoggerPtr HMICommandFactory::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
+      log4cxx::Logger::getLogger("ApplicationManager"));
 #endif // ENABLE_LOG
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
@@ -286,12 +308,72 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_GetSystemInfo: {
+      if (is_response) {
+        command.reset(new commands::GetSystemInfoResponse(message));
+      } else {
+        command.reset(new commands::GetSystemInfoRequest(message));
+      }
+      break;
+    }
     case hmi_apis::FunctionID::SDL_ActivateApp: {
       if (is_response) {
         command.reset(new commands::SDLActivateAppResponse(message));
       } else {
         command.reset(new commands::SDLActivateAppRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_PolicyUpdate: {
+      if (is_response) {
+        command.reset(new commands::SDLPolicyUpdateResponse(message));
+      } else {
+        command.reset(new commands::SDLPolicyUpdate(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetURLS: {
+      if (is_response) {
+        command.reset(new commands::GetUrlsResponse(message));
+      } else {
+        command.reset(new commands::GetUrls(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnAppPermissionChanged: {
+      command.reset(new commands::OnAppPermissionChangedNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetListOfPermissions: {
+      if (is_response) {
+        command.reset(new commands::SDLGetListOfPermissionsResponse(message));
+      } else {
+        command.reset(new commands::SDLGetListOfPermissionsRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetUserFriendlyMessage: {
+      if (is_response) {
+        command.reset(new commands::SDLGetUserFriendlyMessageResponse(message));
+      } else {
+        command.reset(new commands::SDLGetUserFriendlyMessageRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_GetStatusUpdate: {
+      if (is_response) {
+        command.reset(new commands::SDLGetStatusUpdateResponse(message));
+      } else {
+        command.reset(new commands::SDLGetStatusUpdateRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnStatusUpdate: {
+      command.reset(new commands::OnStatusUpdateNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnAppPermissionConsent: {
+      command.reset(new commands::OnAppPermissionConsentNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported: {
@@ -987,25 +1069,20 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnSDLConsentNeededNotification(message));
       break;
     }
-    /*
     case hmi_apis::FunctionID::SDL_UpdateSDL: {
-    if (is_response) {
-    command.reset(new commands::UpdateSDLResponse(message));
-    } else {
-    command.reset(new commands::UpdateSDLRequest(message));
+      if (is_response) {
+        command.reset(new commands::UpdateSDLResponse(message));
+      } else {
+        command.reset(new commands::UpdateSDLRequest(message));
+      }
+      break;
     }
-    break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAppPermissionChanged: {
-    command.reset(new commands::OnAppPermissionChangedNotification(message));
-    break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAllowApp: {
-    command.reset(new commands::OnAllowAppNotification(message));
-    break;
-    }*/
     case hmi_apis::FunctionID::BasicCommunication_OnIgnitionCycleOver: {
       command.reset(new commands::OnIgnitionCycleOverNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSystemInfoChanged: {
+      command.reset(new commands::OnSystemInfoChangedNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_PlayTone: {
@@ -1882,11 +1959,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::TTS_PerformInteraction: {
+    case hmi_apis::FunctionID::VR_PerformInteraction: {
       if (is_response) {
-        command.reset(new commands::TTSPerformInteractionResponse(message));
+        command.reset(new commands::VRPerformInteractionResponse(message));
       } else {
-        command.reset(new commands::TTSPerformInteractionRequest(message));
+        command.reset(new commands::VRPerformInteractionRequest(message));
       }
       break;
     }
@@ -1916,6 +1993,30 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_OnRecordStart: {
       command.reset(new commands::OnRecordStartdNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_SystemRequest: {
+      if (is_response) {
+        command.reset(new commands::BasicCommunicationSystemResponse(message));
+      } else {
+        command.reset(new commands::BasicCommunicationSystemRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_AddStatisticsInfo: {
+      command.reset(new commands::AddStatisticsInfoNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnSystemError: {
+      command.reset(new commands::OnSystemErrorNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnReceivedPolicyUpdate: {
+      command.reset(new commands::OnReceivedPolicyUpdate(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnPolicyUpdate: {
+      command.reset(new commands::OnPolicyUpdate(message));
       break;
     }
   }

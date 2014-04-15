@@ -2,9 +2,10 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/itemRoot"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="15dp">
 
     <CheckBox
         android:id="@+id/use_requestType"
@@ -16,7 +17,46 @@
     <Spinner
         android:id="@+id/requestType"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"/>
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:text="@string/system_request_file_name_label"
+        android:textStyle="bold" />
+
+    <CheckBox
+        android:id="@+id/system_request_use_file_name_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="true"
+        android:text="@string/system_request_use_file_name" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="20dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/system_request_local_file_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:ems="10"
+            android:freezesText="true"
+            android:inputType="text">
+        </EditText>
+
+        <Button
+            android:id="@+id/system_request_select_file_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/ellipsis" />
+    </LinearLayout>
 
 </LinearLayout>

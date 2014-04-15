@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -40,6 +40,11 @@ FFW.BasicCommunication = FFW.RPCObserver
             componentName: "BasicCommunication"
         }),
 
+
+        //OnPutFile
+
+
+        onPutFileSubscribeRequestID: -1,
 allowSDLFunctionalityRequestID: -1,
 
         onSystemErrorSubscribeRequestID: -1,
@@ -52,6 +57,7 @@ allowSDLFunctionalityRequestID: -1,
         onSDLCloseSubscribeRequestID: -1,
 onSDLConsentNeededSubscribeRequestID: -1,
 
+        onPutFileUnsubscribeRequestID: -1,
 onSystemErrorUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
@@ -66,7 +72,8 @@ onSDLConsentNeededUnsubscribeRequestID: -1,
         onSystemErrorNotification: "SDL.OnSystemError",
         onStatusUpdateNotification: "SDL.OnStatusUpdate",
         onAppPermissionChangedNotification: "SDL.OnAppPermissionChanged",
-onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
+        onPutFileNotification: "BasicCommunication.OnPutFile",
+        onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
@@ -107,6 +114,8 @@ onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
             this._super();
 
             // subscribe to notifications
+            this.onPutFileSubscribeRequestID = this.client
+                .subscribeToNotification(this.onPutFileNotification);
 this.onSystemErrorSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSystemErrorNotification);
             this.onStatusUpdateSubscribeRequestID = this.client
@@ -138,6 +147,8 @@ this.onSDLConsentNeededSubscribeRequestID = this.client
 
             // unsubscribe from notifications
 
+            this.onPutFileUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onPutFileNotification);
 this.onSystemErrorUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSystemErrorNotification);
             this.onStatusUpdateUnsubscribeRequestID = this.client
@@ -250,14 +261,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 Em.Logger.log("SDL.GetListOfPermissions: Response from SDL!");
 
-                if (response.id in SDL.SDLModel.getListOfPermissionsPull) {
-                    var appID = SDL.SDLModel.getListOfPermissionsPull[response.id];
-                    SDL.SDLController.getApplicationModel(appID).allowedFunctions = response.result.allowedFunctions;
-
-                    SDL.SettingsController.userFriendlyMessagePopUp();
-
-                    SDL.SDLModel.getListOfPermissionsPull.remove(response.id);
-                }
+                SDL.SettingsController.GetListOfPermissionsResponse(response);
             }
 
             if (response.result.method == "SDL.GetStatusUpdate") {
@@ -270,6 +274,8 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
             if (response.result.method == "SDL.GetURLS") {
 
                 SDL.SDLModel.set('policyURLs', response.result.urls);
+
+                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
             }
         },
 
@@ -294,7 +300,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 SDL.SDLModel.onFileRemoved(notification.params);
             }
 
-if (notification.method == this.onSystemErrorNotification) {
+            if (notification.method == this.onSystemErrorNotification) {
 
                 var message = "Undefined";
 
@@ -309,7 +315,8 @@ if (notification.method == this.onSystemErrorNotification) {
 
             if (notification.method == this.onStatusUpdateNotification) {
 
-                SDL.PopUp.popupActivate(notification.status);
+                //SDL.PopUp.popupActivate(notification.status);
+                SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
             if (notification.method == this.onAppPermissionChangedNotification) {
@@ -334,7 +341,7 @@ if (notification.method == this.onSystemErrorNotification) {
             if (notification.method == this.onSDLCloseNotification) {
                 //notification handler method
             }
-if (notification.method == this.onSDLConsentNeededNotification) {
+            if (notification.method == this.onSDLConsentNeededNotification) {
 
                 //Show popUp
                 SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
@@ -379,6 +386,16 @@ if (notification.method == this.onSDLConsentNeededNotification) {
                         request.id,
                         request.method);
                 }
+                if (request.method == "BasicCommunication.SystemRequest") {
+
+                    this.OnReceivedPolicyUpdate(request.params.fileName);
+
+                    SDL.SettingsController.policyUpdateFile = null;
+
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
                     if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
@@ -390,7 +407,7 @@ if (notification.method == this.onSDLConsentNeededNotification) {
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
-if (request.method == "BasicCommunication.GetSystemInfo") {
+                if (request.method == "BasicCommunication.GetSystemInfo") {
 
                     Em.Logger.log("BasicCommunication.GetSystemInfo Response");
 
@@ -412,6 +429,12 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                     //TO DO
                     //popUp activation
                 }
+                if (request.method == "BasicCommunication.PolicyUpdate") {
+                    SDL.SettingsController.policyUpdateFile = request.params.file;
+                    this.GetURLS(7); //Service type for policies
+
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+            }
             }
         },
 
@@ -446,9 +469,9 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Send request if application was activated
          *
-         * @param {Number} appID
+         * @param {Number} type
          */
-        GetURLS: function(appID) {
+        GetURLS: function(type) {
 
             Em.Logger.log("FFW.SDL.GetURLS: Request from HMI!");
 
@@ -458,10 +481,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                 "id": this.client.generateId(),
                 "method": "SDL.GetURLS",
                 "params": {
-                    "service": {
-                        "servicyType": "servicyType",
-                        "policyAppId": "policyAppId"
-                    }
+                    "service": type
                 }
             };
             this.client.send(JSONMessage);
@@ -504,7 +524,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
          *
          * @callback callbackFunc
          */
-        GetUserFriendlyMessage: function(callbackFunc, appID) {
+        GetUserFriendlyMessage: function(callbackFunc, appID, messageCodes) {
 
             var itemIndex = this.client.generateId();
 
@@ -518,10 +538,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                 "id": itemIndex,
                 "method": "SDL.GetUserFriendlyMessage",
                 "params": {
-                    "messageCodes": ["code"],
                     "language": SDL.SDLModel.hmiUILanguage
                 }
             };
+
+            if (messageCodes) {
+                JSONMessage.params.messageCodes = messageCodes;
+            }
+
             this.client.send(JSONMessage);
         },
 
@@ -555,7 +579,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -637,6 +661,28 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
             this.client.send(JSONMessage);
         },
 
+
+        /**
+         * Notification of decrypted policy table available
+         *
+         * @param {String} policyfile
+         */
+        OnReceivedPolicyUpdate: function(policyfile) {
+
+            Em.Logger.log("FFW.SDL.OnReceivedPolicyUpdate");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnReceivedPolicyUpdate",
+                "params": {
+                    "policyfile": policyfile
+                }
+            };
+
+            this.client.send(JSONMessage);
+        },
+
         /**
          * Notifies if functionality was changed
          *
@@ -649,14 +695,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
          */
         OnAppPermissionConsent: function(consentedFunctions, source, appID) {
 
-            Em.Logger.log("FFW.BasicCommunication.OnAppPermissionConsent");
+            Em.Logger.log("FFW.SDL.OnAppPermissionConsent");
 
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "method": "BasicCommunication.OnAppPermissionConsent",
+                "method": "SDL.OnAppPermissionConsent",
                 "params": {
-                    "consentedFunctions": allowed,
+                    "consentedFunctions": consentedFunctions,
                     "source": source
                 }
             };
@@ -670,7 +716,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            id
          * @param {String}
@@ -729,7 +775,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Send request if application was activated
-         * 
+         *
          * @param {number} appID
          */
         OnAppActivated: function(appID) {
@@ -808,7 +854,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Invoked by UI component when user switches to any functionality which
          * is not other mobile application.
-         * 
+         *
          * @params {String}
          * @params {Number}
          */
@@ -848,7 +894,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Used by HMI when User chooses to exit application.
-         * 
+         *
          * @params {Number}
          */
         ExitApplication: function(appID) {
@@ -869,7 +915,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Sent by HMI to SDL to close all registered applications.
-         * 
+         *
          * @params {String}
          */
         ExitAllApplications: function(reason) {
@@ -891,7 +937,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Response with params of the last one supports mixing audio (ie
          * recording TTS command and playing audio).
-         * 
+         *
          * @params {Number}
          */
         MixingAudioSupported: function(attenuatedSupported) {
@@ -915,7 +961,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Response with Results by user/HMI allowing SDL functionality or
          * disallowing access to all mobile apps.
-         * 
+         *
          * @params {Number}
          */
         AllowAllApps: function(allowed) {
@@ -938,7 +984,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Response with result of allowed application
-         * 
+         *
          * @params {Number}
          */
         AllowApp: function(request) {
@@ -972,7 +1018,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Notifies if device was choosed
-         * 
+         *
          * @param {String}
          *            deviceName
          * @param {Number}
@@ -998,7 +1044,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
 
         /**
          * Send error response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -1031,7 +1077,7 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
         /**
          * Initiated by HMI.
          */
-        OnSystemRequest: function() {
+        OnSystemRequest: function(type, appID, fileName, url) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
 
@@ -1041,12 +1087,14 @@ if (request.method == "BasicCommunication.GetSystemInfo") {
                 "jsonrpc": "2.0",
                 "method": "BasicCommunication.OnSystemRequest",
                 "params":{
-                    "requestType": "HTTP",
-                    "url": ["http://127.0.0.1"],
+                    "requestType": type,
+                    "url": url,
                     "fileType": "JSON",
                     "offset": 1000,
                     "length": 10000,
-                    "timeout": 500
+                    "timeout": 500,
+                    "fileName": fileName ? fileName : document.location.pathname.replace("index.html", "IVSU/PROPRIETARY_REQUEST"),
+                    "appID": appID ? appID : "default"
                 }
             };
             this.client.send(JSONMessage);

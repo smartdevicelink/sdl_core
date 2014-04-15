@@ -38,6 +38,10 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
 
+namespace policy {
+struct DeviceInfo;
+}
+
 namespace application_manager {
 
 class Application;
@@ -161,6 +165,12 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @return SUCCESS if check ok, otherwise return appropriate error code
    */
   mobile_apis::Result::eType CheckWithPolicyData();
+
+  /**
+   * @brief Fill DeviceInfo struct with data from request, if any
+   * @param device_info Struct for device params from request
+   */
+  void FillDeviceInfo(policy::DeviceInfo* device_info);
 
   std::string response_info_;
 

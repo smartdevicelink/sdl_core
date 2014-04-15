@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/set_icon_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
@@ -52,8 +53,8 @@ SetIconRequest::~SetIconRequest() {
 void SetIconRequest::Run() {
   LOG4CXX_INFO(logger_, "SetIconRequest::Run");
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -64,14 +65,14 @@ void SetIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  std::string relative_file_path = app->name();
-  relative_file_path += "/";
-  relative_file_path += sync_file_name;
-
-  std::string full_file_path = file_system::FullPath(relative_file_path);
+  std::string full_file_path =
+      profile::Profile::instance()->app_storage_folder() + "/";
+  full_file_path += app->folder_name();
+  full_file_path += "/";
+  full_file_path += sync_file_name;
 
   if (!file_system::FileExists(full_file_path)) {
-    LOG4CXX_ERROR(logger_, "No such file");
+    LOG4CXX_ERROR(logger_, "No such file " << full_file_path);
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -112,8 +113,8 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
       if (result) {
-        ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-            connection_key());
+        ApplicationSharedPtr app =
+            ApplicationManagerImpl::instance()->application(connection_key());
 
         const std::string path = (*message_)[strings::msg_params]
                                             [strings::sync_file_name]

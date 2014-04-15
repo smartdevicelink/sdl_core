@@ -38,9 +38,13 @@
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+#include "utils/file_system.h"
 
 namespace {
 const char* kMainSection = "MAIN";
+const char* kPolicySection = "Policy";
+
+const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 // Heartbeat is disabled by default
 const uint32_t kDefaultHeartBeatTimeout = 0;
 }
@@ -50,8 +54,10 @@ log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
 
 namespace profile {
 Profile::Profile()
-    : config_file_name_("smartDeviceLink.ini"),
-      launch_hmi_(true),
+    : launch_hmi_(true),
+      app_config_folder_(""),
+      app_storage_folder_(""),
+      config_file_name_("smartDeviceLink.ini"),
       policies_file_name_("policy_table.json"),
       hmi_capabilities_file_name_("hmi_capabilities.json"),
       server_address_("127.0.0.1"),
@@ -77,11 +83,12 @@ Profile::Profile()
       list_files_in_none_(5),
       app_info_storage_("app_info.dat"),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
+      policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
       transport_manager_disconnect_timeout_(0),
       use_last_state_(false),
       supported_diag_modes_(),
-      system_files_path_("/tmp/fs/mp/images/ivsu_cache"){
-  UpdateValues();
+      system_files_path_("/tmp/fs/mp/images/ivsu_cache"),
+      transport_manager_tcp_adapter_port_(12345) {
 }
 
 Profile::~Profile() {
@@ -102,6 +109,15 @@ const std::string& Profile::config_file_name() const {
 bool Profile::launch_hmi() const {
   return launch_hmi_;
 }
+
+const std::string& Profile::app_config_folder() const {
+  return app_config_folder_;
+}
+
+const std::string& Profile::app_storage_folder() const {
+  return app_storage_folder_;
+}
+
 
 const std::string& Profile::policies_file_name() const {
   return policies_file_name_;
@@ -239,6 +255,10 @@ const std::string& Profile::preloaded_pt_file() const {
   return preloaded_pt_file_;
 }
 
+const std::string& Profile::policies_snapshot_file_name() const{
+  return policy_snapshot_file_name_;
+}
+
 uint32_t Profile::transport_manager_disconnect_timeout() const {
   return transport_manager_disconnect_timeout_;
 }
@@ -253,6 +273,10 @@ const std::string& Profile::system_files_path() const {
 
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
   return supported_diag_modes_;
+}
+
+uint16_t Profile::transport_manager_tcp_adapter_port() const {
+  return transport_manager_tcp_adapter_port_;
 }
 
 void Profile::UpdateValues() {
@@ -271,6 +295,39 @@ void Profile::UpdateValues() {
     LOG4CXX_INFO(logger_, "Set launch HMI to " << launch_hmi_);
   }
 
+  *value = '\0';
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "MAIN", "AppConfigFolder",
+                        value)) && ('\0' != *value)) {
+    app_config_folder_ = value;
+  } else {
+    // use current working directory
+    app_config_folder_ = file_system::CurrentWorkingDirectory();
+  }
+  LOG4CXX_INFO(logger_, "Set App config folder to " << app_config_folder_);
+
+  *value = '\0';
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "MAIN", "AppStorageFolder",
+                        value)) && ('\0' != *value)) {
+    app_storage_folder_ = value;
+  } else {
+    // use current working directory
+    app_storage_folder_ = file_system::CurrentWorkingDirectory();
+  }
+  LOG4CXX_INFO(logger_, "Set App storage folder to " << app_storage_folder_);
+
+  *value = '\0';
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "AppInfo", "AppInfoStorage",
+                        value)) && ('\0' != *value)) {
+    app_info_storage_ = app_storage_folder_ + "/" + value;
+    LOG4CXX_INFO(
+        logger_,
+        "Set Application information storage to " << app_info_storage_);
+  }
+
+  *value = '\0';
   if ((0
       != ini_read_value(config_file_name_.c_str(), "HMI", "ServerAddress",
                         value)) && ('\0' != *value)) {
@@ -280,29 +337,33 @@ void Profile::UpdateValues() {
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "Policy", "PoliciesTable", value))
+                           kPolicySection, "PoliciesTable", value))
       && ('\0' != *value)) {
-    policies_file_name_ = value;
+    policies_file_name_ = app_config_folder_ + '/' + value;
     LOG4CXX_INFO(logger_, "Set policy file to " << policies_file_name_);
   }
 
   *value = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "Policy", "PreloadedPT", value))
+                           kPolicySection, "PreloadedPT", value))
       && ('\0' != *value)) {
-    preloaded_pt_file_ = value;
+    preloaded_pt_file_ = app_config_folder_ + '/' + value;
     LOG4CXX_INFO(logger_, "Set preloaded policy file to "
                  << preloaded_pt_file_);
   }
 
-  *value = '\0';
-  if ((0 != ini_read_value(config_file_name_.c_str(),
-                           "MAIN", "HMICapabilities", value))
-      && ('\0' != *value)) {
-    hmi_capabilities_file_name_ = value;
-    LOG4CXX_INFO(
-        logger_,
-        "Set hmi capabilities file to " << hmi_capabilities_file_name_);
+  (void) ReadStringValue(&policy_snapshot_file_name_,
+                         kDefaultPoliciesSnapshotFileName,
+                         kPolicySection, "PathToSnapshot");
+  policy_snapshot_file_name_ = app_config_folder_ +
+                               '/' + policy_snapshot_file_name_;
+
+  if ((0
+      != ini_read_value(config_file_name_.c_str(), "MAIN", "HMICapabilities",
+                        value)) && ('\0' != *value)) {
+    hmi_capabilities_file_name_ = app_config_folder_ + "/" +  value;
+    LOG4CXX_INFO(logger_,
+                 "Set hmi capabilities file to " << hmi_capabilities_file_name_);
   }
 
   *value = '\0';
@@ -391,7 +452,7 @@ void Profile::UpdateValues() {
   if ((0
       != ini_read_value(config_file_name_.c_str(), "MEDIA MANAGER",
                         "VideoStreamFile", value)) && ('\0' != *value)) {
-    video_stream_file_ = value;
+    video_stream_file_ = app_storage_folder_ + "/" + value;
     LOG4CXX_INFO(logger_, "Set video stream file to " << video_stream_file_);
   }
 
@@ -399,7 +460,7 @@ void Profile::UpdateValues() {
   if ((0 != ini_read_value(config_file_name_.c_str(),
                            "MEDIA MANAGER", "AudioStreamFile", value))
       && ('\0' != *value)) {
-    audio_stream_file_ = value;
+    audio_stream_file_ = app_storage_folder_ + "/" + value;
     LOG4CXX_INFO(logger_, "Set audio stream file to " << audio_stream_file_);
   }
 
@@ -595,16 +656,6 @@ void Profile::UpdateValues() {
         "Set system pending requests amount " << pending_requests_amount_);
   }
 
-  *value = '\0';
-  if ((0
-      != ini_read_value(config_file_name_.c_str(), "AppInfo", "AppInfoStorage",
-                        value)) && ('\0' != *value)) {
-    app_info_storage_ = value;
-    LOG4CXX_INFO(
-        logger_,
-        "Set Application information storage to " << app_info_storage_);
-  }
-
   supported_diag_modes_.clear();
   *value = '\0';
   if ((0
@@ -637,6 +688,14 @@ void Profile::UpdateValues() {
       use_last_state_ = true;
     }
     LOG4CXX_INFO(logger_, "Set UseLastState to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+    "TransportManager", "TCPAdapterPort", value)) && ('\0' != *value)) {
+
+    transport_manager_tcp_adapter_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set TCPAdapterPort to " << value);
   }
 }
 

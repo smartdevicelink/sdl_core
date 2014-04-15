@@ -504,7 +504,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                     ],
                                     "graphicSupported": true,
-                                    "imageCapabilities": ["DYNAMIC"],
+                                    "imageCapabilities": ["DYNAMIC", "STATIC"],
                                     "templatesAvailable": ["TEMPLATE"],
                                     "screenParams": {
                                         "resolution": {
@@ -885,7 +885,7 @@ FFW.UI = FFW.RPCObserver.create({
                                     "CLOCK1", "CLOCK2", "CLOCK3", "CLOCKTEXT1", "CLOCKTEXT2", "CLOCKTEXT3", "CLOCKTEXT4"
                                 ],
                                 "graphicSupported": true,
-                                "imageCapabilities": ["DYNAMIC"],
+                                "imageCapabilities": ["DYNAMIC", "STATIC"],
                                 "templatesAvailable": ["TEMPLATE"],
                                 "screenParams": {
                                     "resolution": {
@@ -1222,12 +1222,12 @@ FFW.UI = FFW.RPCObserver.create({
     /**
      * send notification when command was triggered
      *
-     * @param {Number} appID
+     * @param {Number} requestID
      * @param {Number} resultCode
      * @param {Number} commandID
      * @param {String} manualTextEntry
      */
-    interactionResponse: function (appID, resultCode, commandID, manualTextEntry) {
+    interactionResponse: function (requestID, resultCode, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
 
@@ -1235,7 +1235,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": appID,
+                "id": requestID,
                 "result": {
                     "code": resultCode,
                     "method": "UI.PerformInteraction"
@@ -1253,7 +1253,7 @@ FFW.UI = FFW.RPCObserver.create({
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
-                "id": appID,
+                "id": requestID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
                     "message": "Perform Interaction error response.",
@@ -1264,7 +1264,7 @@ FFW.UI = FFW.RPCObserver.create({
             };
         }
 
-        SDL.SDLModel.set('performInteractionSession', false);
+        SDL.SDLModel.set('performInteractionSession', null);
 
         this.client.send(JSONMessage);
     },

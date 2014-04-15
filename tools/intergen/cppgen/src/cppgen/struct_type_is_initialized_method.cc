@@ -53,16 +53,14 @@ StructTypeIsInitializedMethod::~StructTypeIsInitializedMethod() {
 
 void StructTypeIsInitializedMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
-  *os << "return" << '\n';
-  Indent indent1(*os), indent2(*os);
   for (size_t i = 0; i != fields.size(); ++i) {
     const Struct::Field& field = fields[i];
-    strmfmt(*os, "{0}.is_initialized() || ", field.name());
+    strmfmt(*os, "if ({0}.is_initialized()) return true;\n", field.name());
     if ((i % 2) == 1) {
       *os << endl;
     }
   }
-  *os << "false;" << endl;
+  *os << "return false;\n";
 }
 
 }  // namespace codegen

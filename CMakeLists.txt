@@ -32,7 +32,7 @@
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
 option(HMI2 "Use Qt HMI" OFF)
-option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GSteamer" OFF)
+option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
@@ -42,6 +42,7 @@ option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
+option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -115,8 +116,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
-set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
+set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)

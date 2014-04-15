@@ -32,6 +32,7 @@ import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
@@ -323,6 +324,12 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
+    /**
+     * This callback is to inform SPT that session i going to be started
+     * @param sessionID Id of the session to start with
+     */
+    public void onStartSession(byte sessionID);
+
     public void onSessionStarted(byte sessionID, String correlationID);
 
     public void onAudioServiceStart();
@@ -346,4 +353,12 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onUSBNoSuchDeviceException();
 
     public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
+
+    /**
+     * Provide a callback (in most cases for the test purposes) when
+     * {@link com.ford.syncV4.proxy.rpc.PutFile} request is going to be performed
+     *
+     * @param putFile {@link com.ford.syncV4.proxy.rpc.PutFile}
+     */
+    public void onPutFileRequest(PutFile putFile);
 }

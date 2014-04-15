@@ -29,24 +29,27 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/tts_perform_interaction_response.h"
+
+#include "application_manager/commands/hmi/basic_communication_system_request.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSPerformInteractionResponse::TTSPerformInteractionResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+BasicCommunicationSystemRequest::BasicCommunicationSystemRequest(
+  const MessageSharedPtr& message): RequestToHMI(message) {
 }
 
-TTSPerformInteractionResponse::~TTSPerformInteractionResponse() {
+BasicCommunicationSystemRequest::~BasicCommunicationSystemRequest() {
 }
 
-void TTSPerformInteractionResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSPerformInteractionResponse::Run");
+void BasicCommunicationSystemRequest::Run() {
+  LOG4CXX_INFO(logger_, "BasicCommunicationSystemRequest::Run");
+  SendRequest();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataEventStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class AirbagStatus extends RPCStruct {
 
@@ -30,7 +30,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.driverAirbagDeployed, e);
             }
             return theCode;
         }
@@ -52,7 +52,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverSideAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.driverSideAirbagDeployed, e);
             }
             return theCode;
         }
@@ -74,7 +74,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverCurtainAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.driverCurtainAirbagDeployed, e);
             }
             return theCode;
         }
@@ -96,7 +96,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerAirbagDeployed, e);
             }
             return theCode;
         }
@@ -118,7 +118,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerCurtainAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerCurtainAirbagDeployed, e);
             }
             return theCode;
         }
@@ -140,7 +140,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.driverKneeAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.driverKneeAirbagDeployed, e);
             }
             return theCode;
         }
@@ -162,7 +162,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerSideAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerSideAirbagDeployed, e);
             }
             return theCode;
         }
@@ -184,7 +184,7 @@ public class AirbagStatus extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerKneeAirbagDeployed, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.passengerKneeAirbagDeployed, e);
             }
             return theCode;
         }

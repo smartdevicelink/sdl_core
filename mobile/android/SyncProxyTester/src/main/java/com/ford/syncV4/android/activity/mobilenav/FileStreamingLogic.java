@@ -1,9 +1,9 @@
 package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.ford.syncV4.android.activity.SyncProxyTester;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,7 +69,7 @@ public class FileStreamingLogic {
 
             @Override
             public void onStartReading() {
-                Log.d(TAG, "On Start reading");
+                Logger.d(TAG + " On Start reading");
                 mIsStreamingInProgress = true;
                 context.dataStreamingStarted();
             }
@@ -78,10 +78,10 @@ public class FileStreamingLogic {
             public void onDataReceived(final byte[] data) {
                 if (outputStream != null && data != null) {
                     try {
-                        //Log.d(TAG, "On read data:" + data);
+                        //Logger.d(CLASS_NAME, "On read data:" + data);
                         outputStream.write(data);
                     } catch (IOException e) {
-                        Log.e(TAG, "FIle streamer error", e);
+                        Logger.e(TAG + " FIle streamer error", e);
                        cancelStreaming();
                        SyncProxyTester tester = (SyncProxyTester) context.getActivity();
 
@@ -92,13 +92,13 @@ public class FileStreamingLogic {
 
             @Override
             public void onCancelReading() {
-                Log.d(TAG, "On Cancel reading");
+                Logger.d(TAG + " On Cancel reading");
                 context.dataStreamingStopped();
             }
 
             @Override
             public void onEndReading() {
-                Log.d(TAG, "On Complete reading");
+                Logger.d(TAG + " On Complete reading");
                 mIsStreamingInProgress = false;
                 context.dataStreamingStopped();
             }

@@ -1,10 +1,15 @@
 package com.ford.syncV4.android.utils;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Looper;
-import android.util.Log;
 
 import com.ford.syncV4.android.MainApp;
+import com.ford.syncV4.util.logger.ApplicationAdditionalSettings;
+import com.ford.syncV4.util.logger.Logger;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * Created with Android Studio.
@@ -46,7 +52,7 @@ public class AppUtils {
         try {
             return contentsOfResource(new FileInputStream(file));
         } catch (FileNotFoundException e) {
-            Log.e(TAG, "Contents Of Resource exception", e);
+            Logger.e(TAG + " Contents Of Resource exception", e);
         }
         return new byte[0];
     }
@@ -63,7 +69,7 @@ public class AppUtils {
      */
     public static boolean saveDataToFile(byte[] data, String filePath) {
         File mFile = new File(filePath);
-        Log.d(TAG, "Saving data to file '" + filePath + "', exists:" + mFile.exists());
+        Logger.d(TAG + " Saving data to file '" + filePath + "', exists:" + mFile.exists());
         if (mFile.exists()) {
             mFile.delete();
         }
@@ -75,7 +81,7 @@ public class AppUtils {
 
             result = true;
         } catch (IOException e) {
-            Log.e(TAG, "Save Data To File IOException", e);
+            Logger.e(TAG + " Save Data To File IOException", e);
         } finally {
             if (mFileOutputStream != null) {
                 try {
@@ -86,6 +92,20 @@ public class AppUtils {
             }
         }
         return result;
+    }
+
+    /**
+     * Build and return an object which describes Application additional settings needed for the
+     * Logger
+     * @return {@link com.ford.syncV4.util.logger.ApplicationAdditionalSettings} object
+     */
+    public static ApplicationAdditionalSettings getAppAdditionalSettings() {
+        ApplicationAdditionalSettings settings = new ApplicationAdditionalSettings();
+        settings.setApplicationInfo(getApplicationInfo());
+        settings.setAppName("Sync Proxy Tester");
+        settings.setAppVersion(getApplicationVersion());
+        settings.setBuildDate(getAssetsContents("build.info", "Build info not available"));
+        return settings;
     }
 
     /**
@@ -106,16 +126,133 @@ public class AppUtils {
             }
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            Log.w(TAG, "Can't read file", e);
+            Logger.w(TAG + " Can't read file", e);
             return null;
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    Log.e(TAG, e.toString());
+                    Logger.e(TAG, e.toString());
                 }
             }
         }
+    }
+
+    /**
+     * @return an instance of the {@link android.content.pm.ApplicationInfo} class
+     */
+    public static ApplicationInfo getApplicationInfo() {
+        PackageInfo packageInfo = getPackageInfo();
+        if (packageInfo != null) {
+            return packageInfo.applicationInfo;
+        } else {
+            Logger.w("Can't get application info");
+            return null;
+        }
+    }
+
+    /**
+     * @return application version as string
+     */
+    public static String getApplicationVersion() {
+        PackageInfo packageInfo = getPackageInfo();
+        if (packageInfo != null) {
+            return packageInfo.versionName;
+        } else {
+            Logger.w("Can't get application version");
+            return "?";
+        }
+    }
+
+    /**
+     * @return application version as int
+     */
+    public static int getApplicationVersionNumber() {
+        String[] versions = getApplicationVersion().split("\\.");
+        if(versions.length == 2) {
+            String versionMajor = versions[0];
+            String versionMinor = versions[1];
+            return (Integer.valueOf(versionMajor) * 100) + Integer.valueOf(versionMinor);
+        }
+        return 0;
+    }
+
+    /**
+     * @return application code version
+     */
+    public static int getCodeVersionNumber() {
+        PackageInfo packageInfo = getPackageInfo();
+        if (packageInfo != null) {
+            return packageInfo.versionCode;
+        } else {
+            Logger.w("Can't get code version");
+            return 0;
+        }
+    }
+
+    /**
+     * @return information about application build
+     */
+    public static String getBuildInfo() {
+        return getAssetsContents("build.info", "Build info not available");
+    }
+
+    /**
+     * @return text of the CHANGELOG file
+     */
+    public static String getChangeLog() {
+        return getAssetsContents("CHANGELOG.txt", "Changelog not available");
+    }
+
+    /**
+     * @return application package information
+     */
+    private static PackageInfo getPackageInfo() {
+        final PackageManager pm = MainApp.getInstance().getPackageManager();
+        if (pm == null) {
+            Logger.w("Package manager is NULL");
+            return null;
+        }
+        String packageName = "";
+        try {
+            packageName = MainApp.getInstance().getPackageName();
+            return pm.getPackageInfo(packageName, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            Logger.e("Failed to find PackageInfo : " + packageName);
+            return null;
+        } catch (RuntimeException e) {
+            // To catch RuntimeException("Package manager has died") that can occur on some version of Android,
+            // when the remote PackageManager is unavailable. I suspect this sometimes occurs when the App is being reinstalled.
+            Logger.e("Package manager has died : " + packageName);
+            return null;
+        } catch (Throwable e) {
+            Logger.e("Package manager has Throwable : " + e);
+            return null;
+        }
+    }
+
+    private static String getAssetsContents(String filename, String defaultString) {
+        StringBuilder builder = new StringBuilder();
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(
+                    MainApp.getInstance().getAssets().open(filename)));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line + "\n");
+            }
+        } catch (IOException e) {
+            Logger.d("Can't open file with build info", e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    Logger.e(e.toString());
+                }
+            }
+        }
+        return builder.length() > 0 ? builder.toString().trim() : defaultString;
     }
 }

@@ -25,7 +25,8 @@ include_directories (
   ../../../../src/components/media_manager/include
   ../../../../src/components/formatters/include
   ../../../../src/components/config_profile/include
-  ../../../../src/components/policies/include
+  ../../../../src/components/policy/src/policy/include
+  ../../../../src/components/policy/src/policy/usage_statistics/include
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/
@@ -77,5 +78,6 @@ add_library("test_App_Manager"
 						"./src/smoke_test_exp_media.cc"
 						"./src/protocol_handler_mockup.cc"
 						"./src/init_start_data.cc"
-						"./src/test_hmi.cc")
+						"./src/test_hmi.cc"
+                                                "./src/application_manager_impl_test.cc")
 						

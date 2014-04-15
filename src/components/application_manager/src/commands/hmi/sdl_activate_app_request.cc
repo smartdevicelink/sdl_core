@@ -47,7 +47,7 @@ SDLActivateAppRequest::~SDLActivateAppRequest() {
 void SDLActivateAppRequest::Run() {
   LOG4CXX_INFO(logger_, "SDLActivateAppRequest::Run");
   policy::PolicyHandler::instance()->OnActivateApp(
-      (*message_)[strings::msg_params][strings::app_id].asString(),
+      (*message_)[strings::msg_params][strings::app_id].asUInt(),
       (*message_)[strings::params][strings::correlation_id].asInt());
 }
 

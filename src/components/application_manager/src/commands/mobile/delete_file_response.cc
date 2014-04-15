@@ -32,9 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/delete_file_response.h"
-#include "utils/file_system.h"
-#include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -51,14 +50,17 @@ void DeleteFileResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteFileResponse::Run");
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int32_t>(file_system::GetAvailableSpaceForApp(app->name()));
+      static_cast<int32_t>(
+      ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(app->name()));
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

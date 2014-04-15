@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
@@ -33,6 +31,7 @@ import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Vector;
 
@@ -240,12 +239,12 @@ public class SetGlobalPropertiesDialog extends DialogFragment {
                 mCurrentKbdProperties = (KeyboardProperties) IntentHelper.getObjectForKey(
                         Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
                 if (mCurrentKbdProperties == null) {
-                    Log.w(LOG_TAG, "Returned kbdProperties is null");
+                    Logger.w(LOG_TAG + " Returned kbdProperties is null");
                 }
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
             } else if (IntentHelper.containsKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY)) {
                 mCurrentKbdProperties = null;
-                Log.w(LOG_TAG, "Returned kbdProperties is null, probably none of the properties " +
+                Logger.w(LOG_TAG + " Returned kbdProperties is null, probably none of the properties " +
                         "were selected");
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY);
             }

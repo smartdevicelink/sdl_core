@@ -100,35 +100,35 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code ||
-                    mobile_apis::Result::RETRY == result_code;
+      std::string return_info;
+      mobile_apis::Result::eType mobile_code =
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asUInt()));
+
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == mobile_code) {
+        mobile_code = mobile_apis::Result::WARNINGS;
+        return_info = "Unsupported phoneme type sent in a prompt";
+      }
 
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
-        int32_t session_key =
-          (*message_)[strings::params][strings::connection_key].asUInt();
-        ApplicationManagerImpl::instance()->StopAudioPassThru(session_key);
+        ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
       }
 
-      const char* return_info = NULL;
+      bool result = mobile_apis::Result::SUCCESS == mobile_code ||
+                    mobile_apis::Result::RETRY == mobile_code;
 
-      if (result) {
-        if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-            static_cast<hmi_apis::Common_Result::eType>(result_code)) {
-          result_code = mobile_apis::Result::WARNINGS;
-          return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
-        }
-      }
-
-      SendResponse(result, result_code, return_info, &(message[strings::msg_params]));
+      SendResponse(result, mobile_code, return_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     case hmi_apis::FunctionID::TTS_Stopped:{
       SendRecordStartNotification();
       StartMicrophoneRecording();
+      ApplicationManagerImpl::instance()->
+          updateRequestTimeout(connection_key(),
+                               correlation_id(),
+                               default_timeout());
       break;
     }
     default: {
@@ -150,6 +150,8 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
+      msg_params[hmi_request::tts_chunks][i][str::type] =
+          hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     }
     // app_id
     msg_params[strings::app_id] = connection_key();

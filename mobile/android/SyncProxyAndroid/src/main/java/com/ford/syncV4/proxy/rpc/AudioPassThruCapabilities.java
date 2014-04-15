@@ -5,7 +5,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AudioType;
 import com.ford.syncV4.proxy.rpc.enums.BitsPerSample;
 import com.ford.syncV4.proxy.rpc.enums.SamplingRate;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -25,9 +25,10 @@ public class AudioPassThruCapabilities extends RPCStruct {
             try {
                 return SamplingRate.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.samplingRate, e);
+                                Names.samplingRate, e
+                );
             }
         }
         return null;
@@ -49,7 +50,7 @@ public class AudioPassThruCapabilities extends RPCStruct {
             try {
                 return BitsPerSample.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.bitsPerSample, e);
             }
@@ -73,7 +74,7 @@ public class AudioPassThruCapabilities extends RPCStruct {
             try {
                 return AudioType.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.audioType, e);
             }

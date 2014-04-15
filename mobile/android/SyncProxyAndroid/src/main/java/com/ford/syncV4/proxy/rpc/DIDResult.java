@@ -3,7 +3,7 @@ package com.ford.syncV4.proxy.rpc;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataResultCode;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 
@@ -23,9 +23,10 @@ public class DIDResult extends RPCStruct {
             try {
                 return VehicleDataResultCode.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.resultCode, e);
+                                Names.resultCode, e
+                );
             }
         }
         return null;

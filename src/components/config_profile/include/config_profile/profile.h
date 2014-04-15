@@ -57,6 +57,21 @@ class Profile : public utils::Singleton<Profile> {
     virtual ~Profile();
 
     /**
+      * @brief Returns true if HMI should be started, otherwise false
+      */
+    bool launch_hmi() const;
+
+    /**
+      * @brief Returns application configuration path
+      */
+    const std::string& app_config_folder() const;
+
+    /**
+      * @brief Returns application storage path
+      */
+    const std::string& app_storage_folder() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -65,11 +80,6 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Sets the path to the config file
      */
     void config_file_name(const std::string& fileName);
-
-    /**
-      * @brief Returns true if HMI should be started, otherwise false
-      */
-    bool launch_hmi() const;
 
     /**
      * @brief Returns server address
@@ -249,6 +259,12 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& preloaded_pt_file() const;
 
+    /**
+     * @brief Path to policies snapshot file
+     * @return file path
+     */
+    const std::string& policies_snapshot_file_name() const;
+
      /*
       * @brief Timeout in transport manager before disconnect
      */
@@ -268,6 +284,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns system files folder path
       */
     const std::string& system_files_path() const;
+
+    /**
+     * @brief Returns port for TCP transport adapter
+     */
+    uint16_t transport_manager_tcp_adapter_port() const;
 
     // Members section
 
@@ -355,6 +376,8 @@ class Profile : public utils::Singleton<Profile> {
 
     // Members section
     bool                            launch_hmi_;
+    std::string                     app_config_folder_;
+    std::string                     app_storage_folder_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
@@ -390,10 +413,12 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     app_info_storage_;
     int32_t                         heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
+    std::string                     policy_snapshot_file_name_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
+    uint16_t                        transport_manager_tcp_adapter_port_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

@@ -5,7 +5,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
 import java.util.Vector;
@@ -34,7 +34,7 @@ public class KeyboardProperties extends RPCStruct {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.language, e);
             }
@@ -60,9 +60,10 @@ public class KeyboardProperties extends RPCStruct {
             try {
                 theCode = KeyboardLayout.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.keyboardLayout, e);
+                                Names.keyboardLayout, e
+                );
             }
             return theCode;
         }
@@ -86,7 +87,7 @@ public class KeyboardProperties extends RPCStruct {
             try {
                 theCode = KeypressMode.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.keypressMode, e);
             }

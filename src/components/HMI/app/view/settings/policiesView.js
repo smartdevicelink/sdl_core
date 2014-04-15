@@ -31,72 +31,90 @@
  * @version 1.0
  */
 
-SDL.PoliciesView = Em.ContainerView
-    .create( {
+SDL.PoliciesView = Em.ContainerView.create( {
 
-        elementId: 'policies_settings',
+    elementId: 'policies_settings',
 
-        classNames: 'in_settings_view',
+    classNames: 'in_settings_view',
 
-        classNameBindings: [
-            'SDL.States.settings.policies.active:active_state:inactive_state'
-        ],
+    classNameBindings: [
+        'SDL.States.settings.policies.active:active_state:inactive_state'
+    ],
 
-        childViews: [
-            'allowSDLFunctionality',
-            'updateSDLButton',
-            'getStatusUpdate',
-            'getURLS',
-            'statisticsInfo'
-        ],
+    childViews: [
+        'SettingsList'
+    ],
 
-        allowSDLFunctionality: SDL.Button.extend( {
-            goToState: 'policies.deviceConfig',
-            classNames: 'button allowSDLFunctionality settingsButton',
-            text: 'Allow SDL Functionality',
-            elementId: 'allowSDLFunctionality',
-            arrow: true,
-            action: 'onState',
-            target: 'SDL.SettingsController',
-            templateName: 'arrow',
-            onDown: false
-        }),
+    SettingsList: SDL.List.extend( {
 
-        updateSDLButton: SDL.Button.extend( {
-            classNames: 'button updateSDLButton settingsButton',
-            text: 'Update SDL',
-            elementId: 'updateSDLButton',
-            action: 'updateSDL',
-            target: 'SDL.SettingsController',
-            onDown: false
-        }),
+        elementId: 'policies_settings_list',
 
-        getStatusUpdate: SDL.Button.extend( {
-            classNames: 'button getStatusUpdate settingsButton',
-            text: 'Policy table update status',
-            elementId: 'getStatusUpdate',
-            action: 'getStatusUpdate',
-            target: 'SDL.SettingsController',
-            onDown: false
-        }),
+        classNames: 'policies_settings_list',
 
-        getURLS: SDL.Button.extend( {
-            classNames: 'button getURLS settingsButton',
-            text: 'Send request GetURLS',
-            elementId: 'getURLS',
-            action: 'getURLS',
-            target: 'SDL.SettingsController',
-            onDown: false
-        }),
+        itemsOnPage: 5,
 
-        statisticsInfo: SDL.Button.extend( {
-            classNames: 'button statisticsInfo settingsButton',
-            text: 'Statistics Info settings',
-            elementId: 'statisticsInfo',
-            action: 'onState',
-            target: 'SDL.SettingsController',
-            templateName: 'arrow',
-            goToState: 'policies.statisticsInfo',
-            onDown: false
-        })
-    });
+        /** Items */
+        items: [
+            {
+                type: SDL.Button,
+                params: {
+                    goToState: 'policies.deviceConfig',
+                    text: 'Allow SDL Functionality',
+                    action: 'onState',
+                    target: 'SDL.SettingsController',
+                    templateName: 'arrow',
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'Update SDL',
+                    action: 'updateSDL',
+                    target: 'SDL.SettingsController',
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'Policy table update status',
+                    action: 'getStatusUpdate',
+                    target: 'SDL.SettingsController',
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'Send request GetURLS',
+                    action: 'getURLS',
+                    target: 'SDL.SettingsController',
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'Statistics Info settings',
+                    action: 'onState',
+                    target: 'SDL.SettingsController',
+                    templateName: 'arrow',
+                    goToState: 'policies.statisticsInfo',
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'App permissions',
+                    action: 'onState',
+                    target: 'SDL.SettingsController',
+                    templateName: 'arrow',
+                    goToState: 'policies.appPermissionsList',
+                    onDown: false
+                }
+            }
+        ]
+    })
+});

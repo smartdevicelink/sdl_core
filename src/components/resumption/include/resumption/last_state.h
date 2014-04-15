@@ -50,10 +50,6 @@ class LastState : public utils::Singleton<LastState> {
 
  private:
 /**
- * @brief File to save Dictionary
- */
-  static const std::string filename;
-/**
  * @brief Saving dictionary to filesystem
  */
   void SaveToFileSystem();

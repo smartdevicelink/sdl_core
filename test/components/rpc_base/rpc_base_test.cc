@@ -241,29 +241,39 @@ TEST(ValidatedTypes, TestEnumConstructor) {
   ASSERT_FALSE(te.is_valid());
 }
 
-TEST(ValidatedTypes, TestMandatoryConstructor) {
-  Mandatory< Integer<int8_t, 2, 10> > mandatory_int;
-  ASSERT_FALSE(mandatory_int.is_initialized());
-  ASSERT_FALSE(mandatory_int.is_valid());
-  mandatory_int = 42;
-  ASSERT_TRUE(mandatory_int.is_initialized());
-  ASSERT_FALSE(mandatory_int.is_valid());
-  mandatory_int = 9;
-  ASSERT_TRUE(mandatory_int.is_initialized());
-  ASSERT_TRUE(mandatory_int.is_valid());
-  int val = mandatory_int;
-  ASSERT_EQ(val, 9);
+TEST(ValidatedTypes, TestNullableConstructor) {
+  Nullable< Integer<int8_t, 2, 10> >nullable_int;
+  ASSERT_FALSE(nullable_int.is_initialized());
+  ASSERT_FALSE(nullable_int.is_null());
+  ASSERT_FALSE(nullable_int.is_valid());
+  nullable_int = 5;
+  ASSERT_TRUE(nullable_int.is_initialized());
+  ASSERT_FALSE(nullable_int.is_null());
+  ASSERT_TRUE(nullable_int.is_valid());
+  nullable_int.set_to_null();
+  ASSERT_TRUE(nullable_int.is_initialized());
+  ASSERT_TRUE(nullable_int.is_null());
+  ASSERT_TRUE(nullable_int.is_valid());
 }
 
-TEST(ValidatedTypes, TestMandatoryInitializingConstructor) {
-  Mandatory< Integer<int8_t, 2, 10> > mandatory_int(15);
-  ASSERT_TRUE(mandatory_int.is_initialized());
-  ASSERT_FALSE(mandatory_int.is_valid());
-  mandatory_int = 3;
-  ASSERT_TRUE(mandatory_int.is_initialized());
-  ASSERT_TRUE(mandatory_int.is_valid());
-  int8_t val = mandatory_int;
-  ASSERT_EQ(val, 3);
+TEST(ValidatedTypes, TestOptionalNullableConstructor) {
+  Optional< Nullable< Integer<int8_t, 2, 10> > > optional_nullable_int;
+  ASSERT_FALSE(optional_nullable_int.is_initialized());
+  ASSERT_FALSE(optional_nullable_int->is_null());
+  ASSERT_TRUE(optional_nullable_int.is_valid());
+  ASSERT_FALSE(optional_nullable_int);
+
+  *optional_nullable_int = 9;
+  ASSERT_TRUE(optional_nullable_int.is_initialized());
+  ASSERT_FALSE(optional_nullable_int->is_null());
+  ASSERT_TRUE(optional_nullable_int.is_valid());
+  ASSERT_EQ(9, *optional_nullable_int);
+  ASSERT_TRUE(optional_nullable_int);
+
+  optional_nullable_int->set_to_null();
+  ASSERT_TRUE(optional_nullable_int.is_initialized());
+  ASSERT_TRUE(optional_nullable_int->is_null());
+  ASSERT_TRUE(optional_nullable_int.is_valid());
 }
 
 TEST(ValidatedTypes, TestOptionalConstructor) {

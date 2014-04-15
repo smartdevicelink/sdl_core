@@ -16,18 +16,15 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Vector;
 
 public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
-	
-	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-	private static final String SYNC_LIB_PRIVATE_TOKEN = "{DAE1A88C-6C16-4768-ACA5-6F1247EA01C2}";
 	
 	/**
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC
@@ -56,7 +53,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				new BTTransportConfig(), testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, and isMediaApp.");
 	}
 	
 	/**
@@ -97,8 +94,8 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				new BTTransportConfig(), testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
-				"vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
+                "vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.");
 	}
 	
 	/**
@@ -139,8 +136,8 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				new BTTransportConfig(), testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
-				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.");
 	}
 	
 	/**
@@ -182,9 +179,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				callbackToUIThread,
 				new BTTransportConfig(), testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, " +
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+				"and callbackToUIThread");
 	}
 	
 	/**
@@ -226,9 +223,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				callbackToUIThread,
 				new BTTransportConfig(), testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+				"and callbackToUIThread");
 	}
 	
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
@@ -256,9 +253,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				new BTTransportConfig(),
                 null, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		Logger.i("Application constructed SyncProxyALM (using legacy constructor for BT transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
+				"callbackToUIThread and version");
 	}
 	
 	/********************************************** TRANSPORT SWITCHING SUPPORT *****************************************/
@@ -294,7 +291,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				transportConfig, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, and isMediaApp.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, and isMediaApp.");
 	}
 	
 	/**
@@ -337,8 +334,8 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				transportConfig, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
-				"vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, appName, ngnMediaScreenAppName, " +
+				"vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.");
 	}
 	
 	/**
@@ -381,8 +378,8 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				/*callbackToUIThread*/ false,
 				transportConfig, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
-				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, and autoActivateID.");
 	}
 	
 	/**
@@ -426,9 +423,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				callbackToUIThread,
 				transportConfig, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, " +
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+				"and callbackToUIThread");
 	}
 	
 	/**
@@ -472,9 +469,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				callbackToUIThread,
 				transportConfig, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"and callbackToUIThread", SYNC_LIB_TRACE_KEY);
+				"and callbackToUIThread");
 	}
 
 	/**
@@ -526,9 +523,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				transportConfig,
                 null, testConfig);
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"callbackToUIThread and version", SYNC_LIB_TRACE_KEY);
+				"callbackToUIThread and version");
 	}
 
     // TODO: use Builder here
@@ -563,9 +560,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 				transportConfig,
                 connection, testConfig);
 
-		SyncTrace.logProxyEvent("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
+		Logger.i("Application constructed SyncProxyALM (using new constructor with specified transport) instance passing in: IProxyListener, syncProxyConfigurationResources, " +
 				"appName, ngnMediaScreenAppName, vrSynonyms, isMediaApp, syncMsgVersion, languageDesired, autoActivateID, " +
-				"callbackToUIThread, version, transportConfig, and connection", SYNC_LIB_TRACE_KEY);
+				"callbackToUIThread, version, transportConfig, and connection");
 	}
 
     /***************************************** END OF TRANSPORT SWITCHING SUPPORT ***************************************/

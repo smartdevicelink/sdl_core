@@ -1,15 +1,13 @@
 package com.ford.syncV4.protocol;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,7 +15,9 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
-    private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
+
+    private static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
+
     protected IProtocolListener _protocolListener = null;
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
@@ -77,16 +77,23 @@ public abstract class AbstractProtocol {
 
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data, MessageFrameAssembler assembler) {
-        SyncTrace.logProtocolEvent(InterfaceActivityDirection.Receive, header, data,
-                0, data.length, SYNC_LIB_TRACE_KEY);
+        if (data != null) {
+            Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
+        } else {
+            Logger.w(CLASS_NAME + " receive null bytes");
+        }
 
         assembler.handleFrame(header, data);
     }
 
     // This method is called whenever a protocol has an entire frame to send
     protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        SyncTrace.logProtocolEvent(InterfaceActivityDirection.Transmit, header, data,
-                offset, length, SYNC_LIB_TRACE_KEY);
+        if (data != null) {
+            Logger.d(CLASS_NAME + " transmit " + data.length + " bytes");
+        } else {
+            Logger.w(CLASS_NAME + " transmit null bytes");
+        }
+
         resetHeartbeat();
         composeMessage(header, data, offset, length);
     }
@@ -124,9 +131,9 @@ public abstract class AbstractProtocol {
 
     private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
-            Log.d("AUDIO SERVCIE", "ProtocolFrameHeader: " + header.toString());
+            Logger.d("AUDIO SERVICE - ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
-                Log.d("AUDIO SERVCIE", "Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
+                Logger.d("AUDIO SERVICE - Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
             }
         }
     }
@@ -171,7 +178,7 @@ public abstract class AbstractProtocol {
                 }*/
                 // Log.d("ford_audio.txt","audio: " + new String(data));
             } else {
-                Log.w("SyncProxyTester", "wrong frame type for video streaming");
+                Logger.w(CLASS_NAME + " wrong frame type for video streaming");
             }
         }
     }
@@ -188,7 +195,7 @@ public abstract class AbstractProtocol {
                 }*/
                 // Log.d("ford_video.txt","video: " + new String(data));
             } else {
-                Log.w("SyncProxyTester", "wrong frame type for video streaming");
+                Logger.w(CLASS_NAME + " wrong frame type for video streaming");
             }
         }
     }
@@ -212,10 +219,18 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
     }
 
-    // This method handles the startup of a protocol currentSession. A callback is sent
-    // to the protocol listener.
+    /**
+     * This method handles the startup of a protocol currentSession. A callback is sent to the
+     * protocol listener.
+     *
+     * @param serviceType
+     * @param sessionID
+     * @param version
+     * @param correlationID
+     */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, byte version,
+                                                String correlationID) {
         Session session = Session.createSession(serviceType, sessionID);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }

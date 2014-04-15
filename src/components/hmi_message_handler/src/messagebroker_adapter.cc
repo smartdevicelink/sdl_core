@@ -124,7 +124,12 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.Stopped");
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
   MessageBrokerController::subscribeTo("BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemInfoChanged");
+  MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
   MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
+  MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
+  MessageBrokerController::subscribeTo("SDL.OnSystemError");
+  MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
@@ -151,11 +156,6 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
     return;
   }
 
-  if (!handler()) {
-    // WARNING
-    return;
-  }
-
   // Messages from HMI (sent through message broker) have no priority so far
   // assign default priority
   hmi_message_handler::MessageSharedPointer message = hmi_message_handler::MessageSharedPointer(new application_manager::Message(
@@ -163,6 +163,11 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   // message->set_message_type()
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+
+  if (!handler()) {
+    // WARNING
+    return;
+  }
 
   handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");

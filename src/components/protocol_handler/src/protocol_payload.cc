@@ -72,6 +72,7 @@ void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload,
     utils::Extract(bs, &payload->json, payload->header.json_size);
     size_t data_size = payload_size - payload->header.json_size -
         PayloadHeaderBits / CHAR_BIT;
+    DCHECK(data_size < payload_size);
     utils::Extract(bs, &payload->data, data_size);
   }
 }

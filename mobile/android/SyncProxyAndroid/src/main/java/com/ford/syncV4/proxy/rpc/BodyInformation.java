@@ -6,7 +6,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.IgnitionStableStatus;
 import com.ford.syncV4.proxy.rpc.enums.IgnitionStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class BodyInformation extends RPCStruct {
 
@@ -41,7 +41,7 @@ public class BodyInformation extends RPCStruct {
             try {
                 theCode = IgnitionStableStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.ignitionStableStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.ignitionStableStatus, e);
             }
             return theCode;
         }
@@ -63,7 +63,7 @@ public class BodyInformation extends RPCStruct {
             try {
                 theCode = IgnitionStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.ignitionStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.ignitionStatus, e);
             }
             return theCode;
         }

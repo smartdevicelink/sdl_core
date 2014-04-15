@@ -53,16 +53,11 @@ StructTypeIsValidMethod::~StructTypeIsValidMethod() {
 
 void StructTypeIsValidMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
-  *os << "return" << '\n';
-  Indent indent1(*os), indent2(*os);
   for (size_t i = 0; i != fields.size(); ++i) {
     const Struct::Field& field = fields[i];
-    strmfmt(*os, "{0}.is_valid() && ", field.name());
-    if ((i % 2) == 1) {
-      *os << '\n';
-    }
+    strmfmt(*os, "if (!{0}.is_valid()) return false;\n", field.name());
   }
-  *os << func_names::kAdditionalValidation << "();" << endl;
+  *os << "return "<< func_names::kAdditionalValidation << "();\n";
 }
 
 StructTypeAdditionalValidationMethod::StructTypeAdditionalValidationMethod(
@@ -70,7 +65,6 @@ StructTypeAdditionalValidationMethod::StructTypeAdditionalValidationMethod(
     : CppFunction(strct->name(), func_names::kAdditionalValidation, "bool",
                   kConst),
       strct_(strct) {
-
 }
 
 StructTypeAdditionalValidationMethod::~StructTypeAdditionalValidationMethod() {

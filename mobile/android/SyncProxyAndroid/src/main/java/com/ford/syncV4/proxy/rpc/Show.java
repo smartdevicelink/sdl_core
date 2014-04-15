@@ -6,7 +6,7 @@ import java.util.Vector;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class Show extends RPCRequest {
 
@@ -65,7 +65,7 @@ public class Show extends RPCRequest {
             try {
                 theCode = TextAlignment.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.alignment, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.alignment, e);
             }
             return theCode;
         }
@@ -123,7 +123,7 @@ public class Show extends RPCRequest {
         	try {
         		return new Image((Hashtable) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.graphic, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.graphic, e);
             }
         }
         return null;
@@ -145,7 +145,7 @@ public class Show extends RPCRequest {
             try {
                 return new Image((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.secondaryGraphic, e);
             }

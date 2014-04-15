@@ -1,6 +1,6 @@
 package com.ford.syncV4.util;
 
-import android.util.Log;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 
@@ -151,8 +151,7 @@ import java.io.IOException;
  * @author rob@iharder.net
  * @version 2.3.7
  */
-public class Base64
-{
+public class Base64 {
 
     private static final String defaultString = "Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure";
 
@@ -1300,7 +1299,7 @@ public class Base64
 
                 }   // end try
                 catch( java.io.IOException e ) {
-                    Log.e("SyncProxyTester", e.toString());
+                    Logger.e("Sync Base64: ", e.toString());
                     // Just return originally-decoded bytes
                 }   // end catch
                 finally {

@@ -32,17 +32,56 @@
 
 #include "application_manager/policies/pt_exchange_handler_ext.h"
 
+#include <fstream>
+#include <string>
+
+#include "application_manager/message_helper.h"
+#include "config_profile/profile.h"
+#include "utils/file_system.h"
+
+using application_manager::MessageHelper;
+using profile::Profile;
+using std::string;
+
+
 namespace policy {
 
-PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* hanlder)
-    : PTExchangeHandler() {
+log4cxx::LoggerPtr PTExchangeHandlerExt::logger_ = log4cxx::LoggerPtr(
+    log4cxx::Logger::getLogger("PTExchangeHandlerExt"));
+
+
+PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
+    : PTExchangeHandler(),
+      policy_handler_(policy_handler) {
+  DCHECK(policy_handler_);
 }
 
 PTExchangeHandlerExt::~PTExchangeHandlerExt() {
 }
 
 bool PTExchangeHandlerExt::StartExchange() {
-  return true;
+  LOG4CXX_INFO(logger_, "PolicyHandler::StartExchange");
+  PolicyManager* policy_manager = policy_handler_->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
+  string policy_snapshot_file_name =
+      Profile::instance()->policies_snapshot_file_name();
+  BinaryMessageSptr pt_snapshot = policy_manager->RequestPTUpdate();
+  if (pt_snapshot.valid()) {
+    if (file_system::WriteBinaryFile(policy_snapshot_file_name, *pt_snapshot)) {
+      MessageHelper::SendPolicyUpdate(policy_snapshot_file_name,
+                                      policy_manager->TimeoutExchange(),
+                                      policy_manager->RetrySequenceDelaysSeconds());
+      return true;
+    } else {
+      LOG4CXX_ERROR(logger_, "Failed to write snapshot file");
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Failed to obtain policy table snapshot");
+  }
+  return false;
 }
 
 }  //  namespace policy

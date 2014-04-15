@@ -36,8 +36,14 @@
 #include <map>
 #include <set>
 #include <vector>
+
 #include "application_manager/application_data_impl.h"
+#include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+
+namespace usage_statistics {
+class StatisticsManager;
+}  // namespace usage_statistics
 
 namespace application_manager {
 
@@ -46,7 +52,9 @@ namespace mobile_api = mobile_apis;
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
-  explicit ApplicationImpl(uint32_t application_id);
+  ApplicationImpl(uint32_t application_id,
+                  const std::string& global_app_id,
+                  usage_statistics::StatisticsManager* statistics_manager);
   ~ApplicationImpl();
 
   /**
@@ -70,6 +78,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const Version& version() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
+  const std::string folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
   const uint32_t put_file_in_none_count() const;
@@ -96,6 +105,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
+  virtual uint32_t get_grammar_id() const;
+  virtual void set_grammar_id(uint32_t value);
+
+  virtual void set_protocol_version(ProtocolVersion protocol_version);
+  virtual ProtocolVersion protocol_version();
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
@@ -126,6 +140,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual uint32_t UpdateHash();
 
+  UsageStatistics& usage_report();
 
  protected:
   void CleanupFiles();
@@ -133,6 +148,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
  private:
 
   uint32_t hash_val_;
+  uint32_t grammar_id_;
+
 
   smart_objects::SmartObject* active_message_;
 
@@ -155,9 +172,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
 
+  ProtocolVersion protocol_version_;
+
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t> subscribed_vehicle_info_;
+  UsageStatistics usage_report_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

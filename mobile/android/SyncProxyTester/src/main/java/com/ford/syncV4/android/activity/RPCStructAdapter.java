@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.activity;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +11,7 @@ import android.widget.TwoLineListItem;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.proxy.RPCStruct;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Vector;
 
@@ -97,8 +97,7 @@ abstract class RPCStructAdapter<T extends RPCStruct> extends ArrayAdapter<T> {
             }
 
             default:
-                Log.w(LOG_TAG,
-                        "Unknown item view type: " + getItemViewType(position));
+                Logger.w(LOG_TAG + " Unknown item view type: " + getItemViewType(position));
                 return null;
         }
     }

@@ -38,6 +38,12 @@ SDL.SettingsController = Em.Object.create( {
     hiddenLeftMenu: false,
 
     /**
+     * File name for SDL.OnSystemRequest
+     * Came in SDL.PolicyUpdate request
+     */
+    policyUpdateFile: null,
+
+    /**
      * Data of current requested devices which access will be allowed or disallowed.
      */
     currentDeviceAllowance: null,
@@ -108,6 +114,28 @@ SDL.SettingsController = Em.Object.create( {
         }
     },
 
+    changeAppPermission: function(event) {
+
+        var allowance = SDL.SDLController.getApplicationModel(event.appID).allowedFunctions;
+
+        for (var i = 0; i < allowance.length; ++i) {
+
+            if (allowance[i].name == event.name) {
+
+                if (allowance[i].allowed) {
+
+                    allowance[i].allowed = false;
+                    event.set('text', event.name + " - Not allowed");
+                } else {
+
+                    allowance[i].allowed = true;
+                    event.set('text', event.name + " - Allowed");
+                }
+                break;
+            }
+        }
+    },
+
     /**
      * Method to update array with app permissions which came from SDL
      *
@@ -150,6 +178,62 @@ SDL.SettingsController = Em.Object.create( {
                 "appID": params.appID
             });
         }
+    },
+
+    /**
+     * Method to send request to update array with app permissions
+     *
+     * @param {Object} element
+     *
+     */
+    GetListOfPermissions: function(element) {
+        FFW.BasicCommunication.GetListOfPermissions(element.appID);
+    },
+
+    /**
+     * Method to update array with app permissions which came from SDL
+     *
+     * @param {Object} message
+     *
+     */
+    GetListOfPermissionsResponse: function(message) {
+
+        if (message.id in SDL.SDLModel.getListOfPermissionsPull) {
+
+            var appID = SDL.SDLModel.getListOfPermissionsPull[message.id],
+                messageCodes = [];
+
+            SDL.SDLController.getApplicationModel(appID).allowedFunctions = message.result.allowedFunctions;
+
+            for (var i = 0; i < message.result.allowedFunctions.length; i++) {
+                messageCodes.push(message.result.allowedFunctions[i].name);
+            }
+
+            FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.permissionsFriendlyMessageUpdate, appID, messageCodes);
+
+            SDL.SettingsController.userFriendlyMessagePopUp();
+
+            SDL.SDLModel.getListOfPermissionsPull.remove(message.id);
+        }
+    },
+
+    /**
+     * Method to update array with app permissions with UserFriendlyMessage from SDL
+     *
+     * @param {Object} message
+     *
+     */
+    permissionsFriendlyMessageUpdate: function(message, appID) {
+            var len = SDL.SDLController.getApplicationModel(appID).allowedFunctions.length;
+
+            for (var i = 0; i < len; i++) {
+
+                SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+            }
+
+            SDL.AppPermissionsView.update(appID);
+
+            this.onState('policies.appPermissions');
     },
 
     updateSDL: function() {

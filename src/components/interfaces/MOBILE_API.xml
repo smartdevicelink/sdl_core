@@ -741,19 +741,19 @@
                 Can be set as a root screen.
         </description>
     </element>
-    <element name="NAV_FULLSCREEN_MAP" rootscreen="true" scope="partner">
+    <element name="NAV_FULLSCREEN_MAP" rootscreen="true">
         <description>
                 Custom root template screen containing full screen map with navigation controls.
                 Can be set as a root screen.
         </description>
     </element>
-    <element name="NAV_LIST" rootscreen="true" scope="partner">
+    <element name="NAV_LIST" rootscreen="true">
         <description>
                 Custom root template screen containing video represented list.
                 Can be set as a root screen.
         </description>
     </element>
-    <element name="NAV_KEYBOARD" rootscreen="true" scope="partner">
+    <element name="NAV_KEYBOARD" rootscreen="true">
         <description>
                 Custom root template screen containing video represented keyboard.
                 Can be set as a root screen.
@@ -928,13 +928,13 @@
     <param name="menuName" type="String" maxlength="500" />
     <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" array="true" />
     <param name="image" type="Image" mandatory="false"/>
-    <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+    <param name="secondaryText" maxlength="500" type="String" mandatory="false">
       <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
     </param>
-    <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+    <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
       <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
     </param>
-    <param name="secondaryImage" type="Image" mandatory="false" scope="partner">
+    <param name="secondaryImage" type="Image" mandatory="false">
       <description>Optional secondary image struct for choice</description>
     </param>
   </struct>
@@ -976,13 +976,13 @@
     <element name="VRHELPITEMS">
     	<description>The property array of vrHelp of setGlobalProperties</description>
     </element>
-    <element name="MENUNAME" scope="partner">
+    <element name="MENUNAME">
     	<description>The property in-app menu name of setGlobalProperties</description>
     </element>     
-    <element name="MENUICON" scope="partner">
+    <element name="MENUICON">
     	<description>The property in-app menu icon of setGlobalProperties</description>
     </element>
-    <element name="KEYBOARDPROPERTIES" scope="partner">
+    <element name="KEYBOARDPROPERTIES">
       <description>The on-screen keyboard configuration of setGlobalProperties</description>
     </element>
   </enum>
@@ -1395,7 +1395,7 @@
 <!-- Ford Specific Data Items -->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-  <enum name="FuelCutoffStatus" scope="internal">
+  <enum name="FuelCutoffStatus">
     <description>Reflects the status of the RCM fuel cutoff.</description>
     <element name="TERMINATE_FUEL" internal_name="FCS_TERMINATE_FUEL">
     </element>
@@ -1405,7 +1405,7 @@
     </element>
   </enum>
 
-  <enum name="EmergencyEventType" scope="internal">
+  <enum name="EmergencyEventType">
     <description>Reflects the emergency event status of the vehicle.</description>
     <element name="NO_EVENT" internal_name="EET_NO_EVENT">
     </element>
@@ -1423,7 +1423,7 @@
     </element>
   </enum>
 
-  <enum name="ECallConfirmationStatus" scope="internal">
+  <enum name="ECallConfirmationStatus">
     <description>Reflects the status of the eCall Notification.</description>
     <element name="NORMAL" internal_name="ECCS_NORMAL">
     </element>
@@ -1453,7 +1453,7 @@
     <element name="JSON" />
   </enum>
   
-  <enum name="PowerModeQualificationStatus" scope="internal">
+  <enum name="PowerModeQualificationStatus">
     <description>Reflects the status of the current power mode qualification.</description>
     <element name="POWER_MODE_UNDEFINED">
     </element>
@@ -1465,7 +1465,7 @@
     </element>
   </enum>
 
-  <enum name="PowerModeStatus" scope="internal">
+  <enum name="PowerModeStatus">
     <description>Reflects the status of the current power mode.</description>
     <element name="KEY_OUT">
     </element>
@@ -1487,7 +1487,7 @@
     </element>
   </enum>
 
-  <enum name="CarModeStatus" scope="internal">
+  <enum name="CarModeStatus">
     <description>Reflects the status of the current car mode.</description>
     <element name="NORMAL" internal_name="CMS_NORMAL">
     </element>
@@ -1499,7 +1499,7 @@
     </element>
   </enum>
 
-  <struct name="ECallInfo" scope="internal">
+  <struct name="ECallInfo">
     <param name="eCallNotificationStatus" type="VehicleDataNotificationStatus">
       <description>References signal "eCallNotification_4A". See VehicleDataNotificationStatus.</description>
 	</param>
@@ -1511,7 +1511,7 @@
 	</param>
   </struct>
 
-  <struct name="AirbagStatus" scope="internal">
+  <struct name="AirbagStatus">
     <param name="driverAirbagDeployed" type="VehicleDataEventStatus">
       <description>References signal "VedsDrvBag_D_Ltchd". See VehicleDataEventStatus.</description>
 	</param>
@@ -1538,7 +1538,7 @@
 	</param>
   </struct>
 
-  <struct name="EmergencyEvent" scope="internal">
+  <struct name="EmergencyEvent">
     <param name="emergencyEventType" type="EmergencyEventType">
       <description>References signal "VedsEvntType_D_Ltchd". See EmergencyEventType.</description>
 	</param>
@@ -1561,7 +1561,7 @@
 	</param>
   </struct>
 
-  <struct name="ClusterModeStatus" scope="internal">
+  <struct name="ClusterModeStatus">
     <param name="powerModeActive" type="Boolean">
       <description>References signal "PowerMode_UB".</description>
 	</param>
@@ -1576,7 +1576,7 @@
 	</param>
   </struct>
 
-  <struct name="MyKey" scope="partner">
+  <struct name="MyKey">
     <param name="e911Override" type="VehicleDataStatus">
       <description>Indicates whether e911 override is on.  References signal "MyKey_e911Override_St". See VehicleDataStatus.</description>
 	</param>
@@ -1812,7 +1812,7 @@
      </param>
    </struct>
 
-   <struct name="ScreenParams" scope="partner">
+   <struct name="ScreenParams">
     <param name="resolution" type="ImageResolution" mandatory="true">
        <description>The resolution of the prescribed screen area.</description>
     </param>    
@@ -1872,10 +1872,10 @@
     <param name="graphicSupported" type="Boolean">
       <description>The display's persistent screen supports referencing a static or dynamic image.</description>
     </param>
-    <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true" scope="partner">
+    <param name="templatesAvailable" type="String" minsize="0" maxsize="100" maxlength="100" array="true">
       <description>A set of all predefined persistent display templates available on headunit.  To be referenced in SetDisplayLayout.</description>
     </param>
-    <param name="screenParams" type="ScreenParams" mandatory="false" scope="partner">
+    <param name="screenParams" type="ScreenParams" mandatory="false">
       <description>A set of all parameters related to a prescribed screen area (e.g. for video / touch input).</description>
     </param>
     <param name="numCustomPresetsAvailable" type="Integer" minvalue="1" maxvalue="100" mandatory="false">
@@ -2000,7 +2000,7 @@
     </param>
   </struct>
   
-  <enum name="KeyboardLayout" scope="partner">
+  <enum name="KeyboardLayout">
     <description>Enumeration listing possible keyboard layouts.</description>
     <element name="QWERTY" />
     <element name="QWERTZ" />
@@ -2015,7 +2015,7 @@
     <element name="ENTRY_ABORTED" />    
   </enum>
 
-  <enum name="KeypressMode" scope="partner">
+  <enum name="KeypressMode">
     <description>Enumeration listing possible keyboard events.</description>
     <element name="SINGLE_KEYPRESS">
       <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
@@ -2063,7 +2063,8 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />       
   </enum>
 
   <enum name="AppHMIType">
@@ -2351,7 +2352,7 @@
       <description>See PrerecordedSpeech</description>
     </param>
 
-    <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false" scope="internal">   
+    <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false">   
       <description>
       	Specifies the white-list of supported diagnostic modes (0x00-0xFF) capable for DiagnosticMessage requests.
       	If a mode outside this list is requested, it will be rejected.
@@ -2425,15 +2426,15 @@
       	If omitted and a vrHelpTitle is provided, the request will be rejected.
       </description>
     </param>
-    <param name="menuTitle" maxlength="500" type="String" mandatory="false" scope="partner">
+    <param name="menuTitle" maxlength="500" type="String" mandatory="false">
       <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
     </param>
     
-    <param name="menuIcon" type="Image" mandatory="false" scope="partner">
+    <param name="menuIcon" type="Image" mandatory="false">
       <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
     </param>
     
-    <param name="keyboardProperties" type="KeyboardProperties" mandatory="false" scope="partner">
+    <param name="keyboardProperties" type="KeyboardProperties" mandatory="false">
       <description>On-screen keybaord configuration (if available).</description>
     </param>   
   </function>
@@ -2751,7 +2752,7 @@
       </description>
     </param>
 
-    <param name="interactionLayout" type="LayoutMode" mandatory="false" scope="partner">
+    <param name="interactionLayout" type="LayoutMode" mandatory="false">
       <description>See LayoutMode.</description>
     </param>
 
@@ -3353,19 +3354,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal"> 
+    <param name="airbagStatus" type="Boolean" mandatory="false"> 
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 
@@ -3455,19 +3456,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="VehicleDataResult" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="VehicleDataResult" mandatory="false" scope="internal">
+    <param name="airbagStatus" type="VehicleDataResult" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="VehicleDataResult" mandatory="false" scope="partner">
+    <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3536,19 +3537,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3636,19 +3637,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="VehicleDataResult" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="VehicleDataResult" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
     <param name="clusterModes" type="VehicleDataResult" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="VehicleDataResult" mandatory="false" scope="partner">
+    <param name="myKey" type="VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3720,19 +3721,19 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="Boolean" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Boolean" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Boolean" mandatory="false" scope="internal">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="Boolean" mandatory="false" scope="partner">
+    <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
@@ -3825,26 +3826,26 @@
     </param>
 
 	<!-- Ford Specific Data Items -->
-    <param name="eCallInfo" type="ECallInfo" mandatory="false" scope="internal">
+    <param name="eCallInfo" type="ECallInfo" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="AirbagStatus" mandatory="false" scope="internal">
+    <param name="airbagStatus" type="AirbagStatus" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="EmergencyEvent" mandatory="false" scope="internal">
+    <param name="emergencyEvent" type="EmergencyEvent" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="ClusterModeStatus" mandatory="false" scope="internal">
+    <param name="clusterModeStatus" type="ClusterModeStatus" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
-    <param name="myKey" type="MyKey" mandatory="false" scope="partner">
+    <param name="myKey" type="MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
 	<!-- / Ford Specific Data Items -->
 
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="request" scope="partner">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="request">
     <description>Non periodic vehicle data read request</description>
 
     <param name="ecuName" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
@@ -3855,7 +3856,7 @@
     </param>
   </function>
 
-  <function name="ReadDID" functionID="ReadDIDID" messagetype="response" scope="partner">
+  <function name="ReadDID" functionID="ReadDIDID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
 		<description> true, if successful; false, if failed </description>
@@ -3935,7 +3936,7 @@
 
   </function>
 
-  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="request" scope="internal">
+  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="request">
     <description>Non periodic vehicle diagnostic request</description>
 
     <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
@@ -3953,7 +3954,7 @@
     </param>
   </function>
 
-  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="response" scope="internal">
+  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="response">
 
     <param name="success" type="Boolean" platform="documentation">
       <description> true, if successful; false, if failed </description>
@@ -4094,7 +4095,7 @@
     </param>
     <param name="eta" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
-    <param name="timeToDestination" type="String" minlength="0" maxlength="500" mandatory="false" scope="partner">
+    <param name="timeToDestination" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
     <param name="totalDistance" type="String" minlength="0" maxlength="500" mandatory="false">
     </param>
@@ -4294,7 +4295,7 @@
       </description>
     </param>
   
-   <param name="systemFile" type="Boolean" defvalue="false" mandatory="false" scope="internal">
+   <param name="systemFile" type="Boolean" defvalue="false" mandatory="false">
      <description>Indicates if the file is meant to be passed thru core to elsewhere on the system.
      If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area 	 outside of core. If omitted, the value will be set to false.</description>
    </param>
@@ -4531,14 +4532,17 @@
 
   </function>
 
-  <function name="SystemRequest" functionID="SystemRequestID" messagetype="request" scope="partner">
+  <function name="SystemRequest" functionID="SystemRequestID" messagetype="request">
      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
      <param name="requestType" type="RequestType" mandatory="true">
         <description>The type of system request.</description>
      </param>
+     <param name="fileName" type="String" maxlength="255" mandatory="false">
+        <description>The name of file.</description>
+     </param>
   </function>
 
-  <function name="SystemRequest" functionID="SystemRequestID" messagetype="response" scope="partner">
+  <function name="SystemRequest" functionID="SystemRequestID" messagetype="response">
      <param name="success" type="Boolean" platform="documentation">
         <description> true, if successful; false, if failed </description>
      </param>
@@ -4757,7 +4761,7 @@
 	</param>
    </function>
 
-  <function name="OnSystemRequest" functionID="OnSystemRequestID" messagetype="notification" scope="partner">
+  <function name="OnSystemRequest" functionID="OnSystemRequestID" messagetype="notification">
       <description> An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
 		<param name="requestType" type="RequestType" mandatory="true">
@@ -4783,14 +4787,14 @@
     </param>
     <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
        <description>Optional length in bytes for resuming partial data chunks</description>
-    </param>    
+    </param>
   </function>	
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 
-  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="request" scope="partner">
+  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="request">
     <description>
     	Allows encoded data in the form of SyncP packets to be sent to the SYNC module.
     	Legacy / v1 Protocol implementation; use SyncPData instead.
@@ -4802,7 +4806,7 @@
     </param>
   </function>
 
-  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="response" scope="partner">
+  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="response">
   	<param name="success" type="Boolean" platform="documentation">
 		<description> true, if successful; false, if failed </description>
 	</param>
@@ -4823,7 +4827,7 @@
     </param>
   </function>
 
-  <function name="SyncPData" functionID="SyncPDataID" messagetype="request" scope="partner">
+  <function name="SyncPData" functionID="SyncPDataID" messagetype="request">
     <description>
     	Allows binary data in the form of SyncP packets to be sent to the SYNC module.
     	Binary data is in binary part of hybrid msg.
@@ -4831,7 +4835,7 @@
 
   </function>
 
-  <function name="SyncPData" functionID="SyncPDataID" messagetype="response" scope="partner">
+  <function name="SyncPData" functionID="SyncPDataID" messagetype="response">
   	<param name="success" type="Boolean" platform="documentation">
 		<description> true, if successful; false, if failed </description>
 	</param>
@@ -4852,7 +4856,7 @@
     </param>
   </function>
 
-  <function name="OnEncodedSyncPData" functionID="OnEncodedSyncPDataID" messagetype="notification" scope="partner">
+  <function name="OnEncodedSyncPData" functionID="OnEncodedSyncPDataID" messagetype="notification">
     <description>
     	Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
     	Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
@@ -4874,7 +4878,7 @@
     </param>
   </function>
 
-  <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification" scope="partner">
+  <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification">
     <description>
     	Callback including binary data of any SyncP packets that SYNC needs to send back to the mobile device.
     	Responds to SyncPData.

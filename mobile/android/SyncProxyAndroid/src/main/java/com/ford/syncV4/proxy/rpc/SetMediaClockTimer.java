@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class SetMediaClockTimer extends RPCRequest {
 
@@ -57,7 +57,7 @@ public class SetMediaClockTimer extends RPCRequest {
             try {
                 theCode = UpdateMode.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.updateMode, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.updateMode, e);
             }
             return theCode;
         }

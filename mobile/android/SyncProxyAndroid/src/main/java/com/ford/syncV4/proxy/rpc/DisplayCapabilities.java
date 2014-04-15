@@ -7,7 +7,7 @@ import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.DisplayType;
 import com.ford.syncV4.proxy.rpc.enums.MediaClockFormat;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class DisplayCapabilities extends RPCStruct {
 
@@ -25,7 +25,7 @@ public class DisplayCapabilities extends RPCStruct {
             try {
                 theCode = DisplayType.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.displayType, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.displayType, e);
             }
             return theCode;
         }
@@ -102,7 +102,7 @@ public class DisplayCapabilities extends RPCStruct {
 	                    try {
 	                        toAdd = MediaClockFormat.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                        DebugTool.logError("Failed to parse MediaClockFormat from " + getClass().getSimpleName() + "." + Names.mediaClockFormats, e);
+	                        Logger.e("Failed to parse MediaClockFormat from " + getClass().getSimpleName() + "." + Names.mediaClockFormats, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
@@ -165,7 +165,7 @@ public class DisplayCapabilities extends RPCStruct {
             try {
                 return new ScreenParams((Hashtable) obj);
             } catch (Exception e) {
-                DebugTool.logError(
+                Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
                                 Names.screenParams, e);
             }

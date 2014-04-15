@@ -37,7 +37,7 @@
 <interface name="Common" version="1.1" date="2013-10-02">
 
 <enum name="Result">
-	<element name="SUCCESS" value="0"/>
+    <element name="SUCCESS" value="0"/>
     <element name="UNSUPPORTED_REQUEST" value="1"/>
     <element name="UNSUPPORTED_RESOURCE" value="2"/>
     <element name="DISALLOWED" value="3"/>
@@ -797,31 +797,31 @@
   <element name="VEHICLEDATA_GPS">
     <description>Notifies GPSData may be subscribed</description>
   </element>
-    <element name="VEHICLEDATA_SPEED" />
-    <element name="VEHICLEDATA_RPM" />
-    <element name="VEHICLEDATA_FUELLEVEL" />
-    <element name="VEHICLEDATA_FUELLEVEL_STATE" />
-    <element name="VEHICLEDATA_FUELCONSUMPTION" />
-    <element name="VEHICLEDATA_EXTERNTEMP" />
-    <element name="VEHICLEDATA_VIN" />
-    <element name="VEHICLEDATA_PRNDL" />
-    <element name="VEHICLEDATA_TIREPRESSURE" />
-    <element name="VEHICLEDATA_ODOMETER" />    
-    <element name="VEHICLEDATA_BELTSTATUS" />
-    <element name="VEHICLEDATA_BODYINFO" />
-    <element name="VEHICLEDATA_DEVICESTATUS" />
-    <element name="VEHICLEDATA_ECALLINFO"/>
-    <element name="VEHICLEDATA_AIRBAGSTATUS"/>
-    <element name="VEHICLEDATA_EMERGENCYEVENT"/>
-    <element name="VEHICLEDATA_CLUSTERMODESTATUS"/>
-    <element name="VEHICLEDATA_MYKEY"/>
-    <element name="VEHICLEDATA_BRAKING" />  
-    <element name="VEHICLEDATA_WIPERSTATUS" />
-    <element name="VEHICLEDATA_HEADLAMPSTATUS" /> 
-    <element name="VEHICLEDATA_BATTVOLTAGE" />
-    <element name="VEHICLEDATA_ENGINETORQUE" />          
-    <element name="VEHICLEDATA_ACCPEDAL" />         
-    <element name="VEHICLEDATA_STEERINGWHEEL" />    
+  <element name="VEHICLEDATA_SPEED" />
+  <element name="VEHICLEDATA_RPM" />
+  <element name="VEHICLEDATA_FUELLEVEL" />
+  <element name="VEHICLEDATA_FUELLEVEL_STATE" />
+  <element name="VEHICLEDATA_FUELCONSUMPTION" />
+  <element name="VEHICLEDATA_EXTERNTEMP" />
+  <element name="VEHICLEDATA_VIN" />
+  <element name="VEHICLEDATA_PRNDL" />
+  <element name="VEHICLEDATA_TIREPRESSURE" />
+  <element name="VEHICLEDATA_ODOMETER" />
+  <element name="VEHICLEDATA_BELTSTATUS" />
+  <element name="VEHICLEDATA_BODYINFO" />
+  <element name="VEHICLEDATA_DEVICESTATUS" />
+  <element name="VEHICLEDATA_ECALLINFO" />
+  <element name="VEHICLEDATA_AIRBAGSTATUS" />
+  <element name="VEHICLEDATA_EMERGENCYEVENT" />
+  <element name="VEHICLEDATA_CLUSTERMODESTATUS" />
+  <element name="VEHICLEDATA_MYKEY" />
+  <element name="VEHICLEDATA_BRAKING" />
+  <element name="VEHICLEDATA_WIPERSTATUS" />
+  <element name="VEHICLEDATA_HEADLAMPSTATUS" />
+  <element name="VEHICLEDATA_BATTVOLTAGE" />
+  <element name="VEHICLEDATA_ENGINETORQUE" />
+  <element name="VEHICLEDATA_ACCPEDAL" />
+  <element name="VEHICLEDATA_STEERINGWHEEL" />
 </enum>
 
 <enum name="WiperStatus">
@@ -950,8 +950,9 @@
     <element name="FILE_RESUME" />
     <element name="AUTH_REQUEST" />       
     <element name="AUTH_CHALLENGE" />       
-    <element name="AUTH_ACK" />       
-  </enum>
+    <element name="AUTH_ACK" />
+    <element name="PROPRIETARY" />
+</enum>
 
 <enum name="ECallConfirmationStatus">
   <description>Reflects the status of the eCall Notification.</description>
@@ -1059,6 +1060,15 @@
 
 <!-- End of IVI part-->
 
+<enum name="AppPriority">
+  <element name="EMERGENCY"/>
+  <element name="NAVIGATION"/>
+  <element name="VOICE_COMMUNICATION"/>
+  <element name="COMMUNICATION"/>
+  <element name="NORMAL"/>
+  <element name="NONE"/>
+</enum>
+
 <!-- Policies -->
 <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
@@ -1095,7 +1105,7 @@
   </param>
   </struct>
   <struct name="ServiceInfo">
-    <param name="servicyType" type="String" mandatory="true">
+    <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="policyAppId" type="String" mandatory="false">
@@ -1871,6 +1881,9 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of deactivated application.</description>
       </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
     </function>
     <function name="ActivateApp" messagetype="response">
     </function>
@@ -1911,6 +1924,9 @@
       <param name="resume" type="Boolean" mandatory="false">
         <description>The information about resumption application. </description>
       </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
@@ -1944,15 +1960,16 @@
     </function>
     <!-- Policies -->
 
+    <!-- SyncP RPC-->
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
-	    Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
+        Binary data can be included in hybrid part of message for some requests (such as Authentication request responses)
       </description>
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
-      <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -1966,7 +1983,53 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+        <description>File reference name.</description>
+      </param>
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param>
     </function>
+    <function name="SystemRequest" messagetype="request">
+      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+          <description>The type of system request.</description>
+      </param>
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+          <description>The path to file.</description>
+      </param>
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param>
+    </function>
+    <function name="SystemRequest" messagetype="response">
+    </function>
+    <function name="PolicyUpdate" messagetype="request">
+      <description>
+        From: SDL
+        To: SYNCP Manager
+        Asks SYNCP Manager to send given Policy Table snapshot to the backend
+      </description>
+      <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>
+          Location of policy table snapshot
+        </description>
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Send attempt timeout in seconds
+        </description>
+      </param>
+      <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
+        <description>
+          Array of delays to wait after failed atempts
+        </description>
+      </param>
+    </function>
+    <function name="PolicyUpdate" messagetype="response">
+    </function>
+    <!-- End of SyncP RPC-->
+
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
     </function>
@@ -1981,6 +2044,12 @@
     </param>
     <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Optional length in bytes for resuming partial data chunks</description>
+    </param>
+
+    <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
+      <description>Full Size of file. sends in first OnPutFile notification if file is splited
+		     	   into many PutFiles
+	  </description>
     </param>
 
     <param name="FileName" type="String" maxlength="255" mandatory="true">
@@ -2004,8 +2073,8 @@
         If omitted, the value will be set to false.
       </description>
     </param>
+  </function>
 
-   </function>
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>
@@ -2057,6 +2126,11 @@
     <param name="type" type="Common.VRCommandType" mandatory="true">
       <description>Type of added command. See VRCommandType.</description>
     </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>
+        ID of the specific grammar, whether top-level or choice set.
+      </description>
+    </param>
     <param name="appID" type="Integer" mandatory="false">
       <description>ID of application that requested this RPC.</description>
     </param>
@@ -2068,11 +2142,52 @@
     <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
       <description>Id of a command (list of strings), previously sent by AddCommand.</description>
     </param>
+    <param name="type" type="Common.VRCommandType" mandatory="true">
+      <description>Type of added command. See VRCommandType.</description>
+    </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>ID of the specific grammar.</description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="DeleteCommand" messagetype="response">
+  </function>
+  <function name="PerformInteraction" messagetype="request">
+    <description>
+      Sets some properties for the application initiated request.
+    </description>
+    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        This is the intial prompt spoken to the user at the start of an interaction. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.
+      </description>
+    </param>
+    <param name="timeout" type="Integer" mandatory="true">
+      <description>Timeout initiate timeoutPrompt</description>
+    </param>
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="true">
+      <description>
+        IDs of the specific compiled grammars for this voice interaction.
+      </description>
+    </param>
+  </function>
+  <function name="PerformInteraction" messagetype="response">
+    <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
+      <description>
+        ID of the choice that was selected in response to PerformInteraction.
+      </description>
+    </param>
   </function>
   <function name="OnCommand" messagetype="notification">
     <description>Notifies SDL about command trigerred via VR</description>
@@ -2150,27 +2265,6 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>Must be true if TTS is present and ready to communicate with SDL.</description>
     </param>
-  </function>
-  <function name="PerformInteraction" messagetype="request">
-    <description>Sets some properties for the application initiated request.</description>
-    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>The help prompt. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
-    </param>
-    <param name="initialPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>
-      	This is the intial prompt spoken to the user at the start of an interaction.
-      	An array of text chunks of type TTSChunk. See TTSChunk.
-      	The array must have at least one item.
-      </description>
-    </param>
-    <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>Help text for a wait timeout. An array of text chunks of type TTSChunk. See TTSChunk. The array must have at least one item.</description>
-    </param>
-    <param name="timeout" type="Integer" mandatory="true">
-      <description>Timeout initiate timeoutPrompt</description>
-    </param>
-  </function>
-  <function name="PerformInteraction" messagetype="response">
   </function>
   <function name="Speak" messagetype="request">
     <description>RPC from SDL to TTS for speaking the text.</description>
@@ -2528,7 +2622,6 @@
   </function>
   <function name="SetAppIcon" messagetype="response">
   </function>
-  
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
@@ -2540,7 +2633,6 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
-  
   <function name="SetDisplayLayout" messagetype="response">
     <param name="displayCapabilities" type="Common.DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>
@@ -3480,6 +3572,9 @@
         <description>If app permissions were reduced (isAppPermissionsRevoked == true), then this array specifies list of removed permissions. </description>
       </param>
     <param name="isAppRevoked" type="Boolean" mandatory="true"/>
+    <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
   </function>
 
   <function name="GetUserFriendlyMessage" messagetype="request" scope="internal">
@@ -3507,6 +3602,27 @@
       </param>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
+
+    <!-- SyncP RPC-->
+    <function name="OnReceivedPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notification sent to SDL when SYNCP Manager receives and decrypts updated policy table
+      </description>
+      <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>Location of decrypted policy table Json file on target</description>
+      </param>
+    </function>
+
+    <function name="OnPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notifies SDL to supply a new "PolicyUpdate" request with more recent snapshot data
+      </description>
+    </function>
+    <!-- End of SyncP RPC-->
 
     <function name="GetListOfPermissions"  messagetype="request">
       <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
@@ -3543,6 +3659,9 @@
       </param>
       <param name="appUnauthorized" type="Boolean" mandatory="false">
         <description>When present and set to true (should be if present) then this means that application was not authorized (nickname check failed.)</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
 
@@ -3581,10 +3700,10 @@
 
     <function name="GetURLS" messagetype="request" scope="internal">
       <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Common.ServiceInfo" mandatory="true"/>
+      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="String" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
 </interface>
 </interfaces>

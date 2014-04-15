@@ -36,6 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -64,11 +65,11 @@ class PutFileRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-    uint32_t offset_;
-    std::string sync_file_name_;
-    uint32_t length_;
+    uint32_t                     offset_;
+    std::string                  sync_file_name_;
+    uint32_t                     length_;
     mobile_apis::FileType::eType file_type_;
-    bool is_persistent_file_;
+    bool                         is_persistent_file_;
 
     void SendOnPutFileNotification();
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);

@@ -120,8 +120,11 @@ void Extract(BitStream* bs, std::vector<uint8_t>* data, size_t length) {
       return;
     }
     data->resize(length);
-    void* dataptr = &data->front();
-    bs->ExtractBytes(dataptr, length);
+
+    if (0 != length) {
+      void* dataptr = &data->front();
+      bs->ExtractBytes(dataptr, length);
+    }
   }
 }
 

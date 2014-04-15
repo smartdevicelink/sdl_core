@@ -6,6 +6,7 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
+    compile 'log4j:log4j:1.2.17'
     androidTestCompile ('com.google.dexmaker:dexmaker-mockito:1.0') {
         exclude group: 'org.hamcrest'
     }
@@ -20,7 +21,10 @@ android {
     sourceSets {
 
         androidTest {
+            java.exclude 'com/ford/syncV4/integrationtest'
+
             java.srcDirs = ['androidTest/java']
+            assets.srcDirs = ['androidTest/assets']
         }
     }
 
@@ -30,3 +34,5 @@ android {
         abortOnError false
     }
 }
+
+

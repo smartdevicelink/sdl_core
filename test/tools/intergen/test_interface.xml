@@ -184,6 +184,15 @@
     </param>
   </struct>
 
+  <struct name="TestStructWithNullableParam">
+    <param name="nullableInt" nullable="true" type="Integer" minavlue="0" maxvalue="42" />
+  </struct>
+
+  <struct name="TestStructWithNullableStructParam">
+    <param name="nullableEnum" nullable="true" type="ImageType"/>
+    <param name="nonNullableEnum" nullable="true" type="ImageType"/>
+  </struct>
+
   <enum name="FunctionID" internal_scope="base">
     <description>Enumeration linking function names with function IDs in AppLink protocol.</description>
     <description>Assumes enumeration starts at value 0.</description>
@@ -327,6 +336,44 @@
       Test typedef over enum
     </description>
   </typedef>
+
+  <struct name="EmptyStruct">
+    <description>
+      Completely empty structure
+    </description>
+  </struct>
+
+  <struct name="StructWithOptionalEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" />
+  </struct>
+
+  <struct name="StructWithNullableTypedef">
+    <description>
+      Test struct having nullable typedef as a param
+    </description>
+    <param name="nullableTdResult" type="TdResult" nullable="true"/>
+  </struct>
+
+  <struct name="StructWithOneOptionalIntField" nullable="true" >
+    <param name="optionalInt" type="Integer" minvalue="1" maxvalue="42" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithFieldOfStructThatMightBeEmpty">
+    <param name="fieldThatMightBeEmpty" type="StructWithOneOptionalIntField" mandatory="true" />
+  </struct>
+
+  <struct name="StructWithNullableOptionalMap">
+    <param name="nullableOptionalIntMap" type="Integer" map="true" nullable="true" manadatory="false" minsize="0" maxsize="5" minvalue="2" maxvalue="10" />
+  </struct>
+
+  <struct name="StructWithNullableMapOfNullableInts">
+    <param name="nullableMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="1" maxsize="5" nullable="true" null_values_allowed="true" />
+  </struct>
+
   <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">
     <description>
       Test typedef over array

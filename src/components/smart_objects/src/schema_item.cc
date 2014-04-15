@@ -41,6 +41,10 @@ bool ISchemaItem::setDefaultValue(SmartObject& Object) {
   return false;
 }
 
+bool ISchemaItem::hasDefaultValue(SmartObject& Object) {
+  return false;
+}
+
 void ISchemaItem::applySchema(SmartObject& Object) {
 }
 

@@ -32,7 +32,7 @@ set(LIBRARIES
   connectionHandler
   TransportManager
   HMIMessageHandler
-  MessageBroker
+  MessageBroker  
   ${BROKER_LIBRARIES}
   Utils
   encryption
@@ -47,6 +47,7 @@ set(LIBRARIES
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
+  list(APPEND LIBRARIES dl)
 endif()
 
 if (BUILD_BT_SUPPORT)
@@ -106,10 +107,10 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-if (BUILD_TESTS_WITH_HMI)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/wp1_policy_table.json DESTINATION ${CMAKE_BINARY_DIR}/test/)
+if (BUILD_TESTS)
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_BINARY_DIR}/test/)
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_BINARY_DIR}/test/)
+  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_BINARY_DIR}/test/)
 endif()
 
 if (${QT_HMI})
