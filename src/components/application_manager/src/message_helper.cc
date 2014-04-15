@@ -1376,10 +1376,10 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     smart_objects::SmartObject& item = allowed_functions_array[index];
     item[strings::name] = (*it).group_name;
     item[strings::id] = (*it).group_id;
-    policy::PermissionState permission_state = (*it).state;
+    policy::GroupConsent permission_state = (*it).state;
     // If state undefined, 'allowed' parameter should be absent
-    if (policy::kUndefined != permission_state) {
-      item["allowed"] = policy::kAllowed == permission_state;
+    if (policy::kGroupUndefined != permission_state) {
+      item["allowed"] = policy::kGroupAllowed == permission_state;
     }
   }
 
