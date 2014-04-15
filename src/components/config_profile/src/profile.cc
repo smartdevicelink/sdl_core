@@ -87,7 +87,8 @@ Profile::Profile()
       transport_manager_disconnect_timeout_(0),
       use_last_state_(false),
       supported_diag_modes_(),
-      system_files_path_("/tmp/fs/mp/images/ivsu_cache"){
+      system_files_path_("/tmp/fs/mp/images/ivsu_cache"),
+      transport_manager_tcp_adapter_port_(12345) {
 }
 
 Profile::~Profile() {
@@ -272,6 +273,10 @@ const std::string& Profile::system_files_path() const {
 
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
   return supported_diag_modes_;
+}
+
+uint16_t Profile::transport_manager_tcp_adapter_port() const {
+  return transport_manager_tcp_adapter_port_;
 }
 
 void Profile::UpdateValues() {
@@ -683,6 +688,14 @@ void Profile::UpdateValues() {
       use_last_state_ = true;
     }
     LOG4CXX_INFO(logger_, "Set UseLastState to " << value);
+  }
+
+  *value = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(),
+    "TransportManager", "TCPAdapterPort", value)) && ('\0' != *value)) {
+
+    transport_manager_tcp_adapter_port_ = atoi(value);
+    LOG4CXX_INFO(logger_, "Set TCPAdapterPort to " << value);
   }
 }
 
