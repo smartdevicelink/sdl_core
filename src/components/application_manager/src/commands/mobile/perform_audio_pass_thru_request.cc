@@ -150,6 +150,8 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
+      msg_params[hmi_request::tts_chunks][i][str::type] =
+          hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     }
     // app_id
     msg_params[strings::app_id] = connection_key();
