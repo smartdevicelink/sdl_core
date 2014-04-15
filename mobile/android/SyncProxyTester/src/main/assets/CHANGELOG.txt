@@ -1,4 +1,5 @@
 [CW16]
+* SyncProxyAndroid SDK: Audio and video streaming doesn't work if mobile App use protocol v2
 + SyncProxyTester: Do not auto-scroll logs when user scrolling log view
 
 [CW15]
