@@ -298,6 +298,15 @@ public class AppPreferencesManager {
     }
 
     /**
+     * @return true if it is needed to set up application icon automatically
+     */
+    public static boolean getAutoSetAppIconFlag() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
+                Const.PREFS_DEFAULT_AUTOSETAPPICON);
+    }
+
+    /**
      * @return the Context of the application
      */
     private static Context getAppContext() {
