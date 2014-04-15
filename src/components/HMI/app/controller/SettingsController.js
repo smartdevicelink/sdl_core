@@ -213,7 +213,7 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SettingsController.userFriendlyMessagePopUp();
 
-            SDL.SDLModel.getListOfPermissionsPull.remove(message.id);
+            delete SDL.SDLModel.getListOfPermissionsPull[message.id];
         }
     },
 
@@ -228,12 +228,14 @@ SDL.SettingsController = Em.Object.create( {
 
             for (var i = 0; i < len; i++) {
 
-                SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                if (message && message.label) {
+                    SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                }
             }
 
             SDL.AppPermissionsView.update(appID);
 
-            this.onState('policies.appPermissions');
+            SDL.States.goToStates('settings.policies.appPermissionsList');
     },
 
     updateSDL: function() {
@@ -255,9 +257,9 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
     },
 
-    userFriendlyMessagePopUp: function() {
+    userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
     },
 
     OnAllowSDLFunctionality: function(result) {

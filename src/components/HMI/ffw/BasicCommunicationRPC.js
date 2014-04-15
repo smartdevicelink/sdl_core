@@ -196,8 +196,8 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 if (response.id in SDL.SDLModel.userFriendlyMessagePull) {
                     var callbackObj = SDL.SDLModel.userFriendlyMessagePull[response.id];
-                    callbackObj.callback(response.result.message, callbackObj.appID);
-                    SDL.SDLModel.userFriendlyMessagePull.remove(response.id);
+                    callbackObj.callbackFunc(response.result.message, callbackObj.appID);
+                    delete SDL.SDLModel.userFriendlyMessagePull[response.id];
                 }
             }
 
@@ -230,15 +230,15 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                         this.GetListOfPermissions(appID);
 
-                        this.OnAppPermissionConsent(response.result.allowedFunctions, "GUI", appID);
+                        //this.OnAppPermissionConsent(response.result.allowedFunctions, "GUI", appID);
                     }
 
                     if (response.result.isAppPermissionsRevoked) {
 
-                        SDL.SettingsController.userFriendlyMessagePopUp();
+                        SDL.SettingsController.userFriendlyMessagePopUp(appID, response.result.appRevokedPermissions);
 
                         //deleted array
-                        SDL.SDLModel.setAppPermissions(params.appRevokedPermissions);
+                        SDL.SDLModel.setAppPermissions(response.result.appRevokedPermissions);
                     }
 
                     if (response.result.isAppRevoked) {

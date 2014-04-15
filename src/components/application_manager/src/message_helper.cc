@@ -1184,24 +1184,19 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
     commands::CommandImpl::protocol_version_;
   (*message)[strings::params][hmi_response::code] = 0;
 
-  bool isSDLAllowed = permissions.isSDLAllowed;
-  if (!isSDLAllowed) {
+  (*message)[strings::msg_params]["isSDLAllowed"] = permissions.isSDLAllowed;
+  if (!permissions.isSDLAllowed) {
     (*message)[strings::msg_params]["device"]["name"] = permissions.deviceInfo
         .device_name;
-    // TODO(AOleynik): Change id assignment
     (*message)[strings::msg_params]["device"]["id"] = permissions.deviceInfo
         .device_handle;
   }
 
-  (*message)[strings::msg_params]["isSDLAllowed"] = isSDLAllowed;
+  (*message)[strings::msg_params]["isAppRevoked"] = permissions.appRevoked;
+  (*message)[strings::msg_params]["isAppPermissionsRevoked"] = permissions
+      .isAppPermissionsRevoked;
 
-  // TODO(AOleynik): Add processing of other parameters
-  if (permissions.appRevoked) {
-    (*message)[strings::msg_params]["isAppRevoked"] = permissions.appRevoked;
-  }
   if (permissions.isAppPermissionsRevoked) {
-    (*message)[strings::msg_params]["isAppPermissionsRevoked"] = permissions
-        .isAppPermissionsRevoked;
     (*message)[strings::msg_params]["appRevokedPermissions"] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
@@ -1209,10 +1204,10 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
           .appRevokedPermissions[i];
     }
   }
-  if (permissions.appPermissionsConsentNeeded) {
-    (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = permissions
-        .appPermissionsConsentNeeded;
-  }
+
+  (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = permissions
+      .appPermissionsConsentNeeded;
+
   if (!permissions.priority.empty()) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(
                                                     permissions.priority);
