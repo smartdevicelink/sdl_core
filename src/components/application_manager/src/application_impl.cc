@@ -242,8 +242,7 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
-  std::string file_name = path.substr(path.find_last_of("/") + 1);
-  if (app_files_.find(file_name) != app_files_.end()) {
+  if (app_files_.find(path) != app_files_.end()) {
     app_icon_path_ = path;
     return true;
   }
@@ -280,7 +279,6 @@ ProtocolVersion ApplicationImpl::protocol_version() {
 
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
-
     app_files_[file.file_name] = file;
     return true;
   }
@@ -379,7 +377,7 @@ uint32_t ApplicationImpl::UpdateHash() {
 void ApplicationImpl::CleanupFiles() {
   std::string directory_name =
       profile::Profile::instance()->app_storage_folder();
-  directory_name += "/" + name();
+  directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(
