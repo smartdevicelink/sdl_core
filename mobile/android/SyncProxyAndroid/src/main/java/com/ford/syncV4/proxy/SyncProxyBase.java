@@ -336,14 +336,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // UI Handler
     private Handler _mainUIHandler = null;
     // Parameters passed to the constructor from the app to register an app interface
-    private String _applicationName = null;
+    private Object _applicationName = null;
     private Vector<TTSChunk> _ttsName = null;
-    private String _ngnMediaScreenAppName = null;
-    private Boolean _isMediaApp = null;
+    private Object _ngnMediaScreenAppName = null;
+    private Object _isMediaApp = null;
     private Language _syncLanguageDesired = null;
     private Language _hmiDisplayLanguageDesired = null;
     private Vector<AppHMIType> _appHMIType = null;
-    private String _appID = null;
+    private Object _appID = null;
     private String _autoActivateIdDesired = null;
     private SyncMsgVersion _syncMsgVersionRequest = null;
     private Vector<String> _vrSynonyms = null;
@@ -665,9 +665,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (_applicationName == null) {
                 throw new IllegalArgumentException("To use SyncProxyALM, an application name, appName, must be provided");
             }
-            if (_applicationName.length() < 1 || _applicationName.length() > 100) {
-                throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
-            }
+            //if (_applicationName.length() < 1 || _applicationName.length() > 100) {
+            //    throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
+            //}
             if (_isMediaApp == null) {
                 throw new IllegalArgumentException("isMediaApp must not be null when using SyncProxyALM.");
             }
@@ -2436,10 +2436,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Protected registerAppInterface used to ensure only non-ALM applications call
     // ReqisterAppInterface
     protected void registerAppInterfacePrivate(
-            SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName,
-            String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp,
+            SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
+            Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            String appID, String autoActivateID, Integer correlationID, String hashId,
+            Object appID, String autoActivateID, Integer correlationID, String hashId,
             DeviceInfo deviceInfo) throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
@@ -2845,7 +2845,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         _applicationName = applicationName;
     }
 
-    public String getApplicationName() {
+    public Object getApplicationName() {
         return _applicationName;
     }
 
@@ -2861,7 +2861,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._ngnMediaScreenAppName = ngnMediaScreenAppName;
     }
 
-    public String getNgnMediaScreenAppName() {
+    public Object getNgnMediaScreenAppName() {
         return _ngnMediaScreenAppName;
     }
 
@@ -2877,7 +2877,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._isMediaApp = isMediApp;
     }
 
-    public Boolean getIsMediaApp() {
+    public Object getIsMediaApp() {
         return _isMediaApp;
     }
 
@@ -2909,7 +2909,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this._appID = appID;
     }
 
-    public String getAppID() {
+    public Object getAppID() {
         return _appID;
     }
 
