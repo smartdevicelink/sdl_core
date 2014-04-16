@@ -40,12 +40,12 @@
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
-#include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
+//#include "media_manager/media_manager_impl_test.h"
 //#include "jsoncpp/json_reader_test.h"
 
 // #include "json_handler/smart_schema_draft_test.h"
