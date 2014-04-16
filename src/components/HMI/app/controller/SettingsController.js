@@ -235,7 +235,7 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.AppPermissionsView.update(appID);
 
-            SDL.States.goToStates('settings.policies.appPermissionsList');
+            SDL.States.goToStates('settings.policies.appPermissions');
     },
 
     updateSDL: function() {
