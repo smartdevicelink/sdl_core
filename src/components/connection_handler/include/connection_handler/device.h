@@ -59,7 +59,7 @@ typedef std::vector<int32_t> AppList;
  * \brief Connection class
  */
 class Device {
-  public:
+public:
     /**
      * \brief Class constructor
      */
@@ -83,9 +83,13 @@ class Device {
      */
     std::string user_friendly_name() const;
 
+    /**
+        *\brief Also should be used for iOS USB connections
+        *(better not know why this same method)
+        */
     std::string mac_address() const;
 
-  private:
+private:
     /**
      * \brief Uniq device handle.
      */
