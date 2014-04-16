@@ -262,6 +262,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   sync_primitives::Lock retry_sequence_lock_;
   PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
+  bool on_ignition_check_done_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

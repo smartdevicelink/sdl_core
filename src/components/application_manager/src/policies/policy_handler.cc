@@ -60,6 +60,7 @@ PolicyHandler::PolicyHandler()
     dl_handle_(0),
     exchange_handler_(NULL),
     is_exchange_in_progress_(false),
+    on_ignition_check_done_(false),
     retry_sequence_("RetrySequence", new RetrySequence(this)) {
 }
 
@@ -604,15 +605,24 @@ void PolicyHandler::PTExchangeAtIgnition() {
     return;
   }
 
+  if (on_ignition_check_done_) {
+    return;
+  }
+
+  on_ignition_check_done_ = true;
+
   TimevalStruct current_time = date_time::DateTime::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
   int days = current_time.tv_sec / kSecondsInDay;
 
-  // Start update on limits exhaustion, if update wasn't started already by any
-  // other event
   LOG4CXX_INFO(
     logger_,
-    "\nIgnition cycles exceeded: " << std::boolalpha << policy_manager_->ExceededIgnitionCycles() << "\nDays exceeded: " << std::boolalpha << policy_manager_->ExceededDays(days) << "\nStatusUpdateRequired: " << std::boolalpha << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
+    "\nIgnition cycles exceeded: " << std::boolalpha <<
+        policy_manager_->ExceededIgnitionCycles()
+        << "\nDays exceeded: " << std::boolalpha
+        << policy_manager_->ExceededDays(days)
+        << "\nStatusUpdateRequired: " << std::boolalpha
+        << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
   if (policy_manager_->ExceededIgnitionCycles()
       || policy_manager_->ExceededDays(days)
       || policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired) {
