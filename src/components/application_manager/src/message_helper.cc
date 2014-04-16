@@ -298,7 +298,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
       .ngn_media_screen_name();
 
   if (resumption) {
-    message[strings::msg_params][strings::resumption] = true;
+    message[strings::msg_params][strings::resume_vr_grammars] = true;
   }
 
   if (ngn_media_screen_name) {
@@ -341,7 +341,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   policy::PolicyHandler::instance()->policy_manager()->GetPriority(
         application_impl.mobile_app_id()->asString(), &priority);
   if (!priority.empty()) {
-    message[strings::msg_params]["priority"] = GetPriorityCode(priority);
+    message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
   }
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
