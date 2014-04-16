@@ -1087,6 +1087,7 @@
     <element name="VUI" />
   </enum>
   <struct name="UserFriendlyMessage" scope="internal">
+    <param name="messageCode" type="String" mandatory="true"/>
     <param name="ttsString" type="String" mandatory="false"/>
     <param name="label" type="String" mandatory="false" />
     <param name="line1" type="String" mandatory="false"/>
