@@ -65,6 +65,9 @@ ApplicationImpl::ApplicationImpl(
       grammar_id_(0),
       usage_report_(global_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3) {
+
+  // subscribe application to custom button by default
+  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 ApplicationImpl::~ApplicationImpl() {
