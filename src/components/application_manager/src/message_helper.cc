@@ -1116,16 +1116,20 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
     return;
   }
 
+  application_manager::ApplicationConstSharedPtr app =
+    application_manager::ApplicationManagerImpl::instance()
+    ->application(app_id);
+  if (!app.valid()) {
+    LOG4CXX_WARN(g_logger, "Invalid app_id: " << app_id);
+    return;
+  }
+
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_ActivateApp;
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
   (*message)[strings::params][strings::correlation_id] =
     ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   (*message)[strings::msg_params][strings::app_id] = app_id;
-
-  application_manager::ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application(app_id);
 
   std::string priority;
   policy::PolicyHandler::instance()->policy_manager()->GetPriority(
