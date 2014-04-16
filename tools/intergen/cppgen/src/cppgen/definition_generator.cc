@@ -44,6 +44,7 @@
 #include "cppgen/struct_type_from_json_method.h"
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
+#include "cppgen/struct_type_report_erros_method.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
 
@@ -98,6 +99,7 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   StructTypeIsValidMethod(strct).Define(&o, false);
   StructTypeIsInitializedMethod(strct).Define(&o, false);
   StructTypeIsEmptyMethod(strct).Define(&o, false);
+  StructTypeReportErrosMethod(strct).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().types_ns();
@@ -138,6 +140,7 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   StructTypeIsValidMethod(&response).Define(&o, false);
   StructTypeIsInitializedMethod(&response).Define(&o, false);
   StructTypeIsEmptyMethod(&response).Define(&o, false);
+  StructTypeReportErrosMethod(&response).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().responses_ns();
@@ -173,6 +176,7 @@ void DefinitionGenerator::GenerateCodeForNotification(
   StructTypeIsValidMethod(&notification).Define(&o, false);
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
   StructTypeIsEmptyMethod(&notification).Define(&o, false);
+  StructTypeReportErrosMethod(&notification).Define(&o, false);
   o << endl;
 
   Namespace& val_ns = module_manager_->SourceForValidator().notifications_ns();
@@ -207,6 +211,7 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   StructTypeIsValidMethod(&request).Define(&o, false);
   StructTypeIsInitializedMethod(&request).Define(&o, false);
   StructTypeIsEmptyMethod(&request).Define(&o, false);
+  StructTypeReportErrosMethod(&request).Define(&o, false);
   MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;
 

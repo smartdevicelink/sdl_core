@@ -48,6 +48,8 @@ class MessageWriter;
 }  // namespace dbus
 
 namespace rpc {
+class ValidationReport;
+
 template<typename T> class Range;
 class PrimitiveType;
 class CompositeType;
@@ -84,6 +86,7 @@ class PrimitiveType {
  public:
   bool is_initialized() const;
   bool is_valid() const;
+  void ReportErrors(ValidationReport* report) const;
  protected:
   enum ValueState {
     kUninitialized,
@@ -103,6 +106,7 @@ class PrimitiveType {
 class CompositeType {
  public:
   void mark_initialized();
+  void ReportErrors(ValidationReport* report) const;
  protected:
   enum InitializationState {
     kUninitialized,
@@ -247,6 +251,7 @@ class Array : public std::vector<T>, public CompositeType {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -273,6 +278,7 @@ class Map : public std::map<std::string, T>, public CompositeType  {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T>
@@ -295,6 +301,7 @@ class Nullable : public T {
   bool is_initialized() const;
   bool is_null() const;
   void set_to_null();
+  void ReportErrors(ValidationReport* report) const;
  private:
   bool marked_null_;
 };
@@ -325,6 +332,7 @@ class Optional {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
  private:
   T value_;
 };

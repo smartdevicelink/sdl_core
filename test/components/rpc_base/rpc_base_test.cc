@@ -317,4 +317,124 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
   ASSERT_FALSE(val.is_valid());
 }
 
+TEST(ValidatedTypes, ReportUninitializedIntType) {
+  Integer<int8_t, 1, 3> val;
+  ASSERT_FALSE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: value is not initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectInitializedIntType) {
+  Integer<int8_t, 1, 3> val(5);
+  ASSERT_FALSE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: value initialized incorrectly\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportUninitializedOptionalType) {
+  Optional< Integer<int8_t, 1, 3> > val;
+  ASSERT_TRUE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: optional value is not initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectInitializedOptionalType) {
+  Optional< Integer<int8_t, 1, 3> > val(5);
+  ASSERT_FALSE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: value initialized incorrectly\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportUninitializedNullableIntType) {
+  Nullable< Integer<int8_t, 1, 3> > val;
+  ASSERT_FALSE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: value is not initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportNullInitializedNullableIntType) {
+  Nullable< Integer<int8_t, 1, 3> > val;
+  val.set_to_null();
+  ASSERT_TRUE(val.is_valid());
+  ValidationReport report("val");
+  val.ReportErrors(&report);
+  ASSERT_EQ("val: null initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportNoninitializedIntArray) {
+  Array< Enum<TestEnum>, 1, 3 > array;
+  ASSERT_FALSE(array.is_valid());
+  ValidationReport report("array");
+  array.ReportErrors(&report);
+  ASSERT_EQ("array: object is not initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray1) {
+  Array< Integer<int8_t, 1, 10>, 1, 3 > array;
+  array.push_back(11);
+  ASSERT_FALSE(array.is_valid());
+  ValidationReport report("array");
+  array.ReportErrors(&report);
+  ASSERT_EQ("array: array initialized\n"
+            "  array element 0: value initialized incorrectly\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray2) {
+  Array< Integer<int8_t, 1, 10>, 1, 3 > array;
+  array.push_back(1);
+  array.push_back(2);
+  array.push_back(3);
+  array.push_back(4);
+  ASSERT_FALSE(array.is_valid());
+  ValidationReport report("array");
+  array.ReportErrors(&report);
+  ASSERT_EQ("array: array has invalid size\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectlyInitializedArray3) {
+  Array< Integer<int8_t, 1, 10>, 1, 3 > array;
+  array.push_back(1);
+  array.push_back(2);
+  array.push_back(42);
+  array.push_back(4);
+  ValidationReport report("array");
+  array.ReportErrors(&report);
+  ASSERT_EQ("array: array has invalid size\n"
+            "  array element 2: value initialized incorrectly\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportUninitializedMap) {
+  Map< Integer<int8_t, 1, 10>, 1, 3 > map;
+  ValidationReport report("map");
+  map.ReportErrors(&report);
+  ASSERT_EQ("map: object is not initialized\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectlyInitializedMap1) {
+  Map< Integer<int8_t, 1, 10>, 1, 3 > map;
+  map["aha"] = 42;
+  ValidationReport report("map");
+  map.ReportErrors(&report);
+  ASSERT_EQ("map: map initialized\n"
+            "  map element \"aha\": value initialized incorrectly\n", PrettyFormat(report));
+}
+
+TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
+  Map< Integer<int8_t, 1, 10>, 1, 3 > map;
+  map["aha"] = 3;
+  map["haha"] = 12;
+  map["muhahaha"] = 17;
+  map["muhahaha"] = 22;
+  ValidationReport report("map");
+  map.ReportErrors(&report);
+  ASSERT_EQ("map: map initialized\n"
+            "  map element \"haha\": value initialized incorrectly\n"
+            "  map element \"muhahaha\": value initialized incorrectly\n", PrettyFormat(report));
+}
+
 }  // namespace codegen

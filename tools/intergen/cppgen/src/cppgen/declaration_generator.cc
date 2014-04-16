@@ -50,6 +50,7 @@
 #include "cppgen/struct_type_from_json_method.h"
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
+#include "cppgen/struct_type_report_erros_method.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "model/constant.h"
@@ -173,6 +174,7 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
     StructTypeIsEmptyMethod(strct).Declare(&o, true);
+    StructTypeReportErrosMethod(strct).Declare(&o, true);
   }
   {
     Section priv("private", &o);
@@ -284,6 +286,7 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
     StructTypeIsEmptyMethod(&request).Declare(&o, true);
+    StructTypeReportErrosMethod(&request).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
     FunctionStringIdMethod(&request).Define(&o, true);
@@ -336,6 +339,7 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
     StructTypeIsEmptyMethod(&response).Declare(&o, true);
+    StructTypeReportErrosMethod(&response).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
     FunctionStringIdMethod(&response).Define(&o, true);
@@ -387,6 +391,7 @@ void DeclarationGenerator::GenerateCodeForNotification(
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
     StructTypeIsEmptyMethod(&notification).Declare(&o, true);
+    StructTypeReportErrosMethod(&notification).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);
     FunctionStringIdMethod(&notification).Define(&o, true);
