@@ -100,13 +100,10 @@ SDL.TBTTurnList = SDL.SDLAbstractView.create({
                         templateName: turnListArray[i].turnIcon ? 'icon' : ''
                     }));
             }
-            if (SDL.SDLController.getApplicationModel(appID).turnListSoftButtons) {
-                turnListArray = SDL.SDLController.getApplicationModel(appID).turnListSoftButtons;
-                length = turnListArray.length;
-            } else {
-                length = null;
-                turnListArray = [];
-            }
+
+            turnListArray = SDL.SDLController.getApplicationModel(appID).turnListSoftButtons;
+            length = turnListArray.length;
+            
             for (var i = 0; i < length; i++) {
                 this.get('tbtTurnListList.list.childViews').pushObject(SDL.Button.create(SDL.PresetEventsCustom, {
                         systemAction     : turnListArray[i].systemAction,

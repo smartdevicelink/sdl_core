@@ -784,8 +784,8 @@ SDL.SDLModel = Em.Object.create({
      */
     tbtTurnListUpdate: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList ? params.turnList : [];
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons ? params.softButtons : [];
         SDL.TBTTurnList.updateList(params.appID);
     },
 
