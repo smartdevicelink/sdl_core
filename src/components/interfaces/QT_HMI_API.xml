@@ -2754,6 +2754,12 @@
     <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
     </param>
+    <param name="muteAudio" type="Boolean" mandatory="true">
+      <description>
+        Defines if the current audio source should be muted during the APT session. If not, the audio source will play without interruption.
+        If omitted, the value is set to true.
+      </description>
+    </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
   </function>

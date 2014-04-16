@@ -123,6 +123,7 @@ const char max_duration[] = "maxDuration";
 const char sampling_rate[] = "samplingRate";
 const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
+const char mute_audio[] = "muteAudio";
 const char button_name[] = "buttonName";
 const char button_event_mode[] = "buttonEventMode";
 const char button_press_mode[] = "buttonPressMode";

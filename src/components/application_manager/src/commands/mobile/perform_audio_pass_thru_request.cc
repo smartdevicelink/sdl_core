@@ -191,6 +191,14 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
         (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
+  if ((*message_)[str::msg_params].keyExists(str::mute_audio)) {
+    msg_params[str::mute_audio] =
+        (*message_)[str::msg_params][str::mute_audio].asBool();
+  } else {
+    // If omitted, the value is set to true
+    msg_params[str::mute_audio] = true;
+  }
+
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,
                  &msg_params, true);
 }
