@@ -32,6 +32,7 @@
 
 #include "transport_manager/mme/mme_connection_factory.h"
 #include "transport_manager/mme/iap_connection.h"
+#include "transport_manager/mme/iap2_connection.h"
 #include "transport_manager/mme/mme_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
@@ -55,19 +56,43 @@ TransportAdapter::Error MmeConnectionFactory::CreateConnection(
     return TransportAdapter::BAD_PARAM;
   }
   MmeDevicePtr mme_device = DeviceSptr::static_pointer_cast<MmeDevice>(device);
-  std::string mount_point = mme_device->mount_point();
-  IAPConnection* iap_connection = new IAPConnection(device_uid, app_handle, controller_, mount_point);
-  ConnectionSptr connection(iap_connection);
+  switch (mme_device->protocol()) {
+    case MmeDevice::IAP: {
+      std::string mount_point = mme_device->mount_point();
+      IAPConnection* iap_connection = new IAPConnection(device_uid, app_handle, controller_, mount_point);
+      ConnectionSptr connection(iap_connection);
 
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
+      controller_->ConnectionCreated(connection, device_uid, app_handle);
 
-  if (iap_connection->Init()) {
-    LOG4CXX_INFO(logger_, "iAP connection initialised");
-    return TransportAdapter::OK;
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Could not initialise iAP connection");
-    return TransportAdapter::FAIL;
+      if (iap_connection->Init()) {
+        LOG4CXX_INFO(logger_, "iAP connection initialised");
+        return TransportAdapter::OK;
+      }
+      else {
+        LOG4CXX_WARN(logger_, "Could not initialise iAP connection");
+        return TransportAdapter::FAIL;
+      }
+    }
+    case MmeDevice::IAP2: {
+      std::string mount_point = mme_device->mount_point();
+      IAP2Connection* iap2_connection = new IAP2Connection(device_uid, app_handle, controller_, mount_point);
+      ConnectionSptr connection(iap2_connection);
+
+      controller_->ConnectionCreated(connection, device_uid, app_handle);
+
+      if (iap2_connection->Init()) {
+        LOG4CXX_INFO(logger_, "iAP2 connection initialised");
+        return TransportAdapter::OK;
+      }
+      else {
+        LOG4CXX_WARN(logger_, "Could not initialise iAP2 connection");
+        return TransportAdapter::FAIL;
+      }
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Unsupported protocol for device " << device_uid);
+      return TransportAdapter::NOT_SUPPORTED;
+    }
   }
 }
 

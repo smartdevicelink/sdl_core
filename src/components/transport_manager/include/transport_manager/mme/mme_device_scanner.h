@@ -58,7 +58,8 @@ class MmeDeviceScanner : public DeviceScanner {
   virtual bool IsInitialised() const;
 
 private:
-  typedef uint64_t msid_t;
+  typedef uint64_t qdb_int;
+  typedef qdb_int msid_t;
   typedef std::vector<msid_t> MsidContainer;
   typedef std::map<msid_t, MmeDevicePtr> DeviceContainer;
 
@@ -66,7 +67,15 @@ private:
   void OnDeviceLeft(msid_t msid);
   void NotifyDevicesUpdated();
   bool GetMmeList(MsidContainer& msids);
-  bool GetMmeInfo(msid_t msid, std::string& mount_point);
+  bool GetMmeInfo(
+    msid_t msid,
+    std::string& mount_point,
+    MmeDevice::Protocol& protocol,
+    std::string& unique_device_id,
+    std::string& vendor,
+    std::string& product,
+    bool& attached
+  );
 
   static const char* mme_name;
   static const char* qdb_name;

@@ -36,7 +36,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-const char* MmeDeviceScanner::mme_name = "/dev/mme/default";
+const char* MmeDeviceScanner::mme_name = "/dev/mmsync";
 const char* MmeDeviceScanner::qdb_name = "/dev/qdb/mediaservice_db";
 
 MmeDeviceScanner::MmeDeviceScanner(TransportAdapterController* controller) : controller_(controller), initialised_(false), mme_hdl_(0), qdb_hdl_(0) {
@@ -82,10 +82,17 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
     for (MsidContainer::const_iterator i = msids.begin(); i != msids.end(); ++i) {
       msid_t msid = *i;
       std::string mount_point;
-      if (GetMmeInfo(msid, mount_point)) {
-// TODO(nvaganov@luxoft.com): get vendor id and product name from database
-        MmeDevicePtr mme_device(new MmeDevice(mount_point, "Apple iPhone", "Apple iPhone"));
-        devices.insert(std::make_pair(msid, mme_device));
+      MmeDevice::Protocol protocol;
+      std::string unique_device_id;
+      std::string vendor;
+      std::string product;
+      bool attached;
+      if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
+        if (attached) {
+          std::string device_name = vendor + " " + product;
+          MmeDevicePtr mme_device(new MmeDevice(mount_point, protocol, device_name, unique_device_id));
+          devices.insert(std::make_pair(msid, mme_device));
+        }
       }
     }
     devices_lock_.Ackquire();
@@ -127,9 +134,14 @@ bool MmeDeviceScanner::IsInitialised() const {
 
 void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
   std::string mount_point;
-  if (GetMmeInfo(msid, mount_point)) {
-// TODO(nvaganov@luxoft.com): get vendor id and product name from database
-    MmeDevicePtr mme_device(new MmeDevice(mount_point, "Apple iPhone", "Apple iPhone"));
+  MmeDevice::Protocol protocol;
+  std::string unique_device_id;
+  std::string vendor;
+  std::string product;
+  bool attached; // not used
+  if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
+    std::string device_name = vendor + " " + product;
+    MmeDevicePtr mme_device(new MmeDevice(mount_point, protocol, device_name, unique_device_id));
     devices_lock_.Ackquire();
     devices_.insert(std::make_pair(msid, mme_device));
     devices_lock_.Release();
@@ -181,15 +193,61 @@ bool MmeDeviceScanner::GetMmeList(MsidContainer& msids) {
 }
 
 // TODO(nvaganov@luxoft.com): get vendor id and product name from database
-bool MmeDeviceScanner::GetMmeInfo(msid_t msid, std::string& mount_point) {
-  const char query[] = "SELECT mountpath FROM mediastores WHERE msid=%lld";
+bool MmeDeviceScanner::GetMmeInfo(
+  msid_t msid,
+  std::string& mount_point,
+  MmeDevice::Protocol& protocol,
+  std::string& unique_device_id,
+  std::string& vendor,
+  std::string& product,
+  bool& attached
+) {
+
+  const char query[] = "SELECT mountpath, fs_type, serial, manufacturer, device_name, attached FROM mediastores WHERE msid=%lld";
   LOG4CXX_TRACE(logger_, "Querying " << qdb_name);
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query, msid);
   if (res != 0) {
     LOG4CXX_DEBUG(logger_, "Parsing result");
-    char* data = (char*) qdb_cell(res, 0, 0);
+    char* data = (char*) qdb_cell(res, 0, 0); // mountpath
     mount_point = std::string(data);
-    LOG4CXX_DEBUG(logger_, "Mount point " << mount_point << " discovered");
+    LOG4CXX_DEBUG(logger_, "Mount point " << mount_point);
+    data = (char*) qdb_cell(res, 0, 1); // fs_type
+    if (0 == strcmp(data, "iap")) {
+      protocol = MmeDevice::IAP;
+      LOG4CXX_DEBUG(logger_, "Protocol iAP");
+    }
+    else if (0 == strcmp(data, "iap2")) {
+      protocol = MmeDevice::IAP2;
+      LOG4CXX_DEBUG(logger_, "Protocol iAP2");
+    }
+    else {
+      protocol = MmeDevice::UnknownProtocol;
+      LOG4CXX_WARN(logger_, "Unsupported protocol " << data);
+    }
+    data = (char*) qdb_cell(res, 0, 2); // serial
+    unique_device_id = std::string(data);
+    LOG4CXX_DEBUG(logger_, "Device ID " << unique_device_id);
+    data = (char*) qdb_cell(res, 0, 3); // manufacturer
+    vendor = std::string(data);
+    LOG4CXX_DEBUG(logger_, "Vendor " << vendor);
+    data = (char*) qdb_cell(res, 0, 4); // device_name
+    if (strcmp(data, "") != 0) {
+      product = std::string(data);
+      LOG4CXX_DEBUG(logger_, "Product " << product);
+    }
+    else { // for some reason device_name can be empty
+      product = "Unnamed device";
+      LOG4CXX_WARN(logger_, "Unnamed product");
+    }
+    qdb_int* attached_data = (qdb_int*) qdb_cell(res, 0, 5); // attached
+    qdb_int attached_int = *attached_data;
+    attached = (attached_int != 0);
+    if (attached) {
+      LOG4CXX_DEBUG(logger_, "Device is attached");
+    }
+    else {
+      LOG4CXX_DEBUG(logger_, "Device isn\'t attached");
+    }
     qdb_freeresult(res);
     return true;
   }
