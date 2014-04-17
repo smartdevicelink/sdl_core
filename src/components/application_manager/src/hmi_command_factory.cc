@@ -37,10 +37,7 @@
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
 #include "application_manager/commands/hmi/update_device_list_response.h"
-#include "application_manager/commands/hmi/on_update_device_list.h"
 #include "application_manager/commands/hmi/on_start_device_discovery.h"
-#include "application_manager/commands/hmi/update_app_list_request.h"
-#include "application_manager/commands/hmi/update_app_list_response.h"
 #include "application_manager/commands/hmi/on_find_applications.h"
 #include "application_manager/commands/hmi/allow_all_apps_request.h"
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
@@ -228,7 +225,6 @@
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
-#include "application_manager/commands/hmi/on_show_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
@@ -1106,10 +1102,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnUpdateDeviceList: {
-      command.reset(new commands::OnUpdateDeviceList(message));
-      break;
-    }
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered: {
       command.reset(new commands::OnAppRegisteredNotification(message));
       break;
@@ -1120,14 +1112,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnFindApplications: {
       command.reset(new commands::OnFindApplications(message));
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_UpdateAppList: {
-      if (is_response) {
-        command.reset(new commands::UpdateAppListResponse(message));
-      } else {
-        command.reset(new commands::UpdateAppListRequest(message));
-      }
       break;
     }
     case hmi_apis::FunctionID::VR_Started: {
@@ -1907,10 +1891,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
 #endif // #ifdef HMI_DBUS_API
-    case hmi_apis::FunctionID::UI_ShowNotification: {
-      command.reset(new commands::OnShowNotification(message));
-      break;
-    }
     case hmi_apis::FunctionID::Navigation_OnTBTClientState: {
       command.reset(new commands::OnNaviTBTClientStateNotification(message));
       break;
