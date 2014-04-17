@@ -45,6 +45,7 @@
 #include "cppgen/literal_generator.h"
 #include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
+#include "cppgen/naming_convention.h"
 #include "cppgen/struct_type_constructor.h"
 #include "cppgen/struct_type_dbus_serializer.h"
 #include "cppgen/struct_type_from_json_method.h"
@@ -143,7 +144,14 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& header_file = module_manager_->HeaderForStruct(*strct);
   DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   ostream& o = header_file.types_ns().os();
-  const char* base_class_name = "CompositeType";
+  std::string base_class_name = "CompositeType";
+  if (strct->frankenstruct()) {
+    base_class_name = RpcTypeNameGenerator(
+                        &strct->interface(),
+                        preferences_,
+                        strct->frankenstruct(),
+                        false).result();
+  }
   DeclareStructureBegin(o, strct->name(), base_class_name,
                         Comment(strct->description()));
   {
@@ -173,7 +181,7 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
-    StructTypeEmptyMethod(strct).Declare(&o, true);
+    StructTypeStructEmptyMethod(strct).Declare(&o, true);
     StructTypeReportErrosMethod(strct).Declare(&o, true);
   }
   {
@@ -231,7 +239,7 @@ void DeclarationGenerator::GenerateCodeForStructField(
                             preferences_,
                             field.type(),
                             field_is_optional).result();
-  o << " " << field.name() << ";";
+  o << " " << AvoidKeywords(field.name()) << ";";
   if (!field.description().empty()) {
     o << " " << Comment(field.description());
   }
@@ -285,7 +293,7 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
-    StructTypeEmptyMethod(&request).Declare(&o, true);
+    StructTypeStructEmptyMethod(&request).Declare(&o, true);
     StructTypeReportErrosMethod(&request).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
@@ -338,7 +346,7 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
-    StructTypeEmptyMethod(&response).Declare(&o, true);
+    StructTypeStructEmptyMethod(&response).Declare(&o, true);
     StructTypeReportErrosMethod(&response).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
@@ -390,7 +398,7 @@ void DeclarationGenerator::GenerateCodeForNotification(
     }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
-    StructTypeEmptyMethod(&notification).Declare(&o, true);
+    StructTypeStructEmptyMethod(&notification).Declare(&o, true);
     StructTypeReportErrosMethod(&notification).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);

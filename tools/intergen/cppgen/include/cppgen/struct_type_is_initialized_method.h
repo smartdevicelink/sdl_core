@@ -59,10 +59,10 @@ class StructTypeIsInitializedMethod : public CppFunction {
  * this method has no is_ prefix to support stl style
  * that is dictated by maps and arrays
  */
-class StructTypeEmptyMethod : public CppFunction {
+class StructTypeStructEmptyMethod : public CppFunction {
  public:
-  StructTypeEmptyMethod(const Struct* strct);
-  ~StructTypeEmptyMethod();
+  StructTypeStructEmptyMethod(const Struct* strct);
+  ~StructTypeStructEmptyMethod();
  private:
   // CppFunction pure virtual methods implementation
   virtual void DefineBody(std::ostream* os) const;

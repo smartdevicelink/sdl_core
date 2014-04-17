@@ -390,6 +390,10 @@
     <param name="mandatoryIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" />
   </struct>
 
+  <struct name="FrankenstructOfEmptyBoolWithMandatoryInt" type="String" maxlength="15" minsize="0" maxsize="3">
+    <param name="mandatoryInt" type="Integer" minvalue="0" maxvalue="42" />
+  </struct>
+
   <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">
     <description>
       Test typedef over array

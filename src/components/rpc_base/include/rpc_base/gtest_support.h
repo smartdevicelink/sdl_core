@@ -30,44 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef STRUCT_TYPE_FROM_JSON_METHOD_H_
-#define STRUCT_TYPE_FROM_JSON_METHOD_H_
+#ifndef RPC_BASE_GTEST_SUPPORT_H_
+#define RPC_BASE_GTEST_SUPPORT_H_
 
-#include "cppgen/cpp_function.h"
+#include <gtest/gtest.h>
 
-namespace codegen {
-class Struct;
+#include "rpc_base/validation_report.h"
 
-/*
- * Generates struct constructor that assigns fields values taking them from
- * parsed json tree
- */
-class StructTypeFromJsonConstructor : public CppStructConstructor {
- public:
-  StructTypeFromJsonConstructor(const Struct* strct,
-                                const std::string& base_class_name);
-  ~StructTypeFromJsonConstructor();
- private:
-  // CppFunction pure virtual methods implementation
-  virtual void DefineBody(std::ostream* os) const;
- private:
-  // Fields
-  const Struct* strct_;
-};
+// A predicate-formatter for asserting that intergen generated
+// object is valid
+template<typename T>
+::testing::AssertionResult AssertRpcObjValid(const char* obj_expr,
+                                               const T& obj) {
+  if (obj.is_valid())
+    return ::testing::AssertionSuccess();
 
-/*
- * Generates struct method that serializes the struct fields into json tree.
- */
-class StructTypeToJsonMethod : public CppFunction {
- public:
-  StructTypeToJsonMethod(const Struct* strct);
-  ~StructTypeToJsonMethod();
- private:
-  // CppFunction pure virtual methods implementation
-  virtual void DefineBody(std::ostream* os) const;
- private:
-  const Struct* strct_;
-};
-}  // namespace codegen
+  rpc::ValidationReport report(obj_expr);
+  obj.ReportErrors(&report);
 
-#endif /* STRUCT_TYPE_FROM_JSON_METHOD_H_ */
+  return ::testing::AssertionFailure()
+      << obj_expr << " failed validation. Violations are:\n"
+      << rpc::PrettyFormat(report);
+}
+
+#define ASSERT_RPCTYPE_VALID(object) \
+  ASSERT_PRED_FORMAT1(AssertRpcObjValid, object)
+
+#define EXPECT_RPCTYPE_VALID(object) \
+  EXPECT_PRED_FORMAT1(AssertRpcObjValid, object)
+
+#endif /* RPC_BASE_GTEST_SUPPORT_H_ */
