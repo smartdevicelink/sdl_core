@@ -110,7 +110,7 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
-  profile::Profile::instance()->config_file_name("log4cxx.properties");
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
 
