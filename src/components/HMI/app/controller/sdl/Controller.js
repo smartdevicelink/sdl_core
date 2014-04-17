@@ -546,13 +546,12 @@ SDL.SDLController = Em.Object
          */
         registerApplication: function(params, applicationType) {
 
-            SDL.SDLModel.get('registeredApps')
-                .pushObject(this.applicationModels[applicationType].create( {
-                    appID: params.appID,
-                    appName: params.appName,
-                    deviceName: params.deviceName,
-                    appType: params.appType
-                }));
+            SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create( {
+                appID: params.appID,
+                appName: params.appName,
+                deviceName: params.deviceName,
+                appType: params.appType
+            }));
 
             var exitCommand = {
                 "id": -10,

@@ -248,7 +248,7 @@ SDL.SettingsController = Em.Object.create( {
 
     AllowSDLFunctionality: function(device) {
         this.currentDeviceAllowance = device;
-        SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
+        SDL.SDLModel.connectedDevices[device.id].sdlFunctionality.popUpId = SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
     },
 
     onSDLConsentNeededHandler: function(params) {
@@ -275,6 +275,10 @@ SDL.SettingsController = Em.Object.create( {
         SDL.DeviceConfigView.showDeviceList();
 
         FFW.BasicCommunication.OnAllowSDLFunctionality(result, "GUI", SDL.SettingsController.currentDeviceAllowance);
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.allowed = result;
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.popUpId = null;
 
         SDL.SettingsController.currentDeviceAllowance = null;
     }
