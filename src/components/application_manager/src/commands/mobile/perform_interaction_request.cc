@@ -164,11 +164,21 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       LOG4CXX_INFO(logger_, "Interaction Mode: MANUAL_ONLY");
+
+      if (!CheckChoiceSetVRSynonyms(app)) {
+        return;
+      }
+
       if (!CheckChoiceSetMenuNames(app)) {
         return;
       }
 
+      if (!CheckVrHelpItemPositions(app)) {
+        return;
+      }
+
       app->set_perform_interaction_active(correlation_id);
+      SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -500,17 +510,19 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
-  int32_t grammar_id_index = 0;
-  for (uint32_t i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-    if (!choice_set) {
-      LOG4CXX_WARN(logger_, "Couldn't found choiset");
-      continue;
+  if (mobile_apis::InteractionMode::MANUAL_ONLY != interaction_mode_) {
+    msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
+    int32_t grammar_id_index = 0;
+    for (uint32_t i = 0; i < choice_list.length(); ++i) {
+      smart_objects::SmartObject* choice_set =
+          app->FindChoiceSet(choice_list[i].asInt());
+      if (!choice_set) {
+        LOG4CXX_WARN(logger_, "Couldn't found choiset");
+        continue;
+      }
+      msg_params[strings::grammar_id][grammar_id_index++]=
+          (*choice_set)[strings::grammar_id].asUInt();
     }
-    uint32_t grammar_id = (*choice_set)[strings::grammar_id].asUInt();
-    msg_params[strings::grammar_id][grammar_id_index++]= (*choice_set)[strings::grammar_id];
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
