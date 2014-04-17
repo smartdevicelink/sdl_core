@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 
-public class IncomingProtocolMessageComparitor implements Comparator<ProtocolMessage> {
+public class OutgoingProtocolMessageComparator implements Comparator<ProtocolMessage> {
 
 	@Override
 	public int compare(ProtocolMessage arg0, ProtocolMessage arg1) {
@@ -12,3 +12,4 @@ public class IncomingProtocolMessageComparitor implements Comparator<ProtocolMes
 		return 0;
 	}
 }
+
