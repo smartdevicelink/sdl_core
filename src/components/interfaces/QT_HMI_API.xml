@@ -2524,9 +2524,15 @@
     </param>
   </function>
   <function name="OnSystemContext" messagetype="notification">
-    <description>Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
+    <description>
+      Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu);
+      switches to VR; pop-up appears on screen etc.
+    </description>
     <param name="systemContext" type="Common.SystemContext" mandatory="true">
       <description>The context the application is brought into.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that is related to this RPC.</description>
     </param>
   </function>
   <function name="GetCapabilities" messagetype="request">

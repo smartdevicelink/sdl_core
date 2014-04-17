@@ -797,8 +797,8 @@ SDL.SDLController = Em.Object
         /**
          * Send system context
          */
-        onSystemContextChange: function() {
+        onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'));
+            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
         }
     });

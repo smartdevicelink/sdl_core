@@ -172,6 +172,8 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLModel.onUIAlert(request.params, request.id);
 
+                    SDL.SDLController.onSystemContextChange(request.params.appID);
+
                     break;
                 }
                 case "UI.Show":
@@ -232,6 +234,8 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLModel.uiPerformInteraction(request);
 
+                    SDL.SDLController.onSystemContextChange();
+
                     break;
                 }
                 case "UI.SetMediaClockTimer":
@@ -251,12 +255,16 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLModel.uiSlider(request);
 
+                    SDL.SDLController.onSystemContextChange();
+
                     break;
                 }
                 case "UI.ScrollableMessage":
                 {
 
                     SDL.SDLModel.onSDLScrolableMessage(request, request.id);
+
+                    SDL.SDLController.onSystemContextChange();
 
                     break;
                 }
@@ -631,6 +639,8 @@ FFW.UI = FFW.RPCObserver.create({
 
                     this.performAudioPassThruRequestID = request.id;
                     SDL.SDLModel.UIPerformAudioPassThru(request.params);
+
+                    SDL.SDLController.onSystemContextChange();
 
                     break;
                 }
@@ -1296,7 +1306,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {String}
      *            systemContextValue
      */
-    OnSystemContext: function (systemContextValue) {
+    OnSystemContext: function (systemContextValue, appID) {
 
         Em.Logger.log("FFW.UI.OnSystemContext");
 
@@ -1308,6 +1318,11 @@ FFW.UI = FFW.RPCObserver.create({
                 "systemContext": systemContextValue
             }
         };
+
+        if (appID) {
+            JSONMessage.params.appID = appID;
+        }
+
         this.client.send(JSONMessage);
     },
 

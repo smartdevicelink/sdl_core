@@ -206,11 +206,14 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     onActivate: function() {
         SDL.SDLController.VRMove();
-    	SDL.SDLController.onSystemContextChange();
     	if (this.VRActive) {
+
     		FFW.VR.Started();
+            SDL.SDLController.onSystemContextChange();
     	} else {
+
     		FFW.VR.Stopped();
+            SDL.SDLController.onSystemContextChange();
     	}
     }.observes('this.VRActive'),
     
