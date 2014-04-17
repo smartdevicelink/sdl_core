@@ -206,7 +206,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         message.setData(frame);
         message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         message.setSessionID((byte) 48);
-        message.setSessionType(ServiceType.Mobile_Nav);
+        message.setServiceType(ServiceType.Mobile_Nav);
         return message;
     }
 

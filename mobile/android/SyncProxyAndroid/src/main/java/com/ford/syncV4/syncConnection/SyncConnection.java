@@ -199,7 +199,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
                 if (_protocol != null) {
                     // If transport is still connected, sent EndProtocolSessionMessage
-                    if (sendFinishMessages && getIsConnected()) {
+                    if (sendFinishMessages) {
                         _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                     }
                 }
@@ -481,8 +481,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
-                                             int length) {
+    public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset, int length) {
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (_transport != null) {
@@ -602,6 +601,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendH264(ProtocolMessage pm) {
+
+        // Do to unordered messages from blocking queue do not use it for the stream for a whiled
+        //mConnectionListener.sendOutgoingMessage(pm);
+
         sendMessage(pm);
     }
 

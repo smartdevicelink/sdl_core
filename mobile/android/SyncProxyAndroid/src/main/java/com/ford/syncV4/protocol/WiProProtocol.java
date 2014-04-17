@@ -9,12 +9,16 @@ import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.service.ConsecutiveFrameProcessor;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class WiProProtocol extends AbstractProtocol {
 
@@ -35,7 +39,7 @@ public class WiProProtocol extends AbstractProtocol {
     int messageID = 0;
     Hashtable<Integer, MessageFrameAssembler> _assemblerForMessageID = new Hashtable<Integer, MessageFrameAssembler>();
     Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> _assemblerForSessionID = new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
-    protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
+    protected Hashtable<Byte, ReentrantLock> _messageLocks = new Hashtable<Byte, ReentrantLock>();
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatSendInterval_ms = 0;
     // NOTE: To date, not implemented on SYNC
@@ -129,21 +133,21 @@ public class WiProProtocol extends AbstractProtocol {
 
     public void SendMessage(ProtocolMessage protocolMsg) {
         protocolMsg.setRPCType((byte) 0x00); //always sending a request
-        byte sessionID = protocolMsg.getSessionID();
+        final byte sessionID = protocolMsg.getSessionID();
 
-        byte protocolVersionToSend = getProtocolVersion();
+        final byte protocolVersionToSend = getProtocolVersion();
         /*if (protocolVersionToSend > ProtocolConstants.PROTOCOL_VERSION_MAX) {
             protocolVersionToSend = ProtocolConstants.PROTOCOL_VERSION_MAX;
         }*/
 
         ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
                 protocolMsg, protocolVersionToSend).generate();
-        byte[] data = protocolMessageConverter.getData();
-        ServiceType serviceType = protocolMessageConverter.getSessionType();
+        final byte[] data = protocolMessageConverter.getData();
+        final ServiceType serviceType = protocolMessageConverter.getSessionType();
 
 
         // Get the message lock for this protocol currentSession
-        Object messageLock = _messageLocks.get(sessionID);
+        ReentrantLock messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
@@ -151,64 +155,42 @@ public class WiProProtocol extends AbstractProtocol {
             return;
         }
 
-        synchronized (messageLock) {
+        messageLock.lock();
+
+        //synchronized (messageLock) {
+
             if (data.length > MAX_DATA_SIZE) {
 
-                messageID++;
-                ProtocolFrameHeader firstHeader =
-                        ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType,
-                                sessionID, messageID, protocolVersionToSend);
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                executor.submit(new Runnable() {
+                    @Override
+                    public void run() {
+                        ConsecutiveFrameProcessor consecutiveFrameProcessor =
+                                new ConsecutiveFrameProcessor();
 
-                // Assemble first frame.
-                int frameCount = data.length / MAX_DATA_SIZE;
-                if (data.length % MAX_DATA_SIZE > 0) {
-                    frameCount++;
-                }
-                //byte[] firstFrameData = new byte[PROTOCOL_FRAME_HEADER_SIZE];
-                byte[] firstFrameData = new byte[8];
-                // First four bytes are data size.
-                System.arraycopy(BitConverter.intToByteArray(data.length), 0, firstFrameData, 0, 4);
-                // Second four bytes are frame count.
-                System.arraycopy(BitConverter.intToByteArray(frameCount), 0, firstFrameData, 4, 4);
+                        consecutiveFrameProcessor.process(data, sessionID, messageID++, serviceType,
+                                protocolVersionToSend, MAX_DATA_SIZE,
+                                new ConsecutiveFrameProcessor.IConsecutiveFrameProcessor() {
 
-                handleProtocolFrameToSend(firstHeader, firstFrameData, 0, firstFrameData.length);
+                            @Override
+                            public void onProtocolFrameToSend(ProtocolFrameHeader header,
+                                                              byte[] data, int offset, int length) {
 
-                int currentOffset = 0;
-                byte frameSequenceNumber = 0;
-
-                for (int i = 0; i < frameCount; i++) {
-                    if (i < (frameCount - 1)) {
-                        ++frameSequenceNumber;
-                        if (frameSequenceNumber ==
-                                ProtocolFrameHeader.FrameDataFinalConsecutiveFrame) {
-                            // we can't use 0x00 as frameSequenceNumber, because
-                            // it's reserved for the last frame
-                            ++frameSequenceNumber;
-                        }
-                    } else {
-                        frameSequenceNumber = ProtocolFrameHeader.FrameDataFinalConsecutiveFrame;
-                    } // end-if
-
-                    int bytesToWrite = data.length - currentOffset;
-                    if (bytesToWrite > MAX_DATA_SIZE) {
-                        bytesToWrite = MAX_DATA_SIZE;
+                                        handleProtocolFrameToSend(header, data, offset, length);
+                            }
+                        });
                     }
+                });
 
-                    ProtocolFrameHeader consecHeader =
-                            ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType,
-                                    sessionID, bytesToWrite, frameSequenceNumber,
-                                    messageID, protocolVersionToSend);
-                    handleProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
-                    currentOffset += bytesToWrite;
-                }
             } else {
-                messageID++;
                 ProtocolFrameHeader header =
                         ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID,
-                                data.length, messageID, protocolVersionToSend);
+                                data.length, messageID++, protocolVersionToSend);
                 handleProtocolFrameToSend(header, data, 0, data.length);
             }
-        }
+        //}
+
+        messageLock.unlock();
     }
 
     private void sendFrameToTransport(ProtocolFrameHeader header) {
@@ -354,7 +336,7 @@ public class WiProProtocol extends AbstractProtocol {
             //if (framesRemaining == 0) {
             if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
                 ProtocolMessage message = new ProtocolMessage();
-                message.setSessionType(header.getServiceType());
+                message.setServiceType(header.getServiceType());
                 message.setSessionID(header.getSessionID());
                 //If it is WiPro 2.0 it must have binary header
                 if (header.getVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
@@ -435,9 +417,9 @@ public class WiProProtocol extends AbstractProtocol {
                 sendStartProtocolSessionACK(header.getServiceType(), header.getSessionID());
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceACK.getValue()) {
                 // Use this sessionID to create a message lock
-                Object messageLock = _messageLocks.get(header.getSessionID());
+                ReentrantLock messageLock = _messageLocks.get(header.getSessionID());
                 if (messageLock == null) {
-                    messageLock = new Object();
+                    messageLock = new ReentrantLock();
                     _messageLocks.put(header.getSessionID(), messageLock);
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
@@ -482,7 +464,7 @@ public class WiProProtocol extends AbstractProtocol {
             } else if (header.getServiceType() == ServiceType.Bulk_Data) {
                 message.setMessageType(MessageType.BULK);
             } // end-if
-            message.setSessionType(header.getServiceType());
+            message.setServiceType(header.getServiceType());
             message.setSessionID(header.getSessionID());
             //If it is WiPro 2.0 it must have binary header
             if (header.getVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {

@@ -21,7 +21,7 @@ public abstract class AbstractProtocol {
     protected IProtocolListener _protocolListener = null;
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
-    private Object _frameLock = new Object();
+    private static final Object FRAME_LOCK = new Object();
     private static File audioFile;
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
@@ -75,6 +75,26 @@ public abstract class AbstractProtocol {
     // expected to be received from SYNC.
     public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
 
+    public static byte[] appendDataToProtocolHeader(ProtocolFrameHeader header, byte[] data,
+                                                    int offset, int length) {
+        if (offset >= data.length) {
+            throw new IllegalArgumentException("offset should not be more then length");
+        }
+        byte[] dataChunk;
+        if (offset + length >= data.length) {
+            dataChunk = Arrays.copyOfRange(data, offset, data.length);
+        } else {
+            dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+        }
+
+        byte[] frameHeader = header.assembleHeaderBytes();
+        byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+        System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+        System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+
+        return commonArray;
+    }
+
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data, MessageFrameAssembler assembler) {
         if (data != null) {
@@ -99,22 +119,9 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        synchronized (_frameLock) {
+        synchronized (FRAME_LOCK) {
             if (data != null) {
-                if (offset >= data.length) {
-                    throw new IllegalArgumentException("offset should not be more then length");
-                }
-                byte[] dataChunk = null;
-                if (offset + length >= data.length) {
-                    dataChunk = Arrays.copyOfRange(data, offset, data.length);
-                } else {
-                    dataChunk = Arrays.copyOfRange(data, offset, offset + length);
-                }
-
-                byte[] frameHeader = header.assembleHeaderBytes();
-                byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-                System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-                System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+                byte[] commonArray = appendDataToProtocolHeader(header, data, offset, length);
                 handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
             } else {
                 byte[] frameHeader = header.assembleHeaderBytes();
@@ -202,8 +209,7 @@ public abstract class AbstractProtocol {
 
     // This method handles protocol message bytes that are ready to send.
     // A callback is sent to the protocol listener.
-    protected void handleProtocolMessageBytesToSend(byte[] bytesToSend,
-                                                    int offset, int length) {
+    protected void handleProtocolMessageBytesToSend(byte[] bytesToSend, int offset, int length) {
         _protocolListener.onProtocolMessageBytesToSend(bytesToSend, offset, length);
     }
 

@@ -2,6 +2,7 @@ package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.util.BitConverter;
 
 /**
@@ -12,14 +13,22 @@ import com.ford.syncV4.util.BitConverter;
  */
 public class ConsecutiveFrameProcessor {
 
-    public void execute() {
+    public interface IConsecutiveFrameProcessor {
+
+        public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
+                                          int length);
+    }
+
+    public void process(byte[] data, byte sessionID, final int messageID, ServiceType serviceType,
+                        byte protocolVersionToSend, int maxDataSize,
+                        IConsecutiveFrameProcessor callback) {
         ProtocolFrameHeader firstHeader =
                 ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType,
                         sessionID, messageID, protocolVersionToSend);
 
         // Assemble first frame.
-        int frameCount = data.length / MAX_DATA_SIZE;
-        if (data.length % MAX_DATA_SIZE > 0) {
+        int frameCount = data.length / maxDataSize;
+        if (data.length % maxDataSize > 0) {
             frameCount++;
         }
         //byte[] firstFrameData = new byte[PROTOCOL_FRAME_HEADER_SIZE];
@@ -29,7 +38,7 @@ public class ConsecutiveFrameProcessor {
         // Second four bytes are frame count.
         System.arraycopy(BitConverter.intToByteArray(frameCount), 0, firstFrameData, 4, 4);
 
-        handleProtocolFrameToSend(firstHeader, firstFrameData, 0, firstFrameData.length);
+        callback.onProtocolFrameToSend(firstHeader, firstFrameData, 0, firstFrameData.length);
 
         int currentOffset = 0;
         byte frameSequenceNumber = 0;
@@ -48,15 +57,15 @@ public class ConsecutiveFrameProcessor {
             } // end-if
 
             int bytesToWrite = data.length - currentOffset;
-            if (bytesToWrite > MAX_DATA_SIZE) {
-                bytesToWrite = MAX_DATA_SIZE;
+            if (bytesToWrite > maxDataSize) {
+                bytesToWrite = maxDataSize;
             }
 
             ProtocolFrameHeader consecHeader =
                     ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType,
                             sessionID, bytesToWrite, frameSequenceNumber,
                             messageID, protocolVersionToSend);
-            handleProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
+            callback.onProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
             currentOffset += bytesToWrite;
         }
     }

@@ -9,9 +9,9 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.messageDispatcher.IDispatchingStrategy;
-import com.ford.syncV4.messageDispatcher.IncomingProtocolMessageComparitor;
-import com.ford.syncV4.messageDispatcher.InternalProxyMessageComparitor;
-import com.ford.syncV4.messageDispatcher.OutgoingProtocolMessageComparitor;
+import com.ford.syncV4.messageDispatcher.IncomingProtocolMessageComparator;
+import com.ford.syncV4.messageDispatcher.InternalProxyMessageComparator;
+import com.ford.syncV4.messageDispatcher.OutgoingProtocolMessageComparator;
 import com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher;
 import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
@@ -82,7 +82,6 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
-import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
@@ -677,7 +676,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void setupOutgoingMessageDispatcher() {
         // Setup Outgoing ProxyMessage Dispatcher
-        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+        //synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
             // Ensure outgoingProxyMessageDispatcher is null
             if (_outgoingProxyMessageDispatcher != null) {
                 _outgoingProxyMessageDispatcher.dispose();
@@ -685,7 +684,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
 
             _outgoingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("OUTGOING_MESSAGE_DISPATCHER",
-                    new OutgoingProtocolMessageComparitor(),
+                    new OutgoingProtocolMessageComparator(),
                     new IDispatchingStrategy<ProtocolMessage>() {
                         @Override
                         public void dispatch(ProtocolMessage message) {
@@ -702,7 +701,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             handleErrorsFromOutgoingMessageDispatcher(info, ex);
                         }
                     });
-        }
+        //}
     }
 
     private void setupInternalProxyMessageDispatcher() {
@@ -715,7 +714,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
 
             _internalProxyMessageDispatcher = new ProxyMessageDispatcher<InternalProxyMessage>("INTERNAL_MESSAGE_DISPATCHER",
-                    new InternalProxyMessageComparitor(),
+                    new InternalProxyMessageComparator(),
                     new IDispatchingStrategy<InternalProxyMessage>() {
 
                         @Override
@@ -788,7 +787,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
 
             _incomingProxyMessageDispatcher = new ProxyMessageDispatcher<ProtocolMessage>("INCOMING_MESSAGE_DISPATCHER",
-                    new IncomingProtocolMessageComparitor(),
+                    new IncomingProtocolMessageComparator(),
                     new IDispatchingStrategy<ProtocolMessage>() {
                         @Override
                         public void dispatch(ProtocolMessage message) {
@@ -1108,12 +1107,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
 
             // Close OutgoingProxyMessageDispatcher thread
-            synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+            //synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
                 if (_outgoingProxyMessageDispatcher != null) {
                     _outgoingProxyMessageDispatcher.dispose();
                     _outgoingProxyMessageDispatcher = null;
                 }
-            }
+            //}
 
             // Close InternalProxyMessageDispatcher thread
             synchronized (INTERNAL_MESSAGE_QUEUE_THREAD_LOCK) {
@@ -1429,11 +1428,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void queueOutgoingMessage(ProtocolMessage message) {
-        synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
+        //synchronized (OUTGOING_MESSAGE_QUEUE_THREAD_LOCK) {
             if (_outgoingProxyMessageDispatcher != null) {
                 _outgoingProxyMessageDispatcher.queueMessage(message);
             }
-        }
+        //}
     }
 
     /**
@@ -3071,6 +3070,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     startAudioService(sessionID, correlationID);
                 }
             }
+        }
+
+        @Override
+        public void sendOutgoingMessage(ProtocolMessage protocolMessage) {
+            queueOutgoingMessage(protocolMessage);
         }
     }
 
