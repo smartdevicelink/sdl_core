@@ -413,7 +413,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
     }
 
     const std::string& mobile_app_id = app->mobile_app_id()->asString();
-    if (!mobile_app_id.empty()) {
+    if (mobile_app_id.empty()) {
       LOG4CXX_WARN(logger_, "Application with connection key '" <<app_id<<"'"
                    " has no application id.");
       return false;
