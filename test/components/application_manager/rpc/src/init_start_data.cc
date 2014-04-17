@@ -36,8 +36,7 @@
 void InitStartData() {
   printf("\n\n\n in initStartData\n\n\n");
 
-  log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("initStartData"));
+  GETLOGGER(logger_, "initStartData")
 
   LOG4CXX_INFO(logger_, " Application started!");
 

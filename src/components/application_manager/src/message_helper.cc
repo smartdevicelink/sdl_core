@@ -48,8 +48,7 @@
 
 namespace {
 
-log4cxx::LoggerPtr g_logger = log4cxx::LoggerPtr(
-                                  log4cxx::Logger::getLogger("ApplicationManager"));
+GETLOGGER(logger_, "ApplicationManager")
 
 hmi_apis::Common_Language::eType ToCommonLanguage(
     mobile_apis::Language::eType mobile_language) {
@@ -60,11 +59,11 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
     long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
     long max_mobile_lang = long(mobile_apis::Language::NO_NO);
     if (max_common_lang_val != max_mobile_lang) {
-        LOG4CXX_ERROR(g_logger, "Mapping between Common_Language and Language"
+        LOG4CXX_ERROR(logger_, "Mapping between Common_Language and Language"
                       " has changed! Please update converter function");
     }
     if (lang_val > max_common_lang_val) {
-        LOG4CXX_ERROR(g_logger, "Non-convertable language ID");
+        LOG4CXX_ERROR(logger_, "Non-convertable language ID");
     }
     return hmi_apis::Common_Language::eType(lang_val);
 }
@@ -349,7 +348,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
     const uint32_t app_id) {
 
-    LOG4CXX_INFO(g_logger, "GetHashUpdateNotification" << app_id);
+    LOG4CXX_INFO(logger_, "GetHashUpdateNotification" << app_id);
     ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                    app_id);
     DCHECK(app.get());
@@ -364,7 +363,7 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
 }
 
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
-    LOG4CXX_INFO(g_logger, "SendHashUpdateNotification");
+    LOG4CXX_INFO(logger_, "SendHashUpdateNotification");
 
     smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
     PrintSmartObject(*so);
@@ -549,7 +548,7 @@ smart_objects::SmartObject* MessageHelper::CreateSetAppIcon(
 }
 
 bool MessageHelper::SendIVISubscribtions(const uint32_t app_id) {
-    LOG4CXX_INFO(g_logger, " MessageHelper::SendIVISubscribtions ");
+    LOG4CXX_INFO(logger_, " MessageHelper::SendIVISubscribtions ");
 
     bool succes = true;
     ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
@@ -568,7 +567,7 @@ bool MessageHelper::SendIVISubscribtions(const uint32_t app_id) {
 
 MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(
     const uint32_t app_id) {
-    LOG4CXX_INFO(g_logger, " MessageHelper::GetIVISubscribtionRequests ");
+    LOG4CXX_INFO(logger_, " MessageHelper::GetIVISubscribtionRequests ");
 
     ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                    app_id);
@@ -1131,7 +1130,7 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
         application_manager::ApplicationManagerImpl::instance()
         ->application(app_id);
     if (!app.valid()) {
-        LOG4CXX_WARN(g_logger, "Invalid app_id: " << app_id);
+        LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
         return;
     }
 
@@ -1480,7 +1479,7 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
 
 void MessageHelper::SendNaviStartStream(const std::string& url,
                                         int32_t connection_key) {
-    LOG4CXX_INFO(g_logger, "MessageHelper::SendNaviStartStream");
+    LOG4CXX_INFO(logger_, "MessageHelper::SendNaviStartStream");
     smart_objects::SmartObject* start_stream = new smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
@@ -1617,7 +1616,7 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
 }
 
 bool MessageHelper::SendStopAudioPathThru() {
-    LOG4CXX_INFO(g_logger, "MessageHelper::SendAudioStopAudioPathThru");
+    LOG4CXX_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
 
     NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
         new NsSmartDeviceLink::NsSmartObjects::SmartObject;

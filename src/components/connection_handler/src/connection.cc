@@ -45,10 +45,7 @@
  */
 namespace connection_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr Connection::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif // ENABLE_LOG
+GETLOGGER(Connection::logger_, "ConnectionHandler")
 
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,

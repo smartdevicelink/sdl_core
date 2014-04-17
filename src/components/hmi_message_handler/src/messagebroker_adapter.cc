@@ -39,10 +39,7 @@ namespace hmi_message_handler {
 
 typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
-#endif // ENABLE_LOG
+GETLOGGER(MessageBrokerAdapter::logger_, "HMIMessageHandler")
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,

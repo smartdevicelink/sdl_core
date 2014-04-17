@@ -36,10 +36,7 @@ namespace application_manager {
 
 namespace commands {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("Commands"));
-#endif
+GETLOGGER(logger_, "Commands")
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;

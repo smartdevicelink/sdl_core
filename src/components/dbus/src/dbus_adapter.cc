@@ -41,8 +41,7 @@ extern char introspection_xml[];
 
 namespace dbus {
 
-log4cxx::LoggerPtr DBusAdapter::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
+GETLOGGER(DBusAdapter::logger_, "HMIMessageHandler")
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems) {

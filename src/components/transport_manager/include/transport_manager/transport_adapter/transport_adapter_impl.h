@@ -37,6 +37,7 @@
 
 #include <queue>
 #include <set>
+#include <map>
 #include <memory>
 #include <string>
 

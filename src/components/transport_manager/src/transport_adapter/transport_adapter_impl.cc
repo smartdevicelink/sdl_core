@@ -43,9 +43,7 @@
 namespace transport_manager {
 
 namespace transport_adapter {
-
-log4cxx::LoggerPtr logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
+  GETLOGGER(logger_, "TransportManager")
 
 TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,

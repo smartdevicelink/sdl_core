@@ -42,11 +42,7 @@
 
 namespace protocol_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-#endif // ENABLE_LOG
-
+GETLOGGER(ProtocolHandlerImpl::logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.

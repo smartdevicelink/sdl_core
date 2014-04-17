@@ -100,10 +100,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
 
-#   ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#   endif // ENABLE_LOG
-
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);

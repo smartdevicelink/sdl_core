@@ -38,7 +38,7 @@
 #include "utils/file_system.h"
 
 namespace {
-log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
+  GETLOGGER(logger_, "ApplicationManager")
 }
 
 namespace application_manager {
@@ -237,7 +237,7 @@ void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
   if (!is_media_application()
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(g_logger, "Trying to set audio streaming state"
+    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
     return;
   }

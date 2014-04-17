@@ -37,10 +37,7 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr FromMicRecorderAdapter::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("FromMicRecorderAdapter"));
-#endif // ENABLE_LOG
+GETLOGGER(FromMicRecorderAdapter::logger_, "FromMicRecorderAdapter")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
   : recorder_thread_(NULL)

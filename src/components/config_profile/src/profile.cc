@@ -49,8 +49,7 @@ const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 }
 
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-                                 log4cxx::Logger::getLogger("Profile"));
+GETLOGGER(logger_, "Profile")
 
 namespace profile {
 Profile::Profile()

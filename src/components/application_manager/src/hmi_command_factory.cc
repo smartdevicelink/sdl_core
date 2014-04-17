@@ -259,10 +259,7 @@
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr HMICommandFactory::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("ApplicationManager"));
-#endif // ENABLE_LOG
+GETLOGGER(HMICommandFactory::logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
   const MessageSharedPtr& message) {

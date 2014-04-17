@@ -1,9 +1,5 @@
 /**
- * \file LOG4CXXLogger.hpp
- * \brief Definitions required by logger.
- * Stores device information
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,15 +31,22 @@
  */
 
 #ifndef LOG4CXXLOGGER_HPP_
+
+
+#ifdef ENABLE_LOG
   #include <errno.h>
   #include <string.h>
   #include <log4cxx/logger.h>
   #include <log4cxx/propertyconfigurator.h>
+#endif // ENABLE_LOG
 
 namespace log4cxx
 {
 
 #ifdef ENABLE_LOG
+    #define GETLOGGER(logger_var, logger_name) \
+      log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
+
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -68,7 +71,11 @@ namespace log4cxx
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
-#else
+
+#else // ENABLE_LOG is OFF
+
+    #define GETLOGGER(logger, name)
+
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_INFO

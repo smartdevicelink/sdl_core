@@ -80,9 +80,8 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
     : thread_(name.c_str(), new LoopThreadDelegate(&message_queue_, handler)) {
   bool started = thread_.startWithOptions(thread_opts);
   if (!started) {
-    log4cxx::LoggerPtr logger =
-        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-    LOG4CXX_ERROR(logger, "Failed to start thread " << name);
+    GETLOGGER(logger_, "Utils")
+    LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
   }
 }
 
