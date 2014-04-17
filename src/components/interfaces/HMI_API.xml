@@ -1087,6 +1087,7 @@
     <element name="VUI" />
   </enum>
   <struct name="UserFriendlyMessage" scope="internal">
+    <param name="messageCode" type="String" mandatory="true"/>
     <param name="ttsString" type="String" mandatory="false"/>
     <param name="label" type="String" mandatory="false" />
     <param name="line1" type="String" mandatory="false"/>
@@ -1921,8 +1922,8 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>The information about resumption application. </description>
+      <param name="resumeVrGrammars" type="Boolean" mandatory="false">
+        <description>The flag if VR grammars resume is required</description>
       </param>
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
@@ -2176,7 +2177,7 @@
     <param name="timeout" type="Integer" mandatory="true">
       <description>Timeout initiate timeoutPrompt</description>
     </param>
-    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
         IDs of the specific compiled grammars for this voice interaction.
       </description>
@@ -2556,9 +2557,15 @@
     </param>
   </function>
   <function name="OnSystemContext" messagetype="notification">
-    <description>Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
+    <description>
+      Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu);
+      switches to VR; pop-up appears on screen etc.
+    </description>
     <param name="systemContext" type="Common.SystemContext" mandatory="true">
       <description>The context the application is brought into.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that is related to this RPC.</description>
     </param>
   </function>
   <function name="GetCapabilities" messagetype="request">
@@ -2788,6 +2795,12 @@
     </param>
     <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+    </param>
+    <param name="muteAudio" type="Boolean" mandatory="true">
+      <description>
+        Defines if the current audio source should be muted during the APT session. If not, the audio source will play without interruption.
+        If omitted, the value is set to true.
+      </description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">

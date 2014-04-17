@@ -33,17 +33,17 @@
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "protocol_handler/protocol_packet.h"
+#include "utils/logger.h"
 #include "utils/byte_order.h"
 #include "json/json.h"
 
 namespace security_manager {
+namespace {
+  GETLOGGER(logger_, "SecurityManager")
+}
 
 static const char* err_id ="id";
 static const char* err_text ="text";
-
-// TODO(EZamakhov): add section to log4cxx.properties file
-log4cxx::LoggerPtr SecurityManager::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("SecurityManager"));
 
 SecurityManager::SecurityManager():
   security_messages_("SecurityManager::security_messages_", this),

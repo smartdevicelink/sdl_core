@@ -5,6 +5,7 @@ include_directories (
   ../config_profile/include/
   ../security_manager/include/
   ../utils/include/
+  ../../thirdPartyLibs/encryption/include
 )
 
 set (SOURCES
@@ -19,3 +20,4 @@ set(LIBRARIES
 )
 
 add_library(connectionHandler ${SOURCES})
+target_link_libraries(connectionHandler encryption)

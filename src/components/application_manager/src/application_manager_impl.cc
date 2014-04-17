@@ -55,10 +55,7 @@
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
-#endif // ENABLE_LOG
+GETLOGGER(ApplicationManagerImpl::logger_, "ApplicationManager")
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;

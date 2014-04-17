@@ -31,12 +31,14 @@
  */
 
 #include "application_manager/policies/pt_exchange_handler_impl.h"
+#include "utils/logger.h"
 #include <unistd.h>
 
 namespace policy {
 
-log4cxx::LoggerPtr PTExchangeHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("PTExchangeHandlerImpl"));
+namespace {
+  GETLOGGER(logger_, "PTExchangeHandlerImpl")
+}
 
 PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
     : policy_handler_(handler) {

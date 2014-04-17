@@ -142,6 +142,15 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    /**
+     * @brief Convert string to HMI level, if possible
+     * @param hmi_level Stringified HMI level
+     * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
+     * is not possible
+     */
+    static mobile_api::HMILevel::eType StringToHMILevel(
+        const std::string& hmi_level);
+
     /*
     * @brief Used to obtain string representation of app's
     * HMI Level.

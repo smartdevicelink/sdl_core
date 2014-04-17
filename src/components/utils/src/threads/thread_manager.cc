@@ -45,12 +45,8 @@ using namespace std;
 using namespace sync_primitives;
 
 namespace {
-
 const char* kUnknownName = "UnnamedThread";
-
-log4cxx::LoggerPtr g_logger =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-
+GETLOGGER(logger_, "Utils")
 } // namespace
 
 UnnamedThreadRegistry::UnnamedThreadRegistry() {
@@ -88,12 +84,12 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
     pair<IdNamesMap::iterator, bool> inserted =
         id_names_.insert(make_pair(id, name));
     if (!inserted.second) {
-      LOG4CXX_ERROR(g_logger, "Trying to register thread name " << name
+      LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
                            <<", but it is already registered with name "
                            <<inserted.first->second);
     }
   } else {
-    LOG4CXX_ERROR(g_logger, "Ignoring duplicate thread name: " + name);
+    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " + name);
   }
 }
 
@@ -103,7 +99,7 @@ string ThreadManager::GetName(PlatformThreadHandle id) const {
   if (found != id_names_.end()) {
     return found->second;
   } else {
-    LOG4CXX_WARN(g_logger, "Thread doesn't have associated name");
+    LOG4CXX_WARN(logger_, "Thread doesn't have associated name");
     return unnamed_thread_namer_.GetUniqueName(id);
   }
 }

@@ -64,10 +64,7 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(
   return transport_manager::ConnectionUID(handle);
 }
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ConnectionHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif  // ENABLE_LOG
+GETLOGGER(ConnectionHandlerImpl::logger_, "ConnectionHandler")
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
     : connection_handler_observer_(NULL),

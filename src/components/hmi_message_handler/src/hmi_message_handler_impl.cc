@@ -35,10 +35,7 @@
 
 namespace hmi_message_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
-#endif // ENABLE_LOG
+GETLOGGER(HMIMessageHandlerImpl::logger_, "HMIMessageHandler")
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),

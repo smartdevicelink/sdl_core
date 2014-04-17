@@ -287,6 +287,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& system_files_path() const;
 
     /**
+     * @brief Returns port for TCP transport adapter
+     */
+    uint16_t transport_manager_tcp_adapter_port() const;
+
+    /**
      * @brief Reads a string value from the profile
      *
      * @param value         Result value
@@ -451,6 +456,7 @@ class Profile : public utils::Singleton<Profile> {
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
+    uint16_t                        transport_manager_tcp_adapter_port_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

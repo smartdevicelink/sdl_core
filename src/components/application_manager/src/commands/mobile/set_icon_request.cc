@@ -67,12 +67,12 @@ void SetIconRequest::Run() {
 
   std::string full_file_path =
       profile::Profile::instance()->app_storage_folder() + "/";
-  full_file_path += app->name();
+  full_file_path += app->folder_name();
   full_file_path += "/";
   full_file_path += sync_file_name;
 
   if (!file_system::FileExists(full_file_path)) {
-    LOG4CXX_ERROR(logger_, "No such file");
+    LOG4CXX_ERROR(logger_, "No such file " << full_file_path);
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

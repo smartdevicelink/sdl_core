@@ -49,6 +49,20 @@ class StructTypeIsInitializedMethod : public CppFunction {
  private:
   // CppFunction pure virtual methods implementation
   virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
+  const Struct* strct_;
+};
+
+class StructTypeIsEmptyMethod : public CppFunction {
+ public:
+  StructTypeIsEmptyMethod(const Struct* strct);
+  ~StructTypeIsEmptyMethod();
+ private:
+  // CppFunction pure virtual methods implementation
+  virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
   const Struct* strct_;
 };
 

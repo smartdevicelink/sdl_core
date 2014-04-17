@@ -35,11 +35,12 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "security_manager/security_manager.h"
+#include "utils/logger.h"
 
 namespace security_manager {
-
-log4cxx::LoggerPtr CryptoManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("CryptoManagerImpl"));
+namespace {
+  GETLOGGER(logger_, "CryptoManagerImpl")
+}
 
 int CryptoManagerImpl::instance_count_ = 0;
 

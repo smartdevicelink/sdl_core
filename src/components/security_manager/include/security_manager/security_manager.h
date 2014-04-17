@@ -36,8 +36,6 @@
 #include <list>
 #include <string>
 
-#include "utils/logger.h"
-
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/session_observer.h"
@@ -223,7 +221,6 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
     /**
      *\brief Logger
      */
-    static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   };
 }  // namespace security_manager

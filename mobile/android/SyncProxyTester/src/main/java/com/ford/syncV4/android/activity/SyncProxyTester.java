@@ -463,7 +463,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(SyncProxyTester.this);
-                    String rawJSON = "";
+                    String rawJSON;
 
                     Integer corrId = -1;
                     if (listObj instanceof RPCRequest) {
@@ -473,8 +473,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     }
 
                     try {
-                        rawJSON = ((RPCMessage) listObj).serializeJSON(
-                                mBoundProxyService.syncProxyGetWiProVersion()).toString(2);
+                        byte protocolVersion = mBoundProxyService.syncProxyGetWiProVersion();
+                        rawJSON = ((RPCMessage) listObj).serializeJSON(protocolVersion).toString(2);
                         builder.setTitle("Raw JSON" + (corrId != -1 ? " (Corr ID " + corrId + ")" : ""));
                     } catch (Exception e) {
                         try {

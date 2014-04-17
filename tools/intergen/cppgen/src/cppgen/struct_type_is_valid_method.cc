@@ -53,9 +53,17 @@ StructTypeIsValidMethod::~StructTypeIsValidMethod() {
 
 void StructTypeIsValidMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
+  bool struct_can_be_valid_empty = true;
   for (size_t i = 0; i != fields.size(); ++i) {
-    const Struct::Field& field = fields[i];
-    strmfmt(*os, "if (!{0}.is_valid()) return false;\n", field.name());
+    if (fields[i].is_mandatory()) {
+      struct_can_be_valid_empty = false;
+    }
+  }
+  if (struct_can_be_valid_empty) {
+    *os << "if (is_empty()) return initialization_state__ == kInitialized;\n";
+  }
+  for (size_t i = 0; i != fields.size(); ++i) {
+    strmfmt(*os, "if (!{0}.is_valid()) return false;\n", fields[i].name());
   }
   *os << "return "<< func_names::kAdditionalValidation << "();\n";
 }

@@ -42,15 +42,20 @@ using typesafe_format::format;
 
 namespace codegen {
 
-StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(const Struct* strct)
+StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()),
       strct_(strct) {
-  Add(Parameter("value", "const Json::Value*"));
+  Add(Parameter("value__", "const Json::Value*"));
+  std::string base_initializer =
+      format("InitHelper({0}, &Json::Value::isObject)", parameters_[0].name);
+  Add(Initializer(base_class_name, base_initializer));
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     std::string initializer =
-        format("CompositeType::ValueMember({0}, \"{1}\")",
+        format("impl::ValueMember({0}, \"{1}\")",
                parameters_[0].name,
                i->name());
     if (i->default_value()) {
@@ -78,7 +83,7 @@ void StructTypeToJsonMethod::DefineBody(std::ostream* os) const {
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     const Struct::Field& field = *i;
-    strmfmt(*os, "CompositeType::WriteJsonField(\"{0}\", {0}, &result__);",
+    strmfmt(*os, "impl::WriteJsonField(\"{0}\", {0}, &result__);",
             field.name())
         << '\n';
   }

@@ -39,7 +39,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include "utils/logger.h"
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
@@ -429,13 +428,6 @@ class ProtocolHandlerImpl
     RESULT_CODE EncryptFrame(ProtocolFramePtr packet);
     RESULT_CODE DecryptFrame(ProtocolFramePtr packet);
   private:
-    /**
-     * \brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
-
     /**
      *\brief Pointer on instance of class implementing IProtocolObserver
      *\brief (JSON Handler)

@@ -44,7 +44,8 @@ class Struct;
  */
 class StructTypeFromJsonConstructor : public CppStructConstructor {
  public:
-  StructTypeFromJsonConstructor(const Struct* strct);
+  StructTypeFromJsonConstructor(const Struct* strct,
+                                const std::string& base_class_name);
   ~StructTypeFromJsonConstructor();
  private:
   const Struct* strct_;

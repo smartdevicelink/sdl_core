@@ -33,12 +33,12 @@
 #include "utils/lock.h"
 
 #include <errno.h>
+#include <stdint.h>
 
 #include "utils/logger.h"
 
 namespace {
-log4cxx::LoggerPtr g_logger =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
+  GETLOGGER(logger_, "Utils")
 }
 
 namespace sync_primitives {
@@ -50,26 +50,26 @@ Lock::Lock()
 {
   int32_t status = pthread_mutex_init(&mutex_, NULL);
   if (status != 0) {
-    LOG4CXX_ERROR(g_logger, "Failed to initialize mutex");
+    LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
   }
 }
 
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Destroying non-released mutex");
+    LOG4CXX_ERROR(logger_, "Destroying non-released mutex");
   }
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(g_logger, "Failed to destroy mutex");
+    LOG4CXX_ERROR(logger_, "Failed to destroy mutex");
   }
 }
 
 void Lock::Ackquire() {
   int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(g_logger, "Failed to acquire mutex");
+    LOG4CXX_ERROR(logger_, "Failed to acquire mutex");
   }
   AssertFreeAndMarkTaken();
 }
@@ -78,7 +78,7 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(g_logger, "Failed to unlock mutex");
+    LOG4CXX_ERROR(logger_, "Failed to unlock mutex");
   }
 }
 
@@ -86,7 +86,7 @@ bool Lock::Try() {
   bool ackquired = false;
 #ifndef NDEBUG
   if (lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Trying to lock already taken mutex");
+    LOG4CXX_ERROR(logger_, "Trying to lock already taken mutex");
   }
 #endif
   switch(pthread_mutex_trylock(&mutex_)) {
@@ -101,7 +101,7 @@ bool Lock::Try() {
     } break;
     default: {
       ackquired = false;
-      LOG4CXX_ERROR(g_logger, "Failed to try lock the mutex");
+      LOG4CXX_ERROR(logger_, "Failed to try lock the mutex");
     }
   }
   return ackquired;
@@ -110,13 +110,13 @@ bool Lock::Try() {
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
   if (lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Locking already taken mutex");
+    LOG4CXX_ERROR(logger_, "Locking already taken mutex");
   }
   lock_taken_ = true;
 }
 void Lock::AssertTakenAndMarkFree() {
   if (!lock_taken_) {
-    LOG4CXX_ERROR(g_logger, "Unlocking a mutex that is not taken");
+    LOG4CXX_ERROR(logger_, "Unlocking a mutex that is not taken");
   }
   lock_taken_ = false;
 }

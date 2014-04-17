@@ -31,12 +31,14 @@
  */
 
 #include "rpc/init_hmi.h"
+#include "utils/logger.h"
+namespace {
+  GETLOGGER(logger_, "MediaAdapterImpl")
+}  // namespace
 
 namespace InitializeHMI {
   #ifdef __QNX__
   bool Execute(std::string command, const char * const *) {
-    log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("appMain"));
     if (system(command.c_str()) == -1) {
       LOG4CXX_INFO(logger, "Can't start HMI!");
       return false;
@@ -45,8 +47,6 @@ namespace InitializeHMI {
   }
   #else
   bool Execute(std::string file, const char * const * argv) {
-    log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("appMain"));
     // Create a child process.
     pid_t pid_hmi = fork();
 
@@ -92,8 +92,6 @@ namespace InitializeHMI {
    * @return true if success otherwise false.
    */
   bool InitHmi() {
-    log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("appMain"));
     struct stat sb;
     if (stat("../src/appMain/hmi_link", &sb) == -1) {
       LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
@@ -138,8 +136,6 @@ namespace InitializeHMI {
    * @return true if success otherwise false.
    */
   bool InitHmi() {
-    log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("appMain"));
     std::string kStartHmi = "./start_hmi.sh";
     struct stat sb;
     if (stat(kStartHmi.c_str(), &sb) == -1) {
@@ -150,9 +146,6 @@ namespace InitializeHMI {
     return Execute(kStartHmi, NULL);
   }
   #endif  // QT_HMI
-
-  log4cxx::LoggerPtr loggerInitHmi = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("test_InitHMI"));
 
   InitHMI::InitHMI()
     : ThreadDelegate() {

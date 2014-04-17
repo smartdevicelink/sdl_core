@@ -409,7 +409,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testApplicationNameSetTest() throws Exception {
         String name = "name";
         proxy.setApplicationName(name);
-        String real = proxy.getApplicationName();
+        Object real = proxy.getApplicationName();
         assertEquals("names should be the same", real, name);
     }
 
@@ -426,7 +426,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testNgnMediaScreenAppNameSet() throws Exception {
         String mediaScreenName = "name";
         proxy.setNgnMediaScreenAppName(mediaScreenName);
-        String real = proxy.getNgnMediaScreenAppName();
+        Object real = proxy.getNgnMediaScreenAppName();
         assertEquals(real, mediaScreenName);
     }
 
@@ -441,7 +441,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testIsMediaAppSet() throws Exception {
         Boolean isMediaApp = false;
         proxy.setIsMediApp(isMediaApp);
-        Boolean real = proxy.getIsMediaApp();
+        Object real = proxy.getIsMediaApp();
         assertEquals(real, isMediaApp);
     }
 
@@ -470,7 +470,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testAppIDSet() throws Exception {
         String appID = "appID";
         proxy.setAppID(appID);
-        String real = proxy.getAppID();
+        Object real = proxy.getAppID();
         assertEquals(real, appID);
     }
 
@@ -512,7 +512,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals(ttsChunkVector, proxy.getTTSName());
         assertEquals(mediaAppName, proxy.getNgnMediaScreenAppName());
         assertEquals(vrSynonyms, proxy.getVrSynonyms());
-        assertEquals((Boolean) true, proxy.getIsMediaApp());
+        assertEquals(proxy.getIsMediaApp(), true);
         assertEquals(Language.AR_SA, proxy.getSyncLanguageDesired());
         assertEquals(Language.CS_CZ, proxy.getHmiDisplayLanguageDesired());
         assertEquals(appHMITypeVector, proxy.getAppHMIType());

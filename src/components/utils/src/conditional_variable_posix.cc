@@ -38,8 +38,8 @@
 #include "utils/logger.h"
 
 namespace {
-log4cxx::LoggerPtr g_logger =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
+
+GETLOGGER(logger_, "Utils")
 
 const long kNanosecondsPerSecond = 1000000000;
 const long kMillisecondsPerSecond = 1000;
@@ -52,16 +52,16 @@ ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
   int32_t initialized  = pthread_condattr_init(&attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to initialize "
+    LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable attributes");
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
   initialized = pthread_cond_init(&cond_var_, &attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to initialize "
+    LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable");
   int32_t rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to destroy "
+    LOG4CXX_ERROR(logger_, "Failed to destroy "
                             "conditional variable attributes");
 }
 
@@ -73,14 +73,14 @@ ConditionalVariable::~ConditionalVariable() {
 void ConditionalVariable::NotifyOne() {
   int32_t signaled = pthread_cond_signal(&cond_var_);
   if (signaled != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to signal conditional variable");
+    LOG4CXX_ERROR(logger_, "Failed to signal conditional variable");
 
 }
 
 void ConditionalVariable::Broadcast() {
   int32_t signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to broadcast conditional variable");
+    LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
 
 }
 
@@ -91,7 +91,7 @@ void ConditionalVariable::Wait(AutoLock& auto_lock) {
                                       &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0)
-    LOG4CXX_ERROR(g_logger, "Failed to wait for conditional variable");
+    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
@@ -124,7 +124,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
       wait_status = kTimeout;
     } break;
     default: {
-      LOG4CXX_ERROR(g_logger, "Failed to timewait for conditional variable");
+      LOG4CXX_ERROR(logger_, "Failed to timewait for conditional variable");
     }
   }
 

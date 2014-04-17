@@ -71,6 +71,7 @@ class MessageInterface: public CppClass {
   virtual const MethodsList& methods();
  private:
   // Fields
+  Method constructor_;
   Method handle_with_method_;
   InterfaceStringIdMethod interface_string_id_method_;
   std::vector<const Method*> methods_;

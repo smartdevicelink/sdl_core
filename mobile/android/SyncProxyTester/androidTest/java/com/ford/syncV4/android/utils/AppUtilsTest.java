@@ -19,7 +19,7 @@ public class AppUtilsTest extends TestCase {
     /**
      * This test <b>require</b> that a file "policyTableUpdate.json" be located at SD Card
      */
-    public void testReadFromFile() {
+    public void _testReadFromFile() {
         String mPolicyTableUpdatePath = Environment.getExternalStorageDirectory() +
                 "/policyTableUpdate.json";
         File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
@@ -29,7 +29,7 @@ public class AppUtilsTest extends TestCase {
         assertNotNull(data);
     }
 
-    public void testSaveDataToFile() {
+    public void _testSaveDataToFile() {
         String mPath = Environment.getExternalStorageDirectory() +
                 "/dataToBeSaved.json";
         byte[] mData = getRandomBytes(256);
@@ -37,7 +37,7 @@ public class AppUtilsTest extends TestCase {
         assertTrue(AppUtils.saveDataToFile(mData, mPath));
     }
 
-    public void testSaveAndReadDataFromFile() {
+    public void _testSaveAndReadDataFromFile() {
         String mPath = Environment.getExternalStorageDirectory() +
                 "/dataToBeSavedAndRead.json";
         String mString = "{\"glossary\": {\"title\": \"example glossary\", \"GlossDiv\": {\"title\": " +

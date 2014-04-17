@@ -40,49 +40,21 @@
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
+
 #include "connection_handler/connection_test.h"
 #include "connection_handler/heart_beat_monitor_test.h"
 #include "connection_handler/connection_handler_impl_test.h"
 #include "security_manager/crypto_manager_impl_test.h"
 #include "security_manager/security_manager_test.h"
 #include "security_manager/security_query_test.h"
-//#include "media_manager/media_manager_impl_test.h"
-//#include "SmartObjectDraftTest.h"
-//#include "SmartObjectInvalidTest.h"
-//#include "SmartObjectStressTest.h"
-//#include "SmartObjectUnitTest.h"
-//#include "TSharedPtrTest.h"
-//#include "SmartObjectConvertionTimeTest.h"
-//#include "jsoncpp/json_reader_test.h"
-//#include "json_handler/smart_schema_draft_test.h"
-//#include "json_handler/formatters/formatter_test_helper.h"
-//#include "json_handler/formatters/formatter_json_alrpcv1_test.h"
-//#include "json_handler/formatters/formatter_json_alrpcv2_test.h"
-//#include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
-
-//#include "smart_objects/smart_object.h"
-//#include "application_manager/smart_object_keys.h"
-//#include "formatters/CSmartFactory.hpp"
-
-//using namespace test::components::request_watchdog_test;
-//using namespace test::components::utils;
-//using namespace test::components::protocol_handler_test;
-//using namespace utils;
-
-//using namespace test::third_party_libs::json_reader_test;
-//using namespace test::components::json_handler::smart_schema_draft_test;
-//using namespace test::components::json_handler::formatters;
-
-//using namespace NsSmartDeviceLink::NsSmartObjects;
-//using namespace NsSmartDeviceLink::NsJSONHandler::strings;
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
-// #include "jsoncpp/json_reader_test.h"
+//#include "jsoncpp/json_reader_test.h"
 
 // #include "json_handler/smart_schema_draft_test.h"
 // #include "SmartObjectConvertionTimeTest.h"
@@ -110,8 +82,10 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
+#ifdef ENABLE_LOG
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+#endif // ENABLE_LOG
 
 
 #ifdef TESTS_WITH_HMI
@@ -129,4 +103,3 @@ int main(int argc, char **argv) {
   sleep(2);
   return result;
 }
-

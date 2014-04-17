@@ -70,7 +70,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   bool UnloadPolicyLibrary();
   void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions);
+                            const Permissions& permissions,
+                            const HMILevel& default_hmi);
   /**
    * @brief Checks, if policy update is necessary for application
    */
@@ -257,11 +258,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  static log4cxx::LoggerPtr logger_;
   threads::Thread retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
   PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
+  bool on_ignition_check_done_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

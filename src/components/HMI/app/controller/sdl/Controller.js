@@ -396,8 +396,10 @@ SDL.SDLController = Em.Object
          */
         systemRequestViewSelected: function(state) {
 
-            if (SDL.SDLModel.policyURLs) {
-                this.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            if (SDL.SDLModel.policyURLs.length) {
+                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            } else {
+                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
             }
 
         },
@@ -544,13 +546,12 @@ SDL.SDLController = Em.Object
          */
         registerApplication: function(params, applicationType) {
 
-            SDL.SDLModel.get('registeredApps')
-                .pushObject(this.applicationModels[applicationType].create( {
-                    appID: params.appID,
-                    appName: params.appName,
-                    deviceName: params.deviceName,
-                    appType: params.appType
-                }));
+            SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create( {
+                appID: params.appID,
+                appName: params.appName,
+                deviceName: params.deviceName,
+                appType: params.appType
+            }));
 
             var exitCommand = {
                 "id": -10,
@@ -795,8 +796,8 @@ SDL.SDLController = Em.Object
         /**
          * Send system context
          */
-        onSystemContextChange: function() {
+        onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'));
+            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
         }
     });

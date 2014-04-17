@@ -1,7 +1,4 @@
 /**
- * \file ProtocolHandler.cpp
- * \brief ProtocolHandler class source file.
- *
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -39,11 +36,9 @@
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
-
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-#endif  // ENABLE_LOG
+namespace {
+  GETLOGGER(logger_, "ProtocolHandler")
+}  // namespace
 
 /**
  * Function return packet data as std::string.
@@ -326,9 +321,9 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   const security_manager::SSLContext* ssl_context = session_observer_->
       GetSSLContext(message->connection_key(), message->service_type());
   if (ssl_context && ssl_context->IsInitCompleted()) {
-    maxDataSize = ssl_context->get_max_block_size(
-          MAXIMUM_FRAME_DATA_SIZE - header_size);
+    maxDataSize = ssl_context->get_max_block_size(maxDataSize);
   }
+  LOG4CXX_DEBUG(logger_, "Optimal packet size is." << maxDataSize);
   DCHECK(MAXIMUM_FRAME_DATA_SIZE > maxDataSize);
 
   uint32_t connection_handle = 0;
@@ -488,8 +483,9 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
     return RESULT_FAIL;
   }
 
-  LOG4CXX_INFO_EXT(logger_, "Packet to be sent: " << packet->data() <<
-                             " of size: " << packet->data_size());
+  LOG4CXX_INFO_EXT(logger_, "Packet to be sent: " <<
+                   ConvertPacketDataToString(packet->data(), packet->data_size()) <<
+                   " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   LOG4CXX_INFO(logger_,
                "Message to send with connection id " <<
@@ -811,11 +807,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   }
   return RESULT_OK;
 }
+namespace {
 /**
    * \brief SecurityManagerListener for send Ask/NAsk on success or fail
    * SSL handshake
  */
-namespace {
 class StartSessionHandler : public security_manager::SecurityManagerListener {
  public:
   StartSessionHandler(
@@ -863,11 +859,8 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   uint32_t hash_code_;
   uint8_t service_type_;
   impl::ToMobileQueue* queue_;
-  static log4cxx::LoggerPtr logger_;
 };
-log4cxx::LoggerPtr StartSessionHandler::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-}
+}  // namespace
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {

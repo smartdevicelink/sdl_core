@@ -36,8 +36,7 @@
 namespace media_manager {
 
 namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
+  GETLOGGER(logger, "SocketVideoStreamerAdapter")
 }
 
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {

@@ -35,10 +35,7 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr StreamerListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("StreamerListener"));
-#endif // ENABLE_LOG
+GETLOGGER(StreamerListener::logger_, "StreamerListener")
 
 StreamerListener::StreamerListener()
   : current_application_(0) {

@@ -124,11 +124,7 @@ const TypeRegistry::TypedefList& TypeRegistry::typedefs() const {
 
 // static
 bool TypeRegistry::IsMandatoryParam(const pugi::xml_node& param) {
-  bool mandatory = param.attribute("mandatory").as_bool("true");
-  if (param.attribute("array").as_bool(false)) {
-    mandatory = param.attribute("minsize").as_int(0) > 0;
-  }
-  return mandatory;
+  return param.attribute("mandatory").as_bool("true");
 }
 
 bool TypeRegistry::AddEnums(const pugi::xml_node& xml) {

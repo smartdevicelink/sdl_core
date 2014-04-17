@@ -41,6 +41,7 @@
 #include "transport_manager/usb/usb_adapter.h"
 #endif
 
+#include "config_profile/profile.h"
 
 namespace transport_manager {
 
@@ -52,8 +53,8 @@ int TransportManagerDefault::Init() {
 #ifdef BLUETOOTH_SUPPORT
   AddTransportAdapter(new transport_adapter::BluetoothTransportAdapter);
 #endif
-  const uint16_t kTcpAdapterPort = 12345;
-  AddTransportAdapter(new transport_adapter::TcpTransportAdapter(kTcpAdapterPort));
+  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
+  AddTransportAdapter(new transport_adapter::TcpTransportAdapter(port));
 #ifdef USB_SUPPORT
   AddTransportAdapter(new transport_adapter::UsbAdapter);
 #endif

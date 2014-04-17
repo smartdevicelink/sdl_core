@@ -213,7 +213,7 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SettingsController.userFriendlyMessagePopUp();
 
-            SDL.SDLModel.getListOfPermissionsPull.remove(message.id);
+            delete SDL.SDLModel.getListOfPermissionsPull[message.id];
         }
     },
 
@@ -228,12 +228,14 @@ SDL.SettingsController = Em.Object.create( {
 
             for (var i = 0; i < len; i++) {
 
-                SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                if (message && message.label) {
+                    SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                }
             }
 
             SDL.AppPermissionsView.update(appID);
 
-            this.onState('policies.appPermissions');
+            SDL.States.goToStates('settings.policies.appPermissions');
     },
 
     updateSDL: function() {
@@ -246,7 +248,7 @@ SDL.SettingsController = Em.Object.create( {
 
     AllowSDLFunctionality: function(device) {
         this.currentDeviceAllowance = device;
-        SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
+        SDL.SDLModel.connectedDevices[device.id].sdlFunctionality.popUpId = SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
     },
 
     onSDLConsentNeededHandler: function(params) {
@@ -255,9 +257,9 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
     },
 
-    userFriendlyMessagePopUp: function() {
+    userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
     },
 
     OnAllowSDLFunctionality: function(result) {
@@ -273,6 +275,10 @@ SDL.SettingsController = Em.Object.create( {
         SDL.DeviceConfigView.showDeviceList();
 
         FFW.BasicCommunication.OnAllowSDLFunctionality(result, "GUI", SDL.SettingsController.currentDeviceAllowance);
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.allowed = result;
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.popUpId = null;
 
         SDL.SettingsController.currentDeviceAllowance = null;
     }

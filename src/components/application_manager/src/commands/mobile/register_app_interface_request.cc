@@ -235,14 +235,8 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(
       device_params.device_mac_address, device_info);
 
-    // TODO(AOleyni): Find other criteria of ignition on instead of number of
-    // registered applications
-    // Check policy update on first application registration after ignition on
-    if (1
-        == application_manager::ApplicationManagerImpl::instance()->applications()
-        .size()) {
-      policy::PolicyHandler::instance()->PTExchangeAtIgnition();
-    }
+    // Check policy update on ignition on, if it was not done before
+    policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
     policy::PolicyHandler::instance()->CheckAppPolicyState(

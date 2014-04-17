@@ -36,8 +36,7 @@
 namespace media_manager {
 
 namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("VideoStreamToFileAdapter"));
+  GETLOGGER(logger, "VideoStreamToFileAdapter")
 }
 
 VideoStreamToFileAdapter::VideoStreamToFileAdapter(const std::string& file_name)

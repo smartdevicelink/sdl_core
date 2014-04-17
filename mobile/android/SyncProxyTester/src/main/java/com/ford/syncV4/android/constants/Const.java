@@ -91,5 +91,11 @@ public class Const {
 
     public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
     public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";
+<<<<<<< HEAD
     public static final String PREF_KEY_DO_DEVICE_ROOT_CHECK = "DoDeviceRootCheck";
 }
+=======
+
+    public static final String TEST_DATA_DIR_NAME = "test_data";
+}
+>>>>>>> APPLINK-6884-Logger-flag

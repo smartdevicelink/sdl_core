@@ -93,8 +93,6 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
 
         this.set('timeout', timeout);
 
-        SDL.SDLController.onSystemContextChange();
-
         this.timer = setTimeout(function () {
             if (SDL.SliderView.active) {
                 SDL.SliderView.deactivate(true);

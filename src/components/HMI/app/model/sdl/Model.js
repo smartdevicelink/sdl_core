@@ -379,6 +379,14 @@ SDL.SDLModel = Em.Object.create({
      */
     registeredApps: [],
 
+
+    /**
+     * List of objects with params for connected devices
+     *
+     * @type object
+     */
+    connectedDevices: {},
+
     /**
      * List of devices with registered applications
      *
@@ -784,8 +792,8 @@ SDL.SDLModel = Em.Object.create({
      */
     tbtTurnListUpdate: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList ? params.turnList : [];
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons ? params.softButtons : [];
         SDL.TBTTurnList.updateList(params.appID);
     },
 
@@ -959,6 +967,41 @@ SDL.SDLModel = Em.Object.create({
      *            params
      */
     onGetDeviceList: function (params) {
+
+        //SDL.SDLModel.set('connectedDevices', params.deviceList);
+        var exist = false;
+
+        for (var i = 0; i < params.deviceList.length; i++) {
+
+            if (params.deviceList[i].id in SDL.SDLModel.connectedDevices) {
+                exist = true;
+            }
+
+            if (!exist) {
+                SDL.SDLModel.connectedDevices[params.deviceList[i].id] = {
+                    "name": params.deviceList[i].name,
+                    "sdlFunctionality": {
+                        "popUpId": null,
+                        "allowed": false
+                    }
+                }
+            } else {
+
+                exist = false;
+            }
+        }
+
+        for (var key in SDL.SDLModel.connectedDevices) {
+
+            if (params.deviceList.filterProperty("id", parseInt(key)).length == 0) {
+
+                if (SDL.PopUp.popUpId == SDL.SDLModel.connectedDevices[key].sdlFunctionality.popUpId) {
+                    SDL.PopUp.deactivate();
+                }
+
+                delete SDL.SDLModel.connectedDevices[key];
+            }
+        }
 
         if (SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
             SDL.DeviceListView.ShowDeviceList(params);

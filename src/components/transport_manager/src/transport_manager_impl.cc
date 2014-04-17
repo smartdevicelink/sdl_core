@@ -58,10 +58,7 @@ using ::transport_manager::transport_adapter::TransportAdapter;
 
 namespace transport_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr TransportManagerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
-#endif  // ENABLE_LOG
+GETLOGGER(TransportManagerImpl::logger_, "TransportManager")
 
 TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
   TransportManagerImpl::Connection c;

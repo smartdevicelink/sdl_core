@@ -7,17 +7,21 @@ import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.H264Packetizer;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -34,7 +38,6 @@ import static org.mockito.Mockito.when;
  */
 public class SyncConnectionTest extends InstrumentationTestCase {
 
-    public static final byte VERSION = (byte) 2;
     public static final byte SESSION_ID = (byte) 48;
     public static final int MESSAGE_ID = 48;
 
@@ -50,13 +53,14 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
+        System.setProperty("dexmaker.dexcache",
+                getInstrumentation().getTargetContext().getCacheDir().getPath());
         config = mock(TCPTransportConfig.class);
         when(config.getTransportType()).thenReturn(TransportType.TCP);
         sut = new SyncConnection(mock(ISyncConnectionListener.class));
         sut.init(config);
         WiProProtocol protocol = (WiProProtocol) sut.getWiProProtocol();
-        protocol.setProtocolVersion(VERSION);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
     }
 
     public void testSyncConnectionShouldBeCreated() throws Exception {
@@ -70,7 +74,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
+<<<<<<< HEAD
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, VERSION, false);
+=======
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
+                ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+>>>>>>> APPLINK-6884-Logger-flag
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -79,27 +88,43 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset,
                                                      int length) {
                 super.onProtocolMessageBytesToSend(msgBytes, offset, length);
-                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
+                assertTrue("Arrays should be equal", Arrays.equals(msgBytes,
+                        realHeader.assembleHeaderBytes()));
                 assertEquals("Offset should be 0", offset, 0);
-                assertEquals("Length should be 12", length, 12);
+                assertEquals("Length should be " + ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
+                        length, ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
                 passed[0] = true;
             }
         };
         connection.init(config);
+        when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
+<<<<<<< HEAD
         protocol.setProtocolVersion(VERSION);
         connection.startMobileNavService(session, false);
+=======
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+>>>>>>> APPLINK-6884-Logger-flag
         assertTrue(passed[0]);
     }
 
     public void testOnTransportBytesReceivedReturnedStartSessionACK() throws Exception {
         final boolean[] passed = {false};
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(ServiceType.Mobile_Nav, SESSION_ID, MESSAGE_ID, VERSION);
+        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.
+                createStartSessionACK(ServiceType.Mobile_Nav, SESSION_ID, MESSAGE_ID,
+                        ProtocolConstants.PROTOCOL_VERSION_TWO);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
 
             @Override
+<<<<<<< HEAD
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
                 super.onProtocolServiceStarted(serviceType,sessionID, encrypted, version, correlationID);
+=======
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version, String correlationID) {
+                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
+>>>>>>> APPLINK-6884-Logger-flag
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
@@ -109,14 +134,17 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-        protocol.setProtocolVersion(VERSION);
-        connection.onTransportBytesReceived(header.assembleHeaderBytes(), header.assembleHeaderBytes().length);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        protocol.HandleReceivedBytes(header.assembleHeaderBytes(),
+                header.assembleHeaderBytes().length);
         assertTrue(passed[0]);
     }
 
     public void testCloseMobileNavSessionShouldSendAppropriateBytes() throws Exception {
         final byte[] data = BitConverter.intToByteArray(0);
-        final ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createEndSession(ServiceType.Mobile_Nav, SESSION_ID, 0, VERSION, data.length);
+        final ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createEndSession(ServiceType.Mobile_Nav, SESSION_ID, 0,
+                        ProtocolConstants.PROTOCOL_VERSION_TWO, data.length);
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
 
             private int count = 0;
@@ -134,8 +162,10 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 super.onProtocolMessageBytesToSend(msgBytes, offset, length);
                 if (count == 0) {
                     byte[] commonArray = new byte[msgBytes.length];
-                    System.arraycopy(header.assembleHeaderBytes(), 0, commonArray, 0, header.assembleHeaderBytes().length);
-                    System.arraycopy(data, 0, commonArray, header.assembleHeaderBytes().length, data.length);
+                    System.arraycopy(header.assembleHeaderBytes(), 0, commonArray, 0,
+                            header.assembleHeaderBytes().length);
+                    System.arraycopy(data, 0, commonArray, header.assembleHeaderBytes().length,
+                            data.length);
                     assertTrue("Arrays should be equal", Arrays.equals(msgBytes, commonArray));
                     assertEquals("Offset should be 0", offset, 0);
                     assertEquals("Length should be 12", length, 16);
@@ -145,7 +175,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-        protocol.setProtocolVersion(VERSION);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         connection.closeMobileNaviService(SESSION_ID);
     }
 
@@ -183,7 +213,13 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
+<<<<<<< HEAD
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, VERSION, false);
+=======
+        ProtocolFrameHeader header =
+                ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID,
+                        ProtocolConstants.PROTOCOL_VERSION_TWO);
+>>>>>>> APPLINK-6884-Logger-flag
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -193,15 +229,23 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                                                      int length) {
                 super.onProtocolMessageBytesToSend(msgBytes, offset, length);
                 isPassed[0] = true;
-                assertTrue("Arrays should be equal", Arrays.equals(msgBytes, realHeader.assembleHeaderBytes()));
+                assertTrue("Arrays should be equal", Arrays.equals(msgBytes,
+                        realHeader.assembleHeaderBytes()));
                 assertEquals("Offset should be 0", offset, 0);
-                assertEquals("Length should be 12", length, 12);
+                assertEquals("Length should be " + ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
+                        length, ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
             }
         };
         connection.init(config);
+        when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
+<<<<<<< HEAD
         protocol.setProtocolVersion(VERSION);
         connection.startAudioService(session, false);
+=======
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        protocol.StartProtocolService(ServiceType.Audio_Service, session);
+>>>>>>> APPLINK-6884-Logger-flag
         assertTrue(isPassed[0]);
     }
 
@@ -256,9 +300,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.closeAudioService(SESSION_ID);
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(connection._protocol, times(1)).EndProtocolService(serviceTypeCaptor.capture(), sessionIDCaptor.capture());
-        assertEquals("should end audio service", ServiceType.Audio_Service, serviceTypeCaptor.getValue());
-        assertEquals("should end session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
+        verify(connection._protocol, times(1)).EndProtocolService(serviceTypeCaptor.capture(),
+                sessionIDCaptor.capture());
+        assertEquals("should end audio service", ServiceType.Audio_Service,
+                serviceTypeCaptor.getValue());
+        assertEquals("should end session with SESSION_ID", SESSION_ID,
+                sessionIDCaptor.getValue().byteValue());
     }
 
     // TODO : Reconsider this test case as onTransportConnected is now invoke another listener
@@ -330,8 +377,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         SyncConnection connection = new SyncConnection(connectionListenerMock);
         connection.init(null, mock(SyncTransport.class));
         final WiProProtocol protocol = new WiProProtocol(connection);
-        protocol.setProtocolVersion((byte) 0x02);
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         connection._protocol = protocol;
+        when(connection.getIsConnected()).thenReturn(true);
 
         final byte maxByte = (byte) 0xFF;
         final byte[] bytes =

@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <set>

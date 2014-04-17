@@ -41,7 +41,6 @@
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/ssl_context.h"
-#include "utils/logger.h"
 #include "utils/macro.h"
 
 namespace security_manager {
@@ -88,7 +87,6 @@ namespace security_manager {
     DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
     SSL_CTX *context_;
     Mode mode_;
-    static ::log4cxx::LoggerPtr logger_;
     static int instance_count_;
   };
 } // namespace security_manager

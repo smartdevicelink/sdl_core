@@ -2814,24 +2814,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.grammarID == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'grammarID' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.grammarID.length < 1) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'grammarID'!"
-                        };
-
-                        return this.resultStruct;
-                    }
                     if (params.timeout == null) {
 
                         this.resultStruct = {

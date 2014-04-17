@@ -38,10 +38,7 @@
 namespace threads {
 
 namespace {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::PulseThreadDelegate"));
-
+  GETLOGGER(logger_, "threads::PulseThreadDelegate")
 }  // anonimous namespace
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
