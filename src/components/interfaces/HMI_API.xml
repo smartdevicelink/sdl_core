@@ -2177,7 +2177,7 @@
     <param name="timeout" type="Integer" mandatory="true">
       <description>Timeout initiate timeoutPrompt</description>
     </param>
-    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
         IDs of the specific compiled grammars for this voice interaction.
       </description>
