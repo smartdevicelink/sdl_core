@@ -244,6 +244,14 @@ class TransportManagerImpl : public TransportManager {
    */
   void UpdateDeviceList(TransportAdapter* ta);
 
+
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  virtual void SetTimeMetricObserver(TMMetricObserver* observer);
+
   /**
    * @brief Constructor.
    **/
@@ -444,6 +452,7 @@ class TransportManagerImpl : public TransportManager {
    * Device ID)
    */
   Handle2GUIDConverter converter_;
+  TMMetricObserver* metric_observer_;
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;

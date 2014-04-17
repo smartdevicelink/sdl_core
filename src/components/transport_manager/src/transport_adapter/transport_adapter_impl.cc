@@ -59,7 +59,8 @@ TransportAdapterImpl::TransportAdapterImpl(
       connections_mutex_(),
       device_scanner_(device_scanner),
       server_connection_factory_(server_connection_factory),
-      client_connection_listener_(client_connection_listener) {
+      client_connection_listener_(client_connection_listener),
+      metric_observer_(NULL) {
   pthread_mutex_init(&devices_mutex_, 0);
   pthread_mutex_init(&connections_mutex_, 0);
 }
@@ -425,7 +426,9 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
                                            RawMessageSptr message) {
-  printf("MYLOG1 %x %x | %d \n", message.get(), message->data(), message->data_size());
+  if (metric_observer_) {
+    metric_observer_->StartRawMsg(message.get());
+  }
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
@@ -560,6 +563,14 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   } else {
     return "";
   }
+}
+
+void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver *observer) {
+  metric_observer_ = observer;
+}
+
+TMMetricObserver *TransportAdapterImpl::GetTimeMetricObserver() {
+  return metric_observer_;
 }
 
 void TransportAdapterImpl::Store() const {

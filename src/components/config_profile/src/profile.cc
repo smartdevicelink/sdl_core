@@ -64,6 +64,7 @@ Profile::Profile()
       server_port_(8087),
       video_streaming_port_(5050),
       audio_streaming_port_(5080),
+      time_testing_port_(5090),
       help_prompt_(),
       time_out_promt_(),
       min_tread_stack_size_(threads::Thread::kMinStackSize),
@@ -170,6 +171,11 @@ const uint16_t& Profile::video_streaming_port() const {
 const uint16_t& Profile::audio_streaming_port() const {
     return audio_streaming_port_;
 }
+
+const uint16_t& Profile::time_testing_port() const {
+    return time_testing_port_;
+}
+
 
 const uint64_t& Profile::thread_min_stack_size() const {
     return min_tread_stack_size_;
@@ -385,11 +391,11 @@ void Profile::UpdateValues() {
 
     *value = '\0';
     if ((0
-            != ini_read_value(config_file_name_.c_str(), "HMI", "AudioStreamingPort",
+            != ini_read_value(config_file_name_.c_str(), "MAIN", "TimeTestingPort",
                               value)) && ('\0' != *value)) {
-        audio_streaming_port_ = atoi(value);
+        time_testing_port_ = atoi(value);
         LOG4CXX_INFO(logger_,
-                     "Set audio streaming port to " << audio_streaming_port_);
+                     "Set audio streaming port to " << time_testing_port_);
     }
 
     *value = '\0';

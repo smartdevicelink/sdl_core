@@ -44,7 +44,7 @@ class TransportManagerObserver: public transport_manager::TMMetricObserver {
    virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
    virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
 
-   std::map<protocol_handler::RawMessage*, time_t> time_starts;
+   std::map<const protocol_handler::RawMessage*, time_t> time_starts;
 };
 
 }

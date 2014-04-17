@@ -30,7 +30,11 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
+
 #include "time_manager.h"
+#include "transport_manager/transport_manager_default.h"
+#include "config_profile/profile.h"
+
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -62,10 +66,11 @@ TimeManager::~TimeManager() {
 
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   if (!thread_) {
-    application_manager::ApplicationManagerImpl::instance()->SetMetricObserver(&app_observer);
+    application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
+    transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);;
     if (!thread_) {
-      ip_ = "127.0.0.1";
-      port_ = 12340;
+      ip_ = profile::Profile::instance()->server_address();
+      port_ = profile::Profile::instance()->time_testing_port();;
       streamer_ = new Streamer(this);
       thread_ = new threads::Thread("SocketAdapter", streamer_);
       const size_t kStackSize = 16384;

@@ -211,7 +211,13 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     HMICapabilities& hmi_capabilities();
 
-    void SetMetricObserver(AMMetricObserver* observer);
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(AMMetricObserver* observer);
+
     ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
     /*

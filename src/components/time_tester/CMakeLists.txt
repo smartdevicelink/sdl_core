@@ -10,6 +10,7 @@ include_directories (
   ../formatters/include/
   ../media_manager/include/
   ../smart_objects/include/
+  ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )

@@ -51,17 +51,17 @@
 
 namespace time_tester {
 class TimeManager: public utils::Singleton<TimeManager>  {
+
+  public:
 #ifdef ENABLE_LOG
     static log4cxx::LoggerPtr logger_;
 #endif // ENABLE_LOG
 
-  public:
     TimeManager();
     ~TimeManager();
     void Init(protocol_handler::ProtocolHandlerImpl* ph);
     void Stop();
     void SendMetric(utils::SharedPtr<Metric> metric);
-  private:
   private:
     class Streamer : public threads::ThreadDelegate {
       public:
@@ -124,6 +124,8 @@ class TimeManager: public utils::Singleton<TimeManager>  {
     };
 
     ApplicationManagerObserver app_observer;
+    TransportManagerObserver tm_observer;
+
 
     int16_t port_;
     std::string ip_;

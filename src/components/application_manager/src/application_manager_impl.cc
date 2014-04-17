@@ -1553,7 +1553,7 @@ HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
 }
 
-void ApplicationManagerImpl::SetMetricObserver(AMMetricObserver *observer) {
+void ApplicationManagerImpl::SetTimeMetricObserver(AMMetricObserver *observer) {
   metric_observer_ = observer;
 }
 

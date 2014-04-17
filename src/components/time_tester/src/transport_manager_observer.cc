@@ -8,23 +8,23 @@ namespace time_tester {
 
 void TransportManagerObserver::StartRawMsg(const protocol_handler::RawMessage* ptr) {
   time_t time_start = time(NULL);
-  //time_starts[ptr] = time_start;
+  time_starts[ptr] = time_start;
+  LOG4CXX_WARN(TimeManager::logger_, "StartRawMsg " << ptr );
 }
 
 void TransportManagerObserver::StopRawMsg(const protocol_handler::RawMessage* ptr) {
-  TransportManagerMectic* m = new TransportManagerMectic();
-  m->message_metric = new transport_manager::TMMetricObserver::MessageMetric();
-  TimeManager::instance()->SendMetric(m);
-//  std::map<protocol_handler::RawMessage*, time_t>::iterator it;
-//  it = time_starts.find(ptr);
-//  if (it != time_starts.end()) {
-//    time_t time_end = time(NULL);
-//    MessageMetric metric;
-//    metric.begin = it->second();
-//    metric.end = time_end;
-//    metric.data_size = ptr->data_size();
-//    //messages_.push(metric);
-//  }
+    std::map<const protocol_handler::RawMessage*, time_t>::iterator it;
+    it = time_starts.find(ptr);
+    LOG4CXX_WARN(TimeManager::logger_, "StopRawMsg " << ptr );
+    if (it != time_starts.end()) {
+      TransportManagerMectic* m = new TransportManagerMectic();
+      m->message_metric = new transport_manager::TMMetricObserver::MessageMetric();
+      time_t time_end = time(NULL);
+      m->message_metric->begin = it->second;
+      m->message_metric->end = time_end;
+      m->message_metric->data_size = ptr->data_size();
+      TimeManager::instance()->SendMetric(m);
+    }
 }
 
 } //namespace time_tester
