@@ -46,29 +46,24 @@ StructTypeReportErrosMethod::StructTypeReportErrosMethod(const Struct* strct)
 }
 
 void StructTypeReportErrosMethod::DefineBody(std::ostream* os) const {
-  *os << "if (is_empty()) {\n";
+  *os << "if (empty()) {\n";
   {
     Indent ind(*os);
     strmfmt(*os, "rpc::CompositeType::ReportErrors({0});\n", parameters_[0].name);
   }
-  *os << "} else {\n";
-  {
-    Indent ind(*os);
-    strmfmt(*os, "{0}->set_validation_info(\"structure initialized\");\n", parameters_[0].name);
-    const Struct::FieldsList& fields = strct_->fields();
-    for (size_t i = 0; i != fields.size(); ++i) {
-      const Struct::Field& field = fields[i];
-      strmfmt(*os, "if (!{0}.is_valid()) {\n", field.name());
-      {
-        Indent ind(*os);
-        strmfmt(*os, "{0}.ReportErrors(&{1}->ReportSubobject(\"{0}\"));\n",
-                field.name(),
-                parameters_[0].name);
-      }
-      *os << "}\n";
-    }
-  }
   *os << "}\n";
+  const Struct::FieldsList& fields = strct_->fields();
+  for (size_t i = 0; i != fields.size(); ++i) {
+    const Struct::Field& field = fields[i];
+    strmfmt(*os, "if (!{0}.is_valid()) {\n", field.name());
+    {
+      Indent ind(*os);
+      strmfmt(*os, "{0}.ReportErrors(&{1}->ReportSubobject(\"{0}\"));\n",
+              field.name(),
+              parameters_[0].name);
+    }
+    *os << "}\n";
+  }
 }
 
 } // namespace cppgen

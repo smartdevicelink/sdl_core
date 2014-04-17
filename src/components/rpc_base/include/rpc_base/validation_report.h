@@ -61,17 +61,23 @@ std::string PrettyFormat(const ValidationReport& report);
 
 namespace impl {
 inline void PrettyFormat(const ValidationReport& report,
-                  size_t indent,
+                  const std::string& parent_path,
                   std::string* result) {
-  result->append(std::string(indent, ' '));
-  result->append(report.object_name());
-  result->append(": ");
-  result->append(report.validation_info());
-  result->append("\n");
+  std::string object_path = parent_path;
+  if (!object_path.empty() && report.object_name().front() != '[') {
+    object_path.append(".");
+  }
+  object_path.append(report.object_name());
+  if (!report.validation_info().empty()) {
+    result->append(object_path);
+    result->append(": ");
+    result->append(report.validation_info());
+    result->append("\n");
+  }
   const ValidationReports& subreports = report.subobject_reports();
   for (ValidationReports::const_iterator i = subreports.begin(),
        end = subreports.end(); i != end; ++i) {
-    PrettyFormat(*i, indent + 2, result);
+    PrettyFormat(*i, object_path, result);
   }
 }
 }  // namespace impl
@@ -104,7 +110,7 @@ inline ValidationReport& ValidationReport::ReportSubobject(
 
 inline std::string PrettyFormat(const ValidationReport& report) {
   std::string result;
-  impl::PrettyFormat(report, 0, &result);
+  impl::PrettyFormat(report, "", &result);
   return result;
 }
 

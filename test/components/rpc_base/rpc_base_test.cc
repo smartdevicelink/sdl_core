@@ -338,7 +338,7 @@ TEST(ValidatedTypes, ReportUninitializedOptionalType) {
   ASSERT_TRUE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: optional value is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectInitializedOptionalType) {
@@ -363,7 +363,7 @@ TEST(ValidatedTypes, ReportNullInitializedNullableIntType) {
   ASSERT_TRUE(val.is_valid());
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: null initialized\n", PrettyFormat(report));
+  ASSERT_EQ("", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportNoninitializedIntArray) {
@@ -380,8 +380,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray1) {
   ASSERT_FALSE(array.is_valid());
   ValidationReport report("array");
   array.ReportErrors(&report);
-  ASSERT_EQ("array: array initialized\n"
-            "  array element 0: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("array[0]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray2) {
@@ -405,7 +404,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedArray3) {
   ValidationReport report("array");
   array.ReportErrors(&report);
   ASSERT_EQ("array: array has invalid size\n"
-            "  array element 2: value initialized incorrectly\n", PrettyFormat(report));
+            "array[2]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportUninitializedMap) {
@@ -420,8 +419,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap1) {
   map["aha"] = 42;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map: map initialized\n"
-            "  map element \"aha\": value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("map[\"aha\"]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
@@ -432,9 +430,8 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
   map["muhahaha"] = 22;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map: map initialized\n"
-            "  map element \"haha\": value initialized incorrectly\n"
-            "  map element \"muhahaha\": value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("map[\"haha\"]: value initialized incorrectly\n"
+            "map[\"muhahaha\"]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 }  // namespace codegen
