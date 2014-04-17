@@ -671,16 +671,6 @@ SDL.SDLController = Em.Object
             this.turnChangeDeviceViewBack();
         },
         /**
-         * Method creates list of Application ID's Then call HMI method for
-         * display a list of Applications
-         * 
-         * @param {Object}
-         */
-        onGetAppList: function(appList) {
-
-            SDL.SDLModel.onGetAppList(appList);
-        },
-        /**
          * Method call's request to get list of applications
          */
         findNewApps: function() {
