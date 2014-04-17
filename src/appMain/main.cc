@@ -67,7 +67,7 @@ const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
-const char kApplicationVersion[] = "SDL_RB_3.3";
+const char kApplicationVersion[] = "SDL_RB_3.3.1";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
