@@ -662,11 +662,14 @@
     	<description> Time to destination</description>
     </element>
     
-  	<element name="turnText">
-  		<description> Turn text</description>
-  	</element>
+    <element name="turnText">
+        <description> Turn text</description>
+    </element>
 
-  </enum>
+    <element name="menuTitle">
+      <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </element>
+</enum>
   
   <enum name="ImageFieldName">
     <element name="softButtonImage">
@@ -853,7 +856,6 @@
     <element name="CID2SET">
       <description>See [@TODO: create file ref]</description>
     </element>
-	<issue creator="rs">Real sets have not been defined yet?</issue>
   </enum>
 
   <enum name="TextAlignment">

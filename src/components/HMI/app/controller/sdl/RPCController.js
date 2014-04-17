@@ -78,6 +78,50 @@ SDL.RPCController = Em.Object
 
                 resultStruct: {},
 
+		/**
+                 * Validate method for request UpdateDeviceList
+                 * 
+                 * @param {Object}
+                 *            params
+                 */
+                UpdateDeviceList: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.deviceList == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'deviceList' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.deviceList.length < 0) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'deviceList'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+
                 /**
                  * Validate method for request PolicyUpdate
                  *
