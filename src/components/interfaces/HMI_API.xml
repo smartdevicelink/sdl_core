@@ -1922,8 +1922,8 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>The information about resumption application. </description>
+      <param name="resumeVrGrammars" type="Boolean" mandatory="false">
+        <description>The flag if VR grammars resume is required</description>
       </param>
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
