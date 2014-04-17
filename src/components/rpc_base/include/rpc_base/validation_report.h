@@ -64,7 +64,7 @@ inline void PrettyFormat(const ValidationReport& report,
                   const std::string& parent_path,
                   std::string* result) {
   std::string object_path = parent_path;
-  if (!object_path.empty() && report.object_name().front() != '[') {
+  if (!object_path.empty() && report.object_name()[0] != '[') {
     object_path.append(".");
   }
   object_path.append(report.object_name());
