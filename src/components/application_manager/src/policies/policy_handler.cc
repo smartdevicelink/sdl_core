@@ -662,22 +662,64 @@ void PolicyHandler::OnPTExchangeNeeded() {
 }
 
 void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-    const Permissions& permissions) {
+    const Permissions& permissions, const HMILevel& default_hmi) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (app) {
-    application_manager::MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions);
-
-    LOG4CXX_INFO(
-      logger_,
-      "Notification sent for application_id:" << policy_app_id << " and connection_key " << app->app_id());
-  } else {
+  if (!app) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);
+    return;
+  }
+
+  application_manager::MessageHelper::SendOnPermissionsChangeNotification(
+    app->app_id(), permissions);
+
+  LOG4CXX_INFO(
+    logger_,
+    "Notification sent for application_id:" << policy_app_id
+        << " and connection_key " << app->app_id());
+
+  // The application currently not running (i.e. in NONE) should change HMI
+  // level to default
+  mobile_apis::HMILevel::eType current_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType hmi_level =
+      application_manager::MessageHelper::StringToHMILevel(default_hmi);
+
+  if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
+    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
+                 << default_hmi << " to enum.");
+    return;
+  }
+  if (current_hmi_level == hmi_level) {
+    LOG4CXX_INFO(logger_, "Application already in default hmi state.");
+    return;
+  }
+  switch (current_hmi_level) {
+  case mobile_apis::HMILevel::HMI_NONE:
+  {
+    LOG4CXX_INFO(logger_, "Changing hmi level of application " << policy_app_id
+                 << " to default hmi level " << default_hmi);
+    // If default is FULL, send request to HMI. Notification to mobile will be
+    // sent on response receiving.
+    if (mobile_apis::HMILevel::HMI_FULL == hmi_level) {
+      application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+      break;
+    }
+
+    // Set application hmi level
+    app->set_hmi_level(hmi_level);
+
+    // Send notification to mobile
+    application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
+  }
+    break;
+  default:
+    LOG4CXX_WARN(logger_, "Application " << policy_app_id << " is running."
+                 "HMI level won't be changed.");
+    break;
   }
 }
 

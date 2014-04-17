@@ -70,7 +70,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   bool UnloadPolicyLibrary();
   void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions);
+                            const Permissions& permissions,
+                            const HMILevel& default_hmi);
   /**
    * @brief Checks, if policy update is necessary for application
    */

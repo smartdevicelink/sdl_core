@@ -398,6 +398,17 @@ const VehicleData& MessageHelper::vehicle_data() {
     return vehicle_data_;
 }
 
+mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
+    const std::string& hmi_level) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::HMILevel::eType value;
+  if (TEnumSchemaItem<mobile_apis::HMILevel::eType>::stringToEnum(
+        hmi_level, value)) {
+    return value;
+  }
+  return mobile_apis::HMILevel::INVALID_ENUM;
+}
+
 const char* MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {
     switch (hmi_level) {
