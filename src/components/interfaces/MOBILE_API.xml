@@ -1441,6 +1441,30 @@
     </element>
   </enum>
 
+  <struct name="DeviceInfo">
+    <description>Various information abount connecting device.</description>
+
+    <param name="hardware" type="String" maxlength="500" mandatory="false">
+      <description>Device model</description>
+    </param>
+    <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
+      <description>Device firmware revision</description>
+    </param>
+    <param name="os" type="String" maxlength="500" mandatory="false">
+      <description>Device OS</description>
+    </param>
+    <param name="osVersion" type="String" maxlength="500" mandatory="false">
+      <description>Device OS version</description>
+    </param>
+    <param name="carrier" type="String" maxlength="500" mandatory="false">
+      <description>Device mobile carrier (if applicable)</description>
+    </param>
+    <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Omitted if connected not via BT.</description>
+    </param>
+
+  </struct>
+
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
     <element name="GRAPHIC_BMP" />   
@@ -2264,6 +2288,11 @@
         ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
         This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
         If omitted, then the previous state of an app's commands, etc. will not be restored. 
+      </description>
+    </param>
+    <param name="deviceInfo" type="DeviceInfo" mandatory="false">
+      <description>
+        See DeviceInfo.
       </description>
     </param>
     <param name="appID" type="String" maxlength="100" mandatory="true">
