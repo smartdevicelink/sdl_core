@@ -218,7 +218,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       default_timeout());
       break;
     }
-
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
       ProcessPerformInteractionResponse(event.smart_object());
@@ -287,7 +286,7 @@ void PerformInteractionRequest::ProcessVRResponse(
   vr_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
       message[strings::params][hmi_response::code].asInt());
   if (mobile_apis::Result::ABORTED == vr_perform_interaction_code_) {
-    LOG4CXX_INFO(logger_, "VR response abborted");
+    LOG4CXX_INFO(logger_, "VR response aborted");
     if (mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
       LOG4CXX_INFO(logger_, "Abort send Close Popup");
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
@@ -411,8 +410,6 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
 
   SendResponse(result, result_code, return_info, &(msg_params));
 }
-
-
 
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {

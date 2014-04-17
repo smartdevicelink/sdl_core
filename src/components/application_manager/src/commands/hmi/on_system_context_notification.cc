@@ -60,6 +60,17 @@ void OnSystemContextNotification::Run() {
 
   // SDLAQ-CRS-833 implementation
   for (; app_list.end() != it; ++it) {
+
+    // send notification for background app
+    if ((*message_)[strings::msg_params].keyExist(strings::app_id) &&
+        mobile_api::HMILevel::HMI_BACKGROUND == (*it)->hmi_level()) {
+      if (mobile_api::SystemContext::SYSCTXT_ALERT == system_context) {
+                  app->set_system_context(system_context);
+          MessageHelper::SendHMIStatusNotification(*app);
+        }
+      }
+    }
+
     if (mobile_api::HMILevel::HMI_FULL == (*it)->hmi_level() ||
         mobile_api::HMILevel::HMI_LIMITED == (*it)->hmi_level()) {
 
