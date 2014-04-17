@@ -425,6 +425,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
                                            RawMessageSptr message) {
+  printf("MYLOG1 %x %x | %d \n", message.get(), message->data(), message->data_size());
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);

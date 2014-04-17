@@ -53,6 +53,7 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "time_metric_observer.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -157,6 +158,7 @@ class ProtocolHandlerImpl
      */
     void set_session_observer(SessionObserver* observer);
 
+    virtual void SetMetricObserver(PHMetricObserver* observer);
     /**
      * \brief Method for sending message to Mobile Application
      * \param message Message with params to be sent to Mobile App
@@ -425,7 +427,7 @@ class ProtocolHandlerImpl
      *\brief (JSON Handler)
      */
     ProtocolObservers protocol_observers_;
-
+    PHMetricObserver* metric_observer_;
     /**
      *\brief Pointer on instance of class implementing ISessionObserver
      *\brief (Connection Handler)

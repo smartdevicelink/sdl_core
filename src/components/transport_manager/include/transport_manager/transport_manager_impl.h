@@ -55,6 +55,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+#include "transport_manager/time_metric_observer.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
@@ -456,7 +457,7 @@ class TransportManagerImpl : public TransportManager {
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceList;
   DeviceList device_list_;
-
+  //TMMetricObserver* metric_observer_;
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);

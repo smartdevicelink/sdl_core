@@ -5,6 +5,7 @@ include_directories (
   ../config_profile/include/
   ../utils/include/
   ../../thirdPartyLibs/encryption/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
 )
 
 set (SOURCES

@@ -196,6 +196,10 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
   session_observer_ = observer;
 }
 
+void ProtocolHandlerImpl::SetMetricObserver(PHMetricObserver* observer) {
+  metric_observer_ = observer;
+}
+
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
                                               uint8_t protocol_version,

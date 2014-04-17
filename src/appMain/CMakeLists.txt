@@ -27,6 +27,7 @@ set(LIBRARIES
   MOBILE_API
   v4_protocol_v1_2_no_extra
   SmartObjects
+  TimeTester
   formatters
   ProtocolHandler
   connectionHandler
@@ -76,6 +77,7 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
+  ${CMAKE_SOURCE_DIR}/src/components/time_tester/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ../components/resumption/include/
   ../thirdPartyLibs/MessageBroker/include

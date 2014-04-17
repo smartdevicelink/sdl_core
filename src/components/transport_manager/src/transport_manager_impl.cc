@@ -509,6 +509,7 @@ void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
 #else
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
+  RawMessageSptr data = event.data();
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
 #ifdef USE_RWLOCK
@@ -596,7 +597,6 @@ void TransportManagerImpl::EventListenerThread(void) {
       DeviceHandle device_handle;
       BaseError* error = current->event_error();
       RawMessageSptr data = current->data();
-
       int event_type = current->event_type();
       event_queue_.erase(current);
 #ifdef USE_RWLOCK
@@ -713,6 +713,7 @@ void TransportManagerImpl::EventListenerThread(void) {
             break;
           }
           data->set_connection_key(connection->id);
+          printf("\t\t\t\tMYLOG RECIVED %x %x | %d \n", data.get(),data->data(), data->data_size());
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }

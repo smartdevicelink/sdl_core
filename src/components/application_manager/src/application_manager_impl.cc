@@ -52,6 +52,7 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#include <time.h>
 
 namespace application_manager {
 
@@ -1473,7 +1474,8 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-
+  AMMetricObserver::MessageMetric* metric = new AMMetricObserver::MessageMetric();
+  metric->begin = time(NULL);
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
     new smart_objects::SmartObject);
 
@@ -1486,9 +1488,14 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+  metric->message = so_from_mobile;
 
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
+  metric->end = time(NULL);
+  if (metric_observer_) {
+    metric_observer_->OnMessage(metric);
   }
 }
 
@@ -1544,6 +1551,10 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
+}
+
+void ApplicationManagerImpl::SetMetricObserver(AMMetricObserver *observer) {
+  metric_observer_ = observer;
 }
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {

@@ -52,6 +52,7 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/singleton.h"
+#include "time_tester/time_manager.h"
 
 #ifdef MESSAGEBROKER_HMIADAPTER
 #  include "CMessageBroker.hpp"
@@ -79,6 +80,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    time_tester::TimeManager* time_tester_;
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;

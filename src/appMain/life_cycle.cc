@@ -62,6 +62,7 @@ LifeCycle::LifeCycle()
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
+  , time_tester_(NULL)
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -94,7 +95,6 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
-
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
@@ -121,7 +121,8 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
-
+  time_tester_ = time_tester::TimeManager::instance();
+  time_tester_->Init(protocol_handler_);
   return true;
 }
 
