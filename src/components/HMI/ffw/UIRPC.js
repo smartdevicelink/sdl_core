@@ -475,6 +475,12 @@ FFW.UI = FFW.RPCObserver.create({
                                             "characterSet": "TYPE2SET",
                                             "width": 500,
                                             "rows": 1
+                                        },
+                                        {
+                                            "name": "menuTitle",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
                                         }
                                     ],
                                     "imageFields": [
@@ -989,6 +995,12 @@ FFW.UI = FFW.RPCObserver.create({
                                     },
                                     {
                                         "name": "turnText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "menuTitle",
                                         "characterSet": "TYPE2SET",
                                         "width": 500,
                                         "rows": 1

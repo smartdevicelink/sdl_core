@@ -447,6 +447,9 @@
   <element name="tertiaryText">
     <description> Tertiary text for Choice</description>
   </element>
+  <element name="menuTitle">
+    <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
+  </element>
   <element name="timeToDestination"/>
   <!-- TO DO to be removed -->
   <element name="turnText"/>
