@@ -94,7 +94,7 @@ inline void PrimitiveType::ReportErrors(ValidationReport* report) const {
       break;
     }
     case kValid: {
-      report->set_validation_info("value correctly initialized");
+      // No error
       break;
     }
     default: {
@@ -126,7 +126,7 @@ inline void CompositeType::ReportErrors(ValidationReport* report) const {
       break;
     }
     case kInitialized: {
-      report->set_validation_info("object correctly initialized");
+      // No error
       break;
     }
     default:
@@ -352,16 +352,16 @@ void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
     if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
       report->set_validation_info("array has invalid size");
     } else {
-      report->set_validation_info("array initialized");
+      // No error
     }
   }
   for (size_t i = 0; i != this->size(); ++i) {
     const T& elem = this->operator [](i);
     if (!elem.is_valid()) {
       char elem_idx[32] = {};
-      snprintf(elem_idx, 32, "%zu", i);
+      snprintf(elem_idx, 32, "[%zu]", i);
       ValidationReport& elem_report =
-          report->ReportSubobject(std::string("array element ") + elem_idx);
+          report->ReportSubobject(elem_idx);
       elem.ReportErrors(&elem_report);
     }
   }
@@ -447,13 +447,13 @@ void Map<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
     if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
       report->set_validation_info("map has invalid size");
     } else {
-      report->set_validation_info("map initialized");
+      // No error
     }
   }
   for (typename Map::const_iterator i = this->begin();
       i != this->end(); ++i) {
     if (!i->second.is_valid()) {
-      std::string elem_name = "map element \"" + i->first + "\"";
+      std::string elem_name = "[\"" + i->first + "\"]";
       ValidationReport& elem_report = report->ReportSubobject(elem_name);
       i->second.ReportErrors(&elem_report);
     }
@@ -505,7 +505,7 @@ void Nullable<T>::set_to_null() {
 template<typename T>
 void Nullable<T>::ReportErrors(ValidationReport* report) const {
   if (marked_null_) {
-    report->set_validation_info("null initialized");
+    // No error
   } else {
     T::ReportErrors(report);
   }
@@ -562,7 +562,7 @@ bool Optional<T>::is_initialized() const {
 template<typename T>
 void Optional<T>::ReportErrors(ValidationReport* report) const {
   if (!is_initialized()) {
-    report->set_validation_info("optional value is not initialized");
+    // No error
   } else {
     value_.ReportErrors(report);
   }

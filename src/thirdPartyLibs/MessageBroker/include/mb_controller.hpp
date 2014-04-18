@@ -12,6 +12,7 @@
 #include "json/json.h"
 
 #include "mb_tcpclient.hpp"
+#include "utils/lock.h"
 
 #include <cstring> 
 
@@ -23,7 +24,7 @@ namespace NsMessageBroker
 {
 
    /**
-    * \class CMessageBrokerController
+    *ï¿½\class CMessageBrokerController
     * \brief MessageBroker Controller.
     */
    class CMessageBrokerController : public TcpClient
@@ -230,6 +231,11 @@ namespace NsMessageBroker
       * \brief JSON writer.
       */
      Json::FastWriter m_receiverWriter;
+
+     /*
+      * @brief mutex for mWaitResponseQueue
+      */
+     sync_primitives::Lock       queue_lock_;
       
    };
 } /* namespace NsMessageBroker */

@@ -60,7 +60,7 @@ void StructTypeIsValidMethod::DefineBody(std::ostream* os) const {
     }
   }
   if (struct_can_be_valid_empty) {
-    *os << "if (is_empty()) return initialization_state__ == kInitialized;\n";
+    *os << "if (empty()) return initialization_state__ == kInitialized;\n";
   }
   for (size_t i = 0; i != fields.size(); ++i) {
     strmfmt(*os, "if (!{0}.is_valid()) return false;\n", fields[i].name());

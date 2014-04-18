@@ -173,7 +173,7 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
-    StructTypeIsEmptyMethod(strct).Declare(&o, true);
+    StructTypeEmptyMethod(strct).Declare(&o, true);
     StructTypeReportErrosMethod(strct).Declare(&o, true);
   }
   {
@@ -285,7 +285,7 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
-    StructTypeIsEmptyMethod(&request).Declare(&o, true);
+    StructTypeEmptyMethod(&request).Declare(&o, true);
     StructTypeReportErrosMethod(&request).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
@@ -338,7 +338,7 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
-    StructTypeIsEmptyMethod(&response).Declare(&o, true);
+    StructTypeEmptyMethod(&response).Declare(&o, true);
     StructTypeReportErrosMethod(&response).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
@@ -390,7 +390,7 @@ void DeclarationGenerator::GenerateCodeForNotification(
     }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
-    StructTypeIsEmptyMethod(&notification).Declare(&o, true);
+    StructTypeEmptyMethod(&notification).Declare(&o, true);
     StructTypeReportErrosMethod(&notification).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);

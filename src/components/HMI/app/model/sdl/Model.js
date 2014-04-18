@@ -942,24 +942,6 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to call handler from model to show list of avaliable
-     * applications
-     *
-     * @param {Object}
-     *            appList
-     */
-    onGetAppList: function (appList) {
-
-        var i = 0, len = appList.length;
-        for (i = 0; i < len; i++) {
-            if (appList[i]) {
-                SDL.SDLModel.onAppRegistered(appList[i]);
-            }
-        }
-
-    },
-
-    /**
      * Method to call function from DeviceListView to show list of connected
      * devices
      *

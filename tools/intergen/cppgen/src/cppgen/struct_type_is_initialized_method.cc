@@ -52,18 +52,18 @@ StructTypeIsInitializedMethod::~StructTypeIsInitializedMethod() {
 }
 
 void StructTypeIsInitializedMethod::DefineBody(std::ostream* os) const {
-  *os << "return (initialization_state__ != kUninitialized) || (!is_empty());\n";
+  *os << "return (initialization_state__ != kUninitialized) || (!empty());\n";
 }
 
-StructTypeIsEmptyMethod::StructTypeIsEmptyMethod(const Struct* strct)
-    : CppFunction(strct->name(), "is_empty", "bool", kConst),
+StructTypeEmptyMethod::StructTypeEmptyMethod(const Struct* strct)
+    : CppFunction(strct->name(), "empty", "bool", kConst),
       strct_(strct) {
 }
 
-StructTypeIsEmptyMethod::~StructTypeIsEmptyMethod() {
+StructTypeEmptyMethod::~StructTypeEmptyMethod() {
 }
 
-void StructTypeIsEmptyMethod::DefineBody(std::ostream* os) const {
+void StructTypeEmptyMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
   for (size_t i = 0; i != fields.size(); ++i) {
     const Struct::Field& field = fields[i];

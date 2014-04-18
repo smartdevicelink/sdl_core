@@ -397,9 +397,9 @@ SDL.SDLController = Em.Object
         systemRequestViewSelected: function(state) {
 
             if (SDL.SDLModel.policyURLs.length) {
-                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+                FFW.BasicCommunication.OnSystemRequest(state, SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
             } else {
-                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
+                FFW.BasicCommunication.OnSystemRequest(state);
             }
 
         },
@@ -669,16 +669,6 @@ SDL.SDLController = Em.Object
             FFW.BasicCommunication.OnDeviceChosen(element.deviceName,
                 element.id);
             this.turnChangeDeviceViewBack();
-        },
-        /**
-         * Method creates list of Application ID's Then call HMI method for
-         * display a list of Applications
-         * 
-         * @param {Object}
-         */
-        onGetAppList: function(appList) {
-
-            SDL.SDLModel.onGetAppList(appList);
         },
         /**
          * Method call's request to get list of applications
