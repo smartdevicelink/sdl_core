@@ -32,18 +32,28 @@
 
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#include "protocol_handler/raw_message.h"
+
+#include <stdint.h>
+#include "time.h"
 
 namespace protocol_handler {
 
 class PHMetricObserver {
+  public:
   struct MessageMetric {
+      RawMessagePtr raw_msg;
+      uint32_t message_id;
+      uint8_t session_id;
       time_t begin;
       time_t end;
-      std::string GetStylesString() {
-        return "PHMetricObserver";
-      }
   };
-  virtual void OnMessage(MessageMetric& metric) = 0;
+  /**
+   */
+  virtual void StartMessageProcess(uint32_t message_id) = 0;
+
+  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
+
 };
 
 }

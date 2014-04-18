@@ -19,9 +19,10 @@ set (SOURCES
     ./src/time_manager.cc
     ./src/application_manager_observer.cc
     ./src/transport_manager_observer.cc
+    ./src/protocol_handler_observer.cc
     ./src/application_manager_metric.cc
     ./src/transport_manager_metric.cc
-
+    ./src/protocol_handler_metric.cc
 
 )
 

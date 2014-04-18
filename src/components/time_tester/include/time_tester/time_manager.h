@@ -38,8 +38,11 @@
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
+
 #include "application_manager_observer.h"
 #include "transport_manager_observer.h"
+#include "protocol_handler_observer.h"
+
 #include "application_manager/application_manager_impl.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
@@ -125,7 +128,7 @@ class TimeManager: public utils::Singleton<TimeManager>  {
 
     ApplicationManagerObserver app_observer;
     TransportManagerObserver tm_observer;
-
+    ProtocolHandlerObserver ph_observer;
 
     int16_t port_;
     std::string ip_;

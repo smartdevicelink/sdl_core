@@ -174,6 +174,13 @@ class ProtocolHandlerImpl
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
 
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(PHMetricObserver* observer);
+
   protected:
 
     /**

@@ -67,7 +67,8 @@ TimeManager::~TimeManager() {
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   if (!thread_) {
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
-    transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);;
+    transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
+    ph->SetMetricObserver(&ph_observer);
     if (!thread_) {
       ip_ = profile::Profile::instance()->server_address();
       port_ = profile::Profile::instance()->time_testing_port();;
@@ -94,7 +95,6 @@ void TimeManager::Stop() {
 }
 
 void TimeManager::SendMetric(utils::SharedPtr<Metric> metric) {
-  LOG4CXX_INFO(logger_, "PushMetric");
   messages_.push(metric);
 }
 
@@ -130,7 +130,6 @@ void TimeManager::Streamer::threadMain() {
     while (is_client_connected_) {
       LOG4CXX_INFO(logger_, "Messages wait");
       while (!server_->messages_.empty()) {
-        LOG4CXX_INFO(logger_, "Messages is not empty");
         utils::SharedPtr<Metric> metric = server_->messages_.pop();
         std::string msg = metric->GetStyledString();
         is_client_connected_ = send(msg);
@@ -246,8 +245,6 @@ bool TimeManager::Streamer::send(
     LOG4CXX_ERROR_EXT(logger_, " Unable to send");
     return false;
   }
-
-  LOG4CXX_INFO(logger_, "Streamer::sent " << msg.size());
   return true;
 }
 
