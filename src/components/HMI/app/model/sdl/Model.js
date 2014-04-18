@@ -1102,6 +1102,10 @@ SDL.SDLModel = Em.Object.create({
 
             setTimeout(function(){
                 if (SDL.SDLModel.VRActive) {
+                    if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                        SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['TIMED_OUT']);
+                    }
+
                     SDL.SDLModel.set('VRActive', false);
                 }
             }, message.params.timeout);
@@ -1111,8 +1115,6 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['SUCCESS']);
         }
-
-
     },
 
     /**
