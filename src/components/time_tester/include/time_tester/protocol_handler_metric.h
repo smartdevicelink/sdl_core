@@ -34,10 +34,10 @@
 #ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
 #define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
 
+#include <string>
+#include "utils/shared_ptr.h"
 #include "metric.h"
 #include "protocol_handler_observer.h"
-#include "utils/shared_ptr.h"
-#include <string>
 
 namespace time_tester {
 

@@ -250,7 +250,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param observer - pointer to observer
    */
-  virtual void SetTimeMetricObserver(TMMetricObserver* observer);
+  void SetTimeMetricObserver(TMMetricObserver* observer);
 
   /**
    * @brief Constructor.

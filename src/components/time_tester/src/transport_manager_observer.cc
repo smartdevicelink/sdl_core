@@ -1,8 +1,10 @@
 #include "transport_manager_observer.h"
+
+#include <time.h>
+
 #include "transport_manager_metric.h"
 #include "time_manager.h"
 
-#include <time.h>
 
 namespace time_tester {
 
@@ -11,19 +13,17 @@ TransportManagerObserver::TransportManagerObserver(TimeManager* time_manager):
 }
 
 void TransportManagerObserver::StartRawMsg(const protocol_handler::RawMessage* ptr) {
-  time_t time_start = time(NULL);
-  time_starts[ptr] = time_start;
+  time_starts[ptr] = time(NULL);
 }
 
 void TransportManagerObserver::StopRawMsg(const protocol_handler::RawMessage* ptr) {
-    std::map<const protocol_handler::RawMessage*, time_t>::iterator it;
+    std::map<const protocol_handler::RawMessage*, time_t>::const_iterator it;
     it = time_starts.find(ptr);
     if (it != time_starts.end()) {
       TransportManagerMectic* m = new TransportManagerMectic();
       m->message_metric = new transport_manager::TMMetricObserver::MessageMetric();
-      time_t time_end = time(NULL);
       m->message_metric->begin = it->second;
-      m->message_metric->end = time_end;
+      m->message_metric->end = time(NULL);
       m->message_metric->data_size = ptr->data_size();
       time_manager_->SendMetric(m);
     }

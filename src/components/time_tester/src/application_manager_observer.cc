@@ -1,7 +1,7 @@
 #include "application_manager_observer.h"
+#include "utils/shared_ptr.h"
 #include "time_manager.h"
 #include "application_manager_metric.h"
-#include "utils/shared_ptr.h"
 
 namespace time_tester {
 

@@ -33,9 +33,10 @@
 #ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_OBSERVER_H_
 #define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_OBSERVER_H_
 
+#include "utils/message_queue.h"
 #include "application_manager/time_metric_observer.h"
 #include "application_manager_metric.h"
-#include "utils/message_queue.h"
+
 
 namespace time_tester {
 

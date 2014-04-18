@@ -30,10 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #include "time_manager.h"
-#include "transport_manager/transport_manager_default.h"
-#include "config_profile/profile.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -41,6 +38,11 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+
+#include "transport_manager/transport_manager_default.h"
+#include "config_profile/profile.h"
+
 
 
 namespace time_tester {
@@ -55,7 +57,6 @@ TimeManager::TimeManager():socket_fd_(0),
   is_ready_(false),
   messages_(),
   thread_(NULL),
-  streamer_(NULL),
   app_observer(this),
   tm_observer(this),
   ph_observer(this) {
@@ -64,17 +65,17 @@ TimeManager::TimeManager():socket_fd_(0),
 }
 
 TimeManager::~TimeManager() {
-  LOG4CXX_INFO(logger_, "Destroint TimeManager");
+  LOG4CXX_INFO(logger_, "Destroing TimeManager");
   Stop();
 }
 
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
+  DCHECK(ph);
   if (!thread_) {
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);
-    streamer_ = new Streamer(this);
-    thread_ = new threads::Thread("SocketAdapter", streamer_);
+    thread_ = new threads::Thread("SocketAdapter", new Streamer(this));
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
     LOG4CXX_INFO(logger_, "Create and start sending thread");
@@ -83,11 +84,13 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
 }
 
 void TimeManager::Stop() {
-  thread_->stop();
-  streamer_ = NULL;
-  delete thread_;
-  if (socket_fd_ != -1) {
-    ::close(socket_fd_);
+  if (thread_) {
+    thread_->stop();
+    delete thread_;
+    thread_ = NULL;
+    if (socket_fd_ != -1) {
+      ::close(socket_fd_);
+    }
   }
 }
 
@@ -167,7 +170,7 @@ void TimeManager::Streamer::Start() {
     return;
   }
 
-  struct sockaddr_in serv_addr_;
+  sockaddr_in serv_addr_;
   memset(&serv_addr_, 0, sizeof(serv_addr_));
   serv_addr_.sin_addr.s_addr = inet_addr(server_->ip_.c_str());
   serv_addr_.sin_family = AF_INET;
@@ -197,7 +200,7 @@ void TimeManager::Streamer::Stop() {
     return;
   }
 
-  if (-1 == ::close(new_socket_fd_)) {
+  if (-1 == close(new_socket_fd_)) {
     LOG4CXX_ERROR(logger_, "Unable to close socket");
     return;
   }

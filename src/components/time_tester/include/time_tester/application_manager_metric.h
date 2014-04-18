@@ -34,9 +34,11 @@
 #ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
 #define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
 
+#include <string>
+
 #include "metric.h"
 #include "application_manager_observer.h"
-#include <string>
+
 
 namespace time_tester {
 

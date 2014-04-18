@@ -42,7 +42,7 @@ namespace time_tester {
     const char data_size[] = "data_size";
     const char message_id[] = "message_id";
     const char session_id[] = "session_id";
-    const char correlation_id[] = "session_id";
+    const char correlation_id[] = "correlation_id";
     const char connection_key[] = "connection_key";
 
 

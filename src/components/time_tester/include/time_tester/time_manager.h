@@ -34,23 +34,25 @@
 #define SRC_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MEDIA_MANAGER_H_
 
 
+#include <string>
+#include "log4cxx/logger.h"
+
+#include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
 
-#include "application_manager_observer.h"
-#include "transport_manager_observer.h"
-#include "protocol_handler_observer.h"
-
-#include "application_manager/application_manager_impl.h"
-#include "transport_manager/transport_manager_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
 #include "metric.h"
-#include "utils/shared_ptr.h"
+#include "application_manager_observer.h"
+#include "application_manager/application_manager_impl.h"
+#include "transport_manager_observer.h"
+#include "transport_manager/transport_manager_impl.h"
+#include "protocol_handler_observer.h"
+#include "protocol_handler/protocol_handler_impl.h"
 
-#include "log4cxx/logger.h"
-#include <string>
+
+
 
 namespace time_tester {
 class TimeManager {
@@ -135,7 +137,6 @@ class TimeManager {
     int32_t socket_fd_;
     bool is_ready_;
     threads::Thread* thread_;
-    Streamer* streamer_;
     MessageQueue<utils::SharedPtr<Metric> > messages_;
     DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
