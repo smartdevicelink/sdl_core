@@ -246,13 +246,6 @@ class TransportAdapter {
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
 
   /**
-   * @brief Setup observer for time metric.
-   *
-   * @param observer - pointer to observer
-   */
-  virtual void SetTimeMetricObserver(TMMetricObserver* observer) = 0;
-
-  /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer

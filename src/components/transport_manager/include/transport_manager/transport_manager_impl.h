@@ -410,7 +410,7 @@ class TransportManagerImpl : public TransportManager {
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
-
+  TMMetricObserver* metric_observer_;
  private:
   /**
    * @brief Structure that contains conversion functions (Device ID -> Device
@@ -452,7 +452,6 @@ class TransportManagerImpl : public TransportManager {
    * Device ID)
    */
   Handle2GUIDConverter converter_;
-  TMMetricObserver* metric_observer_;
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;

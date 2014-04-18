@@ -379,7 +379,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @param observer - pointer to observer
    */
-  virtual void SetTimeMetricObserver(TMMetricObserver* observer);
+  void SetTimeMetricObserver(TMMetricObserver* observer);
 
   /**
    * @brief Return Time metric observer

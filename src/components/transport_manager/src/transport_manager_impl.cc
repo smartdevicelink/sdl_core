@@ -317,9 +317,6 @@ int TransportManagerImpl::AddTransportAdapter(
       transport_adapter->Init() == TransportAdapter::OK) {
     transport_adapters_.push_back(transport_adapter);
   }
-  if (metric_observer_) {
-    transport_adapter->SetTimeMetricObserver(metric_observer_);
-  }
   return E_SUCCESS;
 }
 
