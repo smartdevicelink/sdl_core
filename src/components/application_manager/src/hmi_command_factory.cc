@@ -259,7 +259,7 @@
 
 namespace application_manager {
 
-GETLOGGER(HMICommandFactory::logger_, "ApplicationManager")
+CREATE_LOGGER(logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
   const MessageSharedPtr& message) {

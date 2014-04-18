@@ -37,8 +37,12 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/bluetooth/bluetooth_socket_connection.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGER(logger_, "TransportManager")
 
 BluetoothConnectionFactory::BluetoothConnectionFactory(
     TransportAdapterController* controller)

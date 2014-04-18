@@ -46,7 +46,7 @@ using std::string;
 
 namespace policy {
 
-GETLOGGER(PTExchangeHandlerExt::logger_, "PTExchangeHandlerExt")
+CREATE_LOGGER(logger_, "PTExchangeHandlerExt")
 
 PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
     : PTExchangeHandler(),

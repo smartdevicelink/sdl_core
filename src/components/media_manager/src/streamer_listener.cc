@@ -32,10 +32,11 @@
 
 #include "media_manager/streamer_listener.h"
 #include "media_manager/media_manager_impl.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-GETLOGGER(StreamerListener::logger_, "StreamerListener")
+CREATE_LOGGER(logger_, "StreamerListener")
 
 StreamerListener::StreamerListener()
   : current_application_(0) {

@@ -40,7 +40,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -105,12 +104,6 @@ private:
      */
     std::string mac_address_;
 
-    /**
-     * \brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
 };
 
 /**

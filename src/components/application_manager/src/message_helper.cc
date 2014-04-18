@@ -46,9 +46,11 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 
-namespace {
+namespace application_manager {
 
-GETLOGGER(logger_, "ApplicationManager")
+CREATE_LOGGER(logger_, "ApplicationManager")
+
+namespace {
 
 hmi_apis::Common_Language::eType ToCommonLanguage(
     mobile_apis::Language::eType mobile_language) {
@@ -87,12 +89,6 @@ const uint32_t GetPriorityCode(const std::string& priority) {
     return static_cast<uint32_t>(hmi_apis::Common_AppPriority::INVALID_ENUM);
 }
 
-} // namespase
-
-namespace application_manager {
-
-namespace {
-
 bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     using namespace smart_objects;
     for (size_t i = 0; i < soft_buttons.length(); ++i) {
@@ -112,7 +108,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
         }
     }
     return true;
-}
+}  // namespace
 
 }
 std::pair<const char*, VehicleDataType> kVehicleDataInitializer[] = {
@@ -2122,9 +2118,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-#ifndef ENABLE_LOG
-  return true;
-#endif
+#ifdef ENABLE_LOG
     static uint32_t tab = 0;
     std::string tab_buffer;
 
@@ -2190,7 +2184,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
     } else {
         printf("\n-------------------------------------------------------------\n");
     }
-
+#endif
     return true;
 }
 

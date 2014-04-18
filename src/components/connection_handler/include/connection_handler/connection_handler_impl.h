@@ -321,13 +321,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
-    /**
-     *\brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
-#ifdef BUILD_TESTS
     /*
      * Methods for test usage
      */
@@ -336,7 +329,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     void addDeviceConnection(
         const transport_manager::DeviceInfo& device_info,
         const transport_manager::ConnectionUID& connection_id);
-#endif
  private:
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);

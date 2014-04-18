@@ -32,13 +32,13 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
+
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
-namespace {
-  GETLOGGER(logger_, "ProtocolHandler")
-}  // namespace
+
+CREATE_LOGGER(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.

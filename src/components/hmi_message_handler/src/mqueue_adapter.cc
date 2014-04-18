@@ -32,6 +32,7 @@
 
 #include "hmi_message_handler/mqueue_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
@@ -40,7 +41,7 @@ const int kMqueueMessageSize = 65536;
 const char* kSdlToHmiQueue = "/sdl_to_hmi";
 const char* kHmiToSdlQueue = "/hmi_to_sdl";
 
-GETLOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGER(logger_, "HMIMessageHandler")
 
 class ReceiverThreadDelegate : public threads::ThreadDelegate {
  public:

@@ -32,12 +32,13 @@
 
 #include <string>
 #include "utils/threads/thread.h"
+#include "utils/logger.h"
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 
 namespace media_manager {
 
-GETLOGGER(FromMicRecorderAdapter::logger_, "FromMicRecorderAdapter")
+CREATE_LOGGER(logger_, "FromMicRecorderAdapter")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
   : recorder_thread_(NULL)

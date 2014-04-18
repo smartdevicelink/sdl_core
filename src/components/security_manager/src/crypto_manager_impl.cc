@@ -38,9 +38,8 @@
 #include "utils/logger.h"
 
 namespace security_manager {
-namespace {
-  GETLOGGER(logger_, "CryptoManagerImpl")
-}
+
+CREATE_LOGGER(logger_, "CryptoManagerImpl")
 
 int CryptoManagerImpl::instance_count_ = 0;
 

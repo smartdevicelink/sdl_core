@@ -36,9 +36,7 @@
 
 namespace policy {
 
-namespace {
-  GETLOGGER(logger_, "PTExchangeHandlerImpl")
-}
+CREATE_LOGGER(logger_, "PTExchangeHandlerImpl")
 
 PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
     : policy_handler_(handler) {

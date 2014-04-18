@@ -31,6 +31,7 @@
  */
 
 #include "utils/threads/thread_manager.h"
+#include "utils/logger.h"
 
 #include <sstream>
 
@@ -44,17 +45,16 @@ namespace impl {
 using namespace std;
 using namespace sync_primitives;
 
+CREATE_LOGGER(logger_, "Utils")
+
 namespace {
-const char* kUnknownName = "UnnamedThread";
-GETLOGGER(logger_, "Utils")
-} // namespace
+  const char* kUnknownName = "UnnamedThread";
+}
 
 UnnamedThreadRegistry::UnnamedThreadRegistry() {
-
 }
 
 UnnamedThreadRegistry::~UnnamedThreadRegistry() {
-
 }
 
 std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
@@ -110,7 +110,6 @@ void ThreadManager::Unregister(PlatformThreadHandle id) {
   names_.erase(name);
   id_names_.erase(id);
 }
-
 
 } // namespace impl
 } // namespace threads

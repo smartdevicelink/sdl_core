@@ -52,9 +52,7 @@ typedef std::set<utils::SharedPtr<application_manager::Application>> Application
 PolicyHandler* PolicyHandler::instance_ = NULL;
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 
-namespace{
-  GETLOGGER(logger_, "PolicyHandler")
-} // namespace
+CREATE_LOGGER(logger_, "PolicyHandler")
 
 PolicyHandler::PolicyHandler()
   : policy_manager_(0),

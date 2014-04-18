@@ -42,9 +42,8 @@
 #include "connection_handler/connection_handler_impl.h"
 
 namespace media_manager {
-namespace {
-  GETLOGGER(logger_, "A2DPSourcePlayerAdapter")
-}
+
+CREATE_LOGGER(logger_, "A2DPSourcePlayerAdapter")
 
 class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     : public threads::ThreadDelegate {

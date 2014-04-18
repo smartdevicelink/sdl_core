@@ -32,10 +32,11 @@
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-GETLOGGER(HMIMessageHandlerImpl::logger_, "HMIMessageHandler")
+CREATE_LOGGER(logger_, "HMIMessageHandler")
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),

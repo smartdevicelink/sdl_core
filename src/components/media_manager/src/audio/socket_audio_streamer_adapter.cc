@@ -32,12 +32,11 @@
 
 #include "config_profile/profile.h"
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-namespace {
-  GETLOGGER(logger, "SocketAudioStreamerAdapter")
-}
+CREATE_LOGGER(logger, "SocketAudioStreamerAdapter")
 
 SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketAudioStreamerAdapter::SocketAudioStreamerAdapter");

@@ -41,9 +41,8 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
-namespace {
-  GETLOGGER(logger_, "TransportManager")
-}
+
+CREATE_LOGGER(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 

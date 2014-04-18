@@ -36,9 +36,7 @@
 
 namespace threads {
 
-namespace {
-GETLOGGER(logger_, "Utils")
-}
+CREATE_LOGGER(logger_, "Utils")
 
 SingleThreadSimpleValidator::SingleThreadSimpleValidator()
     : creation_thread_id_(Thread::CurrentId()) {

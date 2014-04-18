@@ -38,9 +38,8 @@
 #include "json/json.h"
 
 namespace security_manager {
-namespace {
-  GETLOGGER(logger_, "SecurityManager")
-}
+
+CREATE_LOGGER(logger_, "SecurityManager")
 
 static const char* err_id ="id";
 static const char* err_text ="text";

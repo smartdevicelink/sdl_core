@@ -36,12 +36,12 @@
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
-namespace {
-  GETLOGGER(logger_, "ApplicationManager")
-}
 
 namespace application_manager {
+
+CREATE_LOGGER(logger_, "ApplicationManager")
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,

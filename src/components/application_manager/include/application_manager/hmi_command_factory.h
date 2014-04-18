@@ -35,7 +35,6 @@
 
 #include "application_manager/commands/command.h"
 #include "utils/macro.h"
-#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -56,9 +55,6 @@ class HMICommandFactory {
 
  private:
   HMICommandFactory();
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
   DISALLOW_COPY_AND_ASSIGN(HMICommandFactory);
 };
 

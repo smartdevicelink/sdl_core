@@ -34,6 +34,8 @@
 
 #include "config_profile/profile.h"
 
+#include "utils/logger.h"
+
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
@@ -41,9 +43,9 @@
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
-  GETLOGGER(logger_, "TransportManager")
+
+CREATE_LOGGER(logger_, "TransportAdapterImpl")
 
 TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,

@@ -35,6 +35,7 @@
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_manager.h"
+#include "utils/logger.h"
 
 using namespace std;
 using namespace threads::impl;
@@ -49,9 +50,10 @@ static void* threadFunc(void* closure) {
 }
 
 namespace threads {
-size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 
-GETLOGGER(Thread::logger_, "threads::Thread")
+CREATE_LOGGER(logger_, "threads::Thread")
+
+size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 
 bool Thread::Id::operator==(const Thread::Id other) const {
   return pthread_equal(id_, other.id_) != 0;

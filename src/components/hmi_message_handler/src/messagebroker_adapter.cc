@@ -34,12 +34,13 @@
 
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+CREATE_LOGGER(logger_, "HMIMessageHandler")
 
-GETLOGGER(MessageBrokerAdapter::logger_, "HMIMessageHandler")
+typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,

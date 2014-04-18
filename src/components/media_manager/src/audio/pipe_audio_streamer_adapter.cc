@@ -32,12 +32,11 @@
 
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-namespace {
-GETLOGGER(logger, "PipeAudioStreamerAdapter")
-}
+CREATE_LOGGER(logger, "PipeAudioStreamerAdapter")
 
 PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::PipeAudioStreamerAdapter");

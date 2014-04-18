@@ -218,9 +218,6 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
      *\brief List of listeners for notify handshake done result
      */
     std::list<SecurityManagerListener*> listeners_;
-    /**
-     *\brief Logger
-     */
     DISALLOW_COPY_AND_ASSIGN(SecurityManager);
   };
 }  // namespace security_manager

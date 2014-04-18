@@ -43,12 +43,13 @@
 #include "request_watchdog/request_watchdog.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/logger.h"
 
 namespace test {
 namespace components {
 namespace request_watchdog_test {
 
-GETLOGGER(logger_, "request_watchdog_test")
+CREATE_LOGGER(logger_, "RequestWatchdogTest")
 
 class RequestWatchdogTest : public ::testing::Test {
   protected:

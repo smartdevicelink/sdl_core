@@ -36,7 +36,6 @@
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
-
 namespace commands {
 
 OnHMIStatusNotification::OnHMIStatusNotification(
