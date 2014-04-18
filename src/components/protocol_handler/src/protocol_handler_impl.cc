@@ -648,7 +648,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       if (metric_observer_) {
         PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
         metric->message_id = packet->message_id();
-        metric->session_id = packet->session_id();
+        metric->connection_key = connection_key;
         metric->raw_msg = raw_message;
         metric_observer_->EndMessageProcess(metric);
       }

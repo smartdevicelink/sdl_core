@@ -1,6 +1,7 @@
 
 #include "application_manager/smart_object_keys.h"
 #include "protocol_handler_metric.h"
+#include "json_keys.h"
 
 #include "json/json.h"
 
@@ -9,11 +10,11 @@ namespace time_tester {
 
 std::string ProtocolHandlerMectic::GetStyledString() {
   Json::Value result;
-  result["logger"] = "ProtocolHandler";
-  result["begin"] = static_cast<uint32_t>(message_metric->begin);
-  result["end"] = static_cast<uint32_t>(message_metric->end);
-  result["message_id"] = message_metric->message_id;
-  result["session_id"] = message_metric->session_id;
+  result[strings::logger] = "ProtocolHandler";
+  result[strings::begin] = static_cast<uint32_t>(message_metric->begin);
+  result[strings::end] = static_cast<uint32_t>(message_metric->end);
+  result[strings::message_id] = message_metric->message_id;
+  result[strings::connection_key] = message_metric->connection_key;
   return result.toStyledString();
 }
 

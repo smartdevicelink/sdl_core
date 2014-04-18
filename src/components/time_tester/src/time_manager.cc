@@ -128,7 +128,6 @@ void TimeManager::Streamer::threadMain() {
     is_client_connected_ = true;
     is_first_loop_ = true;
     while (is_client_connected_) {
-      LOG4CXX_INFO(logger_, "Messages wait");
       while (!server_->messages_.empty()) {
         utils::SharedPtr<Metric> metric = server_->messages_.pop();
         std::string msg = metric->GetStyledString();

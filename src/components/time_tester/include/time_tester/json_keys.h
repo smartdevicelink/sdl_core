@@ -1,5 +1,8 @@
 /**
- * Copyright (c) 2014, Ford Motor Company
+ * \file string.h
+ * \brief string constats for Time test utils.
+ *
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,31 +33,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#include "protocol_handler/raw_message.h"
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
 
-#include <stdint.h>
-#include "time.h"
+namespace time_tester {
+  namespace strings {
+    const char logger[] = "logger";
+    const char begin[] = "begin";
+    const char end[] = "end";
+    const char data_size[] = "data_size";
+    const char message_id[] = "message_id";
+    const char session_id[] = "session_id";
+    const char correlation_id[] = "session_id";
+    const char connection_key[] = "connection_key";
 
-namespace protocol_handler {
 
-class PHMetricObserver {
-  public:
-  struct MessageMetric {
-      RawMessagePtr raw_msg;
-      uint32_t message_id;
-      uint8_t connection_key;
-      time_t begin;
-      time_t end;
-  };
-  /**
-   */
-  virtual void StartMessageProcess(uint32_t message_id) = 0;
-
-  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
-
-};
-
+  }
 }
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
