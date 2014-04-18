@@ -70,6 +70,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
+                public void onProtocolHeartbeat() {
+
+                }
+
+                @Override
                 public void onResetHeartbeat() {
 
                 }
@@ -445,6 +450,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
+            public void onProtocolHeartbeat() {
+
+            }
+
+            @Override
             public void onResetHeartbeat() {
 
             }
@@ -566,6 +576,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolHeartbeatACK() {
+
+            }
+
+            @Override
+            public void onProtocolHeartbeat() {
 
             }
 

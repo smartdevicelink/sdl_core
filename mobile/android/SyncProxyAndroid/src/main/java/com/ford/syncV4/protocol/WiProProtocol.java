@@ -52,6 +52,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     /**
      * <b>This method is for the Test Cases only</b>
+     *
      * @param version test protocol version
      */
     public void set_TEST_ProtocolMinVersion(byte version) {
@@ -61,6 +62,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     /**
      * <b>This method is for the Test Cases only</b>
+     *
      * @param version test protocol version
      */
     public void set_TEST_ProtocolMaxVersion(byte version) {
@@ -147,7 +149,8 @@ public class WiProProtocol extends AbstractProtocol {
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
-                            SyncExceptionCause.SYNC_UNAVAILALBE));
+                            SyncExceptionCause.SYNC_UNAVAILALBE)
+            );
             return;
         }
 
@@ -229,7 +232,7 @@ public class WiProProtocol extends AbstractProtocol {
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
             //if (parsedProtocolVersion <= ProtocolConstants.PROTOCOL_VERSION_MAX) {
-                setProtocolVersion(parsedProtocolVersion);
+            setProtocolVersion(parsedProtocolVersion);
             //}
 
             //Nothing has been read into the buffer and version is 2
@@ -427,10 +430,16 @@ public class WiProProtocol extends AbstractProtocol {
             WiProProtocol.this.handleProtocolHeartbeatACK();
         } // end-method
 
+        private void handleProtocolHeartbeat(ProtocolFrameHeader header,
+                                                byte[] data) {
+            WiProProtocol.this.handleProtocolHeartbeat();
+        } // end-method
+
         private void handleControlFrame(ProtocolFrameHeader header, byte[] data) {
             if (header.getFrameData() == FrameDataControlFrameType.HeartbeatACK.getValue()) {
                 handleProtocolHeartbeatACK(header, data);
-                // TODO heartbeat messages currently are not handled
+            } else if (header.getFrameData() == FrameDataControlFrameType.Heartbeat.getValue()) {
+                handleProtocolHeartbeat(header, data);
             } else if (header.getFrameData() == FrameDataControlFrameType.StartService.getValue()) {
                 sendStartProtocolSessionACK(header.getServiceType(), header.getSessionID());
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceACK.getValue()) {

@@ -40,6 +40,11 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
+            public void onProtocolHeartbeat() {
+
+            }
+
+            @Override
             public void onResetHeartbeat() {
 
             }
@@ -120,6 +125,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onProtocolHeartbeatACK() {
+            }
+
+            @Override
+            public void onProtocolHeartbeat() {
+
             }
 
             @Override

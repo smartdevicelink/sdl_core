@@ -259,4 +259,9 @@ public abstract class AbstractProtocol {
     protected void handleProtocolHeartbeatACK() {
         _protocolListener.onProtocolHeartbeatACK();
     }
+
+    protected void handleProtocolHeartbeat() {
+        _protocolListener.onProtocolHeartbeat();
+    }
+
 } // end-class

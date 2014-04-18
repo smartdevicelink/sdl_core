@@ -44,7 +44,7 @@ import java.util.Hashtable;
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
  * and Session management methods.
- *
+ * <p/>
  * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
  * connection
  */
@@ -91,6 +91,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Set {@link com.ford.syncV4.test.TestConfig} object
+     *
      * @param mTestConfig {@link com.ford.syncV4.test.TestConfig}
      */
     public void setTestConfig(TestConfig mTestConfig) {
@@ -101,7 +102,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
      */
     public void init(BaseTransportConfig transportConfig) {
         init(transportConfig, null);
@@ -111,8 +112,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration and transport instance
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         // Initialize the transport
@@ -333,6 +334,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Start a connection of the provided or specified transport
+     *
      * @throws SyncException
      */
     public void startTransport() throws SyncException {
@@ -419,6 +421,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Return the version of protocol
+     *
      * @return byte value of the protocol version
      */
     public byte getProtocolVersion() {
@@ -529,7 +532,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onResetHeartbeat(){
+    public void onProtocolHeartbeat() {
+    }
+
+    @Override
+    public void onResetHeartbeat() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.notifyTransportActivity();
         }
@@ -591,7 +598,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
         _isHeartbeatTimedout = true;
-        closeConnection((byte) 0, false, false);
+        closeConnection((byte) 0, true, true);
         mConnectionListener.onHeartbeatTimedOut();
     }
 
