@@ -44,7 +44,7 @@ import java.util.Hashtable;
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
  * and Session management methods.
- *
+ * <p/>
  * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
  * connection
  */
@@ -97,6 +97,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Set {@link com.ford.syncV4.test.TestConfig} object
+     *
      * @param mTestConfig {@link com.ford.syncV4.test.TestConfig}
      */
     public void setTestConfig(TestConfig mTestConfig) {
@@ -107,7 +108,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
      */
     public void init(BaseTransportConfig transportConfig) {
         init(transportConfig, null);
@@ -117,8 +118,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration and transport instance
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         init(transportConfig, transport, null);
@@ -128,10 +129,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration and transport instance
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport an instance of transport (Bluetooth, USB, WiFi)
-     * @param protocol an instance of {@link com.ford.syncV4.protocol.AbstractProtocol}
-     *                 implementation
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
+     * @param protocol        an instance of {@link com.ford.syncV4.protocol.AbstractProtocol}
+     *                        implementation
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport,
                      AbstractProtocol protocol) {
@@ -361,6 +362,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Start a connection of the provided or specified transport
+     *
      * @throws SyncException
      */
     public void startTransport() throws SyncException {
@@ -401,35 +403,25 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void startAudioService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-<<<<<<< HEAD
-            if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
-=======
             if (!getIsConnected()) {
                 return;
->>>>>>> APPLINK-6884-Logger-flag
             }
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
         }
     }
 
     public void startRpcService(Session session, boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-<<<<<<< HEAD
-            if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
-=======
             if (!getIsConnected()) {
                 return;
->>>>>>> APPLINK-6884-Logger-flag
             }
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+            _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
         }
     }
 
@@ -487,6 +479,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Return the version of protocol
+     *
      * @return byte value of the protocol version
      */
     public byte getProtocolVersion() {
@@ -598,7 +591,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onResetHeartbeat(){
+    public void onResetHeartbeat() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.notifyTransportActivity();
         }
@@ -617,7 +610,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
                                          String correlationID) {
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version, correlationID);
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
     }
 
     @Override
@@ -646,14 +639,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendH264(ProtocolMessage pm) {
-<<<<<<< HEAD
         if (pm != null) {
-            //_connectionListener.onPacketCreated(pm);
             sendMessage(pm);
         }
-=======
-        sendMessage(pm);
->>>>>>> APPLINK-6884-Logger-flag
     }
 
     @Override

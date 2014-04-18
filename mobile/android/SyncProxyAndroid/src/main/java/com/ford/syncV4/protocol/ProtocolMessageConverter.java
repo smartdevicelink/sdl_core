@@ -11,11 +11,7 @@ import com.ford.syncV4.service.secure.SecureServiceRequestResponseSeqNumberHolde
  */
 public class ProtocolMessageConverter {
 
-<<<<<<< HEAD
-
     private static final int FRAME_HEADER_LENGTH = 12;
-=======
->>>>>>> APPLINK-6884-Logger-flag
     private ProtocolMessage mProtocolMsg;
     private byte[] mData;
     private ServiceType mServiceType;
@@ -34,7 +30,7 @@ public class ProtocolMessageConverter {
         return mServiceType;
     }
 
-<<<<<<< HEAD
+
     /**
      * @param serviceTypeToBeSecured
      * @return
@@ -45,26 +41,16 @@ public class ProtocolMessageConverter {
         }
         mData = null;
         mServiceType = mProtocolMsg.getServiceType();
-
         // TODO - get rid of this ugly if statements. FAST!
         if ((mServiceType == ServiceType.Mobile_Nav ||
                 mServiceType == ServiceType.Audio_Service) &&
-                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_THREE) {
-=======
-    public ProtocolMessageConverter generate() {
-        mData = null;
-        mServiceType = mProtocolMsg.getServiceType();
-        // TODO - get rid of this ugly if statements. FAST!
-        if ((mServiceType == ServiceType.Mobile_Nav ||
-                mServiceType == ServiceType.Audio_Service ) &&
                 mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
->>>>>>> APPLINK-6884-Logger-flag
+
             mData = mProtocolMsg.getData();
             return this;
         }
 
         if (mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-<<<<<<< HEAD
 
             // TODO - Ugly way to create Secure Service payload data (binary frame header + data)
             if (mServiceType == ServiceType.Heartbeat) {
@@ -93,29 +79,11 @@ public class ProtocolMessageConverter {
                 mServiceType = ServiceType.Bulk_Data;
             } else {
                 mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + mProtocolMsg.getJsonSize()];
-=======
-            if (mProtocolMsg.getBulkData() != null) {
-                mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
-                        mProtocolMsg.getJsonSize() +
-                        mProtocolMsg.getBulkData().length];
-                mServiceType = ServiceType.Bulk_Data;
-            } else {
-                mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
-                        mProtocolMsg.getJsonSize()];
->>>>>>> APPLINK-6884-Logger-flag
             }
             BinaryFrameHeader binFrameHeader =
                     ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
                             mProtocolMsg.getFunctionID(), mProtocolMsg.getCorrID(),
                             mProtocolMsg.getJsonSize());
-<<<<<<< HEAD
-            System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0, FRAME_HEADER_LENGTH);
-            System.arraycopy(mProtocolMsg.getData(), 0, mData, ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
-                    mProtocolMsg.getJsonSize());
-            if (mProtocolMsg.getBulkData() != null) {
-                System.arraycopy(mProtocolMsg.getBulkData(), 0, mData,
-                        ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + mProtocolMsg.getJsonSize(),
-=======
             System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
                     ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
             System.arraycopy(mProtocolMsg.getData(), 0, mData,
@@ -125,8 +93,8 @@ public class ProtocolMessageConverter {
                 System.arraycopy(mProtocolMsg.getBulkData(), 0, mData,
                         ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
                                 mProtocolMsg.getJsonSize(),
->>>>>>> APPLINK-6884-Logger-flag
-                        mProtocolMsg.getBulkData().length);
+                        mProtocolMsg.getBulkData().length
+                );
             }
         } else {
             mData = mProtocolMsg.getData();

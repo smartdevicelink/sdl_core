@@ -86,7 +86,6 @@ import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
-import com.ford.syncV4.proxy.rpc.enums.SystemContext;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
@@ -1423,20 +1422,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         passErrorToProxyListener(info, e);
     }
 
-<<<<<<< HEAD
-    private void dispatchOutgoingMessage(final ProtocolMessage message) {
-        if (mSyncConnection.getIsConnected()) {
-            mSyncConnection.sendMessage(message);
-        }
-        Logger.i("SyncProxy sending Protocol Message: " + message.toString());
-
-=======
     private void dispatchOutgoingMessage(ProtocolMessage message) {
         Logger.i(LOG_TAG + " Sending Protocol Msg, name:" +
                 FunctionID.getFunctionName(message.getFunctionID()) +
                 " type:" + message.getRPCType());
         mSyncConnection.sendMessage(message);
->>>>>>> APPLINK-6884-Logger-flag
     }
 
     private void handleErrorsFromOutgoingMessageDispatcher(String info, Exception e) {
