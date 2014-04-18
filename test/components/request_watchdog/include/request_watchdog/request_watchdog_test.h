@@ -49,7 +49,7 @@ namespace test {
 namespace components {
 namespace request_watchdog_test {
 
-CREATE_LOGGER(logger_, "request_watchdog_test")
+CREATE_LOGGER(logger_, "RequestWatchdogTest")
 
 class RequestWatchdogTest : public ::testing::Test {
   protected:

@@ -47,7 +47,7 @@ namespace test {
 namespace components {
 namespace media_manager_test {
 
-CREATE_LOGGER(logger_, "media_manager_impl")
+CREATE_LOGGER(logger_, "MediaManagerImplTest")
 
 class MediaManagerTest : public ::testing::Test {
   protected:

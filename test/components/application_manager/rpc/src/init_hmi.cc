@@ -35,7 +35,7 @@
 
 namespace InitializeHMI {
 
-CREATE_LOGGER(logger_, "MediaAdapterImpl")
+CREATE_LOGGER(logger_, "appMain")
 
   #ifdef __QNX__
   bool Execute(std::string command, const char * const *) {

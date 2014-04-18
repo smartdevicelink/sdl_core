@@ -15,7 +15,7 @@
 
 namespace application_manager {
 
-CREATE_LOGGER(logger_, "MobileMessageHandler")
+CREATE_LOGGER(logger_, "ResumeCtrl")
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 

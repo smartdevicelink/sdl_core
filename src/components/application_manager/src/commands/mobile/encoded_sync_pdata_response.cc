@@ -38,8 +38,6 @@
 namespace application_manager {
 namespace commands {
 
-CREATE_LOGGER(logger_, "ApplicationManager")
-
 EncodedSyncPDataResponse::EncodedSyncPDataResponse(
     const MessageSharedPtr& message)
     : CommandResponseImpl(message) {
@@ -62,7 +60,5 @@ void EncodedSyncPDataResponse::Run() {
 
   SendResponse(true);
 }
-
 }  // namespace commands
-
 }  // namespace application_manager
