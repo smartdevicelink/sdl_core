@@ -533,12 +533,22 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeat() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.heartbeatReceived();
+        }
+    }
+
+    @Override
+    public void onResetHeartbeatAck() {
+        if (_heartbeatMonitor != null) {
+            _heartbeatMonitor.notifyTransportOutputActivity();
+        }
     }
 
     @Override
     public void onResetHeartbeat() {
         if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.notifyTransportActivity();
+            _heartbeatMonitor.notifyTransportInputActivity();
         }
     }
 
@@ -600,6 +610,16 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _isHeartbeatTimedout = true;
         closeConnection((byte) 0, true, true);
         mConnectionListener.onHeartbeatTimedOut();
+    }
+
+    @Override
+    public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor) {
+        Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
+        final ProtocolFrameHeader heartbeat =
+                ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
+                        (byte) 2);
+        final byte[] bytes = heartbeat.assembleHeaderBytes();
+        onProtocolMessageBytesToSend(bytes, 0, bytes.length);
     }
 
     public byte getSessionId() {

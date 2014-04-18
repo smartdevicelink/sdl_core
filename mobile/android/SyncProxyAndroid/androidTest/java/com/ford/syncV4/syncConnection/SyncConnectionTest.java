@@ -98,7 +98,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
+                super.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
@@ -294,15 +294,15 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.setHeartbeatMonitor(heartbeatMonitor);
-        connection.onResetHeartbeat();
-        verify(heartbeatMonitor).notifyTransportActivity();
+        connection.onResetHeartbeatAck();
+        verify(heartbeatMonitor).notifyTransportOutputActivity();
     }
 
     public void testHeartbeatSendDoNotResetHeartbeat() throws Exception {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.sendHeartbeat(heartbeatMonitor);
-        verify(heartbeatMonitor, never()).notifyTransportActivity();
+        verify(heartbeatMonitor, never()).notifyTransportOutputActivity();
     }
 
     public void testMaxJsonSizeInIncomingMessageShouldCallOnProtocolError() {

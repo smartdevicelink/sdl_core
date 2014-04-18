@@ -82,7 +82,7 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
-
+        resetHeartbeat();
         assembler.handleFrame(header, data);
     }
 
@@ -94,7 +94,7 @@ public abstract class AbstractProtocol {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
 
-        resetHeartbeat();
+        resetHeartbeatAck();
         composeMessage(header, data, offset, length);
     }
 
@@ -121,6 +121,12 @@ public abstract class AbstractProtocol {
                 handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
             }
         } // end-if
+    }
+
+    private synchronized void resetHeartbeatAck() {
+        if (_protocolListener != null) {
+            _protocolListener.onResetHeartbeatAck();
+        }
     }
 
     private synchronized void resetHeartbeat() {

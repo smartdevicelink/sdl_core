@@ -75,7 +75,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 }
 
                 @Override
-                public void onResetHeartbeat() {
+                public void onResetHeartbeatAck() {
 
                 }
 
@@ -100,6 +100,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
                 @Override
                 public void onStartServiceNackReceived(ServiceType serviceType) {
+
+                }
+
+                @Override
+                public void onResetHeartbeat() {
 
                 }
             };
@@ -455,7 +460,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -480,6 +485,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         };
@@ -585,7 +595,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -611,6 +621,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         });
@@ -738,7 +753,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
-        verify(protocolListener).onResetHeartbeat();
+        verify(protocolListener).onResetHeartbeatAck();
     }
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {

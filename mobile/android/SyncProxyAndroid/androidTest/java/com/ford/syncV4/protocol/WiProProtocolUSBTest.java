@@ -45,7 +45,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -69,6 +69,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         };
@@ -133,7 +138,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -159,6 +164,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         };

@@ -117,7 +117,7 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
 
         final int ACTIVITY_DELAY = 40;
         Thread.sleep(ACTIVITY_DELAY);
-        heartbeatMonitor.notifyTransportActivity();
+        heartbeatMonitor.notifyTransportOutputActivity();
 
         Thread.sleep(INTERVAL - ACTIVITY_DELAY + 10);
         verify(listenerMock, never()).sendHeartbeat(
