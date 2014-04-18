@@ -126,8 +126,7 @@ void TimeManager::Streamer::threadMain() {
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
         utils::SharedPtr<Metric> metric = server_->messages_.pop();
-        std::string msg = metric->GetStyledString();
-        is_client_connected_ = Send(msg);
+        is_client_connected_ = Send(metric->GetStyledString());
       }
 
       if (!IsReady()) {
@@ -212,8 +211,7 @@ bool TimeManager::Streamer::IsReady() const {
   tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 
-  int32_t retval = 0;
-  retval = select(new_socket_fd_ + 1, 0, &fds, 0, &tv);
+  const int retval = select(new_socket_fd_ + 1, 0, &fds, 0, &tv);
 
   if (-1 == retval) {
     LOG4CXX_ERROR_EXT(logger_, "An error occurred");
