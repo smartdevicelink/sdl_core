@@ -529,6 +529,7 @@ const char* MessageHelper::StringifiedFunctionID(
   }
 }
 
+#ifdef HMI_DBUS_API
 namespace {
 const std::map<const char*, uint16_t> create_get_vehicle_data_args() {
     std::map<const char*, uint16_t> rc;
@@ -561,7 +562,7 @@ const std::map<const char*, uint16_t> create_get_vehicle_data_args() {
 }
 static std::map<const char*, uint16_t> vehicle_data_args = create_get_vehicle_data_args();
 }
-
+#endif HMI_DBUS_API
 
 void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params, int32_t app_id) {
 #ifdef HMI_JSON_API
@@ -586,7 +587,7 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::ve
     ApplicationManagerImpl::instance()->ManageHMICommand(request);
 #endif
 
-#ifndef HMI_DBUS_API
+#ifdef HMI_DBUS_API
     for(std::vector<const char*>::iterator it = params.begin();
         it < params.end(); it++) {
         smart_objects::SmartObject* request = new smart_objects::SmartObject;

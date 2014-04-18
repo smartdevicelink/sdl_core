@@ -453,7 +453,9 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
 #ifdef HMI_JSON_API
     event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
-    application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
+    std::vector<const char*> vehicle_data_args;
+    vehicle_data_args.push_back(application_manager::strings::odometer);
+    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args, NULL);
 #endif
 #ifdef HMI_DBUS_API
     event_observer_.get()->subscribe_on_event(
