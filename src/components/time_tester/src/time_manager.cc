@@ -54,7 +54,6 @@ log4cxx::LoggerPtr TimeManager::logger_ = log4cxx::LoggerPtr(
 
 
 TimeManager::TimeManager():socket_fd_(0),
-  is_ready_(false),
   messages_(),
   thread_(NULL),
   app_observer(this),
@@ -62,6 +61,7 @@ TimeManager::TimeManager():socket_fd_(0),
   ph_observer(this) {
   ip_ = profile::Profile::instance()->server_address();
   port_ = profile::Profile::instance()->time_testing_port();
+
 }
 
 TimeManager::~TimeManager() {
@@ -72,14 +72,12 @@ TimeManager::~TimeManager() {
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   DCHECK(ph);
   if (!thread_) {
+    thread_ = new threads::Thread("SocketAdapter", new Streamer(this));
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);
-    thread_ = new threads::Thread("SocketAdapter", new Streamer(this));
-    const size_t kStackSize = 16384;
-    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+    thread_->startWithOptions(threads::ThreadOptions());
     LOG4CXX_INFO(logger_, "Create and start sending thread");
-    is_ready_ = true;
   }
 }
 
@@ -103,7 +101,6 @@ TimeManager::Streamer::Streamer(
   TimeManager* const server)
   : server_(server),
     new_socket_fd_(0),
-    is_first_loop_(true),
     is_client_connected_(false),
     stop_flag_(false) {
 }
@@ -126,14 +123,11 @@ void TimeManager::Streamer::threadMain() {
     }
 
     is_client_connected_ = true;
-    is_first_loop_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
         utils::SharedPtr<Metric> metric = server_->messages_.pop();
         std::string msg = metric->GetStyledString();
         is_client_connected_ = Send(msg);
-        static int32_t messsages_for_session = 0;
-        ++messsages_for_session;
       }
 
       if (!IsReady()) {
@@ -232,8 +226,7 @@ bool TimeManager::Streamer::IsReady() const {
   return result;
 }
 
-bool TimeManager::Streamer::Send(
-  const std::string& msg) {
+bool TimeManager::Streamer::Send(const std::string& msg) {
   if (!IsReady()) {
     LOG4CXX_ERROR_EXT(logger_, " Socket is not ready");
     return false;

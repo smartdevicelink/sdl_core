@@ -121,7 +121,6 @@ class TimeManager {
       private:
         TimeManager* const server_;
         int32_t new_socket_fd_;
-        bool is_first_loop_;
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
 
