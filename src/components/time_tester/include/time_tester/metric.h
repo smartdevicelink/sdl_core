@@ -1,8 +1,6 @@
 /**
- * \file protocol_handler.h
- * \brief ProtocolHandlerImpl class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

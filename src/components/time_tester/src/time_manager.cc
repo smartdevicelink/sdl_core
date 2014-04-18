@@ -112,13 +112,13 @@ TimeManager::Streamer::Streamer(
 }
 
 TimeManager::Streamer::~Streamer() {
-  stop();
+  Stop();
 }
 
 void TimeManager::Streamer::threadMain() {
   LOG4CXX_INFO(logger_, "Streamer::threadMain");
 
-  start();
+  Start();
 
   while (!stop_flag_) {
     new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
@@ -134,14 +134,14 @@ void TimeManager::Streamer::threadMain() {
       while (!server_->messages_.empty()) {
         utils::SharedPtr<Metric> metric = server_->messages_.pop();
         std::string msg = metric->GetStyledString();
-        is_client_connected_ = send(msg);
+        is_client_connected_ = Send(msg);
         static int32_t messsages_for_session = 0;
         ++messsages_for_session;
       }
 
-      if (!is_ready()) {
+      if (!IsReady()) {
         LOG4CXX_INFO(logger_, "Client disconnected.");
-        stop();
+        Stop();
         break;
       }
 
@@ -153,12 +153,12 @@ void TimeManager::Streamer::threadMain() {
 bool TimeManager::Streamer::exitThreadMain() {
   LOG4CXX_INFO(logger_, "Streamer::exitThreadMain");
   stop_flag_ = true;
-  stop();
+  Stop();
   server_->messages_.Shutdown();
   return false;
 }
 
-void TimeManager::Streamer::start() {
+void TimeManager::Streamer::Start() {
   server_->socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (0 >= server_->socket_fd_) {
@@ -192,7 +192,7 @@ void TimeManager::Streamer::start() {
   LOG4CXX_INFO(logger_, "Streamer is listetning for connections");
 }
 
-void TimeManager::Streamer::stop() {
+void TimeManager::Streamer::Stop() {
   LOG4CXX_INFO(logger_, "SocketStreamerAdapter::Streamer::stop");
   if (!new_socket_fd_) {
     return;
@@ -212,7 +212,7 @@ void TimeManager::Streamer::stop() {
   is_client_connected_ = false;
 }
 
-bool TimeManager::Streamer::is_ready() const {
+bool TimeManager::Streamer::IsReady() const {
   bool result = true;
   fd_set fds;
   FD_ZERO(&fds);
@@ -235,9 +235,9 @@ bool TimeManager::Streamer::is_ready() const {
   return result;
 }
 
-bool TimeManager::Streamer::send(
+bool TimeManager::Streamer::Send(
   const std::string& msg) {
-  if (!is_ready()) {
+  if (!IsReady()) {
     LOG4CXX_ERROR_EXT(logger_, " Socket is not ready");
     return false;
   }

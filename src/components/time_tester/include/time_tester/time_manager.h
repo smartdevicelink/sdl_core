@@ -95,26 +95,26 @@ class TimeManager {
          *
          * @return TRUE if socket is ready otherwise FALSE
          */
-        bool is_ready() const;
+        bool IsReady() const;
 
         /*
          * Starts server
          *
          */
-        void start();
+        void Start();
 
         /*
          * Stops server
          *
          */
-        void stop();
+        void Stop();
 
         /*
          * Sends data to connected client
          *
          * @param block Pointer to the data
          */
-        bool send(const std::string &msg);
+        bool Send(const std::string &msg);
 
       private:
         TimeManager* const server_;
@@ -132,10 +132,10 @@ class TimeManager {
 
     int16_t port_;
     std::string ip_;
-    int32_t                                       socket_fd_;
-    bool                                          is_ready_;
-    threads::Thread*                              thread_;
-    Streamer*                                     streamer_;
+    int32_t socket_fd_;
+    bool is_ready_;
+    threads::Thread* thread_;
+    Streamer* streamer_;
     MessageQueue<utils::SharedPtr<Metric> > messages_;
     DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
