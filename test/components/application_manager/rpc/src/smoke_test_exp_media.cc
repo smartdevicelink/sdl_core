@@ -30,22 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/commands/command_impl.h"
+
 #include "rpc/smoke_test_exp_media.h"
 
-namespace test {
-  void SmokeTestExpMedia(const char* patch) {
-    am::ApplicationManagerImpl* app_manager_ =
-        am::ApplicationManagerImpl::instance();
 
+namespace test {
+
+  void SmokeTestExpMedia(const char* patch) {
     ProtocolHandlerMockup* protocol_handler_test_ =
         ProtocolHandlerMockup::instance();
 
     HMIMessageHandlerTester* hmi_handler_test =
         HMIMessageHandlerTester::instance();
 
+    am::ApplicationManagerImpl* app_manager_ =
+        am::ApplicationManagerImpl::instance();
+
     utils::SharedPtr<am::Application> appl(app_manager_->application(65537));
 
-    if (!(appl.valid())) {
+    if (!appl.valid()) {
       RegApp();
       sleep(3);
       appl = app_manager_->application(65537);
@@ -55,8 +59,10 @@ namespace test {
       }
     }
 
-    app_manager_->set_hmi_message_handler(hmi_handler_test);
-    app_manager_->set_protocol_handler(protocol_handler_test_);
+    addTest("smoke_test_exp_media",
+            "init_smoke_test_exp_media",
+            &InitSmokeTestExpMedia,
+            true);
 
     XmlParser* xmlp = XmlParser::instance();
 
@@ -80,14 +86,15 @@ namespace test {
               new smart::SmartObject);
 
           if (xmlp->GetRequestFromTest(&(*soForParser))) {
+            //application_manager::MessageHelper::PrintSmartObject((*soForParser));
             *soRequest = (*soForParser)["request"];
             *soResponse = (*soForParser)["response"];
-
-
 
             (*soRequest)[jsn::S_PARAMS][am::strings::connection_key] = 65537;
             (*soRequest)[jsn::S_PARAMS][am::strings::message_type] =
                 mobile_apis::messageType::request;
+            (*soRequest)[jsn::S_PARAMS][am::strings::protocol_version] = 3;
+                //am::commands::CommandImpl::protocol_version_;
 
             addTest<ProtocolHandlerMockup*,
               utils::SharedPtr<smart::SmartObject>,
@@ -181,6 +188,36 @@ namespace test {
         HMIMessageHandlerTester::instance();
 
     return hmi_handler_test->CheckUntestableRequest();
+  }
+
+  bool InitSmokeTestExpMedia() {
+    am::ApplicationManagerImpl* app_manager_ =
+        am::ApplicationManagerImpl::instance();
+
+    ProtocolHandlerMockup* protocol_handler_test_ =
+        ProtocolHandlerMockup::instance();
+
+    HMIMessageHandlerTester* hmi_handler_test =
+        HMIMessageHandlerTester::instance();
+
+    utils::SharedPtr<am::Application> appl(app_manager_->application(65537));
+
+    if (!appl.valid()) {
+      RegApp();
+      sleep(3);
+      appl = app_manager_->application(65537);
+
+      if (!appl.valid()) {
+        return false;
+      }
+    }
+
+    ActivateApp();
+    sleep(2);
+    app_manager_->set_hmi_message_handler(hmi_handler_test);
+    app_manager_->set_protocol_handler(protocol_handler_test_);
+
+    return true;
   }
 }  // namespace test
 

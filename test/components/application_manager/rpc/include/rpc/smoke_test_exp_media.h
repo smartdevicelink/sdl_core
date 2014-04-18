@@ -53,6 +53,7 @@ namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
 namespace smart = NsSmartDeviceLink::NsSmartObjects;
 
 namespace test {
+
   /**
    * @brief Function read test from xml files and create Gtest to verify Mobile
    * response and HMI request
@@ -69,6 +70,15 @@ namespace test {
    *
    */
   bool CheckNotTestedHMIRequest();
+
+  /**
+   * @brief Function init params smoke test
+   *
+   * @return true if all init
+   *
+   */
+  bool InitSmokeTestExpMedia();
+
 }  // namespace test
 
 #endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_SMOKE_TEST_EXP_MEDIA_H_
