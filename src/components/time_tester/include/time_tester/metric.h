@@ -41,6 +41,7 @@ namespace time_tester {
 class Metric {
   public:
     virtual std::string GetStyledString() = 0;
+    virtual ~Metric(){}
 };
 
 }

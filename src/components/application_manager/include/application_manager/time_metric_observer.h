@@ -51,6 +51,7 @@ class AMMetricObserver {
     };
 
     virtual void OnMessage(utils::SharedPtr<MessageMetric> metric) = 0;
+    virtual ~AMMetricObserver(){}
 };
 
 }

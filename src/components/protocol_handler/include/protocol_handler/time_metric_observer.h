@@ -53,7 +53,7 @@ class PHMetricObserver {
   virtual void StartMessageProcess(uint32_t message_id) = 0;
 
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
-
+  virtual ~PHMetricObserver(){}
 };
 
 }

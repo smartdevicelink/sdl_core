@@ -47,7 +47,7 @@ class TMMetricObserver {
     virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
     virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
 
-    //virtual void StopRawMsg(RawMessageSptr ptr) = 0;
+    virtual ~TMMetricObserver(){};
 
 };
 
