@@ -34,7 +34,6 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
   ProtocolHandlerMectic* metric = new ProtocolHandlerMectic();
   metric->message_metric = m;
   time_manager_->SendMetric(metric);
-
 }
 
 } //namespace time_tester

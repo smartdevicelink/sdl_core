@@ -59,7 +59,8 @@ TimeManager::TimeManager():socket_fd_(0),
   app_observer(this),
   tm_observer(this),
   ph_observer(this) {
-
+  ip_ = profile::Profile::instance()->server_address();
+  port_ = profile::Profile::instance()->time_testing_port();
 }
 
 TimeManager::~TimeManager() {
@@ -72,19 +73,12 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);
-    if (!thread_) {
-      ip_ = profile::Profile::instance()->server_address();
-      port_ = profile::Profile::instance()->time_testing_port();;
-      streamer_ = new Streamer(this);
-      thread_ = new threads::Thread("SocketAdapter", streamer_);
-      const size_t kStackSize = 16384;
-      thread_->startWithOptions(threads::ThreadOptions(kStackSize));
-      LOG4CXX_INFO(logger_, "Create and start sending thread");
-      is_ready_ = true;
-    }
-//    worker_ = new Worker(this);
-//    thread_ = new threads::Thread("TimeManager", worker_);
-//    thread_->startWithOptions(threads::ThreadOptions());
+    streamer_ = new Streamer(this);
+    thread_ = new threads::Thread("SocketAdapter", streamer_);
+    const size_t kStackSize = 16384;
+    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+    LOG4CXX_INFO(logger_, "Create and start sending thread");
+    is_ready_ = true;
   }
 }
 
