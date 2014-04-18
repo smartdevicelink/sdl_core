@@ -114,7 +114,7 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-  // it is important to initialise TimeTeser before TM ti listen TM Adapters
+  // it is important to initialise TimeTester before TM to listen TM Adapters
   time_tester_ = new time_tester::TimeManager();
   time_tester_->Init(protocol_handler_);
   // It's important to initialise TM after setting up listener chain
