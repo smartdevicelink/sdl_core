@@ -252,6 +252,11 @@ class TransportAdapter {
    */
   virtual void SetTimeMetricObserver(TMMetricObserver* observer) = 0;
 
+  /**
+   * @brief Return Time metric observer
+   *
+   * @param return pointer to Time metric observer
+   */
   virtual TMMetricObserver* GetTimeMetricObserver() = 0;
 
 
