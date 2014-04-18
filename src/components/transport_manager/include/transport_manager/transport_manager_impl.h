@@ -466,7 +466,6 @@ class TransportManagerImpl : public TransportManager {
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceList;
   DeviceList device_list_;
-  //TMMetricObserver* metric_observer_;
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(int id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);

@@ -4,7 +4,6 @@ include_directories (
   ../transport_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
-  ../../thirdPartyLibs/jsoncpp/include/
 )
 
 set (SOURCES

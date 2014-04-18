@@ -2,6 +2,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "transport_manager_metric.h"
 
+#include "json/json.h"
 
 
 namespace time_tester {

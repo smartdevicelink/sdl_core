@@ -565,11 +565,11 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   }
 }
 
-void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver *observer) {
+void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
 
-TMMetricObserver *TransportAdapterImpl::GetTimeMetricObserver() {
+TMMetricObserver* TransportAdapterImpl::GetTimeMetricObserver() {
   return metric_observer_;
 }
 

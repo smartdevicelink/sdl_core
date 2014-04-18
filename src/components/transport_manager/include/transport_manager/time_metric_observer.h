@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
 
-#include "json/json.h"
 #include "transport_manager/common.h"
 
 namespace transport_manager {

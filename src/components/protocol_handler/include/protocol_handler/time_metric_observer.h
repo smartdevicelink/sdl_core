@@ -33,8 +33,6 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
 
-#include "json/json.h"
-
 namespace protocol_handler {
 
 class PHMetricObserver {
@@ -42,13 +40,7 @@ class PHMetricObserver {
       time_t begin;
       time_t end;
       std::string GetStylesString() {
-        Json::Value result;
-        result["logger"] = "ProtocolHandler";
-        result["begin"] = static_cast<uint32_t>(begin);
-        result["end"] = static_cast<uint32_t>(end);
-        int32_t mid = 0;
-        result["MessageID"] = mid;
-        return result.toStyledString();
+        return "PHMetricObserver";
       }
   };
   virtual void OnMessage(MessageMetric& metric) = 0;

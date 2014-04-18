@@ -717,7 +717,7 @@ void TransportManagerImpl::EventListenerThread(void) {
           }
           data->set_connection_key(connection->id);
           if (metric_observer_) {
-            metric_observer_->StopRawMsg(data.get()); // MYLOG
+            metric_observer_->StopRawMsg(data.get());
           }
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
@@ -772,7 +772,7 @@ void TransportManagerImpl::EventListenerThread(void) {
   LOG4CXX_INFO(logger_, "Event listener thread finished");
 }
 
-void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver *observer) {
+void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
 void* TransportManagerImpl::MessageQueueStartThread(void* data) {
