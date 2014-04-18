@@ -44,7 +44,7 @@ namespace time_tester {
 
 class ApplicationManagerObserver;
 
-class ApplicationManagerMectic:public Metric {
+class ApplicationManagerMetric: public Metric {
 
   public:
     utils::SharedPtr<application_manager::AMMetricObserver::MessageMetric> message_metric;

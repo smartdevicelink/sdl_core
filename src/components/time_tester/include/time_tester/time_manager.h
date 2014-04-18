@@ -53,7 +53,7 @@
 #include <string>
 
 namespace time_tester {
-class TimeManager: public utils::Singleton<TimeManager>  {
+class TimeManager {
 
   public:
 #ifdef ENABLE_LOG
@@ -137,7 +137,6 @@ class TimeManager: public utils::Singleton<TimeManager>  {
     threads::Thread*                              thread_;
     Streamer*                                     streamer_;
     MessageQueue<utils::SharedPtr<Metric> > messages_;
-
     DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
 

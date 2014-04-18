@@ -6,6 +6,10 @@
 
 namespace time_tester {
 
+TransportManagerObserver::TransportManagerObserver(TimeManager* time_manager):
+  time_manager_ (time_manager) {
+}
+
 void TransportManagerObserver::StartRawMsg(const protocol_handler::RawMessage* ptr) {
   time_t time_start = time(NULL);
   time_starts[ptr] = time_start;
@@ -21,7 +25,7 @@ void TransportManagerObserver::StopRawMsg(const protocol_handler::RawMessage* pt
       m->message_metric->begin = it->second;
       m->message_metric->end = time_end;
       m->message_metric->data_size = ptr->data_size();
-      TimeManager::instance()->SendMetric(m);
+      time_manager_->SendMetric(m);
     }
 }
 

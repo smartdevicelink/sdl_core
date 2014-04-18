@@ -6,7 +6,7 @@
 
 namespace time_tester {
 
-std::string ApplicationManagerMectic::GetStyledString() {
+std::string ApplicationManagerMetric::GetStyledString() {
     Json::Value result;
     result[strings::logger] = "ApplicationManager";
     result[strings::begin] = static_cast<uint32_t>(message_metric->begin);

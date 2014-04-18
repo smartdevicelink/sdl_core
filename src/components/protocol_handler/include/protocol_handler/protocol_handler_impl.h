@@ -158,7 +158,6 @@ class ProtocolHandlerImpl
      */
     void set_session_observer(SessionObserver* observer);
 
-    virtual void SetMetricObserver(PHMetricObserver* observer);
     /**
      * \brief Method for sending message to Mobile Application
      * \param message Message with params to be sent to Mobile App

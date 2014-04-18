@@ -38,13 +38,18 @@
 
 namespace time_tester {
 
+class TimeManager;
+
 class TransportManagerObserver: public transport_manager::TMMetricObserver {
 
   public:
-   virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
-   virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
 
-   std::map<const protocol_handler::RawMessage*, time_t> time_starts;
+    TransportManagerObserver(TimeManager* time_manager);
+    virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
+    virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
+private:
+    TimeManager* time_manager_;
+    std::map<const protocol_handler::RawMessage*, time_t> time_starts;
 };
 
 }

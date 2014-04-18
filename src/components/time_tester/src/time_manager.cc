@@ -55,7 +55,10 @@ TimeManager::TimeManager():socket_fd_(0),
   is_ready_(false),
   messages_(),
   thread_(NULL),
-  streamer_(NULL)  {
+  streamer_(NULL),
+  app_observer(this),
+  tm_observer(this),
+  ph_observer(this) {
 
 }
 
@@ -68,7 +71,7 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   if (!thread_) {
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
-    ph->SetMetricObserver(&ph_observer);
+    ph->SetTimeMetricObserver(&ph_observer);
     if (!thread_) {
       ip_ = profile::Profile::instance()->server_address();
       port_ = profile::Profile::instance()->time_testing_port();;

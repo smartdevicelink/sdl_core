@@ -35,13 +35,19 @@
 
 #include "application_manager/time_metric_observer.h"
 #include "application_manager_metric.h"
-
 #include "utils/message_queue.h"
 
 namespace time_tester {
 
+class TimeManager;
+
 class ApplicationManagerObserver: public application_manager::AMMetricObserver {
+   public:
+    ApplicationManagerObserver(TimeManager* time_manager);
    virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
+
+  private:
+    TimeManager* time_manager_;
 };
 
 }

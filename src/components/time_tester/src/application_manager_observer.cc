@@ -5,10 +5,14 @@
 
 namespace time_tester {
 
+ApplicationManagerObserver::ApplicationManagerObserver(TimeManager* time_manager):
+  time_manager_(time_manager) {
+}
+
 void ApplicationManagerObserver::OnMessage(utils::SharedPtr<MessageMetric> metric) {
-  ApplicationManagerMectic* m = new ApplicationManagerMectic();
+  ApplicationManagerMetric* m = new ApplicationManagerMetric();
   m->message_metric = metric;
-  TimeManager::instance()->SendMetric(m);
+  time_manager_->SendMetric(m);
 }
 
 }

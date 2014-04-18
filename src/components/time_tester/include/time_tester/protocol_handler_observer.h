@@ -36,15 +36,21 @@
 #include "protocol_handler/time_metric_observer.h"
 #include "utils/message_queue.h"
 
+
 namespace time_tester {
+
+class TimeManager;
 
 class ProtocolHandlerObserver: public protocol_handler::PHMetricObserver {
 
   public:
+    ProtocolHandlerObserver(TimeManager* time_manager);
     virtual void StartMessageProcess(uint32_t message_id);
 
     virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 
+  private:
+   TimeManager* time_manager_;
    std::map<uint32_t, time_t> time_starts;
 };
 

@@ -197,10 +197,6 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
   session_observer_ = observer;
 }
 
-void ProtocolHandlerImpl::SetMetricObserver(PHMetricObserver* observer) {
-  metric_observer_ = observer;
-}
-
 void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t session_id,
                                               uint8_t protocol_version,
@@ -403,7 +399,6 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     if (metric_observer_) {
       metric_observer_->StartMessageProcess(msg->message_id());
     }
-    printf("MYLOG OnTMMessageReceived %d \n", msg->message_id());
     raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
@@ -616,7 +611,6 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                                                const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-  printf("\t\tMYLOG HandleMessage %d \n", packet->message_id());
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL: {
       LOG4CXX_INFO(logger_, "handleMessage(1) - case FRAME_TYPE_CONTROL");
@@ -652,7 +646,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
         metric->raw_msg = raw_message;
         metric_observer_->EndMessageProcess(metric);
       }
-      printf("\t\t\tMYLOG BEFORE NOTIFY %d \n", packet->message_id());
       NotifySubscribers(raw_message);
       break;
     }
@@ -676,7 +669,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-  printf("\t\t\t HandleMultiFrameMessage %d \n", packet.get());
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
 
@@ -742,7 +734,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
         metric->raw_msg = rawMessage;
         metric_observer_->EndMessageProcess(metric);
       }
-      printf("\t\t\tMYLOG BEFORE NOTIFY MULTIFRAME %d \n", completePacket->message_id());
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -755,7 +746,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
-  printf("\t\t\tMYLOG HandleControlMessage %d \n", packet->message_id());
+
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 
@@ -822,7 +813,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     SendEndSessionNAck(connection_id, current_session_id, packet.protocol_version(),
                        packet.service_type());
   }
-  printf("\t\t\t\tMYLOG HandleControlMessageEndSession %d \n", packet.message_id());
   return RESULT_OK;
 }
 
@@ -850,7 +840,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     SendStartSessionNAck(connection_id, packet.session_id(), packet.protocol_version(),
                          packet.service_type());
   }
-  printf("\t\t\t\tMYLOG HandleControlMessageStartSession %d \n", packet.message_id());
   return RESULT_OK;
 }
 
@@ -859,7 +848,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   LOG4CXX_INFO(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
-  printf("\t\t\t\tMYLOG HandleControlMessageHeartBeat %d \n", packet.message_id());
   return SendHeartBeatAck(connection_id, packet.session_id(),
                           packet.message_id());
 }
@@ -873,7 +861,6 @@ void ProtocolHandlerImpl::Handle(
       FRAME_TYPE_FIRST == message->frame_type()) {
 
       LOG4CXX_INFO_EXT(logger_, "Packet: dataSize " << message->data_size());
-      printf("\tMYLOG Handle %d \n", message->message_id());
       HandleMessage(message->connection_key(), message);
   } else {
     LOG4CXX_WARN(logger_,

@@ -1,11 +1,14 @@
 #include "protocol_handler_observer.h"
 #include "protocol_handler_metric.h"
-
 #include "time_manager.h"
 
 #include <time.h>
 
 namespace time_tester {
+
+ProtocolHandlerObserver::ProtocolHandlerObserver(TimeManager *time_manager):
+  time_manager_(time_manager) {
+}
 
 void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id) {
   if (message_id == 0) {
@@ -30,7 +33,7 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
   m->end = time(NULL);
   ProtocolHandlerMectic* metric = new ProtocolHandlerMectic();
   metric->message_metric = m;
-  TimeManager::instance()->SendMetric(metric);
+  time_manager_->SendMetric(metric);
 
 }
 
