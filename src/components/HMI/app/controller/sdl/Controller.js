@@ -424,6 +424,8 @@ SDL.SDLController = Em.Object
             SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
+
+            SDL.InteractionChoicesView.timerUpdate();
         },
         /**
          * Method to sent notification for Alert

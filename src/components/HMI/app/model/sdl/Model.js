@@ -472,7 +472,7 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {Boolean}
      */
-    performInteractionSession: null,
+    performInteractionSession: [],
 
 /**
      * Array with app permissions
@@ -1097,11 +1097,19 @@ SDL.SDLModel = Em.Object.create({
         var messageLocal = message;
 
         setTimeout(function(){
+            if (SDL.SDLModel.VRActive) {
+                SDL.SDLModel.set('VRActive', false);
+            }
+        }, messageLocal.params.timeout);
+
+        setTimeout(function(){
             if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
                 SDL.SDLModel.onPrompt(messageLocal.params.timeoutPrompt);
                 SDL.SDLModel.interactionData.helpPrompt = null;
             }
         }, messageLocal.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
+
+        SDL.InteractionChoicesView.timerUpdate();
     },
 
     /**
