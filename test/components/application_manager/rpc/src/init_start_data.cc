@@ -36,7 +36,7 @@
 void InitStartData() {
   printf("\n\n\n in initStartData\n\n\n");
 
-  GETLOGGER(logger_, "initStartData")
+CREATE_LOGGER_NOT_ANONYM(logger_, "initStartData")
 
   LOG4CXX_INFO(logger_, " Application started!");
 

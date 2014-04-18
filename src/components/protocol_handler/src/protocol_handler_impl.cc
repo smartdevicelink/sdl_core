@@ -37,12 +37,14 @@
 
 #include <memory.h>
 
+#include "utils/logger.h"
+
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
 
-GETLOGGER(ProtocolHandlerImpl::logger_, "ProtocolHandler")
+CREATE_LOGGER(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.

@@ -40,7 +40,7 @@ namespace application_manager {
 namespace request_controller {
 using namespace sync_primitives;
 
-GETLOGGER(logger_, "RequestController")
+CREATE_LOGGER(logger_, "RequestController")
 
 RequestController::RequestController()
   : watchdog_(NULL) {

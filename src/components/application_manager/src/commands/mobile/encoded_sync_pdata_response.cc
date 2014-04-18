@@ -33,9 +33,12 @@
 
 #include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
 
-namespace application_manager {
+#include "utils/logger.h"
 
+namespace application_manager {
 namespace commands {
+
+CREATE_LOGGER(logger_, "ApplicationManager")
 
 EncodedSyncPDataResponse::EncodedSyncPDataResponse(
     const MessageSharedPtr& message)

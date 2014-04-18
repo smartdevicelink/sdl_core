@@ -35,9 +35,7 @@
 
 namespace connection_handler {
 
-namespace {
-  GETLOGGER(logger_, "ConnectionHandler")
-}
+CREATE_LOGGER(logger_, "ConnectionHandler")
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection* connection)

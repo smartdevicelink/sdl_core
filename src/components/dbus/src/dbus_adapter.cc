@@ -33,6 +33,7 @@
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
 #include "formatters/CSmartFactory.hpp"
+#include "utils/logger.h"
 
 using ford_message_descriptions::ParameterDescription;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -41,7 +42,7 @@ extern char introspection_xml[];
 
 namespace dbus {
 
-GETLOGGER(DBusAdapter::logger_, "HMIMessageHandler")
+CREATE_LOGGER(logger_, "HMIMessageHandler")
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems) {

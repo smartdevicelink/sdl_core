@@ -61,6 +61,7 @@
 
 // ----------------------------------------------------------------------------
 
+CREATE_LOGGER(logger, "appMain")
 namespace {
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
@@ -71,7 +72,6 @@ const char kApplicationVersion[] = "SDL_RB_3.3";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
-  GETLOGGER(logger, "appMain")
   if (system(command.c_str()) == -1) {
     LOG4CXX_INFO(logger, "Can't start HMI!");
     return false;
@@ -80,7 +80,6 @@ bool Execute(std::string command, const char * const *) {
 }
 #else
 bool Execute(std::string file, const char * const * argv) {
-  GETLOGGER(logger, "appMain")
   // Create a child process.
   pid_t pid_hmi = fork();
 
@@ -127,7 +126,6 @@ bool Execute(std::string file, const char * const * argv) {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  GETLOGGER(logger, "appMain")
 
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
@@ -177,7 +175,6 @@ bool InitHmi() {
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    GETLOGGER(logger, "appMain")
     LOG4CXX_INFO(logger, "HMI start script doesn't exist!");
     return false;
   }
@@ -198,11 +195,7 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization
-
-#ifdef ENABLE_LOG
-  GETLOGGER(logger, "appMain")
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-#endif // ENABLE_LOG
+  INITLOGGER("log4cxx.properties");
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -229,10 +222,7 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-// without this line log4cxx threads continue using some instances destroyed by exit()
-    log4cxx::Logger::getRootLogger()->closeNestedAppenders();
-#endif // ENABLE_LOG
+    DEINITLOGGER();
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
@@ -245,10 +235,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-// without this line log4cxx threads continue using some instances destroyed by exit()
-        log4cxx::Logger::getRootLogger()->closeNestedAppenders();
-#endif // ENABLE_LOG
+        DEINITLOGGER();
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");

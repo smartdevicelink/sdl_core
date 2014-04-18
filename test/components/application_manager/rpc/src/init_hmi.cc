@@ -32,11 +32,11 @@
 
 #include "rpc/init_hmi.h"
 #include "utils/logger.h"
-namespace {
-  GETLOGGER(logger_, "MediaAdapterImpl")
-}  // namespace
 
 namespace InitializeHMI {
+
+CREATE_LOGGER(logger_, "MediaAdapterImpl")
+
   #ifdef __QNX__
   bool Execute(std::string command, const char * const *) {
     if (system(command.c_str()) == -1) {

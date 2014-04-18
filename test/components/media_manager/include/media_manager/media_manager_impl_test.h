@@ -41,12 +41,13 @@
 #include "media_manager/media_manager_impl.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/logger.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-GETLOGGER(logger_, "media_manager_impl")
+CREATE_LOGGER(logger_, "media_manager_impl")
 
 class MediaManagerTest : public ::testing::Test {
   protected:

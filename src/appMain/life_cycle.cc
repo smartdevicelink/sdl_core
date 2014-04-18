@@ -40,10 +40,9 @@
 using threads::Thread;
 
 namespace main_namespace {
+CREATE_LOGGER(logger_, "appMain")
+
 namespace {
-
-GETLOGGER(logger_, "appMain")
-
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(Thread::Id(thread.GetId()), name);
@@ -210,7 +209,6 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-  GETLOGGER(logger_, "appMain")
 
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());

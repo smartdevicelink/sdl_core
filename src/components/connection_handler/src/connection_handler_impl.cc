@@ -46,13 +46,15 @@ namespace {
 int32_t HeartBeatTimeout() {
   return profile::Profile::instance()->heart_beat_timeout();
 }
-}
+}  // namespace
 
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
  */
 namespace connection_handler {
+
+CREATE_LOGGER(logger_, "ConnectionHandler")
 
 ConnectionHandle HandleFromConnectionUID(transport_manager::ConnectionUID uid) {
   return ConnectionHandle(uid);
@@ -61,8 +63,6 @@ ConnectionHandle HandleFromConnectionUID(transport_manager::ConnectionUID uid) {
 transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle) {
   return transport_manager::ConnectionUID(handle);
 }
-
-GETLOGGER(ConnectionHandlerImpl::logger_, "ConnectionHandler")
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),

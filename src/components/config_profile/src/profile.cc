@@ -47,11 +47,12 @@ const char* kPolicySection = "Policy";
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 // Heartbeat is disabled by default
 const uint32_t kDefaultHeartBeatTimeout = 0;
-}
-
-GETLOGGER(logger_, "Profile")
+}  // namespace
 
 namespace profile {
+
+CREATE_LOGGER(logger_, "Profile")
+
 Profile::Profile()
     : launch_hmi_(true),
       app_config_folder_(""),

@@ -38,15 +38,14 @@
 #include "utils/logger.h"
 
 namespace {
-
-GETLOGGER(logger_, "Utils")
-
 const long kNanosecondsPerSecond = 1000000000;
 const long kMillisecondsPerSecond = 1000;
 const long kNanosecondsPerMillisecond = 1000000;
 }
 
 namespace sync_primitives {
+
+CREATE_LOGGER(logger_, "Utils")
 
 ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;

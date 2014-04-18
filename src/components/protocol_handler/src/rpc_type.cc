@@ -36,9 +36,9 @@
 
 namespace protocol_handler {
 
-namespace {
-  GETLOGGER(logger_, "ProtocolHandler")
+CREATE_LOGGER(logger_, "ProtocolHandler")
 
+namespace {
 bool IsSupported(RpcType rpc_type) {
   switch (rpc_type) {
     case kRpcTypeRequest:

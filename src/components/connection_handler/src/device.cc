@@ -35,6 +35,7 @@
 
 #include "connection_handler/device.h"
 #include "encryption/hashing.h"
+#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -42,7 +43,7 @@
  */
 namespace connection_handler {
 
-GETLOGGER(Device::logger_, "ConnectionHandler")
+CREATE_LOGGER(logger_, "ConnectionHandler")
 
 Device::Device(DeviceHandle device_handle,
                const std::string& user_friendly_name,

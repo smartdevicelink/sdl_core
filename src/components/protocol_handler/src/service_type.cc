@@ -4,12 +4,11 @@
 #include "utils/logger.h"
 #include "utils/macro.h"
 
-
 namespace protocol_handler {
 
-namespace {
-  GETLOGGER(logger_, "ConnectionHandler")
+CREATE_LOGGER(logger_, "ConnectionHandler")
 
+namespace {
 // Check if provided service value is one of the specified
 bool IsValid(ServiceType service_type) {
   switch (service_type) {

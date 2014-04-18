@@ -74,10 +74,8 @@ extern "C" void __gcov_flush();
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
-#ifdef ENABLE_LOG
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
-#endif // ENABLE_LOG
+  INITLOGGER("log4cxx.properties");
 
 #ifdef TESTS_WITH_HMI
   test::AdminAppTest app;

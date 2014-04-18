@@ -37,11 +37,9 @@
 
 #include "utils/logger.h"
 
-namespace {
-  GETLOGGER(logger_, "Utils")
-}
-
 namespace sync_primitives {
+
+CREATE_LOGGER(logger_, "Utils")
 
 Lock::Lock()
 #ifndef NDEBUG

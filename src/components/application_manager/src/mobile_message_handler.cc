@@ -37,6 +37,7 @@
 #include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
 #include "utils/bitstream.h"
+#include "utils/logger.h"
 
 #include <stdint.h>
 #include <memory>
@@ -50,7 +51,8 @@ const uint8_t kUnknown = 0xF;
 
 namespace application_manager {
 
-GETLOGGER(MobileMessageHandler::logger_, "MobileMessageHandler")
+CREATE_LOGGER(logger_, "MobileMessageHandler")
+
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
