@@ -526,7 +526,7 @@ TEST_F(GeneratedInterfaceTests, ReportIncorrectlyInitializedMap2) {
 }
 
 TEST_F(GeneratedInterfaceTests, TestFrankenstructCreation) {
-  FrankenstructOfEmptyBoolWithMandatoryInt fbmi;
+  FrankenstructOfEmptyStringWithMandatoryInt fbmi;
   ASSERT_FALSE(fbmi.is_valid());
   ASSERT_FALSE(fbmi.is_initialized());
   ASSERT_TRUE(fbmi.empty());
@@ -551,7 +551,7 @@ TEST_F(GeneratedInterfaceTests, TestFrankenstructCreation) {
 
 TEST_F(GeneratedInterfaceTests, FrankenstructToJson) {
   const char* expected_json = "{\"hello\":\"str\",\"mandatoryInt\":2}\n";
-  FrankenstructOfEmptyBoolWithMandatoryInt fbmi;
+  FrankenstructOfEmptyStringWithMandatoryInt fbmi;
   fbmi.mandatoryInt = 2;
   fbmi["hello"] = "str";
   ASSERT_TRUE(fbmi.is_initialized());
@@ -565,7 +565,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructToJson) {
 TEST_F(GeneratedInterfaceTests, FrankenstructFromJson) {
   const char* input_json = "{\"hello\":\"str\",\"mandatoryInt\":2}\n";
   Json::Value json_value = JsonValue(input_json);
-  FrankenstructOfEmptyBoolWithMandatoryInt fbmi(&json_value);
+  FrankenstructOfEmptyStringWithMandatoryInt fbmi(&json_value);
   ASSERT_TRUE(fbmi.is_initialized());
   ASSERT_RPCTYPE_VALID(fbmi);
   ASSERT_FALSE(fbmi.empty());
@@ -578,7 +578,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromJson) {
 TEST_F(GeneratedInterfaceTests, FrankenstructFromInvalidJson) {
   const char* input_json = "{\"hello\":true,\"mandatoryInt\":2}\n";
   Json::Value json_value = JsonValue(input_json);
-  FrankenstructOfEmptyBoolWithMandatoryInt fbmi(&json_value);
+  FrankenstructOfEmptyStringWithMandatoryInt fbmi(&json_value);
   ASSERT_TRUE(fbmi.is_initialized());
   ASSERT_FALSE(fbmi.is_valid());
   ASSERT_FALSE(fbmi.empty());

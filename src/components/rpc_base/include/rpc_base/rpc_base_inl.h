@@ -267,7 +267,7 @@ Enum<T>::Enum()
 
 template<typename T>
 Enum<T>::Enum(EnumType value)
-    : PrimitiveType(IsValidEnum(value_) ? kValid : kInvalid),
+    : PrimitiveType(IsValidEnum(value) ? kValid : kInvalid),
       value_(value) {
 }
 
