@@ -985,7 +985,7 @@ SDL.SDLModel = Em.Object.create({
             }
         }
 
-        if (SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
+        if (SDL.States.info.devicelist.active) {
             SDL.DeviceListView.ShowDeviceList(params);
         }
 
