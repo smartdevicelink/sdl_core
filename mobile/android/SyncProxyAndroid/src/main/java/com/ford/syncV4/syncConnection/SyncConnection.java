@@ -198,6 +198,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     // If transport is still connected, sent EndProtocolSessionMessage
                     if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
                         _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
+                        stopHeartbeatMonitor();
                     }
                 }
             }
@@ -211,9 +212,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             }
         }
         Logger.d("Close connection:" + keepConnection);
-        if (!keepConnection) {
-            stopHeartbeatMonitor();
-        }
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
             stopH264();
@@ -401,12 +399,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void initialiseSession() {
+        startProtocolSession();
+    }
+
+    public void startHeartbeatTimer() {
         if (_heartbeatMonitor != null) {
             _heartbeatMonitor.start();
-        } else {
-            // TODO :
         }
-        startProtocolSession();
     }
 
     private void startProtocolSession() {

@@ -3036,6 +3036,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 Logger.i(message);
 
                 startRPCProtocolService(session.getSessionId(), correlationID);
+                mSyncConnection.startHeartbeatTimer();
             }
         }
 
