@@ -250,6 +250,10 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         });
                     } else {
 
+                        if (SDL.SDLModel.stateLimited == appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
+
                         SDL.SDLController.getApplicationModel(appID).turnOnSDL();
                     }
 
@@ -398,7 +402,9 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         SDL.States.goToStates('info.apps');
                     }
 
-                    SDL.SDLModel.stateLimited = null;
+                    if (SDL.SDLModel.stateLimited == request.params.appID) {
+                        SDL.SDLModel.stateLimited = null;
+                    }
 
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);

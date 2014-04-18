@@ -180,9 +180,6 @@ SDL.SDLController = Em.Object
                     }
                 }
             }
-            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
-            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -424,6 +421,8 @@ SDL.SDLController = Em.Object
             SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
+
+            SDL.InteractionChoicesView.timerUpdate();
         },
         /**
          * Method to sent notification for Alert

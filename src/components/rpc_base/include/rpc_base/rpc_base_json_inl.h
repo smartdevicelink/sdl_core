@@ -58,7 +58,12 @@ inline CompositeType::InitializationState CompositeType::InitHelper(
   if (!value) {
     return kUninitialized;
   } else if ((value->*type_check)()) {
-    return kInitialized;
+    // Some value type checks return true when initialized with null
+    if (value->isNull()) {
+      return kInvalidInitialized;
+    } else {
+      return kInitialized;
+    }
   } else {
     return kInvalidInitialized;
   }

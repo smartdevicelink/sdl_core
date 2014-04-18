@@ -258,6 +258,7 @@ template<typename T, size_t minsize, size_t maxsize>
 class Map : public std::map<std::string, T>, public CompositeType  {
  public:
   // Types
+  typedef Map<T, minsize, maxsize> Frankenbase;
   typedef std::map<std::string, T> MapType;
  public:
   // Methods
