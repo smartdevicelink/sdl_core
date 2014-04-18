@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "VideoStreamToFileAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "VideoStreamToFileAdapter")
 
 VideoStreamToFileAdapter::VideoStreamToFileAdapter(const std::string& file_name)
   : file_name_(file_name),

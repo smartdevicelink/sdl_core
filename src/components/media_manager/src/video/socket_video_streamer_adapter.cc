@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "SocketVideoStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "SocketVideoStreamerAdapter")
 
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::SocketVideoStreamerAdapter");

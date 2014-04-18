@@ -48,7 +48,7 @@
 
 namespace application_manager {
 
-CREATE_LOGGER(logger_, "ApplicationManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace {
 

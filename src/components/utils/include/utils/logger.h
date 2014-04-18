@@ -43,19 +43,19 @@
 namespace log4cxx
 {
 #ifdef ENABLE_LOG
-    #define CREATE_LOGGER(logger_var, logger_name) \
+    #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
       namespace { \
-        CREATE_LOGGER_NOT_ANONYM(logger_var, logger_name); \
+        CREATE_LOGGERPTR_LOCAL(logger_var, logger_name); \
       }
 
-    #define CREATE_LOGGER_NOT_ANONYM(logger_var, logger_name) \
+    #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
-    #define INITLOGGER(file_name) \
+    #define INIT_LOGGER(file_name) \
       log4cxx::PropertyConfigurator::configure(file_name);
 
     // without this line log4cxx threads continue using some instances destroyed by exit()
-    #define DEINITLOGGER() \
+    #define DEINIT_LOGGER() \
       log4cxx::Logger::getRootLogger()->closeNestedAppenders();
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
@@ -85,13 +85,13 @@ namespace log4cxx
 
 #else // ENABLE_LOG is OFF
 
-    #define CREATE_LOGGER(logger, name)
+    #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
-    #define CREATE_LOGGER_NOT_ANONYM(logger, name)
+    #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
 
-    #define INITLOGGER(file_name)
+    #define INIT_LOGGER(file_name)
 
-    #define DEINITLOGGER(file_name)
+    #define DEINIT_LOGGER(file_name)
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 

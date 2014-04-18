@@ -39,7 +39,7 @@
 
 namespace sync_primitives {
 
-CREATE_LOGGER(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 Lock::Lock()
 #ifndef NDEBUG

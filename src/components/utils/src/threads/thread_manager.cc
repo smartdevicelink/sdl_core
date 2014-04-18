@@ -45,7 +45,7 @@ namespace impl {
 using namespace std;
 using namespace sync_primitives;
 
-CREATE_LOGGER(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 namespace {
   const char* kUnknownName = "UnnamedThread";

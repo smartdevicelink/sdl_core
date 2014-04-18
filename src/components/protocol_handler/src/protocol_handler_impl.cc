@@ -44,7 +44,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGER(logger_, "ProtocolHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.

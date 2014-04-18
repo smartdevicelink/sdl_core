@@ -51,7 +51,7 @@ static void* threadFunc(void* closure) {
 
 namespace threads {
 
-CREATE_LOGGER(logger_, "threads::Thread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "threads::Thread")
 
 size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 

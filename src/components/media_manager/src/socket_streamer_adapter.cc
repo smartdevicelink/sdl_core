@@ -45,7 +45,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "SocketStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 
 SocketStreamerAdapter::SocketStreamerAdapter()
   : socket_fd_(0),

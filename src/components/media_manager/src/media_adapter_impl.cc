@@ -35,7 +35,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger_, "MediaAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaAdapterImpl")
 
 MediaAdapterImpl::MediaAdapterImpl()
   : current_application_(0) {

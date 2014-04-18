@@ -55,7 +55,7 @@ using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 
-CREATE_LOGGER(logger_, "AudioPassThruThread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)

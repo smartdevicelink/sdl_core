@@ -54,7 +54,7 @@ int32_t HeartBeatTimeout() {
  */
 namespace connection_handler {
 
-CREATE_LOGGER(logger_, "ConnectionHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 ConnectionHandle HandleFromConnectionUID(transport_manager::ConnectionUID uid) {
   return ConnectionHandle(uid);

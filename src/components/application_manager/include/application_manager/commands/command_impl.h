@@ -81,7 +81,7 @@ class CommandImpl : public Command {
   MessageSharedPtr message_;
 
 #ifdef ENABLE_LOG
-static log4cxx::LoggerPtr logger_;
+  static log4cxx::LoggerPtr logger_;
 #endif // ENABLE_LOG
 
  private:
@@ -89,7 +89,5 @@ static log4cxx::LoggerPtr logger_;
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_

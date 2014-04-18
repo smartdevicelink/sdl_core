@@ -42,7 +42,7 @@
  */
 namespace connection_handler {
 
-CREATE_LOGGER(logger_, "ConnectionHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,

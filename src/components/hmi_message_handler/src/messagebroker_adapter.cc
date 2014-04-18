@@ -38,7 +38,7 @@
 
 namespace hmi_message_handler {
 
-CREATE_LOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 

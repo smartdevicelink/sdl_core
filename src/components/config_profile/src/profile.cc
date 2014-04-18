@@ -51,7 +51,7 @@ const uint32_t kDefaultHeartBeatTimeout = 0;
 
 namespace profile {
 
-CREATE_LOGGER(logger_, "Profile")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
     : launch_hmi_(true),

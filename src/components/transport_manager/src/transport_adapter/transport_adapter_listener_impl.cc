@@ -42,7 +42,7 @@
 
 namespace transport_manager {
 
-CREATE_LOGGER(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 

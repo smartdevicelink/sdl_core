@@ -47,7 +47,7 @@
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-CREATE_LOGGER(logger_, "HMICapabilities")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
 {

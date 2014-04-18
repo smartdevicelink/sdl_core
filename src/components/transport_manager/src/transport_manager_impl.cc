@@ -59,7 +59,7 @@ using ::transport_manager::transport_adapter::TransportAdapter;
 
 namespace transport_manager {
 
-CREATE_LOGGER(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
   TransportManagerImpl::Connection c;
