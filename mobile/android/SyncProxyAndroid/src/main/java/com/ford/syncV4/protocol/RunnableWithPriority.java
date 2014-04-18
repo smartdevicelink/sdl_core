@@ -10,11 +10,14 @@ import com.ford.syncV4.util.logger.Logger;
  */
 public class RunnableWithPriority implements Runnable {
 
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = RunnableWithPriority.class.getSimpleName();
+
     private byte mPriority;
     private int mCorrelationId;
 
     public RunnableWithPriority(byte priority, int correlationId) {
-        //Logger.d("TRACE: " + correlationId);
+        //Logger.d(LOG_TAG + " TRACE priority: " + priority);
         mPriority = priority;
         mCorrelationId = correlationId;
     }

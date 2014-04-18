@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
@@ -112,7 +113,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
         sut = new WiProProtocol(mock(IProtocolListener.class)) {
-
 
             @Override
             public void SendMessage(ProtocolMessage protocolMsg) {
@@ -807,4 +807,22 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
     }
 
+    public void testPriorityBlockingQueueWithCorrectOutputOrderByCorrelationId()
+            throws InterruptedException {
+        PriorityBlockingQueue<Runnable> queue =
+                new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
+
+        RunnableWithPriority runWithPriority;
+
+        int i;
+        for (i = 0; i < 50; i++) {
+            runWithPriority = new RunnableWithPriority((byte) 0, i);
+            queue.add(runWithPriority);
+        }
+
+        i = 0;
+        while (queue.size() > 0) {
+            assertEquals(i++, ((RunnableWithPriority)queue.take()).getCorrelationId());
+        }
+    }
 }

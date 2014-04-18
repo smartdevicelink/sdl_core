@@ -9,7 +9,6 @@ import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-import com.ford.syncV4.service.ConsecutiveFrameProcessor;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
@@ -17,33 +16,54 @@ import com.ford.syncV4.util.logger.Logger;
 import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
-
     public static final int MTU_SIZE = 1500;
-    private final static String FailurePropagating_Msg = "Failure propagating ";
+
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
-    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
-    boolean _haveHeader = false;
-    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
-    int _headerBufWritePos = 0;
-    ProtocolFrameHeader _currentHeader = null;
-    byte[] _dataBuf = null;
-    int _dataBufWritePos = 0;
+
     int hashID = 0;
-    int messageID = 0;
-    Hashtable<Integer, MessageFrameAssembler> _assemblerForMessageID = new Hashtable<Integer, MessageFrameAssembler>();
-    Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> _assemblerForSessionID = new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
-    protected Hashtable<Byte, ReentrantLock> _messageLocks = new Hashtable<Byte, ReentrantLock>();
+
+    protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
+
+    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
+    private static final String FAILURE_PROPAGATING_MSG = "Failure propagating ";
+    private static final Hashtable<Integer, MessageFrameAssembler> ASSEMBLER_FOR_MESSAGE_ID =
+            new Hashtable<Integer, MessageFrameAssembler>();
+    private static final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
+            new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
+
+    private final static PriorityBlockingQueue<Runnable> BLOCKING_QUEUE =
+            new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
+
+    /**
+     * Executor service to process single frame commands.
+     * If the number of threads is greater than the 10, set the the maximum time that excess
+     * idle threads will wait for new tasks before terminating to 10 seconds
+     */
+    private static final ExecutorService MESSAGES_EXECUTOR_SERVICE =
+            new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS, BLOCKING_QUEUE);
+
+    private final ProtocolVersion protocolVersion = new ProtocolVersion();
+    private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
+            new SendProtocolMessageProcessor();
+
+    private ProtocolFrameHeader mCurrentHeader = null;
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatSendInterval_ms = 0;
     // NOTE: To date, not implemented on SYNC
     private int _heartbeatReceiveInterval_ms = 0;
+    private boolean mHaveHeader = false;
+    private byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+    private int mHeaderBufWritePos = 0;
+    private byte[] mDataBuf = null;
+    private int mDataBufWritePos = 0;
+    private int mMessageID = 0;
 
     public WiProProtocol(IProtocolListener protocolListener) {
         super(protocolListener);
@@ -51,7 +71,7 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public byte getProtocolVersion() {
-        return mProtocolVersion.getCurrentVersion();
+        return protocolVersion.getCurrentVersion();
     }
 
     /**
@@ -72,12 +92,12 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     public void setProtocolVersion(byte version) {
-        mProtocolVersion.setCurrentVersion(version);
+        protocolVersion.setCurrentVersion(version);
 
-        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (protocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             updateDataStructureToProtocolVersion(version);
         } else {
-            Logger.d(CLASS_NAME + " Protocol version:" + mProtocolVersion.getCurrentVersion());
+            Logger.d(CLASS_NAME + " Protocol version:" + protocolVersion.getCurrentVersion());
         }
     }
 
@@ -131,66 +151,46 @@ public class WiProProtocol extends AbstractProtocol {
         handleProtocolFrameToSend(header, data, 0, data.length);
     } // end-method
 
-    public void SendMessage(ProtocolMessage protocolMsg) {
-        protocolMsg.setRPCType((byte) 0x00); //always sending a request
+    public void SendMessage(final ProtocolMessage protocolMsg) {
+        protocolMsg.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
         final byte sessionID = protocolMsg.getSessionID();
-
         final byte protocolVersionToSend = getProtocolVersion();
-        /*if (protocolVersionToSend > ProtocolConstants.PROTOCOL_VERSION_MAX) {
-            protocolVersionToSend = ProtocolConstants.PROTOCOL_VERSION_MAX;
-        }*/
 
         ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
                 protocolMsg, protocolVersionToSend).generate();
         final byte[] data = protocolMessageConverter.getData();
         final ServiceType serviceType = protocolMessageConverter.getSessionType();
 
-
         // Get the message lock for this protocol currentSession
-        ReentrantLock messageLock = _messageLocks.get(sessionID);
+        Object messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
-                            SyncExceptionCause.SYNC_UNAVAILALBE));
+                            SyncExceptionCause.SYNC_UNAVAILALBE)
+            );
             return;
         }
 
-        messageLock.lock();
+        Logger.d(CLASS_NAME + " TRACE " + serviceType.getValue());
+        MESSAGES_EXECUTOR_SERVICE.execute(new RunnableWithPriority(serviceType.getValue(),
+                                                                   protocolMsg.getCorrID()) {
 
-        //synchronized (messageLock) {
+                  @Override
+                  public void run() {
 
-            if (data.length > MAX_DATA_SIZE) {
-
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        ConsecutiveFrameProcessor consecutiveFrameProcessor =
-                                new ConsecutiveFrameProcessor();
-
-                        consecutiveFrameProcessor.process(data, sessionID, messageID++, serviceType,
-                                protocolVersionToSend, MAX_DATA_SIZE,
-                                new ConsecutiveFrameProcessor.IConsecutiveFrameProcessor() {
-
-                            @Override
-                            public void onProtocolFrameToSend(ProtocolFrameHeader header,
-                                                              byte[] data, int offset, int length) {
-
-                                        handleProtocolFrameToSend(header, data, offset, length);
-                            }
-                        });
-                    }
-                });
-
-            } else {
-                ProtocolFrameHeader header =
-                        ProtocolFrameHeaderFactory.createSingleSendData(serviceType, sessionID,
-                                data.length, messageID++, protocolVersionToSend);
-                handleProtocolFrameToSend(header, data, 0, data.length);
-            }
-        //}
-
-        messageLock.unlock();
+                      sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
+                          MAX_DATA_SIZE, sessionID, getNextMessageId(), protocolMsg.getCorrID(),
+                          new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
+                              @Override
+                              public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                                int offset, int length) {
+                                  handleProtocolFrameToSend(header, data, offset, length);
+                              }
+                          }
+                      );
+                  }
+              }
+        );
     }
 
     private void sendFrameToTransport(ProtocolFrameHeader header) {
@@ -220,64 +220,64 @@ public class WiProProtocol extends AbstractProtocol {
                 //Buffer has something in it and version is 2
             } else if (parsedProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 //safe current state of the buffer and also set the new version
-                byte[] tempHeader = _headerBuf;
+                byte[] tempHeader = mHeaderBuf;
                 updateDataStructureToProtocolVersion(parsedProtocolVersion);
-                _headerBuf = tempHeader;
+                mHeaderBuf = tempHeader;
             }
         }
 
         // If I don't yet know the message size, grab those bytes.
-        if (!_haveHeader) {
+        if (!mHaveHeader) {
             // If I can't get the size, just get the bytes that are there.
-            int headerBytesNeeded = _headerBuf.length - _headerBufWritePos;
+            int headerBytesNeeded = mHeaderBuf.length - mHeaderBufWritePos;
             if (receivedBytesLength < headerBytesNeeded) {
                 System.arraycopy(receivedBytes, receivedBytesReadPos,
-                        _headerBuf, _headerBufWritePos, receivedBytesLength);
-                _headerBufWritePos += receivedBytesLength;
+                        mHeaderBuf, mHeaderBufWritePos, receivedBytesLength);
+                mHeaderBufWritePos += receivedBytesLength;
                 return;
             } else {
                 // If I got the size, allocate the buffer
                 System.arraycopy(receivedBytes, receivedBytesReadPos,
-                        _headerBuf, _headerBufWritePos, headerBytesNeeded);
-                _headerBufWritePos += headerBytesNeeded;
+                        mHeaderBuf, mHeaderBufWritePos, headerBytesNeeded);
+                mHeaderBufWritePos += headerBytesNeeded;
                 receivedBytesReadPos += headerBytesNeeded;
-                _haveHeader = true;
-                _currentHeader = ProtocolFrameHeader.parseWiProHeader(_headerBuf);
+                mHaveHeader = true;
+                mCurrentHeader = ProtocolFrameHeader.parseWiProHeader(mHeaderBuf);
                 try {
-                    _dataBuf = new byte[_currentHeader.getDataSize()];
+                    mDataBuf = new byte[mCurrentHeader.getDataSize()];
                 } catch (OutOfMemoryError e) {
-                    // TODO - some terrible things is going on. _currentHeader.getDataSize()
+                    // TODO - some terrible things is going on. mCurrentHeader.getDataSize()
                     // returns awfully big number during unregister - register cycle
                     Logger.e("No memory - no regrets.");
                 }
-                _dataBufWritePos = 0;
+                mDataBufWritePos = 0;
             }
         }
 
         int bytesLeft = receivedBytesLength - receivedBytesReadPos;
-        int bytesNeeded = _dataBuf.length - _dataBufWritePos;
+        int bytesNeeded = mDataBuf.length - mDataBufWritePos;
 
         // If I don't have enough bytes for the message, just grab what's there.
 
         if (bytesLeft < bytesNeeded) {
-            System.arraycopy(receivedBytes, receivedBytesReadPos, _dataBuf,
-                    _dataBufWritePos, bytesLeft);
-            _dataBufWritePos += bytesLeft;
+            System.arraycopy(receivedBytes, receivedBytesReadPos, mDataBuf,
+                    mDataBufWritePos, bytesLeft);
+            mDataBufWritePos += bytesLeft;
         } else {
             // Fill the buffer and call the handler!
-            System.arraycopy(receivedBytes, receivedBytesReadPos, _dataBuf, _dataBufWritePos, bytesNeeded);
+            System.arraycopy(receivedBytes, receivedBytesReadPos, mDataBuf, mDataBufWritePos, bytesNeeded);
             receivedBytesReadPos += bytesNeeded;
 
-            MessageFrameAssembler assembler = getFrameAssemblerForFrame(_currentHeader);
-            handleProtocolFrameReceived(_currentHeader, _dataBuf, assembler);
+            MessageFrameAssembler assembler = getFrameAssemblerForFrame(mCurrentHeader);
+            handleProtocolFrameReceived(mCurrentHeader, mDataBuf, assembler);
 
             // Reset all class member variables for next frame
-            _dataBuf = null;
-            _dataBufWritePos = 0;
-            _haveHeader = false;
-            _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
-            _currentHeader = null;
-            _headerBufWritePos = 0;
+            mDataBuf = null;
+            mDataBufWritePos = 0;
+            mHaveHeader = false;
+            mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+            mCurrentHeader = null;
+            mHeaderBufWritePos = 0;
 
             updateDataStructureToProtocolVersion(getProtocolVersion());
 
@@ -292,21 +292,26 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    protected MessageFrameAssembler getFrameAssemblerForFrame(ProtocolFrameHeader header) {
-        Hashtable<Integer, MessageFrameAssembler> hashSessionID = _assemblerForSessionID.get(new Byte(header.getSessionID()));
+    private MessageFrameAssembler getFrameAssemblerForFrame(ProtocolFrameHeader header) {
+        Hashtable<Integer, MessageFrameAssembler> hashSessionID =
+                ASSEMBLER_FOR_SESSION_ID.get(new Byte(header.getSessionID()));
         if (hashSessionID == null) {
             hashSessionID = new Hashtable<Integer, MessageFrameAssembler>();
-            _assemblerForSessionID.put(new Byte(header.getSessionID()), hashSessionID);
-        } // end-if
+            ASSEMBLER_FOR_SESSION_ID.put(new Byte(header.getSessionID()), hashSessionID);
+        }
 
-        MessageFrameAssembler ret = _assemblerForMessageID.get(new Integer(header.getMessageID()));
+        MessageFrameAssembler ret = ASSEMBLER_FOR_MESSAGE_ID.get(new Integer(header.getMessageID()));
         if (ret == null) {
             ret = new MessageFrameAssembler();
-            _assemblerForMessageID.put(new Integer(header.getMessageID()), ret);
-        } // end-if
+            ASSEMBLER_FOR_MESSAGE_ID.put(new Integer(header.getMessageID()), ret);
+        }
 
         return ret;
-    } // end-method
+    }
+
+    private int getNextMessageId() {
+        return ++mMessageID;
+    }
 
     protected class MessageFrameAssembler {
         protected boolean hasFirstFrame = false;
@@ -355,12 +360,12 @@ public class WiProProtocol extends AbstractProtocol {
                     message.setData(accumulator.toByteArray());
                 }
 
-                _assemblerForMessageID.remove(header.getMessageID());
+                ASSEMBLER_FOR_MESSAGE_ID.remove(header.getMessageID());
 
                 try {
                     handleProtocolMessageReceived(message);
                 } catch (Exception excp) {
-                    Logger.e(FailurePropagating_Msg + "onProtocolMessageReceived: " + excp.toString(), excp);
+                    Logger.e(FAILURE_PROPAGATING_MSG + "onProtocolMessageReceived: " + excp.toString(), excp);
                 } // end-catch
 
                 hasFirstFrame = false;
@@ -417,9 +422,9 @@ public class WiProProtocol extends AbstractProtocol {
                 sendStartProtocolSessionACK(header.getServiceType(), header.getSessionID());
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceACK.getValue()) {
                 // Use this sessionID to create a message lock
-                ReentrantLock messageLock = _messageLocks.get(header.getSessionID());
+                Object messageLock = _messageLocks.get(header.getSessionID());
                 if (messageLock == null) {
-                    messageLock = new ReentrantLock();
+                    messageLock = new Object();
                     _messageLocks.put(header.getSessionID(), messageLock);
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
@@ -433,7 +438,8 @@ public class WiProProtocol extends AbstractProtocol {
                 handleEndSessionFrame(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceNACK.getValue()) {
                 //Logger.d(CLASS_NAME + " End Service NACK");
-            } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() && header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
+            } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() &&
+                    header.getFrameData() == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(header);
             } else if (header.getFrameData() == FrameDataControlFrameType.EndServiceACK.getValue()) {
                 handleEndSessionFrame(header);
@@ -481,7 +487,7 @@ public class WiProProtocol extends AbstractProtocol {
                 message.setData(data);
             }
 
-            _assemblerForMessageID.remove(header.getMessageID());
+            ASSEMBLER_FOR_MESSAGE_ID.remove(header.getMessageID());
 
             if (isAppUnregistered(message)) {
                 Logger.i("App is unregistered");
@@ -491,8 +497,8 @@ public class WiProProtocol extends AbstractProtocol {
             try {
                 handleProtocolMessageReceived(message);
             } catch (Exception ex) {
-                Logger.e(FailurePropagating_Msg + "onProtocolMessageReceived: " + ex.toString(), ex);
-                handleProtocolError(FailurePropagating_Msg + "onProtocolMessageReceived: ", ex);
+                Logger.e(FAILURE_PROPAGATING_MSG + "onProtocolMessageReceived: " + ex.toString(), ex);
+                handleProtocolError(FAILURE_PROPAGATING_MSG + "onProtocolMessageReceived: ", ex);
             } // end-catch
         } // end-method
 
@@ -534,6 +540,6 @@ public class WiProProtocol extends AbstractProtocol {
         }
 
         MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
-        _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+        mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     }
 }

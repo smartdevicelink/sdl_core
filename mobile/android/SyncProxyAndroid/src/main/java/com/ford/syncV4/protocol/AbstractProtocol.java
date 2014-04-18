@@ -109,7 +109,7 @@ public abstract class AbstractProtocol {
     // This method is called whenever a protocol has an entire frame to send
     protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
         if (data != null) {
-            Logger.d(CLASS_NAME + " transmit " + data.length + " bytes");
+            Logger.d(CLASS_NAME + " TRACE transmit " + data.length + " bytes");
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }

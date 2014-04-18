@@ -117,7 +117,7 @@ public class TCPTransport extends SyncTransport {
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        Logger.i("TCPTransport.sendBytesOverTransport: successfully send data");
+                        Logger.i("TRACE TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
                         Logger.w("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;

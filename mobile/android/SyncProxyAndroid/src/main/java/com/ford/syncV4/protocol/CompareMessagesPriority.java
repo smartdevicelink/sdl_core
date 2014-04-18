@@ -1,5 +1,7 @@
 package com.ford.syncV4.protocol;
 
+import com.ford.syncV4.util.logger.Logger;
+
 import java.util.Comparator;
 
 /**
@@ -10,18 +12,23 @@ import java.util.Comparator;
  */
 public class CompareMessagesPriority<T extends RunnableWithPriority> implements Comparator<T> {
 
-    @Override
-    public int compare(T o1, T o2) {
-        int result = 0;
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = CompareMessagesPriority.class.getSimpleName();
 
-        if (o1.getPriority() == o2.getPriority()) {
-            //Logger.d("TRACE: " + o1.getCorrelationId() + " " + o2.getCorrelationId());
-            if (o1.getCorrelationId() < o2.getCorrelationId()) {
+    @Override
+    public int compare(T object1, T object2) {
+        int result;
+
+        Logger.d(LOG_TAG + " TRACE obj1 priority:" + object1.getPriority());
+        Logger.d(LOG_TAG + " obj2 priority:" + object1.getPriority());
+
+        if (object1.getPriority() == object2.getPriority()) {
+            if (object1.getCorrelationId() < object2.getCorrelationId()) {
                result = -1;
             } else {
                 result = 1;
             }
-        } else if (o1.getPriority() < o2.getPriority()) {
+        } else if (object1.getPriority() < object2.getPriority()) {
             result = -1;
         } else {
             result = 1;

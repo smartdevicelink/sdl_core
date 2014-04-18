@@ -12,9 +12,9 @@ public class IncomingProtocolMessageComparator implements Comparator<ProtocolMes
 
         int result;
         if (arg0.getServiceType().getValue() < arg1.getServiceType().getValue()) {
-            result = 1;
-        } else {
             result = -1;
+        } else {
+            result = 1;
         }
 
         return result;

@@ -18,13 +18,13 @@ public class OutgoingProtocolMessageComparator implements Comparator<ProtocolMes
         //Logger.d(CLASS_NAME + " arg0:" + arg0.getCorrID() + " " + arg1.getCorrID());
 
         int result = 0;
-        /*if (arg0.getServiceType().getValue() < arg1.getServiceType().getValue()) {
-            result = 1;
-        } else {
+        if (arg0.getServiceType().getValue() < arg1.getServiceType().getValue()) {
             result = -1;
+        } else {
+            result = 1;
         }
 
-        if (arg0.getServiceType() == ServiceType.Mobile_Nav && arg1.getServiceType() == ServiceType.Mobile_Nav) {
+        /*if (arg0.getServiceType() == ServiceType.Mobile_Nav && arg1.getServiceType() == ServiceType.Mobile_Nav) {
             if (arg0.getCorrID() < arg1.getCorrID()) {
                 result = 1;
             } else {
