@@ -1080,36 +1080,39 @@ SDL.SDLModel = Em.Object.create({
         if (!SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
             SDL.SDLAppController.model.activeRequests.vrPerformInteraction = message.id;
         } else {
-            SDL.SDLController.vrInteractionResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
+            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
             return;
         }
 
-        if (message.params.grammarID) {
-
-            this.set('performInteractionSession', message.params.grammarID);
-            SDL.SDLModel.set('VRActive', true);
-        }
+        setTimeout(function(){
+            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
+                SDL.SDLModel.interactionData.helpPrompt = null;
+            }
+        }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
 
         SDL.SDLModel.onPrompt(message.params.initialPrompt);
 
         SDL.SDLModel.interactionData.helpPrompt = message.params.helpPrompt;
 
-        var messageLocal = message;
+        if (message.params.grammarID) {
 
-        setTimeout(function(){
-            if (SDL.SDLModel.VRActive) {
-                SDL.SDLModel.set('VRActive', false);
-            }
-        }, messageLocal.params.timeout);
+            this.set('performInteractionSession', message.params.grammarID);
+            SDL.SDLModel.set('VRActive', true);
 
-        setTimeout(function(){
-            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLModel.onPrompt(messageLocal.params.timeoutPrompt);
-                SDL.SDLModel.interactionData.helpPrompt = null;
-            }
-        }, messageLocal.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
+            setTimeout(function(){
+                if (SDL.SDLModel.VRActive) {
+                    SDL.SDLModel.set('VRActive', false);
+                }
+            }, message.params.timeout);
 
-        SDL.InteractionChoicesView.timerUpdate();
+            SDL.InteractionChoicesView.timerUpdate();
+        } else {
+
+            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['SUCCESS']);
+        }
+
+
     },
 
     /**

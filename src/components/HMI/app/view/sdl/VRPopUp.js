@@ -102,7 +102,7 @@ SDL.VRPopUp = Em.ContainerView.create( {
                     text: vrCommands[j],
                     type: type,
                     hideButtons: function() {
-                        if (this.type == "Command" && !SDL.SDLModel.performInteractionSession) {
+                        if (this.type == "Command" && SDL.SDLModel.performInteractionSession.length == 0) {
                             return false;
                         } else if (SDL.SDLModel.performInteractionSession && SDL.SDLModel.performInteractionSession.indexOf(this.grammarID) >= 0) {
                             return false;
