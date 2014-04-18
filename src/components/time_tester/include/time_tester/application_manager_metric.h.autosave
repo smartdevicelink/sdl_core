@@ -31,23 +31,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
 
 #include "metric.h"
-#include "transport_manager_observer.h"
+#include "application_manager_observer.h"
 #include <string>
 
 namespace time_tester {
 
-class TransportManagerObserver;
+class ApplicationManagerObserver;
 
-class TransportManagerMectic: public Metric {
+class ApplicationManagerMetric: public Metric {
 
   public:
-    utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
+    utils::SharedPtr<application_manager::AMMetricObserver::MessageMetric> message_metric;
     std::string GetStyledString();
 };
 
 }
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
