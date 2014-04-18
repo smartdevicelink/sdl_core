@@ -33,8 +33,6 @@
 
 #include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
 
-#include "utils/logger.h"
-
 namespace application_manager {
 namespace commands {
 
