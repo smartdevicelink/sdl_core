@@ -50,6 +50,7 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
+#ifdef HMI_JSON_API
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       if (hmi_apis::Common_Result::SUCCESS
           == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
@@ -72,7 +73,30 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
     }
   }
   unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+#endif
+#ifdef HMI_DBUS_API
+  case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
+    if (hmi_apis::Common_Result::SUCCESS
+        == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
+            .asInt())) {
+        TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+        const int kSecondsInDay = 60 * 60 * 24;
+        int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+
+        policy_manager_->PTUpdatedAt(
+            message[strings::msg_params][strings::odometer].asInt(),
+            days_after_epoch);
+    }
+    break;
+  }
+  default: {
+    break;
+  }
 }
+unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+#endif
+}
+
 
 void PolicyEventObserver::subscribe_on_event(
     const event_engine::Event::EventID& event_id, int32_t hmi_correlation_id) {

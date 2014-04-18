@@ -97,6 +97,14 @@ class MessageHelper {
     typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
 
     /**
+     * @brief CreateGetVehicleDataRequest !!!!!!!!!!!!1
+     * @param correlation_id
+     * @param params
+     * @param app_id
+     */
+    static void CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params, int32_t app_id);
+
+    /**
      * @brief Sends HMI status notification to mobile
      *
      *@param application_impl application with changed HMI status
@@ -157,7 +165,7 @@ class MessageHelper {
     static const char* StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
 
-    static void CreateGetDeviceData(int32_t correlation_id);
+    //static void CreateGetDeviceData(int32_t correlation_id); !!!!!!!!!
 
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,

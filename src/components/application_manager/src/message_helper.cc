@@ -33,6 +33,8 @@
 #include <set>
 #include <string>
 #include <algorithm>
+#include <utility>
+#include <map>
 
 #include "utils/macro.h"
 #include "application_manager/application_manager_impl.h"
@@ -44,6 +46,8 @@
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "interfaces/MOBILE_API.h"
+
+
 
 namespace {
 
@@ -525,25 +529,104 @@ const char* MessageHelper::StringifiedFunctionID(
   }
 }
 
-void MessageHelper::CreateGetDeviceData(int32_t correlation_id) {
-  smart_objects::SmartObject* request = new smart_objects::SmartObject;
-  if (!request) {
-    return;
-  }
-  smart_objects::SmartObject& object = *request;
-  object[strings::params][strings::message_type] = static_cast<int>(kRequest);
-  object[strings::params][strings::function_id] =
-    static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-  object[strings::params][strings::correlation_id] = correlation_id;
-  object[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  object[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  object[strings::msg_params] = smart_objects::SmartObject(
-                                  smart_objects::SmartType_Map);
-  object[strings::msg_params][strings::odometer] = true;
-  ApplicationManagerImpl::instance()->ManageHMICommand(request);
+namespace {
+const std::map<const char*, uint16_t> create_get_vehicle_data_args() {
+    std::map<const char*, uint16_t> rc;
+    rc.insert(std::make_pair(strings::gps, hmi_apis::FunctionID::VehicleInfo_GetGpsData));
+    rc.insert(std::make_pair(strings::speed, hmi_apis::FunctionID::VehicleInfo_GetSpeed));
+    rc.insert(std::make_pair(strings::rpm, hmi_apis::FunctionID::VehicleInfo_GetRpm));
+    rc.insert(std::make_pair(strings::fuel_level, hmi_apis::FunctionID::VehicleInfo_GetFuelLevel));
+    rc.insert(std::make_pair(strings::fuel_level_state, hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState));
+    rc.insert(std::make_pair(strings::instant_fuel_consumption, hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption));
+    rc.insert(std::make_pair(strings::external_temp, hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature));
+    rc.insert(std::make_pair(strings::vin, hmi_apis::FunctionID::VehicleInfo_GetVin));
+    rc.insert(std::make_pair(strings::prndl, hmi_apis::FunctionID::VehicleInfo_GetPrndl));
+    rc.insert(std::make_pair(strings::tire_pressure, hmi_apis::FunctionID::VehicleInfo_GetTirePressure));
+    rc.insert(std::make_pair(strings::odometer, hmi_apis::FunctionID::VehicleInfo_GetOdometer));
+    rc.insert(std::make_pair(strings::belt_status, hmi_apis::FunctionID::VehicleInfo_GetBeltStatus));
+    rc.insert(std::make_pair(strings::body_information, hmi_apis::FunctionID::VehicleInfo_GetBodyInformation));
+    rc.insert(std::make_pair(strings::device_status, hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus));
+    rc.insert(std::make_pair(strings::driver_braking, hmi_apis::FunctionID::VehicleInfo_GetDriverBraking));
+    rc.insert(std::make_pair(strings::wiper_status, hmi_apis::FunctionID::VehicleInfo_GetWiperStatus));
+    rc.insert(std::make_pair(strings::head_lamp_status, hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus));
+    rc.insert(std::make_pair(strings::engine_torque, hmi_apis::FunctionID::VehicleInfo_GetEngineTorque));
+    rc.insert(std::make_pair(strings::acc_pedal_pos, hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition));
+    rc.insert(std::make_pair(strings::steering_wheel_angle, hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle));
+    rc.insert(std::make_pair(strings::e_call_info, hmi_apis::FunctionID::VehicleInfo_GetECallInfo));
+    rc.insert(std::make_pair(strings::airbag_status, hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus));
+    rc.insert(std::make_pair(strings::emergency_event, hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent));
+    rc.insert(std::make_pair(strings::cluster_mode_status, hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus));
+    rc.insert(std::make_pair(strings::my_key, hmi_apis::FunctionID::VehicleInfo_GetMyKey));
+    return rc;
 }
+static std::map<const char*, uint16_t> vehicle_data_args = create_get_vehicle_data_args();
+}
+
+
+void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params, int32_t app_id) {
+#ifdef HMI_JSON_API
+    smart_objects::SmartObject* request = new smart_objects::SmartObject;
+    if (!request) {
+      return;
+    }
+    smart_objects::SmartObject& object = *request;
+    object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+    object[strings::params][strings::function_id] =
+      static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+    object[strings::params][strings::correlation_id] = correlation_id;
+    object[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+    object[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+    object[strings::msg_params] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+    for(std::vector<const char*>::iterator it = params.begin();
+        it < params.end(); it++) {
+        object[strings::msg_params][*it] = true;
+    }
+    ApplicationManagerImpl::instance()->ManageHMICommand(request);
+#endif
+
+#ifndef HMI_DBUS_API
+    for(std::vector<const char*>::iterator it = params.begin();
+        it < params.end(); it++) {
+        smart_objects::SmartObject* request = new smart_objects::SmartObject;
+        if (!request) {
+          return;
+        }
+        smart_objects::SmartObject& object = *request;
+        object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+        object[strings::params][strings::correlation_id] = correlation_id;
+        object[strings::params][strings::protocol_version] =
+          commands::CommandImpl::protocol_version_;
+        object[strings::params][strings::protocol_type] =
+          commands::CommandImpl::hmi_protocol_type_;
+        object[strings::params][strings::function_id] =
+          static_cast<int>(vehicle_data_args[*it]);
+        object[strings::msg_params][strings::app_id] = app_id;
+        ApplicationManagerImpl::instance()->ManageHMICommand(request);
+    }
+#endif
+}
+
+//void MessageHelper::CreateGetDeviceData(int32_t correlation_id) {
+//  smart_objects::SmartObject* request = new smart_objects::SmartObject;
+//  if (!request) {
+//    return;
+//  }
+//  smart_objects::SmartObject& object = *request;
+//  object[strings::params][strings::message_type] = static_cast<int>(kRequest);
+//  object[strings::params][strings::function_id] =
+//    static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+//  object[strings::params][strings::correlation_id] = correlation_id;
+//  object[strings::params][strings::protocol_version] =
+//    commands::CommandImpl::protocol_version_;
+//  object[strings::params][strings::protocol_type] =
+//    commands::CommandImpl::hmi_protocol_type_;
+//  object[strings::msg_params] = smart_objects::SmartObject(
+//                                  smart_objects::SmartType_Map);
+//  object[strings::msg_params][strings::odometer] = true;
+//  ApplicationManagerImpl::instance()->ManageHMICommand(request);
+//}
 
 smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
   mobile_apis::FunctionID::eType function_id,

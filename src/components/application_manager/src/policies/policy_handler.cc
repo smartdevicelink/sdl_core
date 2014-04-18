@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <dlfcn.h>
 #include <algorithm>
+#include <vector>
+#include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_retry_sequence.h"
 #include "application_manager/policies/pt_exchange_handler_impl.h"
@@ -448,9 +450,19 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
     event_observer_ = new PolicyEventObserver(policy_manager_);
+#ifdef HMI_JSON_API
     event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
+#endif
+#ifdef HMI_DBUS_API
+    event_observer_.get()->subscribe_on_event(
+      hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
+    std::vector<const char*> vehicle_data_args;
+    vehicle_data_args.push_back(application_manager::strings::odometer);
+    // hardcoded app_id because requests, launched not from mobile side doesnt have it
+    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args, -2);
+#endif
   }
   return ret;
 }
