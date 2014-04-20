@@ -564,13 +564,14 @@ static std::map<const char*, uint16_t> vehicle_data_args = create_get_vehicle_da
 }
 #endif HMI_DBUS_API
 
-void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params, int32_t app_id) {
+void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params) {
 #ifdef HMI_JSON_API
     smart_objects::SmartObject* request = new smart_objects::SmartObject;
     if (!request) {
       return;
     }
     smart_objects::SmartObject& object = *request;
+
     object[strings::params][strings::message_type] = static_cast<int>(kRequest);
     object[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
@@ -595,6 +596,7 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::ve
           return;
         }
         smart_objects::SmartObject& object = *request;
+
         object[strings::params][strings::message_type] = static_cast<int>(kRequest);
         object[strings::params][strings::correlation_id] = correlation_id;
         object[strings::params][strings::protocol_version] =
@@ -603,31 +605,10 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::ve
           commands::CommandImpl::hmi_protocol_type_;
         object[strings::params][strings::function_id] =
           static_cast<int>(vehicle_data_args[*it]);
-        object[strings::msg_params][strings::app_id] = app_id;
         ApplicationManagerImpl::instance()->ManageHMICommand(request);
     }
 #endif
 }
-
-//void MessageHelper::CreateGetDeviceData(int32_t correlation_id) {
-//  smart_objects::SmartObject* request = new smart_objects::SmartObject;
-//  if (!request) {
-//    return;
-//  }
-//  smart_objects::SmartObject& object = *request;
-//  object[strings::params][strings::message_type] = static_cast<int>(kRequest);
-//  object[strings::params][strings::function_id] =
-//    static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-//  object[strings::params][strings::correlation_id] = correlation_id;
-//  object[strings::params][strings::protocol_version] =
-//    commands::CommandImpl::protocol_version_;
-//  object[strings::params][strings::protocol_type] =
-//    commands::CommandImpl::hmi_protocol_type_;
-//  object[strings::msg_params] = smart_objects::SmartObject(
-//                                  smart_objects::SmartType_Map);
-//  object[strings::msg_params][strings::odometer] = true;
-//  ApplicationManagerImpl::instance()->ManageHMICommand(request);
-//}
 
 smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
   mobile_apis::FunctionID::eType function_id,

@@ -455,15 +455,14 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     std::vector<const char*> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
-    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args, NULL);
+    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
 #endif
 #ifdef HMI_DBUS_API
     event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
     std::vector<const char*> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
-    // hardcoded app_id because requests, launched not from mobile side doesnt have it
-    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args, -2);
+    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
 #endif
   }
   return ret;
