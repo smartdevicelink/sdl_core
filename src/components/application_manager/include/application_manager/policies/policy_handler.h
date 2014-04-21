@@ -258,7 +258,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  static log4cxx::LoggerPtr logger_;
   threads::Thread retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
   PTExchangeHandler* exchange_handler_;

@@ -41,6 +41,8 @@
 
 #include "resumption/last_state.h"
 
+#include "utils/logger.h"
+
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
@@ -52,6 +54,8 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
     : TransportAdapterImpl(

@@ -156,7 +156,7 @@ if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
 
-if (ENABLE_LOG)
+if(ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
 endif()
 

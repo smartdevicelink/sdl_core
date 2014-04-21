@@ -43,12 +43,13 @@
 #include "request_watchdog/request_watchdog.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/logger.h"
 
 namespace test {
 namespace components {
 namespace request_watchdog_test {
 
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("request_watchdog_test"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestWatchdogTest")
 
 class RequestWatchdogTest : public ::testing::Test {
   protected:
@@ -129,8 +130,8 @@ RequestWatchdogSubscriber::~RequestWatchdogSubscriber() {
 }
 
 void RequestWatchdogSubscriber::onTimeoutExpired(request_watchdog::RequestInfo requestInfo) {
-  LOG4CXX_TRACE_ENTER(logger);
-  LOG4CXX_INFO(logger, this << "::onTimeoutExpired\n"
+  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_INFO(logger_, this << "::onTimeoutExpired\n"
                << "for the following  request: "
                << "\n ConnectionID : " << requestInfo.connectionID_
                << "\n CorrelationID : " << requestInfo.correlationID_

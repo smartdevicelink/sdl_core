@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <list>
 #include <vector>

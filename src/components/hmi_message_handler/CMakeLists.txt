@@ -31,9 +31,12 @@ set (SOURCES
 
 set (LIBRARIES
     Utils
-    log4cxx
     ${DBUS_ADAPTER}
 )
 
 add_library("HMIMessageHandler" ${SOURCES})
-target_link_libraries ("HMIMessageHandler" ${LIBRARIES})
+target_link_libraries("HMIMessageHandler" ${LIBRARIES})
+
+if(ENABLE_LOG)
+  target_link_libraries("HMIMessageHandler" log4cxx)
+endif()

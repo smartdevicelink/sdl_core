@@ -35,6 +35,7 @@
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sstream>
 
 #include <dirent.h>
 #include <unistd.h>
