@@ -390,7 +390,7 @@
     <param name="mandatoryIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" />
   </struct>
 
-  <struct name="FrankenstructOfEmptyBoolWithMandatoryInt" type="String" maxlength="15" minsize="0" maxsize="3">
+  <struct name="FrankenstructOfEmptyStringWithMandatoryInt" type="String" maxlength="15" minsize="0" maxsize="3">
     <param name="mandatoryInt" type="Integer" minvalue="0" maxvalue="42" />
   </struct>
 

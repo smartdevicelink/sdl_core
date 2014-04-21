@@ -180,9 +180,6 @@ SDL.SDLController = Em.Object
                     }
                 }
             }
-            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
-            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
