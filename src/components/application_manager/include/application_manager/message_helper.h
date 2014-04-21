@@ -97,11 +97,11 @@ class MessageHelper {
     typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
 
     /**
-     * @brief CreateGetVehicleDataRequest !!!!!!!!!!!!1
-     * @param correlation_id
-     * @param params
+     * @brief CreateGetVehicleDataRequest Create request for different interfaces(JSON, DBUS)
+     * @param correlation_id unique ID
+     * @param params Vector of arguments that we need in GetVehicleData request (e.g. gps, odometer, fuel_level)
      */
-    static void CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params);
+    static void CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string> &params);
 
     /**
      * @brief Sends HMI status notification to mobile

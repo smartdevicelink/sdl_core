@@ -531,8 +531,8 @@ const char* MessageHelper::StringifiedFunctionID(
 
 #ifdef HMI_DBUS_API
 namespace {
-const std::map<const char*, uint16_t> create_get_vehicle_data_args() {
-    std::map<const char*, uint16_t> rc;
+const std::map<std::string, uint16_t> create_get_vehicle_data_args() {
+    std::map<std::string, uint16_t> rc;
     rc.insert(std::make_pair(strings::gps, hmi_apis::FunctionID::VehicleInfo_GetGpsData));
     rc.insert(std::make_pair(strings::speed, hmi_apis::FunctionID::VehicleInfo_GetSpeed));
     rc.insert(std::make_pair(strings::rpm, hmi_apis::FunctionID::VehicleInfo_GetRpm));
@@ -560,11 +560,11 @@ const std::map<const char*, uint16_t> create_get_vehicle_data_args() {
     rc.insert(std::make_pair(strings::my_key, hmi_apis::FunctionID::VehicleInfo_GetMyKey));
     return rc;
 }
-static std::map<const char*, uint16_t> vehicle_data_args = create_get_vehicle_data_args();
+static std::map<std::string, uint16_t> vehicle_data_args = create_get_vehicle_data_args();
 }
 #endif HMI_DBUS_API
 
-void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::vector<const char*> params) {
+void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string> &params) {
 #ifdef HMI_JSON_API
     smart_objects::SmartObject* request = new smart_objects::SmartObject;
     if (!request) {
@@ -581,7 +581,7 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::ve
     object[strings::params][strings::protocol_type] =
       commands::CommandImpl::hmi_protocol_type_;
     object[strings::msg_params] = smart_objects::SmartObject(smart_objects::SmartType_Map);
-    for(std::vector<const char*>::iterator it = params.begin();
+    for(std::vector<std::string>::const_iterator it = params.begin();
         it < params.end(); it++) {
         object[strings::msg_params][*it] = true;
     }
@@ -589,7 +589,7 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, std::ve
 #endif
 
 #ifdef HMI_DBUS_API
-    for(std::vector<const char*>::iterator it = params.begin();
+    for(std::vector<std::string>::const_iterator it = params.begin();
         it < params.end(); it++) {
         smart_objects::SmartObject* request = new smart_objects::SmartObject;
         if (!request) {

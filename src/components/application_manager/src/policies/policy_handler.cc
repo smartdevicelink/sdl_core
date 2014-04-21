@@ -450,20 +450,17 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
     event_observer_ = new PolicyEventObserver(policy_manager_);
-#ifdef HMI_JSON_API
+
     event_observer_.get()->subscribe_on_event(
+#ifdef HMI_JSON_API
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
-    std::vector<const char*> vehicle_data_args;
-    vehicle_data_args.push_back(application_manager::strings::odometer);
-    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
 #endif
 #ifdef HMI_DBUS_API
-    event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
-    std::vector<const char*> vehicle_data_args;
+#endif
+    std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
     application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
-#endif
   }
   return ret;
 }
