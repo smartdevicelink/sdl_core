@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
+#ifndef RPC_BASE_GTEST_SUPPORT_H_
+#define RPC_BASE_GTEST_SUPPORT_H_
 
-#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include <gtest/gtest.h>
 
-namespace application_manager {
+#include "rpc_base/validation_report.h"
 
-namespace commands {
+// A predicate-formatter for asserting that intergen generated
+// object is valid
+template<typename T>
+::testing::AssertionResult AssertRpcObjValid(const char* obj_expr,
+                                               const T& obj) {
+  if (obj.is_valid())
+    return ::testing::AssertionSuccess();
 
-/**
- * @brief OnShowNotification command class
- **/
-class OnShowNotification : public NotificationToHMI {
- public:
-  /**
-   * @brief OnShowNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnShowNotification(const MessageSharedPtr& message);
+  rpc::ValidationReport report(obj_expr);
+  obj.ReportErrors(&report);
 
-  /**
-   * @brief OnShowNotification class destructor
-   **/
-  virtual ~OnShowNotification();
+  return ::testing::AssertionFailure()
+      << obj_expr << " failed validation. Violations are:\n"
+      << rpc::PrettyFormat(report);
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+#define ASSERT_RPCTYPE_VALID(object) \
+  ASSERT_PRED_FORMAT1(AssertRpcObjValid, object)
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnShowNotification);
-};
+#define EXPECT_RPCTYPE_VALID(object) \
+  EXPECT_PRED_FORMAT1(AssertRpcObjValid, object)
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
+#endif /* RPC_BASE_GTEST_SUPPORT_H_ */

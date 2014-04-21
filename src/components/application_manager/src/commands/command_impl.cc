@@ -35,7 +35,7 @@
 namespace application_manager {
 namespace commands {
 
-  CREATE_LOGGER_NOT_ANONYM(CommandImpl::logger_, "Commands")
+CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;

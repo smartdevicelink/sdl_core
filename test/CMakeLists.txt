@@ -123,7 +123,17 @@ endif()
 add_executable("test_suit" "./test_suit.cc")
 file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
 
-include_directories(${INCLUDE_DIR})
-target_link_libraries("test_suit" ${LIBRARIES})
+if(BUILD_TESTS_WITH_HMI)
+include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
+target_link_libraries("test_suit" 
+  test_App_Manager 
+  ${LIBRARIES} 
+  ${LibXML2_LIBRARIES} -lxml2
+  avahi-client
+  )
+else(BUILD_TESTS_WITH_HMI)
+  include_directories(${INCLUDE_DIR})
+  target_link_libraries("test_suit" ${LIBRARIES})
+endif(BUILD_TESTS_WITH_HMI)
 
 # vim: set ts=2 sw=2 et:

@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "SocketAudioStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "SocketAudioStreamerAdapter")
 
 SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketAudioStreamerAdapter::SocketAudioStreamerAdapter");

@@ -47,7 +47,7 @@ using namespace sync_primitives;
 
 const int32_t RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
-CREATE_LOGGER(logger_, "RequestWatchdog")
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestWatchdog")
 
 /*
 Watchdog* RequestWatchdog::instance() {

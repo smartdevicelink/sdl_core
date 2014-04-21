@@ -37,7 +37,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGER(logger_, "ConnectionHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 namespace {
 // Check if provided service value is one of the specified

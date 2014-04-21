@@ -41,7 +41,7 @@ const int kMqueueMessageSize = 65536;
 const char* kSdlToHmiQueue = "/sdl_to_hmi";
 const char* kHmiToSdlQueue = "/hmi_to_sdl";
 
-CREATE_LOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 class ReceiverThreadDelegate : public threads::ThreadDelegate {
  public:

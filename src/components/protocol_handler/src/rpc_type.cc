@@ -36,7 +36,7 @@
 
 namespace protocol_handler {
 
-CREATE_LOGGER(logger_, "ProtocolHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 namespace {
 bool IsSupported(RpcType rpc_type) {

@@ -39,7 +39,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "PipeStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "PipeStreamerAdapter")
 
 PipeStreamerAdapter::PipeStreamerAdapter()
   : is_ready_(false),

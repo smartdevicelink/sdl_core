@@ -127,7 +127,7 @@ template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
 
 template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
   if (!queue_.empty()) {
-  CREATE_LOGGER_NOT_ANONYM(logger_, "Utils")
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Destruction of non-drained queue");
   }
 }
@@ -157,7 +157,7 @@ template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
 template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (shutting_down_) {
-  CREATE_LOGGER_NOT_ANONYM(logger_, "Utils")
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
                          " that is being shut down");
   }
@@ -168,7 +168,7 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
 template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
-  CREATE_LOGGER_NOT_ANONYM(logger_, "Utils")
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty que");
   }
   T result = queue_.front();

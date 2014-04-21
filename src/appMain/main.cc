@@ -61,14 +61,14 @@
 
 // ----------------------------------------------------------------------------
 
-CREATE_LOGGER(logger, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
 namespace {
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
-const char kApplicationVersion[] = "SDL_RB_3.3";
+const char kApplicationVersion[] = "Develop";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
@@ -195,7 +195,7 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization
-  INITLOGGER("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties");
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -224,7 +224,7 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     main_namespace::LifeCycle::instance()->StopComponents();
-    DEINITLOGGER();
+    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
@@ -237,7 +237,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
-        DEINITLOGGER();
+        DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");

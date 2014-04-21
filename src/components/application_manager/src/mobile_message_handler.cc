@@ -52,7 +52,7 @@ const uint8_t kUnknown = 0xF;
 
 namespace application_manager {
 
-CREATE_LOGGER(logger_, "MobileMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 
 application_manager::Message*

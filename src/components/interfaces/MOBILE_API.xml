@@ -662,11 +662,14 @@
     	<description> Time to destination</description>
     </element>
     
-  	<element name="turnText">
-  		<description> Turn text</description>
-  	</element>
+    <element name="turnText">
+        <description> Turn text</description>
+    </element>
 
-  </enum>
+    <element name="menuTitle">
+      <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </element>
+</enum>
   
   <enum name="ImageFieldName">
     <element name="softButtonImage">
@@ -853,7 +856,6 @@
     <element name="CID2SET">
       <description>See [@TODO: create file ref]</description>
     </element>
-	<issue creator="rs">Real sets have not been defined yet?</issue>
   </enum>
 
   <enum name="TextAlignment">
@@ -1444,19 +1446,19 @@
   <struct name="DeviceInfo">
     <description>Various information abount connecting device.</description>
 
-    <param name="hardware" type="String" maxlength="500" mandatory="false">
+    <param name="hardware" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device model</description>
     </param>
-    <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
+    <param name="firmwareRev" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device firmware revision</description>
     </param>
-    <param name="os" type="String" maxlength="500" mandatory="false">
+    <param name="os" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device OS</description>
     </param>
-    <param name="osVersion" type="String" maxlength="500" mandatory="false">
+    <param name="osVersion" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device OS version</description>
     </param>
-    <param name="carrier" type="String" maxlength="500" mandatory="false">
+    <param name="carrier" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device mobile carrier (if applicable)</description>
     </param>
     <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">

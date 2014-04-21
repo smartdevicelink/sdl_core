@@ -36,9 +36,6 @@ namespace test {
 
 ApplicationManagerImplTest::ApplicationManagerImplTest()
     : app_(NULL) {
-  app_ = am::ApplicationManagerImpl::instance();
-  // app_ = new application_manager::ApplicationManagerImpl;
-  app_->application_list_;
 }
 
 ApplicationManagerImplTest::~ApplicationManagerImplTest() {

@@ -45,7 +45,7 @@ const long kNanosecondsPerMillisecond = 1000000;
 
 namespace sync_primitives {
 
-CREATE_LOGGER(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;

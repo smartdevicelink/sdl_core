@@ -46,7 +46,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGER(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 ThreadedSocketConnection::ThreadedSocketConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,

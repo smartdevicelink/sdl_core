@@ -39,7 +39,7 @@
 
 namespace security_manager {
 
-CREATE_LOGGER(logger_, "SecurityManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
 static const char* err_id ="id";
 static const char* err_text ="text";

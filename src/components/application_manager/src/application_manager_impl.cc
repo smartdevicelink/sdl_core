@@ -55,7 +55,7 @@
 
 namespace application_manager {
 
-CREATE_LOGGER(logger_, "ApplicationManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;

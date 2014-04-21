@@ -38,7 +38,7 @@
 
 namespace hmi_message_handler {
 
-CREATE_LOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
@@ -104,7 +104,6 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");

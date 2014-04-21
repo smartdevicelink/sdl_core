@@ -43,7 +43,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger_, "A2DPSourcePlayerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "A2DPSourcePlayerAdapter")
 
 class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     : public threads::ThreadDelegate {

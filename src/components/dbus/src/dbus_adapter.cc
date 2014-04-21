@@ -42,7 +42,7 @@ extern char introspection_xml[];
 
 namespace dbus {
 
-CREATE_LOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 std::vector<std::string> &split(const std::string &s, char delim,
                                 std::vector<std::string> &elems) {

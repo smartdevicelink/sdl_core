@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger, "PipeAudioStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "PipeAudioStreamerAdapter")
 
 PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
   LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::PipeAudioStreamerAdapter");

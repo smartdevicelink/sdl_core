@@ -53,7 +53,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGER(logger_, "MediaManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)

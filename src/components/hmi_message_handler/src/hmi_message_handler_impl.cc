@@ -36,7 +36,7 @@
 
 namespace hmi_message_handler {
 
-CREATE_LOGGER(logger_, "HMIMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),

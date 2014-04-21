@@ -182,6 +182,7 @@ const char device_name[] = "deviceName";
 const char reason[] = "reason";
 const char available[] = "available";
 const char text[] = "text";
+const char character_set[] = "characterSet";
 
 // vehicle info
 const char gps[] = "gps";

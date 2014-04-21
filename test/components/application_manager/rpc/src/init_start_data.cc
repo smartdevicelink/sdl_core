@@ -32,11 +32,16 @@
 
 #include "rpc/init_start_data.h"
 #include "life_cycle.h"
+#include "application_manager/commands/command_impl.h"
+
+namespace test {
+
+const int CONNECT_KEY = 65537;
 
 void InitStartData() {
   printf("\n\n\n in initStartData\n\n\n");
 
-CREATE_LOGGER_NOT_ANONYM(logger_, "initStartData")
+  CREATE_LOGGERPTR_LOCAL(logger_, "initStartData")
 
   LOG4CXX_INFO(logger_, " Application started!");
 
@@ -52,28 +57,27 @@ CREATE_LOGGER_NOT_ANONYM(logger_, "initStartData")
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     main_namespace::LifeCycle::instance()->StopComponents();
-  // without this line log4cxx threads continue using some
-  // instances destroyed by exit()
+    // without this line log4cxx threads continue using some
+    // instances destroyed by exit()
     log4cxx::Logger::getRootLogger()->closeNestedAppenders();
     exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+  } LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->launch_hmi()) {
-    if (profile::Profile::instance()->server_address() ==
-        std::string(InitializeHMI::kLocalHostAddress)) {
+    if (profile::Profile::instance()->server_address()
+        == std::string(InitializeHMI::kLocalHostAddress)) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
       sleep(1);
       /*
-      threads::ThreadOptions threadOption(16384);
-      InitializeHMI::InitHMI* initHMI = new InitializeHMI::InitHMI;
-      threads::Thread threadInitializeHMI("InitializeHMI", initHMI);
-      //initHMI->threadMain();
-      //threadInitializeHMI.startWithOptions(threadOption);
-      threadInitializeHMI.start();
-      threadInitializeHMI.join();
-      */
+       threads::ThreadOptions threadOption(16384);
+       InitializeHMI::InitHMI* initHMI = new InitializeHMI::InitHMI;
+       threads::Thread threadInitializeHMI("InitializeHMI", initHMI);
+       //initHMI->threadMain();
+       //threadInitializeHMI.startWithOptions(threadOption);
+       threadInitializeHMI.start();
+       threadInitializeHMI.join();
+       */
 
       if (!InitializeHMI::InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
@@ -81,14 +85,12 @@ CREATE_LOGGER_NOT_ANONYM(logger_, "initStartData")
         // instances destroyed by exit()
         log4cxx::Logger::getRootLogger()->closeNestedAppenders();
         exit(EXIT_FAILURE);
-      }
-      LOG4CXX_INFO(logger_, "InitHmi successful");
+      } LOG4CXX_INFO(logger_, "InitHmi successful");
     }
   }
   utils::SubscribeToTerminateSignal(
-    &main_namespace::LifeCycle::StopComponentsOnSignal);
+      &main_namespace::LifeCycle::StopComponentsOnSignal);
 }
-
 
 void RegApp() {
   connection_handler::ConnectionHandlerImpl* connection_handler_ =
@@ -111,19 +113,13 @@ void RegApp() {
 
   transport_manager::ConnectionUID connection_id_test = 1;
 
-  transport_manager::DeviceInfo device_info_test(
-      device_handler_test,
-      mac_address_test,
-      name_test);
+  transport_manager::DeviceInfo device_info_test(device_handler_test,
+                                                 mac_address_test, name_test);
 
-  // std::vector<transport_manager::DeviceInfo> device_list_test;
-  // device_list_test.push_back(device_info_test);
-  // connection_handler_->OnDeviceListUpdated(device_list_test);
   connection_handler_->OnDeviceAdded(device_info_test);
 
-  connection_handler_->OnConnectionEstablished(
-      device_info_test,
-      connection_id_test);
+  connection_handler_->OnConnectionEstablished(device_info_test,
+                                               connection_id_test);
   sleep(5);
 
   utils::SharedPtr<smart::SmartObject> AppRegRequest(new smart::SmartObject);
@@ -133,8 +129,9 @@ void RegApp() {
       mobile_apis::FunctionID::RegisterAppInterfaceID;
   (*AppRegRequest)[jsn::S_PARAMS][am::strings::message_type] =
       mobile_apis::messageType::request;
-  (*AppRegRequest)[jsn::S_PARAMS][am::strings::protocol_version] = 2;
-  (*AppRegRequest)[jsn::S_PARAMS][am::strings::connection_key] = 65537;
+  (*AppRegRequest)[jsn::S_PARAMS][am::strings::protocol_version] =
+      am::commands::CommandImpl::protocol_version_;
+  (*AppRegRequest)[jsn::S_PARAMS][am::strings::connection_key] = CONNECT_KEY;
 
   (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_name] =
       "SyncProxyTester";
@@ -145,24 +142,26 @@ void RegApp() {
                                       = hmi_apis::Common_Language::EN_US;
 
   (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_id] = "65537";
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::sync_msg_version]["majorVersion"] = 2;
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::sync_msg_version]["minorVersion"] = 2;
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::is_media_application] = true;
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::app_hmi_type][0] = "NAVIGATION";
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::ngn_media_screen_app_name] = "SyncP";
-  (*AppRegRequest)[jsn::S_MSG_PARAMS]
-                   [am::strings::vr_synonyms][0] = "VR SyncProxyTester";
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::sync_msg_version]
+                                      ["majorVersion"] = 2;
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::sync_msg_version]
+                                      ["minorVersion"] = 2;
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::is_media_application] = true;
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::app_hmi_type][0] =
+      "NAVIGATION";
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::ngn_media_screen_app_name] =
+      "SyncP";
+  (*AppRegRequest)[jsn::S_MSG_PARAMS][am::strings::vr_synonyms][0] =
+      "VR SyncProxyTester";
 
   app_manager_->ManageMobileCommand(AppRegRequest);
-
-  // -------------------------------------------------------------------------
-  // Activate App
   sleep(2);
+}
+
+void ActivateApp() {
+  am::ApplicationManagerImpl* app_manager_ =
+      am::ApplicationManagerImpl::instance();
+
   utils::SharedPtr<smart::SmartObject> ActivateApp(new smart::SmartObject);
   (*ActivateApp)[jsn::S_PARAMS][am::strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnAppActivated;
@@ -173,3 +172,4 @@ void RegApp() {
 
   app_manager_->ManageHMICommand(ActivateApp);
 }
+}  // namespace test

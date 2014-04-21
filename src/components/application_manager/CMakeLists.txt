@@ -199,9 +199,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/sdl_activate_app_request.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
-./src/commands/hmi/update_app_list_request.cc
-./src/commands/hmi/update_app_list_response.cc
-./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/update_device_list_request.cc
 ./src/commands/hmi/update_device_list_response.cc
 ./src/commands/hmi/on_sdl_consent_needed_notification.cc
@@ -306,7 +303,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
-./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/on_allow_sdl_functionality_notification.cc
 ./src/commands/hmi/on_app_permission_consent_notification.cc
 ./src/commands/hmi/on_app_registered_notification.cc
@@ -330,7 +326,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ui_language_change_notification.cc
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
-./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
