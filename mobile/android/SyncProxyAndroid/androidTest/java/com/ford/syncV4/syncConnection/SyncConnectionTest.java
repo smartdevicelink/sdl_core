@@ -14,14 +14,11 @@ import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
-import com.ford.syncV4.util.logger.Logger;
 
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -74,12 +71,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-<<<<<<< HEAD
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, VERSION, false);
-=======
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO);
->>>>>>> APPLINK-6884-Logger-flag
+
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO, false);
+
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -99,13 +93,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.init(config);
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-<<<<<<< HEAD
-        protocol.setProtocolVersion(VERSION);
-        connection.startMobileNavService(session, false);
-=======
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
->>>>>>> APPLINK-6884-Logger-flag
+        connection.startMobileNavService(session, false);
+        //protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
         assertTrue(passed[0]);
     }
 
@@ -117,14 +107,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
 
             @Override
-<<<<<<< HEAD
+
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
                 super.onProtocolServiceStarted(serviceType,sessionID, encrypted, version, correlationID);
-=======
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
-                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
->>>>>>> APPLINK-6884-Logger-flag
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
@@ -213,13 +198,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-<<<<<<< HEAD
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, VERSION, false);
-=======
-        ProtocolFrameHeader header =
-                ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID,
-                        ProtocolConstants.PROTOCOL_VERSION_TWO);
->>>>>>> APPLINK-6884-Logger-flag
+
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO, false);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -239,13 +219,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.init(config);
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-<<<<<<< HEAD
-        protocol.setProtocolVersion(VERSION);
-        connection.startAudioService(session, false);
-=======
+
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-        protocol.StartProtocolService(ServiceType.Audio_Service, session);
->>>>>>> APPLINK-6884-Logger-flag
+        connection._protocol.StartProtocolService(ServiceType.Audio_Service, session, false);
         assertTrue(isPassed[0]);
     }
 
