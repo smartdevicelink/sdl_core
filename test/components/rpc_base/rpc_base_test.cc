@@ -32,6 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "json/writer.h"
+#include "rpc_base/gtest_support.h"
 #include "rpc_base/rpc_base.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
@@ -64,12 +65,12 @@ TEST(ValidatedTypes, TestBooleanDefaultConstructor) {
 
 TEST(ValidatedTypes, TestBooleanInitializingConstructor) {
   Boolean true_boolean(true);
-  ASSERT_TRUE(true_boolean.is_valid());
+  ASSERT_RPCTYPE_VALID(true_boolean);
   ASSERT_TRUE(true_boolean.is_initialized());
   ASSERT_EQ(true_boolean, true);
 
   Boolean false_boolean(false);
-  ASSERT_TRUE(false_boolean.is_valid());
+  ASSERT_RPCTYPE_VALID(false_boolean);
   ASSERT_TRUE(false_boolean.is_initialized());
   ASSERT_EQ(false_boolean, false);
 }
@@ -80,7 +81,7 @@ TEST(ValidatedTypes, TestIntegerDefaultConstructor) {
   ASSERT_FALSE(integer.is_initialized());
   ASSERT_EQ(integer, 4);
   integer = 5;
-  ASSERT_TRUE(integer.is_valid());
+  ASSERT_RPCTYPE_VALID(integer);
   ASSERT_TRUE(integer.is_initialized());
   ASSERT_EQ(integer, 5);
   integer = 700;
@@ -96,7 +97,7 @@ TEST(ValidatedTypes, TestIntegerInitializingConstructor) {
   ASSERT_EQ(invalid_integer, 200);
 
   Integer<int32_t, 0, 100> valid_integer(42);
-  ASSERT_TRUE(valid_integer.is_valid());
+  ASSERT_RPCTYPE_VALID(valid_integer);
   ASSERT_TRUE(valid_integer.is_initialized());
   ASSERT_EQ(valid_integer, 42);
 }
@@ -116,7 +117,7 @@ TEST(ValidatedTypes, TestFloatDefaultConstructor) {
 TEST(ValidatedTypes, TestFloatInitializingConstructor) {
   Float<13, 999, 10, 10> flt(4);
   ASSERT_TRUE(flt.is_initialized());
-  ASSERT_TRUE(flt.is_valid());
+  ASSERT_RPCTYPE_VALID(flt);
   ASSERT_EQ(flt, 4.);
 
   flt = 1.2;
@@ -132,7 +133,7 @@ TEST(ValidatedTypes, TestStringDefaultConstructor) {
   ASSERT_EQ(val, "");
   str = "Test";
   ASSERT_TRUE(str.is_initialized());
-  ASSERT_TRUE(str.is_valid());
+  ASSERT_RPCTYPE_VALID(str);
   val = str;
   ASSERT_EQ(val, "Test");
   str = "Long string";
@@ -148,7 +149,7 @@ TEST(ValidatedTypes, TestStringLengthRange) {
   ASSERT_FALSE(str.is_valid());
   str = "Hello";
   ASSERT_TRUE(str.is_initialized());
-  ASSERT_TRUE(str.is_valid());
+  ASSERT_RPCTYPE_VALID(str);
   str = "Sh";
   ASSERT_TRUE(str.is_initialized());
   ASSERT_FALSE(str.is_valid());
@@ -174,7 +175,7 @@ TEST(ValidatedTypes, TestArray) {
   ASSERT_FALSE(arr.is_valid());
   arr.push_back("Text");
   arr.push_back("Dext");
-  ASSERT_TRUE(arr.is_valid());
+  ASSERT_RPCTYPE_VALID(arr);
   ASSERT_TRUE(arr.is_initialized());
   arr.push_back("Too long");
   ASSERT_FALSE(arr.is_valid());
@@ -186,12 +187,12 @@ TEST(ValidatedTypes, TestArrayInitializingConstructor) {
   strings.push_back("Two");
   Array<String<1, 5>, 2, 10> arr(strings);
   ASSERT_TRUE(arr.is_initialized());
-  ASSERT_TRUE(arr.is_valid());
+  ASSERT_RPCTYPE_VALID(arr);
 }
 
 TEST(ValidatedTypes, TestOptionalEmptyArray) {
   Optional< Array<Integer<int8_t, 0, 10>, 0, 5> > ai;
-  ASSERT_TRUE(ai.is_valid());
+  ASSERT_RPCTYPE_VALID(ai);
   ASSERT_FALSE(ai.is_initialized());
   Json::FastWriter fw;
   std::string serialized = fw.write(ai.ToJsonValue());
@@ -214,7 +215,7 @@ TEST(ValidatedTypes, TestMap) {
   map["a"] = "Hello";
   map["b"] = "World";
   ASSERT_TRUE(map.is_initialized());
-  ASSERT_TRUE(map.is_valid());
+  ASSERT_RPCTYPE_VALID(map);
   map["c"] = "Too long";
   ASSERT_FALSE(map.is_valid());
 }
@@ -225,7 +226,7 @@ TEST(ValidatedTypes, TestMapInitializingConstructor) {
   init_map["b"] = "World";
   Map<String<1, 6>, 2, 10 > map(init_map);
   ASSERT_TRUE(map.is_initialized());
-  ASSERT_TRUE(map.is_valid());
+  ASSERT_RPCTYPE_VALID(map);
 }
 
 TEST(ValidatedTypes, TestEmptyMandatoryMap) {
@@ -243,7 +244,7 @@ TEST(ValidatedTypes, TestEnumConstructor) {
   ASSERT_FALSE(te.is_valid());
   te = kValue1;
   ASSERT_TRUE(te.is_initialized());
-  ASSERT_TRUE(te.is_valid());
+  ASSERT_RPCTYPE_VALID(te);
   ASSERT_EQ(te, kValue1);
   te = TestEnum(42);
   ASSERT_TRUE(te.is_initialized());
@@ -258,43 +259,43 @@ TEST(ValidatedTypes, TestNullableConstructor) {
   nullable_int = 5;
   ASSERT_TRUE(nullable_int.is_initialized());
   ASSERT_FALSE(nullable_int.is_null());
-  ASSERT_TRUE(nullable_int.is_valid());
+  ASSERT_RPCTYPE_VALID(nullable_int);
   nullable_int.set_to_null();
   ASSERT_TRUE(nullable_int.is_initialized());
   ASSERT_TRUE(nullable_int.is_null());
-  ASSERT_TRUE(nullable_int.is_valid());
+  ASSERT_RPCTYPE_VALID(nullable_int);
 }
 
 TEST(ValidatedTypes, TestOptionalNullableConstructor) {
   Optional< Nullable< Integer<int8_t, 2, 10> > > optional_nullable_int;
   ASSERT_FALSE(optional_nullable_int.is_initialized());
   ASSERT_FALSE(optional_nullable_int->is_null());
-  ASSERT_TRUE(optional_nullable_int.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_nullable_int);
   ASSERT_FALSE(optional_nullable_int);
 
   *optional_nullable_int = 9;
   ASSERT_TRUE(optional_nullable_int.is_initialized());
   ASSERT_FALSE(optional_nullable_int->is_null());
-  ASSERT_TRUE(optional_nullable_int.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_nullable_int);
   ASSERT_EQ(9, *optional_nullable_int);
   ASSERT_TRUE(optional_nullable_int);
 
   optional_nullable_int->set_to_null();
   ASSERT_TRUE(optional_nullable_int.is_initialized());
   ASSERT_TRUE(optional_nullable_int->is_null());
-  ASSERT_TRUE(optional_nullable_int.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_nullable_int);
 }
 
 TEST(ValidatedTypes, TestOptionalConstructor) {
   Optional< Integer<int16_t, 3, 15> > optional_int;
   ASSERT_FALSE(optional_int.is_initialized());
-  ASSERT_TRUE(optional_int.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_int);
   *optional_int = 42;
   ASSERT_TRUE(optional_int.is_initialized());
   ASSERT_FALSE(optional_int.is_valid());
   *optional_int = 12;
   ASSERT_TRUE(optional_int.is_initialized());
-  ASSERT_TRUE(optional_int.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_int);
   int readback = *optional_int;
   ASSERT_EQ(readback, 12);
 }
@@ -302,7 +303,7 @@ TEST(ValidatedTypes, TestOptionalConstructor) {
 TEST(ValidatedTypes, TestOptionalInitializingConstructor) {
   Optional< String<1, 12> > optional_string("Hello world");
   ASSERT_TRUE(optional_string.is_initialized());
-  ASSERT_TRUE(optional_string.is_valid());
+  ASSERT_RPCTYPE_VALID(optional_string);
   std::string value = *optional_string;
   ASSERT_EQ(value, "Hello world");
 }
@@ -312,7 +313,7 @@ TEST(ValidatedTypes, TestDifferentTypesAssignment) {
   Integer<int32_t, 5, 90> val2(45);
   val = val2;
   ASSERT_TRUE(val2.is_initialized());
-  ASSERT_TRUE(val2.is_valid());
+  ASSERT_RPCTYPE_VALID(val2);
   ASSERT_TRUE(val.is_initialized());
   ASSERT_FALSE(val.is_valid());
 }
@@ -335,10 +336,10 @@ TEST(ValidatedTypes, ReportIncorrectInitializedIntType) {
 
 TEST(ValidatedTypes, ReportUninitializedOptionalType) {
   Optional< Integer<int8_t, 1, 3> > val;
-  ASSERT_TRUE(val.is_valid());
+  ASSERT_RPCTYPE_VALID(val);
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: optional value is not initialized\n", PrettyFormat(report));
+  ASSERT_EQ("", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectInitializedOptionalType) {
@@ -360,10 +361,10 @@ TEST(ValidatedTypes, ReportUninitializedNullableIntType) {
 TEST(ValidatedTypes, ReportNullInitializedNullableIntType) {
   Nullable< Integer<int8_t, 1, 3> > val;
   val.set_to_null();
-  ASSERT_TRUE(val.is_valid());
+  ASSERT_RPCTYPE_VALID(val);
   ValidationReport report("val");
   val.ReportErrors(&report);
-  ASSERT_EQ("val: null initialized\n", PrettyFormat(report));
+  ASSERT_EQ("", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportNoninitializedIntArray) {
@@ -380,8 +381,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray1) {
   ASSERT_FALSE(array.is_valid());
   ValidationReport report("array");
   array.ReportErrors(&report);
-  ASSERT_EQ("array: array initialized\n"
-            "  array element 0: value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("array[0]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedIntArray2) {
@@ -405,7 +405,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedArray3) {
   ValidationReport report("array");
   array.ReportErrors(&report);
   ASSERT_EQ("array: array has invalid size\n"
-            "  array element 2: value initialized incorrectly\n", PrettyFormat(report));
+            "array[2]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportUninitializedMap) {
@@ -420,8 +420,7 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap1) {
   map["aha"] = 42;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map: map initialized\n"
-            "  map element \"aha\": value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("map[\"aha\"]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
@@ -432,9 +431,8 @@ TEST(ValidatedTypes, ReportIncorrectlyInitializedMap2) {
   map["muhahaha"] = 22;
   ValidationReport report("map");
   map.ReportErrors(&report);
-  ASSERT_EQ("map: map initialized\n"
-            "  map element \"haha\": value initialized incorrectly\n"
-            "  map element \"muhahaha\": value initialized incorrectly\n", PrettyFormat(report));
+  ASSERT_EQ("map[\"haha\"]: value initialized incorrectly\n"
+            "map[\"muhahaha\"]: value initialized incorrectly\n", PrettyFormat(report));
 }
 
 }  // namespace codegen

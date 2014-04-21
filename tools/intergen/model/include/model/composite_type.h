@@ -155,10 +155,14 @@ class Struct : public Type {
  public:
   // Methods
   Struct(const Interface* interface,
-         const std::string& name, Scope scope,
+         const std::string& name,
+         const Type* frankenmap,
+         Scope scope,
          const Description& description);
   ~Struct();
   const Interface& interface() const;
+  // Returns frankenstruct type if this struct is frankenstruct
+  const Type* frankenstruct() const;
   const std::string& name() const;
   const Description& description() const;
   const FieldsList& fields() const;
@@ -174,6 +178,7 @@ class Struct : public Type {
   // Fields
   const Interface* interface_;
   std::string name_;
+  const Type* frankenmap_;
   Scope scope_;
   Description description_;
   FieldsList fields_;

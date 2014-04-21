@@ -131,7 +131,8 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"secondaryText"    , hmi_apis::Common_TextFieldName::secondaryText},
     {"tertiaryText"     , hmi_apis::Common_TextFieldName::tertiaryText},
     {"timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination},
-    {"turnText"         , hmi_apis::Common_TextFieldName::turnText}
+    {"turnText"         , hmi_apis::Common_TextFieldName::turnText},
+    {"menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle},
 };
 
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType> media_clock_enum_name =
@@ -217,6 +218,14 @@ const std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_en
     {"MFD4", hmi_apis::Common_DisplayType::MFD4},
     {"MFD5", hmi_apis::Common_DisplayType::MFD5},
     {"GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH}
+};
+
+const std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum =
+{
+    {"TYPE2SET" , hmi_apis::Common_CharacterSet::TYPE2SET},
+    {"TYPE5SET" , hmi_apis::Common_CharacterSet::TYPE5SET},
+    {"CID1SET" ,  hmi_apis::Common_CharacterSet::CID1SET},
+    {"CID2SET" ,  hmi_apis::Common_CharacterSet::CID2SET}
 };
 
 HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
@@ -598,22 +607,38 @@ bool HMICapabilities::load_capabilities_from_file() {
         }
 
         if (display_capabilities_so.keyExists(hmi_response::text_fields)) {
-          smart_objects::SmartObject text_fields_enum(
-              smart_objects::SmartType_Array);
-          smart_objects::SmartObject& text_fields_string =
-              display_capabilities_so[hmi_response::text_fields];
+          int32_t len =
+              display_capabilities_so[hmi_response::text_fields].length();
 
-          for (int32_t i = 0, j = 0; i < text_fields_string.length(); ++i) {
-            std::map<std::string, hmi_apis::Common_TextFieldName::eType>
-            ::const_iterator it = text_fields_enum_name.find(
-                (text_fields_string[i]).asString());
+          for (int32_t i = 0; i < len; ++i) {
 
-            if (text_fields_enum_name.end() != it) {
-              text_fields_enum[j++] =  it->second;
+            if ((display_capabilities_so
+                [hmi_response::text_fields][i]).keyExists(strings::name)) {
+              std::map<std::string, hmi_apis::Common_TextFieldName::eType>
+              ::const_iterator it_text_field_name = text_fields_enum_name.find(
+                  display_capabilities_so[hmi_response::text_fields]
+                                          [i][strings::name].asString());
+              display_capabilities_so[hmi_response::text_fields][i].erase(strings::name);
+              if (text_fields_enum_name.end() != it_text_field_name) {
+                display_capabilities_so[hmi_response::text_fields]
+                        [i][strings::name] =  it_text_field_name->second;
+              }
+            }
+            if ((display_capabilities_so
+                [hmi_response::text_fields][i]).keyExists(strings::character_set)) {
+              std::map<std::string, hmi_apis::Common_CharacterSet::eType>
+              ::const_iterator it_characte_set = character_set_enum.find(
+                  display_capabilities_so[hmi_response::text_fields]
+                                          [i][strings::character_set].asString());
+              display_capabilities_so
+              [hmi_response::text_fields][i].erase(strings::character_set);
+              if (character_set_enum.end() != it_characte_set) {
+                display_capabilities_so
+                [hmi_response::text_fields][i][strings::character_set] =
+                    it_characte_set->second;
+              }
             }
           }
-          display_capabilities_so.erase(hmi_response::text_fields);
-          display_capabilities_so[hmi_response::text_fields] = text_fields_enum;
         }
 
         if (display_capabilities_so.keyExists(hmi_response::image_fields)) {

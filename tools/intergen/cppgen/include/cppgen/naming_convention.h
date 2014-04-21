@@ -85,6 +85,10 @@ std::string UpperCamelCaseInterfaceName(const Interface& interface);
 // Currently it just lower_case_interface_name
 std::string InterfaceNamespaceName(const Interface& interface);
 
+// Produces new name (generally for struct fields) if it
+// conflicts with known keywords
+std::string AvoidKeywords(const std::string& name);
+
 }  // namespace codegen
 
 #endif /* NAMING_CONVENTION_H_ */

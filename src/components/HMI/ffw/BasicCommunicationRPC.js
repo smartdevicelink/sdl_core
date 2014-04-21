@@ -250,6 +250,10 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         });
                     } else {
 
+                        if (SDL.SDLModel.stateLimited == appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
+
                         SDL.SDLController.getApplicationModel(appID).turnOnSDL();
                     }
 
@@ -376,15 +380,6 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 if (request.method == "BasicCommunication.AllowDeviceToConnect") {
                     this.AllowDeviceToConnect(request.id, request.method, allow);
                 }
-                if (request.method == "BasicCommunication.UpdateAppList") {
-                    if (SDL.States.info.active) {
-                        SDL.SDLController
-                            .onGetAppList(request.params.applications);
-                    }
-                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
-                }
                 if (request.method == "BasicCommunication.UpdateDeviceList") {
                     SDL.SDLModel.onGetDeviceList(request.params);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
@@ -407,7 +402,9 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         SDL.States.goToStates('info.apps');
                     }
 
-                    SDL.SDLModel.stateLimited = null;
+                    if (SDL.SDLModel.stateLimited == request.params.appID) {
+                        SDL.SDLModel.stateLimited = null;
+                    }
 
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
