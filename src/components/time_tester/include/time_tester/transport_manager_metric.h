@@ -1,8 +1,6 @@
 /**
- * \file platform_usb_device.cc
- * \brief QNX PlatformUsbDevice class source file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,47 +31,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/qnx/platform_usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
 
-#include "utils/logger.h"
+#include <string>
+#include "metric.h"
+#include "transport_manager_observer.h"
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace time_tester {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+class TransportManagerObserver;
 
-PlatformUsbDevice::PlatformUsbDevice(
-    usbd_device_instance_t* instance, usbd_device* device,
-    const usbd_device_descriptor_t& device_descriptor)
-    : bus_number_(instance->path),
-      address_(instance->devno),
-      vendor_id_(instance->ident.vendor),
-      product_id_(instance->ident.device),
-      device_descriptor_(device_descriptor),
-      usbd_device_instance_(*instance),
-      usbd_device_(device) {}
+class TransportManagerMectic: public Metric {
 
-std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
-  char* str = usbd_string(usbd_device_, index, 0);
-  if (NULL == str) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor");
-    return "";
-  }
-  return std::string(str);
+  public:
+    utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
+    std::string GetStyledString();
+};
+
 }
-
-std::string PlatformUsbDevice::GetManufacturer() const {
-  return GetDescString(device_descriptor_.iManufacturer);
-}
-
-std::string PlatformUsbDevice::GetProductName() const {
-  return GetDescString(device_descriptor_.iProduct);
-}
-
-std::string PlatformUsbDevice::GetSerialNumber() const {
-  return GetDescString(device_descriptor_.iSerialNumber);
-}
-
-}  // namespace
-}  // namespace
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_

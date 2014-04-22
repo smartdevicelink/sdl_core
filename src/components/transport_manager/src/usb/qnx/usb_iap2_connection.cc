@@ -33,8 +33,12 @@
 #include "transport_manager/usb/qnx/usb_iap2_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 const char* UsbIAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
 

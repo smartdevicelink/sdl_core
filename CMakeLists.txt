@@ -40,9 +40,10 @@ option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(TIME_TESTER "Enable profiling time test util" ON)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
-option(ENABLE_GCOV "gcov code coverage feature" OFF)
+option(ENABLE_GCOV "gcov code coverage feature" ON)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -158,6 +159,10 @@ endif()
 
 if(ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
+endif()
+
+if (TIME_TESTER)
+    add_definitions(-DTIME_TESTER)
 endif()
 
 # TODO(AK): check current OS here
