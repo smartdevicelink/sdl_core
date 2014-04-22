@@ -1,4 +1,5 @@
-/*
+/**
+ *
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,53 +31,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_manager_default.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
 
-#ifdef BLUETOOTH_SUPPORT
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#endif
+namespace time_tester {
+  namespace strings {
+    const char logger[] = "logger";
+    const char begin[] = "begin";
+    const char end[] = "end";
+    const char data_size[] = "data_size";
+    const char message_id[] = "message_id";
+    const char session_id[] = "session_id";
+    const char correlation_id[] = "correlation_id";
+    const char connection_key[] = "connection_key";
 
-#ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
-#endif
 
-#include "config_profile/profile.h"
-
-namespace transport_manager {
-
-int TransportManagerDefault::Init() {
-  if (E_SUCCESS != TransportManagerImpl::Init()) {
-    return E_TM_IS_NOT_INITIALIZED;
   }
-  transport_adapter::TransportAdapterImpl* ta;
-#ifdef BLUETOOTH_SUPPORT
-  ta = new transport_adapter::BluetoothTransportAdapter;
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#ifdef USB_SUPPORT
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-
-  return E_SUCCESS;
 }
-
-TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
-
-}  //  namespace transport_manager
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_
