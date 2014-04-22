@@ -49,7 +49,6 @@
 #include <list>
 #include <algorithm>
 
-#include "utils/logger.h"
 #include "utils/timer_thread.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
@@ -105,25 +104,9 @@ class TransportManagerImpl : public TransportManager {
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id)
-        : transport_manager(transport_manager),
-          transport_adapter(transport_adapter),
-          timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
-          shutDown(false),
-          messages_count(0) {
-            Connection::id = id;
-            Connection::device = dev_id;
-            Connection::application = app_id;
-    }
+                       const ApplicationHandle& app_id);
 
-    void DisconnectFailedRoutine() {
-      LOG4CXX_INFO(logger_, "Disconnection failed");
-      transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
-                                    transport_manager->converter_.UidToHandle(device),
-                                    DisconnectDeviceError());
-      shutDown = false;
-      timer->stop();
-    }
+    void DisconnectFailedRoutine();
 
   };
  public:
@@ -337,16 +320,7 @@ class TransportManagerImpl : public TransportManager {
   void EventListenerThread(void);
 
   /**
-   * \brief For logging.
-   */
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
-  /**
    * @brief store messages
-   *
-   * @param
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
@@ -364,8 +338,6 @@ class TransportManagerImpl : public TransportManager {
 
   /**
    * @brief store events from comming device
-   *
-   * @param
    *
    * @see @ref components_transportmanager_client_connection_management
    **/

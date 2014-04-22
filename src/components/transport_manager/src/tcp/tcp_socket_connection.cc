@@ -36,6 +36,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "utils/logger.h"
 
 #include <memory.h>
 #include <signal.h>
@@ -43,6 +44,9 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
                                          const ApplicationHandle& app_handle,

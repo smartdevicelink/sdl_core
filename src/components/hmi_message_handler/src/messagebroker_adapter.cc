@@ -34,15 +34,13 @@
 
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
-#endif // ENABLE_LOG
+typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
@@ -106,7 +104,6 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");

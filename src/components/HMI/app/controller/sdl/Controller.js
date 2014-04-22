@@ -180,9 +180,6 @@ SDL.SDLController = Em.Object
                     }
                 }
             }
-            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
-            }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -397,9 +394,9 @@ SDL.SDLController = Em.Object
         systemRequestViewSelected: function(state) {
 
             if (SDL.SDLModel.policyURLs.length) {
-                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+                FFW.BasicCommunication.OnSystemRequest(state, SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
             } else {
-                FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
+                FFW.BasicCommunication.OnSystemRequest(state);
             }
 
         },
@@ -424,6 +421,8 @@ SDL.SDLController = Em.Object
             SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
+
+            SDL.InteractionChoicesView.timerUpdate();
         },
         /**
          * Method to sent notification for Alert
@@ -546,13 +545,12 @@ SDL.SDLController = Em.Object
          */
         registerApplication: function(params, applicationType) {
 
-            SDL.SDLModel.get('registeredApps')
-                .pushObject(this.applicationModels[applicationType].create( {
-                    appID: params.appID,
-                    appName: params.appName,
-                    deviceName: params.deviceName,
-                    appType: params.appType
-                }));
+            SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create( {
+                appID: params.appID,
+                appName: params.appName,
+                deviceName: params.deviceName,
+                appType: params.appType
+            }));
 
             var exitCommand = {
                 "id": -10,
@@ -672,16 +670,6 @@ SDL.SDLController = Em.Object
             this.turnChangeDeviceViewBack();
         },
         /**
-         * Method creates list of Application ID's Then call HMI method for
-         * display a list of Applications
-         * 
-         * @param {Object}
-         */
-        onGetAppList: function(appList) {
-
-            SDL.SDLModel.onGetAppList(appList);
-        },
-        /**
          * Method call's request to get list of applications
          */
         findNewApps: function() {
@@ -797,8 +785,8 @@ SDL.SDLController = Em.Object
         /**
          * Send system context
          */
-        onSystemContextChange: function() {
+        onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'));
+            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
         }
     });

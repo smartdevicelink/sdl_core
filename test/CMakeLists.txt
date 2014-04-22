@@ -109,7 +109,12 @@ add_executable("test_suit" "./test_suit.cc")
 
 if (BUILD_TESTS_WITH_HMI)
 include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
-target_link_libraries("test_suit" test_App_Manager ${LIBRARIES} ${LibXML2_LIBRARIES} -lxml2)
+target_link_libraries("test_suit" 
+  test_App_Manager 
+  ${LIBRARIES} 
+  ${LibXML2_LIBRARIES} -lxml2
+  avahi-client
+  )
 else (BUILD_TESTS_WITH_HMI)
 include_directories(${INCLUDE_DIR})
 target_link_libraries("test_suit" ${LIBRARIES})

@@ -31,6 +31,7 @@
 
 #include "cppgen/struct_type_dbus_serializer.h"
 
+#include "cppgen/naming_convention.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
@@ -99,7 +100,8 @@ StructTypeFromDbusReaderConstructor::StructTypeFromDbusReaderConstructor(
     const Struct::FieldsList& fields = strct->fields();
     for (Struct::FieldsList::const_iterator i = fields.begin(), end = fields.end();
          i != end; ++i) {
-      Add(Initializer(i->name(), "reader__"));
+      Add(Initializer(AvoidKeywords(i->name()),
+                      "reader__"));
     }
   }
 }

@@ -52,8 +52,7 @@ typedef std::set<utils::SharedPtr<application_manager::Application>> Application
 PolicyHandler* PolicyHandler::instance_ = NULL;
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 
-log4cxx::LoggerPtr PolicyHandler::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("PolicyHandler"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 PolicyHandler::PolicyHandler()
   : policy_manager_(0),
@@ -413,7 +412,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
     }
 
     const std::string& mobile_app_id = app->mobile_app_id()->asString();
-    if (!mobile_app_id.empty()) {
+    if (mobile_app_id.empty()) {
       LOG4CXX_WARN(logger_, "Application with connection key '" <<app_id<<"'"
                    " has no application id.");
       return false;
@@ -452,6 +451,9 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
     event_observer_.get()->subscribe_on_event(
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
     application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
+    if (policy_manager_->CleanupUnpairedDevices(unpaired_device_ids_)) {
+     unpaired_device_ids_.clear();
+    }
   }
   return ret;
 }
@@ -523,6 +525,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
+
+    // In case of changed consent for device, related applications will be
+    // limited to pre_DataConsent permissions, if device disallowed, or switch
+    // back to their own permissions, if device allowed again, and must be
+    // notified about these changes
+    typedef std::set<application_manager::ApplicationSharedPtr> ApplicationList;
+    ApplicationList app_list =
+        application_manager::ApplicationManagerImpl::instance()->applications();
+    ApplicationList::const_iterator it_app_list = app_list.begin();
+    ApplicationList::const_iterator it_app_list_end = app_list.end();
+    for (; it_app_list != it_app_list_end; ++it_app_list) {
+      if (device_id == (*it_app_list).get()->device()) {
+        policy_manager_->SendNotificationOnPermissionsUpdated(
+              (*it_app_list).get()->mobile_app_id()->asString());
+      }
+    }
 
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
@@ -662,22 +680,64 @@ void PolicyHandler::OnPTExchangeNeeded() {
 }
 
 void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-    const Permissions& permissions) {
+    const Permissions& permissions, const HMILevel& default_hmi) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (app) {
-    application_manager::MessageHelper::SendOnPermissionsChangeNotification(
-      app->app_id(), permissions);
-
-    LOG4CXX_INFO(
-      logger_,
-      "Notification sent for application_id:" << policy_app_id << " and connection_key " << app->app_id());
-  } else {
+  if (!app) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);
+    return;
+  }
+
+  application_manager::MessageHelper::SendOnPermissionsChangeNotification(
+    app->app_id(), permissions);
+
+  LOG4CXX_INFO(
+    logger_,
+    "Notification sent for application_id:" << policy_app_id
+        << " and connection_key " << app->app_id());
+
+  // The application currently not running (i.e. in NONE) should change HMI
+  // level to default
+  mobile_apis::HMILevel::eType current_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType hmi_level =
+      application_manager::MessageHelper::StringToHMILevel(default_hmi);
+
+  if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
+    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
+                 << default_hmi << " to enum.");
+    return;
+  }
+  if (current_hmi_level == hmi_level) {
+    LOG4CXX_INFO(logger_, "Application already in default hmi state.");
+    return;
+  }
+  switch (current_hmi_level) {
+  case mobile_apis::HMILevel::HMI_NONE:
+  {
+    LOG4CXX_INFO(logger_, "Changing hmi level of application " << policy_app_id
+                 << " to default hmi level " << default_hmi);
+    // If default is FULL, send request to HMI. Notification to mobile will be
+    // sent on response receiving.
+    if (mobile_apis::HMILevel::HMI_FULL == hmi_level) {
+      application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+      break;
+    }
+
+    // Set application hmi level
+    app->set_hmi_level(hmi_level);
+
+    // Send notification to mobile
+    application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
+  }
+    break;
+  default:
+    LOG4CXX_WARN(logger_, "Application " << policy_app_id << " is running."
+                 "HMI level won't be changed.");
+    break;
   }
 }
 

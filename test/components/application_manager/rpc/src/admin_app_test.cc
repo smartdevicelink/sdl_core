@@ -53,9 +53,9 @@ namespace test {
 
     printf("\n\n\n after init in Admin \n\n\n");
 
-    //////////////////////////////////////////////
+    /**************************************************************************/
     // Smoke test
-    //SmokeTestExpMedia("./components/application_manager/rpc/XmlTests");
+    // SmokeTestExpMedia("./components/application_manager/rpc/XmlTests");
     sleep(5);
   }
 }  // namespace test

@@ -112,6 +112,10 @@ import java.util.Vector;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
         ISystemRequestProxy {
+
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = SyncProxyBase.class.getSimpleName();
+
     // Synchronization Objects
     static final Object CONNECTION_REFERENCE_LOCK = new Object(),
             INCOMING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
@@ -170,9 +174,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     protected SyncConnectionState _syncConnectionState = null;
     protected SyncInterfaceAvailability _syncIntefaceAvailablity = null;
-    protected HMILevel _hmiLevel = null;
-    protected AudioStreamingState _audioStreamingState = null;
-    protected SystemContext _systemContext = null;
 
     public SyncMsgVersion getSyncMsgVersion() throws SyncException {
         return _syncMsgVersion;
@@ -1304,10 +1305,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void dispatchOutgoingMessage(ProtocolMessage message) {
-        if (mSyncConnection.getIsConnected()) {
-            mSyncConnection.sendMessage(message);
-        }
-        Logger.i("SyncProxy sending Protocol Message: " + message.toString());
+        Logger.i(LOG_TAG + " Sending Protocol Msg, name:" +
+                FunctionID.getFunctionName(message.getFunctionID()) +
+                " type:" + message.getRPCType());
+        mSyncConnection.sendMessage(message);
     }
 
     private void handleErrorsFromOutgoingMessageDispatcher(String info, Exception e) {

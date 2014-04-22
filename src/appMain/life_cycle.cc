@@ -40,13 +40,9 @@
 using threads::Thread;
 
 namespace main_namespace {
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("appMain"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
-
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(Thread::Id(thread.GetId()), name);
@@ -219,8 +215,6 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
 
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
@@ -228,13 +222,13 @@ bool LifeCycle::InitMessageSystem() {
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     dbus_adapter_);
   if (!dbus_adapter_->Init()) {
-    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    LOG4CXX_INFO(logger_, "Cannot init DBus service!");
     return false;
   }
 
   dbus_adapter_->SubscribeTo();
 
-  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
   dbus_adapter_thread_ = new System::Thread(
     new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
       *dbus_adapter_,

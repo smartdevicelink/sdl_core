@@ -37,10 +37,9 @@
 
 #include <queue>
 #include <set>
+#include <map>
 #include <memory>
 #include <string>
-
-#include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -508,13 +507,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   TMMetricObserver* metric_observer_;
 };
-
-#ifdef ENABLE_LOG
-extern log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
 #endif  // #ifndef \
         // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_

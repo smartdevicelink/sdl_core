@@ -45,6 +45,7 @@
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
 #include "cppgen/struct_type_report_erros_method.h"
+#include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
 
@@ -76,7 +77,14 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& source_file = module_manager_->SourceForStruct(*strct);
   ostream& o = source_file.types_ns().os();
   o << Comment(format("{0} methods", strct->name())) << endl;
-  const char* base_class_name = "CompositeType";
+  std::string base_class_name = "CompositeType";
+  if (strct->frankenstruct()) {
+    base_class_name = RpcTypeNameGenerator(
+                        &strct->interface(),
+                        preferences_,
+                        strct->frankenstruct(),
+                        false).result();
+  }
   StructTypeDefaultConstructor(strct, base_class_name).Define(&o, false);
   StructTypeMandatoryConstructor mandatory_constructor(preferences_,
                                                        strct,
@@ -98,7 +106,7 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
   }
   StructTypeIsValidMethod(strct).Define(&o, false);
   StructTypeIsInitializedMethod(strct).Define(&o, false);
-  StructTypeIsEmptyMethod(strct).Define(&o, false);
+  StructTypeStructEmptyMethod(strct).Define(&o, false);
   StructTypeReportErrosMethod(strct).Define(&o, false);
   o << endl;
 
@@ -139,7 +147,7 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
   MessageHandleWithMethod(response.name()).Define(&o, false);
   StructTypeIsValidMethod(&response).Define(&o, false);
   StructTypeIsInitializedMethod(&response).Define(&o, false);
-  StructTypeIsEmptyMethod(&response).Define(&o, false);
+  StructTypeStructEmptyMethod(&response).Define(&o, false);
   StructTypeReportErrosMethod(&response).Define(&o, false);
   o << endl;
 
@@ -175,7 +183,7 @@ void DefinitionGenerator::GenerateCodeForNotification(
   MessageHandleWithMethod(notification.name()).Define(&o, false);
   StructTypeIsValidMethod(&notification).Define(&o, false);
   StructTypeIsInitializedMethod(&notification).Define(&o, false);
-  StructTypeIsEmptyMethod(&notification).Define(&o, false);
+  StructTypeStructEmptyMethod(&notification).Define(&o, false);
   StructTypeReportErrosMethod(&notification).Define(&o, false);
   o << endl;
 
@@ -210,7 +218,7 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
   }
   StructTypeIsValidMethod(&request).Define(&o, false);
   StructTypeIsInitializedMethod(&request).Define(&o, false);
-  StructTypeIsEmptyMethod(&request).Define(&o, false);
+  StructTypeStructEmptyMethod(&request).Define(&o, false);
   StructTypeReportErrosMethod(&request).Define(&o, false);
   MessageHandleWithMethod(request.name()).Define(&o, false);
   o << endl;

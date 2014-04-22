@@ -33,13 +33,11 @@
 #include <unistd.h>
 
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr FromMicToFileRecorderThread::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("FromMicToFileRecorderThread"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicToFileRecorderThread")
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 

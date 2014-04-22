@@ -37,16 +37,14 @@
 
 #include <memory.h>
 
+#include "utils/logger.h"
+
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-#endif // ENABLE_LOG
-
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.

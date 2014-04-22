@@ -41,17 +41,12 @@
 
 #include "mobile_message_handler/mobile_message_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
-#include "utils/logger.h"
-
 #include "utils/lock.h"
 #include "utils/conditional_variable.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
 //! ---------------------------------------------------------------------------
-
-log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("mobile_message_handler_test"));
 
 sync_primitives::Lock lock;
 sync_primitives::ConditionalVariable cond_var;
