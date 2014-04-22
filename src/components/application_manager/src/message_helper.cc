@@ -48,13 +48,7 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 
-<<<<<<< HEAD
-
-
-namespace {
-=======
 namespace application_manager {
->>>>>>> develop
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 

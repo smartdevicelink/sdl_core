@@ -1952,9 +1952,6 @@
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
-      <param name="priority" type="Common.AppPriority" mandatory="false">
-        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
-      </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
