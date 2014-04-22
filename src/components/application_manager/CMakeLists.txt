@@ -398,7 +398,6 @@ endif (${HMI_DBUS_API})
 
 SET (LIBRARIES
   UsageStatistics
-  log4cxx
   dl
 )
 
@@ -407,4 +406,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
 endif()
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
-target_link_libraries ("ApplicationManager" ${LIBRARIES})
+target_link_libraries("ApplicationManager" ${LIBRARIES})
+
+if(ENABLE_LOG)
+  target_link_libraries("ApplicationManager" log4cxx)
+endif()

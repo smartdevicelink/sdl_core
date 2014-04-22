@@ -32,13 +32,11 @@
 
 #include "media_manager/streamer_listener.h"
 #include "media_manager/media_manager_impl.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr StreamerListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("StreamerListener"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "StreamerListener")
 
 StreamerListener::StreamerListener()
   : current_application_(0) {

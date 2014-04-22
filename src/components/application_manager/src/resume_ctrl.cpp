@@ -14,10 +14,9 @@
 #include "resumption/last_state.h"
 
 namespace application_manager {
-#ifdef ENABLE_LOG
-  log4cxx::LoggerPtr ResumeCtrl::logger_ = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("ResumeCtrl"));
-#endif // ENABLE_LOG
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ResumeCtrl")
+
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* app_mngr)

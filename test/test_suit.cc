@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties");
 
 #ifdef TESTS_WITH_HMI
   test::AdminAppTest app;
@@ -92,4 +92,3 @@ int main(int argc, char **argv) {
   sleep(2);
   return result;
 }
-

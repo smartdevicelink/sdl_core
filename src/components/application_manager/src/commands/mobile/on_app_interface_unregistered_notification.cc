@@ -36,7 +36,6 @@
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
-
 namespace commands {
 
 OnAppInterfaceUnregisteredNotification::OnAppInterfaceUnregisteredNotification(
@@ -52,7 +51,5 @@ void OnAppInterfaceUnregisteredNotification::Run() {
 
   SendNotification();
 }
-
 }  // namespace commands
-
 }  // namespace application_manager

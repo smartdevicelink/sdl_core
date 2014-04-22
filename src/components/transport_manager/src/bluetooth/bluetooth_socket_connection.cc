@@ -46,8 +46,12 @@
 #include "transport_manager/bluetooth/bluetooth_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,

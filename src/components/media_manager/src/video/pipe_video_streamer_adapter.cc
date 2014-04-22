@@ -35,10 +35,7 @@
 
 namespace media_manager {
 
-namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("PipeVideoStreamerAdapter"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger, "PipeVideoStreamerAdapter")
 
 PipeVideoStreamerAdapter::PipeVideoStreamerAdapter() {
   LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::PipeVideoStreamerAdapter");

@@ -35,6 +35,7 @@
 
 #include "connection_handler/device.h"
 #include "encryption/hashing.h"
+#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -42,10 +43,7 @@
  */
 namespace connection_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr Device::logger_ = log4cxx::LoggerPtr(
-        log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 Device::Device(DeviceHandle device_handle,
                const std::string& user_friendly_name,

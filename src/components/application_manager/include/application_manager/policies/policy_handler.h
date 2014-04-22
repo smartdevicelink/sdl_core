@@ -258,7 +258,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  static log4cxx::LoggerPtr logger_;
   threads::Thread retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
   PTExchangeHandler* exchange_handler_;
@@ -276,6 +275,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * Used for limiting device consent request per PTS/PTU session
    */
   bool is_exchange_in_progress_;
+
+  /**
+   * @brief Holds device ids, which were unpaired
+   */
+  DeviceIds unpaired_device_ids_;
 
   inline PolicyManager* CreateManager();
 

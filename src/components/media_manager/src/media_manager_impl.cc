@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
@@ -52,10 +53,7 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MediaManagerImpl"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)

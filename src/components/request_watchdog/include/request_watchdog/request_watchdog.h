@@ -39,7 +39,6 @@
 #include <list>
 #include <map>
 #include "request_watchdog/watchdog.h"
-#include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/date_time.h"
@@ -212,7 +211,6 @@ class RequestWatchdog : public Watchdog {
     };
 
     static const int32_t                  DEFAULT_CYCLE_TIMEOUT = 250000;
-    static log4cxx::LoggerPtr             logger_;
     std::list<WatchdogSubscriber*>        subscribers_;
     sync_primitives::Lock                 subscribersLock_;
     std::map<RequestInfo*, TimevalStruct> requests_;

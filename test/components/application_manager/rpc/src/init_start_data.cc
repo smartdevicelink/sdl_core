@@ -41,8 +41,7 @@ const int CONNECT_KEY = 65537;
 void InitStartData() {
   printf("\n\n\n in initStartData\n\n\n");
 
-  log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("initStartData"));
+  CREATE_LOGGERPTR_LOCAL(logger_, "initStartData")
 
   LOG4CXX_INFO(logger_, " Application started!");
 

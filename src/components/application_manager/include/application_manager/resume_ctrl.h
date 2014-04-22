@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -166,10 +166,6 @@ class ResumeCtrl: public event_engine::EventObserver {
       uint32_t old_session_key; // session key is the same as app_id
       ApplicationSharedPtr app;
     };
-
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
     /**
      * @brief Time step to check resumption TIME_OUT
