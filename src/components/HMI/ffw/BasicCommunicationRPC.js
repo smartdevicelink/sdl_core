@@ -250,11 +250,15 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         });
                     } else {
 
+                        if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
+                            SDL.States.goToStates('info.apps');
+                        }
+
                         if (SDL.SDLModel.stateLimited == appID) {
                             SDL.SDLModel.stateLimited = null;
                         }
 
-                        SDL.SDLController.getApplicationModel(appID).turnOnSDL();
+                        SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
                     }
 
                     delete SDL.SDLModel.activateAppRequestsList[response.id];
