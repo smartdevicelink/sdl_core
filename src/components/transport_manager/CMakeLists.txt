@@ -73,6 +73,9 @@ if (BUILD_MME_SUPPORT)
     src/mme/iap_connection.cc
     src/mme/iap2_connection.cc
   )
+  if (MME_MQ)
+    add_definitions(-DMME_MQ)
+  endif(MME_MQ)
 endif(BUILD_MME_SUPPORT)
 
 add_library("TransportManager" ${SOURCES})
@@ -88,6 +91,9 @@ if (BUILD_MME_SUPPORT)
   target_link_libraries ("TransportManager" iap2client)
   target_link_libraries ("TransportManager" mme)
   target_link_libraries ("TransportManager" qdb)
+  if (MME_MQ)
+    target_link_libraries("TransportManager" mq)
+  endif(MME_MQ)
 endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)

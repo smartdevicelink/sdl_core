@@ -33,11 +33,19 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_SCANNER_H_
 
+#ifdef MME_MQ
+#include <mqueue.h>
+#else
 #include <mme/mme.h>
+#endif
 #include <qdb/qdb.h>
 
 #include "utils/threads/thread.h"
+#ifdef MME_MQ
+#include "utils/threads/thread_delegate.h"
+#else
 #include "utils/threads/pulse_thread_delegate.h"
+#endif
 #include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -77,17 +85,47 @@ private:
     bool& attached
   );
 
-  static const char* mme_name;
   static const char* qdb_name;
+#ifdef MME_MQ
+  static const char* mq_name;
+#else
+  static const char* mme_name;
+#endif
 
   TransportAdapterController* controller_;
   bool initialised_;
+#ifdef MME_MQ
+  mqd_t mqd_;
+#else
   mme_hdl_t* mme_hdl_;
+#endif
   qdb_hdl_t* qdb_hdl_;
   utils::SharedPtr<threads::Thread> notify_thread_;
   DeviceContainer devices_;
   sync_primitives::Lock devices_lock_;
+#ifdef MME_MQ
+  class NotifyThreadDelegate : public threads::ThreadDelegate {
+   public:
+    NotifyThreadDelegate(mqd_t mqd, MmeDeviceScanner* parent);
+    virtual void threadMain();
 
+   private:
+#pragma pack(push, 1)
+    typedef struct {
+      msid_t msid;
+      char name[256];
+      bool iAP2;
+    } MmeDeviceInfo;
+#pragma pack(pop)
+
+    static const int kBufferSize = 65536;
+
+    MmeDeviceScanner* parent_;
+    mqd_t mqd_;
+    bool run_;
+    char buffer_[kBufferSize];
+  };
+#else
   class NotifyThreadDelegate : public threads::PulseThreadDelegate {
    public:
     NotifyThreadDelegate(mme_hdl_t* mme_hdl, MmeDeviceScanner* parent);
@@ -100,6 +138,7 @@ private:
     MmeDeviceScanner* parent_;
     mme_hdl_t* mme_hdl_;
   };
+#endif
 };
 
 }  // namespace transport_adapter
