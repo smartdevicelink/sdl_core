@@ -564,48 +564,40 @@ static std::map<std::string, uint16_t> vehicle_data_args = create_get_vehicle_da
 }
 #endif HMI_DBUS_API
 
-void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string> &params) {
+void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string>& params) {
 #ifdef HMI_JSON_API
     smart_objects::SmartObject* request = new smart_objects::SmartObject;
-    if (!request) {
-      return;
-    }
-    smart_objects::SmartObject& object = *request;
 
-    object[strings::params][strings::message_type] = static_cast<int>(kRequest);
-    object[strings::params][strings::function_id] =
+    *request[strings::params][strings::message_type] = static_cast<int>(kRequest);
+    *request[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-    object[strings::params][strings::correlation_id] = correlation_id;
-    object[strings::params][strings::protocol_version] =
+    *request[strings::params][strings::correlation_id] = correlation_id;
+    *request[strings::params][strings::protocol_version] =
       commands::CommandImpl::protocol_version_;
-    object[strings::params][strings::protocol_type] =
+    *request[strings::params][strings::protocol_type] =
       commands::CommandImpl::hmi_protocol_type_;
-    object[strings::msg_params] = smart_objects::SmartObject(smart_objects::SmartType_Map);
+    *request[strings::msg_params] = smart_objects::SmartObject(smart_objects::SmartType_Map);
     for(std::vector<std::string>::const_iterator it = params.begin();
-        it < params.end(); it++) {
-        object[strings::msg_params][*it] = true;
+      it != params.end(); it++) {
+      object[strings::msg_params][*it] = true;
     }
     ApplicationManagerImpl::instance()->ManageHMICommand(request);
 #endif
 
 #ifdef HMI_DBUS_API
     for(std::vector<std::string>::const_iterator it = params.begin();
-        it < params.end(); it++) {
-        smart_objects::SmartObject* request = new smart_objects::SmartObject;
-        if (!request) {
-          return;
-        }
-        smart_objects::SmartObject& object = *request;
+      it != params.end(); it++) {
+      smart_objects::SmartObject* request = new smart_objects::SmartObject;
 
-        object[strings::params][strings::message_type] = static_cast<int>(kRequest);
-        object[strings::params][strings::correlation_id] = correlation_id;
-        object[strings::params][strings::protocol_version] =
-          commands::CommandImpl::protocol_version_;
-        object[strings::params][strings::protocol_type] =
-          commands::CommandImpl::hmi_protocol_type_;
-        object[strings::params][strings::function_id] =
-          static_cast<int>(vehicle_data_args[*it]);
-        ApplicationManagerImpl::instance()->ManageHMICommand(request);
+      *request[strings::params][strings::message_type] = static_cast<int>(kRequest);
+      *request[strings::params][strings::correlation_id] = correlation_id;
+      *request[strings::params][strings::protocol_version] =
+        commands::CommandImpl::protocol_version_;
+      *request[strings::params][strings::protocol_type] =
+        commands::CommandImpl::hmi_protocol_type_;
+      *request[strings::params][strings::function_id] =
+        static_cast<int>(vehicle_data_args[*it]);
+      ApplicationManagerImpl::instance()->ManageHMICommand(request);
     }
 #endif
 }

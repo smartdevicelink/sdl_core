@@ -48,6 +48,7 @@ class PolicyEventObserver :
       int32_t hmi_correlation_id = 0);
  private:
   PolicyManager* policy_manager_;
+  void ProcessOdometerEvent();
 };
 
 }  //  namespace policy
