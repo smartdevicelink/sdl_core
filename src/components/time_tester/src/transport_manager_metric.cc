@@ -14,7 +14,7 @@ std::string TransportManagerMectic::GetStyledString() {
     result[strings::logger] = "TransportManager";
     result[strings::begin] = static_cast<uint32_t>(message_metric->begin);
     result[strings::end] = static_cast<uint32_t>(message_metric->end);
-    result[strings::data_size] = message_metric->data_size;
+    result[strings::data_size] = static_cast<uint32_t>(message_metric->data_size);
     return result.toStyledString();
 }
 
