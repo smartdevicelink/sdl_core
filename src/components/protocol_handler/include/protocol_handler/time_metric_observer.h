@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,53 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_manager_default.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#include "protocol_handler/raw_message.h"
 
-#ifdef BLUETOOTH_SUPPORT
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#endif
+#include <stdint.h>
+#include "time.h"
 
-#ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
-#endif
+namespace protocol_handler {
 
-#include "config_profile/profile.h"
+class PHMetricObserver {
+  public:
+  struct MessageMetric {
+      RawMessagePtr raw_msg;
+      uint32_t message_id;
+      uint8_t connection_key;
+      time_t begin;
+      time_t end;
+  };
+  /**
+   */
+  virtual void StartMessageProcess(uint32_t message_id) = 0;
 
-namespace transport_manager {
+  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
+  virtual ~PHMetricObserver(){}
+};
 
-int TransportManagerDefault::Init() {
-  if (E_SUCCESS != TransportManagerImpl::Init()) {
-    return E_TM_IS_NOT_INITIALIZED;
-  }
-  transport_adapter::TransportAdapterImpl* ta;
-#ifdef BLUETOOTH_SUPPORT
-  ta = new transport_adapter::BluetoothTransportAdapter;
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#ifdef USB_SUPPORT
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-
-  return E_SUCCESS;
 }
-
-TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
-
-}  //  namespace transport_manager
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_

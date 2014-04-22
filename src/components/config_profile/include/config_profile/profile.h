@@ -102,6 +102,11 @@ class Profile : public utils::Singleton<Profile> {
     const uint16_t& audio_streaming_port() const;
 
     /**
+      * @brief Returns port for time reports
+      */
+    const uint16_t& time_testing_port() const;
+
+    /**
      * @brief Returns policies file name
      */
     const std::string& policies_file_name() const;
@@ -383,6 +388,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        server_port_;
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
+    uint16_t                        time_testing_port_;
     std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;

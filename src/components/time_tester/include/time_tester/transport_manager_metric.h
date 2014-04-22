@@ -1,4 +1,5 @@
-/*
+/**
+ *
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,53 +31,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_manager_default.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
 
-#ifdef BLUETOOTH_SUPPORT
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#endif
+#include <string>
+#include "metric.h"
+#include "transport_manager_observer.h"
 
-#ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
-#endif
+namespace time_tester {
 
-#include "config_profile/profile.h"
+class TransportManagerObserver;
 
-namespace transport_manager {
+class TransportManagerMectic: public Metric {
 
-int TransportManagerDefault::Init() {
-  if (E_SUCCESS != TransportManagerImpl::Init()) {
-    return E_TM_IS_NOT_INITIALIZED;
-  }
-  transport_adapter::TransportAdapterImpl* ta;
-#ifdef BLUETOOTH_SUPPORT
-  ta = new transport_adapter::BluetoothTransportAdapter;
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#ifdef USB_SUPPORT
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
+  public:
+    utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
+    std::string GetStyledString();
+};
 
-  return E_SUCCESS;
 }
-
-TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
-
-}  //  namespace transport_manager
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_

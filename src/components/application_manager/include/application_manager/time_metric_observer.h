@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,53 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_manager_default.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
 
-#ifdef BLUETOOTH_SUPPORT
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#endif
 
-#ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
-#endif
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
+#include "json/json.h"
+#include "utils/shared_ptr.h"
 
-#include "config_profile/profile.h"
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace application_manager {
 
-namespace transport_manager {
+class AMMetricObserver {
+  public:
+    struct MessageMetric {
+        time_t begin;
+        time_t end;
+        utils::SharedPtr<smart_objects::SmartObject> message;
+    };
 
-int TransportManagerDefault::Init() {
-  if (E_SUCCESS != TransportManagerImpl::Init()) {
-    return E_TM_IS_NOT_INITIALIZED;
-  }
-  transport_adapter::TransportAdapterImpl* ta;
-#ifdef BLUETOOTH_SUPPORT
-  ta = new transport_adapter::BluetoothTransportAdapter;
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
-  uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#ifdef USB_SUPPORT
-  ta = new transport_adapter::TcpTransportAdapter(port);
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-  AddTransportAdapter(ta);
-#endif
+    virtual void OnMessage(utils::SharedPtr<MessageMetric> metric) = 0;
+    virtual ~AMMetricObserver(){}
+};
 
-  return E_SUCCESS;
 }
-
-TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
-
-}  //  namespace transport_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
