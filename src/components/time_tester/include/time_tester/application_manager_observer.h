@@ -44,7 +44,7 @@ class TimeManager;
 
 class ApplicationManagerObserver: public application_manager::AMMetricObserver {
    public:
-    ApplicationManagerObserver(TimeManager* time_manager);
+    explicit ApplicationManagerObserver(TimeManager* time_manager);
    virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
 
   private:
