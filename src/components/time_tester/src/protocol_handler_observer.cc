@@ -15,7 +15,7 @@ void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id) {
     return;
   }
   if (time_starts.find(message_id) != time_starts.end()) {
-    LOG4CXX_INFO(TimeManager::logger_, "Message ID already wait for stop processing" << message_id);
+    LOG4CXX_INFO(logger_, "Message ID already wait for stop processing" << message_id);
     return;
   }
 
@@ -26,7 +26,7 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
   uint32_t message_id = m->message_id;
   std::map<uint32_t, time_t>::const_iterator it = time_starts.find(message_id);
   if (it == time_starts.end()) {
-    LOG4CXX_ERROR(TimeManager::logger_, "Cant find start time for message" << message_id);
+    LOG4CXX_ERROR(logger_, "Cant find start time for message" << message_id);
     return;
   }
   m->begin= time_starts[message_id];

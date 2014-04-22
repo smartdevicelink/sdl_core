@@ -55,13 +55,12 @@
 
 
 namespace time_tester {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
+
 class TimeManager {
 
   public:
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
     TimeManager();
     ~TimeManager();
     void Init(protocol_handler::ProtocolHandlerImpl* ph);

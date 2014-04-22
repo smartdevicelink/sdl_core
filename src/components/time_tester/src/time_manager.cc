@@ -39,6 +39,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
@@ -46,12 +47,6 @@
 
 
 namespace time_tester {
-
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr TimeManager::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("TimeManager"));
-#endif // ENABLE_LOG
-
 
 TimeManager::TimeManager():socket_fd_(0),
   messages_(),
