@@ -44,7 +44,6 @@ class PTExchangeHandlerImpl : public PTExchangeHandler {
   virtual bool StartExchange();
  protected:
   PolicyHandler* policy_handler_;
-  static log4cxx::LoggerPtr logger_;
 };
 }  //  namespace policy
 

@@ -34,6 +34,7 @@
 
 #include <ostream>
 
+#include "cppgen/naming_convention.h"
 #include "cppgen/generator_preferences.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
@@ -52,10 +53,23 @@ StructTypeIsValidMethod::~StructTypeIsValidMethod() {
 }
 
 void StructTypeIsValidMethod::DefineBody(std::ostream* os) const {
+  if (strct_->frankenstruct()) {
+    strmfmt(*os, "if (!Frankenbase::{0}()) return false;\n",
+            name_);
+  }
   const Struct::FieldsList& fields = strct_->fields();
+  bool struct_can_be_valid_empty = true;
   for (size_t i = 0; i != fields.size(); ++i) {
-    const Struct::Field& field = fields[i];
-    strmfmt(*os, "if (!{0}.is_valid()) return false;\n", field.name());
+    if (fields[i].is_mandatory()) {
+      struct_can_be_valid_empty = false;
+    }
+  }
+  if (struct_can_be_valid_empty) {
+    *os << "if (struct_empty()) return initialization_state__ == kInitialized;\n";
+  }
+  for (size_t i = 0; i != fields.size(); ++i) {
+    strmfmt(*os, "if (!{0}.is_valid()) return false;\n",
+            AvoidKeywords(fields[i].name()));
   }
   *os << "return "<< func_names::kAdditionalValidation << "();\n";
 }

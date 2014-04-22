@@ -25,7 +25,8 @@ include_directories (
   ../../../../src/components/media_manager/include
   ../../../../src/components/formatters/include
   ../../../../src/components/config_profile/include
-  ../../../../src/components/policies/include
+  ../../../../src/components/policy/src/policy/include
+  ../../../../src/components/policy/src/policy/usage_statistics/include
   ${GSTREAMER_gst_INCLUDE_DIR}
   ${GLIB_glib_2_INCLUDE_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/
@@ -65,6 +66,7 @@ set(LIBRARIES
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/XmlTests/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/XmlTests/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SyncProxyTester/ DESTINATION ${CMAKE_BINARY_DIR}/test/SyncProxyTester/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SyncProxyTester/icon.png DESTINATION ${CMAKE_BINARY_DIR}/test/AppManagerImplTest/)
 
 add_library("test_App_Manager"
 						"./src/admin_app_test.cc"

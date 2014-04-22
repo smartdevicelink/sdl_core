@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ *
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +31,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
 
-#include "application_manager/commands/hmi/response_from_hmi.h"
+#include <string>
+#include "metric.h"
+#include "transport_manager_observer.h"
 
-namespace application_manager {
+namespace time_tester {
 
-namespace commands {
+class TransportManagerObserver;
 
-/**
- * @brief UpdateAppListResponse command class
- **/
-class UpdateAppListResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief UpdateAppListResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UpdateAppListResponse(const MessageSharedPtr& message);
+class TransportManagerMectic: public Metric {
 
-  /**
-   * @brief UpdateAppListResponse class destructor
-   **/
-  virtual ~UpdateAppListResponse();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UpdateAppListResponse);
+  public:
+    utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
+    std::string GetStyledString();
 };
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_RESPONSE_H_
+}
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_

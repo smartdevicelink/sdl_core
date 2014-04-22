@@ -116,6 +116,7 @@ namespace NsMessageBroker
    void CMessageBrokerController::sendJsonMessage(Json::Value& message)
    {
       DBG_MSG(("CMessageBrokerController::sendJsonMessage()\n"));
+      sync_primitives::AutoLock auto_lock(queue_lock_);
       std::string mes = m_writer.write(message);
       if (!isNotification(message) && !isResponse(message))
       {// not notification, not a response, store id and method name to recognize an answer
@@ -129,6 +130,7 @@ namespace NsMessageBroker
    std::string CMessageBrokerController::findMethodById(std::string id)
    {
       DBG_MSG(("CMessageBrokerController::findMethodById()\n"));
+      sync_primitives::AutoLock auto_lock(queue_lock_);
       std::string res = "";
       std::map <std::string, std::string>::iterator it;
       it = mWaitResponseQueue.find(id);

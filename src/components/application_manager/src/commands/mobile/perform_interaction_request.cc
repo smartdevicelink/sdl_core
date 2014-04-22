@@ -164,11 +164,21 @@ void PerformInteractionRequest::Run() {
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
       LOG4CXX_INFO(logger_, "Interaction Mode: MANUAL_ONLY");
+
+      if (!CheckChoiceSetVRSynonyms(app)) {
+        return;
+      }
+
       if (!CheckChoiceSetMenuNames(app)) {
         return;
       }
 
+      if (!CheckVrHelpItemPositions(app)) {
+        return;
+      }
+
       app->set_perform_interaction_active(correlation_id);
+      SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
     }
@@ -208,7 +218,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       default_timeout());
       break;
     }
-
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
       ProcessPerformInteractionResponse(event.smart_object());
@@ -277,7 +286,7 @@ void PerformInteractionRequest::ProcessVRResponse(
   vr_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
       message[strings::params][hmi_response::code].asInt());
   if (mobile_apis::Result::ABORTED == vr_perform_interaction_code_) {
-    LOG4CXX_INFO(logger_, "VR response abborted");
+    LOG4CXX_INFO(logger_, "VR response aborted");
     if (mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
       LOG4CXX_INFO(logger_, "Abort send Close Popup");
       smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
@@ -402,8 +411,6 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   SendResponse(result, result_code, return_info, &(msg_params));
 }
 
-
-
 void PerformInteractionRequest::SendUIPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {
   smart_objects::SmartObject& choice_set_id_list =
@@ -500,17 +507,19 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
-  msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
-  int32_t grammar_id_index = 0;
-  for (uint32_t i = 0; i < choice_list.length(); ++i) {
-    smart_objects::SmartObject* choice_set =
-        app->FindChoiceSet(choice_list[i].asInt());
-    if (!choice_set) {
-      LOG4CXX_WARN(logger_, "Couldn't found choiset");
-      continue;
+  if (mobile_apis::InteractionMode::MANUAL_ONLY != interaction_mode_) {
+    msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
+    int32_t grammar_id_index = 0;
+    for (uint32_t i = 0; i < choice_list.length(); ++i) {
+      smart_objects::SmartObject* choice_set =
+          app->FindChoiceSet(choice_list[i].asInt());
+      if (!choice_set) {
+        LOG4CXX_WARN(logger_, "Couldn't found choiset");
+        continue;
+      }
+      msg_params[strings::grammar_id][grammar_id_index++]=
+          (*choice_set)[strings::grammar_id].asUInt();
     }
-    uint32_t grammar_id = (*choice_set)[strings::grammar_id].asUInt();
-    msg_params[strings::grammar_id][grammar_id_index++]= (*choice_set)[strings::grammar_id];
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {

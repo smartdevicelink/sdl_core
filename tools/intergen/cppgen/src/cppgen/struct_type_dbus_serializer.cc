@@ -31,6 +31,7 @@
 
 #include "cppgen/struct_type_dbus_serializer.h"
 
+#include "cppgen/naming_convention.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
@@ -61,13 +62,19 @@ void StructTypeDbusMessageSignatureMethod::DefineBody(std::ostream* os) const {
     }
     for (Struct::FieldsList::const_iterator i = fields.begin(),
          end = fields.end(); i != end; ++i) {
-      RpcTypeNameGenerator::Availability availability =
-          i->default_value() || i->is_mandatory() ?
-              RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
+      // Field is considered optional if it has mandatory=false attribute and
+      // if it does NOT have default values. Fields that have default values are
+      // always available no mater if they present in input or not
+      bool field_is_optional = false;
+      if (!i->is_mandatory()) {
+        if (i->default_value() == NULL) {
+          field_is_optional = true;
+        }
+      }
       std::string field_type = RpcTypeNameGenerator(&strct_->interface(),
                                                     preferences_,
                                                     i->type(),
-                                                    availability).result();
+                                                    field_is_optional).result();
       strmfmt(*os, "rpc::DbusSignature< {0} >({1});\n",
               field_type, parameters_[0].name);
 
@@ -93,7 +100,8 @@ StructTypeFromDbusReaderConstructor::StructTypeFromDbusReaderConstructor(
     const Struct::FieldsList& fields = strct->fields();
     for (Struct::FieldsList::const_iterator i = fields.begin(), end = fields.end();
          i != end; ++i) {
-      Add(Initializer(i->name(), "reader__"));
+      Add(Initializer(AvoidKeywords(i->name()),
+                      "reader__"));
     }
   }
 }
@@ -110,13 +118,19 @@ void StructTypeFromDbusReaderConstructor::DefineBody(std::ostream* os) const {
     *os << "dbus::MessageReader subreader__ = reader__->TakeStructReader();\n";
     for (Struct::FieldsList::const_iterator i = fields.begin(), end = fields.end();
          i != end; ++i) {
-      RpcTypeNameGenerator::Availability availability =
-          i->default_value() || i->is_mandatory() ?
-              RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
+      // Field is considered optional if it has mandatory=false attribute and
+      // if it does NOT have default values. Fields that have default values are
+      // always available no mater if they present in input or not
+      bool field_is_optional = false;
+      if (!i->is_mandatory()) {
+        if (i->default_value() == NULL) {
+          field_is_optional = true;
+        }
+      }
       std::string field_type = RpcTypeNameGenerator(&strct_->interface(),
                                                     preferences_,
                                                     i->type(),
-                                                    availability).result();
+                                                    field_is_optional).result();
       strmfmt(*os, "{0} = {1}(&subreader__);\n", i->name(), field_type);
     }
   }

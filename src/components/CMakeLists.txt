@@ -73,6 +73,10 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
+if (TIME_TESTER)
+    add_subdirectory(./time_tester)
+endif()
+
 
 if (${HMI_DBUS_API})
 # --- DBus

@@ -97,8 +97,6 @@ SDL.ScrollableMessage = SDL.SDLAbstractView.create({
             this.timer = setTimeout(function () {
                 self.deactivate();
             }, params.timeout);
-
-            SDL.SDLController.onSystemContextChange();
         }
     },
 

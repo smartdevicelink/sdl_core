@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_show_notification.h"
+#ifndef RPC_BASE_GTEST_SUPPORT_H_
+#define RPC_BASE_GTEST_SUPPORT_H_
 
-namespace application_manager {
+#include <gtest/gtest.h>
 
-namespace commands {
+#include "rpc_base/validation_report.h"
 
-OnShowNotification::OnShowNotification(const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
+// A predicate-formatter for asserting that intergen generated
+// object is valid
+template<typename T>
+::testing::AssertionResult AssertRpcObjValid(const char* obj_expr,
+                                               const T& obj) {
+  if (obj.is_valid())
+    return ::testing::AssertionSuccess();
+
+  rpc::ValidationReport report(obj_expr);
+  obj.ReportErrors(&report);
+
+  return ::testing::AssertionFailure()
+      << obj_expr << " failed validation. Violations are:\n"
+      << rpc::PrettyFormat(report);
 }
 
-OnShowNotification::~OnShowNotification() {
-}
+#define ASSERT_RPCTYPE_VALID(object) \
+  ASSERT_PRED_FORMAT1(AssertRpcObjValid, object)
 
-void OnShowNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnShowNotification::Run");
+#define EXPECT_RPCTYPE_VALID(object) \
+  EXPECT_PRED_FORMAT1(AssertRpcObjValid, object)
 
-  SendNotification();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
-
+#endif /* RPC_BASE_GTEST_SUPPORT_H_ */

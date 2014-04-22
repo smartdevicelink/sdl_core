@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/on_audio_pass_thru_notification.h"
 
 namespace application_manager {
-
 namespace commands {
 
 OnAudioPassThruNotification::OnAudioPassThruNotification(
@@ -50,7 +49,5 @@ void OnAudioPassThruNotification::Run() {
 
   SendNotification();
 }
-
 }  // namespace commands
-
 }  // namespace application_manager

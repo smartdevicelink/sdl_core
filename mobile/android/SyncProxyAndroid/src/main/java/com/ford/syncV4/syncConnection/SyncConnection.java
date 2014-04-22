@@ -194,9 +194,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                                 boolean sendFinishMessages) {
         if (rpcSessionID != 0) {
             synchronized (PROTOCOL_REFERENCE_LOCK) {
+                if (!getIsConnected()) {
+                    return;
+                }
                 if (_protocol != null) {
                     // If transport is still connected, sent EndProtocolSessionMessage
-                    if (sendFinishMessages && (_transport != null) && _transport.getIsConnected()) {
+                    if (sendFinishMessages && getIsConnected()) {
                         _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
                     }
                 }
@@ -205,11 +208,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             waitForRpcEndServiceACK();
         }
 
-        synchronized (PROTOCOL_REFERENCE_LOCK) {
+        /*synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!keepConnection) {
                 _protocol = null;
             }
-        }
+        }*/
+
         Logger.d("Close connection:" + keepConnection);
         if (!keepConnection) {
             stopHeartbeatMonitor();
@@ -253,12 +257,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void closeMobileNaviService(byte mobileNavSessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                // If transport is still connected, sent EndProtocolSessionMessage
-                if (_transport != null && _transport.getIsConnected()) {
-                    _protocol.EndProtocolService(ServiceType.Mobile_Nav, mobileNavSessionId);
-                }
-            } // end-if
+            if (!getIsConnected()) {
+                return;
+            }
+            if (_protocol == null) {
+                return;
+            }
+            _protocol.EndProtocolService(ServiceType.Mobile_Nav, mobileNavSessionId);
         }
         waitForVideoEndServiceACK();
     }
@@ -275,12 +280,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void closeAudioService(byte sessionID) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                // If transport is still connected, sent EndProtocolSessionMessage
-                if (_transport != null && _transport.getIsConnected()) {
-                    _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
-                }
-            } // end-if
+            if (!getIsConnected()) {
+                return;
+            }
+            if (_protocol == null) {
+                return;
+            }
+            _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
         }
         waitForAudioEndServiceACK();
     }
@@ -353,24 +359,39 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void sendMessage(ProtocolMessage msg) {
-        if (msg != null && _protocol != null) {
-            _protocol.SendMessage(msg);
+        if (!getIsConnected()) {
+            return;
         }
+        if (_protocol == null) {
+            return;
+        }
+        if (msg == null) {
+            return;
+        }
+        _protocol.SendMessage(msg);
     }
 
     public void startMobileNavService(Session session) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            if (!getIsConnected()) {
+                return;
             }
+            if (_protocol == null) {
+                return;
+            }
+            _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
         }
     }
 
     public void startAudioService(Session session) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+            if (!getIsConnected()) {
+                return;
             }
+            if (_protocol == null) {
+                return;
+            }
+            _protocol.StartProtocolService(ServiceType.Audio_Service, session);
         }
     }
 
@@ -378,16 +399,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                try {
-                    _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
-                } catch (OutOfMemoryError e) {
-                    final String info = " Out of memory while handling incoming message";
-                    if (mConnectionListener != null) {
-                        mConnectionListener.onProtocolError(info, e);
-                    } else {
-                        Logger.e(CLASS_NAME + info, e);
-                    }
+            if (!getIsConnected()) {
+                return;
+            }
+            if (_protocol == null) {
+                return;
+            }
+            try {
+                _protocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
+            } catch (OutOfMemoryError e) {
+                final String info = " Out of memory while handling incoming message";
+                if (mConnectionListener != null) {
+                    mConnectionListener.onProtocolError(info, e);
+                } else {
+                    Logger.e(CLASS_NAME + info, e);
                 }
             }
         }
@@ -411,10 +436,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private void startProtocolSession() {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                Logger.d(CLASS_NAME + " StartProtocolSession, id:" + mSessionId);
-                _protocol.StartProtocolSession(mSessionId);
+            if (!getIsConnected()) {
+                return;
             }
+            if (_protocol == null) {
+                return;
+            }
+            Logger.d(CLASS_NAME + " StartProtocolSession, id:" + mSessionId);
+            _protocol.StartProtocolSession(mSessionId);
         }
     }
 
@@ -573,9 +602,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendH264(ProtocolMessage pm) {
-        if (pm != null) {
-            sendMessage(pm);
-        }
+        sendMessage(pm);
     }
 
     @Override

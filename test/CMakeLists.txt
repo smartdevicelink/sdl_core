@@ -1,6 +1,9 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
+
+if (BUILD_TESTS_WITH_HMI)
 find_package(LibXML2 REQUIRED)
+endif(BUILD_TESTS_WITH_HMI)
 
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
@@ -12,7 +15,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
 
 
-include_directories (
+set (INCLUDE_DIR
   ../src/thirdPartyLibs/gmock-1.7.0/include
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/gmock-1.7.0/gtest/include
@@ -23,6 +26,8 @@ include_directories (
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
+  ../src/components/policy/src/policy/include
+  ../src/components/policy/src/policy/usage_statistics/include
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
@@ -45,14 +50,13 @@ include_directories (
   ../test/components/application_manager/rpc/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_BINARY_DIR}
-  ${LibXML2_INCLUDE_DIR}
 #  /usr/lib/i386-linux-gnu/glib-2.0/include
 #  /usr/lib/x86_64-linux-gnu/glib-2.0/include/
 #  ${GSTREAMER_gst_INCLUDE_DIR}
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
- set(LIBRARIES
+set(LIBRARIES
     MediaManager
     ApplicationManager
     gtest
@@ -85,11 +89,6 @@ include_directories (
     MessageBrokerClient
     MessageBrokerServer
     encryption
-    bluetooth
-    pthread
-    avahi-client
-    avahi-common
-    ${LibXML2_LIBRARIES} -lxml2
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
@@ -109,8 +108,15 @@ endif()
 add_executable("test_suit" "./test_suit.cc")
 
 if (BUILD_TESTS_WITH_HMI)
-  target_link_libraries("test_suit" test_App_Manager ${LIBRARIES})
+include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
+target_link_libraries("test_suit" 
+  test_App_Manager 
+  ${LIBRARIES} 
+  ${LibXML2_LIBRARIES} -lxml2
+  avahi-client
+  )
 else (BUILD_TESTS_WITH_HMI)
+include_directories(${INCLUDE_DIR})
 target_link_libraries("test_suit" ${LIBRARIES})
 endif (BUILD_TESTS_WITH_HMI)
 

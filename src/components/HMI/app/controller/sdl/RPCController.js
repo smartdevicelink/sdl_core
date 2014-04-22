@@ -59,9 +59,10 @@ SDL.RPCController = Em.Object
             var error = false;
             if (array instanceof Array) {
                 for ( var i = 0; i < array.length; i++) {
-                    if (array[i].image && array[i].image.imageType !== "DYNAMIC") {
+                    if (array[i].image && 
+                        ((array[i].image.imageType !== "DYNAMIC") && 
+                         (array[i].image.imageType !== "STATIC"))) {
 
-                        error = true;
                     }
                 }
             }
@@ -76,6 +77,50 @@ SDL.RPCController = Em.Object
             .create( {
 
                 resultStruct: {},
+
+		/**
+                 * Validate method for request UpdateDeviceList
+                 * 
+                 * @param {Object}
+                 *            params
+                 */
+                UpdateDeviceList: function(params) {
+
+                    if (params == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'params' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.deviceList == null) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Parameter 'deviceList' does not exists!"
+                        };
+
+                        return this.resultStruct;
+                    }
+                    if (params.deviceList.length < 0) {
+
+                        this.resultStruct = {
+                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
+                            "resultMessage": "Wrong type of parameter 'deviceList'!"
+                        };
+
+                        return this.resultStruct;
+                    }
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
 
                 /**
                  * Validate method for request PolicyUpdate
@@ -294,50 +339,6 @@ SDL.RPCController = Em.Object
                     return this.resultStruct;
                 },
 
-
-                /**
-                 * Validate method for request UpdateDeviceList
-                 * 
-                 * @param {Object}
-                 *            params
-                 */
-                UpdateDeviceList: function(params) {
-
-                    if (params == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.deviceList == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'deviceList' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.deviceList.length < 0) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'deviceList'!"
-                        };
-
-                        return this.resultStruct;
-                    }
-
-                    this.resultStruct = {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-                    };
-
-                    return this.resultStruct;
-                },
-
                 /**
                  * Validate method for request AllowDeviceToConnect
                  * 
@@ -379,49 +380,6 @@ SDL.RPCController = Em.Object
                  *            params
                  */
                 GetSystemInfo: function(params) {
-
-                    this.resultStruct = {
-                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
-                    };
-
-                    return this.resultStruct;
-                },
-
-                /**
-                 * Validate method for request UpdateAppList
-                 * 
-                 * @param {Object}
-                 *            params
-                 */
-                UpdateAppList: function(params) {
-
-                    if (params == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.applications == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'applications' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.applications.length < 1) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'applications'!"
-                        };
-
-                        return this.resultStruct;
-                    }
 
                     this.resultStruct = {
                         "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
@@ -1077,7 +1035,7 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("turnIcon" in params
-                        && (params.turnIcon.imageType !== "DYNAMIC" && params.turnIcon.imageType !== "STATIC")) {
+                        && ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1086,7 +1044,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("nextTurnIcon" in params
-                        && params.nextTurnIcon.imageType !== "DYNAMIC") {
+                        && ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1170,7 +1128,8 @@ SDL.RPCController = Em.Object
 
                         for ( var i = 0; i < params.turnList.length; i++) {
                             if (params.turnList[i].image
-                                && params.turnList[i].image.imageType !== "DYNAMIC") {
+                                && ((params.turnIcon.imageType !== "DYNAMIC")
+                                &&  (params.turnIcon.imageType !== "STATIC"))) {
 
                                 this.resultStruct = {
                                     "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
@@ -1338,7 +1297,8 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("icon" in params && params.icon.imageType !== "DYNAMIC") {
+                    if ("icon" in params &&
+                        ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -1413,7 +1373,7 @@ SDL.RPCController = Em.Object
                         }
                     }
                     if ("graphic" in params
-                        && params.graphic.imageType !== "DYNAMIC") {
+                        && ((params.graphic.imageType !== "DYNAMIC") && (params.graphic.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -2091,7 +2051,7 @@ SDL.RPCController = Em.Object
                         return this.resultStruct;
                     }
                     if ("syncFileName" in params
-                        && params.syncFileName.imageType !== "DYNAMIC") {
+                        && ((params.syncFileName.imageType !== "DYNAMIC") && (params.syncFileName.imageType !== "STATIC"))) {
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Unsupported image type!"
@@ -2807,24 +2767,6 @@ SDL.RPCController = Em.Object
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
                             "resultMessage": "Parameter 'params' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (params.grammarID == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'grammarID' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.grammarID.length < 1) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Wrong type of parameter 'grammarID'!"
                         };
 
                         return this.resultStruct;

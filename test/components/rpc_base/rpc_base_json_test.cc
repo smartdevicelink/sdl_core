@@ -256,10 +256,9 @@ TEST(ValidatedTypesJson, ArrayFromJsonTest) {
   ASSERT_EQ(readback.size(), array_value.size());
 }
 
-TEST(ValidatedTypesJson, ArrayNullTest) {
+TEST(ValidatedTypesJson, MandatoryArrayNullTest) {
   Array<String<1, 32>, 2, 5> arr(&Value::null);
   ASSERT_TRUE(arr.is_initialized());
-  ASSERT_TRUE(arr.is_null());
   ASSERT_FALSE(arr.is_valid());
 }
 
@@ -267,22 +266,19 @@ TEST(ValidatedTypesJson, ArrayAbsentValueTest) {
   Value* novalue = NULL;
   Array<String<1, 32>, 2, 5> arr(novalue);
   ASSERT_FALSE(arr.is_initialized());
-  ASSERT_FALSE(arr.is_null());
   ASSERT_FALSE(arr.is_valid());
 }
 
-TEST(ValidatedTypesJson, MapNullTest) {
+TEST(ValidatedTypesJson, MandatoryMapNullTest) {
   Map<String<1, 32>, 2, 5> map(&Value::null);
   ASSERT_TRUE(map.is_initialized());
-  ASSERT_TRUE(map.is_null());
   ASSERT_FALSE(map.is_valid());
 }
 
-TEST(ValidatedTypesJson, MapAbsentValueTest) {
+TEST(ValidatedTypesJson, OptionalMapAbsentValueTest) {
   Value* novalue = NULL;
-  Map<String<1, 32>, 0, 5> map(novalue);
+  Optional< Map<String<1, 32>, 0, 5> > map(novalue);
   ASSERT_FALSE(map.is_initialized());
-  ASSERT_FALSE(map.is_null());
   ASSERT_TRUE(map.is_valid());
 }
 
@@ -294,6 +290,22 @@ TEST(ValidatedTypesJson, ArrayFromInvalidJsonTest) {
   ASSERT_TRUE(int_array.is_initialized());
   ASSERT_FALSE(int_array.is_valid());
   ASSERT_EQ(int_array.size(), array_value.size());
+}
+
+TEST(ValidatedTypesJson, ArrayFromNonArrayJsonTest) {
+  Value array_value = "Hello";
+  Array<Integer<int8_t, 0, 32>, 0, 4> int_array(&array_value);
+  ASSERT_TRUE(int_array.is_initialized());
+  ASSERT_FALSE(int_array.is_valid());
+  ASSERT_TRUE(int_array.empty());
+}
+
+TEST(ValidatedTypesJson, MapFromNonArrayJsonTest) {
+  Value array_value = "Hello";
+  Map<Integer<int8_t, 0, 32>, 0, 4> int_map(&array_value);
+  ASSERT_TRUE(int_map.is_initialized());
+  ASSERT_FALSE(int_map.is_valid());
+  ASSERT_TRUE(int_map.empty());
 }
 
 TEST(ValidatedTypesJson, OptionalBoolFromJsonTest) {

@@ -44,8 +44,12 @@
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 UsbConnectionFactory::UsbConnectionFactory(
     TransportAdapterController* controller)

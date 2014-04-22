@@ -82,10 +82,10 @@ void OnAppPermissionConsentNotification::Run() {
     permissions.group_id = (*it)["id"].asInt();
     permissions.group_alias = (*it)["name"].asString();
     if ((*it).keyExists("allowed")) {
-      permissions.state = (*it)["allowed"].asBool() ? policy::kAllowed :
-                                                      policy::kDisallowed;
+      permissions.state = (*it)["allowed"].asBool() ? policy::kGroupAllowed :
+                                                      policy::kGroupDisallowed;
     } else {
-      permissions.state = policy::kUndefined;
+      permissions.state = policy::kGroupUndefined;
     }
 
       permission_consent.group_permissions.push_back(permissions);

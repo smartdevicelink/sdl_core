@@ -7,57 +7,62 @@ import com.ford.syncV4.proxy.constants.ProtocolConstants;
 * Created by Andrew Batutin on 8/21/13.
 */
 public class ProtocolMessageConverter {
-    private ProtocolMessage _protocolMsg;
-    private byte[] _data;
-    private ServiceType _serviceType;
+
+    private ProtocolMessage mProtocolMsg;
+    private byte[] mData;
+    private ServiceType mServiceType;
     private int mProtocolVersion = ProtocolConstants.PROTOCOL_VERSION_ONE;
 
     public ProtocolMessageConverter(ProtocolMessage protocolMsg, int version) {
-        this._protocolMsg = protocolMsg;
+        this.mProtocolMsg = protocolMsg;
         this.mProtocolVersion = version;
     }
 
     public byte[] getData() {
-        return _data;
+        return mData;
     }
 
     public ServiceType getSessionType() {
-        return _serviceType;
+        return mServiceType;
     }
 
     public ProtocolMessageConverter generate() {
-        _data = null;
-        _serviceType = _protocolMsg.getServiceType();
+        mData = null;
+        mServiceType = mProtocolMsg.getServiceType();
         // TODO - get rid of this ugly if statements. FAST!
-        if ((_serviceType == ServiceType.Mobile_Nav ||
-                _serviceType == ServiceType.Audio_Service ) &&
-                mProtocolVersion == ProtocolConstants.PROTOCOL_VERSION_THREE) {
-            _data = _protocolMsg.getData();
+        if ((mServiceType == ServiceType.Mobile_Nav ||
+                mServiceType == ServiceType.Audio_Service ) &&
+                mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            mData = mProtocolMsg.getData();
             return this;
         }
         if (mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            if (_protocolMsg.getBulkData() != null) {
-                _data = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize() +
-                        _protocolMsg.getBulkData().length];
-                _serviceType = ServiceType.Bulk_Data;
+            if (mProtocolMsg.getBulkData() != null) {
+                mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
+                        mProtocolMsg.getJsonSize() +
+                        mProtocolMsg.getBulkData().length];
+                mServiceType = ServiceType.Bulk_Data;
             } else {
-                _data = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize()];
+                mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
+                        mProtocolMsg.getJsonSize()];
             }
             BinaryFrameHeader binFrameHeader =
-                    ProtocolFrameHeaderFactory.createBinaryFrameHeader(_protocolMsg.getRPCType(),
-                            _protocolMsg.getFunctionID(), _protocolMsg.getCorrID(),
-                            _protocolMsg.getJsonSize());
-            System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, _data, 0,
+                    ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
+                            mProtocolMsg.getFunctionID(), mProtocolMsg.getCorrID(),
+                            mProtocolMsg.getJsonSize());
+            System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
                     ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
-            System.arraycopy(_protocolMsg.getData(), 0, _data, ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
-                    _protocolMsg.getJsonSize());
-            if (_protocolMsg.getBulkData() != null) {
-                System.arraycopy(_protocolMsg.getBulkData(), 0, _data,
-                        ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 + _protocolMsg.getJsonSize(),
-                        _protocolMsg.getBulkData().length);
+            System.arraycopy(mProtocolMsg.getData(), 0, mData,
+                    ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2,
+                    mProtocolMsg.getJsonSize());
+            if (mProtocolMsg.getBulkData() != null) {
+                System.arraycopy(mProtocolMsg.getBulkData(), 0, mData,
+                        ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
+                                mProtocolMsg.getJsonSize(),
+                        mProtocolMsg.getBulkData().length);
             }
         } else {
-            _data = _protocolMsg.getData();
+            mData = mProtocolMsg.getData();
         }
         return this;
     }

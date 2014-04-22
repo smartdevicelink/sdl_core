@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_TEST_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_TEST_H_
+#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_APPLICATION_MANAGER_IMPL_TEST_H_
+#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_APPLICATION_MANAGER_IMPL_TEST_H_
 
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <list>
 #include <vector>
@@ -46,7 +46,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
-#include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
 #include "protocol_handler/protocol_observer.h"
@@ -82,6 +81,8 @@
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
 #include "application_manager/mobile_message_handler.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "protocol_handler/protocol_handler_impl.h"
 
 namespace application_manager {
 class ApplicationManagerImpl;
@@ -93,176 +94,112 @@ namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace test {
 
-  class ApplicationManagerImplTest {
-   public:
-    ApplicationManagerImplTest();
+class ApplicationManagerImplTest {
+ public:
+  ApplicationManagerImplTest();
 
-    ~ApplicationManagerImplTest();
+  ~ApplicationManagerImplTest();
 
-     const std::map<int32_t, am::ApplicationSharedPtr>& GetApplications();
+  const std::set<am::ApplicationSharedPtr>& GetApplications();
 
-     const std::set<am::ApplicationSharedPtr>& GetApplicationList();
+  const std::list<am::CommandSharedPtr>& GetNotificationList();
 
-     const std::list<am::CommandSharedPtr>& GetNotificationList();
+  const std::map<const int32_t, const uint32_t>& GetAppIDList();
 
-     const std::map<const int32_t, const uint32_t>& GetAppIDList();
+  bool GetAudioPassThruActive();
 
-     bool GetAudioPassThruActive();
+  bool GetIsDistractingDriver();
 
-     bool GetIsDistractingDriver();
+  bool GetIsVrSessionStrated();
 
-     bool GetIsVrSessionStrated();
+  bool GetHMICooperating();
 
-     bool GetHMICooperating();
+  bool GetIsAllAppsAllowed();
 
-     bool GetIsAllAppsAllowed();
+  const media_manager::MediaManager* GetMediaManager();
 
-     const media_manager::MediaManager* GetMediaManager();
+  const hmi_message_handler::HMIMessageHandler* GetHmiHandler();
 
-     const hmi_message_handler::HMIMessageHandler* GetHmiHandler();
+  const connection_handler::ConnectionHandler* GetConnectionHandler();
 
-     const connection_handler::ConnectionHandler* GetConnectionHandler();
+  const protocol_handler::ProtocolHandler* GetProtocolHandler();
 
-     const protocol_handler::ProtocolHandler* GetProtocolHandler();
+  const policy::PolicyManager* GetPolicyManager();
 
-     const policies::PolicyManager* GetPolicyManager();
+  const am::HMICapabilities& GetHmiCapabilities();
 
-     const am::HMICapabilities& GetHmiCapabilities();
+  const hmi_apis::HMI_API* GetHmiSoFactory();
 
-     const am::policies_manager::PoliciesManager& GetPoliciesManager();
+  const mobile_apis::MOBILE_API* GetMobileSoFactory();
 
-     const hmi_apis::HMI_API* GetHmiSoFactory();
+  am::mobile_api::AppInterfaceUnregisteredReason::eType
+  GetUnregisterReason();
 
-     const mobile_apis::MOBILE_API* GetMobileSoFactory();
+  const am::impl::FromMobileQueue& GetMessagesFromMobile();
 
-     //uint32_t GetCorelationId();
+  const am::impl::ToMobileQueue& GetMessagesToMobile();
 
-     //uint32_t GetMaxCorelationId();
+  const am::impl::FromHmiQueue& GetMessagesFromHmi();
 
-     am::mobile_api::AppInterfaceUnregisteredReason::eType
-         GetUnregisterReason();
+  const am::impl::ToHmiQueue& GetMessagesToHmi();
 
-     const am::impl::FromMobileQueue& GetMessagesFromMobile();
+ private:
+  am::ApplicationManagerImpl* app_;
+};
 
-     const am::impl::ToMobileQueue& GetMessagesToMobile();
+class HMIMessageHandlerInterceptor :
+    public hmi_message_handler::HMIMessageHandler {
+ public:
+  HMIMessageHandlerInterceptor();
 
-     const am::impl::FromHmiQueue& GetMessagesFromHmi();
+  ~HMIMessageHandlerInterceptor();
 
-     const am::impl::ToHmiQueue& GetMessagesToHmi();
+  virtual void SendMessageToHMI(
+      hmi_message_handler::MessageSharedPointer message);
+  virtual void OnMessageReceived(
+      utils::SharedPtr<application_manager::Message> message);
+  virtual void OnErrorSending(
+      utils::SharedPtr<application_manager::Message> message);
+  virtual void AddHMIMessageAdapter(
+      hmi_message_handler::HMIMessageAdapter* adapter);
+  virtual void RemoveHMIMessageAdapter(
+      hmi_message_handler::HMIMessageAdapter* adapter);
+  std::list<hmi_message_handler::MessageSharedPointer>* GetMasMessage();
 
-     /*
-     const std::map<int32_t, am::ApplicationSharedPtr>& GetApplications() {
-     return applications_;
-     }
+ private:
+  std::list<hmi_message_handler::MessageSharedPointer> mas_mess;
 
-     const std::set<am::ApplicationSharedPtr>& GetApplicationList() {
-     return application_list_;
-     }
+  DISALLOW_COPY_AND_ASSIGN(HMIMessageHandlerInterceptor);
+};
 
-     const std::list<am::CommandSharedPtr>& GetNotificationList() {
-     return notification_list_;
-     }
+class ProtocolHandlerInterceptor : public protocol_handler::ProtocolHandlerImpl {
+ public:
+  ProtocolHandlerInterceptor(
+      transport_manager::TransportManager* transport_manager_param);
 
-     const std::map<const int32_t, const uint32_t>& GetAppIDList() {
-     return appID_list_;
-     }
+  ~ProtocolHandlerInterceptor();
 
-     bool GetAudioPassThruActive() {
-     return audio_pass_thru_active_;
-     }
+  void SendMessageToMobileApp(const protocol_handler::RawMessagePtr& message,
+                              bool final_message) OVERRIDE;
 
-     bool GetIsDistractingDriver() {
-     return is_distracting_driver_;
-     }
+  std::list<protocol_handler::RawMessagePtr>* GetMasRawMessage();
 
-     bool GetIsVrSessionStrated() {
-     return is_vr_session_strated_;
-     }
+ private:
+  ProtocolHandlerInterceptor* operator=(const ProtocolHandlerInterceptor&);
+  ProtocolHandlerInterceptor(const ProtocolHandlerInterceptor&);
 
-     bool GetHMICooperating() {
-     return hmi_cooperating_;
-     }
+  std::list<protocol_handler::RawMessagePtr> mas_mess;
+};
 
-     bool GetIsAllAppsAllowed() {
-     return is_all_apps_allowed_;
-     }
+void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest);
 
-     const media_manager::MediaManager* GetMediaManager() {
-     return media_manager_;
-     }
+utils::SharedPtr<protocol_handler::RawMessage>
+ConvertSOToRawMess(utils::SharedPtr<smart::SmartObject> so);
 
-     const hmi_message_handler::HMIMessageHandler* GetHmiHandler() {
-     return hmi_handler_;
-     }
+void AddDevice(uint32_t);
 
-     const connection_handler::ConnectionHandler* GetConnectionHandler() {
-     return connection_handler_;
-     }
-
-     const protocol_handler::ProtocolHandler* GetProtocolHandler() {
-     return protocol_handler_;
-     }
-
-     const policies::PolicyManager* GetPolicyManager() {
-     return policy_manager_;
-     }
-
-     const am::HMICapabilities& GetHmiCapabilities() {
-     return hmi_capabilities_;
-     }
-
-     const am::policies_manager::PoliciesManager& GetPoliciesManager() {
-     return policies_manager_;
-     }
-
-     const hmi_apis::HMI_API* GetHmiSoFactory() {
-     return hmi_so_factory_;
-     }
-
-     const mobile_apis::MOBILE_API* GetMobileSoFactory() {
-     return mobile_so_factory_;
-     }
-
-     const uint32_t& GetCorelationId() {
-     return corelation_id_;
-     }
-
-     const uint32_t& GetMaxCorelationId() {
-     return max_corelation_id_;
-     }
-
-     am::mobile_api::AppInterfaceUnregisteredReason::eType
-     GetUnregisterReason() {
-     return unregister_reason_;
-     }
-
-     const am::impl::FromMobileQueue& GetMessagesFromMobile() {
-     return messages_from_mobile_;
-     }
-
-     const am::impl::ToMobileQueue& GetMessagesToMobile() {
-     return messages_to_mobile_;
-     }
-
-     const am::impl::FromHmiQueue& GetMessagesFromHmi() {
-     return messages_from_hmi_;
-     }
-
-     const am::impl::ToHmiQueue& GetMessagesToHmi() {
-     return messages_to_hmi_;
-     }
-     */
-   private:
-    am::ApplicationManagerImpl* app_;
-  };
-
-  void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest);
-
-  utils::SharedPtr<protocol_handler::RawMessage>
-      ConvertSOToRawMess(utils::SharedPtr<smart::SmartObject> so);
-
-  void AddDevice(uint32_t);
+void RemovedDevice(uint32_t);
 
 }  // namespace test
 
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_IMPL_TEST_H_
+#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_APPLICATION_MANAGER_IMPL_TEST_H_

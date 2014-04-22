@@ -61,18 +61,17 @@
 
 // ----------------------------------------------------------------------------
 
+CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
 namespace {
 
 const char kBrowser[] = "/usr/bin/chromium-browser";
 const char kBrowserName[] = "chromium-browser";
 const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
 const char kLocalHostAddress[] = "127.0.0.1";
-const char kApplicationVersion[] = "SDL_RB_3.3";
+const char kApplicationVersion[] = "Develop";
 
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
   if (system(command.c_str()) == -1) {
     LOG4CXX_INFO(logger, "Can't start HMI!");
     return false;
@@ -81,8 +80,6 @@ bool Execute(std::string command, const char * const *) {
 }
 #else
 bool Execute(std::string file, const char * const * argv) {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
   // Create a child process.
   pid_t pid_hmi = fork();
 
@@ -129,8 +126,6 @@ bool Execute(std::string file, const char * const * argv) {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("appMain"));
 
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
@@ -177,8 +172,6 @@ if (stat(hmi_link.c_str(), &sb) == -1) {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
@@ -202,10 +195,7 @@ int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
   // Logger initialization
-
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties");
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -232,8 +222,7 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     main_namespace::LifeCycle::instance()->StopComponents();
-// without this line log4cxx threads continue using some instances destroyed by exit()
-    log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
@@ -246,8 +235,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
-// without this line log4cxx threads continue using some instances destroyed by exit()
-        log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+        DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");

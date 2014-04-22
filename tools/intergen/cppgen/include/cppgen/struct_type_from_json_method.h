@@ -44,9 +44,14 @@ class Struct;
  */
 class StructTypeFromJsonConstructor : public CppStructConstructor {
  public:
-  StructTypeFromJsonConstructor(const Struct* strct);
+  StructTypeFromJsonConstructor(const Struct* strct,
+                                const std::string& base_class_name);
   ~StructTypeFromJsonConstructor();
  private:
+  // CppFunction pure virtual methods implementation
+  virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
   const Struct* strct_;
 };
 

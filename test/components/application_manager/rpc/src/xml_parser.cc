@@ -31,6 +31,9 @@
  */
 
 #include "rpc/xml_parser.h"
+#include "config_profile/ini_file.h"
+#include "config_profile/profile.h"
+
 
 namespace test {
 
@@ -398,8 +401,17 @@ namespace test {
 
     std::vector<uint8_t> binStr;
 
-    std::string fullPatch = "SyncProxyTester/" + msgValue;
-    std::string full_file_path = file_system::FullPath(fullPatch);
+    am::ApplicationManagerImpl* app_manager =
+        am::ApplicationManagerImpl::instance();
+
+    am::ApplicationSharedPtr active_app = app_manager->active_application();
+    if (!active_app.valid()) {
+      return;
+    }
+    std::string app_name = (*active_app).name();
+
+    std::string fullPatch = profile::Profile::instance()->app_storage_folder();
+    std::string full_file_path = fullPatch + app_name + "/" + msgValue;
 
     if (file_system::ReadBinaryFile(full_file_path, binStr)) {
       (*so)[am::strings::binary_data] = binStr;
@@ -414,8 +426,17 @@ namespace test {
     std::string msgValue(ToString(xmlParam->children->content));
     if (!VerifyString(msgParam)) return;
 
-    std::string fullPatch = "SyncProxyTester/" + msgValue;
-    std::string full_file_path = file_system::FullPath(fullPatch);
+    am::ApplicationManagerImpl* app_manager =
+        am::ApplicationManagerImpl::instance();
+
+    am::ApplicationSharedPtr active_app = app_manager->active_application();
+    if (!active_app.valid()) {
+      return;
+    }
+    std::string app_name = (*active_app).name();
+
+    std::string fullPatch = profile::Profile::instance()->app_storage_folder();
+    std::string full_file_path = fullPatch + app_name+ "/" + msgValue;
 
     (*so)[msgParam] = full_file_path;
   }

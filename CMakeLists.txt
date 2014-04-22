@@ -40,8 +40,10 @@ option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(TIME_TESTER "Enable profiling time test util" ON)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
+option(ENABLE_GCOV "gcov code coverage feature" ON)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -116,7 +118,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+if (ENABLE_GCOV)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+  add_definitions(-DGCOV_ENABLED)
+endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -151,8 +157,12 @@ if (BUILD_BACKTRACE_SUPPORT)
   add_definitions(-DBACKTRACE_SUPPORT)
 endif()
 
-if (ENABLE_LOG)
+if(ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
+endif()
+
+if (TIME_TESTER)
+    add_definitions(-DTIME_TESTER)
 endif()
 
 # TODO(AK): check current OS here

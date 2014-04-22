@@ -40,7 +40,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -55,11 +54,11 @@ typedef uint32_t DeviceHandle;
 typedef std::vector<int32_t> AppList;
 
 /**
- * \class Device
+ * \class Device
  * \brief Connection class
  */
 class Device {
-  public:
+public:
     /**
      * \brief Class constructor
      */
@@ -83,9 +82,13 @@ class Device {
      */
     std::string user_friendly_name() const;
 
+    /**
+        *\brief Also should be used for iOS USB connections
+        *(better not know why this same method)
+        */
     std::string mac_address() const;
 
-  private:
+private:
     /**
      * \brief Uniq device handle.
      */
@@ -101,12 +104,6 @@ class Device {
      */
     std::string mac_address_;
 
-    /**
-     * \brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 };
 
 /**

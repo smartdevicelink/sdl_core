@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,24 +28,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/on_update_device_list.h"
-#include "application_manager/application_manager_impl.h"
 
-namespace application_manager {
+#ifndef CPPGEN_STRUCT_TYPE_REPORT_ERROS_METHOD_H
+#define CPPGEN_STRUCT_TYPE_REPORT_ERROS_METHOD_H
 
-namespace commands {
+#include "cppgen/cpp_function.h"
 
-OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+namespace codegen {
+class Struct;
 
-OnUpdateDeviceList::~OnUpdateDeviceList() {
-}
+class StructTypeReportErrosMethod: public CppFunction {
+ public:
+  StructTypeReportErrosMethod(const Struct* strct);
+ private:
+  // CppFunction pure virtual methods implementation
+  virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
+  const Struct* strct_;
+};
 
-void OnUpdateDeviceList::Run() {
-  LOG4CXX_INFO(logger_, "OnUpdateDeviceList::Run");
-}
+} // namespace codegen
 
-}  // namespace commands
-
-}  // namespace application_manager
+#endif // CPPGEN_STRUCT_TYPE_REPORT_ERROS_METHOD_H

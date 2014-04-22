@@ -37,12 +37,7 @@
 
 namespace threads {
 
-namespace {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::PulseThreadDelegate"));
-
-}  // anonimous namespace
+CREATE_LOGGERPTR_GLOBAL(logger_, "threads::PulseThreadDelegate")
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
   LOG4CXX_TRACE(logger_, "Creating QNX channel");

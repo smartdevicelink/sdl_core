@@ -24,6 +24,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
+import com.ford.syncV4.android.manager.ApplicationIconManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
@@ -166,7 +167,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     private IProxyServiceEvent mProxyServiceEvent;
     private ICloseSession mCloseSessionCallback;
 
-    private int mAwaitingInitIconResponseCorrelationID;
     private PutFileTransferManager mPutFileTransferManager;
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
@@ -438,12 +438,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return ProtocolConstants.PROTOCOL_VERSION_MIN;
     }
 
-    private boolean getAutoSetAppIconFlag() {
-        return getSharedPreferences(Const.PREFS_NAME, 0).getBoolean(
-                Const.PREFS_KEY_AUTOSETAPPICON,
-                Const.PREFS_DEFAULT_AUTOSETAPPICON);
-    }
-
     @Override
     public void onDestroy() {
         createInfoMessageForAdapter("ProxyService.onDestroy()");
@@ -513,7 +507,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(serviceType);
     }
 
-    private void initialize() {
+    private void initializePredefinedView() {
         Logger.d(TAG, "Initialize predefined view");
         playingAudio = true;
         playAnnoyingRepetitiveAudio();
@@ -537,13 +531,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         commandAddCommandPredefined(XML_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"XML Test", "XML"})), "XML Test");
         commandAddCommandPredefined(POLICIES_TEST_COMMAND, new Vector<String>(Arrays.asList(new String[]{"Policies Test", "Policies"})), "Policies Test");
-    }
-
-    private void sendPutFileForAppIcon() {
-        Logger.d(TAG, "PutFileForAppIcon");
-        mAwaitingInitIconResponseCorrelationID = getNextCorrelationID();
-        commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME, AppUtils.contentsOfResource(R.raw.fiesta),
-                mAwaitingInitIconResponseCorrelationID, true);
     }
 
     private void show(String mainField1, String mainField2) throws SyncException {
@@ -610,7 +597,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mLogAdapter = logAdapter;
     }
 
-    protected int getNextCorrelationID() {
+    public int getNextCorrelationID() {
         return autoIncCorrId++;
     }
 
@@ -662,12 +649,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         final HMILevel curHMILevel = notification.getHmiLevel();
         final Boolean appInterfaceRegistered = mSyncProxy.getAppInterfaceRegistered();
 
-        if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered && firstHMIStatusChange) {
+        if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered) {
             if (!isModuleTesting()) {
-                // Process an init state of the predefined requests here, assume that if
-                // hashId is not null means this is resumption
-                if (mSyncProxy.getHashId() == null) {
-                    sendPutFileForAppIcon();
+                if (AppPreferencesManager.getAutoSetAppIconFlag()) {
+                    ApplicationIconManager.getInstance().setApplicationIcon(this);
                 }
             }
         }
@@ -703,9 +688,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         // Process an init state of the predefined requests here, assume that if
                         // hashId is not null means this is resumption
                         if (mSyncProxy.getHashId() == null) {
-                            initialize();
-                        } else {
-                            setAppIcon();
+                            initializePredefinedView();
                         }
                     } else {
                         try {
@@ -791,6 +774,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
+        ApplicationIconManager.getInstance().reset();
 
         if (wasConnected) {
             mConnectionListenersManager.dispatch();
@@ -1045,17 +1029,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     @Override
     public void onPutFileResponse(PutFileResponse response) {
         createDebugMessageForAdapter(response);
-        int mCorrelationId = response.getCorrelationID();
-        if (mCorrelationId == mAwaitingInitIconResponseCorrelationID && getAutoSetAppIconFlag()) {
-            setAppIcon();
+        final int receivedCorrelationId = response.getCorrelationID();
+
+        if (AppPreferencesManager.getAutoSetAppIconFlag()) {
+            ApplicationIconManager.getInstance().setAppIcon(this, receivedCorrelationId);
         }
+
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(mCorrelationId, response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(receivedCorrelationId,
+                    response.getResultCode()));
             synchronized (mTesterMain.getXMLTestThreadContext()) {
                 mTesterMain.getXMLTestThreadContext().notify();
             }
         }
-        mPutFileTransferManager.removePutFileFromAwaitArray(mCorrelationId);
+        mPutFileTransferManager.removePutFileFromAwaitArray(receivedCorrelationId);
     }
 
     @Override
@@ -1868,8 +1855,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
         syncProxySendPutFilesResumable(newPutFile);
-
-        //mAwaitingInitIconResponseCorrelationID = 0;
     }
 
     /**
@@ -2166,8 +2151,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         setAppIcon.setCorrelationID(getNextCorrelationID());
 
         syncProxySendRPCRequest(setAppIcon);
-
-        mAwaitingInitIconResponseCorrelationID = 0;
     }
 
     /**

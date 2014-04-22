@@ -26,8 +26,9 @@ create_test("test_mobile_message_handler"
 	"./src/mobile_message_handler_test.cc"
 	"${LIBRARIES}")
 
-target_link_libraries ("test_mobile_message_handler"
-	log4cxx)
+if(ENABLE_LOG)
+  target_link_libraries("test_mobile_message_handler" log4cxx)
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

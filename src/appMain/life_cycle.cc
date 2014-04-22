@@ -40,13 +40,9 @@
 using threads::Thread;
 
 namespace main_namespace {
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr LifeCycle::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("appMain"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
-
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(Thread::Id(thread.GetId()), name);
@@ -62,6 +58,9 @@ LifeCycle::LifeCycle()
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
+#ifdef TIME_TESTER
+  , time_tester_(NULL)
+#endif //TIME_TESTER
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -94,7 +93,6 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
-
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
@@ -114,6 +112,11 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
+  // it is important to initialise TimeTester before TM to listen TM Adapters
+#ifdef TIME_TESTER
+  time_tester_ = new time_tester::TimeManager();
+  time_tester_->Init(protocol_handler_);
+#endif //TIME_TESTER
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
@@ -121,7 +124,6 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
-
   return true;
 }
 
@@ -213,8 +215,6 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
 
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
@@ -222,13 +222,13 @@ bool LifeCycle::InitMessageSystem() {
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     dbus_adapter_);
   if (!dbus_adapter_->Init()) {
-    LOG4CXX_INFO(logger, "Cannot init DBus service!");
+    LOG4CXX_INFO(logger_, "Cannot init DBus service!");
     return false;
   }
 
   dbus_adapter_->SubscribeTo();
 
-  LOG4CXX_INFO(logger, "Start DBusMessageAdapter thread!");
+  LOG4CXX_INFO(logger_, "Start DBusMessageAdapter thread!");
   dbus_adapter_thread_ = new System::Thread(
     new System::ThreadArgImpl<hmi_message_handler::DBusMessageAdapter>(
       *dbus_adapter_,
@@ -251,6 +251,13 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
+#ifdef TIME_TESTER
+  if (time_tester_) {
+    time_tester_->Stop();
+    delete time_tester_;
+    time_tester_ = NULL;
+  }
+#endif //TIME_TESTER
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);

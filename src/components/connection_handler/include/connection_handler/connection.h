@@ -40,7 +40,6 @@
 #include <map>
 #include <vector>
 
-#include "utils/logger.h"
 #include "utils/lock.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
@@ -100,7 +99,7 @@ typedef std::map<uint8_t, ServiceList>::iterator SessionMapIterator;
 typedef std::map<uint8_t, ServiceList>::const_iterator SessionMapConstIterator;
 
 /**
- * \class Connection
+ * \class Connection
  * \brief Connection class
  */
 class Connection {
@@ -196,13 +195,6 @@ class Connection {
    * \brief monitor that closes connection if there is no traffic over it
    */
   HeartBeatMonitor heartbeat_monitor_;
-
-  /**
-   * \brief For logging.
-   */
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 };
 
 }/* namespace connection_handler */

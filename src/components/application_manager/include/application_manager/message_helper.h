@@ -149,6 +149,15 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    /**
+     * @brief Convert string to HMI level, if possible
+     * @param hmi_level Stringified HMI level
+     * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
+     * is not possible
+     */
+    static mobile_api::HMILevel::eType StringToHMILevel(
+        const std::string& hmi_level);
+
     /*
     * @brief Used to obtain string representation of app's
     * HMI Level.
@@ -161,7 +170,7 @@ class MessageHelper {
     * @brief Used to obtain function name by its id
     * @param function_id Function ID
     */
-    static const char* StringifiedFunctionID(
+    static std::string StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
 
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(

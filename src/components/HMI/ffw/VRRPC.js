@@ -341,7 +341,7 @@ FFW.VR = FFW.RPCObserver.create( {
             };
         }
 
-        SDL.SDLModel.set('performInteractionSession', null);
+        SDL.SDLModel.set('performInteractionSession', []);
 
         this.client.send(JSONMessage);
     },

@@ -36,12 +36,12 @@
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
-namespace {
-log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
-}
 
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
@@ -65,6 +65,9 @@ ApplicationImpl::ApplicationImpl(
       grammar_id_(0),
       usage_report_(global_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3) {
+
+  // subscribe application to custom button by default
+  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -234,7 +237,7 @@ void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
   if (!is_media_application()
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(g_logger, "Trying to set audio streaming state"
+    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
     return;
   }
@@ -242,8 +245,7 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
-  std::string file_name = path.substr(path.find_last_of("/") + 1);
-  if (app_files_.find(file_name) != app_files_.end()) {
+  if (app_files_.find(path) != app_files_.end()) {
     app_icon_path_ = path;
     return true;
   }
@@ -280,7 +282,6 @@ ProtocolVersion ApplicationImpl::protocol_version() {
 
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
-
     app_files_[file.file_name] = file;
     return true;
   }
@@ -379,7 +380,7 @@ uint32_t ApplicationImpl::UpdateHash() {
 void ApplicationImpl::CleanupFiles() {
   std::string directory_name =
       profile::Profile::instance()->app_storage_folder();
-  directory_name += "/" + name();
+  directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(

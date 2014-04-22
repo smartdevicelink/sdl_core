@@ -27,7 +27,8 @@ import java.io.InputStreamReader;
  */
 public class AppUtils {
 
-    private static final String TAG = "AppUtils";
+    @SuppressWarnings("unused")
+    private static final String TAG = AppUtils.class.getSimpleName();
 
     public static boolean isRunningUIThread() {
         return Looper.myLooper() == Looper.getMainLooper();
@@ -57,6 +58,11 @@ public class AppUtils {
         return new byte[0];
     }
 
+    /**
+     *
+     * @param fileName
+     * @return
+     */
     public static byte[] contentsOfResource(String fileName) {
         return contentsOfResource(new File(fileName));
     }
@@ -68,15 +74,15 @@ public class AppUtils {
      * @return
      */
     public static boolean saveDataToFile(byte[] data, String filePath) {
-        File mFile = new File(filePath);
-        Logger.d(TAG + " Saving data to file '" + filePath + "', exists:" + mFile.exists());
-        if (mFile.exists()) {
-            mFile.delete();
+        File file = new File(filePath);
+        Logger.d(TAG + " Saving data to file '" + filePath + "', exists:" + file.exists());
+        if (file.exists()) {
+            file.delete();
         }
         FileOutputStream mFileOutputStream = null;
         boolean result = false;
         try {
-            mFileOutputStream = new FileOutputStream(mFile.getPath());
+            mFileOutputStream = new FileOutputStream(file.getPath());
             mFileOutputStream.write(data);
 
             result = true;
@@ -92,6 +98,18 @@ public class AppUtils {
             }
         }
         return result;
+    }
+
+    /**
+     *
+     * @param data
+     * @param dirName
+     * @param fileName
+     * @return
+     */
+    public static boolean saveDataToFile(byte[] data, String dirName, String fileName) {
+        createDirIfNeeded(dirName);
+        return saveDataToFile(data, dirName + "/" + fileName);
     }
 
     /**
@@ -254,5 +272,20 @@ public class AppUtils {
             }
         }
         return builder.length() > 0 ? builder.toString().trim() : defaultString;
+    }
+
+    /**
+     * This method creates a directory with given name is such does not exists
+     *
+     * @param path a path to the directory
+     */
+    public static void createDirIfNeeded(String path) {
+        File file = new File(path);
+        if (file.exists() && !file.isDirectory()) {
+            file.delete();
+        }
+        if (!file.exists()) {
+            file.mkdirs();
+        }
     }
 }

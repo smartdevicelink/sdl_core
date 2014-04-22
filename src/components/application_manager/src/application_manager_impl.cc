@@ -52,13 +52,11 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#include <time.h>
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
@@ -1026,16 +1024,33 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         app->usage_report().RecordRpcSentInHMINone();
       }
 
-      if (!result.hmi_level_permitted) {
-        LOG4CXX_WARN(
-          logger_,
-          "Request blocked by policies. " << "FunctionID: " << static_cast<int32_t>(function_id) << " Application HMI status: " << static_cast<int32_t>(app->hmi_level()));
+      if (result.hmi_level_permitted != policy::kRpcAllowed) {
+        LOG4CXX_WARN(logger_, "Request blocked by policies. "
+                     << "FunctionID: "
+                     << static_cast<int32_t>(function_id)
+                     << " Application HMI status: "
+                     << static_cast<int32_t>(app->hmi_level()));
 
         app->usage_report().RecordPolicyRejectedRpcCall();
 
+        mobile_apis::Result::eType check_result =
+            mobile_apis::Result::DISALLOWED;
+
+        switch (result.hmi_level_permitted) {
+        case policy::kRpcDisallowed:
+          check_result = mobile_apis::Result::DISALLOWED;
+          break;
+        case policy::kRpcUserDisallowed:
+          check_result = mobile_apis::Result::USER_DISALLOWED;
+          break;
+        default:
+          check_result = mobile_apis::Result::INVALID_ENUM;
+          break;
+        }
+
         smart_objects::SmartObject* response =
           MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-              mobile_apis::Result::REJECTED, correlation_id, connection_key);
+              check_result, correlation_id, connection_key);
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return true;
@@ -1456,7 +1471,8 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-
+  AMMetricObserver::MessageMetric* metric = new AMMetricObserver::MessageMetric();
+  metric->begin = time(NULL);
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
     new smart_objects::SmartObject);
 
@@ -1469,9 +1485,14 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+  metric->message = so_from_mobile;
 
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
+  metric->end = time(NULL);
+  if (metric_observer_) {
+    metric_observer_->OnMessage(metric);
   }
 }
 
@@ -1527,6 +1548,10 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
+}
+
+void ApplicationManagerImpl::SetTimeMetricObserver(AMMetricObserver *observer) {
+  metric_observer_ = observer;
 }
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {

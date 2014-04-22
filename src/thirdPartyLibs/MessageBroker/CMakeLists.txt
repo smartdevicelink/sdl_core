@@ -1,6 +1,8 @@
 include_directories (
   ./include/
   ../jsoncpp/include
+	../../components/utils/include
+  
 )
 
 set (MESSAGE_BROKER_SOURCES

@@ -426,10 +426,10 @@ public class RPCRequestFactory {
 	}
 	
 	public static RegisterAppInterface buildRegisterAppInterface(
-			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
-			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
+            Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-			String appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
+            Object appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {

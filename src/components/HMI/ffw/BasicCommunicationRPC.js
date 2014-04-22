@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2013, Ford Motor Company All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met: ·
  * Redistributions of source code must retain the above copyright notice, this
@@ -10,7 +10,7 @@
  * with the distribution. · Neither the name of the Ford Motor Company nor the
  * names of its contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -196,8 +196,8 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 if (response.id in SDL.SDLModel.userFriendlyMessagePull) {
                     var callbackObj = SDL.SDLModel.userFriendlyMessagePull[response.id];
-                    callbackObj.callback(response.result.message, callbackObj.appID);
-                    SDL.SDLModel.userFriendlyMessagePull.remove(response.id);
+                    callbackObj.callbackFunc(response.result.message, callbackObj.appID);
+                    delete SDL.SDLModel.userFriendlyMessagePull[response.id];
                 }
             }
 
@@ -230,15 +230,15 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                         this.GetListOfPermissions(appID);
 
-                        this.OnAppPermissionConsent(response.result.allowedFunctions, "GUI", appID);
+                        //this.OnAppPermissionConsent(response.result.allowedFunctions, "GUI", appID);
                     }
 
                     if (response.result.isAppPermissionsRevoked) {
 
-                        SDL.SettingsController.userFriendlyMessagePopUp();
+                        SDL.SettingsController.userFriendlyMessagePopUp(appID, response.result.appRevokedPermissions);
 
                         //deleted array
-                        SDL.SDLModel.setAppPermissions(params.appRevokedPermissions);
+                        SDL.SDLModel.setAppPermissions(response.result.appRevokedPermissions);
                     }
 
                     if (response.result.isAppRevoked) {
@@ -249,6 +249,10 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                             "appID": appID
                         });
                     } else {
+
+                        if (SDL.SDLModel.stateLimited == appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
 
                         SDL.SDLController.getApplicationModel(appID).turnOnSDL();
                     }
@@ -275,7 +279,12 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
                 SDL.SDLModel.set('policyURLs', response.result.urls);
 
-                this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                if (response.result.urls.length) {
+                    this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                } else {
+                    this.OnSystemRequest("PROPRIETARY");
+                }
+
             }
         },
 
@@ -371,15 +380,6 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 if (request.method == "BasicCommunication.AllowDeviceToConnect") {
                     this.AllowDeviceToConnect(request.id, request.method, allow);
                 }
-                if (request.method == "BasicCommunication.UpdateAppList") {
-                    if (SDL.States.info.active) {
-                        SDL.SDLController
-                            .onGetAppList(request.params.applications);
-                    }
-                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
-                }
                 if (request.method == "BasicCommunication.UpdateDeviceList") {
                     SDL.SDLModel.onGetDeviceList(request.params);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
@@ -388,7 +388,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
-                    this.OnReceivedPolicyUpdate(SDL.SettingsController.policyUpdateFile);
+                    this.OnReceivedPolicyUpdate(request.params.fileName);
 
                     SDL.SettingsController.policyUpdateFile = null;
 
@@ -402,7 +402,9 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         SDL.States.goToStates('info.apps');
                     }
 
-                    SDL.SDLModel.stateLimited = null;
+                    if (SDL.SDLModel.stateLimited == request.params.appID) {
+                        SDL.SDLModel.stateLimited = null;
+                    }
 
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
@@ -579,7 +581,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
@@ -716,7 +718,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * send response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            id
          * @param {String}
@@ -775,7 +777,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Send request if application was activated
-         * 
+         *
          * @param {number} appID
          */
         OnAppActivated: function(appID) {
@@ -854,7 +856,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Invoked by UI component when user switches to any functionality which
          * is not other mobile application.
-         * 
+         *
          * @params {String}
          * @params {Number}
          */
@@ -894,7 +896,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Used by HMI when User chooses to exit application.
-         * 
+         *
          * @params {Number}
          */
         ExitApplication: function(appID) {
@@ -915,7 +917,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Sent by HMI to SDL to close all registered applications.
-         * 
+         *
          * @params {String}
          */
         ExitAllApplications: function(reason) {
@@ -937,7 +939,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Response with params of the last one supports mixing audio (ie
          * recording TTS command and playing audio).
-         * 
+         *
          * @params {Number}
          */
         MixingAudioSupported: function(attenuatedSupported) {
@@ -961,7 +963,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
         /**
          * Response with Results by user/HMI allowing SDL functionality or
          * disallowing access to all mobile apps.
-         * 
+         *
          * @params {Number}
          */
         AllowAllApps: function(allowed) {
@@ -984,7 +986,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Response with result of allowed application
-         * 
+         *
          * @params {Number}
          */
         AllowApp: function(request) {
@@ -1018,7 +1020,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Notifies if device was choosed
-         * 
+         *
          * @param {String}
          *            deviceName
          * @param {Number}
@@ -1044,7 +1046,7 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
 
         /**
          * Send error response from onRPCRequest
-         * 
+         *
          * @param {Number}
          *            resultCode
          * @param {Number}
