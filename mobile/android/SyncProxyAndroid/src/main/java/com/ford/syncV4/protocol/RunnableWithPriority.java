@@ -17,7 +17,7 @@ public class RunnableWithPriority implements Runnable {
     private int mCorrelationId;
 
     public RunnableWithPriority(byte priority, int correlationId) {
-        //Logger.d(LOG_TAG + " TRACE priority: " + priority);
+        Logger.d(LOG_TAG + " TRACE priority: " + priority);
         mPriority = priority;
         mCorrelationId = correlationId;
     }

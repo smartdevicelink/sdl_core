@@ -171,7 +171,7 @@ public class WiProProtocol extends AbstractProtocol {
             return;
         }
 
-        Logger.d(CLASS_NAME + " TRACE " + serviceType.getValue());
+        //Logger.d(CLASS_NAME + " TRACE " + serviceType.getValue());
         MESSAGES_EXECUTOR_SERVICE.execute(new RunnableWithPriority(serviceType.getValue(),
                                                                    protocolMsg.getCorrID()) {
 
