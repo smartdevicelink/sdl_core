@@ -22,7 +22,7 @@ public class ComposeMessageProcessor {
     private final static PriorityBlockingQueue<Runnable> BLOCKING_QUEUE =
             new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
     private static final ExecutorService MESSAGES_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS, BLOCKING_QUEUE);
+            new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, BLOCKING_QUEUE);
 
     private static int sCorrelationIdCounter = 0;
 
@@ -40,6 +40,8 @@ public class ComposeMessageProcessor {
                 header.getServiceType().getValue(), getNextCorrelationId()) {
             @Override
             public void run() {
+                super.run();
+
                 if (data != null) {
                     byte[] commonArray = appendDataToProtocolHeader(header, data, offset, length);
                     callback.onMessageBytesToSend(commonArray, 0, commonArray.length);

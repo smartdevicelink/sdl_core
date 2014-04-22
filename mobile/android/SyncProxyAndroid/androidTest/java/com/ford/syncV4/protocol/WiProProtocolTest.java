@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -896,8 +897,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     }
 
     public void testRPCHasHigherPriorityToBulk() throws InterruptedException {
-        int messagesNumber = 6;
-        CountDownLatch countDownLatch = new CountDownLatch();
+        int messagesNumber = 50;
+        //CountDownLatch countDownLatch = new CountDownLatch();
         IProtocolListener protocolListener = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(protocolListener) {
 
@@ -929,12 +930,27 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ProtocolMessage protocolMessage =
                 generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
 
-        Logger.d(TAG + " send msg's");
-        protocol.SendMessage(protocolMessageWithData);
-        protocol.SendMessage(protocolMessageWithData);
-        protocol.SendMessage(protocolMessageWithData);
-        protocol.SendMessage(protocolMessageWithData);
-        protocol.SendMessage(protocolMessage);
-        protocol.SendMessage(protocolMessage);
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 1);
+            if (result == 0) {
+                protocol.SendMessage(protocolMessageWithData);
+            } else {
+                protocol.SendMessage(protocolMessage);
+            }
+        }
+
+        Thread.sleep(2000);
+    }
+
+    private int randInt(int min, int max) {
+
+        // Usually this can be a field rather than a method variable
+        Random rand = new Random();
+
+        // nextInt is normally exclusive of the top value,
+        // so add 1 to make it inclusive
+        int randomNum = rand.nextInt((max - min) + 1) + min;
+
+        return randomNum;
     }
 }

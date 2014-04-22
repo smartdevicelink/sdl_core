@@ -38,13 +38,11 @@ public class ProtocolMessageConverter {
             return this;
         }
         if (mProtocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            Logger.d("TRACE bulk data:" + mProtocolMsg.getBulkData());
             if (mProtocolMsg.getBulkData() != null) {
                 mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
                         mProtocolMsg.getJsonSize() +
                         mProtocolMsg.getBulkData().length];
                 mServiceType = ServiceType.Bulk_Data;
-                Logger.d("TRACE set bulk data:" + mServiceType);
             } else {
                 mData = new byte[ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2 +
                         mProtocolMsg.getJsonSize()];

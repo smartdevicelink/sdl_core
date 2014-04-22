@@ -38,7 +38,7 @@ public class WiProProtocol extends AbstractProtocol {
     private static final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
             new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
 
-    private final static PriorityBlockingQueue<Runnable> BLOCKING_QUEUE =
+    private final PriorityBlockingQueue<Runnable> blockingQueue =
             new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
 
     /**
@@ -46,8 +46,8 @@ public class WiProProtocol extends AbstractProtocol {
      * If the number of threads is greater than the 10, set the the maximum time that excess
      * idle threads will wait for new tasks before terminating to 10 seconds
      */
-    private static final ExecutorService MESSAGES_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS, BLOCKING_QUEUE);
+    private final ExecutorService messagesExecutorService =
+            new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, blockingQueue);
 
     private final ProtocolVersion protocolVersion = new ProtocolVersion();
     private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
@@ -172,13 +172,14 @@ public class WiProProtocol extends AbstractProtocol {
         }
 
         //Logger.d(CLASS_NAME + " TRACE " + serviceType.getValue());
-        MESSAGES_EXECUTOR_SERVICE.execute(new RunnableWithPriority(serviceType.getValue(),
-                                                                   protocolMsg.getCorrID()) {
+        messagesExecutorService.execute(new RunnableWithPriority(serviceType.getValue(),
+                                                  protocolMsg.getCorrID()) {
 
-                  @Override
-                  public void run() {
+              @Override
+              public void run() {
+                  super.run();
 
-                      sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
+                  sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
                           MAX_DATA_SIZE, sessionID, getNextMessageId(), protocolMsg.getCorrID(),
                           new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
                               @Override
@@ -187,9 +188,9 @@ public class WiProProtocol extends AbstractProtocol {
                                   handleProtocolFrameToSend(header, data, offset, length);
                               }
                           }
-                      );
-                  }
+                  );
               }
+          }
         );
     }
 

@@ -23,9 +23,9 @@ public class SendProtocolMessageProcessor {
                                           int length);
     }
 
-    private final static PriorityBlockingQueue<Runnable> BLOCKING_QUEUE =
+    private final PriorityBlockingQueue<Runnable> blockingQueue =
             new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
-    private static final ExecutorService MESSAGES_CACHED_EXECUTOR_SERVICE =
+    private final ExecutorService cachedThreadPool =
             Executors.newCachedThreadPool();
 
     /**
@@ -33,8 +33,8 @@ public class SendProtocolMessageProcessor {
      * If the number of threads is greater than the 10, set the the maximum time that excess
      * idle threads will wait for new tasks before terminating to 10 seconds
      */
-    private static final ExecutorService MESSAGES_EXECUTOR_SERVICE =
-            new ThreadPoolExecutor(1, 10, 10, TimeUnit.SECONDS, BLOCKING_QUEUE);
+    private final ExecutorService threadPoolExecutor =
+            new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, blockingQueue);
 
     public void process(final ServiceType serviceType, final byte protocolVersionToSend,
                         final byte[] data, final int maxDataSize,
@@ -42,7 +42,7 @@ public class SendProtocolMessageProcessor {
                         final ISendProtocolMessageProcessor callback) {
         if (data.length > maxDataSize) {
 
-            MESSAGES_CACHED_EXECUTOR_SERVICE.submit(new Runnable() {
+            cachedThreadPool.submit(new Runnable() {
                 @Override
                 public void run() {
 
@@ -66,12 +66,12 @@ public class SendProtocolMessageProcessor {
             });
         } else {
 
-            MESSAGES_EXECUTOR_SERVICE.execute(
+            threadPoolExecutor.execute(
                     new RunnableWithPriority(serviceType.getValue(), correlationId) {
 
                         @Override
                         public void run() {
-
+                            super.run();
                             ProtocolFrameHeader header =
                                     ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
                                             sessionID, data.length, messageId,

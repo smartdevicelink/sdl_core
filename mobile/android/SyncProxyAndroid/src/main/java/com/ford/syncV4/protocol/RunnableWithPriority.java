@@ -24,7 +24,12 @@ public class RunnableWithPriority implements Runnable {
 
     @Override
     public void run() {
-
+        Logger.d("TRACE Run");
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getCorrelationId() {

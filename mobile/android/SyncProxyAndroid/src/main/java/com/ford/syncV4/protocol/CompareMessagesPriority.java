@@ -15,12 +15,16 @@ public class CompareMessagesPriority<T extends RunnableWithPriority> implements 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = CompareMessagesPriority.class.getSimpleName();
 
+    public CompareMessagesPriority() {
+        Logger.d(LOG_TAG + " TRACE Construct");
+    }
+
     @Override
     public int compare(T object1, T object2) {
         int result = 0;
 
-        //Logger.d(LOG_TAG + " TRACE obj1 priority:" + object1.getPriority() + " " + object1.getCorrelationId());
-        //Logger.d(LOG_TAG + " TRACE obj2 priority:" + object1.getPriority() + " " + object2.getCorrelationId());
+        Logger.d(LOG_TAG + " TRACE obj1 priority:" + object1.getPriority() + " " + object1.getCorrelationId());
+        Logger.d(LOG_TAG + " TRACE obj2 priority:" + object1.getPriority() + " " + object2.getCorrelationId());
 
         if (object1.getPriority() == object2.getPriority()) {
             if (object1.getCorrelationId() != -1 && object2.getCorrelationId() != -1) {
