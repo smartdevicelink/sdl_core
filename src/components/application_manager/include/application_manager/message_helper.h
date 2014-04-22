@@ -97,7 +97,7 @@ class MessageHelper {
     typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
 
     /**
-     * @brief CreateGetVehicleDataRequest Creates request for different interfaces(JSON, DBUS)
+     * @brief Creates request for different interfaces(JSON, DBUS)
      * @param correlation_id unique ID
      * @param params Vector of arguments that we need in GetVehicleData request (e.g. gps, odometer, fuel_level)
      */
