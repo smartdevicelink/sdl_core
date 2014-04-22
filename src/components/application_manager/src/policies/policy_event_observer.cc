@@ -32,8 +32,9 @@
 
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/smart_object_keys.h"
-#include "smart_objects/smart_object.h"
 #include "utils/date_time.h"
+#include "policy/policy_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace policy {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -52,24 +53,28 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
   switch (event.id()) {
 #ifdef HMI_JSON_API
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      ProcessOdometerEvent();
+      ProcessOdometerEvent(message);
       break;
     }
-#endif
-#ifdef HMI_DBUS_API
-    case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
-      ProcessOdometerEvent();
-      break;
-    }
-#endif
     default: {
       break;
     }
-  }
+  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+#endif
+#ifdef HMI_DBUS_API
+    case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
+      ProcessOdometerEvent(message);
+      break;
+    }
+    default: {
+      break;
+    }
   unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+#endif
+  }
 }
 
-void PolicyEventObserver::ProcessOdometerEvent() {
+void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject& message) {
   if (hmi_apis::Common_Result::SUCCESS
       == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
         .asInt())) {
