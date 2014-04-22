@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.mockito.Matchers.any;
@@ -101,7 +102,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             };
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
-    private WiProProtocol sut;
+    private WiProProtocol wiProProtocol;
     private ProtocolFrameHeader currentFrameHeader;
     private byte[] currentData;
 
@@ -112,7 +113,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void setUp() throws Exception {
         super.setUp();
         System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        sut = new WiProProtocol(mock(IProtocolListener.class)) {
+        wiProProtocol = new WiProProtocol(mock(IProtocolListener.class)) {
 
             @Override
             public void SendMessage(ProtocolMessage protocolMsg) {
@@ -132,7 +133,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 callCheck(currentCheckMethod, data, header, offset, length);
             }
         };
-        sut.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        wiProProtocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
@@ -142,7 +143,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 ProtocolFrameHeaderFactory.createSingleSendData(ServiceType.Mobile_Nav, SESSION_ID,
                         currentData.length, MESSAGE_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSmallFrame");
-        sut.SendMessage(message);
+        wiProProtocol.SendMessage(message);
     }
 
     public void testSendMobileNavFirstBigFrameProtocolMessageSucceed() throws Exception {
@@ -152,7 +153,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 ProtocolFrameHeaderFactory.createMultiSendDataFirst(ServiceType.Mobile_Nav,
                         SESSION_ID, MESSAGE_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsFirstBigFrame");
-        sut.SendMessage(message);
+        wiProProtocol.SendMessage(message);
     }
 
     public void testSendMobileNavConsecutiveBigFrameProtocolMessageSucceed() throws Exception {
@@ -163,7 +164,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                         SESSION_ID, currentData.length, FRAME_SEQUENCE_NUMBER, MESSAGE_ID,
                         ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsSecondBigFrame");
-        sut.SendMessage(message);
+        wiProProtocol.SendMessage(message);
     }
 
     public void testSendMobileNavLastBigFrameProtocolMessageSucceed() throws Exception {
@@ -174,7 +175,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                         SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID,
                         ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastBigFrame");
-        sut.SendMessage(message);
+        wiProProtocol.SendMessage(message);
     }
 
     public void testSendMobileNabLastUnAlightedBigFrameProtocolMessageSucceed() throws Exception {
@@ -185,10 +186,10 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 ProtocolFrameHeaderFactory.createMultiSendDataRest(ServiceType.Mobile_Nav,
                         SESSION_ID, currentData.length, (byte) 0, MESSAGE_ID,
                         ProtocolConstants.PROTOCOL_VERSION_THREE);
-        sut.set_TEST_ProtocolMaxVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        sut.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        wiProProtocol.set_TEST_ProtocolMaxVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        wiProProtocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         currentCheckMethod = generateCurrentCheckMethod("checkCurrentArgumentsLastUnAlightedBigFrame");
-        sut.SendMessage(message);
+        wiProProtocol.SendMessage(message);
     }
 
     private Method generateCurrentCheckMethod(String checkMethodName) throws NoSuchMethodException {
@@ -205,8 +206,22 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ProtocolMessage message = new ProtocolMessage();
         message.setData(frame);
         message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        message.setSessionID((byte) 48);
+        message.setSessionID(SESSION_ID);
         message.setServiceType(ServiceType.Mobile_Nav);
+        return message;
+    }
+
+    private ProtocolMessage generateRPCProtocolMessage(int dataSize, int bulkDataSize) {
+        ProtocolMessage message = new ProtocolMessage();
+        if (dataSize > 0) {
+            message.setData(generateByteArray(0, dataSize));
+        }
+        if (bulkDataSize > 0) {
+            message.setBulkData(generateByteArray(0, bulkDataSize));
+        }
+        message.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        message.setSessionID(SESSION_ID);
+        message.setServiceType(ServiceType.RPC);
         return message;
     }
 
@@ -736,16 +751,21 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[10];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[10];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 0, data.length);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + data.length];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 0 , expectedResult,frameHeaderArray.length, data.length);
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
+        byte[] expectedResult = new byte[frameHeaderArray.length + data.length];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 0, expectedResult, frameHeaderArray.length, data.length);
+
+        // Take in count that messages are going to be sent with ExecutorService
+        Thread.sleep(20);
+
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
+                expectedResult.length);
     }
 
     public void testFrameHeaderSendWithNoData() throws Exception {
@@ -760,7 +780,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(frameHeaderArray, 0, frameHeaderArray.length);
+
+        // Take in count that messages are going to be sent with ExecutorService
+        Thread.sleep(20);
+
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(frameHeaderArray, 0,
+                frameHeaderArray.length);
     }
 
     public void testFrameHeaderAndDataSendWithPartialChunk() throws Exception {
@@ -773,16 +798,21 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[100];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[100];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 20, 20);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + 20];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 20 , expectedResult,frameHeaderArray.length, 20);
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
+        byte[] expectedResult = new byte[frameHeaderArray.length + 20];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 20, expectedResult, frameHeaderArray.length, 20);
+
+        // Take in count that messages are going to be sent with ExecutorService
+        Thread.sleep(20);
+
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
+                expectedResult.length);
     }
 
     public void testFrameHeaderAndDataSendWithPartialChunkWithLengthToBig() throws Exception {
@@ -795,16 +825,21 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.Mobile_Nav);
         frameHeader.setDataSize(0);
-        byte [] data = new byte[100];
-        for (int i = 0; i < data.length; i ++){
-            data[i] = (byte) (i+1);
+        byte[] data = new byte[100];
+        for (int i = 0; i < data.length; i++) {
+            data[i] = (byte) (i + 1);
         }
         protocol.handleProtocolFrameToSend(frameHeader, data, 90, 20);
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
-        byte [] expectedResult = new byte[frameHeaderArray.length + 10];
-        System.arraycopy(frameHeaderArray, 0 , expectedResult, 0, frameHeaderArray.length);
-        System.arraycopy(data, 90 , expectedResult,frameHeaderArray.length, 10);
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
+        byte[] expectedResult = new byte[frameHeaderArray.length + 10];
+        System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
+        System.arraycopy(data, 90, expectedResult, frameHeaderArray.length, 10);
+
+        // Take in count that messages are going to be sent with ExecutorService
+        Thread.sleep(20);
+
+        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
+                expectedResult.length);
     }
 
     public void testPriorityBlockingQueueWithCorrectOutputOrderByCorrelationId()
@@ -824,5 +859,82 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         while (queue.size() > 0) {
             assertEquals(i++, ((RunnableWithPriority)queue.take()).getCorrelationId());
         }
+    }
+
+    public void testPriorityInMessages() {
+        ProtocolFrameHeader rpc = ProtocolFrameHeaderFactory.createStartSession(
+                ServiceType.RPC, SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolFrameHeader bulkData = ProtocolFrameHeaderFactory.createStartSession(
+                ServiceType.Bulk_Data, SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolFrameHeader mobileNaviService = ProtocolFrameHeaderFactory.createStartSession(
+                ServiceType.Mobile_Nav, SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolFrameHeader audioService = ProtocolFrameHeaderFactory.createStartSession(
+                ServiceType.Audio_Service, SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        // RPC has a high priority
+        assertTrue(rpc.getServiceType().getValue() < bulkData.getServiceType().getValue());
+        assertTrue(rpc.getServiceType().getValue() < mobileNaviService.getServiceType().getValue());
+        assertTrue(rpc.getServiceType().getValue() < audioService.getServiceType().getValue());
+
+        // Bulk data has a lower priority
+        assertTrue(bulkData.getServiceType().getValue() > rpc.getServiceType().getValue());
+        assertTrue(bulkData.getServiceType().getValue() > mobileNaviService.getServiceType().getValue());
+        assertTrue(bulkData.getServiceType().getValue() > audioService.getServiceType().getValue());
+
+        // Mobile Navi prior to Bulk data
+        assertTrue(mobileNaviService.getServiceType().getValue() > rpc.getServiceType().getValue());
+        assertTrue(mobileNaviService.getServiceType().getValue() < bulkData.getServiceType().getValue());
+        assertTrue(mobileNaviService.getServiceType().getValue() > audioService.getServiceType().getValue());
+
+        // Audio prior to Mobile Navi
+        assertTrue(audioService.getServiceType().getValue() < mobileNaviService.getServiceType().getValue());
+        assertTrue(audioService.getServiceType().getValue() < bulkData.getServiceType().getValue());
+        assertTrue(audioService.getServiceType().getValue() > rpc.getServiceType().getValue());
+    }
+
+    public void testRPCHasHigherPriorityToBulk() throws InterruptedException {
+        int messagesNumber = 6;
+        CountDownLatch countDownLatch = new CountDownLatch();
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getDataSize());
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage protocolMessageWithData =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 1000);
+        ProtocolMessage protocolMessage =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
+
+        Logger.d(TAG + " send msg's");
+        protocol.SendMessage(protocolMessageWithData);
+        protocol.SendMessage(protocolMessageWithData);
+        protocol.SendMessage(protocolMessageWithData);
+        protocol.SendMessage(protocolMessageWithData);
+        protocol.SendMessage(protocolMessage);
+        protocol.SendMessage(protocolMessage);
     }
 }

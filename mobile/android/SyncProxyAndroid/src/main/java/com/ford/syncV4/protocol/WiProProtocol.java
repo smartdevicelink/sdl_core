@@ -159,7 +159,7 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
                 protocolMsg, protocolVersionToSend).generate();
         final byte[] data = protocolMessageConverter.getData();
-        final ServiceType serviceType = protocolMessageConverter.getSessionType();
+        final ServiceType serviceType = protocolMessageConverter.getServiceType();
 
         // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
