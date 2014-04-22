@@ -32,13 +32,11 @@
 
 #include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketVideoStreamerAdapter"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger, "SocketVideoStreamerAdapter")
 
 SocketVideoStreamerAdapter::SocketVideoStreamerAdapter() {
   LOG4CXX_INFO(logger, "SocketVideoStreamerAdapter::SocketVideoStreamerAdapter");

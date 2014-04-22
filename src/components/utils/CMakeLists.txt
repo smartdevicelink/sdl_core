@@ -32,7 +32,12 @@ endif()
 add_library("Utils" ${SOURCES})
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-	target_link_libraries ("Utils" log4cxx apr-1 aprutil-1)
+  target_link_libraries("Utils" apr-1 aprutil-1)
 else()
-	target_link_libraries ("Utils" log4cxx apr-1 aprutil-1 rt)
+  target_link_libraries("Utils" apr-1 aprutil-1 rt)
 endif()
+
+if(ENABLE_LOG)
+  target_link_libraries("Utils" log4cxx)
+endif()
+

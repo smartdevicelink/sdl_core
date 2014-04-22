@@ -42,10 +42,7 @@
 
 namespace transport_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr TransportAdapterListenerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 

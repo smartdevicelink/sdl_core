@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <list>
 #include <vector>
@@ -46,7 +46,6 @@
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
-// #include "application_manager/policies_manager/policies_manager.h"
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
 #include "protocol_handler/protocol_observer.h"

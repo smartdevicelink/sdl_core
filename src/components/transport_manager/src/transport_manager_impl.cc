@@ -43,6 +43,7 @@
 #include <functional>
 #include <sstream>
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/protocol_packet.h"
 #include "transport_manager/transport_manager_impl.h"
@@ -58,10 +59,7 @@ using ::transport_manager::transport_adapter::TransportAdapter;
 
 namespace transport_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr TransportManagerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
   TransportManagerImpl::Connection c;
@@ -854,6 +852,28 @@ void TransportManagerImpl::MessageQueueThread(void) {
 
   pthread_mutex_unlock(&message_queue_mutex_);
   LOG4CXX_INFO(logger_, "Message queue thread finished");
+}
+
+TransportManagerImpl::ConnectionInternal::ConnectionInternal(
+    TransportManagerImpl *transport_manager, TransportAdapter *transport_adapter,
+    const ConnectionUID &id, const DeviceUID &dev_id, const ApplicationHandle &app_id)
+  : transport_manager(transport_manager),
+    transport_adapter(transport_adapter),
+    timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
+    shutDown(false),
+    messages_count(0) {
+  Connection::id = id;
+  Connection::device = dev_id;
+  Connection::application = app_id;
+}
+
+void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
+  LOG4CXX_INFO(logger_, "Disconnection failed");
+  transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
+                                transport_manager->converter_.UidToHandle(device),
+                                DisconnectDeviceError());
+  shutDown = false;
+  timer->stop();
 }
 
 }  // namespace transport_manager

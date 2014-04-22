@@ -40,8 +40,7 @@ namespace application_manager {
 namespace request_controller {
 using namespace sync_primitives;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestController"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
   : watchdog_(NULL) {

@@ -31,14 +31,11 @@
  */
 #include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/connection.h"
-#include "log4cxx/logger.h"
+#include "utils/logger.h"
 
 namespace connection_handler {
 
-namespace {
-log4cxx::LoggerPtr g_logger =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("ConnectionHandler"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection* connection)
@@ -54,17 +51,17 @@ HeartBeatMonitor::~HeartBeatMonitor() {
 void HeartBeatMonitor::BeginMonitoring() {
   AssertRunningOnCreationThread();
   if (heartbeat_timeout_seconds_ != 0) {
-    LOG4CXX_INFO(g_logger, "Heart beat monitor: monitoring connection "
+    LOG4CXX_INFO(logger_, "Heart beat monitor: monitoring connection "
                  << connection_->connection_handle() << ", timeout "
                  << heartbeat_timeout_seconds_ << " seconds");
     timer_.start(heartbeat_timeout_seconds_);
   } else {
-    LOG4CXX_INFO(g_logger, "Heart beat monitor: disabled");
+    LOG4CXX_INFO(logger_, "Heart beat monitor: disabled");
   }
 }
 
 void HeartBeatMonitor::TimeOut() {
-  LOG4CXX_INFO(g_logger, "Heart beat monitor: connection "
+  LOG4CXX_INFO(logger_, "Heart beat monitor: connection "
                << connection_->connection_handle() << " timed out, closing");
   connection_->Close();
 }
@@ -73,7 +70,7 @@ void HeartBeatMonitor::KeepAlive() {
   AssertRunningOnCreationThread();
   if (heartbeat_timeout_seconds_ != 0) {
     LOG4CXX_INFO(
-        g_logger,
+        logger_,
         "Resetting heart beat timer for connection "
           << connection_->connection_handle());
     timer_.stop();

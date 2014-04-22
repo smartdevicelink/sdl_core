@@ -32,13 +32,11 @@
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr HMIMessageHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl()
     : observer_(NULL),

@@ -37,6 +37,7 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include <string>
+#include <sstream>
 
 namespace application_manager {
 
