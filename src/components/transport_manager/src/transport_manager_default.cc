@@ -64,7 +64,7 @@ int TransportManagerDefault::Init() {
   }
   AddTransportAdapter(ta);
 #ifdef USB_SUPPORT
-  ta = new transport_adapter::TcpTransportAdapter(port);
+  ta = new transport_adapter::UsbAdapter();
   if (metric_observer_) {
     ta->SetTimeMetricObserver(metric_observer_);
   }
