@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -33,9 +33,7 @@
 #ifndef SRC_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MEDIA_MANAGER_H_
 #define SRC_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MEDIA_MANAGER_H_
 
-
 #include <string>
-#include "log4cxx/logger.h"
 
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
@@ -51,93 +49,46 @@
 #include "protocol_handler_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
 
-
-
-
 namespace time_tester {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
-
 class TimeManager {
+ public:
+  TimeManager();
+  ~TimeManager();
+  void Init(protocol_handler::ProtocolHandlerImpl* ph);
+  void Stop();
+  void SendMetric(utils::SharedPtr<Metric> metric);
+ private:
+  ApplicationManagerObserver app_observer;
+  TransportManagerObserver tm_observer;
+  ProtocolHandlerObserver ph_observer;
 
-  public:
-    TimeManager();
-    ~TimeManager();
-    void Init(protocol_handler::ProtocolHandlerImpl* ph);
+  int16_t port_;
+  std::string ip_;
+  int32_t socket_fd_;
+  bool is_ready_;
+  threads::Thread* thread_;
+  MessageQueue<utils::SharedPtr<Metric> > messages_;
+
+  class Streamer : public threads::ThreadDelegate {
+   public:
+    explicit Streamer(TimeManager* const server);
+    ~Streamer();
+    void threadMain() OVERRIDE;
+    bool exitThreadMain() OVERRIDE;
+    bool IsReady() const;
+    void Start();
     void Stop();
-    void SendMetric(utils::SharedPtr<Metric> metric);
+    bool Send(const std::string &msg);
   private:
-    class Streamer : public threads::ThreadDelegate {
-      public:
-        /*
-         * Default constructor
-         *
-         * @param server  Server pointer
-         */
-        explicit Streamer(TimeManager* const server);
+    TimeManager* const server_;
+    int32_t new_socket_fd_;
+    volatile bool is_client_connected_;
+    volatile bool stop_flag_;
+    DISALLOW_COPY_AND_ASSIGN(Streamer);
+  };
 
-        /*
-         * Destructor
-         */
-        ~Streamer();
-
-        /*
-         * Function called by thread on start
-         */
-        void threadMain();
-
-        /*
-         * Function called by thread on exit
-         */
-        bool exitThreadMain();
-
-        /*
-         * Checks if server is ready
-         *
-         * @return TRUE if socket is ready otherwise FALSE
-         */
-        bool IsReady() const;
-
-        /*
-         * Starts server
-         *
-         */
-        void Start();
-
-        /*
-         * Stops server
-         *
-         */
-        void Stop();
-
-        /*
-         * Sends data to connected client
-         *
-         * @param block Pointer to the data
-         */
-        bool Send(const std::string &msg);
-
-      private:
-        TimeManager* const server_;
-        int32_t new_socket_fd_;
-        volatile bool is_client_connected_;
-        volatile bool stop_flag_;
-
-        DISALLOW_COPY_AND_ASSIGN(Streamer);
-    };
-
-    ApplicationManagerObserver app_observer;
-    TransportManagerObserver tm_observer;
-    ProtocolHandlerObserver ph_observer;
-
-    int16_t port_;
-    std::string ip_;
-    int32_t socket_fd_;
-    bool is_ready_;
-    threads::Thread* thread_;
-    MessageQueue<utils::SharedPtr<Metric> > messages_;
-    DISALLOW_COPY_AND_ASSIGN(TimeManager);
+  DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
-
 }  // namespace time_manager
 #endif  // SRC_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MEDIA_MANAGER_H_

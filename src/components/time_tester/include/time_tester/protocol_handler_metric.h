@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -41,14 +40,11 @@
 
 namespace time_tester {
 
-class ProtocolHandlerObserver;
-
 class ProtocolHandlerMectic: public Metric {
 
   public:
     utils::SharedPtr<protocol_handler::PHMetricObserver::MessageMetric> message_metric;
     std::string GetStyledString();
 };
-
-}
+}  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_

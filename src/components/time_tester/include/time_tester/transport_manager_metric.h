@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -40,14 +39,10 @@
 
 namespace time_tester {
 
-class TransportManagerObserver;
-
 class TransportManagerMectic: public Metric {
-
-  public:
-    utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
-    std::string GetStyledString();
+ public:
+  utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
+  std::string GetStyledString();
 };
-
-}
+}  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
