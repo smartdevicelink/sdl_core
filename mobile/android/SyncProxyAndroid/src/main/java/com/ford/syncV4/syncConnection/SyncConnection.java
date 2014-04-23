@@ -425,7 +425,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @return byte value of the protocol version
      */
     public byte getProtocolVersion() {
-        return ((WiProProtocol) _protocol).getProtocolVersion();
+        return  _protocol.getProtocolVersion();
     }
 
     @Override
@@ -598,8 +598,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Asked to send heartbeat");
         final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat,
-                        (byte) 2);
+                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
         final byte[] bytes = heartbeat.assembleHeaderBytes();
         onProtocolMessageBytesToSend(bytes, 0, bytes.length);
     }
@@ -617,7 +616,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
         final ProtocolFrameHeader heartbeat =
                 ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
-                        (byte) 2);
+                        _protocol.getProtocolVersion());
         final byte[] bytes = heartbeat.assembleHeaderBytes();
         onProtocolMessageBytesToSend(bytes, 0, bytes.length);
     }

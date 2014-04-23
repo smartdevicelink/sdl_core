@@ -18,15 +18,10 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
-
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
-    public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
-    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
     boolean _haveHeader = false;
-    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     int _headerBufWritePos = 0;
     ProtocolFrameHeader _currentHeader = null;
     byte[] _dataBuf = null;
@@ -44,39 +39,6 @@ public class WiProProtocol extends AbstractProtocol {
     public WiProProtocol(IProtocolListener protocolListener) {
         super(protocolListener);
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
-    }
-
-    public byte getProtocolVersion() {
-        return mProtocolVersion.getCurrentVersion();
-    }
-
-    /**
-     * <b>This method is for the Test Cases only</b>
-     *
-     * @param version test protocol version
-     */
-    public void set_TEST_ProtocolMinVersion(byte version) {
-        ProtocolConstants.PROTOCOL_VERSION_MIN = version;
-        setProtocolVersion(version);
-    }
-
-    /**
-     * <b>This method is for the Test Cases only</b>
-     *
-     * @param version test protocol version
-     */
-    public void set_TEST_ProtocolMaxVersion(byte version) {
-        ProtocolConstants.PROTOCOL_VERSION_MAX = version;
-    }
-
-    public void setProtocolVersion(byte version) {
-        mProtocolVersion.setCurrentVersion(version);
-
-        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            updateDataStructureToProtocolVersion(version);
-        } else {
-            Logger.d(CLASS_NAME + " Protocol version:" + mProtocolVersion.getCurrentVersion());
-        }
     }
 
     public void StartProtocolSession(byte sessionId) {
@@ -546,21 +508,4 @@ public class WiProProtocol extends AbstractProtocol {
         _protocolListener.onStartServiceNackReceived(serviceType);
     }
 
-    private void updateDataStructureToProtocolVersion(byte version) {
-        Logger.d(CLASS_NAME + " Data structure updated to v:" + version);
-        // TODO : Incorporate SSL overhead const
-        // Implement here
-
-        switch (version) {
-            case ProtocolConstants.PROTOCOL_VERSION_ONE:
-                PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_1;
-                break;
-            default:
-                PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2;
-                break;
-        }
-
-        MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
-        _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
-    }
 }
