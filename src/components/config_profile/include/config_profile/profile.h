@@ -364,7 +364,7 @@ class Profile : public utils::Singleton<Profile> {
                          const char* const pKey) const;
 
     /**
-     * @brief Reads an int32_t value from the profile
+     * @brief Reads an uint16/32/64_t value from the profile
      *
      * @param value         Result value
      * @param default_value Value to use key wasn't found
@@ -372,12 +372,22 @@ class Profile : public utils::Singleton<Profile> {
      * @param pKey          The key whose value needs to be read out
      *
      * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
+     * (then the value is changed to default)
      */
-    bool ReadIntValue(int32_t* value,
-                      int32_t  default_value,
-                      const char* const pSection,
-                      const char* const pKey) const;
+    bool ReadUIntValue(uint16_t* value,
+                       uint16_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint32_t* value,
+                       uint32_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint64_t* value,
+                       uint64_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
 
     // Members section
     bool                            launch_hmi_;
@@ -417,7 +427,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        delete_file_in_none_;
     uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
-    int32_t                         heart_beat_timeout_;
+    uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
     uint32_t                        transport_manager_disconnect_timeout_;
