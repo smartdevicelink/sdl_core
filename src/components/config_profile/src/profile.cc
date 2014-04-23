@@ -383,9 +383,6 @@ uint16_t Profile::transport_manager_tcp_adapter_port() const {
 void Profile::UpdateValues() {
     LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
-    char value[INI_LINE_LEN + 1];
-    *value = '\0';
-
     // Launch HMI parameter
     std::string launch_value;
     if (ReadValue(&launch_value, kHmiSection, kLaunchHMIKey) &&
