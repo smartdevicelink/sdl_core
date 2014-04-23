@@ -25,6 +25,7 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
@@ -40,11 +41,12 @@ import static org.mockito.Mockito.when;
  */
 public class WiProProtocolTest extends InstrumentationTestCase {
 
-    public static final int MESSAGE_ID = 1;
-    public static final byte SESSION_ID = (byte) 48;
-    public static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
-    public static final int FRAME_SIZE_SHIFT = 100;
-    public static final IProtocolListener DUMMY_PROTOCOL_LISTENER =
+    private static final int MESSAGE_ID = 1;
+    private static final byte SESSION_ID = (byte) 48;
+    private static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
+    private static final int FRAME_SIZE_SHIFT = 100;
+    private static final int EXECUTOR_SERVICE_SLEEP_TIME = 150;
+    private static final IProtocolListener DUMMY_PROTOCOL_LISTENER =
             new IProtocolListener() {
                 @Override
                 public void onProtocolMessageBytesToSend(byte[] msgBytes,
@@ -209,6 +211,16 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         message.setSessionID(SESSION_ID);
         message.setServiceType(ServiceType.Mobile_Nav);
+        return message;
+    }
+
+    private ProtocolMessage generateAudioProtocolMessage(int messageSize) {
+        byte[] frame = generateByteArray(0, messageSize);
+        ProtocolMessage message = new ProtocolMessage();
+        message.setData(frame);
+        message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        message.setSessionID(SESSION_ID);
+        message.setServiceType(ServiceType.Audio_Service);
         return message;
     }
 
@@ -678,7 +690,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
         }catch (IllegalArgumentException exp){
-            assertTrue(" should not get here",false);
+            assertTrue(" should not get here", false);
         }
     }
 
@@ -738,7 +750,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-        protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
+        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
         verify(protocolListener).onResetHeartbeat();
     }
 
@@ -763,7 +775,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         System.arraycopy(data, 0, expectedResult, frameHeaderArray.length, data.length);
 
         // Take in count that messages are going to be sent with ExecutorService
-        Thread.sleep(20);
+        Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
@@ -783,7 +795,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         byte[] frameHeaderArray = frameHeader.assembleHeaderBytes();
 
         // Take in count that messages are going to be sent with ExecutorService
-        Thread.sleep(20);
+        Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(frameHeaderArray, 0,
                 frameHeaderArray.length);
@@ -810,7 +822,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         System.arraycopy(data, 20, expectedResult, frameHeaderArray.length, 20);
 
         // Take in count that messages are going to be sent with ExecutorService
-        Thread.sleep(20);
+        Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
@@ -837,7 +849,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         System.arraycopy(data, 90, expectedResult, frameHeaderArray.length, 10);
 
         // Take in count that messages are going to be sent with ExecutorService
-        Thread.sleep(20);
+        Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
@@ -898,7 +910,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
     public void testRPCHasHigherPriorityToBulk() throws InterruptedException {
         int messagesNumber = 50;
-        //CountDownLatch countDownLatch = new CountDownLatch();
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
         IProtocolListener protocolListener = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(protocolListener) {
 
@@ -914,6 +927,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 super.handleProtocolFrameToSend(header, data, offset, length);
 
                 Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
             }
 
             private void prepareMockItems() {
@@ -927,7 +943,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         ProtocolMessage protocolMessageWithData =
                 generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 1000);
-        ProtocolMessage protocolMessage =
+        ProtocolMessage rpcProtocolMessage =
                 generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
 
         for (int i = 0; i < messagesNumber; i++) {
@@ -935,11 +951,279 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             if (result == 0) {
                 protocol.SendMessage(protocolMessageWithData);
             } else {
-                protocol.SendMessage(protocolMessage);
+                protocol.SendMessage(rpcProtocolMessage);
             }
         }
 
-        Thread.sleep(2000);
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
+    }
+
+    public void testRPCHasHigherPriorityToAudio() throws InterruptedException {
+        int messagesNumber = 50;
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage audioProtocolMessage =
+                generateAudioProtocolMessage(1000);
+        ProtocolMessage rpcProtocolMessage =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
+
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 1);
+            if (result == 0) {
+                protocol.SendMessage(audioProtocolMessage);
+            } else {
+                protocol.SendMessage(rpcProtocolMessage);
+            }
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
+    }
+
+    public void testRPCHasHigherPriorityToMobileNavi() throws InterruptedException {
+        int messagesNumber = 50;
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage mobileNavProtocolMessage =
+                generateMobileNavProtocolMessage(1000);
+        ProtocolMessage rpcProtocolMessage =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
+
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 1);
+            if (result == 0) {
+                protocol.SendMessage(mobileNavProtocolMessage);
+            } else {
+                protocol.SendMessage(rpcProtocolMessage);
+            }
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
+    }
+
+    public void testAudioHasHigherPriorityToMobileNavi() throws InterruptedException {
+        int messagesNumber = 50;
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getServiceType() +" " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage audioProtocolMessage =
+                generateAudioProtocolMessage(1000);
+        ProtocolMessage mobileNavProtocolMessage =
+                generateMobileNavProtocolMessage(1000);
+
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 1);
+            if (result == 0) {
+                protocol.SendMessage(audioProtocolMessage);
+            } else {
+                protocol.SendMessage(mobileNavProtocolMessage);
+            }
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
+    }
+
+    public void testAudioHasHigherPriorityToBulkData() throws InterruptedException {
+        int messagesNumber = 50;
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getServiceType() +" " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage audioProtocolMessage =
+                generateAudioProtocolMessage(1000);
+        ProtocolMessage protocolMessageWithData =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 1000);
+
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 1);
+            if (result == 0) {
+                protocol.SendMessage(audioProtocolMessage);
+            } else {
+                protocol.SendMessage(protocolMessageWithData);
+            }
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
+    }
+
+    public void testDifferentMessagesTypeWithCorrectPriorities() throws InterruptedException {
+        int messagesNumber = 50;
+        final int[] messagesCounter = {0};
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesNumber);
+        IProtocolListener protocolListener = mock(IProtocolListener.class);
+        WiProProtocol protocol = new WiProProtocol(protocolListener) {
+
+            @Override
+            public void SendMessage(ProtocolMessage protocolMsg) {
+                prepareMockItems();
+                super.SendMessage(protocolMsg);
+            }
+
+            @Override
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
+                super.handleProtocolFrameToSend(header, data, offset, length);
+
+                Logger.d(TAG + " header:" + header.getFrameType() + " " + header.getServiceType() +" " + header.getDataSize());
+
+                messagesCounter[0]++;
+                countDownLatch.countDown();
+            }
+
+            private void prepareMockItems() {
+                _messageLocks = mock(Hashtable.class);
+                when(_messageLocks.get(anyByte())).thenReturn("mockLock");
+                doThrow(new IllegalStateException("should not get protocol error"))
+                        .when(_protocolListener).onProtocolError(anyString(), any(Exception.class));
+            }
+        };
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolMessage audioProtocolMessage = generateAudioProtocolMessage(1000);
+        ProtocolMessage mobileNaviProtocolMessage = generateMobileNavProtocolMessage(1000);
+        ProtocolMessage rpcProtocolMessage =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
+        ProtocolMessage protocolMessageWithData =
+                generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 1000);
+
+        for (int i = 0; i < messagesNumber; i++) {
+            int result = randInt(0, 3);
+            if (result == 0) {
+                protocol.SendMessage(audioProtocolMessage);
+            } else if (result == 1) {
+                protocol.SendMessage(protocolMessageWithData);
+            } else if (result == 2) {
+                protocol.SendMessage(mobileNaviProtocolMessage);
+            } else if (result == 3) {
+                protocol.SendMessage(rpcProtocolMessage);
+            }
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        assertEquals(messagesCounter[0], messagesNumber);
     }
 
     private int randInt(int min, int max) {
@@ -949,8 +1233,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         // nextInt is normally exclusive of the top value,
         // so add 1 to make it inclusive
-        int randomNum = rand.nextInt((max - min) + 1) + min;
 
-        return randomNum;
+        return rand.nextInt((max - min) + 1) + min;
     }
 }
