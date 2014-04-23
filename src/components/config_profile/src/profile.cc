@@ -755,7 +755,7 @@ void Profile::UpdateValues() {
                   kMainSection, kPendingRequestsAmoundKey);
 
     if (pending_requests_amount_ <= 0) {
-        pending_requests_amount_ = 1000;
+        pending_requests_amount_ = kDefaultPendingRequestsAmount;
     }
 
     LOG_UPDATED_VALUE(pending_requests_amount_, kPendingRequestsAmoundKey,
