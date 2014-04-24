@@ -105,8 +105,8 @@ public class TCPTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset, int length) {
         TCPTransportState currentState = getCurrentState();
-        Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
-                , msgBytes.length, offset, length, currentState.name()));
+        //Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
+        //        , msgBytes.length, offset, length, currentState.name()));
 
         boolean bResult = false;
 

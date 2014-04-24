@@ -3,6 +3,7 @@ package com.ford.syncV4.protocol;
 import android.os.Environment;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
@@ -107,6 +108,9 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+        if (header.getFrameData() == FrameDataControlFrameType.StartService.value()) {
+            Logger.d("TRACE-StartService");
+        }
         if (data != null) {
             if (offset >= data.length) {
                 throw new IllegalArgumentException("offset should not be more then length");

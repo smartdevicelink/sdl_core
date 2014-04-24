@@ -91,7 +91,7 @@ public class WiProProtocol extends AbstractProtocol {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.RPC,
                 sessionId, getProtocolVersion());
         Logger.d(CLASS_NAME + " Start Protocol Session, protocol ver:" + getProtocolVersion());
-        sendFrameToTransport(header);
+        handleProtocolFrameToSend(header, null, 0, 0);
     }
 
     @Override
@@ -112,14 +112,15 @@ public class WiProProtocol extends AbstractProtocol {
         }
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType,
                 sessionId, getProtocolVersion());
-        sendFrameToTransport(header);
-    } // end-method
+        handleProtocolFrameToSend(header, null, 0, 0);
+    }
+
 
     private void sendStartProtocolSessionACK(ServiceType serviceType, byte sessionID) {
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSessionACK(serviceType,
                 sessionID, 0x00, getProtocolVersion());
-        sendFrameToTransport(header);
-    } // end-method
+        handleProtocolFrameToSend(header, null, 0, 0);
+    }
 
     public void SetHeartbeatSendInterval(int heartbeatSendInterval_ms) {
         _heartbeatSendInterval_ms = heartbeatSendInterval_ms;
@@ -196,9 +197,6 @@ public class WiProProtocol extends AbstractProtocol {
         );
     }
 
-    private void sendFrameToTransport(ProtocolFrameHeader header) {
-        handleProtocolFrameToSend(header, null, 0, 0);
-    }
 
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;

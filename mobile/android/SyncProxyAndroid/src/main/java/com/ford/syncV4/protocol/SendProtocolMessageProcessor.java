@@ -110,8 +110,7 @@ public class SendProtocolMessageProcessor {
 
                                          @Override
                                          public void run() {
-                                             callback.onProtocolFrameToSend(header, data, 0,
-                                                     data.length);
+                                             callback.onProtocolFrameToSend(header, null, 0, 0);
                                          }
                                      }
             );
