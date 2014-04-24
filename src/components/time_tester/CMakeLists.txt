@@ -3,6 +3,7 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include/
   ../connection_handler/include/
+  ../security_manager/include/
   ../transport_manager/include/
   ../application_manager/include/
   ../hmi_message_handler/include/

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -34,22 +34,21 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
 
 #include "transport_manager/common.h"
+#include "utils/date_time.h"
 
 namespace transport_manager {
 
 class TMMetricObserver {
-  public:
-    struct MessageMetric {
-        time_t begin;
-        time_t end;
-        size_t data_size;
-    };
-    virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
-    virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
+ public:
+  struct MessageMetric {
+    TimevalStruct begin;
+    TimevalStruct end;
+    size_t data_size;
+  };
+  virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
+  virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
 
-    virtual ~TMMetricObserver(){};
-
+  virtual ~TMMetricObserver(){}
 };
-
-}
+}  // transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_

@@ -175,7 +175,7 @@ bool InitHmi() {
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_INFO(logger, "HMI start script doesn't exist!");
+    LOG4CXX_FATAL(logger, "HMI start script doesn't exist!");
     return false;
   }
 

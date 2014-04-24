@@ -37,6 +37,7 @@
 #include "utils/logger.h"
 
 #include "utils/file_system_tests.h"
+#include "utils/data_time_tests.h"
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"

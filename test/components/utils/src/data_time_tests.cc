@@ -29,27 +29,4 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_OBSERVER_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_OBSERVER_H_
-
-#include "utils/message_queue.h"
-#include "application_manager/time_metric_observer.h"
-#include "application_manager_metric.h"
-
-
-namespace time_tester {
-
-class TimeManager;
-
-class ApplicationManagerObserver: public application_manager::AMMetricObserver {
-   public:
-    explicit ApplicationManagerObserver(TimeManager* time_manager);
-   virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
-
-  private:
-    TimeManager* time_manager_;
-};
-
-}
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_OBSERVER_H_
+#include "utils/data_time_tests.h"

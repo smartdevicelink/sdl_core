@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -44,9 +44,9 @@
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
 
-
-
 namespace time_tester {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
 
 TimeManager::TimeManager():socket_fd_(0),
   messages_(),
@@ -54,9 +54,8 @@ TimeManager::TimeManager():socket_fd_(0),
   app_observer(this),
   tm_observer(this),
   ph_observer(this) {
-  ip_ = profile::Profile::instance()->server_address();
-  port_ = profile::Profile::instance()->time_testing_port();
-
+    ip_ = profile::Profile::instance()->server_address();
+    port_ = profile::Profile::instance()->time_testing_port();
 }
 
 TimeManager::~TimeManager() {
@@ -91,7 +90,6 @@ void TimeManager::Stop() {
 void TimeManager::SendMetric(utils::SharedPtr<Metric> metric) {
   messages_.push(metric);
 }
-
 
 TimeManager::Streamer::Streamer(
   TimeManager* const server)
@@ -168,11 +166,12 @@ void TimeManager::Streamer::Start() {
   if (-1 == bind(server_->socket_fd_,
                  reinterpret_cast<struct sockaddr*>(&serv_addr_),
                  sizeof(serv_addr_))) {
-    LOG4CXX_ERROR_EXT(logger_, "Unable to bind");
+    LOG4CXX_ERROR(logger_, "Unable to bind server "
+                  << server_->ip_.c_str() << ':' << server_->port_);
     return;
   }
   if (-1 == listen(server_->socket_fd_, 1)) {
-    LOG4CXX_INFO(logger_, "Streamer listen error " << strerror(errno) );
+    LOG4CXX_ERROR(logger_, "Streamer listen error " << strerror(errno) );
     return;
   }
   LOG4CXX_INFO(logger_, "Streamer is listetning for connections");
@@ -203,7 +202,7 @@ bool TimeManager::Streamer::IsReady() const {
   fd_set fds;
   FD_ZERO(&fds);
   FD_SET(new_socket_fd_, &fds);
-  struct timeval tv;
+  TimevalStruct tv;
   tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 
@@ -233,5 +232,4 @@ bool TimeManager::Streamer::Send(const std::string& msg) {
   }
   return true;
 }
-
-}
+}  // namespace time_tester

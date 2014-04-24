@@ -1457,8 +1457,8 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
     const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-  AMMetricObserver::MessageMetric* metric = new AMMetricObserver::MessageMetric();
-  metric->begin = time(NULL);
+  AMMetricObserver::MessageMetricPtr metric(new AMMetricObserver::MessageMetric());
+  metric->begin = date_time::DateTime::getCurrentTime();
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
       new smart_objects::SmartObject);
 
@@ -1476,7 +1476,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
-  metric->end = time(NULL);
+  metric->end = date_time::DateTime::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }
