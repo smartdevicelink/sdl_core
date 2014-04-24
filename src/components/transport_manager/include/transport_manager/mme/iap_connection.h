@@ -88,9 +88,11 @@ class IAPConnection : public Connection {
 
     void ParseEvents();
     void AcceptSession(uint32_t protocol_id);
+    void AcceptSession(uint32_t protocol_id, const char* protocol_name);
     void CloseSession(uint32_t session_id);
     void ReceiveData(uint32_t session_id);
     void OpenSession(uint32_t protocol_id);
+    void OpenSession(uint32_t protocol_id, const char* protocol_name);
 
     IAPConnection* parent_;
     ipod_hdl_t* ipod_hdl_;

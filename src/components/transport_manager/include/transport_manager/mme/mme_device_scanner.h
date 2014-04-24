@@ -52,6 +52,8 @@
 
 #include "transport_manager/mme/mme_device.h"
 
+#define MAX_QUEUE_MSG_SIZE 4095
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -87,7 +89,8 @@ private:
 
   static const char* qdb_name;
 #ifdef MME_MQ
-  static const char* mq_name;
+  static const char* event_mq_name;
+  static const char* ack_mq_name;
 #else
   static const char* mme_name;
 #endif
@@ -95,7 +98,8 @@ private:
   TransportAdapterController* controller_;
   bool initialised_;
 #ifdef MME_MQ
-  mqd_t mqd_;
+  mqd_t event_mqd_;
+  mqd_t ack_mqd_;
 #else
   mme_hdl_t* mme_hdl_;
 #endif
@@ -106,7 +110,7 @@ private:
 #ifdef MME_MQ
   class NotifyThreadDelegate : public threads::ThreadDelegate {
    public:
-    NotifyThreadDelegate(mqd_t mqd, MmeDeviceScanner* parent);
+    NotifyThreadDelegate(mqd_t event_mqd, mqd_t ack_mqd, MmeDeviceScanner* parent);
     virtual void threadMain();
 
    private:
@@ -118,12 +122,15 @@ private:
     } MmeDeviceInfo;
 #pragma pack(pop)
 
-    static const int kBufferSize = 65536;
+    static const int kBufferSize = MAX_QUEUE_MSG_SIZE;
+    static const int kAckBufferSize = MAX_QUEUE_MSG_SIZE;
 
     MmeDeviceScanner* parent_;
-    mqd_t mqd_;
+    mqd_t event_mqd_;
+    mqd_t ack_mqd_;
     bool run_;
     char buffer_[kBufferSize];
+    char ack_buffer_[kAckBufferSize];
   };
 #else
   class NotifyThreadDelegate : public threads::PulseThreadDelegate {

@@ -38,7 +38,8 @@ namespace transport_adapter {
 
 const char* MmeDeviceScanner::qdb_name = "/dev/qdb/mediaservice_db";
 #ifdef MME_MQ
-const char* MmeDeviceScanner::mq_name = "/dev/mqueue/ToSDLCoreUSBAdapter";
+const char* MmeDeviceScanner::event_mq_name = "/dev/mqueue/ToSDLCoreUSBAdapter";
+const char* MmeDeviceScanner::ack_mq_name = "/dev/mqueue/FromSDLCoreUSBAdapter";
 #else
 const char* MmeDeviceScanner::mme_name = "/dev/mmsync";
 #endif
@@ -47,7 +48,8 @@ MmeDeviceScanner::MmeDeviceScanner(TransportAdapterController* controller)
   : controller_(controller)
   , initialised_(false)
 #ifdef MME_MQ
-  , mqd_(-1)
+  , event_mqd_(-1)
+  , ack_mqd_(-1)
 #else
   , mme_hdl_(0)
 #endif
@@ -79,25 +81,42 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
   struct mq_attr attributes;
 #define MSGQ_MAX_MESSAGES 128
   attributes.mq_maxmsg = MSGQ_MAX_MESSAGES;
-#define MAX_QUEUE_MSG_SIZE 4095
   attributes.mq_msgsize = MAX_QUEUE_MSG_SIZE;
   attributes.mq_flags = 0;
-  LOG4CXX_TRACE(logger_, "Opening " << mq_name);
-  mqd_ = mq_open(mq_name, flags, mode, &attributes);
+  LOG4CXX_TRACE(logger_, "Opening " << event_mq_name);
+  event_mqd_ = mq_open(event_mq_name, flags, mode, &attributes);
 #else
   int flags = O_RDONLY;
-  LOG4CXX_TRACE(logger_, "Opening " << mq_name);
-  mqd_ = mq_open(mq_name, flags);
+  event_mqd_ = mq_open(event_mq_name, flags);
 #endif
-  if (mqd_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Opened " << mq_name);
-
-    notify_thread_ = new threads::Thread("MME MQ notifier", new NotifyThreadDelegate(mqd_, this));
-    notify_thread_->start();
+  if (event_mqd_ != -1) {
+    LOG4CXX_DEBUG(logger_, "Opened " << event_mq_name);
   }
   else {
-    LOG4CXX_ERROR(logger_, "Could not open " << mq_name << ", errno = " << errno);
+    LOG4CXX_ERROR(logger_, "Could not open " << event_mq_name << ", errno = " << errno);
     error = TransportAdapter::FAIL;
+  }
+#if CREATE_MME_MQ
+  flags = O_WRONLY | O_CREAT;
+#else
+  flags = O_WRONLY;
+#endif
+  LOG4CXX_TRACE(logger_, "Opening " << ack_mq_name);
+#if CREATE_MME_MQ
+  ack_mqd_ = mq_open(ack_mq_name, flags, mode, &attributes);
+#else
+  ack_mqd_ = mq_open(ack_mq_name, flags);
+#endif
+  if (ack_mqd_ != -1) {
+    LOG4CXX_DEBUG(logger_, "Opened " << ack_mq_name);
+  }
+  else {
+    LOG4CXX_ERROR(logger_, "Could not open " << ack_mq_name << ", errno = " << errno);
+    error = TransportAdapter::FAIL;
+  }
+  if ((event_mqd_ != -1) && (ack_mqd_ != -1)) {
+    notify_thread_ = new threads::Thread("MME MQ notifier", new NotifyThreadDelegate(event_mqd_, ack_mqd_, this));
+    notify_thread_->start();
   }
 #else
   LOG4CXX_TRACE(logger_, "Connecting to " << mme_name);
@@ -113,6 +132,7 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
     error = TransportAdapter::FAIL;
   }
 #endif
+
   initialised_ = true;
   return error;
 }
@@ -153,12 +173,19 @@ void MmeDeviceScanner::Terminate() {
     notify_thread_->stop();
   }
 #ifdef MME_MQ
-  LOG4CXX_TRACE(logger_, "Closing " << mq_name);
-  if (mq_close(mqd_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Closed " << mq_name);
+  LOG4CXX_TRACE(logger_, "Closing " << event_mq_name);
+  if (mq_close(event_mqd_) != -1) {
+    LOG4CXX_DEBUG(logger_, "Closed " << event_mq_name);
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not close " << mq_name);
+    LOG4CXX_WARN(logger_, "Could not close " << event_mq_name);
+  }
+  LOG4CXX_TRACE(logger_, "Closing " << ack_mq_name);
+  if (mq_close(ack_mqd_) != -1) {
+    LOG4CXX_DEBUG(logger_, "Closed " << ack_mq_name);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Could not close " << ack_mq_name);
   }
 #else
   LOG4CXX_TRACE(logger_, "Disconnecting from " << mme_name);
@@ -262,7 +289,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     mount_point = std::string(data);
     LOG4CXX_DEBUG(logger_, "Mount point " << mount_point);
     data = (char*) qdb_cell(res, 0, 1); // fs_type
-    if (0 == strcmp(data, "iap")) {
+    if (0 == strcmp(data, "ipod")) {
       protocol = MmeDevice::IAP;
       LOG4CXX_DEBUG(logger_, "Protocol iAP");
     }
@@ -308,15 +335,15 @@ bool MmeDeviceScanner::GetMmeInfo(
 }
 
 #ifdef MME_MQ
-MmeDeviceScanner::NotifyThreadDelegate::NotifyThreadDelegate(mqd_t mqd, MmeDeviceScanner* parent) : parent_(parent), mqd_(mqd), run_(true) {
+MmeDeviceScanner::NotifyThreadDelegate::NotifyThreadDelegate(mqd_t event_mqd, mqd_t ack_mqd, MmeDeviceScanner* parent) : parent_(parent), event_mqd_(event_mqd), ack_mqd_(ack_mqd), run_(true) {
 }
 
 void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
   while (run_) {
-    LOG4CXX_TRACE(logger_, "Waiting for message from " << MmeDeviceScanner::mq_name);
-    ssize_t size = mq_receive(mqd_, buffer_, kBufferSize, 0);
+    LOG4CXX_TRACE(logger_, "Waiting for message from " << MmeDeviceScanner::event_mq_name);
+    ssize_t size = mq_receive(event_mqd_, buffer_, kBufferSize, 0);
     if (size != -1) {
-      LOG4CXX_DEBUG(logger_, "Received " << size << " bytes from " << MmeDeviceScanner::mq_name);
+      LOG4CXX_DEBUG(logger_, "Received " << size << " bytes from " << MmeDeviceScanner::event_mq_name);
       char code = buffer_[0];
       switch (code) {
 #define SDL_MSG_IPOD_DEVICE_CONNECT 0x1A
@@ -326,6 +353,16 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           const char* name = mme_device_info->name;
           LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_CONNECT: msid = " << msid << ", name = " << name);
           parent_->OnDeviceArrived(msid);
+          LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_CONNECT_ACK");
+#define SDL_MSG_IPOD_DEVICE_CONNECT_ACK 0x1B
+          ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_CONNECT_ACK;
+          LOG4CXX_TRACE(logger_, "Sending message to " << MmeDeviceScanner::ack_mq_name);
+          if (mq_send(ack_mqd_, ack_buffer_, kAckBufferSize, 0) != -1) {
+            LOG4CXX_DEBUG(logger_, "Message sent to " << MmeDeviceScanner::ack_mq_name);
+          }
+          else {
+            LOG4CXX_WARN(logger_, "Error occured while sending message to " << MmeDeviceScanner::ack_mq_name << ", errno = " << errno);
+          }
         }
 #define SDL_MSG_IPOD_DEVICE_DISCONNECT 0x1C
         case SDL_MSG_IPOD_DEVICE_DISCONNECT: {
@@ -334,11 +371,21 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           const char* name = mme_device_info->name;
           LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_DISCONNECT: msid = " << msid << ", name = " << name);
           parent_->OnDeviceLeft(msid);
+          LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK");
+#define SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK 0x1D
+          ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK;
+          LOG4CXX_TRACE(logger_, "Sending message to " << MmeDeviceScanner::ack_mq_name);
+          if (mq_send(ack_mqd_, ack_buffer_, kAckBufferSize, 0) != -1) {
+            LOG4CXX_DEBUG(logger_, "Message sent to " << MmeDeviceScanner::ack_mq_name);
+          }
+          else {
+            LOG4CXX_WARN(logger_, "Error occured while sending message to " << MmeDeviceScanner::ack_mq_name << ", errno = " << errno);
+          }
         }
       }
     }
     else {
-      LOG4CXX_WARN(logger_, "Error occured while receiving message from " << MmeDeviceScanner::mq_name);
+      LOG4CXX_WARN(logger_, "Error occured while receiving message from " << MmeDeviceScanner::event_mq_name << ", errno = " << errno);
     }
   }
 }

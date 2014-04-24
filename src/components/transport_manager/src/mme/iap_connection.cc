@@ -170,10 +170,17 @@ void IAPConnection::ReceiverThreadDelegate::ParseEvents() {
 void IAPConnection::ReceiverThreadDelegate::AcceptSession(uint32_t protocol_id) {
   char protocol_name[kProtocolNameSize];
   ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+  AcceptSession(protocol_id, protocol_name);
+}
+
+void IAPConnection::ReceiverThreadDelegate::AcceptSession(uint32_t protocol_id, const char* protocol_name) {
   LOG4CXX_INFO(logger_, "iAP: session request on protocol " << protocol_name);
   LOG4CXX_TRACE(logger_, "iAP: accepting session on protocol " << protocol_name);
   if (ipod_eaf_session_accept(ipod_hdl_, protocol_id, 0) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: session on protocol " << protocol_name << " accepted");
+// For some reason event IPOD_EAF_EVENT_SESSION_OPEN is never reported
+// and we have to open session right after having accepted it
+    OpenSession(protocol_id, protocol_name);
   }
   else {
     LOG4CXX_ERROR(logger_, "iAP: failed to accept session on protocol " << protocol_name);
@@ -207,6 +214,11 @@ void IAPConnection::ReceiverThreadDelegate::ReceiveData(uint32_t session_id) {
 
 void IAPConnection::ReceiverThreadDelegate::OpenSession(uint32_t protocol_id) {
   char protocol_name[kProtocolNameSize];
+  ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+  OpenSession(protocol_id, protocol_name);
+}
+
+void IAPConnection::ReceiverThreadDelegate::OpenSession(uint32_t protocol_id, const char* protocol_name) {
   LOG4CXX_TRACE(logger_, "iAP: opening session on protocol " << protocol_name);
   int session_id = ipod_eaf_session_open(ipod_hdl_, protocol_id);
   if (session_id != -1) {
