@@ -1021,15 +1021,18 @@ SDL.SDLModel = Em.Object.create({
             }
         }
 
-        for (var key in SDL.SDLModel.connectedDevices) {
+        var dev = SDL.SDLModel.connectedDevices;
+        for (var key in dev) {
 
-            if (params.deviceList.filterProperty("id", parseInt(key)).length == 0) {
+            if (dev.hasOwnProperty(key)) {
+                if (params.deviceList.filterProperty("id", parseInt(key)).length == 0) {
 
-                if (SDL.PopUp.popUpId == SDL.SDLModel.connectedDevices[key].sdlFunctionality.popUpId) {
-                    SDL.PopUp.deactivate();
+                    if (SDL.PopUp.popUpId == dev[key].sdlFunctionality.popUpId) {
+                        SDL.PopUp.deactivate();
+                    }
+
+                    delete dev[key];
                 }
-
-                delete SDL.SDLModel.connectedDevices[key];
             }
         }
 
@@ -1112,9 +1115,10 @@ SDL.SDLModel = Em.Object.create({
             SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
         }
 
-        SDL.InteractionChoicesView.activate(message);
-
-        SDL.SDLController.VRMove();
+       // if (message.params.choiceSet || message.params.interactionLayout == "KEYBOARD") {
+            SDL.InteractionChoicesView.activate(message);
+            SDL.SDLController.VRMove();
+        //}
     },
 
     /**

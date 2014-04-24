@@ -1224,7 +1224,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ClosePopUp":
                 {
 
-                    SDL.SDLController.closePopUp();
+                    SDL.SDLController.closePopUp(request.params.methodName);
 
 
                     Em.Logger.log("FFW." + request.method + "Response");
