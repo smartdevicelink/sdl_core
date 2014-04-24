@@ -425,7 +425,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * @return byte value of the protocol version
      */
     public byte getProtocolVersion() {
-        return  _protocol.getProtocolVersion();
+        return _protocol.getProtocolVersion();
     }
 
     @Override
@@ -596,11 +596,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
-        Logger.d(CLASS_NAME + " Asked to send heartbeat");
-        final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
-        final byte[] bytes = heartbeat.assembleHeaderBytes();
-        onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        if (_protocol != null) {
+            Logger.d(CLASS_NAME + " Asked to send heartbeat");
+            final ProtocolFrameHeader heartbeat =
+                    ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
+            final byte[] bytes = heartbeat.assembleHeaderBytes();
+            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        }
     }
 
     @Override
@@ -613,12 +615,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor) {
-        Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
-        final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
-                        _protocol.getProtocolVersion());
-        final byte[] bytes = heartbeat.assembleHeaderBytes();
-        onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        if (_protocol != null) {
+            Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
+            final ProtocolFrameHeader heartbeat =
+                    ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
+                            _protocol.getProtocolVersion());
+            final byte[] bytes = heartbeat.assembleHeaderBytes();
+            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        }
     }
 
     public byte getSessionId() {

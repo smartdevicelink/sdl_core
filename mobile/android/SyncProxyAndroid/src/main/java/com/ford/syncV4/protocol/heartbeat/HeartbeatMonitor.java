@@ -98,7 +98,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     if (listener != null) {
                         listener.heartbeatTimedOut(HeartbeatMonitor.this);
                     }
-                    // TODO stop?
+                    stop();
                 }
             }
             rescheduleHeartbeat();
@@ -146,8 +146,6 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                                     heartbeatAckTimeoutRunnable, interval)) {
                                 Logger.e(CLASS_NAME + " Couldn't schedule run()");
                             }
-
-
 
                             Logger.d(CLASS_NAME + " Starting looper");
                             Looper.loop();
