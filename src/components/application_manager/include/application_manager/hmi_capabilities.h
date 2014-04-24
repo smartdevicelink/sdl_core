@@ -35,7 +35,6 @@
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
-#include "utils/logger.h"
 #include "json/json.h"
 
 namespace NsSmartDeviceLink {
@@ -428,9 +427,6 @@ class HMICapabilities {
   smart_objects::SmartObject*      prerecorded_speech_;
 
   ApplicationManagerImpl*          app_mngr_;
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
 };

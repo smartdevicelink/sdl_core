@@ -1,3 +1,6 @@
+
+set(target TransportManager)
+
 include_directories (
   ./include
   ../utils/include/
@@ -70,22 +73,26 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif(BUILD_USB_SUPPORT)
 
-add_library("TransportManager" ${SOURCES})
+add_library(${target} ${SOURCES})
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    target_link_libraries ("TransportManager" usbdi)
+    target_link_libraries(${target} usbdi)
     if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      target_link_libraries ("TransportManager" ipod)
-      target_link_libraries ("TransportManager" iap2client)
+      target_link_libraries(${target} ipod)
+      target_link_libraries(${target} iap2client)
     endif()
   endif()
 endif(BUILD_USB_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
-  target_link_libraries ("TransportManager" avahi-common)
+  target_link_libraries(${target} avahi-common)
 endif()
-target_link_libraries ("TransportManager" log4cxx)
+
+if(ENABLE_LOG)
+  target_link_libraries(${target} log4cxx)
+endif()
+
 if (BUILD_BT_SUPPORT)
-  target_link_libraries("TransportManager" bluetooth)
+  target_link_libraries(${target} bluetooth)
 endif()

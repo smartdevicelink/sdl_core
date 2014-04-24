@@ -1,13 +1,7 @@
 #include "protocol_handler/service_type.h"
 #include "protocol_handler/message_priority.h"
 
-#include "utils/logger.h"
 #include "utils/macro.h"
-
-namespace {
-log4cxx::LoggerPtr g_logger = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ConnectionHandler"));
-}
 
 namespace protocol_handler {
 

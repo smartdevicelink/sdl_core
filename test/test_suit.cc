@@ -40,12 +40,12 @@
 #include "utils/prioritized_queue_tests.h"
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
-#include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
+//#include "media_manager/media_manager_impl_test.h"
 //#include "jsoncpp/json_reader_test.h"
 
 // #include "json_handler/smart_schema_draft_test.h"
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
 
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties");
 
 #ifdef TESTS_WITH_HMI
   test::AdminAppTest app;
@@ -85,11 +85,10 @@ int main(int argc, char **argv) {
 #endif
   int result = RUN_ALL_TESTS();
 
-#ifdef __cplusplus
+#if defined(__cplusplus) and defined(GCOV_ENABLED)
   __gcov_flush();
 #endif
 
   sleep(2);
   return result;
 }
-

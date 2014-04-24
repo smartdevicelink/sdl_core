@@ -12,6 +12,7 @@
 #include "json/json.h"
 
 #include "mb_tcpclient.hpp"
+#include "utils/lock.h"
 
 #include <cstring> 
 
@@ -23,7 +24,7 @@ namespace NsMessageBroker
 {
 
    /**
-    * \class CMessageBrokerController
+    *ï¿½\class CMessageBrokerController
     * \brief MessageBroker Controller.
     */
    class CMessageBrokerController : public TcpClient
@@ -184,13 +185,34 @@ namespace NsMessageBroker
       * \brief Method for receiving thread.
       */
       void* MethodForReceiverThread(void * arg);
+
+      virtual void exitReceavingThread() {
+        stop = true;
+        while (is_active) {
+          sleep(1);
+        }
+      }
+
+   protected:
+      /**
+       * @brief flag top stop thread
+       */
+      volatile bool stop;
+
+      /**
+       * @brief Flag represents that receaving data is active
+       */
+      volatile bool is_active;
+
    private:
       /**
       * \brief Method for receiving messages without tcp packeting.
       * \param message received data
       */
       void onMessageReceived(Json::Value message);
-   private:
+
+
+
       /**
       * \brief Start value of id's diapason.
       */
@@ -230,6 +252,11 @@ namespace NsMessageBroker
       * \brief JSON writer.
       */
      Json::FastWriter m_receiverWriter;
+
+     /*
+      * @brief mutex for mWaitResponseQueue
+      */
+     sync_primitives::Lock       queue_lock_;
       
    };
 } /* namespace NsMessageBroker */

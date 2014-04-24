@@ -37,10 +37,9 @@
 
 #include <queue>
 #include <set>
+#include <map>
 #include <memory>
 #include <string>
-
-#include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -374,6 +373,20 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  void SetTimeMetricObserver(TMMetricObserver* observer);
+
+  /**
+   * @brief Return Time metric observer
+   *
+   * @param return pointer to Time metric observer
+   */
+  virtual TMMetricObserver* GetTimeMetricObserver();
+
  protected:
 
   /**
@@ -488,14 +501,13 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Pointer to the factory of connections initiated from client.
    */
   ClientConnectionListener* client_connection_listener_;
+
+  /**
+   * @brief Pointer to time metric observer
+   */
+  TMMetricObserver* metric_observer_;
 };
-
-#ifdef ENABLE_LOG
-extern log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
 #endif  // #ifndef \
         // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_

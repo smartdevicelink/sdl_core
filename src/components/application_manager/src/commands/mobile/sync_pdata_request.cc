@@ -45,8 +45,7 @@ namespace commands {
 
 const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME =
     "policy_sync_data.dat";
-const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME =
-    profile::Profile::instance()->app_storage_folder() + "/policies";
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME = "policies";
 
 SyncPDataRequest::SyncPDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -78,8 +77,11 @@ void SyncPDataRequest::Run() {
   const std::vector<uint8_t> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
-  std::string file_path = file_system::CreateDirectory(
-      TEMPORARY_HARDCODED_FOLDERNAME);
+  std::string path =
+      profile::Profile::instance()->app_storage_folder() + "/";
+  path += TEMPORARY_HARDCODED_FOLDERNAME;
+
+  std::string file_path = file_system::CreateDirectory(path);
 
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(

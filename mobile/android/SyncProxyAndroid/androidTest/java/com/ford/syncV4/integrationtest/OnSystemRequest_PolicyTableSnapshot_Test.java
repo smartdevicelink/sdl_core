@@ -132,7 +132,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
             }
         }).when(handlerMock)
           .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot),
-                  eq(fileType));
+                  eq(fileType), eq(requestType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP

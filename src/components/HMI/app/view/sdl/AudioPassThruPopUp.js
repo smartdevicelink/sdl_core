@@ -171,8 +171,8 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
             if( this.timer ){
                 clearTimeout( this.timer );
             }
-        }
 
-        SDL.SDLController.onSystemContextChange();
+            SDL.SDLController.onSystemContextChange();
+        }
     }.observes( 'activate' )
 } );

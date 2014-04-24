@@ -36,8 +36,12 @@
 #include "transport_manager/usb/qnx/platform_usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 PlatformUsbDevice::PlatformUsbDevice(
     usbd_device_instance_t* instance, usbd_device* device,

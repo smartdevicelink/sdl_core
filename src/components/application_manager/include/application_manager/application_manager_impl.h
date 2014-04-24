@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -60,11 +60,10 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
-
+#include "time_metric_observer.h"
 #include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
@@ -210,6 +209,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     /////////////////////////////////////////////////////
 
     HMICapabilities& hmi_capabilities();
+
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(AMMetricObserver* observer);
 
     ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -627,9 +633,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-#   ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#   endif // ENABLE_LOG
+	AMMetricObserver* metric_observer_;
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

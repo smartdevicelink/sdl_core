@@ -37,16 +37,14 @@
 
 #include <memory.h>
 
+#include "utils/logger.h"
+
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-#endif // ENABLE_LOG
-
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.
@@ -156,7 +154,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)) {
+                                   threads::ThreadOptions(kStackSize)),
+      metric_observer_(NULL) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -394,8 +393,11 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   for (std::vector<ProtocolFramePtr>::const_iterator it =
            protocol_frames.begin();
        it != protocol_frames.end(); ++it) {
-    raw_ford_messages_from_mobile_.PostMessage(
-        impl::RawFordMessageFromMobile(*it));
+    impl::RawFordMessageFromMobile msg(*it);
+    if (metric_observer_) {
+      metric_observer_->StartMessageProcess(msg->message_id());
+    }
+    raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -607,7 +609,6 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                                                const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL: {
       LOG4CXX_INFO(logger_, "handleMessage(1) - case FRAME_TYPE_CONTROL");
@@ -636,7 +637,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       RawMessagePtr raw_message(
           new RawMessage(connection_key, packet->protocol_version(), packet->data(),
                          packet->data_size(), packet->service_type()));
-
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+        metric->message_id = packet->message_id();
+        metric->connection_key = connection_key;
+        metric->raw_msg = raw_message;
+        metric_observer_->EndMessageProcess(metric);
+      }
       NotifySubscribers(raw_message);
       break;
     }
@@ -660,7 +667,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
 
@@ -718,10 +724,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       }
 
       ProtocolPacket* completePacket = it->second.get();
-      RawMessage* rawMessage = new RawMessage(
+      RawMessagePtr rawMessage (new RawMessage(
           key, completePacket->protocol_version(), completePacket->data(),
-          completePacket->total_data_bytes(), completePacket->service_type());
-
+          completePacket->total_data_bytes(), completePacket->service_type()));
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+        metric->raw_msg = rawMessage;
+        metric_observer_->EndMessageProcess(metric);
+      }
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -734,6 +744,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
+
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 
@@ -886,7 +897,11 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
       session_id, 0, number_of_frames));
 
   raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+        impl::RawFordMessageToMobile(ptr, false));
+}
+
+void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver* observer) {
+  metric_observer_ = observer;
 }
 
 std::string ConvertPacketDataToString(const uint8_t* data,

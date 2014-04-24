@@ -31,6 +31,7 @@ set (SOURCES
   src/cppgen/struct_type_from_json_method.cc
   src/cppgen/struct_type_is_initialized_method.cc
   src/cppgen/struct_type_is_valid_method.cc
+  src/cppgen/struct_type_report_erros_method.cc
   src/cppgen/type_name_code_generator.cc
 )
 
@@ -61,6 +62,7 @@ set (HEADERS
   include/cppgen/struct_type_from_json_method.h
   include/cppgen/struct_type_is_initialized_method.h
   include/cppgen/struct_type_is_valid_method.h
+  include/cppgen/struct_type_report_erros_method.h
   include/cppgen/type_name_code_generator.h
 )
 

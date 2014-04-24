@@ -31,13 +31,15 @@
 */
 
 #include "hmi_message_handler/dbus_message_adapter.h"
-
+#include "utils/logger.h"
 #include "formatters/CSmartFactory.hpp"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
 
 namespace hmi_message_handler {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 const std::string DBusMessageAdapter::SDL_SERVICE_NAME = "com.ford.sdl.core";
 const std::string DBusMessageAdapter::SDL_OBJECT_PATH  = "/";

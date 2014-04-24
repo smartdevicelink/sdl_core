@@ -33,13 +33,9 @@
 #include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
-
 namespace commands {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("Commands"));
-#endif
+CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;
@@ -65,5 +61,4 @@ void CommandImpl::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

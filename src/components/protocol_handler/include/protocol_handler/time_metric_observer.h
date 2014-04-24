@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
+#include "protocol_handler/raw_message.h"
 
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include <stdint.h>
+#include "time.h"
 
-namespace application_manager {
+namespace protocol_handler {
 
-namespace commands {
-
-/**
- * @brief UpdateAppListRequest command class
- **/
-class UpdateAppListRequest : public RequestToHMI {
- public:
+class PHMetricObserver {
+  public:
+  struct MessageMetric {
+      RawMessagePtr raw_msg;
+      uint32_t message_id;
+      uint8_t connection_key;
+      time_t begin;
+      time_t end;
+  };
   /**
-   * @brief UpdateAppListRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit UpdateAppListRequest(const MessageSharedPtr& message);
+   */
+  virtual void StartMessageProcess(uint32_t message_id) = 0;
 
-  /**
-   * @brief UpdateAppListRequest class destructor
-   **/
-  virtual ~UpdateAppListRequest();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(UpdateAppListRequest);
+  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
+  virtual ~PHMetricObserver(){}
 };
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_APP_LIST_REQUEST_H_
+}
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_

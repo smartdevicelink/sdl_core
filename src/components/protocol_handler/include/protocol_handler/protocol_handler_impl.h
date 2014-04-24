@@ -39,7 +39,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include "utils/logger.h"
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
@@ -53,6 +52,7 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "time_metric_observer.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -171,6 +171,13 @@ class ProtocolHandlerImpl
      * streaming server and displayed to user.
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
+
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(PHMetricObserver* observer);
 
   protected:
 
@@ -414,18 +421,11 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageToMobile& message);
   private:
     /**
-     * \brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
-    /**
      *\brief Pointer on instance of class implementing IProtocolObserver
      *\brief (JSON Handler)
      */
     ProtocolObservers protocol_observers_;
-
+    PHMetricObserver* metric_observer_;
     /**
      *\brief Pointer on instance of class implementing ISessionObserver
      *\brief (Connection Handler)

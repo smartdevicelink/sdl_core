@@ -39,7 +39,6 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "utils/logger.h"
 
 using transport_manager::transport_adapter::TransportAdapter;
 
@@ -291,12 +290,6 @@ class TransportAdapterListenerImpl
                                     const ApplicationHandle& app_id);
 
  private:
-  /**
-   * \brief For logging.
-   */
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
   TransportManagerImpl* transport_manager_impl_;
   TransportAdapter* transport_adapter_;
 };

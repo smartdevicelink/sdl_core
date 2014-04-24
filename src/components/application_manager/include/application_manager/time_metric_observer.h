@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
 
-#include "application_manager/commands/hmi/notification_from_hmi.h"
 
+#include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
+#include "json/json.h"
+#include "utils/shared_ptr.h"
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
-namespace commands {
+class AMMetricObserver {
+  public:
+    struct MessageMetric {
+        time_t begin;
+        time_t end;
+        utils::SharedPtr<smart_objects::SmartObject> message;
+    };
 
-/**
- * @brief OnUpdateDeviceList command class
- **/
-class OnUpdateDeviceList : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnUpdateDeviceList class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnUpdateDeviceList(const MessageSharedPtr& message);
-
-  /**
-   * @brief OnUpdateDeviceList class destructor
-   **/
-  virtual ~OnUpdateDeviceList();
-
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);
+    virtual void OnMessage(utils::SharedPtr<MessageMetric> metric) = 0;
+    virtual ~AMMetricObserver(){}
 };
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_RESPONSE_H_
+}
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_

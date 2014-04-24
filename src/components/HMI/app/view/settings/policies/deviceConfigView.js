@@ -100,20 +100,23 @@ SDL.DeviceConfigView = Em.ContainerView.create( {
             }
         });
 
-        var i, dev = SDL.SDLModel.conectedDevices;
+        var dev = SDL.SDLModel.connectedDevices;
 
-        for (i = 0; i < dev.length; i++) {
+        for (var key in dev) {
 
-            this.listOfDevices.items.push({
-                type: SDL.Button,
-                params: {
-                    action: 'changeDeviceAccess',
-                    target: 'SDL.SettingsController',
-                    text: dev[i].allowed ? dev[i].name + " - Allowed" : dev[i].name + " - Not allowed",
-                    name: dev[i].name,
-                    id: dev[i].id
-                }
-            });
+            if (dev.hasOwnProperty(key)) {
+
+                this.listOfDevices.items.push({
+                    type: SDL.Button,
+                    params: {
+                        action: 'changeDeviceAccess',
+                        target: 'SDL.SettingsController',
+                        text: dev[key].allowed ? dev[key].name + " - Allowed" : dev[key].name + " - Not allowed",
+                        name: dev[key].name,
+                        id: dev[key].id
+                    }
+                });
+            }
         }
 
         this.listOfDevices.list.refresh();

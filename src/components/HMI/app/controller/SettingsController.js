@@ -77,8 +77,11 @@ SDL.SettingsController = Em.Object.create( {
             allowedText = " - Allowed";
         }
 
-        for (var i = 0; i < SDL.SDLModel.conectedDevices.length; ++i) {
-            SDL.SDLModel.conectedDevices[i].allowed = allowedValue;
+        var dev = SDL.SDLModel.connectedDevices;
+        for (var key in dev) {
+            if (dev.hasOwnProperty(key)) {
+                dev[key].allowed = allowedValue;
+            }
         }
 
         SDL.DeviceConfigView.showDeviceList();
@@ -87,29 +90,34 @@ SDL.SettingsController = Em.Object.create( {
     },
 
     changeDeviceAccess: function(event) {
-        for (var i = 0; i < SDL.SDLModel.conectedDevices.length; ++i) {
 
-            if (SDL.SDLModel.conectedDevices[i].id == event.id) {
+        var dev = SDL.SDLModel.connectedDevices;
+        for (var key in dev) {
 
-                if (SDL.SDLModel.conectedDevices[i].allowed) {
+            if (dev.hasOwnProperty(key)) {
 
-                    SDL.SDLModel.conectedDevices[i].allowed = false;
-                    event.set('text', event.name + " - Not allowed");
-                } else {
+                if (dev[key].id == event.id) {
 
-                    SDL.SDLModel.conectedDevices[i].allowed = true;
-                    event.set('text', event.name + " - Allowed");
+                    if (dev[key].allowed) {
+
+                        dev[key].allowed = false;
+                        event.set('text', event.name + " - Not allowed");
+                    } else {
+
+                        dev[key].allowed = true;
+                        event.set('text', event.name + " - Allowed");
+                    }
+
+                    var device = {
+                        "name": dev[key].name,
+                        "id": dev[key].id
+                    };
+
+                    SDL.DeviceConfigView.set('globalConfigurationValue', null);
+
+                    FFW.BasicCommunication.OnAllowSDLFunctionality(dev[key].allowed, "GUI", device);
+                    break;
                 }
-
-                var device = {
-                    "name": SDL.SDLModel.conectedDevices[i].name,
-                    "id": SDL.SDLModel.conectedDevices[i].id
-                };
-
-                SDL.DeviceConfigView.set('globalConfigurationValue', null);
-
-                FFW.BasicCommunication.OnAllowSDLFunctionality(SDL.SDLModel.conectedDevices[i].allowed, "GUI", device);
-                break;
             }
         }
     },
@@ -213,7 +221,7 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SettingsController.userFriendlyMessagePopUp();
 
-            SDL.SDLModel.getListOfPermissionsPull.remove(message.id);
+            delete SDL.SDLModel.getListOfPermissionsPull[message.id];
         }
     },
 
@@ -228,12 +236,14 @@ SDL.SettingsController = Em.Object.create( {
 
             for (var i = 0; i < len; i++) {
 
-                SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                if (message && message.label) {
+                    SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
+                }
             }
 
             SDL.AppPermissionsView.update(appID);
 
-            this.onState('policies.appPermissions');
+            SDL.States.goToStates('settings.policies.appPermissions');
     },
 
     updateSDL: function() {
@@ -246,7 +256,7 @@ SDL.SettingsController = Em.Object.create( {
 
     AllowSDLFunctionality: function(device) {
         this.currentDeviceAllowance = device;
-        SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
+        SDL.SDLModel.connectedDevices[device.id].sdlFunctionality.popUpId = SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
     },
 
     onSDLConsentNeededHandler: function(params) {
@@ -255,16 +265,19 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
     },
 
-    userFriendlyMessagePopUp: function() {
+    userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
     },
 
     OnAllowSDLFunctionality: function(result) {
 
-        for (var i = 0; i < SDL.SDLModel.conectedDevices.length; ++i) {
-            if (SDL.SDLModel.conectedDevices[i].id == SDL.SettingsController.currentDeviceAllowance.id) {
-                SDL.SDLModel.conectedDevices[i].allowed = result;
+        var dev = SDL.SDLModel.connectedDevices;
+        for (var key in dev) {
+            if (dev.hasOwnProperty(key)) {
+                if (dev[key].id == SDL.SettingsController.currentDeviceAllowance.id) {
+                    dev[key].allowed = result;
+                }
             }
         }
 
@@ -273,6 +286,10 @@ SDL.SettingsController = Em.Object.create( {
         SDL.DeviceConfigView.showDeviceList();
 
         FFW.BasicCommunication.OnAllowSDLFunctionality(result, "GUI", SDL.SettingsController.currentDeviceAllowance);
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.allowed = result;
+
+        SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.popUpId = null;
 
         SDL.SettingsController.currentDeviceAllowance = null;
     }

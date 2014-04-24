@@ -36,12 +36,12 @@
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
-namespace {
-log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
-}
 
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
@@ -65,6 +65,9 @@ ApplicationImpl::ApplicationImpl(
       grammar_id_(0),
       usage_report_(global_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3) {
+
+  // subscribe application to custom button by default
+  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -234,7 +237,7 @@ void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
   if (!is_media_application()
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(g_logger, "Trying to set audio streaming state"
+    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
     return;
   }

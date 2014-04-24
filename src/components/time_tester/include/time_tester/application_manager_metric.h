@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ *
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +31,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
 
-#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include <string>
 
-namespace application_manager {
+#include "metric.h"
+#include "application_manager_observer.h"
 
-namespace commands {
 
-/**
- * @brief OnShowNotification command class
- **/
-class OnShowNotification : public NotificationToHMI {
- public:
-  /**
-   * @brief OnShowNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnShowNotification(const MessageSharedPtr& message);
+namespace time_tester {
 
-  /**
-   * @brief OnShowNotification class destructor
-   **/
-  virtual ~OnShowNotification();
+class ApplicationManagerObserver;
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+class ApplicationManagerMetric: public Metric {
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnShowNotification);
+  public:
+    utils::SharedPtr<application_manager::AMMetricObserver::MessageMetric> message_metric;
+    std::string GetStyledString();
 };
 
-}  // namespace commands
-
-}  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SHOW_NOTIFICATION_H_
+}
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_

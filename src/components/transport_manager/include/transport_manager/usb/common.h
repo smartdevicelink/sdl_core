@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_COMMON_H_
 
-#include <cstdint>
+#include <stdint.h>
 
 #include "utils/shared_ptr.h"
 

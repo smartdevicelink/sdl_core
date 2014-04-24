@@ -34,6 +34,7 @@
 
 
 #include "cppgen/literal_generator.h"
+#include "cppgen/naming_convention.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
 
@@ -42,26 +43,45 @@ using typesafe_format::format;
 
 namespace codegen {
 
-StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(const Struct* strct)
+StructTypeFromJsonConstructor::StructTypeFromJsonConstructor(
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()),
       strct_(strct) {
-  Add(Parameter("value", "const Json::Value*"));
+  Add(Parameter("value__", "const Json::Value*"));
+  std::string base_initializer = parameters_[0].name;
+  if (!strct->frankenstruct()) {
+    base_initializer =
+      format("InitHelper({0}, &Json::Value::isObject)", parameters_[0].name);
+  }
+  Add(Initializer(base_class_name, base_initializer));
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     std::string initializer =
-        format("CompositeType::ValueMember({0}, \"{1}\")",
+        format("impl::ValueMember({0}, \"{1}\")",
                parameters_[0].name,
                i->name());
     if (i->default_value()) {
       std::string def_value = LiteralGenerator(*i->default_value()).result();
       initializer += (", " + def_value);
     }
-    Add(Initializer(i->name(), initializer));
+    Add(Initializer(AvoidKeywords(i->name()), initializer));
   }
 }
 
 StructTypeFromJsonConstructor::~StructTypeFromJsonConstructor() {
+}
+
+void StructTypeFromJsonConstructor::DefineBody(std::ostream* os) const {
+  if (strct_->frankenstruct()) {
+    for (Struct::FieldsList::const_iterator i = strct_->fields().begin(),
+         end = strct_->fields().end(); i != end; ++i) {
+      const Struct::Field& field = *i;
+      strmfmt(*os, "erase(\"{0}\");\n",
+              field.name());
+    }
+  }
 }
 
 StructTypeToJsonMethod::StructTypeToJsonMethod(const Struct* strct)
@@ -73,14 +93,18 @@ StructTypeToJsonMethod::~StructTypeToJsonMethod() {
 }
 
 void StructTypeToJsonMethod::DefineBody(std::ostream* os) const {
-  *os << "Json::Value result__(Json::objectValue);" << '\n';
+  if (strct_->frankenstruct()) {
+    strmfmt(*os, "Json::Value result__(Frankenbase::{0}());\n",
+            name_);
+  } else {
+    *os << "Json::Value result__(Json::objectValue);" << '\n';
+  }
   const Struct::FieldsList& fields = strct_->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     const Struct::Field& field = *i;
-    strmfmt(*os, "CompositeType::WriteJsonField(\"{0}\", {0}, &result__);",
-            field.name())
-        << '\n';
+    strmfmt(*os, "impl::WriteJsonField(\"{0}\", {1}, &result__);\n",
+            field.name(), AvoidKeywords(field.name()));
   }
   *os << "return result__;" << '\n';
 }

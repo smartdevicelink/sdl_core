@@ -39,8 +39,12 @@
 #include "transport_manager/usb/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 class UsbHandler::ControlTransferSequenceState {
  public:

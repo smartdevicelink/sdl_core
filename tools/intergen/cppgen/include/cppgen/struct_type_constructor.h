@@ -44,7 +44,8 @@ class TypePreferences;
  */
 class StructTypeDefaultConstructor : public CppStructConstructor {
  public:
-  StructTypeDefaultConstructor(const Struct* strct);
+  StructTypeDefaultConstructor(const Struct* strct,
+                               const std::string& base_class_name);
   ~StructTypeDefaultConstructor();
  private:
 };
@@ -57,7 +58,8 @@ class StructTypeDefaultConstructor : public CppStructConstructor {
 class StructTypeMandatoryConstructor : public CppStructConstructor {
  public:
   StructTypeMandatoryConstructor(const TypePreferences* preferences,
-                                 const Struct* strct);
+                                 const Struct* strct,
+                                 const std::string& base_class_name);
   ~StructTypeMandatoryConstructor();
  private:
   // CppFunction pure virtual methods implementation

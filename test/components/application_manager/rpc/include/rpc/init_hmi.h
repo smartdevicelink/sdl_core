@@ -48,7 +48,6 @@
 #include <fstream>
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "networking.h"

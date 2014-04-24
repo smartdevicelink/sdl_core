@@ -49,14 +49,26 @@ int TransportManagerDefault::Init() {
   if (E_SUCCESS != TransportManagerImpl::Init()) {
     return E_TM_IS_NOT_INITIALIZED;
   }
-
+  transport_adapter::TransportAdapterImpl* ta;
 #ifdef BLUETOOTH_SUPPORT
-  AddTransportAdapter(new transport_adapter::BluetoothTransportAdapter);
+  ta = new transport_adapter::BluetoothTransportAdapter;
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+  AddTransportAdapter(ta);
 #endif
   uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  AddTransportAdapter(new transport_adapter::TcpTransportAdapter(port));
+  ta = new transport_adapter::TcpTransportAdapter(port);
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+  AddTransportAdapter(ta);
 #ifdef USB_SUPPORT
-  AddTransportAdapter(new transport_adapter::UsbAdapter);
+  ta = new transport_adapter::UsbAdapter();
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+  AddTransportAdapter(ta);
 #endif
 
   return E_SUCCESS;
