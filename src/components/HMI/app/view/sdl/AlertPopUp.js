@@ -238,7 +238,6 @@ SDL.AlertPopUp = Em.ContainerView.create({
         
         this.set('active', true);
         this.set('timeout', message.duration);
-        SDL.SDLController.onSystemContextChange();
 
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {

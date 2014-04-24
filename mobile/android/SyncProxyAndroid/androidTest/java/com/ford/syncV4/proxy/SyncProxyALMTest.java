@@ -7,23 +7,20 @@ import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.session.Session;
-import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-
-import java.lang.reflect.Field;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -417,22 +414,21 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
     public void testMaxJsonSizeInIncomingMessageShouldCallOnError()
             throws SyncException, NoSuchFieldException, IllegalAccessException {
-        final WiProProtocol protocol =
-                new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setVersion((byte) 0x02);
+        final WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         final SyncConnection syncConnectionMock = mock(SyncConnection.class);
         when(syncConnectionMock.getWiProProtocol()).thenReturn(protocol);
 
-        IProxyListenerALMTesting proxyListenerMock =
-                mock(IProxyListenerALMTesting.class);
+        IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
         SyncProxyALM proxy =
                 new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                         false, null, null, null, null, null, null, false, false,
-                        2, null, syncConnectionMock, new TestConfig());
-        SyncConnection connection =
-                new SyncConnection(proxy.getInterfaceBroker());
+                        ProtocolConstants.PROTOCOL_VERSION_TWO, null, syncConnectionMock,
+                        new TestConfig());
+        SyncConnection connection = new SyncConnection(proxy.getInterfaceBroker());
         connection.init(null, mock(SyncTransport.class));
         proxy.setSyncConnection(connection);
+        when(connection.getIsConnected()).thenReturn(true);
 
         final byte maxByte = (byte) 0xFF;
         final byte[] bytes =

@@ -95,6 +95,7 @@ class TypeForwardDeclarator : public TypeCodeGenerator {
 
   // Only structs can be forward declared but they can be part of array declaration
   // All other types don't need forward declaration
+  virtual void GenerateCodeForNullable(const NullableType* nullable);
   virtual void GenerateCodeForArray(const Array* array);
   virtual void GenerateCodeForMap(const Map* map);
   virtual void GenerateCodeForStruct(const Struct* strct);

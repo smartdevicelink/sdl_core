@@ -56,8 +56,6 @@ class FromMicToFileRecorderThread : public threads::ThreadDelegate {
     void set_record_duration(int32_t duration);
 
   private:
-    static log4cxx::LoggerPtr logger_;
-
     int32_t argc_;
     gchar** argv_;
 

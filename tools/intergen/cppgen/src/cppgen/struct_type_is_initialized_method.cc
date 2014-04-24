@@ -34,6 +34,7 @@
 
 #include <ostream>
 
+#include "cppgen/naming_convention.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
 
@@ -52,17 +53,32 @@ StructTypeIsInitializedMethod::~StructTypeIsInitializedMethod() {
 }
 
 void StructTypeIsInitializedMethod::DefineBody(std::ostream* os) const {
+  if (strct_->frankenstruct()) {
+    strmfmt(*os, "if (Frankenbase::{0}()) return true;\n",
+            name_);
+  }
+  *os << "return (initialization_state__ != kUninitialized) || (!struct_empty());\n";
+}
+
+StructTypeStructEmptyMethod::StructTypeStructEmptyMethod(const Struct* strct)
+    : CppFunction(strct->name(), "struct_empty", "bool", kConst),
+      strct_(strct) {
+}
+
+StructTypeStructEmptyMethod::~StructTypeStructEmptyMethod() {
+}
+
+void StructTypeStructEmptyMethod::DefineBody(std::ostream* os) const {
   const Struct::FieldsList& fields = strct_->fields();
-  *os << "return" << '\n';
-  Indent indent1(*os), indent2(*os);
   for (size_t i = 0; i != fields.size(); ++i) {
     const Struct::Field& field = fields[i];
-    strmfmt(*os, "{0}.is_initialized() || ", field.name());
+    strmfmt(*os, "if ({0}.is_initialized()) return false;\n",
+            AvoidKeywords(field.name()));
     if ((i % 2) == 1) {
       *os << endl;
     }
   }
-  *os << "false;" << endl;
+  *os << "return true;\n";
 }
 
 }  // namespace codegen

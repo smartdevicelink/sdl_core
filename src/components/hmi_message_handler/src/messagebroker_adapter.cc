@@ -34,13 +34,13 @@
 
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "config_profile/profile.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-log4cxx::LoggerPtr MessageBrokerAdapter::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("HMIMessageHandler"));
+typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
                                            const std::string& server_address,
@@ -104,7 +104,6 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnStartDeviceDiscovery");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
@@ -118,7 +117,16 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("Navigation.OnTBTClientState");
   MessageBrokerController::subscribeTo("TTS.Started");
   MessageBrokerController::subscribeTo("TTS.Stopped");
+  MessageBrokerController::subscribeTo("VR.Started");
+  MessageBrokerController::subscribeTo("VR.Stopped");
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemInfoChanged");
+  MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
+  MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
+  MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
+  MessageBrokerController::subscribeTo("SDL.OnSystemError");
+  MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
@@ -145,11 +153,6 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
     return;
   }
 
-  if (!handler()) {
-    // WARNING
-    return;
-  }
-
   // Messages from HMI (sent through message broker) have no priority so far
   // assign default priority
   hmi_message_handler::MessageSharedPointer message = hmi_message_handler::MessageSharedPointer(new application_manager::Message(
@@ -157,6 +160,11 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   // message->set_message_type()
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+
+  if (!handler()) {
+    // WARNING
+    return;
+  }
 
   handler()->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Successfully sent to observer");

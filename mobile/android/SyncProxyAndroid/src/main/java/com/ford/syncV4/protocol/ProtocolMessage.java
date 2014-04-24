@@ -2,9 +2,10 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 
 public class ProtocolMessage {
-	private byte version = 1;
+	private byte version = ProtocolConstants.PROTOCOL_VERSION_MIN;
 	private ServiceType _serviceType = ServiceType.RPC;
 	private MessageType _messageType = MessageType.UNDEFINED;
 	private byte _sessionID = 0;

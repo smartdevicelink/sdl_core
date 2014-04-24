@@ -94,6 +94,25 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
 
 void CObjectSchemaItem::applySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
+
+    SmartObject def_value;
+    const std::set<std::string> objectKeys = Object.enumerate();
+    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
+        mMembers.begin(); i != mMembers.end(); ++i) {
+      if ((objectKeys.end() == objectKeys.find(i->first)) &&
+          (true == i->second.mSchemaItem->hasDefaultValue(def_value))) {
+        // create default value
+        Object[i->first] = SmartObject(def_value.getType());
+        if (SmartType_Boolean == def_value.getType()) {
+          Object[i->first] = def_value.asBool();
+        } else if (SmartType_Integer == def_value.getType()) {
+          Object[i->first] = def_value.asUInt();
+        } else if (SmartType_Double == def_value.getType()) {
+          Object[i->first] = def_value.asDouble();
+        }
+      }
+    }
+
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (Object.keyExists(i->first)) {
@@ -105,6 +124,15 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
 
 void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
+    const std::set<std::string> objectKeys = Object.enumerate();
+    for (std::set<std::string>::const_iterator k = objectKeys.begin();
+         k != objectKeys.end(); ++k) {
+        if (mMembers.end() == mMembers.find(*k)) {
+            // remove fake params
+            Object.erase(*k);
+        }
+    }
+
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (Object.keyExists(i->first)) {

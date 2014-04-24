@@ -59,7 +59,6 @@ class FromMicRecorderListener : public MediaAdapterListener {
     threads::Thread* reader_;
     std::string file_name_;
     int32_t current_application_;
-    static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
 };
 }  //  namespace media_manager

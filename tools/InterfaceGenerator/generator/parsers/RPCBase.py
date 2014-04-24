@@ -560,26 +560,33 @@ class Parser(object):
         scope = self._extract_attrib(attrib, "scope")
         if scope is not None:
             params["scope"] = scope
-        self._ignore_attribute(attrib, "defvalue")
 
+        default_value = None;
         param_type = None
         type_name = self._extract_attrib(attrib, "type")
         if type_name is None:
             raise ParseError("Type is not specified for parameter '" +
                              params["name"] + "'")
         if type_name == "Boolean":
-            param_type = Model.Boolean()
+            default_value = self._extract_attrib(
+                attrib, "defvalue")
+            if default_value != None:
+                default_value = self._get_bool_from_string(default_value);
+            param_type = Model.Boolean(default_value=default_value)
         elif type_name == "Integer" or \
                 type_name == "Float":
             min_value = self._extract_optional_number_attrib(
                 attrib, "minvalue", int if type_name == "Integer" else float)
             max_value = self._extract_optional_number_attrib(
                 attrib, "maxvalue", int if type_name == "Integer" else float)
+            default_value = self._extract_optional_number_attrib(
+                attrib, "defvalue", int if type_name == "Integer" else float)
 
             param_type = \
                 (Model.Integer if type_name == "Integer" else Model.Double)(
                     min_value=min_value,
-                    max_value=max_value)
+                    max_value=max_value,
+                    default_value=default_value)
         elif type_name == "String":
             min_length = self._extract_optional_number_attrib(
                 attrib, "minlength")
@@ -588,7 +595,8 @@ class Parser(object):
                 min_length = 1
             max_length = self._extract_optional_number_attrib(
                 attrib, "maxlength")
-            param_type = Model.String(min_length=min_length, max_length=max_length)
+            default_value = self._extract_attrib(attrib, "defvalue")
+            param_type = Model.String(min_length=min_length, max_length=max_length, default_value=default_value)
         else:
             if 1 == type_name.count("."):
                 custom_type_name = type_name.replace(".", "_")
@@ -597,6 +605,15 @@ class Parser(object):
 
             if custom_type_name in self._types:
                 param_type = self._types[custom_type_name]
+                default_value = self._extract_attrib(attrib, "defvalue")
+                if default_value != None:
+                    if default_value not in param_type.elements:
+                        raise ParseError("Default value '" + default_value +
+                                     "' for parameter '" + params["name"] +
+                                     "' is not a member of " +
+                                     type(param_type).__name__ +
+                                     "'" + params["name"] + "'")
+                    default_value = param_type.elements[default_value]
             else:
                 raise ParseError("Unknown type '" + type_name + "'")
 
@@ -608,7 +625,7 @@ class Parser(object):
             param_type = Model.Array(element_type=param_type,
                                      min_size=min_size,
                                      max_size=max_size)
-
+            
         base_type = \
             param_type.element_type if isinstance(param_type, Model.Array) \
             else param_type
@@ -662,6 +679,8 @@ class Parser(object):
             param_type = base_type
 
         params["param_type"] = param_type
+        if default_value is not None:
+            params["default_value"] = default_value
 
         return params, other_subelements, attrib
 

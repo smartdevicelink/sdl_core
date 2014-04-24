@@ -6,7 +6,7 @@ import java.util.Vector;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class HMIPermissions extends RPCStruct {
 
@@ -29,7 +29,7 @@ public class HMIPermissions extends RPCStruct {
 	                    try {
 	                        toAdd = HMILevel.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.allowed, e);
+	                    	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.allowed, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);
@@ -63,7 +63,7 @@ public class HMIPermissions extends RPCStruct {
 	                    try {
 	                        toAdd = HMILevel.valueForString(strFormat);
 	                    } catch (Exception e) {
-	                    	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.userDisallowed, e);
+	                    	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.userDisallowed, e);
 	                    }
 	                    if (toAdd != null) {
 	                        newList.add(toAdd);

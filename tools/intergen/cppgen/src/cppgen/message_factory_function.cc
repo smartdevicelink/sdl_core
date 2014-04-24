@@ -55,7 +55,7 @@ MessageFactoryFunction::MessageFactoryFunction(
       factory_type_(factory_type) {
   Add(MessageFactoryFunction::Parameter(
         serialization_type == kJson ? "json" : "reader",
-        serialization_type == kJson ? "const Json::Value&": "dbus::MessageReader*"));
+        serialization_type == kJson ? "const Json::Value*": "dbus::MessageReader*"));
   Add(MessageFactoryFunction::Parameter("function_id", "FunctionID"));
 }
 

@@ -109,6 +109,5 @@ SDL.TBTClientStateView = Em.ContainerView.create( {
      */
     toggleActivity: function() {
         this.toggleProperty( 'active' );
-        SDL.SDLController.onSystemContextChange();
     }
 } );

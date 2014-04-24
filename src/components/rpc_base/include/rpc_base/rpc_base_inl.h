@@ -36,6 +36,9 @@
 #include "rpc_base.h"
 
 #include <cassert>
+#include <cstdio>
+
+#include "rpc_base/validation_report.h"
 
 namespace rpc {
 
@@ -64,33 +67,89 @@ bool Range<T>::Includes(U val) const {
   return min() <= val && val <= max();
 }
 
-inline PrimitiveType::PrimitiveType(bool initialized, bool valid)
-    : initialized_(initialized), valid_(valid) {
+
+/*
+ * PrimitiveType base class
+ */
+inline PrimitiveType::PrimitiveType(ValueState value_state)
+    : value_state_(value_state) {
 }
 
 inline bool PrimitiveType::is_initialized() const {
-  return initialized_;
+  return value_state_ != kUninitialized;
 }
 
 inline bool PrimitiveType::is_valid() const {
-  return valid_;
+  return value_state_ == kValid;
+}
+
+inline void PrimitiveType::ReportErrors(ValidationReport* report) const {
+  switch (value_state_) {
+    case kUninitialized: {
+      report->set_validation_info("value is not initialized");
+      break;
+    }
+    case kInvalid: {
+      report->set_validation_info("value initialized incorrectly");
+      break;
+    }
+    case kValid: {
+      // No error
+      break;
+    }
+    default: {
+      assert(!"Unexpected value state");
+      break;
+    }
+  }
+}
+
+/*
+ * CompositeType base class
+ */
+inline void CompositeType::mark_initialized() {
+  initialization_state__ = kInitialized;
+}
+
+inline CompositeType::CompositeType(InitializationState init_state)
+    : initialization_state__(init_state) {
+}
+
+inline void CompositeType::ReportErrors(ValidationReport* report) const {
+  switch (initialization_state__) {
+    case kUninitialized: {
+      report->set_validation_info("object is not initialized");
+      break;
+    }
+    case kInvalidInitialized: {
+      report->set_validation_info("object initialized incorrectly");
+      break;
+    }
+    case kInitialized: {
+      // No error
+      break;
+    }
+    default:
+      assert(!"Unexpected initialization state");
+      break;
+  }
 }
 
 /*
  * Boolean class
  */
 inline Boolean::Boolean()
-    : PrimitiveType(false, false), value_(false) {
+    : PrimitiveType(kUninitialized),
+      value_(false) {
 }
 
 inline Boolean::Boolean(bool value)
-    : PrimitiveType(true, true), value_(value) {
+    : PrimitiveType(kValid), value_(value) {
 }
 
 inline Boolean& Boolean::operator=(bool new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = true;
+  value_state_ = kValid;
   return *this;
 }
 
@@ -106,21 +165,20 @@ const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(range_.min()) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(IntType value)
-    : PrimitiveType(true, range_.Includes(value)),
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(IntType new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = range_.Includes(value_);
+  value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -139,13 +197,13 @@ const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(range_.min()) {
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(double value)
-    : PrimitiveType(true, range_.Includes(value)),
+    : PrimitiveType(range_.Includes(value) ? kValid : kInvalid),
       value_(value) {
 }
 
@@ -153,8 +211,7 @@ template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>&
 Float<minnum, maxnum, minden, maxden>::operator=(double new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = range_.Includes(new_val);
+  value_state_ = range_.Includes(new_val) ? kValid : kInvalid;
   return *this;
 }
 
@@ -171,27 +228,26 @@ const Range<size_t> String<minlen, maxlen>::length_range_(minlen, maxlen);
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String()
-    : PrimitiveType(false, false) {
+    : PrimitiveType(kUninitialized) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const std::string& value)
-    : PrimitiveType(true, length_range_.Includes(value.length())),
+    : PrimitiveType(length_range_.Includes(value.length()) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const char* value)
-    : PrimitiveType(true, true),
+    : PrimitiveType(kUninitialized),
       value_(value) {
-  valid_ = length_range_.Includes(value_.length());
+  value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
 }
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = length_range_.Includes(new_val.length());
+  value_state_ = length_range_.Includes(new_val.length()) ? kValid : kInvalid;
   return *this;
 }
 
@@ -205,21 +261,20 @@ String<minlen, maxlen>::operator const std::string&() const {
  */
 template<typename T>
 Enum<T>::Enum()
-    : PrimitiveType(false, false),
+    : PrimitiveType(kUninitialized),
       value_(EnumType()) {
 }
 
 template<typename T>
 Enum<T>::Enum(EnumType value)
-    : PrimitiveType(true, IsValidEnum(value_)),
+    : PrimitiveType(IsValidEnum(value) ? kValid : kInvalid),
       value_(value) {
 }
 
 template<typename T>
 Enum<T>& Enum<T>::operator=(EnumType new_val) {
   value_ = new_val;
-  initialized_ = true;
-  valid_ = IsValidEnum(value_);
+  value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -232,13 +287,15 @@ Enum<T>::operator EnumType() const {
  * Array class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Array<T, minsize, maxsize>::Array() {
+Array<T, minsize, maxsize>::Array()
+    : CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
 Array<T, minsize, maxsize>::Array(const U& value)
-    : ArrayType(value.begin(), value.end() ){
+    : ArrayType(value.begin(), value.end()),
+      CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -257,8 +314,15 @@ void Array<T, minsize, maxsize>::push_back(const U& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_valid() const {
-  if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
+  // Empty array might be valid only if marked initialized
+  if (this->empty() && (initialization_state__ != kInitialized)) {
     return false;
+  }
+  // Array size must be within allowed range
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+    return false;
+  }
+  // All array elements must be valid
   for (typename ArrayType::const_iterator i = this->begin();
       i != this->end(); ++i) {
     if (!i->is_valid())
@@ -269,19 +333,52 @@ bool Array<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Array<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  // Array that is not empty is initialized for sure
+  if (!this->empty()) {
+    return true;
+  }
+  // Empty array is initialized if not marked as unitialized
+  if (initialization_state__ != kUninitialized) {
+    return true;
+  }
+  return false;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
+  if (this->empty()) {
+    CompositeType::ReportErrors(report);
+  } else {
+    if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+      report->set_validation_info("array has invalid size");
+    } else {
+      // No error
+    }
+  }
+  for (size_t i = 0; i != this->size(); ++i) {
+    const T& elem = this->operator [](i);
+    if (!elem.is_valid()) {
+      char elem_idx[32] = {};
+      snprintf(elem_idx, 32, "[%zu]", i);
+      ValidationReport& elem_report =
+          report->ReportSubobject(elem_idx);
+      elem.ReportErrors(&elem_report);
+    }
+  }
 }
 
 /*
  * Map class
  */
 template<typename T, size_t minsize, size_t maxsize>
-Map<T, minsize, maxsize>::Map() {
+Map<T, minsize, maxsize>::Map()
+    : CompositeType(kUninitialized) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
 template<typename U>
-Map<T, minsize, maxsize>::Map(const U& value) {
+Map<T, minsize, maxsize>::Map(const U& value)
+    : CompositeType(kUninitialized) {
   for (typename U::const_iterator i = value.begin(), e = value.end(); i != e;
       ++i) {
     // Explicitly convert that value to T because all rpc_types have explicit
@@ -312,8 +409,15 @@ void Map<T, minsize, maxsize>::insert(const std::pair<std::string, U>& value) {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_valid() const {
-  if (!Range<size_t>(minsize, maxsize).Includes(this->size()))
+  // Empty map might be valid only if marked initialized
+  if (this->empty() && (initialization_state__ != kInitialized)) {
     return false;
+  }
+  // Maps size must be within allowed range
+  if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+    return false;
+  }
+  // All map elements must be valid
   for (typename Map::const_iterator i = this->begin();
       i != this->end(); ++i) {
     if (!i->second.is_valid())
@@ -324,32 +428,87 @@ bool Map<T, minsize, maxsize>::is_valid() const {
 
 template<typename T, size_t minsize, size_t maxsize>
 bool Map<T, minsize, maxsize>::is_initialized() const {
-  return !this->empty();
+  // Map that is not empty is initialized for sure
+  if (!this->empty()) {
+    return true;
+  }
+  // Empty map might be initialized only if not marked as unitialized
+  if (initialization_state__ != kUninitialized) {
+    return true;
+  }
+  return false;
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+void Map<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
+  if (this->empty()) {
+    CompositeType::ReportErrors(report);
+  } else {
+    if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+      report->set_validation_info("map has invalid size");
+    } else {
+      // No error
+    }
+  }
+  for (typename Map::const_iterator i = this->begin();
+      i != this->end(); ++i) {
+    if (!i->second.is_valid()) {
+      std::string elem_name = "[\"" + i->first + "\"]";
+      ValidationReport& elem_report = report->ReportSubobject(elem_name);
+      i->second.ReportErrors(&elem_report);
+    }
+  }
 }
 
 /*
- * Mandatory class
+ * Nullable class
  */
 template<typename T>
-Mandatory<T>::Mandatory() {
+Nullable<T>::Nullable()
+    : marked_null_(false) {
 }
 
 template<typename T>
 template<typename U>
-Mandatory<T>::Mandatory(const U& value)
-    : T(value) {
+Nullable<T>::Nullable(const U& value)
+    : T(value),
+      marked_null_(false) {
 }
 
 template<typename T>
 template<typename U>
-Mandatory<T>& Mandatory<T>::operator=(const U& new_val) {
+Nullable<T>& Nullable<T>::operator=(const U& new_val) {
   this->T::operator=(new_val);
   return *this;
 }
 
 template<typename T>
-bool Mandatory<T>::is_valid() const {
-  return T::is_initialized() && T::is_valid();
+bool Nullable<T>::is_valid() const {
+  return is_null() || T::is_valid();
+}
+
+template<typename T>
+bool Nullable<T>::is_initialized() const {
+  return is_null() || T::is_initialized();
+}
+
+template<typename T>
+bool Nullable<T>::is_null() const {
+  return marked_null_;
+}
+
+template<typename T>
+void Nullable<T>::set_to_null() {
+  marked_null_ = true;
+}
+
+template<typename T>
+void Nullable<T>::ReportErrors(ValidationReport* report) const {
+  if (marked_null_) {
+    // No error
+  } else {
+    T::ReportErrors(report);
+  }
 }
 
 /*
@@ -398,6 +557,15 @@ bool Optional<T>::is_valid() const {
 template<typename T>
 bool Optional<T>::is_initialized() const {
   return value_.is_initialized();
+}
+
+template<typename T>
+void Optional<T>::ReportErrors(ValidationReport* report) const {
+  if (!is_initialized()) {
+    // No error
+  } else {
+    value_.ReportErrors(report);
+  }
 }
 
 }  // namespace rpc

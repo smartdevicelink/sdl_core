@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "protocol_handler/raw_message.h"
 #include "application_manager/message.h"
 
@@ -58,8 +57,6 @@ class MobileMessageHandler {
 
     //! -------------------------------------------------------------
   private:
-    static log4cxx::LoggerPtr logger_;
-
     DISALLOW_COPY_AND_ASSIGN(MobileMessageHandler);
 };
 }  // namespace application_manager

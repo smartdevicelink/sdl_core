@@ -179,7 +179,6 @@ void CommandRequestImpl::SendHMIRequest(
   }
 }
 
-//TODO(VS): Should be removed after we will shift to Event engine usage completely
 void CommandRequestImpl::CreateHMINotification(
     const hmi_apis::FunctionID::eType& function_id,
     const NsSmart::SmartObject& msg_params) const {
@@ -195,15 +194,121 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   notify[strings::params][strings::function_id] = function_id;
-  notify[strings::params][strings::protocol_version] =
-      CommandImpl::protocol_version_;
-  notify[strings::params][strings::protocol_type] =
-      CommandImpl::hmi_protocol_type_;
   notify[strings::msg_params] = msg_params;
 
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
+}
+
+mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
+    const hmi_apis::Common_Result::eType& hmi_code) const {
+
+  mobile_apis::Result::eType mobile_result = mobile_apis::Result::GENERIC_ERROR;
+  switch (hmi_code) {
+    case hmi_apis::Common_Result::SUCCESS: {
+      mobile_result = mobile_apis::Result::SUCCESS;
+      break;
+    }
+    case hmi_apis::Common_Result::UNSUPPORTED_REQUEST: {
+      mobile_result = mobile_apis::Result::UNSUPPORTED_REQUEST;
+      break;
+    }
+    case hmi_apis::Common_Result::UNSUPPORTED_RESOURCE: {
+      mobile_result = mobile_apis::Result::UNSUPPORTED_RESOURCE;
+      break;
+    }
+    case hmi_apis::Common_Result::DISALLOWED: {
+      mobile_result = mobile_apis::Result::DISALLOWED;
+      break;
+    }
+    case hmi_apis::Common_Result::REJECTED: {
+      mobile_result = mobile_apis::Result::REJECTED;
+      break;
+    }
+    case hmi_apis::Common_Result::ABORTED: {
+      mobile_result = mobile_apis::Result::ABORTED;
+      break;
+    }
+    case hmi_apis::Common_Result::IGNORED: {
+      mobile_result = mobile_apis::Result::IGNORED;
+      break;
+    }
+    case hmi_apis::Common_Result::RETRY: {
+      mobile_result = mobile_apis::Result::RETRY;
+      break;
+    }
+    case hmi_apis::Common_Result::IN_USE: {
+      mobile_result = mobile_apis::Result::IN_USE;
+      break;
+    }
+    case hmi_apis::Common_Result::DATA_NOT_AVAILABLE: {
+      mobile_result = mobile_apis::Result::VEHICLE_DATA_NOT_AVAILABLE;
+      break;
+    }
+    case hmi_apis::Common_Result::TIMED_OUT: {
+      mobile_result = mobile_apis::Result::TIMED_OUT;
+      break;
+    }
+    case hmi_apis::Common_Result::INVALID_DATA: {
+      mobile_result = mobile_apis::Result::INVALID_DATA;
+      break;
+    }
+    case hmi_apis::Common_Result::CHAR_LIMIT_EXCEEDED: {
+      mobile_result = mobile_apis::Result::CHAR_LIMIT_EXCEEDED;
+      break;
+    }
+    case hmi_apis::Common_Result::INVALID_ID: {
+      mobile_result = mobile_apis::Result::INVALID_ID;
+      break;
+    }
+    case hmi_apis::Common_Result::DUPLICATE_NAME: {
+      mobile_result = mobile_apis::Result::DUPLICATE_NAME;
+      break;
+    }
+    case hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED: {
+      mobile_result = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
+      break;
+    }
+    case hmi_apis::Common_Result::WRONG_LANGUAGE: {
+      mobile_result = mobile_apis::Result::WRONG_LANGUAGE;
+      break;
+    }
+    case hmi_apis::Common_Result::OUT_OF_MEMORY: {
+      mobile_result = mobile_apis::Result::OUT_OF_MEMORY;
+      break;
+    }
+    case hmi_apis::Common_Result::TOO_MANY_PENDING_REQUESTS: {
+      mobile_result = mobile_apis::Result::TOO_MANY_PENDING_REQUESTS;
+      break;
+    }
+    case hmi_apis::Common_Result::NO_APPS_REGISTERED: {
+      mobile_result = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
+      break;
+    }
+    case hmi_apis::Common_Result::NO_DEVICES_CONNECTED: {
+      mobile_result = mobile_apis::Result::APPLICATION_NOT_REGISTERED;
+      break;
+    }
+    case hmi_apis::Common_Result::WARNINGS: {
+      mobile_result = mobile_apis::Result::WARNINGS;
+      break;
+    }
+    case hmi_apis::Common_Result::GENERIC_ERROR: {
+      mobile_result = mobile_apis::Result::GENERIC_ERROR;
+      break;
+    }
+    case hmi_apis::Common_Result::USER_DISALLOWED: {
+      mobile_result = mobile_apis::Result::USER_DISALLOWED;
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
+      break;
+    }
+  }
+
+  return mobile_result;
 }
 
 }  // namespace commands

@@ -51,15 +51,17 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
-#include "policies/policy_manager_impl.h"
 #include "utils/singleton.h"
-
+#ifdef TIME_TESTER
+#include "time_tester/time_manager.h"
+#endif
 #ifdef MESSAGEBROKER_HMIADAPTER
 #  include "CMessageBroker.hpp"
 #  include "mb_tcpserver.hpp"
 #  include "networking.h"  // cpplint: Include the directory when naming .h files
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
+
 
 namespace main_namespace {
 class LifeCycle : public utils::Singleton<LifeCycle> {
@@ -80,6 +82,9 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+#ifdef TIME_TESTER
+    time_tester::TimeManager* time_tester_;
+#endif //TIME_TESTER
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
@@ -89,7 +94,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // MESSAGEBROKER_HMIADAPTER
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
-    policies::PolicyManagerImpl* policy_manager_;
 
 #ifdef MESSAGEBROKER_HMIADAPTER
     NsMessageBroker::CMessageBroker* message_broker_;
@@ -101,8 +105,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #ifdef DBUS_HMIADAPTER
     System::Thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
-
-    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 

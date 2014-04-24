@@ -6,7 +6,7 @@ package com.ford.syncV4.trace;
 import java.util.Iterator;
 import java.util.Set;
 
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -19,19 +19,19 @@ import android.telephony.TelephonyManager;
 public class TraceDeviceInfo {
 	// http://developer.android.com/guide/topics/data/data-storage.html
 
-	private static TelephonyManager m_telephonyManager;
+	private static TelephonyManager sTelephonyManager;
 	
 	// Constructor
 	public TraceDeviceInfo(TelephonyManager telephonyManager) {
-		m_telephonyManager = telephonyManager;
+		sTelephonyManager = telephonyManager;
 	}
 
 	public static void setTelephonyManager(TelephonyManager telephonyManager) {
-		m_telephonyManager = telephonyManager;
+		sTelephonyManager = telephonyManager;
 	}
 
 	public static TelephonyManager getTelephonyManager() {
-		return m_telephonyManager;
+		return sTelephonyManager;
 	}
 
 	// package scoped
@@ -39,15 +39,15 @@ public class TraceDeviceInfo {
 		// Telephony manager can tell us a few things...
 		String info = "";
 
-		if (m_telephonyManager != null) {
+		if (sTelephonyManager != null) {
 			try { // getDeviceId() requires android.permission.READ_PHONE_STATE
-				info = "<deviceid>" + m_telephonyManager.getDeviceId() + "</deviceid>";
+				info = "<deviceid>" + sTelephonyManager.getDeviceId() + "</deviceid>";
 			} catch (Exception e1) {
-				DebugTool.logError("Failure getting telephony device ID: " + e1.toString(), e1);
+                Logger.e("Failure getting telephony device ID: " + e1.toString(), e1);
 			}
 	
 			info = "<pt>";
-			switch (m_telephonyManager.getPhoneType()) {
+			switch (sTelephonyManager.getPhoneType()) {
 				case TelephonyManager.PHONE_TYPE_NONE:
 					info += "NONE";
 					break;
@@ -63,7 +63,7 @@ public class TraceDeviceInfo {
 	
 			info += "</pt>" + "<nt>";
 	
-			switch (m_telephonyManager.getNetworkType()) {
+			switch (sTelephonyManager.getNetworkType()) {
 				case TelephonyManager.NETWORK_TYPE_UNKNOWN:
 					info += "UKNOWN";
 					break;

@@ -35,6 +35,7 @@
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
+#include "json/json.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -45,7 +46,6 @@ class SmartObject;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
-
 class ApplicationManagerImpl;
 
 class HMICapabilities {
@@ -361,7 +361,6 @@ class HMICapabilities {
   void set_prerecorded_speech(
        const smart_objects::SmartObject& prerecorded_speech);
 
-
  protected:
 
   /*
@@ -371,6 +370,29 @@ class HMICapabilities {
    * @return TRUE if capabilities loaded successfully, otherwise FALSE.
    */
   bool load_capabilities_from_file();
+
+  /*
+   * @brief function checks if json member exists
+   *
+   * @param json_member from file hmi_capabilities.json
+   * @param name_of_member name which we should check
+   *     hmi_capabilities.json
+   *
+   * @returns TRUE if member exists and returns FALSE if
+   * member does not exist.
+   */
+  bool check_existing_json_member(
+      const Json::Value& json_member, const char* name_of_member);
+
+  /*
+   * @brief function converts json object "languages" to smart object
+   *
+   * @param json_languages from file hmi_capabilities.json
+   * @param languages - the converted object
+   *
+   */
+  void convert_json_languages_to_obj(Json::Value& json_languages,
+                                     smart_objects::SmartObject& languages);
 
  private:
   bool                             is_vr_cooperating_;

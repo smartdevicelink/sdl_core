@@ -41,6 +41,8 @@
 
 #include "resumption/last_state.h"
 
+#include "utils/logger.h"
+
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
@@ -52,6 +54,8 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
     : TransportAdapterImpl(
@@ -73,7 +77,8 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 
 void TcpTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
-  resumption::LastState::Dictionary tcp_adapter_dictionary;
+  Json::Value tcp_adapter_dictionary;
+  Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end(); ++i) {
     DeviceUID device_id = *i;
@@ -83,53 +88,57 @@ void TcpTransportAdapter::Store() const {
     }
     utils::SharedPtr<TcpDevice> tcp_device =
       DeviceSptr::static_pointer_cast<TcpDevice>(device);
-    resumption::LastState::Dictionary device_dictionary;
+    Json::Value device_dictionary;
+    device_dictionary["name"] = tcp_device->name();
     struct in_addr address;
     address.s_addr = tcp_device->in_addr();
-    device_dictionary.AddItem("address", std::string(inet_ntoa(address)));
-    resumption::LastState::Dictionary applications_dictionary;
+    device_dictionary["address"] = std::string(inet_ntoa(address));
+    Json::Value applications_dictionary;
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin(); j != app_ids.end(); ++j) {
       ApplicationHandle app_handle = *j;
-      const int port = tcp_device->GetApplicationPort(app_handle);
-      std::string port_string;
-      std::stringstream stream(port_string);
-      stream << port;
-      if (port != -1) { // don't want to store incoming applications
-        resumption::LastState::Dictionary application_dictionary;
-        application_dictionary.AddItem("port", port_string);
-        applications_dictionary.AddSubitem(port_string, application_dictionary);
+      if (FindEstablishedConnection(tcp_device->unique_device_id(), app_handle)) {
+        int port = tcp_device->GetApplicationPort(app_handle);
+        if (port != -1) { // don't want to store incoming applications
+          Json::Value application_dictionary;
+          char port_record[12];
+          sprintf(port_record, "%d", port);
+          application_dictionary["port"] = std::string(port_record);
+          applications_dictionary.append(application_dictionary);
+        }
       }
     }
-    device_dictionary.AddSubitem("applications", applications_dictionary);
-    tcp_adapter_dictionary.AddSubitem(tcp_device->name(), device_dictionary);
+    if (!applications_dictionary.empty()) {
+      device_dictionary["applications"] = applications_dictionary;
+      devices_dictionary.append(device_dictionary);
+    }
   }
-  resumption::LastState::instance()->dictionary.AddSubitem(
-    "TcpAdapter", tcp_adapter_dictionary
-  );
+  tcp_adapter_dictionary["devices"] = devices_dictionary;
+  resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"] =
+    tcp_adapter_dictionary;
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
-  resumption::LastState::Dictionary tcp_adapter_dictionary =
-    resumption::LastState::instance()->dictionary.SubitemAt("TcpAdapter");
-  for (resumption::LastState::Dictionary::const_iterator i =
-    tcp_adapter_dictionary.begin(); i != tcp_adapter_dictionary.end(); ++i) {
-    std::string name = i->first;
-    resumption::LastState::Dictionary device_dictionary = i->second;
-    std::string address_record = device_dictionary.ItemAt("address");
+  const Json::Value tcp_adapter_dictionary =
+    resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
+  const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
+  for (Json::Value::const_iterator i = devices_dictionary.begin();
+    i != devices_dictionary.end(); ++i) {
+    const Json::Value device_dictionary = *i;
+    std::string name = device_dictionary["name"].asString();
+    std::string address_record = device_dictionary["address"].asString();
     in_addr_t address = inet_addr(address_record.c_str());
     TcpDevice* tcp_device = new TcpDevice(address, name);
     DeviceSptr device(tcp_device);
     AddDevice(device);
-    resumption::LastState::Dictionary applications_dictionary =
-      device_dictionary.SubitemAt("applications");
-    for (resumption::LastState::Dictionary::const_iterator j =
-      applications_dictionary.begin(); j != applications_dictionary.end(); ++j) {
-      resumption::LastState::Dictionary application_dictionary = j->second;
-      std::string port_record = application_dictionary.ItemAt("port");
+    const Json::Value applications_dictionary = device_dictionary["applications"];
+    for (Json::Value::const_iterator j = applications_dictionary.begin();
+      j != applications_dictionary.end(); ++j) {
+      const Json::Value application_dictionary = *j;
+      std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {

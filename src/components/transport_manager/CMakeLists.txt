@@ -73,6 +73,7 @@ if (BUILD_MME_SUPPORT)
     src/mme/iap_connection.cc
     src/mme/iap2_connection.cc
   )
+  add_definitions(-DMME_SUPPORT)
   if (MME_MQ)
     add_definitions(-DMME_MQ)
   endif(MME_MQ)

@@ -37,14 +37,14 @@
 
 #include <memory.h>
 
+#include "utils/logger.h"
+
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
 namespace protocol_handler {
 
-log4cxx::LoggerPtr ProtocolHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ProtocolHandler"));
-
+CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 /**
  * Function return packet data as std::string.
@@ -129,6 +129,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
       case PROTOCOL_VERSION_1:
         required_size += PROTOCOL_HEADER_V1_SIZE;
         break;
+      case PROTOCOL_VERSION_3:
       case PROTOCOL_VERSION_2:
         required_size += PROTOCOL_HEADER_V2_SIZE;
         break;
@@ -153,7 +154,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)) {
+                                   threads::ThreadOptions(kStackSize)),
+      metric_observer_(NULL) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -201,7 +203,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
       0, hash_code));
 
@@ -288,7 +290,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       SERVICE_TYPE_ZERO, FRAME_DATA_HEART_BEAT_ACK, session_id,
       0, message_id));
 
@@ -312,7 +314,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
   uint32_t maxDataSize = 0;
   if (PROTOCOL_VERSION_1 == message->protocol_version()) {
     maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V1_SIZE;
-  } else if (PROTOCOL_VERSION_2 == message->protocol_version()) {
+  } else {
     maxDataSize = MAXIMUM_FRAME_DATA_SIZE - PROTOCOL_HEADER_V2_SIZE;
   }
 
@@ -333,7 +335,8 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                 message->protocol_version(),
                                                 SERVICE_TYPE_RPC,
                                                 message->data_size(),
-                                                message->data(), false);
+                                                message->data(), false,
+                                                final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send single frame message.");
@@ -348,16 +351,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                SERVICE_TYPE_RPC,
                                                message->data_size(),
                                                message->data(), false,
-                                               maxDataSize);
+                                               maxDataSize, final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send multiframe messages.");
     }
   }
-
-  if (final_message)
-    transport_manager_->Disconnect(connection_handle);
-
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -394,8 +393,11 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   for (std::vector<ProtocolFramePtr>::const_iterator it =
            protocol_frames.begin();
        it != protocol_frames.end(); ++it) {
-    raw_ford_messages_from_mobile_.PostMessage(
-        impl::RawFordMessageFromMobile(*it));
+    impl::RawFordMessageFromMobile msg(*it);
+    if (metric_observer_) {
+      metric_observer_->StartMessageProcess(msg->message_id());
+    }
+    raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -415,6 +417,30 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
 
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Sending message finished successfully.");
+
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  const ProtocolPacket sent_message(message->connection_key(),
+                                    message->data(),
+                                    message->data_size());
+
+  std::map<uint8_t, uint32_t>::iterator it =
+      sessions_last_message_id_.find(sent_message.session_id());
+
+  if (sessions_last_message_id_.end() != it) {
+    uint32_t last_message_id = it->second;
+    sessions_last_message_id_.erase(it);
+    if ((sent_message.message_id() ==  last_message_id) &&
+        ((FRAME_TYPE_SINGLE == sent_message.frame_type()) ||
+        ((FRAME_TYPE_CONSECUTIVE == sent_message.frame_type()) &&
+         (0 == sent_message.frame_data())))) {
+
+      session_observer_->PairFromKey(message->connection_key(),
+                                       &connection_handle,
+                                       &sessionID);
+      transport_manager_->Disconnect(connection_handle);
+    }
+  }
 
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
@@ -444,6 +470,7 @@ void ProtocolHandlerImpl::OnConnectionClosed(
 RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
                                            const ProtocolPacket& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
   if (!packet.packet()) {
     LOG4CXX_ERROR(logger_, "Failed to create packet.");
 
@@ -487,20 +514,16 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    const uint32_t data_size, const uint8_t* data, const bool compress) {
+    const uint32_t data_size, const uint8_t* data, const bool compress,
+    const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  uint8_t versionF = PROTOCOL_VERSION_1;
-  if (2 == protocol_version) {
-    versionF = PROTOCOL_VERSION_2;
-  }
-
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      versionF, compress, FRAME_TYPE_SINGLE, service_type, 0,
+      protocol_version, compress, FRAME_TYPE_SINGLE, service_type, 0,
       session_id, data_size, message_counters_[session_id]++, data));
 
   raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+      impl::RawFordMessageToMobile(ptr, is_final_message));
 
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -510,17 +533,12 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
     const uint32_t data_size, const uint8_t* data, const bool compress,
-    const uint32_t maxdata_size) {
+    const uint32_t maxdata_size, const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
   RESULT_CODE retVal = RESULT_OK;
 
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
-
-  uint8_t versionF = PROTOCOL_VERSION_1;
-  if (2 == protocol_version) {
-    versionF = PROTOCOL_VERSION_2;
-  }
 
   int32_t numOfFrames = 0;
   int32_t lastdata_size = 0;
@@ -550,7 +568,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   outDataFirstFrame[7] = numOfFrames;
 
   ProtocolFramePtr firstPacket(new protocol_handler::ProtocolPacket(connection_id,
-      versionF, compress, FRAME_TYPE_FIRST, service_type, 0,
+      protocol_version, compress, FRAME_TYPE_FIRST, service_type, 0,
       session_id, FIRST_FRAME_DATA_SIZE, ++message_counters_[session_id],
       outDataFirstFrame));
 
@@ -564,7 +582,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       memcpy(outDataFrame, data + (maxdata_size * i), maxdata_size);
 
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          versionF, compress, FRAME_TYPE_CONSECUTIVE,
+          protocol_version, compress, FRAME_TYPE_CONSECUTIVE,
           service_type, ((i % FRAME_DATA_MAX_VALUE) + 1), session_id,
           maxdata_size, message_counters_[session_id], outDataFrame));
 
@@ -575,12 +593,12 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
       memcpy(outDataFrame, data + (maxdata_size * i), lastdata_size);
 
       ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          versionF, compress, FRAME_TYPE_CONSECUTIVE,
+          protocol_version, compress, FRAME_TYPE_CONSECUTIVE,
           service_type, 0x0, session_id, lastdata_size,
           message_counters_[session_id], outDataFrame));
 
       raw_ford_messages_to_mobile_.PostMessage(
-          impl::RawFordMessageToMobile(ptr, false));
+          impl::RawFordMessageToMobile(ptr, is_final_message));
     }
   }
 
@@ -591,7 +609,6 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                                                const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL: {
       LOG4CXX_INFO(logger_, "handleMessage(1) - case FRAME_TYPE_CONTROL");
@@ -620,7 +637,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       RawMessagePtr raw_message(
           new RawMessage(connection_key, packet->protocol_version(), packet->data(),
                          packet->data_size(), packet->service_type()));
-
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+        metric->message_id = packet->message_id();
+        metric->connection_key = connection_key;
+        metric->raw_msg = raw_message;
+        metric_observer_->EndMessageProcess(metric);
+      }
       NotifySubscribers(raw_message);
       break;
     }
@@ -644,7 +667,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
 
@@ -702,10 +724,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       }
 
       ProtocolPacket* completePacket = it->second.get();
-      RawMessage* rawMessage = new RawMessage(
+      RawMessagePtr rawMessage (new RawMessage(
           key, completePacket->protocol_version(), completePacket->data(),
-          completePacket->total_data_bytes(), completePacket->service_type());
-
+          completePacket->total_data_bytes(), completePacket->service_type()));
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+        metric->raw_msg = rawMessage;
+        metric_observer_->EndMessageProcess(metric);
+      }
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -718,6 +744,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
+
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 
@@ -752,7 +779,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   uint8_t current_session_id = packet.session_id();
 
   uint32_t hash_code = 0;
-  if (packet.protocol_version() == 2) {
+  if (1 != packet.protocol_version()) {
     hash_code = packet.message_id();
   }
 
@@ -762,7 +789,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
       ServiceTypeFromByte(packet.service_type()));
 
   if (-1 != session_hash_code) {
-    if (2 == packet.protocol_version()) {
+    if (1 != packet.protocol_version()) {
       if (packet.message_id() != session_hash_code) {
         success = false;
       }
@@ -789,11 +816,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {
-  LOG4CXX_INFO(logger_,
-               "ProtocolHandlerImpl::HandleControlMessageStartSession" 
-				<< (int) packet.protocol_version() );
   LOG4CXX_INFO_EXT(logger_,
-                   "Version 2 " << (packet.protocol_version() == PROTOCOL_VERSION_2));
+                   "Protocol version: " <<
+                   static_cast<int>(packet.protocol_version()));
 
   int32_t session_id = session_observer_->OnSessionStartedCallback(
       connection_id, packet.session_id(),
@@ -849,6 +874,12 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
       " dataSize: " << message->data_size() << " ;"
       " protocolVersion " << message->protocol_version());
 
+  if (message.is_final) {
+    sessions_last_message_id_.insert(
+        std::pair<uint8_t, uint32_t>(message->session_id(),
+                                     message->message_id()));
+  }
+
   SendFrame(message->connection_key(), (*message.get()));
 }
 
@@ -861,12 +892,16 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
   uint8_t session_id = 0;
   session_observer_->PairFromKey(connection_key, &connection_id, &session_id);
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      PROTOCOL_VERSION_2, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
       SERVICE_TYPE_NAVI, FRAME_DATA_SERVICE_DATA_ACK,
       session_id, 0, number_of_frames));
 
   raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+        impl::RawFordMessageToMobile(ptr, false));
+}
+
+void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver* observer) {
+  metric_observer_ = observer;
 }
 
 std::string ConvertPacketDataToString(const uint8_t* data,

@@ -7,8 +7,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.EmergencyEventType;
 import com.ford.syncV4.proxy.rpc.enums.FuelCutoffStatus;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataEventStatus;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataNotificationStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class EmergencyEvent extends RPCStruct {
 
@@ -33,7 +32,7 @@ public class EmergencyEvent extends RPCStruct {
             try {
                 theCode = EmergencyEventType.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.emergencyEventType, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.emergencyEventType, e);
             }
             return theCode;
         }
@@ -55,7 +54,7 @@ public class EmergencyEvent extends RPCStruct {
             try {
                 theCode = FuelCutoffStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelCutoffStatus, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelCutoffStatus, e);
             }
             return theCode;
         }
@@ -77,7 +76,7 @@ public class EmergencyEvent extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.rolloverEvent, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.rolloverEvent, e);
             }
             return theCode;
         }
@@ -99,7 +98,7 @@ public class EmergencyEvent extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.maximumChangeVelocity, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.maximumChangeVelocity, e);
             }
             return theCode;
         }
@@ -121,7 +120,7 @@ public class EmergencyEvent extends RPCStruct {
             try {
                 theCode = VehicleDataEventStatus.valueForString((String) obj);
             } catch (Exception e) {
-                DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.multipleEvents, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.multipleEvents, e);
             }
             return theCode;
         }

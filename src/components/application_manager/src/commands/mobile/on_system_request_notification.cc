@@ -32,6 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/on_system_request_notification.h"
+#include "interfaces/MOBILE_API.h"
+#include "utils/file_system.h"
 
 namespace application_manager {
 
@@ -49,6 +51,24 @@ OnSystemRequestNotification::~OnSystemRequestNotification() {
 
 void OnSystemRequestNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemRequestNotification::Run");
+
+  mobile_apis::RequestType::eType request_type = static_cast<mobile_apis::RequestType::eType>
+      ((*message_)[strings::msg_params][strings::request_type].asInt());
+
+  if (mobile_apis::RequestType::PROPRIETARY == request_type) {
+  std::string filename = (*message_)[strings::msg_params][strings::file_name].asString();
+
+  std::vector<uint8_t> binary_data;
+  file_system::ReadBinaryFile(filename, binary_data);
+    (*message_)[strings::params][strings::binary_data] = binary_data;
+    (*message_)[strings::msg_params][strings::file_type] =
+        mobile_apis::FileType::JSON;
+  } else if (mobile_apis::RequestType::HTTP == request_type) {
+    (*message_)[strings::msg_params][strings::file_type] =
+        mobile_apis::FileType::BINARY;
+    // TODO(PV): if needed for HTTP HMI case to be changed.
+    //(*message_)[strings::params][strings::binary_data] = binary_data;
+  }
 
   SendNotification();
 }

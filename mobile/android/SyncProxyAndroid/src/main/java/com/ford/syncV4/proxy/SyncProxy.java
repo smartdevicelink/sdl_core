@@ -6,17 +6,13 @@ import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.trace.SyncTrace;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.util.logger.Logger;
 
 public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	
-	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-	private static final String SYNC_LIB_PRIVATE_TOKEN = "{DAE1A88C-6C16-4768-ACA5-6F1247EA01C2}";
-
 	/**
 	 * Constructor for the SyncProxy object, the proxy for communicating between the App and SYNC. 
 	 * 
@@ -41,7 +37,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*callbackToUIThread*/ true,
 				new BTTransportConfig(), new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener.");
 	}
 	
 	/**
@@ -69,7 +65,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*callbackToUIThread*/ true,
 				new BTTransportConfig(), new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.");
 	}
 	
 	/**
@@ -97,7 +93,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				callbackToUIThread,
 				new BTTransportConfig(), new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.");
 	}
 	
 	/**
@@ -126,7 +122,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				callbackToUIThread,
 				new BTTransportConfig(), new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.");
 	}
 	
 	/********************************************** TRANSPORT SWITCHING SUPPORT *****************************************/
@@ -156,7 +152,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*callbackToUIThread*/ true,
 				transportConfig, new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener.");
 	}
 	
 	/**
@@ -186,7 +182,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				/*callbackToUIThread*/ true,
 				transportConfig, new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, SyncProxyConfigurationResources.");
 	}
 	
 	/**
@@ -215,7 +211,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				callbackToUIThread,
 				transportConfig, new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.");
 	}
 	
 	/**
@@ -245,7 +241,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				callbackToUIThread,
 				transportConfig, new TestConfig());
 		
-		SyncTrace.logProxyEvent("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.", SYNC_LIB_TRACE_KEY);
+		Logger.i("Application constructed SyncProxy instance passing in: IProxyListener, callBackToUIThread.");
 	}
 		
 	/******************** Public Helper Methods *************************/
@@ -289,7 +285,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId());
+                getHashId(), getDeviceInfo());
 	}
 	
 	/**

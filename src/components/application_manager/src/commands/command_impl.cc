@@ -33,15 +33,13 @@
 #include "application_manager/commands/command_impl.h"
 
 namespace application_manager {
-
 namespace commands {
 
-log4cxx::LoggerPtr logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("Commands"));
+CREATE_LOGGERPTR_LOCAL(CommandImpl::logger_, "Commands")
 
 const int32_t CommandImpl::hmi_protocol_type_ = 1;
 const int32_t CommandImpl::mobile_protocol_type_ = 0;
-const int32_t CommandImpl::protocol_version_ = 2;
+const int32_t CommandImpl::protocol_version_ = 3;
 
 CommandImpl::CommandImpl(const MessageSharedPtr& message)
     : message_(message) {
@@ -63,5 +61,4 @@ void CommandImpl::Run() {
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

@@ -40,14 +40,15 @@
 #include <functional>
 #include <map>
 #include "request_watchdog/request_watchdog.h"
+#include "utils/logger.h"
 
 namespace request_watchdog {
 using namespace sync_primitives;
 
 const int32_t RequestWatchdog::DEFAULT_CYCLE_TIMEOUT;
 
-log4cxx::LoggerPtr RequestWatchdog::logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestWatchdog"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestWatchdog")
+
 /*
 Watchdog* RequestWatchdog::instance() {
   static RequestWatchdog instnc;

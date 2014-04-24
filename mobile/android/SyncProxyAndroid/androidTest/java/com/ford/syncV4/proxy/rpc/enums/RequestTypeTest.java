@@ -18,7 +18,7 @@ public class RequestTypeTest extends TestCase {
                 IsArrayContainingInAnyOrder.arrayContainingInAnyOrder(
                         RequestType.HTTP, RequestType.FILE_RESUME,
                         RequestType.AUTH_REQUEST, RequestType.AUTH_CHALLENGE,
-                        RequestType.AUTH_ACK));
+                        RequestType.AUTH_ACK, RequestType.PROPRIETARY));
     }
 
     public void testValueForStringHTTPShouldReturnCorrectValue() {
@@ -45,6 +45,11 @@ public class RequestTypeTest extends TestCase {
                 is(RequestType.AUTH_ACK));
     }
 
+    public void testValueForStringPROPRIETARYShouldReturnCorrectValue() {
+        assertThat(RequestType.valueForString("PROPRIETARY"),
+                is(RequestType.PROPRIETARY));
+    }
+
     public void testHTTPToStringShouldReturnCorrectValue() {
         assertThat(RequestType.HTTP.toString(), is("HTTP"));
     }
@@ -63,6 +68,10 @@ public class RequestTypeTest extends TestCase {
 
     public void testAUTH_ACKToStringShouldReturnCorrectValue() {
         assertThat(RequestType.AUTH_ACK.toString(), is("AUTH_ACK"));
+    }
+
+    public void testPROPRIETARYToStringShouldReturnCorrectValue() {
+        assertThat(RequestType.PROPRIETARY.toString(), is("PROPRIETARY"));
     }
 
     public void testValueForStringUnknownShouldThrowIllegalArgumentException() {

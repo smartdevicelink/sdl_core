@@ -37,6 +37,7 @@
 #include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
 #include "utils/bitstream.h"
+#include "utils/logger.h"
 
 #include <stdint.h>
 #include <memory>
@@ -50,8 +51,8 @@ const uint8_t kUnknown = 0xF;
 
 namespace application_manager {
 
-log4cxx::LoggerPtr MobileMessageHandler::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MobileMessageHandler"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
+
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
@@ -209,7 +210,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   }
 
   protocol_handler::RawMessage* msgToProtocolHandler =
-    new protocol_handler::RawMessage(message->connection_key(), 2,
+    new protocol_handler::RawMessage(message->connection_key(),
+                                     message->protocol_version(),
                                      dataForSending,
                                      MAX_HEADER_SIZE + jsonSize + binarySize);
 

@@ -63,7 +63,8 @@ enum ProtocolVersion {
   kUnknownProtocol = -1,
   kHMI = 0,
   kV1 = 1,
-  kV2 = 2
+  kV2 = 2,
+  kV3 = 3
 };
 
 class Message {

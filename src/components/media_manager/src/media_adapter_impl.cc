@@ -31,11 +31,11 @@
 */
 
 #include "media_manager/media_adapter_impl.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-log4cxx::LoggerPtr MediaAdapterImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MediaAdapterImpl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaAdapterImpl")
 
 MediaAdapterImpl::MediaAdapterImpl()
   : current_application_(0) {

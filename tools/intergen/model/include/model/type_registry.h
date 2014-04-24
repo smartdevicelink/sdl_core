@@ -108,8 +108,11 @@ class TypeRegistry {
   // if |get_array| is true array is created, otherwise map is created
   // Returns false and prints to cerr on error
   bool GetContainer(const pugi::xml_node& params, const Type** type,
-                    bool get_array);
-  bool GetNonArray(const pugi::xml_node& params, const Type** type);
+                    bool get_array, bool container_nullable);
+  bool GetNonArray(const pugi::xml_node& params,
+                   const Type** type,
+                   bool nullable);
+  bool GetNullable(const Type* original_type, const Type** type);
   bool GetEnum(const std::string& name, const Type** type) const;
   bool GetStruct(const std::string& name, const Type** type) const;
   bool GetTypedef(const std::string& name, const Type** type) const;
@@ -118,15 +121,19 @@ class TypeRegistry {
   bool IsRegisteredEnum(const std::string& enum_name) const;
   bool IsRegisteredStruct(const std::string& struct_name) const;
   bool IsRegisteredTypedef(const std::string& typedef_name) const;
+  // Returns true if given type is defined in external interface
   bool IsExternalType(const std::string& full_type_name) const;
  private:
   // fields
   const Interface* interface_;
   BuiltinTypeRegistry* builtin_type_registry_;
+  // Special FunctionID enum. Enum is filled by TypeRegistry if it is
+  // defined in input file. Otherwise it is filled when interface is parsed.
   Enum* function_ids_enum_;
   const ModelFilter* model_filter_;
   std::set<Array> arrays_;
   std::set<Map> maps_;
+  std::set<NullableType> nullables_;
   EnumList enums_;
   utils::StdContainerDeleter<EnumList> enums_deleter_;
   EnumByName enum_by_name_;

@@ -43,6 +43,38 @@ SDL.SDLModel = Em.Object.create({
         'vrHelp': null
     },
 
+/**
+     * List of callback functions for request SDL.GetUserFriendlyMessage
+     * where key is requestId
+     * and parameter is a function that will handle data came in respone from SDL
+     *
+     * @type {Object}
+     */
+    userFriendlyMessagePull: {},
+
+    /**
+     * List of appID functions for request SDL.GetListOfPermissions
+     * where key is requestId
+     * and parameter is a appID that will handle data came in respone from SDL
+     *
+     * @type {Object}
+     */
+    getListOfPermissionsPull: {},
+
+    /**
+     * List of application id's for request SDL.ActivateApp
+     * where key is requestId
+     * and parameter is a id of application to be activated
+     *
+     * @type {Object}
+     */
+    activateAppRequestsList: {},
+
+    /**
+     * ID of app in LIMITED HMI state
+     */
+    stateLimited: null,
+
     /**
      * IScroll object to manage scroll on PerformInteraction view
      *
@@ -58,11 +90,40 @@ SDL.SDLModel = Em.Object.create({
     timeStamp: null,
 
     /**
+     * List of VR commands
+     */
+    VRCommands: [],
+
+    /**
      * Video player object for navigationApp
      *
      * @type {Object}
      */
-    naviVideo: null,
+    naviVideo: {},
+
+/**
+     * Array of strings came in SDL.GetURLS response
+     *
+     * @type {Object}
+     */
+    policyURLs: [],
+
+    /**
+     * Policy Settings Info state value
+     *
+     * @type {String}
+     */
+    settingsInfoListState: 'iAPP_BUFFER_FULL',
+
+    /**
+     * Policy Settings Info list
+     *
+     * @type {Object}
+     */
+    settingsInfoList: [
+        'iAPP_BUFFER_FULL',
+        'blah'
+    ],
 
     /**
      * Flag to indicate AudioPassThruPopUp activity
@@ -166,6 +227,7 @@ SDL.SDLModel = Em.Object.create({
             id: 9
         }
     ],
+
     /**
      * List of states for ExitApplication notification
      */
@@ -181,6 +243,36 @@ SDL.SDLModel = Em.Object.create({
         {
             name: "FACTORY_DEFAULTS",
             id  : 2
+        }
+    ],
+
+    /**
+     * List of states for OnSystemRequest notification
+     */
+    systemRequestState: [
+        {
+            name: "HTTP",
+            id  : 0
+        },
+        {
+            name: "FILE_RESUME",
+            id  : 1
+        },
+        {
+            name: "AUTH_REQUEST",
+            id  : 2
+        },
+        {
+            name: "AUTH_CHALLENGE",
+            id  : 3
+        },
+        {
+            name: "AUTH_ACK",
+            id  : 4
+        },
+        {
+            name: "PROPRIETARY",
+            id  : 5
         }
     ],
 
@@ -287,6 +379,21 @@ SDL.SDLModel = Em.Object.create({
      */
     registeredApps: [],
 
+
+    /**
+     * List of objects with params for connected devices
+     *
+     * @type object
+     */
+    connectedDevices: {},
+
+    /**
+     * List of devices with registered applications
+     *
+     * @type object
+     */
+    conectedDevices: [],
+
     /**
      * List of registered components
      *
@@ -322,9 +429,12 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {Object}
      */
-    listOfIcons: {
+    defaultListOfIcons: {
         // appID: syncFileName
-        0: "images/media/ico_li.png"
+        //0: "images/media/ico_li.png"
+        'app': 'images/info/info_leftMenu_apps_ico.png',
+        'command': 'images/common/defaultButtonImage.png',
+        'trackIcon': 'images/sdl/audio_icon.jpg'
     },
 
     /**
@@ -356,6 +466,23 @@ SDL.SDLModel = Em.Object.create({
     hmiUILanguage: 'EN-US',
 
     /**
+     * Parameter describes if performInteraction session was started on HMI
+     * this flag set to true when UI.PerformInteraction request came on HMI
+     * and set to false when HMI send response to SDL Core on UI.PerformInteraction request
+     *
+     * @type {Boolean}
+     */
+    performInteractionSession: [],
+
+/**
+     * Array with app permissions
+     * used for policies
+     *
+     * @type {Object}
+     */
+    appPermissions: [],
+
+    /**
      * List of supported languages
      *
      * @type {Array}
@@ -384,6 +511,30 @@ SDL.SDLModel = Em.Object.create({
         'DA-DK',
         'NO-NO'
     ],
+
+    /**
+     * Function make diff between two arrays of permissions
+     * remove argument array from existed array of permissions
+     */
+    setAppPermissions: function(oldPermissions){
+        var temp = this.appPermissions.filter(function(item, i) {
+            var ok = oldPermissions.indexOf(item) === -1;
+//            if (ok) {
+//                array5.push(i + 1);
+//            }
+            return ok;
+        });
+
+        this.set('appPermissions', temp);
+    },
+
+    /**
+     * Method to set selected state of settings Info List
+     */
+    settingsInfoListStateChange: function() {
+
+        FFW.BasicCommunication.AddStatisticsInfo(this.settingsInfoListState);
+    }.observes('this.settingsInfoListState'),
 
     /**
      * Method to open Phone view and dial phone number
@@ -470,6 +621,119 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * Method to remove deleted by SDL Core images used in HMI
+     * check images came in request from SDLCore like UI.Show, UI.AddCommand, UI.SetGlobalProperties,
+     * UI.SeAppIcon, Navigation.ShowConstantTBT, Navigation.UpdateTurnList, UI.ShowNotification
+     *
+     * @param {Object}
+     */
+    onFileRemoved: function(params) {
+
+        var result = false;
+
+        if ((params.fileType === "GRAPHIC_PNG" || params.fileType === "GRAPHIC_BMP" || params.fileType === "GRAPHIC_JPEG") && SDL.SDLController.getApplicationModel(params.appID)) {
+            result = SDL.SDLController.getApplicationModel(params.appID).onImageRemoved(params.fileName);
+
+            if (SDL.SDLController.getApplicationModel(params.appID).appIcon.indexOf(params.fileName) != -1) {
+                SDL.SDLController.getApplicationModel(params.appID).set('appIcon', SDL.SDLModel.defaultListOfIcons.app);
+            }
+
+            if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams) {
+
+                if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.turnIcon
+                    && SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.turnIcon.value.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.turnIcon.value = SDL.SDLModel.defaultListOfIcons.command;
+                    SDL.TurnByTurnView.activate(params.appID);
+                }
+
+                if (SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.nextTurnIcon
+                    && SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.nextTurnIcon.value.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).constantTBTParams.nextTurnIcon.value = SDL.SDLModel.defaultListOfIcons.command;
+                    SDL.TurnByTurnView.activate(params.appID);
+                }
+            }
+
+            if (SDL.SDLAppController.model.appInfo.trackIcon && SDL.SDLAppController.model.appInfo.trackIcon.indexOf(params.fileName) != -1) {
+                SDL.SDLAppController.model.appInfo.set('trackIcon', SDL.SDLModel.defaultListOfIcons.trackIcon);
+            }
+
+            if (SDL.SDLAppController.model.appInfo.mainImage && SDL.SDLAppController.model.appInfo.mainImage.indexOf(params.fileName) != -1) {
+                SDL.SDLAppController.model.appInfo.set('mainImage', SDL.SDLModel.defaultListOfIcons.trackIcon);
+            }
+
+            var len = SDL.SDLController.getApplicationModel(params.appID).turnList.length;
+            for (var i = 0; i < len; i++) {
+                if (!SDL.SDLController.getApplicationModel(params.appID).turnList[i].turnIcon) {
+                    continue;
+                }
+                if (SDL.SDLController.getApplicationModel(params.appID).turnList[i].turnIcon.value.indexOf(params.fileName) != -1) {
+                    SDL.SDLController.getApplicationModel(params.appID).turnList[i].turnIcon.value = SDL.SDLModel.defaultListOfIcons.command;
+                }
+            }
+
+            SDL.TBTTurnList.updateList(params.appID);
+
+            if (SDL.SDLController.getApplicationModel(params.appID).softButtons) {
+                var len = SDL.SDLController.getApplicationModel(params.appID).softButtons.length;
+                for (var i = 0; i < len; i++) {
+                    if (!SDL.SDLController.getApplicationModel(params.appID).softButtons[i].image) {
+                        continue;
+                    }
+                    if (SDL.SDLController.getApplicationModel(params.appID).softButtons[i].image.value.indexOf(params.fileName) != -1) {
+                        SDL.SDLController.getApplicationModel(params.appID).softButtons[i].image.value = SDL.SDLModel.defaultListOfIcons.command;
+                    }
+                }
+
+                if (params.appID == SDL.SDLAppController.model.appID) {
+                    SDL.sdlView.innerMenu.refreshItems();
+                }
+            }
+
+            var len = SDL.VRHelpListView.helpList.items.length;
+            for (var i = 0; i < len; i++) {
+                if (!SDL.VRHelpListView.helpList.items[i].params.icon) {
+                    continue;
+                }
+                if (SDL.VRHelpListView.helpList.items[i].params.icon.indexOf(params.fileName) != -1) {
+                    SDL.VRHelpListView.helpList.items[i].params.icon = SDL.SDLModel.defaultListOfIcons.command;
+                }
+            }
+
+            SDL.VRHelpListView.helpList.list.refresh();
+
+            var len = SDL.InteractionChoicesView.listOfChoices.items.length;
+            for (var i = 0; i < len; i++) {
+                if (!SDL.InteractionChoicesView.listOfChoices.items[i].params.icon) {
+                    continue;
+                }
+                if (SDL.InteractionChoicesView.listOfChoices.items[i].params.icon.indexOf(params.fileName) != -1) {
+                    SDL.InteractionChoicesView.listOfChoices.items[i].params.icon = SDL.SDLModel.defaultListOfIcons.command;
+                }
+            }
+
+            SDL.InteractionChoicesView.listOfChoices.list.refresh();
+
+            var len = SDL.InteractionChoicesView.listWrapper.naviChoises._childViews.length;
+            for (var i = 0; i < len; i++) {
+                if (!SDL.InteractionChoicesView.listWrapper.naviChoises._childViews[i].icon) {
+                    continue;
+                }
+                if (SDL.InteractionChoicesView.listWrapper.naviChoises._childViews[i].icon.indexOf(params.fileName) != -1) {
+                    SDL.InteractionChoicesView.listWrapper.naviChoises._childViews[i].icon = SDL.SDLModel.defaultListOfIcons.command;
+                }
+            }
+
+            SDL.InteractionChoicesView.listWrapper.naviChoises.rerender();
+
+        }
+
+
+        if (result && SDL.OptionsView.active && SDL.SDLAppController.model.appID == params.appID) {
+            SDL.OptionsView.commands.refreshItems();
+        }
+    },
+
+    /**
      * Method to start playing video from streaming video source
      * provided by SDLCore
      *
@@ -478,7 +742,7 @@ SDL.SDLModel = Em.Object.create({
     startStream: function(params) {
 
         SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-        SDL.SDLModel.playVideo();
+        SDL.SDLModel.playVideo(params.appID);
     },
 
     /**
@@ -494,8 +758,8 @@ SDL.SDLModel = Em.Object.create({
             }),
             videoChild = null;
 
-        SDL.NavigationAppView.removeChild(SDL.NavigationAppView.get('videoView'));
-        SDL.NavigationAppView.rerender();
+        SDL.NavigationAppView.videoView.remove();
+        SDL.NavigationAppView.videoView.destroy();
 
         SDL.SDLController.getApplicationModel(appID).set('navigationStream', null);
 
@@ -533,11 +797,11 @@ SDL.SDLModel = Em.Object.create({
     /**
      * Method to reset navigationApp streaming url from current app model
      */
-    playVideo: function(){
-        if (SDL.SDLAppController.model.navigationStream !== null) {
+    playVideo: function(appID){
+        if (SDL.SDLController.getApplicationModel(appID).navigationStream !== null) {
 
             SDL.SDLModel.naviVideo = document.getElementById("html5Player");
-            SDL.SDLModel.naviVideo.src = SDL.SDLAppController.model.navigationStream;
+            SDL.SDLModel.naviVideo.src = SDL.SDLController.getApplicationModel(appID).navigationStream;
             SDL.SDLModel.naviVideo.play();
         }
     },
@@ -574,8 +838,8 @@ SDL.SDLModel = Em.Object.create({
      */
     tbtTurnListUpdate: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList;
-        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons;
+        SDL.SDLController.getApplicationModel(params.appID).turnList = params.turnList ? params.turnList : [];
+        SDL.SDLController.getApplicationModel(params.appID).turnListSoftButtons = params.softButtons ? params.softButtons : [];
         SDL.TBTTurnList.updateList(params.appID);
     },
 
@@ -631,14 +895,16 @@ SDL.SDLModel = Em.Object.create({
         }
 
         if (params.ttsName) {
-            SDL.VRPopUp.AddActivateApp(params.ttsName.text ,params.appID);
+            for (var i = 0; i < params.ttsName.length; i++) {
+                var message = {"cmdID": 0, "vrCommands": [params.ttsName[i].text], "appID": params.application.appID, "type": "Application"};
+                this.addCommandVR(message);
+            }
         }
 
         if (params.vrSynonyms) {
-            var length = params.vrSynonyms.length
-            for (var i = 0; i < length; i++) {
-                SDL.VRPopUp.AddActivateApp(params.vrSynonyms[i] ,params.application.appID);
-            }
+
+            var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};
+            this.addCommandVR(message);
         }
 
         if (params.application.isMediaApplication) {
@@ -724,24 +990,6 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
-     * Method to call handler from model to show list of avaliable
-     * applications
-     *
-     * @param {Object}
-     *            appList
-     */
-    onGetAppList: function (appList) {
-
-        var i = 0, len = appList.length;
-        for (i = 0; i < len; i++) {
-            if (appList[i]) {
-                SDL.SDLModel.onAppRegistered(appList[i]);
-            }
-        }
-
-    },
-
-    /**
      * Method to call function from DeviceListView to show list of connected
      * devices
      *
@@ -750,7 +998,45 @@ SDL.SDLModel = Em.Object.create({
      */
     onGetDeviceList: function (params) {
 
-        if (SDL.States.info.devicelist.active && params.deviceList && params.deviceList.length) {
+        //SDL.SDLModel.set('connectedDevices', params.deviceList);
+        var exist = false;
+
+        for (var i = 0; i < params.deviceList.length; i++) {
+
+            if (params.deviceList[i].id in SDL.SDLModel.connectedDevices) {
+                exist = true;
+            }
+
+            if (!exist) {
+                SDL.SDLModel.connectedDevices[params.deviceList[i].id] = {
+                    "name": params.deviceList[i].name,
+                    "sdlFunctionality": {
+                        "popUpId": null,
+                        "allowed": false
+                    }
+                }
+            } else {
+
+                exist = false;
+            }
+        }
+
+        var dev = SDL.SDLModel.connectedDevices;
+        for (var key in dev) {
+
+            if (dev.hasOwnProperty(key)) {
+                if (params.deviceList.filterProperty("id", parseInt(key)).length == 0) {
+
+                    if (SDL.PopUp.popUpId == dev[key].sdlFunctionality.popUpId) {
+                        SDL.PopUp.deactivate();
+                    }
+
+                    delete dev[key];
+                }
+            }
+        }
+
+        if (SDL.States.info.devicelist.active) {
             SDL.DeviceListView.ShowDeviceList(params);
         }
 
@@ -813,15 +1099,13 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      *            message Object with parameters come from SDLCore
-     * @param {Number}
-     *            performInteractionRequestId Id of current handled request
      */
     uiPerformInteraction: function (message) {
 
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
         } else {
-            SDL.SDLController.interactionChoiseCloseResponse(message.appID, SDL.SDLModel.resultCode['REJECTED']);
+            SDL.SDLController.interactionChoiseCloseResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
             return;
         }
 
@@ -831,9 +1115,58 @@ SDL.SDLModel = Em.Object.create({
             SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
         }
 
-        SDL.InteractionChoicesView.activate(message);
+       // if (message.params.choiceSet || message.params.interactionLayout == "KEYBOARD") {
+            SDL.InteractionChoicesView.activate(message);
+            SDL.SDLController.VRMove();
+        //}
+    },
 
-        SDL.SDLController.VRMove();
+    /**
+     * SDL VR PerformInteraction response handler
+     *
+     * @param {Object}
+     *            message Object with parameters come from SDLCore
+     */
+    vrPerformInteraction: function (message) {
+
+        if (!SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = message.id;
+        } else {
+            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
+            return;
+        }
+
+        setTimeout(function(){
+            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
+                SDL.SDLModel.interactionData.helpPrompt = null;
+            }
+        }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
+
+        SDL.SDLModel.onPrompt(message.params.initialPrompt);
+
+        SDL.SDLModel.interactionData.helpPrompt = message.params.helpPrompt;
+
+        if (message.params.grammarID) {
+
+            this.set('performInteractionSession', message.params.grammarID);
+            SDL.SDLModel.set('VRActive', true);
+
+            setTimeout(function(){
+                if (SDL.SDLModel.VRActive) {
+                    if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                        SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['TIMED_OUT']);
+                    }
+
+                    SDL.SDLModel.set('VRActive', false);
+                }
+            }, message.params.timeout);
+
+            SDL.InteractionChoicesView.timerUpdate();
+        } else {
+
+            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['SUCCESS']);
+        }
     },
 
     /**
@@ -944,12 +1277,23 @@ SDL.SDLModel = Em.Object.create({
      */
     addCommandVR: function (message) {
 
-        var appId = 0;
-        if ("appID" in message) {
-            appId = message.appID;
+        if (message.type == "Application") {
+
+            SDL.SDLModel.VRCommands.push(message);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type);
+        } else if ("appID" in message) {
+
+            SDL.SDLController.getApplicationModel(message.appID).VRCommands.push(message);
+
+            if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID == message.appID) {
+
+                SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, message.appID, message.type, message.grammarID);
+            }
+        } else {
+
+            SDL.SDLModel.VRCommands.push(message);
+            SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, 0, message.type, message.grammarID);
         }
-
-        SDL.VRPopUp.AddCommand(message.cmdID, message.vrCommands, appId);
     },
 
     /**
@@ -958,21 +1302,30 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Number}
      */
-    deleteCommandVR: function (commandID) {
+    deleteCommandVR: function (params) {
 
-        SDL.VRPopUp.DeleteCommand(commandID);
+        SDL.VRPopUp.DeleteCommand(params.cmdID, params.appID);
+
+        var len = SDL.SDLController.getApplicationModel(params.appID).VRCommands.length;
+
+        for (var i = len - 1; i >= 0 ; i--) {
+            if (SDL.SDLController.getApplicationModel(params.appID).VRCommands[i].appID == params.appID &&
+                SDL.SDLController.getApplicationModel(params.appID).VRCommands[i].cmdID == params.cmdID) {
+                SDL.SDLController.getApplicationModel(params.appID).VRCommands.splice(i, 1);
+            }
+        }
     },
-
-    /**
-     * SDL VR DeleteCommand response handler delete command from voice
-     * recognition window
-     *
-     * @param {Number}
-     */
-    deleteCommandVR: function (commandID) {
-
-        SDL.VRPopUp.DeleteCommand(commandID);
-    },
+//
+//    /**
+//     * SDL VR DeleteCommand response handler delete command from voice
+//     * recognition window
+//     *
+//     * @param {Number}
+//     */
+//    deleteCommandVR: function (commandID) {
+//
+//        SDL.VRPopUp.DeleteCommand(commandID);
+//    },
 
     onDeactivateApp: function (target, appID) {
 

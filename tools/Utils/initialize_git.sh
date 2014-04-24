@@ -1,8 +1,6 @@
 #/usr/bin/sh
 
 GIT_REPO=$1
-
-
 if [ "$GIT_REPO" = "" ]
 then
     echo "You should setup your git folder with first paraameter"
@@ -10,7 +8,22 @@ then
     echo -e "\t ./initialise_git.sh /home/{USER_NAME}/applink"
     exit
 fi
+
 cd $GIT_REPO
+OUT=$?
+if [ $OUT != 0 ];then
+   echo "Bad directory"
+   exit;
+fi
+
+GIT_REPO=`pwd`
+DOT_GIT=$GIT_REPO/.git/
+POLICY_REPO=$GIT_REPO/src/components/policy
+POLICY_DOT_GIT=$GIT_REPO/.git/modules/src/components/policy
+
+git submodule init
+git submodule update 
+
 echo "Enter first name: " 
 read FIRST_NAME
 echo "Enter last name: " 
@@ -43,8 +56,12 @@ git config user.email $EMAIL
 MESSAGE_DATA="Not a subject for review\n\n\tReason:"
 MESSGAGE_FILE_NAME="default_message"
 
-echo -e $MESSAGE_DATA > .git/$MESSGAGE_FILE_NAME 
-git config commit.template .git/$MESSGAGE_FILE_NAME 
+echo -e $MESSAGE_DATA > $DOT_GIT$MESSGAGE_FILE_NAME 
+git config commit.template $DOT_GIT$MESSGAGE_FILE_NAME
+
+cd $POLICY_REPO
+git config commit.template $DOT_GIT$MESSGAGE_FILE_NAME
+
 echo "Done"
 
 

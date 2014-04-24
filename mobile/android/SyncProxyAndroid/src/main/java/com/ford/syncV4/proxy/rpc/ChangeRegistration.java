@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ChangeRegistration extends RPCRequest {
 
@@ -31,7 +31,7 @@ public class ChangeRegistration extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.language, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.language, e);
             }
             return theCode;
         }
@@ -53,7 +53,7 @@ public class ChangeRegistration extends RPCRequest {
             try {
                 theCode = Language.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguage, e);
+            	Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.hmiDisplayLanguage, e);
             }
             return theCode;
         }

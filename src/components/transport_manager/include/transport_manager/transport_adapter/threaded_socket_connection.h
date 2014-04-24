@@ -39,7 +39,6 @@
 
 #include <queue>
 
-#include "utils/logger.h"
 #include "transport_manager/transport_adapter/connection.h"
 
 using ::transport_manager::transport_adapter::Connection;
@@ -156,9 +155,6 @@ class ThreadedSocketConnection : public Connection {
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
 };
-
-extern log4cxx::LoggerPtr logger_;
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
 

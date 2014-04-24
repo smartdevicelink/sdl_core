@@ -14,7 +14,7 @@ public class InvalidJsonRPCMarshaller extends JsonRPCMarshaller {
 	@Override
 	public byte[] marshall(RPCMessage msg, byte version) {
 		byte[] msgBytes = super.marshall(msg, version);
-		
+
 		if (msgBytes != null) {
 			final int newLength = msgBytes.length - 1;
 			byte[] bytes = new byte[newLength];

@@ -34,11 +34,8 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_CONTEXT_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_impl.h"
 
 namespace application_manager {
-
-class ApplicationManagerImpl;
 
 namespace commands {
 
@@ -66,31 +63,6 @@ class OnSystemContextNotification : public NotificationFromHMI {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
-
-  /**
-   * @brief Change audio streaming state of app to NOT_AUDIBLE
-   *
-   * @param app_mgr application manager
-   *
-   * @param app pointer to application
-   **/
-  void MuteAudioStream(ApplicationManagerImpl* app_mgr,
-                       ApplicationSharedPtr app);
-
-  /**
-   * @brief Change audio streaming state of app to AUDIBLE
-   *
-   * @param app pointer to application
-   **/
-  void UnmuteAudioStream(ApplicationSharedPtr app);
-
-  /**
-   * @brief Change vr session state
-   *
-   * @param vr_session_is_active_on_hmi current vr session state on HMI
-   **/
-  void UpdateVRState(ApplicationManagerImpl* app_mgr,
-                     bool vr_session_is_active_on_hmi);
 };
 
 }  // namespace commands

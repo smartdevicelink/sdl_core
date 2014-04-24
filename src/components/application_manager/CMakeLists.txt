@@ -1,3 +1,8 @@
+if (EXTENDED_POLICY_FLAG)
+  add_definitions(-DEXTENDED_POLICY)
+endif()
+
+
 include_directories (
   ./include/
   ../utils/include/
@@ -10,15 +15,20 @@ include_directories (
   ../config_profile/include/
   ../request_watchdog/include/
   ../transport_manager/include/
-  ../policies/include/
+  ../resumption/include/
+  ../rpc_base/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ../../thirdPartyLibs/encryption/include/
   ../../thirdPartyLibs/MessageBroker/include
   ${CMAKE_BINARY_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
+  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
 )
 
 set (SOURCES
 ./src/application_manager_impl.cc
+./src/usage_statistics.cc
 ./src/message.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc
@@ -32,8 +42,22 @@ set (SOURCES
 )
 
 set (POLICIES_MANAGER
-./src/policies_manager/policies_manager.cc
+./src/policies/policy_handler.cc
+./src/policies/policy_event_observer.cc
+./src/policies/policy_retry_sequence.cc
+./src/policies/pt_exchange_handler.cc
 )
+
+if (EXTENDED_POLICY_FLAG)
+  list(APPEND POLICIES_MANAGER
+    ./src/policies/pt_exchange_handler_ext.cc
+    ./src/policies/pt_exchange_handler_impl.cc
+  )
+else ()
+  list(APPEND POLICIES_MANAGER
+    ./src/policies/pt_exchange_handler_impl.cc
+  )
+endif ()
 
 set (EVENT_ENGINE
 ./src/event_engine/event.cc
@@ -53,6 +77,8 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/add_sub_menu_response.cc
 ./src/commands/mobile/alert_request.cc
 ./src/commands/mobile/alert_response.cc
+./src/commands/mobile/alert_maneuver_request.cc
+./src/commands/mobile/alert_maneuver_response.cc
 ./src/commands/mobile/change_registration_request.cc
 ./src/commands/mobile/change_registration_response.cc
 ./src/commands/mobile/create_interaction_choice_set_request.cc
@@ -147,21 +173,34 @@ set (MOBILE_COMMANDS_SOURCES
 set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/request_to_hmi.cc
 ./src/commands/hmi/response_from_hmi.cc
+./src/commands/hmi/request_from_hmi.cc
+./src/commands/hmi/response_to_hmi.cc
 ./src/commands/hmi/notification_to_hmi.cc
 ./src/commands/hmi/notification_from_hmi.cc
 ./src/commands/hmi/allow_all_apps_request.cc
 ./src/commands/hmi/allow_all_apps_response.cc
 ./src/commands/hmi/allow_app_request.cc
 ./src/commands/hmi/allow_app_response.cc
+./src/commands/hmi/update_sdl_request.cc
+./src/commands/hmi/update_sdl_response.cc
 ./src/commands/hmi/activate_app_request.cc
 ./src/commands/hmi/activate_app_response.cc
+./src/commands/hmi/get_system_info_request.cc
+./src/commands/hmi/get_system_info_response.cc
+./src/commands/hmi/sdl_get_list_of_permissions_request.cc
+./src/commands/hmi/sdl_get_list_of_permissions_response.cc
+./src/commands/hmi/sdl_get_user_friendly_message_request.cc
+./src/commands/hmi/sdl_get_user_friendly_message_response.cc
+./src/commands/hmi/sdl_get_status_update_request.cc
+./src/commands/hmi/sdl_get_status_update_response.cc
+./src/commands/hmi/on_status_update_notification.cc
+./src/commands/hmi/sdl_activate_app_response.cc
+./src/commands/hmi/sdl_activate_app_request.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
-./src/commands/hmi/update_app_list_request.cc
-./src/commands/hmi/update_app_list_response.cc
-./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/update_device_list_request.cc
 ./src/commands/hmi/update_device_list_response.cc
+./src/commands/hmi/on_sdl_consent_needed_notification.cc
 ./src/commands/hmi/on_exit_all_applications_notification.cc
 ./src/commands/hmi/on_exit_application_notification.cc
 ./src/commands/hmi/on_start_device_discovery.cc
@@ -200,8 +239,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/tts_set_global_properties_response.cc
 ./src/commands/hmi/tts_get_capabilities_request.cc
 ./src/commands/hmi/tts_get_capabilities_response.cc
-./src/commands/hmi/tts_perform_interaction_request.cc
-./src/commands/hmi/tts_perform_interaction_response.cc
+./src/commands/hmi/vr_perform_interaction_request.cc
+./src/commands/hmi/vr_perform_interaction_response.cc
 ./src/commands/hmi/ui_add_command_request.cc
 ./src/commands/hmi/ui_add_command_response.cc
 ./src/commands/hmi/ui_delete_command_request.cc
@@ -254,6 +293,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/vi_get_vehicle_type_response.cc
 ./src/commands/hmi/navi_is_ready_request.cc
 ./src/commands/hmi/navi_is_ready_response.cc
+./src/commands/hmi/navi_alert_maneuver_request.cc
+./src/commands/hmi/navi_alert_maneuver_response.cc
 ./src/commands/hmi/navi_update_turn_list_request.cc
 ./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
@@ -261,10 +302,15 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
-./src/commands/hmi/on_update_device_list.cc
+./src/commands/hmi/on_allow_sdl_functionality_notification.cc
+./src/commands/hmi/on_app_permission_consent_notification.cc
 ./src/commands/hmi/on_app_registered_notification.cc
+./src/commands/hmi/on_app_permission_changed_notification.cc
 ./src/commands/hmi/on_app_unregistered_notification.cc
 ./src/commands/hmi/on_driver_distraction_notification.cc
+./src/commands/hmi/on_ignition_cycle_over_notification.cc
+./src/commands/hmi/on_system_info_changed_notification.cc
+./src/commands/hmi/on_file_removed_notification.cc
 ./src/commands/hmi/on_play_tone_notification.cc
 ./src/commands/hmi/on_tts_started_notification.cc
 ./src/commands/hmi/on_tts_stopped_notification.cc
@@ -279,7 +325,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ui_language_change_notification.cc
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
-./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
@@ -293,9 +338,21 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_stop_stream_request.cc
 ./src/commands/hmi/audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
+./src/commands/hmi/on_put_file_notification.cc
 ./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
+./src/commands/hmi/on_record_start_notification.cc
+./src/commands/hmi/add_statistics_info_notification.cc
+./src/commands/hmi/on_system_error_notification.cc
+./src/commands/hmi/basic_communication_system_request.cc
+./src/commands/hmi/basic_communication_system_response.cc
+./src/commands/hmi/sdl_policy_update.cc
+./src/commands/hmi/sdl_policy_update_response.cc
+./src/commands/hmi/on_received_policy_update.cc
+./src/commands/hmi/on_policy_update.cc
+./src/commands/hmi/get_urls.cc
+./src/commands/hmi/get_urls_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -339,5 +396,18 @@ if (${HMI_DBUS_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
 endif (${HMI_DBUS_API})
 
+SET (LIBRARIES
+  UsageStatistics
+  dl
+)
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+  list(REMOVE_ITEM LIBRARIES dl)
+endif()
+
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
-target_link_libraries ("ApplicationManager" log4cxx)
+target_link_libraries("ApplicationManager" ${LIBRARIES})
+
+if(ENABLE_LOG)
+  target_link_libraries("ApplicationManager" log4cxx)
+endif()

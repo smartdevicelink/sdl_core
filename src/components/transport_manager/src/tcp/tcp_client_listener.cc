@@ -52,12 +52,16 @@
 #  include <netinet/tcp_var.h>
 #endif  // __linux__
 
+#include "utils/logger.h"
+
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,

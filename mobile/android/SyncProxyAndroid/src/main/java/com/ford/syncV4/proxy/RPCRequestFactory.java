@@ -1,5 +1,7 @@
 package com.ford.syncV4.proxy;
 
+import android.util.Log;
+
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -12,6 +14,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommand;
 import com.ford.syncV4.proxy.rpc.DeleteFile;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSet;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenu;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.proxy.rpc.ListFiles;
 import com.ford.syncV4.proxy.rpc.MenuParams;
@@ -28,6 +31,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
+import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -36,14 +40,25 @@ import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
 public class RPCRequestFactory {
 
-	public static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 5;
-	public static final int SYNC_MSG_MAJOR_VERSION = 1;
-	public static final int SYNC_MSG_MINOR_VERSION = 0;
+    private static final String LOG_TAG = RPCRequestFactory.class.getSimpleName();
+
+    /**
+     * Since version 3.0O revision P
+     */
+	private static final int NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH = 100;
+	private static final int APP_NAME_MAX_LENGTH = 100;
+	private static final int VR_SYNONYM_MAX_LENGTH = 40;
+	private static final int VR_SYNONYM_MIX_SIZE = 1;
+	private static final int VR_SYNONYM_MAX_SIZE = 100;
+
+    private static final int SYNC_MSG_MAJOR_VERSION = 1;
+    private static final int SYNC_MSG_MINOR_VERSION = 0;
 
 	public static EncodedSyncPData buildEncodedSyncPData(
 			Vector<String> data, Integer correlationID) {
@@ -370,6 +385,24 @@ public class RPCRequestFactory {
     }
 
     /**
+     * Build {@link com.ford.syncV4.proxy.rpc.PutFile} object
+     * @param fileName      name of the associated file
+     * @param data          bytes array
+     * @param correlationID correlation id of the request
+     * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
+     */
+    public static SystemRequest buildSystemRequest(String fileName, byte[] data,
+                                             Integer correlationID, RequestType requestType) {
+        SystemRequest systemRequest = new SystemRequest();
+        systemRequest.setFileName(fileName);
+        systemRequest.setBulkData(data);
+        systemRequest.setRequestType(requestType);
+        systemRequest.setCorrelationID(correlationID);
+
+        return systemRequest;
+    }
+
+    /**
      * Build <b>PutFile</b> object with provided parameters
      *
      * @param syncFileName   File name
@@ -392,71 +425,76 @@ public class RPCRequestFactory {
 		return putFile;
 	}
 	
-	public static RegisterAppInterface buildRegisterAppInterface(String appName) {
-		return buildRegisterAppInterface(appName, false);
-	}
-	
 	public static RegisterAppInterface buildRegisterAppInterface(
-			String appName, Boolean isMediaApp) {
-		
-		return buildRegisterAppInterface(null, appName, null, null, null, isMediaApp, 
-				null, null, null, null, null, null);
-	}
-	
-	public static RegisterAppInterface buildRegisterAppInterface(
-			SyncMsgVersion syncMsgVersion, String appName, Vector<TTSChunk> ttsName, 
-			String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
+            Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-			String appID, Integer correlationID, String hashId) {
+            Object appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
 		RegisterAppInterface msg = new RegisterAppInterface();
 		
 		if (correlationID == null) {
 			correlationID = 1;
 		}
 		msg.setCorrelationID(correlationID);
-		
-		if (syncMsgVersion == null) {
+
+        // TODO : For the TEST CASES only
+		/*if (syncMsgVersion == null) {
 			syncMsgVersion = new SyncMsgVersion();
 			syncMsgVersion.setMajorVersion(new Integer(SYNC_MSG_MAJOR_VERSION));
 			syncMsgVersion.setMinorVersion(new Integer(SYNC_MSG_MINOR_VERSION));
-		} 
+		}*/
 		msg.setSyncMsgVersion(syncMsgVersion);
-		
+
+        // TODO : For the TEST CASES only
+        /*if (appName.length() > APP_NAME_MAX_LENGTH) {
+            appName = appName.substring(0, APP_NAME_MAX_LENGTH);
+        }*/
 		msg.setAppName(appName);
 		
 		msg.setTtsName(ttsName);
-		
-		if (ngnMediaScreenAppName == null) {
-			ngnMediaScreenAppName = appName;
-		}
-		
-		if (ngnMediaScreenAppName.length() > NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH) {
-			ngnMediaScreenAppName = ngnMediaScreenAppName.substring(0,
-					NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH);
-		}
-		msg.setNgnMediaScreenAppName(ngnMediaScreenAppName);
-		
-		if (vrSynonyms == null) {
-			vrSynonyms = new Vector<String>();
-			vrSynonyms.add(appName);
-		}
-		msg.setVrSynonyms(vrSynonyms);
+
+        // TODO : For the TEST CASES only
+		/*if (ngnMediaScreenAppName != null) {
+            if (ngnMediaScreenAppName.length() > NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH) {
+                ngnMediaScreenAppName = ngnMediaScreenAppName.substring(0,
+                        NGN_MEDIA_SCREEN_APP_NAME_MAX_LENGTH);
+            }
+
+		}*/
+        msg.setNgnMediaScreenAppName(ngnMediaScreenAppName);
+
+        // TODO : For the TEST CASES only
+		/*if (vrSynonyms != null && vrSynonyms.size() >= VR_SYNONYM_MIX_SIZE &&
+                vrSynonyms.size() <= VR_SYNONYM_MAX_SIZE) {
+			//vrSynonyms = new Vector<String>();
+            msg.setVrSynonyms(vrSynonyms);
+		}*/
+        msg.setVrSynonyms(vrSynonyms);
 		
 		msg.setIsMediaApplication(isMediaApp);
-		
-		if (languageDesired == null) {
-			languageDesired = Language.EN_US;
-		}
+
+		//if (languageDesired == null) {
+			//languageDesired = Language.EN_US;
+		//}
 		msg.setLanguageDesired(languageDesired);
-		
+
 		msg.setHmiDisplayLanguageDesired(hmiDisplayLanguageDesired);
-		
+
+        // TODO : For the TEST CASES only
+        /*if (appHMIType == null) {
+            appHMIType = new Vector<AppHMIType>();
+        }*/
+
 		msg.setAppType(appHMIType);
 		
 		msg.setAppID(appID);
 
         if (hashId != null) {
             msg.setHashID(hashId);
+        }
+
+        if (deviceInfo != null) {
+            msg.setDeviceInfo(deviceInfo);
         }
 
 		return msg;

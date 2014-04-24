@@ -31,13 +31,13 @@
  */
 
 #include "utils/threads/thread.h"
+#include "utils/logger.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/audio/audio_stream_sender_thread.h"
 
 namespace media_manager {
 
-log4cxx::LoggerPtr FromMicRecorderListener::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("FromMicRecorderListener"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderListener")
 
 FromMicRecorderListener::FromMicRecorderListener(
   const std::string& file_name)

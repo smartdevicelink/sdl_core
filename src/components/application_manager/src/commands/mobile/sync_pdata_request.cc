@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/sync_pdata_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "encryption/Base64.h"
@@ -44,8 +45,7 @@ namespace commands {
 
 const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FILENAME =
     "policy_sync_data.dat";
-const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME =
-    "policies";
+const std::string SyncPDataRequest::TEMPORARY_HARDCODED_FOLDERNAME = "policies";
 
 SyncPDataRequest::SyncPDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -57,8 +57,8 @@ SyncPDataRequest::~SyncPDataRequest() {
 void SyncPDataRequest::Run() {
   LOG4CXX_INFO(logger_, "SyncPDataRequest::Run");
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-      connection_key());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -77,14 +77,15 @@ void SyncPDataRequest::Run() {
   const std::vector<uint8_t> file_data =
       (*message_)[strings::params][strings::binary_data].asBinary();
 
-  std::string relative_file_path = file_system::CreateDirectory(
-      TEMPORARY_HARDCODED_FOLDERNAME);
-  relative_file_path += "/";
-  relative_file_path += sync_file_name;
+  std::string path =
+      profile::Profile::instance()->app_storage_folder() + "/";
+  path += TEMPORARY_HARDCODED_FOLDERNAME;
+
+  std::string file_path = file_system::CreateDirectory(path);
 
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(
-          file_data, file_system::FullPath(relative_file_path), 0);
+          file_data, file_path, sync_file_name, 0);
 
   switch(save_result) {
     case mobile_apis::Result::SUCCESS:

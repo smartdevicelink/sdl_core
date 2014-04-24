@@ -45,11 +45,7 @@ SDL.SDLController = Em.Object
             if (SDL.AlertPopUp.active) {
                 return 'ALERT';
             }
-            if (SDL.TBTClientStateView.active
-                || SDL.VehicleInfo.active
-                || SDL.DriverDistraction.active
-                || SDL.ExitApp.active
-                || SDL.SliderView.active
+            if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
                 || SDL.AudioPassThruPopUp.activate) {
@@ -60,21 +56,20 @@ SDL.SDLController = Em.Object
                 return 'MENU';
             }
             if (SDL.States.info.nonMedia.active
-                || SDL.States.media.sdlmedia.active) {
+                || SDL.States.media.sdlmedia.active
+                || SDL.States.navigationApp.baseNavigation.active) {
 
                 return 'MAIN';
             } else {
                 return 'MENU';
             }
-        }.property('SDL.DriverDistraction.active',
-            'SDL.OptionsView.active',
+        }.property('SDL.OptionsView.active',
+            'SDL.SliderView.active',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
-            'SDL.TBTClientStateView.active',
-            'SDL.VehicleInfo.active',
             'SDL.States.info.nonMedia.active',
             'SDL.States.media.sdlmedia.active',
-            'SDL.ExitApp.active',
+            'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active',
@@ -325,27 +320,27 @@ SDL.SDLController = Em.Object
          * Action for ClosePopUp request that triggers deactivate function from
          * opened popUp
          */
-        closePopUp: function() {
+        closePopUp: function(methodName) {
 
-            if (SDL.AlertPopUp.active) {
+            if (methodName == "UI.Alert") {
                 SDL.AlertPopUp.deactivate();
             }
-            if (SDL.AudioPassThruPopUp.active) {
+            if (methodName == "UI.PerformAudioPassThru") {
                 SDL.AudioPassThruPopUp.deactivate();
                 this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
-            if (SDL.InteractionChoicesView.active) {
+            if (methodName == "UI.PerformInteraction") {
                 SDL.InteractionChoicesView.deactivate("ABORTED");
             }
-            if (SDL.ScrollableMessage.active) {
+            if (methodName == "UI.ScrollableMessage") {
                 SDL.ScrollableMessage.deactivate(true);
             }
-            if (SDL.SliderView.active) {
+            if (methodName == "UI.Slider") {
                 SDL.SliderView.deactivate(true);
             }
-            if (SDL.VRHelpListView.active) {
-                SDL.VRHelpListView.deactivate();
-            }
+//            if (SDL.VRHelpListView.active) {
+//                SDL.VRHelpListView.deactivate();
+//            }
         },
 
         /**
@@ -354,6 +349,14 @@ SDL.SDLController = Em.Object
         InteractionChoicesDeactivate: function() {
 
             SDL.InteractionChoicesView.deactivate("ABORTED");
+        },
+
+        /**
+         * Method to close AlertMeneuverPopUp view
+         */
+        closeAlertMeneuverPopUp: function() {
+
+            SDL.AlertManeuverPopUp.set('activate', false);
         },
         /**
          * Method to open Turn List view from TBT
@@ -384,6 +387,20 @@ SDL.SDLController = Em.Object
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
+         * Method to sent notification with selected reason of OnSystemRequest
+         *
+         * @param {String}
+         */
+        systemRequestViewSelected: function(state) {
+
+            if (SDL.SDLModel.policyURLs.length) {
+                FFW.BasicCommunication.OnSystemRequest(state, SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            } else {
+                FFW.BasicCommunication.OnSystemRequest(state);
+            }
+
+        },
+        /**
          * Method to sent notification ABORTED for PerformInteractionChoise
          */
         interactionChoiseCloseResponse: function(appID, result, choiceID, manualTextEntry) {
@@ -393,6 +410,19 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('interactionData.vrHelp', null);
 
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
+        },
+        /**
+         * Method to sent notification ABORTED for VR PerformInteraction
+         */
+        vrInteractionResponse: function(result, choiceID) {
+
+            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
+
+            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
+
+            SDL.SDLModel.set('VRActive', false);
+
+            SDL.InteractionChoicesView.timerUpdate();
         },
         /**
          * Method to sent notification for Alert
@@ -494,6 +524,7 @@ SDL.SDLController = Em.Object
         onLanguageChangeUI: function() {
 
             FFW.UI.OnLanguageChange(SDL.SDLModel.hmiUILanguage);
+            FFW.BasicCommunication.OnSystemInfoChanged(SDL.SDLModel.hmiUILanguage);
         }.observes('SDL.SDLModel.hmiUILanguage'),
         /**
          * Method to set language for TTS and VR components with parameters sent
@@ -514,13 +545,26 @@ SDL.SDLController = Em.Object
          */
         registerApplication: function(params, applicationType) {
 
-            SDL.SDLModel.get('registeredApps')
-                .pushObject(this.applicationModels[applicationType].create( {
-                    appID: params.appID,
-                    appName: params.appName,
-                    deviceName: params.deviceName,
-                    appType: params.appType
-                }));
+            SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create( {
+                appID: params.appID,
+                appName: params.appName,
+                deviceName: params.deviceName,
+                appType: params.appType
+            }));
+
+            var exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit",
+                        "position": 0
+                    },
+                    cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
         },
         /**
          * Unregister application
@@ -530,9 +574,19 @@ SDL.SDLController = Em.Object
          */
         unregisterApplication: function(appID) {
 
-            //this.getApplicationModel(appID).set('unregistered', true);
+            this.getApplicationModel(appID).VRCommands = [];
             this.getApplicationModel(appID).onDeleteApplication(appID);
+            var len = SDL.SDLModel.VRCommands.length;
+            for (var i = len - 1; i >= 0; i--) {
+                if (SDL.SDLModel.VRCommands[i].appID == appID) {
+                    SDL.SDLModel.VRCommands.splice(i, 1);
+                }
+            }
+
             SDL.VRPopUp.DeleteActivateApp(appID);
+            if (SDL.SDLModel.stateLimited == appID) {
+                SDL.SDLModel.set('stateLimited', null);
+            }
             SDL.SDLAppController.set('model', null);
         },
         /**
@@ -566,7 +620,9 @@ SDL.SDLController = Em.Object
                             break;
                         }
                         case 'RESEND_CURRENT_ENTRY':{
-                            FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            if (str) {
+                                FFW.UI.OnKeyboardInput(str, "KEYPRESS");
+                            }
                             break;
                         }
                     }
@@ -614,16 +670,6 @@ SDL.SDLController = Em.Object
             this.turnChangeDeviceViewBack();
         },
         /**
-         * Method creates list of Application ID's Then call HMI method for
-         * display a list of Applications
-         * 
-         * @param {Object}
-         */
-        onGetAppList: function(appList) {
-
-            SDL.SDLModel.onGetAppList(appList);
-        },
-        /**
          * Method call's request to get list of applications
          */
         findNewApps: function() {
@@ -637,7 +683,7 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
-            FFW.BasicCommunication.OnAppActivated(element.appID);
+            FFW.BasicCommunication.ActivateApp(element.appID);
         },
         /**
          * Method sent custom softButtons pressed and event status to RPC
@@ -739,8 +785,8 @@ SDL.SDLController = Em.Object
         /**
          * Send system context
          */
-        onSystemContextChange: function() {
+        onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'));
+            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
         }
     });

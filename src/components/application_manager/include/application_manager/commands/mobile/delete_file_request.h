@@ -39,6 +39,8 @@
 
 namespace application_manager {
 
+struct AppFile;
+
 namespace commands {
 
 /**
@@ -65,6 +67,8 @@ class DeleteFileRequest : public CommandRequestImpl {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DeleteFileRequest);
+
+  void SendFileRemovedNotification(const AppFile* file) const;
 };
 
 }  // namespace commands

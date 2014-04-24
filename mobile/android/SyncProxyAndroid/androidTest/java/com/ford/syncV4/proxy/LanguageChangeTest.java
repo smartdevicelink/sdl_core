@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy;
 
 import android.test.InstrumentationTestCase;
+import android.util.Log;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
@@ -40,7 +41,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnLanguageChange first
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -76,7 +77,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnLanguageChange first
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -108,7 +109,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -130,7 +131,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        proxy._wiproVersion = 2;
+        //proxy.mWiproVersion = 2;
 
         // send OnLanguageChange first
         Hashtable<String, Object> params = new Hashtable<String, Object>();

@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_AUDIO_STREAM_SENDER_THREAD_H_
 
 #include <string>
-#include "utils/logger.h"
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
@@ -122,11 +121,10 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     uint32_t session_key_;
     const std::string fileName_;
     int32_t offset_;
-    bool shouldBeStoped_;
+    volatile bool shouldBeStoped_;
     sync_primitives::Lock shouldBeStoped_lock_;
 
     static const int32_t kAudioPassThruTimeout;
-    static log4cxx::LoggerPtr logger_;
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };

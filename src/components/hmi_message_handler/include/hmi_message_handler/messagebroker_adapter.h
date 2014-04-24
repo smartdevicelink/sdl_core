@@ -37,7 +37,6 @@
 
 #include "mb_controller.hpp"
 #include "hmi_message_handler/hmi_message_adapter.h"
-#include "utils/logger.h"
 #include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {
@@ -82,7 +81,6 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
   static const std::string ADDRESS;
   static const uint16_t PORT;
 
-  static log4cxx::LoggerPtr logger_;
   DISALLOW_COPY_AND_ASSIGN(MessageBrokerAdapter);
 };
 }  //  namespace hmi_message_handler

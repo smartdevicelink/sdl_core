@@ -61,6 +61,12 @@ void ShowRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
+  //SDLAQ-CRS-494, VC3.1
+  if (0 == (*message_)[strings::msg_params].length()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
@@ -184,24 +190,6 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
     msg_params[strings::custom_presets] =
         (*message_)[strings::msg_params][strings::custom_presets];
-  } else {
-    HMICapabilities& hmi_capabilities =
-        ApplicationManagerImpl::instance()->hmi_capabilities();
-    const smart_objects::SmartObject* display_capabilities =
-        hmi_capabilities.display_capabilities();
-    msg_params[strings::custom_presets] = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
-    char name_custom_preset [50] = {0};
-    int amount_custom_preset = 0;
-      if ((*display_capabilities).keyExists
-          (hmi_response::num_custom_presets_available)) {
-        amount_custom_preset = (*display_capabilities)
-            [hmi_response::num_custom_presets_available].asInt();
-      }
-    for (int i = 0; i < amount_custom_preset; ++i) {
-      sprintf(name_custom_preset, "%s%d", "PRESET_", i+1);
-      msg_params[strings::custom_presets][i] = name_custom_preset;
-    }
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_Show, &msg_params, true);

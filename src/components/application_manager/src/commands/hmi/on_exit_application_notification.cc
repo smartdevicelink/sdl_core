@@ -32,6 +32,9 @@
 
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -47,8 +50,17 @@ OnExitApplicationNotification::~OnExitApplicationNotification() {
 void OnExitApplicationNotification::Run() {
   LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
 
-  ApplicationManagerImpl::instance()->UnregisterApplication(
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  ApplicationSharedPtr app_impl = app_mgr->application(
       (*message_)[strings::msg_params][strings::app_id].asUInt());
+  if (!(app_impl.valid())) {
+    LOG4CXX_ERROR(logger_, "Application does not exist");
+    return;
+  }
+  app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+  app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
+  MessageHelper::SendHMIStatusNotification(*app_impl);
 }
 
 }  // namespace commands

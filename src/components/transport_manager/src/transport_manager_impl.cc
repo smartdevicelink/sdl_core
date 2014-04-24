@@ -43,6 +43,7 @@
 #include <functional>
 #include <sstream>
 #include "utils/macro.h"
+#include "utils/logger.h"
 #include "protocol_handler/raw_message.h"
 #include "protocol_handler/protocol_packet.h"
 #include "transport_manager/transport_manager_impl.h"
@@ -58,8 +59,7 @@ using ::transport_manager::transport_adapter::TransportAdapter;
 
 namespace transport_manager {
 
-log4cxx::LoggerPtr TransportManagerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
   TransportManagerImpl::Connection c;
@@ -76,7 +76,8 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
-      connection_id_counter_(0) {
+      connection_id_counter_(0),
+      metric_observer_(NULL) {
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
   pthread_rwlock_init(&message_queue_rwlock_, NULL);
@@ -314,7 +315,6 @@ int TransportManagerImpl::AddTransportAdapter(
       transport_adapter->Init() == TransportAdapter::OK) {
     transport_adapters_.push_back(transport_adapter);
   }
-
   return E_SUCCESS;
 }
 
@@ -507,6 +507,7 @@ void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
 #else
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
+  RawMessageSptr data = event.data();
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
 #ifdef USE_RWLOCK
@@ -594,7 +595,6 @@ void TransportManagerImpl::EventListenerThread(void) {
       DeviceHandle device_handle;
       BaseError* error = current->event_error();
       RawMessageSptr data = current->data();
-
       int event_type = current->event_type();
       event_queue_.erase(current);
 #ifdef USE_RWLOCK
@@ -711,6 +711,9 @@ void TransportManagerImpl::EventListenerThread(void) {
             break;
           }
           data->set_connection_key(connection->id);
+          if (metric_observer_) {
+            metric_observer_->StopRawMsg(data.get());
+          }
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }
@@ -762,6 +765,10 @@ void TransportManagerImpl::EventListenerThread(void) {
   pthread_mutex_unlock(&event_queue_mutex_);
 
   LOG4CXX_INFO(logger_, "Event listener thread finished");
+}
+
+void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
+  metric_observer_ = observer;
 }
 void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   if (NULL != data) {
@@ -852,6 +859,28 @@ void TransportManagerImpl::MessageQueueThread(void) {
 
   pthread_mutex_unlock(&message_queue_mutex_);
   LOG4CXX_INFO(logger_, "Message queue thread finished");
+}
+
+TransportManagerImpl::ConnectionInternal::ConnectionInternal(
+    TransportManagerImpl *transport_manager, TransportAdapter *transport_adapter,
+    const ConnectionUID &id, const DeviceUID &dev_id, const ApplicationHandle &app_id)
+  : transport_manager(transport_manager),
+    transport_adapter(transport_adapter),
+    timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
+    shutDown(false),
+    messages_count(0) {
+  Connection::id = id;
+  Connection::device = dev_id;
+  Connection::application = app_id;
+}
+
+void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
+  LOG4CXX_INFO(logger_, "Disconnection failed");
+  transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
+                                transport_manager->converter_.UidToHandle(device),
+                                DisconnectDeviceError());
+  shutDown = false;
+  timer->stop();
 }
 
 }  // namespace transport_manager

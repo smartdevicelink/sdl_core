@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
+#include "application_manager/message.h"
 #include <set>
 
 namespace NsSmartDeviceLink {
@@ -53,10 +54,14 @@ namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 typedef int32_t ErrorCode;
 
+class UsageStatistics;
+
 enum APIVersion {
   kUnknownAPI = -1,
+  kAPIV0 = 0,
   kAPIV1 = 1,
-  kAPIV2 = 2
+  kAPIV2 = 2,
+  kAPIV3 = 3
 };
 
 struct Version {
@@ -74,7 +79,7 @@ struct AppFile {
     AppFile() {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
-          mobile_apis::FileType::eType  type)
+          mobile_apis::FileType::eType type)
       : is_persistent(persistent),
         is_download_complete(download_complete),
         file_name(name),
@@ -145,6 +150,8 @@ class DynamicApplicationData {
     virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const = 0;
     virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
     virtual const smart_objects::SmartObject* keyboard_props() const = 0;
+    virtual const smart_objects::SmartObject* menu_title() const = 0;
+    virtual const smart_objects::SmartObject* menu_icon() const = 0;
 
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
@@ -162,7 +169,10 @@ class DynamicApplicationData {
       const smart_objects::SmartObject& tbt_show) = 0;
     virtual void set_keyboard_props(
         const smart_objects::SmartObject& keyboard_props) = 0;
-
+    virtual void set_menu_title(
+        const smart_objects::SmartObject& menu_title) = 0;
+    virtual void set_menu_icon(
+        const smart_objects::SmartObject& menu_icon) = 0;
     /*
      * @brief Adds a command to the in application menu
      */
@@ -382,6 +392,7 @@ class Application : public virtual InitialApplicationData,
     virtual const Version& version() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
+    virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
@@ -393,6 +404,7 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
     virtual void set_tts_speak_state(bool state_tts_speak) = 0;
+    virtual bool tts_speak_state() = 0;
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
@@ -407,6 +419,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
+    virtual uint32_t get_grammar_id() const = 0 ;
+    virtual void set_grammar_id(uint32_t value) = 0;
+
+    virtual void set_protocol_version(ProtocolVersion protocol_version) = 0;
+    virtual ProtocolVersion protocol_version() = 0;
 
     virtual bool AddFile(AppFile& file) = 0;
     virtual const AppFilesMap& getAppFiles() const = 0;
@@ -420,6 +437,7 @@ class Application : public virtual InitialApplicationData,
      */
     virtual bool UpdateFile(AppFile& file) = 0;
     virtual bool DeleteFile(const std::string& file_name) = 0;
+    virtual const AppFile* GetFile(const std::string& file_name) = 0;
 
     virtual bool SubscribeToButton(mobile_apis::ButtonName::eType btn_name) = 0;
     virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;
@@ -428,6 +446,12 @@ class Application : public virtual InitialApplicationData,
     virtual bool SubscribeToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
+
+    /**
+     * Returns object for recording statistics
+     * @return object for recording statistics
+     */
+    virtual UsageStatistics& usage_report() = 0;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

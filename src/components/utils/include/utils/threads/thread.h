@@ -44,7 +44,6 @@
 #include <string>
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
 
@@ -222,8 +221,6 @@ class Thread {
   impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;
   bool isThreadRunning_;
-
-  static log4cxx::LoggerPtr logger_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Thread);

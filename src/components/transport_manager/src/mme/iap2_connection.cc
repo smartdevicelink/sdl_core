@@ -30,11 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/logger.h"
+
 #include "transport_manager/mme/iap2_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 const char* IAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
 

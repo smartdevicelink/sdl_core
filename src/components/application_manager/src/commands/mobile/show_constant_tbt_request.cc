@@ -61,30 +61,31 @@ void ShowConstantTBTRequest::Run() {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     return;
   }
+  // SDLAQ-CRS-664, VC3.1
+  if (0 == (*message_)[strings::msg_params].length()) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
-  // TODO(DK): Missing mandatory param
-  if (!msg_params.keyExists(strings::soft_buttons)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
-    return;
-  }
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    mobile_apis::Result::eType processing_result =
+        MessageHelper::ProcessSoftButtons(msg_params, app);
 
-  mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params, app);
-
-  if (mobile_apis::Result::SUCCESS != processing_result) {
-    if (mobile_apis::Result::INVALID_DATA == processing_result) {
-      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
-      SendResponse(false, processing_result);
-      return;
-    }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      result_ = processing_result;
+    if (mobile_apis::Result::SUCCESS != processing_result) {
+      if (mobile_apis::Result::INVALID_DATA == processing_result) {
+        LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+        SendResponse(false, processing_result);
+        return;
+      }
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
+        LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
+        result_ = processing_result;
+      }
     }
   }
 
@@ -156,7 +157,7 @@ void ShowConstantTBTRequest::Run() {
 
   app->set_tbt_show_command(msg_params);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
-                   true);
+                 true);
 }
 
 
@@ -169,8 +170,8 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
 
       mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt()));
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
       if (mobile_apis::Result::INVALID_ENUM != result_) {

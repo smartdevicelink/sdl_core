@@ -41,12 +41,13 @@
 #include "media_manager/media_manager_impl.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/logger.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("media_manager_impl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImplTest")
 
 class MediaManagerTest : public ::testing::Test {
   protected:
@@ -101,7 +102,7 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
-  LOG4CXX_INFO(logger, ".Playing stream");
+  LOG4CXX_INFO(logger_, ".Playing stream");
   //LOG4CXX_TRACE(logger, );
   //while (true) {
     usleep(10000000);

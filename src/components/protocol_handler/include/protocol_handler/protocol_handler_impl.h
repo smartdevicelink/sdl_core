@@ -39,7 +39,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include "utils/logger.h"
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
@@ -53,6 +52,7 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#include "time_metric_observer.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -171,6 +171,13 @@ class ProtocolHandlerImpl
      * streaming server and displayed to user.
      */
     void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
+
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(PHMetricObserver* observer);
 
   protected:
 
@@ -305,6 +312,7 @@ class ProtocolHandlerImpl
      * \param data_size Size of message excluding protocol header
      * \param data Message string
      * \param compress Compression flag
+     * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendSingleFrameMessage(
@@ -314,7 +322,8 @@ class ProtocolHandlerImpl
       const uint8_t service_type,
       const uint32_t data_size,
       const uint8_t* data,
-      const bool compress);
+      const bool compress,
+      const bool is_final_message);
 
     /**
      * \brief Sends message which size doesn't permit to send it in one frame.
@@ -327,6 +336,7 @@ class ProtocolHandlerImpl
      * \param data Message string
      * \param compress Compression flag
      * \param max_data_size Maximum allowed size of single frame.
+     * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
     RESULT_CODE SendMultiFrameMessage(
@@ -337,7 +347,8 @@ class ProtocolHandlerImpl
       const uint32_t data_size,
       const uint8_t* data,
       const bool compress,
-      const uint32_t max_data_size);
+      const uint32_t max_data_size,
+      const bool is_final_message);
 
     /**
      * \brief Sends message already containing protocol header.
@@ -410,16 +421,11 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageToMobile& message);
   private:
     /**
-     * \brief For logging.
-     */
-    static log4cxx::LoggerPtr logger_;
-
-    /**
      *\brief Pointer on instance of class implementing IProtocolObserver
      *\brief (JSON Handler)
      */
     ProtocolObservers protocol_observers_;
-
+    PHMetricObserver* metric_observer_;
     /**
      *\brief Pointer on instance of class implementing ISessionObserver
      *\brief (Connection Handler)
@@ -452,6 +458,12 @@ class ProtocolHandlerImpl
      *\brief Counter of messages sent in each session.
      */
     std::map<uint8_t, uint32_t> message_counters_;
+
+    /**
+     *\brief map for session last message.
+     */
+    std::map<uint8_t, uint32_t> sessions_last_message_id_;
+
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;

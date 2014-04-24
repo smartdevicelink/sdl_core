@@ -38,7 +38,6 @@
 #include "media_manager/media_adapter.h"
 #include "media_manager/media_adapter_listener.h"
 #include "utils/macro.h"
-#include "utils/logger.h"
 
 namespace media_manager {
 
@@ -56,8 +55,6 @@ class MediaAdapterImpl : public MediaAdapter {
     int32_t current_application_;
 
   private:
-    static log4cxx::LoggerPtr logger_;
-
     DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };
 }  //  namespace media_manager

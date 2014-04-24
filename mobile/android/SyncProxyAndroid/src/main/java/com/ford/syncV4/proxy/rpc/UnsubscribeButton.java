@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class UnsubscribeButton extends RPCRequest {
 
@@ -24,7 +24,7 @@ public class UnsubscribeButton extends RPCRequest {
             try {
                 theCode = ButtonName.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonName, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.buttonName, e);
             }
             return theCode;
         }

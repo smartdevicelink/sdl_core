@@ -45,11 +45,13 @@
 #include "cppgen/literal_generator.h"
 #include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
+#include "cppgen/naming_convention.h"
 #include "cppgen/struct_type_constructor.h"
 #include "cppgen/struct_type_dbus_serializer.h"
 #include "cppgen/struct_type_from_json_method.h"
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
+#include "cppgen/struct_type_report_erros_method.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "model/constant.h"
@@ -142,7 +144,15 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& header_file = module_manager_->HeaderForStruct(*strct);
   DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   ostream& o = header_file.types_ns().os();
-  DeclareStructureBegin(o, strct->name(), "",
+  std::string base_class_name = "CompositeType";
+  if (strct->frankenstruct()) {
+    base_class_name = RpcTypeNameGenerator(
+                        &strct->interface(),
+                        preferences_,
+                        strct->frankenstruct(),
+                        false).result();
+  }
+  DeclareStructureBegin(o, strct->name(), base_class_name,
                         Comment(strct->description()));
   {
     Section pub("public", &o);
@@ -150,14 +160,16 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   }
   {
     Section pub("public", &o);
-    StructTypeDefaultConstructor(strct).Declare(&o, true);
-    StructTypeMandatoryConstructor mandatory_constructor(preferences_, strct);
+    StructTypeDefaultConstructor(strct, base_class_name).Declare(&o, true);
+    StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                         strct,
+                                                         base_class_name);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(strct->name()).Declare(&o, true);
     if (preferences_->generate_json) {
-      StructTypeFromJsonConstructor(strct).Declare(&o , true);
+      StructTypeFromJsonConstructor(strct, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(strct).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
@@ -169,6 +181,8 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
+    StructTypeStructEmptyMethod(strct).Declare(&o, true);
+    StructTypeReportErrosMethod(strct).Declare(&o, true);
   }
   {
     Section priv("private", &o);
@@ -187,7 +201,7 @@ void DeclarationGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
           RpcTypeNameGenerator(&tdef->interface(),
                                preferences_,
                                tdef->type(),
-                               RpcTypeNameGenerator::kUnspecified).result(),
+                               false).result(),
           tdef->name())
       << '\n';
 }
@@ -211,15 +225,21 @@ void DeclarationGenerator::GenerateCodeForStructField(
     CppFile* header_file,
     Namespace* name_space) {
   ostream& o = name_space->os();
-  RpcTypeNameGenerator::Availability availability =
-      field.default_value() || field.is_mandatory() ?
-          RpcTypeNameGenerator::kMandatory : RpcTypeNameGenerator::kOptional;
+  // Field is considered optional if it has mandatory=false attribute and
+  // if it does NOT have default values. Fields that have default values are
+  // always available no mater if they present in input or not
+  bool field_is_optional = false;
+  if (!field.is_mandatory()) {
+    if (field.default_value() == NULL) {
+      field_is_optional = true;
+    }
+  }
   header_file->IncludeType(*field.type());
   o << RpcTypeNameGenerator(&strct.interface(),
                             preferences_,
                             field.type(),
-                            availability).result();
-  o << " " << field.name() << ";";
+                            field_is_optional).result();
+  o << " " << AvoidKeywords(field.name()) << ";";
   if (!field.description().empty()) {
     o << " " << Comment(field.description());
   }
@@ -238,7 +258,8 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
   DeclareExternalTypes(*preferences_, &header_file->global_namespace());
   Namespace& requests_ns = header_file->requests_ns();
   ostream& o = requests_ns.os();
-  DeclareStructureBegin(o, request.name(), "Request",
+  const char* base_class_name = "Request";
+  DeclareStructureBegin(o, request.name(), base_class_name,
                         Comment(request.description()));
   {
     Section pub("public", &o);
@@ -250,15 +271,17 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
   }
   {
     Section pub("public", &o);
-    StructTypeDefaultConstructor(&request).Declare(&o, true);
-    StructTypeMandatoryConstructor mandatory_constructor(preferences_, &request);
+    StructTypeDefaultConstructor(&request, base_class_name).Declare(&o, true);
+    StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                         &request,
+                                                         base_class_name);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(request.name()).Declare(&o, true);
 
     if (preferences_->generate_json) {
-      StructTypeFromJsonConstructor(&request).Declare(&o , true);
+      StructTypeFromJsonConstructor(&request, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(&request).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
@@ -270,6 +293,8 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
     }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
+    StructTypeStructEmptyMethod(&request).Declare(&o, true);
+    StructTypeReportErrosMethod(&request).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
     FunctionStringIdMethod(&request).Define(&o, true);
@@ -287,7 +312,8 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
   DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   Namespace& responses_ns = header_file.responses_ns();
   ostream& o = responses_ns.os();
-  DeclareStructureBegin(o, response.name(), "Response",
+  const char* base_class_name = "Response";
+  DeclareStructureBegin(o, response.name(), base_class_name,
                         Comment(response.description()));
   {
     Section pub("public", &o);
@@ -297,14 +323,16 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
   }
   {
     Section pub("public", &o);
-    StructTypeDefaultConstructor(&response).Declare(&o, true);
-    StructTypeMandatoryConstructor mandatory_constructor(preferences_, &response);
+    StructTypeDefaultConstructor(&response, base_class_name).Declare(&o, true);
+    StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                         &response,
+                                                         base_class_name);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(response.name()).Declare(&o, true);
     if (preferences_->generate_json) {
-      StructTypeFromJsonConstructor(&response).Declare(&o, true);
+      StructTypeFromJsonConstructor(&response, base_class_name).Declare(&o, true);
       StructTypeToJsonMethod(&response).Declare(&o , true);
 
     }
@@ -318,6 +346,8 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
+    StructTypeStructEmptyMethod(&response).Declare(&o, true);
+    StructTypeReportErrosMethod(&response).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
     FunctionStringIdMethod(&response).Define(&o, true);
@@ -336,7 +366,8 @@ void DeclarationGenerator::GenerateCodeForNotification(
   DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   Namespace& notifications_ns = header_file.notifications_ns();
   ostream& o = notifications_ns.os();
-  DeclareStructureBegin(o, notification.name(), "Notification",
+  const char* base_class_name = "Notification";
+  DeclareStructureBegin(o, notification.name(), base_class_name,
                         Comment(notification.description()));
   {
     Section pub("public", &o);
@@ -346,14 +377,16 @@ void DeclarationGenerator::GenerateCodeForNotification(
   }
   {
     Section pub("public", &o);
-    StructTypeDefaultConstructor(&notification).Declare(&o, true);
-    StructTypeMandatoryConstructor mandatory_constructor(preferences_, &notification);
+    StructTypeDefaultConstructor(&notification, base_class_name).Declare(&o, true);
+    StructTypeMandatoryConstructor mandatory_constructor(preferences_,
+                                                         &notification,
+                                                         base_class_name);
     if (mandatory_constructor.has_mandatory_parameters()) {
       mandatory_constructor.Declare(&o, true);
     }
     CppStructDestructor(notification.name()).Declare(&o, true);
     if (preferences_->generate_json) {
-      StructTypeFromJsonConstructor(&notification).Declare(&o , true);
+      StructTypeFromJsonConstructor(&notification, base_class_name).Declare(&o , true);
       StructTypeToJsonMethod(&notification).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
@@ -365,6 +398,8 @@ void DeclarationGenerator::GenerateCodeForNotification(
     }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
+    StructTypeStructEmptyMethod(&notification).Declare(&o, true);
+    StructTypeReportErrosMethod(&notification).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);
     FunctionStringIdMethod(&notification).Define(&o, true);
@@ -393,6 +428,11 @@ TypeForwardDeclarator::TypeForwardDeclarator(Namespace* ns, const Type* type)
     : ns_(ns) {
   assert(ns_);
   type->Apply(this);
+}
+
+void TypeForwardDeclarator::GenerateCodeForNullable(
+    const NullableType* nullable) {
+  nullable->type()->Apply(this);
 }
 
 void TypeForwardDeclarator::GenerateCodeForArray(const Array* array) {

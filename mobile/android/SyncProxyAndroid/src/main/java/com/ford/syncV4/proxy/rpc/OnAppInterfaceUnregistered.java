@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCNotification;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class OnAppInterfaceUnregistered extends RPCNotification {
 
@@ -24,7 +24,7 @@ public class OnAppInterfaceUnregistered extends RPCNotification {
             try {
                 theCode = AppInterfaceUnregisteredReason.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.reason, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.reason, e);
             }
             return theCode;
         }

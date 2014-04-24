@@ -37,11 +37,18 @@
 
 #include <libusb/libusb.h>
 
+#include <sstream>
+
 #include "transport_manager/usb/libusb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
@@ -105,7 +112,7 @@ bool UsbConnection::PostInTransfer() {
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
-    if (logger_->isTraceEnabled()) {
+    if (LOG4CXX_IS_TRACE_ENABLED(logger_)) {
       std::ostringstream hexdata;
       for (int i = 0; i < transfer->actual_length; ++i) {
         hexdata << " " << std::hex << std::setw(2) << std::setfill('0')

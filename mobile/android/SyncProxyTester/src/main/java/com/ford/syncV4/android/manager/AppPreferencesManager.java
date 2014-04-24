@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.transport.TransportType;
 
 /**
@@ -256,6 +257,53 @@ public class AppPreferencesManager {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING, disableLock);
         editor.commit();
+    }
+
+    /**
+     * Set protocol minimum supported version int value
+     * @param value version of the protocol
+     */
+    public static void setProtocolMinVersion(int value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, value);
+        editor.commit();
+    }
+
+    /**
+     * @return protocol minimum supported version int value
+     */
+    public static int getProtocolMinVersion() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, ProtocolConstants.PROTOCOL_VERSION_MIN);
+    }
+
+    /**
+     * Set protocol maximum supported version int value
+     * @param value version of the protocol
+     */
+    public static void setProtocolMaxVersion(int value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, value);
+        editor.commit();
+    }
+
+    /**
+     * @return protocol maximum supported version int value
+     */
+    public static int getProtocolMaxVersion() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, ProtocolConstants.PROTOCOL_VERSION_MIN);
+    }
+
+    /**
+     * @return true if it is needed to set up application icon automatically
+     */
+    public static boolean getAutoSetAppIconFlag() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREFS_KEY_AUTOSETAPPICON,
+                Const.PREFS_DEFAULT_AUTOSETAPPICON);
     }
 
     /**

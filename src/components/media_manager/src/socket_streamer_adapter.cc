@@ -41,23 +41,23 @@
 #include <string.h>
 #include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("SocketStreamerAdapter"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 
 SocketStreamerAdapter::SocketStreamerAdapter()
   : socket_fd_(0),
     is_ready_(false),
     messages_(),
-    thread_(NULL) {
+    thread_(NULL),
+    streamer_(NULL) {
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {
   thread_->stop();
+  streamer_ = NULL;
   delete thread_;
   if (socket_fd_ != -1) {
     ::close(socket_fd_);
@@ -74,6 +74,8 @@ void SocketStreamerAdapter::StartActivity(int32_t application_key) {
 
   is_ready_ = true;
   current_application_ = application_key;
+
+  messages_.Reset();
 
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
@@ -93,6 +95,11 @@ void SocketStreamerAdapter::StopActivity(int32_t application_key) {
   is_ready_ = false;
   current_application_ = 0;
 
+  if (streamer_) {
+    streamer_->stop();
+    messages_.Shutdown();
+  }
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
@@ -108,7 +115,8 @@ bool SocketStreamerAdapter::is_app_performing_activity(
 void SocketStreamerAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
+    streamer_ = new Streamer(this);
+    thread_ = new threads::Thread("SocketStreamerAdapter", streamer_);
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   }
@@ -159,6 +167,7 @@ void SocketStreamerAdapter::Streamer::threadMain() {
     }
 
     is_client_connected_ = true;
+    is_first_loop_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
         protocol_handler::RawMessagePtr msg = server_->messages_.pop();
@@ -172,20 +181,24 @@ void SocketStreamerAdapter::Streamer::threadMain() {
         ++messsages_for_session;
 
         LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-                     << messsages_for_session << " the message for "
-                     << server_->current_application_);
-        std::set<MediaListenerPtr>::iterator it =
-            server_->media_listeners_.begin();
+            << messsages_for_session << " the message for "
+            << server_->current_application_);
+        std::set<MediaListenerPtr>::iterator it = server_->media_listeners_
+            .begin();
         for (; server_->media_listeners_.end() != it; ++it) {
           (*it)->OnDataReceived(server_->current_application_,
                                 messsages_for_session);
         }
       }
-      server_->messages_.wait();
-      is_client_connected_ = is_ready();
-    }
 
-    stop();
+      if (!is_ready()) {
+        LOG4CXX_INFO(logger, "Client disconnected.");
+        stop();
+        break;
+      }
+
+      server_->messages_.wait();
+    }
   }
 }
 
@@ -233,7 +246,7 @@ void SocketStreamerAdapter::Streamer::start() {
 }
 
 void SocketStreamerAdapter::Streamer::stop() {
-  is_client_connected_ = false;
+  LOG4CXX_INFO(logger, "SocketStreamerAdapter::Streamer::stop");
   if (!new_socket_fd_) {
     return;
   }
@@ -249,6 +262,7 @@ void SocketStreamerAdapter::Streamer::stop() {
   }
 
   new_socket_fd_ = -1;
+  is_client_connected_ = false;
 }
 
 bool SocketStreamerAdapter::Streamer::is_ready() const {

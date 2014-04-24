@@ -37,10 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-
 namespace commands {
-
-extern log4cxx::LoggerPtr logger_;
 
 /**
  * @brief Class is intended to encapsulate RPC as an object
@@ -83,12 +80,14 @@ class CommandImpl : public Command {
  protected:
   MessageSharedPtr message_;
 
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
-
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_

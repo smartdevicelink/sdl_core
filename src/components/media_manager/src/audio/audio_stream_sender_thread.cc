@@ -44,6 +44,7 @@
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 #include "media_manager/audio/audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
@@ -53,8 +54,8 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
-log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("AudioPassThruThread"));
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
@@ -72,19 +73,21 @@ void AudioStreamSenderThread::threadMain() {
 
   offset_ = 0;
 
-  setShouldBeStopped(false);
-
   while (true) {
     if (getShouldBeStopped()) {
       break;
     }
 
-    sendAudioChunkToMobile();
+    usleep(kAudioPassThruTimeout * 1000000);
 
     if (getShouldBeStopped()) {
       break;
     }
+
+    sendAudioChunkToMobile();
   }
+
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
@@ -93,8 +96,6 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   std::vector<uint8_t> binaryData;
   std::vector<uint8_t>::iterator from;
   std::vector<uint8_t>::iterator to;
-
-  usleep(kAudioPassThruTimeout * 1000000);
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
     LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << fileName_);
@@ -130,6 +131,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
 
 bool AudioStreamSenderThread::getShouldBeStopped() {
   AutoLock auto_lock(shouldBeStoped_lock_);
+
   return shouldBeStoped_;
 }
 

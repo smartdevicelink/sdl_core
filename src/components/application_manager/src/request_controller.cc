@@ -40,8 +40,7 @@ namespace application_manager {
 namespace request_controller {
 using namespace sync_primitives;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestController"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
   : watchdog_(NULL) {
@@ -152,13 +151,15 @@ void RequestController::terminateAppRequests(
   {
     AutoLock auto_lock(request_list_lock_);
     std::list<Request>::iterator it = request_list_.begin();
-    for (; request_list_.end() != it; ++it) {
+    while (request_list_.end() != it) {
       const commands::CommandRequestImpl* request_impl =
           static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->connection_key() == app_id) {
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
         it = request_list_.erase(it);
+      } else {
+        ++it;
       }
     }
   }

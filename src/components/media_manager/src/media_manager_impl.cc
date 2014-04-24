@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
@@ -52,8 +53,7 @@
 
 namespace media_manager {
 
-log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MediaManagerImpl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
@@ -155,34 +155,38 @@ void MediaManagerImpl::StartMicrophoneRecording(
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->
       application(application_key);
-  std::string relative_file_path =
-    file_system::CreateDirectory(app->name());
-  relative_file_path += "/";
-  relative_file_path += output_file;
-  from_mic_listener_ = new FromMicRecorderListener(relative_file_path);
+  std::string file_path = profile::Profile::instance()->app_storage_folder();
+  file_path += "/";
+  file_path += app->folder_name();
+  file_system::CreateDirectory(file_path);
+
+  file_path += "/";
+  file_path += output_file;
+  from_mic_listener_ = new FromMicRecorderListener(file_path);
 #if defined(EXTENDED_MEDIA_MODE)
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-    ->set_output_file(relative_file_path);
+    ->set_output_file(file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
     ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
   }
 #else
-  if (file_system::FileExists(relative_file_path)) {
+  if (file_system::FileExists(file_path)) {
     LOG4CXX_INFO(logger_, "File " << output_file << " exists, removing");
-    if (file_system::DeleteFile(relative_file_path)) {
+    if (file_system::DeleteFile(file_path)) {
       LOG4CXX_INFO(logger_, "File " << output_file << " removed");
     }
     else {
       LOG4CXX_WARN(logger_, "Could not remove file " << output_file);
     }
   }
-  const std::string predefined_rec_file = "audio.8bit.wav";
+  const std::string predefined_rec_file =
+      profile::Profile::instance()->app_storage_folder() + "/audio.8bit.wav";
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(predefined_rec_file, buf)) {
-    if (file_system::Write(relative_file_path, buf)) {
+    if (file_system::Write(file_path, buf)) {
       LOG4CXX_INFO(logger_,
         "File " << predefined_rec_file << " copied to " << output_file);
     }
@@ -228,8 +232,8 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_video_pipe_path().c_str());
       } else {
-        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s", file_system::FullPath(
-            profile::Profile::instance()->video_stream_file()).c_str()));
+        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+            profile::Profile::instance()->video_stream_file().c_str()));
       }
       application_manager::MessageHelper::SendNaviStartStream(url,
                                                               application_key);
@@ -265,8 +269,7 @@ void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
                  profile::Profile::instance()->named_audio_pipe_path().c_str());
       } else {
         DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
-               file_system::FullPath(profile::Profile::instance()->
-                                     audio_stream_file()).c_str()));
+             profile::Profile::instance()->audio_stream_file().c_str()));
       }
 
       application_manager::MessageHelper::SendAudioStartStream(url,

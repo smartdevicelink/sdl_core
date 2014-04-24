@@ -1,32 +1,41 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
 
+if (BUILD_TESTS_WITH_HMI)
+find_package(LibXML2 REQUIRED)
+endif(BUILD_TESTS_WITH_HMI)
+
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
 
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
+add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
 
-include_directories (
+
+set (INCLUDE_DIR
   ../src/thirdPartyLibs/gmock-1.7.0/include
   ../src/thirdPartyLibs/jsoncpp/include/
   ../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ../src/thirdPartyLibs/MessageBroker/include
+  ../src/appMain
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include
   ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
+  ../src/components/policy/src/policy/include
+  ../src/components/policy/src/policy/usage_statistics/include
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
-  ../src/components/resumption/include
   ../src/components/utils/include/
+  ../src/components/resumption/include/
   ../test/components/mobile_message_handler/include/
   ../test/components/request_watchdog/include/
   ../test/components/media_manager/include
@@ -48,29 +57,18 @@ include_directories (
 )
 
 set(LIBRARIES
-    
-    test_App_Manager
-
-    ApplicationManager
     MediaManager
-
-    Resumption
+    ApplicationManager
     gtest
     gtest_main
     gmock
     gmock_main
-    
     formatters
     HMI_API
-    
-    
     v4_protocol_v1_2_no_extra
-
     SmartObjects
-    
     RequestWatchdog
-
-    policies
+    #policy
     ProtocolHandler
     Utils
     ConfigProfile
@@ -82,25 +80,24 @@ set(LIBRARIES
     #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
-    #test_MobileMessageHandlerTest
-    
-    
-    
     connectionHandler
     MOBILE_API
     jsoncpp
-    
-#################################################    
     TransportManager
     HMIMessageHandler
     MessageBroker
     MessageBrokerClient
     MessageBrokerServer
-    
     encryption
-#   rt
-   # ${GSTREAMER_gstreamer_LIBRARY}
+    # rt
+    # ${GSTREAMER_gstreamer_LIBRARY}
+    Resumption
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES dl)
+endif()
+
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -108,20 +105,19 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 endif()
 
-if (BUILD_BT_SUPPORT)
-  list(APPEND LIBRARIES bluetooth)
-endif()
-
-if (BUILD_AVAHI_SUPPORT)
-  list(APPEND LIBRARIES avahi-client avahi-common)
-endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES pthread)
-endif()
-
 add_executable("test_suit" "./test_suit.cc")
-target_link_libraries("test_suit" ${LIBRARIES})
 
+if (BUILD_TESTS_WITH_HMI)
+include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
+target_link_libraries("test_suit" 
+  test_App_Manager 
+  ${LIBRARIES} 
+  ${LibXML2_LIBRARIES} -lxml2
+  avahi-client
+  )
+else (BUILD_TESTS_WITH_HMI)
+include_directories(${INCLUDE_DIR})
+target_link_libraries("test_suit" ${LIBRARIES})
+endif (BUILD_TESTS_WITH_HMI)
 
 # vim: set ts=2 sw=2 et:

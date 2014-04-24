@@ -30,11 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/logger.h"
+
 #include "transport_manager/mme/mme_device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 const char* MmeDeviceScanner::qdb_name = "/dev/qdb/mediaservice_db";
 #ifdef MME_MQ

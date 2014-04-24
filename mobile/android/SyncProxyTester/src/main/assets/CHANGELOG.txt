@@ -1,4 +1,36 @@
+[CW16]
+* SyncProxyTester: Crashes when executing RegisterAppInterface auto-tests with wrong type of parameters
++ SyncProxyTester: Use 'test_data' folder of mobile device to storing and reading PTU / PTS
+* SyncProxyAndroid SDK: Audio and video streaming doesn't work if mobile App use protocol v2
++ SyncProxyTester: Do not auto-scroll logs when user scrolling log view
+
+[CW15]
+* SyncProxyAndroid SDK: OnSystemRequest processing logic change
+* SyncProxyTester: Restore connection from 'Proxy Start' command
+* SyncProxyTester | SyncProxyAndroid SDK: OnSystemRequest and every PutFileResponse log into SPT
+* SyncProxyAndroid SDK: Eliminate defects with HM timeout
+* SyncProxyAndroid SDK: Modify protocol version negotiation
+
+[CW14]
++ SyncProxyTester | SyncProxyAndroid SDK: Add Logger class to save and send application logs
++ SyncProxyAndroid SDK: Add new field 'menuTitle' to TextFieldName enum
+* SyncProxyTester | SyncProxyAndroid SDK: Update SystemRequest message with 'file name' and bulk data
++ SyncProxyAndroid SDK: Implement protocol version negotiation
+
+[CW13]
+* SyncProxyTester | SyncProxyAndroid SDK: In case of RegisterAppInterface command allow to send parameters which are out of API specification
++ SyncProxyTester: Add DeviceInfo object into request command
+* SyncProxyTester: RegisterAppInterface without HashId in case of UnregisterAppInterface have take place
++ SyncProxyTester | SyncProxyAndroid SDK: Add possibility do not close USB connection when perform single UnregisterAppInterface command
++ SyncProxyTester: TCP port configuration with NSD
+
 [CW12]
++ SyncProxyAndroid SDK: Add new field "DeviceInfo" to the RegisterAppInterface request
++ SyncProxyAndroid SDK: Add new structure "DeviceInfo"
+* SyncProxyAndroid SDK: PerformAudioPassThru: no OnAudioPassThru notifications
+* SyncProxyAndroid SDK: Connection closes after UnregisterAppInterface
+* SyncProxyTester | SyncProxyAndroid SDK: Add possibility to restart RPC service for the specific Test Cases
+* SyncProxyTester: Check open session (by Session Id) when executing automatic tests DISABLED
 + SyncProxyTester: Check connection and open session when executing automatic tests
 + SyncProxyTester: Set AppId parameter at Application SetUp dialog
 

@@ -35,7 +35,7 @@ namespace NsMessageBroker
       ssize_t recv = TcpClient::Recv(data);
       DBG_MSG(("Received message: %s\n", data.c_str()));
       m_receivingBuffer += data;
-      while (1)
+      while (!stop)
       {
          Json::Value root;
          if (!m_reader.parse(m_receivingBuffer, root))
@@ -116,6 +116,7 @@ namespace NsMessageBroker
    void CMessageBrokerController::sendJsonMessage(Json::Value& message)
    {
       DBG_MSG(("CMessageBrokerController::sendJsonMessage()\n"));
+      sync_primitives::AutoLock auto_lock(queue_lock_);
       std::string mes = m_writer.write(message);
       if (!isNotification(message) && !isResponse(message))
       {// not notification, not a response, store id and method name to recognize an answer
@@ -129,6 +130,7 @@ namespace NsMessageBroker
    std::string CMessageBrokerController::findMethodById(std::string id)
    {
       DBG_MSG(("CMessageBrokerController::findMethodById()\n"));
+      sync_primitives::AutoLock auto_lock(queue_lock_);
       std::string res = "";
       std::map <std::string, std::string>::iterator it;
       it = mWaitResponseQueue.find(id);
@@ -269,12 +271,15 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
+      stop = false;
+      is_active = true;
       arg = arg; // to avoid compiler warnings
-      while(1)
+      while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
+      is_active = false;
       return NULL;
    }
 

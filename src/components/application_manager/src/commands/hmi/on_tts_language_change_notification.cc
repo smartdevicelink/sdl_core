@@ -58,6 +58,12 @@ void OnTTSLanguageChangeNotification::Run() {
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][strings::language].asInt()));
 
+  /* need to clarify, because unchanged VR
+  cause WRONG_LANGUAGE on Register */
+  hmi_capabilities.set_active_vr_language(
+      static_cast<hmi_apis::Common_Language::eType>(
+          (*message_)[strings::msg_params][strings::language].asInt()));
+
   (*message_)[strings::msg_params][strings::hmi_display_language] =
       hmi_capabilities.active_ui_language();
 
@@ -78,7 +84,8 @@ void OnTTSLanguageChangeNotification::Run() {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-      ApplicationManagerImpl::instance()->UnregisterApplication(app->app_id(), true);
+      ApplicationManagerImpl::instance()->UnregisterApplication(
+          app->app_id(), mobile_apis::Result::SUCCESS, true);
     }
   }
 }

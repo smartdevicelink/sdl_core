@@ -33,17 +33,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-
 #include <algorithm>
 
+#include "utils/logger.h"
+
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 
-log4cxx::LoggerPtr TransportAdapterListenerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 

@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/logger.h"
+
 #include "transport_manager/mme/mme_connection_factory.h"
 #include "transport_manager/mme/iap_connection.h"
 #include "transport_manager/mme/iap2_connection.h"
@@ -38,6 +40,8 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 MmeConnectionFactory::MmeConnectionFactory(TransportAdapterController* controller) : controller_(controller), initialised_(false) {
 }

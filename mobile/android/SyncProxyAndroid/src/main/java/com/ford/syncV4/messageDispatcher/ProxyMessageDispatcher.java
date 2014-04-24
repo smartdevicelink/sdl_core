@@ -3,7 +3,7 @@ package com.ford.syncV4.messageDispatcher;
 import java.util.Comparator;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class ProxyMessageDispatcher<messageType> {
 	PriorityBlockingQueue<messageType> _queue = null;
@@ -40,16 +40,15 @@ public class ProxyMessageDispatcher<messageType> {
 		try {
 			messageType thisMessage;
 		
-			while(dispatcherDisposed == false) {
+			while(!dispatcherDisposed) {
 				thisMessage = _queue.take();
 				_strategy.dispatch(thisMessage);
 			}
 		} catch (InterruptedException e) {
 			// Thread was interrupted by dispose() method, no action required
-			return;
 		} catch (Exception e) {
-			DebugTool.logError("Error occurred dispating message.", e);
-			_strategy.handleDispatchingError("Error occurred dispating message.", e);
+            Logger.e("Error occurred dispatching message.", e);
+			_strategy.handleDispatchingError("Error occurred dispatching message.", e);
 		}
 	}
 		

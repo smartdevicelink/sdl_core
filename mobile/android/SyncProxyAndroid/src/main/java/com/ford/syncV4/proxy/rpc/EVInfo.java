@@ -5,8 +5,7 @@ import java.util.Hashtable;
 import com.ford.syncV4.proxy.RPCStruct;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.MaintenanceModeStatus;
-import com.ford.syncV4.proxy.rpc.enums.VehicleDataActiveStatus;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public class EVInfo extends RPCStruct {
 
@@ -50,7 +49,7 @@ public class EVInfo extends RPCStruct {
             try {
                 theCode = MaintenanceModeStatus.valueForString((String) obj);
             } catch (Exception e) {
-            	DebugTool.logError("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelMaintenanceMode, e);
+                Logger.e("Failed to parse " + getClass().getSimpleName() + "." + Names.fuelMaintenanceMode, e);
             }
             return theCode;
         }

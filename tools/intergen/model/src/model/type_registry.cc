@@ -78,19 +78,20 @@ bool TypeRegistry::init(const pugi::xml_node& xml) {
 }
 
 bool TypeRegistry::GetCompositeType(const pugi::xml_node& params, const Type** type) {
-  pugi::xml_attribute array = params.attribute("array");
-  pugi::xml_attribute map = params.attribute("map");
-  if (array && map) {
+  bool is_array = params.attribute("array").as_bool(false);
+  bool is_map = params.attribute("map").as_bool(false);
+  bool is_nullable = params.attribute("nullable").as_bool(false);
+  if (is_array && is_map) {
     strmfmt(std::cerr, "Entity {0} has both map and array attributes specified",
             params.attribute("name").as_string(""));
     return false;
   }
-  if (map && map.as_bool(false)) {
-    return GetContainer(params, type, false);
-  } else if (array && array.as_bool(false)) {
-    return GetContainer(params, type, true);
+  if (is_map) {
+    return GetContainer(params, type, false, is_nullable);
+  } else if (is_array) {
+    return GetContainer(params, type, true, is_nullable);
   } else {
-    return GetNonArray(params, type);
+    return GetNonArray(params, type, is_nullable);
   }
 }
 
@@ -123,11 +124,7 @@ const TypeRegistry::TypedefList& TypeRegistry::typedefs() const {
 
 // static
 bool TypeRegistry::IsMandatoryParam(const pugi::xml_node& param) {
-  bool mandatory = param.attribute("mandatory").as_bool("true");
-  if (param.attribute("array").as_bool(false)) {
-    mandatory = param.attribute("minsize").as_int(0) > 0;
-  }
-  return mandatory;
+  return param.attribute("mandatory").as_bool("true");
 }
 
 bool TypeRegistry::AddEnums(const pugi::xml_node& xml) {
@@ -169,6 +166,7 @@ bool TypeRegistry::AddEnum(const pugi::xml_node& xml_enum) {
     return false;
   }
   Enum* this_enum = NULL;
+  // FunctionID enum is already created, avoid creation of duplicate FunctionID enum
   if (name == Enum::kFunctionIdEnumName) {
     this_enum = function_ids_enum_;
   } else {
@@ -188,12 +186,23 @@ bool TypeRegistry::AddStruct(const pugi::xml_node& xml_struct) {
     return true;
   }
   std::string name = xml_struct.attribute("name").value();
+  const Type* frankenmap = NULL;
+  if (!xml_struct.attribute("type").empty()) {
+    if (!GetContainer(xml_struct,
+                      &frankenmap,
+                      false,
+                      false)) {
+      std::cerr << "Invalid frankenstruct: " << name << std::endl;
+      return false;
+    }
+  }
   Description description = CollectDescription(xml_struct);
   if (IsRegisteredStruct(name)) {
     std::cerr << "Duplicate structure: " << name << std::endl;
     return false;
   }
-  structs_.push_back(new Struct(interface_, name, scope, description));
+  structs_.push_back(new Struct(interface_, name, frankenmap,
+                                scope, description));
   struct_by_name_[name] = structs_.back();
   if (!AddStructureFields(structs_.back(), xml_struct)) {
     return false;
@@ -224,9 +233,11 @@ bool TypeRegistry::AddTypedef(const pugi::xml_node& xml_typedef) {
 }
 
 bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
-                                bool get_array) {
+                                bool get_array, bool container_nullable) {
   const Type* element_type = NULL;
-  if (GetNonArray(params, &element_type)) {
+  bool null_values_allowed =
+      params.attribute("null_values_allowed").as_bool(false);
+  if (GetNonArray(params, &element_type, null_values_allowed)) {
     assert(element_type);
     std::string minsize_str = params.attribute("minsize").as_string("0");
     std::string maxsize_str = params.attribute("maxsize").as_string("0");
@@ -240,9 +251,13 @@ bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
         *type = &*maps_.insert(Map(element_type, Map::Range(minsize, maxsize)))
             .first;
       }
-      return true;
+      if (container_nullable) {
+        return GetNullable(*type, type);
+      } else {
+        return true;
+      }
     } else {
-      std::cerr << "Incorrect array size range: " << minsize_str << ", "
+      std::cerr << "Incorrect container size range: " << minsize_str << ", "
                 << maxsize_str << std::endl;
     }
   }
@@ -250,26 +265,40 @@ bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
 }
 
 bool TypeRegistry::GetNonArray(const pugi::xml_node& params,
-                               const Type** type) {
+                               const Type** type, bool nullable) {
+  bool type_found = false;
   pugi::xml_attribute type_name = params.attribute("type");
   if (type_name) {
     std::string type_name_str = type_name.value();
     BuiltinTypeRegistry::BuiltInType builtin_type = builtin_type_registry_
         ->BuiltInTypeByName(type_name_str);
     if (BuiltinTypeRegistry::kNotABuiltInType != builtin_type) {
-      return builtin_type_registry_->GetType(builtin_type, params, type);
+      type_found = builtin_type_registry_->GetType(builtin_type, params, type);
     } else if (IsExternalType(type_name_str)) {
-      return GetExternalType(type_name_str, type);
+      type_found = GetExternalType(type_name_str, type);
     } else if (*type = GetType(type_name_str)) {
-      return true;
+      type_found = true;
     } else {
       std::cerr << "Unregistered type: " << type_name_str << std::endl;
-      return false;
+      type_found = false;
     }
   } else {
     std::cerr << "Absent type name" << std::endl;
-    return false;
+    type_found = false;
   }
+
+  if (type_found && nullable) {
+    type_found = GetNullable(*type, type);
+  }
+  return type_found;
+}
+
+bool TypeRegistry::GetNullable(const Type* original_type,
+                               const Type** type) {
+  std::set<NullableType>::const_iterator inserted =
+      nullables_.insert(NullableType(original_type)).first;
+  *type = &*inserted;
+  return true;
 }
 
 bool TypeRegistry::GetEnum(const std::string& name, const Type** type) const {

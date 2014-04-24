@@ -33,18 +33,20 @@
 #include <string>
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
-#include "utils/file_system.h"
 #include "application_manager/message_helper.h"
-
-namespace {
-log4cxx::LoggerPtr g_logger = log4cxx::Logger::getLogger("ApplicationManager");
-}
-
+#include "config_profile/profile.h"
+#include "utils/file_system.h"
+#include "utils/logger.h"
 
 
 namespace application_manager {
 
-ApplicationImpl::ApplicationImpl(uint32_t application_id)
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
+ApplicationImpl::ApplicationImpl(
+    uint32_t application_id,
+    const std::string& global_app_id,
+    usage_statistics::StatisticsManager* statistics_manager)
     : app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
@@ -59,8 +61,13 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id)
       is_app_allowed_(true),
       has_been_activated_(false),
       tts_speak_state_(false),
-      device_(0) {
-    srand(time(NULL));
+      device_(0),
+      grammar_id_(0),
+      usage_report_(global_app_id, statistics_manager),
+      protocol_version_(ProtocolVersion::kV3) {
+
+  // subscribe application to custom button by default
+  SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -127,6 +134,10 @@ const std::string& ApplicationImpl::name() const {
   return app_name_;
 }
 
+const std::string ApplicationImpl::folder_name() const {
+  return name() + mobile_app_id()->asString();
+}
+
 bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
@@ -180,6 +191,10 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
   tts_speak_state_ = state_tts_speak;
 }
 
+bool ApplicationImpl::tts_speak_state() {
+  return tts_speak_state_;
+}
+
 void ApplicationImpl::set_hmi_level(
     const mobile_api::HMILevel::eType& hmi_level) {
   if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
@@ -190,6 +205,7 @@ void ApplicationImpl::set_hmi_level(
   }
 
   hmi_level_ = hmi_level;
+  usage_report_.RecordHmiStateChanged(hmi_level);
 }
 
 void ApplicationImpl::set_hmi_supports_navi_streaming(const bool& supports) {
@@ -221,7 +237,7 @@ void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
   if (!is_media_application()
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(g_logger, "Trying to set audio streaming state"
+    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
     return;
   }
@@ -229,8 +245,7 @@ void ApplicationImpl::set_audio_streaming_state(
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
-  std::string file_name = path.substr(path.find_last_of("/") + 1);
-  if (app_files_.find(file_name) != app_files_.end()) {
+  if (app_files_.find(path) != app_files_.end()) {
     app_icon_path_ = path;
     return true;
   }
@@ -245,8 +260,24 @@ void ApplicationImpl::set_device(connection_handler::DeviceHandle device) {
   device_ = device;
 }
 
+uint32_t ApplicationImpl::get_grammar_id() const {
+  return grammar_id_;
+}
+
+void ApplicationImpl::set_grammar_id(uint32_t value) {
+  grammar_id_ = value;
+}
+
 bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
+}
+
+void ApplicationImpl::set_protocol_version(ProtocolVersion protocol_version) {
+  protocol_version_ = protocol_version;
+}
+
+ProtocolVersion ApplicationImpl::protocol_version() {
+  return protocol_version_;
 }
 
 bool ApplicationImpl::AddFile(AppFile& file) {
@@ -276,6 +307,13 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
 
 const AppFilesMap& ApplicationImpl::getAppFiles() const {
   return this->app_files_;
+}
+
+const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
+   if (app_files_.find(file_name) != app_files_.end()) {
+     return &(app_files_[file_name]);
+   }
+   return NULL;
 }
 
 bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
@@ -312,6 +350,10 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
   return (subscribed_vehicle_info_.size() == old_size - 1);
 }
 
+UsageStatistics& ApplicationImpl::usage_report() {
+  return usage_report_;
+}
+
 const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {
   return subscribed_buttons_;
 }
@@ -336,11 +378,13 @@ uint32_t ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  std::string directory_name = file_system::FullPath(name());
+  std::string directory_name =
+      profile::Profile::instance()->app_storage_folder();
+  directory_name += "/" + folder_name();
+
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(
             directory_name);
-
     AppFilesMap::const_iterator app_files_it;
 
     for (std::vector<std::string>::const_iterator it = files.begin();

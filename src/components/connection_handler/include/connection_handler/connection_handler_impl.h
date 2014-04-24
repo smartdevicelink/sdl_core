@@ -288,12 +288,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
-    /**
-     *\brief For logging.
-     */
-    static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
-
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */

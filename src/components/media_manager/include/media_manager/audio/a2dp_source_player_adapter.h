@@ -36,7 +36,6 @@
 #include <map>
 #include "protocol_handler/raw_message.h"
 #include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
 
 namespace threads {
 class Thread;
@@ -58,7 +57,6 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
     class A2DPSourcePlayerThread;
 
     std::map<int32_t, threads::Thread*> sources_;
-    static log4cxx::LoggerPtr logger_;
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 

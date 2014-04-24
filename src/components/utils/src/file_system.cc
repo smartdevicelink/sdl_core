@@ -35,6 +35,7 @@
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sstream>
 
 #include <dirent.h>
 #include <unistd.h>
@@ -42,16 +43,11 @@
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
-#include "config_profile/profile.h"
 
-uint64_t file_system::GetAvailableDiskSpace() {
-  char currentAppPath[FILENAME_MAX];
-  memset(reinterpret_cast<void*>(currentAppPath), 0, FILENAME_MAX);
-  getcwd(currentAppPath, FILENAME_MAX - 1);
-
+uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   struct statvfs fsInfo;
   memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
-  if( statvfs(currentAppPath, &fsInfo) == 0) {
+  if (statvfs(path.c_str(), &fsInfo) == 0) {
     return fsInfo.f_bsize * fsInfo.f_bfree;
   } else {
     return 0;
@@ -108,26 +104,6 @@ uint32_t file_system::DirectorySize(const std::string& path) {
   delete[] direntbuffer;
 #endif
   return size;
-}
-
-uint32_t file_system::GetAvailableSpaceForApp(const std::string& app_name) {
-  const uint32_t app_quota = profile::Profile::instance()->app_dir_quota();
-  if (DirectoryExists(app_name)) {
-    std::string full_path = FullPath(app_name);
-    uint32_t size_of_directory = DirectorySize(full_path);
-    if (app_quota < size_of_directory) {
-      return 0;
-    }
-    uint32_t current_app_quota = app_quota - size_of_directory;
-    uint32_t available_disk_space = GetAvailableDiskSpace();
-    if (current_app_quota > available_disk_space) {
-      return available_disk_space;
-    } else {
-      return current_app_quota;
-    }
-  } else {
-    return app_quota;
-  }
 }
 
 std::string file_system::CreateDirectory(const std::string& name) {
@@ -200,8 +176,6 @@ bool file_system::Write(
   return false;
 }
 
-
-
 std::ofstream* file_system::Open(const std::string& file_name,
                                  std::ios_base::openmode mode) {
 
@@ -235,10 +209,7 @@ void file_system::Close(std::ofstream* file_stream) {
   }
 }
 
-std::string file_system::FullPath(const std::string& file) {
-  // FILENAME_MAX defined stdio_lim.h was replaced with less value
-  // since it seems, that is caused overflow in some cases
-
+std::string file_system::CurrentWorkingDirectory() {
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];
   memset(currentAppPath, 0, filename_max_lenght);
@@ -246,7 +217,7 @@ std::string file_system::FullPath(const std::string& file) {
 
   char path[filename_max_lenght];
   memset(path, 0, filename_max_lenght);
-  snprintf(path, filename_max_lenght - 1, "%s/%s", currentAppPath, file.c_str());
+  snprintf(path, filename_max_lenght - 1, "%s", currentAppPath);
   return std::string(path);
 }
 
@@ -360,6 +331,15 @@ std::vector<std::string> file_system::ListFiles(
   return listFiles;
 }
 
+bool file_system::WriteBinaryFile(const std::string& name,
+                                  const std::vector<uint8_t>& contents) {
+  using namespace std;
+  ofstream output(name.c_str(), ios_base::binary|ios_base::trunc);
+  output.write(reinterpret_cast<const char*>(&contents.front()),
+               contents.size());
+  return output.good();
+}
+
 bool file_system::ReadBinaryFile(const std::string& name,
                                  std::vector<uint8_t>& result) {
   if (!FileExists(name) || !IsAccessible(name, R_OK)) {
@@ -417,4 +397,14 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
   }
 
   return converted_path;
+}
+
+bool file_system::CreateFile(const std::string& path) {
+  std::ofstream file(path);
+  if (!(file.is_open())) {
+    return false;
+  } else {
+    file.close();
+    return true;
+  }
 }

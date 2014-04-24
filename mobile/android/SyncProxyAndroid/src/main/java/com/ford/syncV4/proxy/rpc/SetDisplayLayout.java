@@ -4,7 +4,6 @@ import java.util.Hashtable;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.util.DebugTool;
 
 public class SetDisplayLayout extends RPCRequest {
 

@@ -103,6 +103,12 @@ class TimerThread {
      */
     virtual void stop();
 
+    /*
+     * @brief Tell tmer status
+     * @return true if timer is currently running, therwise return false
+     */
+    virtual bool isRunning();
+
   protected:
 
     /*
@@ -243,6 +249,11 @@ void TimerThread<T>::stop() {
     thread_->stop();
     is_running_ = false;
   }
+}
+
+template <class T>
+bool TimerThread<T>::isRunning() {
+  return is_running_;
 }
 
 template <class T>

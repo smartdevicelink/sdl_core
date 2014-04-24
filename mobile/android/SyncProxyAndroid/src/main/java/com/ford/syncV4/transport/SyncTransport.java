@@ -1,17 +1,16 @@
 package com.ford.syncV4.transport;
 
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.trace.SyncTrace;
-import com.ford.syncV4.trace.enums.InterfaceActivityDirection;
-import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 public abstract class SyncTransport {
-	private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-	
-	private final static String FailurePropagating_Msg = "Failure propagating ";
+
+    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
+
+    private final static String FailurePropagating_Msg = "Failure propagating ";
 	private Boolean isConnected = false;
 	
-	private String _sendLockObj = "lock";
+	private static final String SEND_LOCK_OBJ = "lock";
 	
 	// Get status of transport connection
 	public Boolean getIsConnected() {
@@ -33,13 +32,13 @@ public abstract class SyncTransport {
 			// Trace received data
 			if (receivedBytesLength > 0) {
 				// Send transport data to the siphon server
-				SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
-				SyncTrace.logTransportEvent("", null, InterfaceActivityDirection.Receive, receivedBytes, receivedBytesLength, SYNC_LIB_TRACE_KEY);
+				//SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
+                Logger.d(CLASS_NAME + " Receive Bytes");
 				
 				_transportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
 			} // end-if
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg, excp);
 		} // end-catch
     } // end-method
@@ -59,13 +58,12 @@ public abstract class SyncTransport {
     // sent out over transport.
     public boolean sendBytes(byte[] message, int offset, int length) {
         boolean bytesWereSent = false;
-        synchronized (_sendLockObj) {
+        synchronized (SEND_LOCK_OBJ) {
         	bytesWereSent = sendBytesOverTransport(message, offset, length);
         } // end-lock
         // Send transport data to the siphon server
-		SiphonServer.sendBytesFromAPP(message, offset, length);
-        
-		SyncTrace.logTransportEvent("", null, InterfaceActivityDirection.Transmit, message, offset, length, SYNC_LIB_TRACE_KEY);
+		//SiphonServer.sendBytesFromAPP(message, offset, length);
+        Logger.d(CLASS_NAME + " Send Bytes");
         return bytesWereSent;
     } // end-method
 
@@ -76,10 +74,10 @@ public abstract class SyncTransport {
 	protected void handleTransportConnected() {
 		isConnected = true;
 		try {
-	    	SyncTrace.logTransportEvent("Transport.connected", null, InterfaceActivityDirection.Receive, null, 0, SYNC_LIB_TRACE_KEY);
+            Logger.d(CLASS_NAME + " Connected");
 			_transportListener.onTransportConnected();
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
 		} // end-catch
 	} // end-method
@@ -90,10 +88,10 @@ public abstract class SyncTransport {
 		isConnected = false;
 
 		try {
-	    	SyncTrace.logTransportEvent("Transport.disconnect: " + info, null, InterfaceActivityDirection.Transmit, null, 0, SYNC_LIB_TRACE_KEY);
+            Logger.d(CLASS_NAME + " Disconnected");
 			_transportListener.onTransportDisconnected(info);
 		} catch (Exception excp) {
-			DebugTool.logError(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
+			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
 		} // end-catch
 	} // end-method
 	

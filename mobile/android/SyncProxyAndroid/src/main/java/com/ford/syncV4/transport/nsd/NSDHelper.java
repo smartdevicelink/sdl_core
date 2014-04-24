@@ -4,7 +4,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.util.Log;
+
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -25,7 +26,7 @@ public class NSDHelper {
 
     public static final String SERVICE_TYPE = "_ford-sdlapp._tcp.";
 
-    public static final String TAG = "NSDHelper";
+    public static final String CLASS_NAME = NSDHelper.class.getSimpleName();
     public String mServiceName = "SyncProxyAndroid";
 
     NsdServiceInfo mService;
@@ -49,16 +50,16 @@ public class NSDHelper {
 
             @Override
             public void onDiscoveryStarted(String regType) {
-                Log.d(TAG, "Service discovery started");
+               Logger.d(CLASS_NAME + " Service discovery started");
             }
 
             @Override
             public void onServiceFound(NsdServiceInfo service) {
-                Log.d(TAG, "Service discovery success: " + service);
+               Logger.d(CLASS_NAME + " Service discovery success: " + service);
                 if (!service.getServiceType().equals(SERVICE_TYPE)) {
-                    Log.d(TAG, "Unknown Service Type: " + service.getServiceType());
+                   Logger.d(CLASS_NAME + " Unknown Service Type: " + service.getServiceType());
                 } else if (service.getServiceName().equals(mServiceName)) {
-                    Log.d(TAG, "Same machine: " + mServiceName);
+                   Logger.d(CLASS_NAME + " Same machine: " + mServiceName);
                 } else if (service.getServiceName().contains(mServiceName)){
                     mNsdManager.resolveService(service, mResolveListener);
                 }
@@ -66,7 +67,7 @@ public class NSDHelper {
 
             @Override
             public void onServiceLost(NsdServiceInfo service) {
-                Log.e(TAG, "service lost: " + service);
+               Logger.e(CLASS_NAME + " service lost: " + service);
                 if (mService == service) {
                     mService = null;
                 }
@@ -74,18 +75,18 @@ public class NSDHelper {
 
             @Override
             public void onDiscoveryStopped(String serviceType) {
-                Log.i(TAG, "Discovery stopped: " + serviceType);
+               Logger.i(CLASS_NAME + " Discovery stopped: " + serviceType);
             }
 
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+               Logger.e(CLASS_NAME + " Discovery failed: Error code:" + errorCode);
                 mNsdManager.stopServiceDiscovery(this);
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.e(TAG, "Discovery failed: Error code:" + errorCode);
+               Logger.e(CLASS_NAME + " Discovery failed: Error code:" + errorCode);
                 mNsdManager.stopServiceDiscovery(this);
             }
         };
@@ -97,15 +98,15 @@ public class NSDHelper {
 
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.e(TAG, "Resolve failed code: " + errorCode);
+               Logger.e(CLASS_NAME + " Resolve failed code: " + errorCode);
             }
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.d(TAG, "Resolve Succeeded. " + serviceInfo);
+               Logger.d(CLASS_NAME + " Resolve Succeeded. " + serviceInfo);
 
                 if (serviceInfo.getServiceName().equals(mServiceName)) {
-                    Log.d(TAG, "Same IP.");
+                   Logger.d(CLASS_NAME + " Same IP.");
                     return;
                 }
                 mService = serviceInfo;
@@ -140,6 +141,8 @@ public class NSDHelper {
     }
 
     public void registerService(int port) {
+       Logger.d(CLASS_NAME + " Register Service, port:" + port + ", name:" + mServiceName + ", " +
+                "type:" + SERVICE_TYPE);
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
         serviceInfo.setServiceName(mServiceName);

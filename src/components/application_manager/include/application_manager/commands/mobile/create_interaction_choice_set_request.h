@@ -69,6 +69,14 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
  private:
 
+    /*
+     * @brief Sends VR AddCommand request to HMI
+     *
+     * @param app_id Application ID
+     *
+     */
+   void SendVRAddCommandRequest(application_manager::ApplicationSharedPtr const app);
+
   /*
    * @brief Checks incoming choiseSet params.
    * @param app Registred mobile application

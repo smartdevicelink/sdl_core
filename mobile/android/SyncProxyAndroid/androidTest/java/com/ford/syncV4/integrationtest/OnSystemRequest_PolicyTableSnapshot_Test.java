@@ -1,7 +1,6 @@
 package com.ford.syncV4.integrationtest;
 
 import android.test.InstrumentationTestCase;
-import android.util.Log;
 
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
@@ -14,6 +13,7 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
 import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
@@ -26,7 +26,7 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.util.TestConfig;
+import com.ford.syncV4.test.TestConfig;
 
 import org.hamcrest.core.IsNull;
 import org.json.JSONException;
@@ -62,7 +62,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
     private static final String TAG = "PolicyTableSnapshot_Test";
 
-    private static final byte PROTOCOL_VERSION = (byte) 2;
+    private static final byte PROTOCOL_VERSION = ProtocolConstants.PROTOCOL_VERSION_MAX;
     private static final int PUTFILE_FUNCTIONID = 32;
     private static final int ONSYSTEMREQUEST_FUNCTIONID = 32781;
     private static final String OFFSET = "offset";
@@ -91,6 +91,9 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         protocolMock = mock(WiProProtocol.class);
         connectionMock = createNewSyncConnectionMock();
 
+        // Set correct version of the Protocol when creates RPC requests at SyncProxyBase
+        when(connectionMock.getProtocolVersion()).thenReturn(ProtocolConstants.PROTOCOL_VERSION_MAX);
+
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, null, null, false, false, 2,
                 null, connectionMock, new TestConfig());
@@ -105,6 +108,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
     public void testOnSystemRequestWithPTS() throws Exception {
         final FileType fileType = FileType.JSON;
+        final RequestType requestType = RequestType.HTTP;
         final int extraDataSize = 10;
         final int dataSize = (maxDataSize * 2) + extraDataSize;
         final byte[] dataSnapshot = TestCommon.getRandomBytes(dataSize);
@@ -123,11 +127,12 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
                 final ISystemRequestProxy proxy =
                         (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putPolicyTableUpdateFile(filename, data);
+                proxy.putPolicyTableUpdateFile(filename, data, fileType, requestType);
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot));
+          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot),
+                  eq(fileType), eq(requestType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP
@@ -172,67 +177,6 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         // wait for processing
         Thread.sleep(WAIT_TIMEOUT);
-
-        // expect the second part of PutFile to be sent
-        /*ArgumentCaptor<ProtocolMessage> pmCaptor1 = ArgumentCaptor.forClass(ProtocolMessage.class);
-        verify(connectionMock2, times(1)).sendMessage(pmCaptor1.capture());
-
-        // set another connection mock to be able to verify the third time below
-        final SyncConnection connectionMock3 = createNewSyncConnectionMock();
-        setSyncConnection(proxy, connectionMock3);
-
-        final ProtocolMessage pm1 = pmCaptor1.getValue();
-        assertThat(pm1.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkPutFileJSON(pm1.getData(), maxDataSize, maxDataSize, filename, fileType);
-        final byte[] data1 = Arrays.copyOfRange(dataSnapshot, maxDataSize, maxDataSize * 2);
-        assertThat(pm1.getBulkData(), is(data1));
-        assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
-
-        // the listener should not be called for PutFile
-        verifyZeroInteractions(proxyListenerMock);
-
-        // emulate incoming PutFile response for second part
-        PutFileResponse putFileResponse2 = new PutFileResponse();
-        putFileResponse2.setResultCode(Result.SUCCESS);
-        putFileResponse2.setCorrelationID(putFileRequestCorrID);
-
-        ProtocolMessage incomingPutFileResponsePM2 = createResponseProtocolMessage(putFileResponse2,
-                        putFileRequestCorrID, PUTFILE_FUNCTIONID);
-        emulateIncomingMessage(proxy, incomingPutFileResponsePM2);
-
-        // wait for processing
-        Thread.sleep(WAIT_TIMEOUT);
-
-        // expect the third part of PutFile to be sent
-        ArgumentCaptor<ProtocolMessage> pmCaptor2 =
-                ArgumentCaptor.forClass(ProtocolMessage.class);
-        verify(connectionMock3, times(1)).sendMessage(pmCaptor2.capture());
-
-        final ProtocolMessage pm2 = pmCaptor2.getValue();
-        assertThat(pm2.getFunctionID(), is(PUTFILE_FUNCTIONID));
-        checkPutFileJSON(pm2.getData(), maxDataSize * 2, extraDataSize,
-                filename, fileType);
-        final byte[] data2 = Arrays.copyOfRange(dataSnapshot, maxDataSize * 2,
-                (maxDataSize * 2) + extraDataSize);
-        assertThat(pm2.getBulkData(), is(data2));
-        assertThat(pm2.getCorrID(), is(putFileRequestCorrID));
-
-        // the listener should not be called for PutFile
-        verifyZeroInteractions(proxyListenerMock);
-
-        // emulate incoming PutFile response for third part
-        PutFileResponse putFileResponse3 = new PutFileResponse();
-        putFileResponse3.setResultCode(Result.SUCCESS);
-        putFileResponse3.setCorrelationID(putFileRequestCorrID);
-
-        ProtocolMessage incomingPutFileResponsePM3 =
-                createResponseProtocolMessage(putFileResponse3,
-                        putFileRequestCorrID, PUTFILE_FUNCTIONID);
-        emulateIncomingMessage(proxy, incomingPutFileResponsePM3);
-
-        // wait for processing
-        Thread.sleep(WAIT_TIMEOUT);
-        */
 
         // the listener should not be called for PutFile or OnSystemRequest
         verify(proxyListenerMock, never()).onPutFileResponse(any(PutFileResponse.class));
