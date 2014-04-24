@@ -320,27 +320,27 @@ SDL.SDLController = Em.Object
          * Action for ClosePopUp request that triggers deactivate function from
          * opened popUp
          */
-        closePopUp: function() {
+        closePopUp: function(methodName) {
 
-            if (SDL.AlertPopUp.active) {
+            if (methodName == "UI.Alert") {
                 SDL.AlertPopUp.deactivate();
             }
-            if (SDL.AudioPassThruPopUp.active) {
+            if (methodName == "UI.PerformAudioPassThru") {
                 SDL.AudioPassThruPopUp.deactivate();
                 this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
-            if (SDL.InteractionChoicesView.active) {
+            if (methodName == "UI.PerformInteraction") {
                 SDL.InteractionChoicesView.deactivate("ABORTED");
             }
-            if (SDL.ScrollableMessage.active) {
+            if (methodName == "UI.ScrollableMessage") {
                 SDL.ScrollableMessage.deactivate(true);
             }
-            if (SDL.SliderView.active) {
+            if (methodName == "UI.Slider") {
                 SDL.SliderView.deactivate(true);
             }
-            if (SDL.VRHelpListView.active) {
-                SDL.VRHelpListView.deactivate();
-            }
+//            if (SDL.VRHelpListView.active) {
+//                SDL.VRHelpListView.deactivate();
+//            }
         },
 
         /**

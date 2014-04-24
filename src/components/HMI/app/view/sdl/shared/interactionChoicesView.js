@@ -244,7 +244,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
      */
     deactivate: function (result, choiceID) {
 
-        if (SDL.SDLModel.performInteractionSession.length > 0) {
+        if (SDL.SDLModel.performInteractionSession.length > 0 && result != "ABORTED") {
             this.timerUpdate();
         } else {
 
