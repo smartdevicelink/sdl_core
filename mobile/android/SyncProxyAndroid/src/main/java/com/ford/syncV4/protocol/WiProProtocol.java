@@ -15,10 +15,6 @@ import com.ford.syncV4.util.logger.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Hashtable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class WiProProtocol extends AbstractProtocol {
 
@@ -37,17 +33,6 @@ public class WiProProtocol extends AbstractProtocol {
             new Hashtable<Integer, MessageFrameAssembler>();
     private static final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
             new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
-
-    private final PriorityBlockingQueue<Runnable> blockingQueue =
-            new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
-
-    /**
-     * Executor service to process single frame commands.
-     * If the number of threads is greater than the 10, set the the maximum time that excess
-     * idle threads will wait for new tasks before terminating to 10 seconds
-     */
-    private final ExecutorService messagesExecutorService =
-            new ThreadPoolExecutor(5, 10, 10, TimeUnit.SECONDS, blockingQueue);
 
     private final ProtocolVersion protocolVersion = new ProtocolVersion();
     private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
@@ -151,13 +136,13 @@ public class WiProProtocol extends AbstractProtocol {
         handleProtocolFrameToSend(header, data, 0, data.length);
     } // end-method
 
-    public void SendMessage(final ProtocolMessage protocolMsg) {
-        protocolMsg.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
-        final byte sessionID = protocolMsg.getSessionID();
+    public void SendMessage(final ProtocolMessage protocolMessage) {
+        protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
+        final byte sessionID = protocolMessage.getSessionID();
         final byte protocolVersionToSend = getProtocolVersion();
 
         ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
-                protocolMsg, protocolVersionToSend).generate();
+                protocolMessage, protocolVersionToSend).generate();
         final byte[] data = protocolMessageConverter.getData();
         final ServiceType serviceType = protocolMessageConverter.getServiceType();
 
@@ -171,26 +156,29 @@ public class WiProProtocol extends AbstractProtocol {
             return;
         }
 
-        //Logger.d(CLASS_NAME + " TRACE " + serviceType.getValue());
-        messagesExecutorService.execute(new RunnableWithPriority(serviceType.getValue(),
-                                                  protocolMsg.getCorrID()) {
+        sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
+                MAX_DATA_SIZE, sessionID, getNextMessageId(),
+                new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
 
-              @Override
-              public void run() {
-                  super.run();
+                    @Override
+                    public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                      int offset, int length) {
+                        //Logger.d("TRACE: " + correlationId);
+                        handleProtocolFrameToSend(header, data, offset, length);
+                    }
 
-                  sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
-                          MAX_DATA_SIZE, sessionID, getNextMessageId(), protocolMsg.getCorrID(),
-                          new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
-                              @Override
-                              public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
-                                                                int offset, int length) {
-                                  handleProtocolFrameToSend(header, data, offset, length);
-                              }
-                          }
-                  );
-              }
-          }
+                    @Override
+                    public void onProtocolFrameToSendError(SendProtocolMessageProcessor.ERROR_TYPE errorType,
+                                                           String message) {
+                        switch (errorType) {
+                            case DATA_NPE:
+                                handleProtocolError("Error sending protocol message to SYNC.",
+                                        new SyncException(message, SyncExceptionCause.INVALID_ARGUMENT)
+                                );
+                                break;
+                        }
+                    }
+                }
         );
     }
 

@@ -969,7 +969,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null) {
                 mSyncConnection = new SyncConnection(_interfaceBroker);
-                final HeartbeatMonitor heartbeatMonitor =
+                final HeartbeatMonitor heartbeatMonitor = 
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);

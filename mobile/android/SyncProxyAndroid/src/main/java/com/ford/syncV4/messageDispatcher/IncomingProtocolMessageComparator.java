@@ -8,15 +8,7 @@ public class IncomingProtocolMessageComparator implements Comparator<ProtocolMes
 
 	@Override
 	public int compare(ProtocolMessage arg0, ProtocolMessage arg1) {
-		// Always return 0, turning the priority queue into a FIFO queue. 
-
-        int result;
-        if (arg0.getServiceType().getValue() < arg1.getServiceType().getValue()) {
-            result = -1;
-        } else {
-            result = 1;
-        }
-
-        return result;
+		// Always return 0, turning the priority queue into a FIFO queue.
+        return 0;
 	}
 }

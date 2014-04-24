@@ -12,12 +12,14 @@ import com.ford.syncV4.util.logger.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Arrays;
 
 public abstract class AbstractProtocol {
 
     private static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
 
     protected IProtocolListener _protocolListener = null;
+
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
     private static final Object FRAME_LOCK = new Object();
@@ -25,7 +27,6 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
-    private final ComposeMessageProcessor composeMessageProcessor = new ComposeMessageProcessor();
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -87,7 +88,8 @@ public abstract class AbstractProtocol {
     }
 
     // This method is called whenever a protocol has an entire frame to send
-    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
+                                             int length) {
         if (data != null) {
             Logger.d(CLASS_NAME + " transmit " + data.length + " bytes");
         } else {
@@ -99,13 +101,25 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        composeMessageProcessor.process(header, data, offset, length,
-                new ComposeMessageProcessor.IComposeMessageProcessor() {
-            @Override
-            public void onMessageBytesToSend(byte[] bytesToSend, int offset, int length) {
-                handleProtocolMessageBytesToSend(bytesToSend, offset, length);
+        if (data != null) {
+            if (offset >= data.length) {
+                throw new IllegalArgumentException("offset should not be more then length");
             }
-        });
+            byte[] dataChunk;
+            if (offset + length >= data.length) {
+                dataChunk = Arrays.copyOfRange(data, offset, data.length);
+            } else {
+                dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+            }
+            byte[] frameHeader = header.assembleHeaderBytes();
+            byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+            System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+            System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+            handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+        } else {
+            byte[] frameHeader = header.assembleHeaderBytes();
+            handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
+        }
     }
 
     private synchronized void resetHeartbeat() {

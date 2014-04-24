@@ -11,14 +11,34 @@ import com.ford.syncV4.util.BitConverter;
  * Date: 17.04.14
  * Time: 17:19
  */
+
+/**
+ * This class provides functionality to process single message with a data into a sequence of
+ * small messages
+ */
 public class ConsecutiveFrameProcessor {
 
+    /**
+     * Interface to provide {@link com.ford.syncV4.service.ConsecutiveFrameProcessor}'s
+     * lifecycle callbacks
+     */
     public interface IConsecutiveFrameProcessor {
 
         public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
                                           int length);
     }
 
+    /**
+     * Process a data into a sequence of small messages
+     *
+     * @param data                  byte array of the data
+     * @param sessionID             id of the session
+     * @param messageID             id of the message
+     * @param serviceType           type of the service
+     * @param protocolVersionToSend version of current protocol
+     * @param maxDataSize           maximum data size
+     * @param callback              lifecycle callback
+     */
     public void process(byte[] data, byte sessionID, final int messageID, ServiceType serviceType,
                         byte protocolVersionToSend, int maxDataSize,
                         IConsecutiveFrameProcessor callback) {

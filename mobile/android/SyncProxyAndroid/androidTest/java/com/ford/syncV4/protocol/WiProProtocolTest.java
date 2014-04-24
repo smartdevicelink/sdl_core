@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
@@ -855,25 +854,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
                 expectedResult.length);
     }
 
-    public void testPriorityBlockingQueueWithCorrectOutputOrderByCorrelationId()
-            throws InterruptedException {
-        PriorityBlockingQueue<Runnable> queue =
-                new PriorityBlockingQueue<Runnable>(20, new CompareMessagesPriority());
-
-        RunnableWithPriority runWithPriority;
-
-        int i;
-        for (i = 0; i < 50; i++) {
-            runWithPriority = new RunnableWithPriority((byte) 0, i);
-            queue.add(runWithPriority);
-        }
-
-        i = 0;
-        while (queue.size() > 0) {
-            assertEquals(i++, ((RunnableWithPriority)queue.take()).getCorrelationId());
-        }
-    }
-
     public void testPriorityInMessages() {
         ProtocolFrameHeader rpc = ProtocolFrameHeaderFactory.createStartSession(
                 ServiceType.RPC, SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_TWO);
@@ -955,9 +935,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     public void testRPCHasHigherPriorityToAudio() throws InterruptedException {
@@ -993,8 +973,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         };
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
 
-        ProtocolMessage audioProtocolMessage =
-                generateAudioProtocolMessage(1000);
+        ProtocolMessage audioProtocolMessage = generateAudioProtocolMessage(1000);
         ProtocolMessage rpcProtocolMessage =
                 generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 0);
 
@@ -1007,9 +986,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     public void testRPCHasHigherPriorityToMobileNavi() throws InterruptedException {
@@ -1059,9 +1038,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     public void testAudioHasHigherPriorityToMobileNavi() throws InterruptedException {
@@ -1111,9 +1090,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     public void testAudioHasHigherPriorityToBulkData() throws InterruptedException {
@@ -1149,8 +1128,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         };
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
 
-        ProtocolMessage audioProtocolMessage =
-                generateAudioProtocolMessage(1000);
+        ProtocolMessage audioProtocolMessage = generateAudioProtocolMessage(1000);
         ProtocolMessage protocolMessageWithData =
                 generateRPCProtocolMessage(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2, 1000);
 
@@ -1163,9 +1141,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     public void testDifferentMessagesTypeWithCorrectPriorities() throws InterruptedException {
@@ -1221,9 +1199,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
-        assertEquals(messagesCounter[0], messagesNumber);
+        assertEquals(messagesNumber, messagesCounter[0]);
     }
 
     private int randInt(int min, int max) {
