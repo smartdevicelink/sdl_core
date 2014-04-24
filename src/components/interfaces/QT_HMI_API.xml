@@ -949,10 +949,10 @@
 
 <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
+    <element name="HTTP" />   
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
 </enum>
@@ -1079,6 +1079,15 @@
 
 <!-- End of IVI part-->
 
+<enum name="AppPriority">
+  <element name="EMERGENCY"/>
+  <element name="NAVIGATION"/>
+  <element name="VOICE_COMMUNICATION"/>
+  <element name="COMMUNICATION"/>
+  <element name="NORMAL"/>
+  <element name="NONE"/>
+</enum>
+
 <!-- Policies -->
 <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
@@ -1115,7 +1124,7 @@
   </param>
   </struct>
   <struct name="ServiceInfo">
-    <param name="servicyType" type="String" mandatory="true">
+    <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="policyAppId" type="String" mandatory="false">
@@ -1461,7 +1470,7 @@
     	Desired keypress mode.
     	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
-  </param>
+  </param> 
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -1853,6 +1862,12 @@
     <function name="OnStartDeviceDiscovery" messagetype="notification">
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
+    <function name="OnResumeAudioSource" messagetype="notification">
+      <description>This method must be invoked by SDL to update audio state.</description>
+      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+        <description>The ID of app to be resumed audio source.</description>
+      </param>
+    </function>
     <function name="UpdateDeviceList" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change device list.</description>
       <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100">
@@ -1896,6 +1911,9 @@
       <description>Request from SDL to HMI to bring specified application to front on UI e.g make it HMI status 'FULL'.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of deactivated application.</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
     <function name="ActivateApp" messagetype="response">
@@ -1973,6 +1991,7 @@
     </function>
     <!-- Policies -->
 
+    <!-- SyncP RPC-->
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
@@ -1981,7 +2000,7 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
-      <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -1995,19 +2014,52 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
-      <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
         <description>File reference name.</description>
       </param>
-      <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-        <description>
-          Full Size of file. sends in first OnPutFile notification if file is splited
-          into many PutFiles
-        </description>
-      </param>
-      <param name="appID" type="String" maxlength="50" mandatory="true">
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
         <description>ID of application that requested this RPC.</description>
       </param>
     </function>
+    <function name="SystemRequest" messagetype="request">
+      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+          <description>The type of system request.</description>
+      </param>
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+          <description>The path to file.</description>
+      </param>
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param>
+    </function>
+    <function name="SystemRequest" messagetype="response">
+    </function>
+    <function name="PolicyUpdate" messagetype="request">
+      <description>
+        From: SDL
+        To: SYNCP Manager
+        Asks SYNCP Manager to send given Policy Table snapshot to the backend
+      </description>
+      <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>
+          Location of policy table snapshot
+        </description>
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Send attempt timeout in seconds
+        </description>
+      </param>
+      <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
+        <description>
+          Array of delays to wait after failed atempts
+        </description>
+      </param>
+    </function>
+    <function name="PolicyUpdate" messagetype="response">
+    </function>
+    <!-- End of SyncP RPC-->
 
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
@@ -2054,20 +2106,6 @@
     </param>
   </function>
 
-  <function name="SystemRequest" messagetype="request">
-    <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
-    <param name="requestType" type="Common.RequestType" mandatory="true">
-      <description>The type of system request.</description>
-    </param>
-    <param name="fileName" type="String" maxlength="255" mandatory="true">
-      <description>The path to file.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that requested this RPC.</description>
-    </param>
-   </function>
-   <function name="SystemRequest" messagetype="response">
-   </function>
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>
@@ -2992,8 +3030,7 @@
       </description>
     </param>
   </function>
-
-<!--Qt HMI version of GetVehicleData-->
+  <!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3268,9 +3305,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of GetVehicleData-->
+  <!--end Qt HMI version of GetVehicleData-->
 
-<!--Qt HMI version of OnVehicleData-->
+  <!--Qt HMI version of OnVehicleData-->
   <function name="OnGpsData" messagetype="notification">
     <param name="gps" type="Common.GPSData" mandatory="true">
       <description>See GPSData</description>
@@ -3396,9 +3433,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of OnVehicleData-->
+  <!--end Qt HMI version of OnVehicleData-->
 
-<!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
   <function name="SubscribeGps" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3923,8 +3960,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
 </interface>
+
 
  <!-- Policies -->
 <interface name="SDL" version="1.0" date="2014-03-12">
@@ -3943,6 +3981,9 @@
         <description>If app permissions were reduced (isAppPermissionsRevoked == true), then this array specifies list of removed permissions. </description>
       </param>
     <param name="isAppRevoked" type="Boolean" mandatory="true"/>
+    <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
   </function>
 
   <function name="GetUserFriendlyMessage" messagetype="request" scope="internal">
@@ -3970,6 +4011,27 @@
       </param>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
+
+    <!-- SyncP RPC-->
+    <function name="OnReceivedPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notification sent to SDL when SYNCP Manager receives and decrypts updated policy table
+      </description>
+      <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>Location of decrypted policy table Json file on target</description>
+      </param>
+    </function>
+
+    <function name="OnPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notifies SDL to supply a new "PolicyUpdate" request with more recent snapshot data
+      </description>
+    </function>
+    <!-- End of SyncP RPC-->
 
     <function name="GetListOfPermissions"  messagetype="request">
       <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
@@ -4006,6 +4068,9 @@
       </param>
       <param name="appUnauthorized" type="Boolean" mandatory="false">
         <description>When present and set to true (should be if present) then this means that application was not authorized (nickname check failed.)</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
 
@@ -4044,10 +4109,10 @@
 
     <function name="GetURLS" messagetype="request" scope="internal">
       <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Common.ServiceInfo" mandatory="true"/>
+      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="String" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
 </interface>
 </interfaces>

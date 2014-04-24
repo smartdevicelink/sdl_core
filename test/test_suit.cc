@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 #endif
   int result = RUN_ALL_TESTS();
 
-#ifdef __cplusplus
+#if defined(__cplusplus) and defined(GCOV_ENABLED)
   __gcov_flush();
 #endif
 

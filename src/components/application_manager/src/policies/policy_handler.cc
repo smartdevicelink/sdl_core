@@ -33,6 +33,8 @@
 #include <unistd.h>
 #include <dlfcn.h>
 #include <algorithm>
+#include <vector>
+#include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_retry_sequence.h"
 #include "application_manager/policies/pt_exchange_handler_impl.h"
@@ -448,9 +450,20 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
     event_observer_ = new PolicyEventObserver(policy_manager_);
+
     event_observer_.get()->subscribe_on_event(
+#ifdef HMI_JSON_API
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
-    application_manager::MessageHelper::CreateGetDeviceData(correlation_id);
+#endif
+#ifdef HMI_DBUS_API
+      hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
+#endif
+    std::vector<std::string> vehicle_data_args;
+    vehicle_data_args.push_back(application_manager::strings::odometer);
+    application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
+    if (policy_manager_->CleanupUnpairedDevices(unpaired_device_ids_)) {
+     unpaired_device_ids_.clear();
+    }
   }
   return ret;
 }
@@ -522,6 +535,22 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
+
+    // In case of changed consent for device, related applications will be
+    // limited to pre_DataConsent permissions, if device disallowed, or switch
+    // back to their own permissions, if device allowed again, and must be
+    // notified about these changes
+    typedef std::set<application_manager::ApplicationSharedPtr> ApplicationList;
+    ApplicationList app_list =
+        application_manager::ApplicationManagerImpl::instance()->applications();
+    ApplicationList::const_iterator it_app_list = app_list.begin();
+    ApplicationList::const_iterator it_app_list_end = app_list.end();
+    for (; it_app_list != it_app_list_end; ++it_app_list) {
+      if (device_id == (*it_app_list).get()->device()) {
+        policy_manager_->SendNotificationOnPermissionsUpdated(
+              (*it_app_list).get()->mobile_app_id()->asString());
+      }
+    }
 
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),

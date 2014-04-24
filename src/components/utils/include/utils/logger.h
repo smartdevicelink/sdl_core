@@ -29,9 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef LOG4CXXLOGGER_HPP_
-
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
 
 #ifdef ENABLE_LOG
   #include <errno.h>
@@ -40,8 +39,7 @@
   #include <log4cxx/propertyconfigurator.h>
 #endif // ENABLE_LOG
 
-namespace log4cxx
-{
+namespace log4cxx {
 #ifdef ENABLE_LOG
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
       namespace { \
@@ -136,11 +134,7 @@ namespace log4cxx
 
     #define LOG4CXX_TRACE_ENTER(logger)
     #define LOG4CXX_TRACE_EXIT(logger)
-
 #endif // ENABLE_LOG
-}
 
-#define LOG4CXXLOGGER_HPP_
-
-
-#endif /* LOG4CXXLOGGER_HPP_ */
+}  // namespace log4cxx
+#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_

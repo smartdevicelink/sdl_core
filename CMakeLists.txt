@@ -28,6 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+cmake_minimum_required(VERSION 2.8.0)
+
+set (PROJECT smartDeviceLinkCore)
+project (${PROJECT})
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
@@ -40,8 +45,10 @@ option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
+option(TIME_TESTER "Enable profiling time test util" ON)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
+option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -50,6 +57,7 @@ set(HMI_TYPE_OPTION 	"$ENV{HMI_TYPE}")
 set(TARGET_OPTION 	"$ENV{TARGET}")
 set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
+set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
@@ -100,13 +108,15 @@ if (HMI_ADAPTER_OPTION)
   endif()
 endif()
 
+if (ENABLE_LOG_OPTION)
+  if (${ENABLE_LOG_OPTION} STREQUAL "LOG_OFF")
+    message(STATUS "Jenkins integration: Log is turned off")
+    set (ENABLE_LOG OFF)
+  endif()
+endif()
+
 #Jenkins integration section end
 
-
-cmake_minimum_required(VERSION 2.8.0)
-
-set (PROJECT smartDeviceLinkCore)
-project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
 
@@ -116,7 +126,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX .)
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage")
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+if (ENABLE_GCOV)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+  add_definitions(-DGCOV_ENABLED)
+endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -153,6 +167,10 @@ endif()
 
 if(ENABLE_LOG)
   add_definitions(-DENABLE_LOG)
+endif()
+
+if (TIME_TESTER)
+    add_definitions(-DTIME_TESTER)
 endif()
 
 # TODO(AK): check current OS here

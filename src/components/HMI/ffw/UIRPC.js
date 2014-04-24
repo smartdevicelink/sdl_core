@@ -644,7 +644,7 @@ FFW.UI = FFW.RPCObserver.create({
                                     ],
                                     "graphicSupported": true,
                                     "imageCapabilities": ["DYNAMIC", "STATIC"],
-                                    "templatesAvailable": ["TEMPLATE"],
+                                    "templatesAvailable": [request.params.displayLayout],
                                     "screenParams": {
                                         "resolution": {
                                             "resolutionWidth": 800,
@@ -1224,7 +1224,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ClosePopUp":
                 {
 
-                    SDL.SDLController.closePopUp();
+                    SDL.SDLController.closePopUp(request.params.methodName);
 
 
                     Em.Logger.log("FFW." + request.method + "Response");

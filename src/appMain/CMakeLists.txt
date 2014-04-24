@@ -21,12 +21,17 @@ set(default_media_inc
 )
 endif()
 
+if (TIME_TESTER)
+    set(TIME_TESTER_LIB
+        TimeTester)
+endif()
 set(LIBRARIES
   ApplicationManager
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
   SmartObjects
+  ${TIME_TESTER_LIB}
   formatters
   ProtocolHandler
   connectionHandler
@@ -78,6 +83,7 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
+  ${CMAKE_SOURCE_DIR}/src/components/time_tester/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ../components/resumption/include/
   ../thirdPartyLibs/MessageBroker/include

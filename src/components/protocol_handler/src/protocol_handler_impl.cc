@@ -152,7 +152,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)) {
+                                   threads::ThreadOptions(kStackSize)),
+      metric_observer_(NULL) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -397,8 +398,11 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
       LOG4CXX_WARN(logger_, "Error frame decryption. Frame skipped.");
       continue;
     }
-    raw_ford_messages_from_mobile_.PostMessage(
-          impl::RawFordMessageFromMobile(frame));
+    impl::RawFordMessageFromMobile msg(*it);
+    if (metric_observer_) {
+      metric_observer_->StartMessageProcess(msg->message_id());
+    }
+    raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -604,7 +608,6 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                                                const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL:
       LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
@@ -636,6 +639,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
+  if (!session_observer_) {
+    LOG4CXX_ERROR(logger_,
+                  "Cannot handle message from Transport"
+                  << " Manager: ISessionObserver doesn't exist.");
+    LOG4CXX_TRACE_EXIT(logger_);
+    return RESULT_FAIL;
+  }
+
   const uint32_t connection_key =
       session_observer_->KeyFromPair(connection_id, packet->session_id());
 
@@ -646,6 +657,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
   }
+  if (metric_observer_) {
+    PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+    metric->message_id = packet->message_id();
+    metric->connection_key = connection_key;
+    metric->raw_msg = rawMessage;
+    metric_observer_->EndMessageProcess(metric);
+  }
+
   NotifySubscribers(rawMessage);
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -654,7 +673,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
-
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
 
@@ -720,9 +738,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
                            completePacket->data(),
                            completePacket->total_data_bytes(),
                            completePacket->service_type()));
+
       if (!rawMessage) {
         LOG4CXX_TRACE_EXIT(logger_);
         return RESULT_FAIL;
+      }
+
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
+        metric->raw_msg = rawMessage;
+        metric_observer_->EndMessageProcess(metric);
       }
       NotifySubscribers(rawMessage);
 
@@ -1066,7 +1091,11 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
       session_id, 0, number_of_frames));
 
   raw_ford_messages_to_mobile_.PostMessage(
-      impl::RawFordMessageToMobile(ptr, false));
+        impl::RawFordMessageToMobile(ptr, false));
+}
+
+void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver* observer) {
+  metric_observer_ = observer;
 }
 
 std::string ConvertPacketDataToString(const uint8_t* data,

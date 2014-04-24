@@ -1864,6 +1864,12 @@
     <function name="OnStartDeviceDiscovery" messagetype="notification">
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
+    <function name="OnResumeAudioSource" messagetype="notification">
+      <description>This method must be invoked by SDL to update audio state.</description>
+      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+        <description>The ID of app to be resumed audio source.</description>
+      </param>
+    </function>
     <function name="UpdateDeviceList" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change device list.</description>
       <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100">
