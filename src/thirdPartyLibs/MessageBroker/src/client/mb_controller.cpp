@@ -35,7 +35,7 @@ namespace NsMessageBroker
       ssize_t recv = TcpClient::Recv(data);
       DBG_MSG(("Received message: %s\n", data.c_str()));
       m_receivingBuffer += data;
-      while (1)
+      while (!stop)
       {
          Json::Value root;
          if (!m_reader.parse(m_receivingBuffer, root))
@@ -271,12 +271,15 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
+      stop = false;
+      is_active = true;
       arg = arg; // to avoid compiler warnings
-      while(1)
+      while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
+      is_active = false;
       return NULL;
    }
 

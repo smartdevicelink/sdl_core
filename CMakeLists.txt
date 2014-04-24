@@ -28,6 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+cmake_minimum_required(VERSION 2.8.0)
+
+set (PROJECT smartDeviceLinkCore)
+project (${PROJECT})
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
@@ -104,11 +109,6 @@ endif()
 
 #Jenkins integration section end
 
-
-cmake_minimum_required(VERSION 2.8.0)
-
-set (PROJECT smartDeviceLinkCore)
-project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
 

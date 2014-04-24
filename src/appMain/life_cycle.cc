@@ -303,11 +303,11 @@ void LifeCycle::StopComponents() {
   if (mb_adapter_) {
     mb_adapter_->unregisterController();
     mb_adapter_->Close();
+    mb_adapter_->exitReceavingThread();
     delete mb_adapter_;
   }
   if (mb_adapter_thread_) {
     mb_adapter_thread_->Stop();
-    mb_adapter_thread_->Join();
     delete mb_adapter_thread_;
   }
 
