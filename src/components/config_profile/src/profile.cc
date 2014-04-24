@@ -60,7 +60,7 @@ const char* kPolicySection = "Policy";
 const char* kHmiSection = "HMI";
 const char* kAppInfoSection = "AppInfo";
 const char* kMediaManagerSection = "MEDIA MANAGER";
-const char* KGlobalPropertiesSection = "GLOBAL PROPERTIES";
+const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
@@ -111,6 +111,7 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
+const char* kTtsDelimiterKey = "TtsDelimiter";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -119,6 +120,7 @@ const char* kDefautlPoliciesTableFileName = "policy_table.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
+const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -184,7 +186,8 @@ Profile::Profile()
       use_last_state_(false),
       supported_diag_modes_(),
       system_files_path_(kDefaultSystemFilesPath),
-      transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort) {
+      transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
+      tts_delimiter_(kDefaultTtsDelimiter) {
 }
 
 Profile::~Profile() {
@@ -377,7 +380,11 @@ const std::vector<uint32_t>& Profile::supported_diag_modes() const {
 }
 
 uint16_t Profile::transport_manager_tcp_adapter_port() const {
-    return transport_manager_tcp_adapter_port_;
+  return transport_manager_tcp_adapter_port_;
+}
+
+const std::string&Profile::tts_delimiter() const {
+  return tts_delimiter_;
 }
 
 void Profile::UpdateValues() {
@@ -644,54 +651,58 @@ void Profile::UpdateValues() {
 
     LOG_UPDATED_VALUE(app_dir_quota_, kAppDirectoryQuotaKey, kMainSection);
 
+    // TTS delimiter
+    // Should be gotten before any TTS prompts, since it should be appended back
+    ReadStringValue(&tts_delimiter_, kDefaultTtsDelimiter,
+                    kGlobalPropertiesSection, kTtsDelimiterKey);
+
+    LOG_UPDATED_VALUE(tts_delimiter_, kTtsDelimiterKey,
+                      kGlobalPropertiesSection);
+
     // Help prompt
     help_prompt_.clear();
     std::string help_prompt_value;
     std::string help_prompt_value_log;
-    if (ReadValue(&help_prompt_value, KGlobalPropertiesSection,
-                  kHelpPromptKey)) {
-      std::copy(help_prompt_value.begin(), help_prompt_value.end(),
-                std::back_inserter(help_prompt_value_log));
+    if (ReadValue(&help_prompt_value, kGlobalPropertiesSection,
+                  kHelpPromptKey)) {      
       char* str = NULL;
       str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
       while (str != NULL) {
-          help_prompt_.push_back(std::string(str));
+          // Default prompt should have delimiter included for each item
+          help_prompt_.push_back(std::string(str)+tts_delimiter_);
           str = strtok(NULL, ",");
       }
-    } else {
-      help_prompt_value.clear();
+      LogContainer(help_prompt_, &help_prompt_value_log);
     }
 
     LOG_UPDATED_VALUE(help_prompt_value_log, kHelpPromptKey,
-                      KGlobalPropertiesSection);
+                      kGlobalPropertiesSection);
 
     // Timeout prompt
     time_out_promt_.clear();
     std::string timeout_prompt_value;
     std::string timeout_prompt_value_log;
-    if (ReadValue(&timeout_prompt_value, KGlobalPropertiesSection,
+    if (ReadValue(&timeout_prompt_value, kGlobalPropertiesSection,
               kTimeoutPromptKey)) {
-      std::copy(timeout_prompt_value.begin(), timeout_prompt_value.end(),
-                std::back_inserter(timeout_prompt_value_log));
       char* str = NULL;
       str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
       while (str != NULL) {
-          time_out_promt_.push_back(std::string(str));
+          // Default prompt should have delimiter included for each item
+          time_out_promt_.push_back(std::string(str)+tts_delimiter_);
           str = strtok(NULL, ",");
       }
-    } else {
-      timeout_prompt_value.clear();
+      LogContainer(time_out_promt_, &timeout_prompt_value_log);
     }
 
     LOG_UPDATED_VALUE(timeout_prompt_value_log, kTimeoutPromptKey,
-                      KGlobalPropertiesSection);
+                      kGlobalPropertiesSection);
 
     // Voice recognition help title
-    ReadStringValue(&vr_help_title_, "", KGlobalPropertiesSection,
+    ReadStringValue(&vr_help_title_, "", kGlobalPropertiesSection,
                     kHelpTitleKey);
 
     LOG_UPDATED_VALUE(vr_help_title_, kHelpTitleKey,
-                      KGlobalPropertiesSection);
+                      kGlobalPropertiesSection);
 
     // Voice recognition help command
     vr_commands_.clear();
@@ -699,16 +710,13 @@ void Profile::UpdateValues() {
     std::string vr_help_command_value_log;
     if (ReadValue(&vr_help_command_value, kVrCommandsSection,
                   kHelpCommandKey)) {
-      std::copy(vr_help_command_value.begin(), vr_help_command_value.end(),
-                std::back_inserter(vr_help_command_value_log));
       char* str = NULL;
       str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
       while (str != NULL) {
           vr_commands_.push_back(std::string(str));
           str = strtok(NULL, ",");
       }
-    } else {
-      vr_help_command_value.clear();
+      LogContainer(vr_commands_, &vr_help_command_value_log);
     }
 
     LOG_UPDATED_VALUE(vr_help_command_value_log, kHelpCommandKey,
@@ -926,6 +934,24 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
         *value = user_value;
         return true;
     }
+}
+
+void Profile::LogContainer(const std::vector<std::string>& container,
+                           std::string* log) {
+  if (container.empty()) {
+    return;
+  }
+  if (NULL == log) {
+    return;
+  }
+  std::vector<std::string>::const_iterator it = container.begin();
+  std::vector<std::string>::const_iterator it_end = container.end();
+  for (; it != it_end-1; ++it) {
+    log->append(*it);
+    log->append(" ; ");
+  }
+
+  log->append(container.back());
 }
 
 
