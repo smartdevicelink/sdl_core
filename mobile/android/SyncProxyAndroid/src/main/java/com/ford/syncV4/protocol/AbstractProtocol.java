@@ -52,6 +52,12 @@ public abstract class AbstractProtocol {
     public abstract void SendMessage(ProtocolMessage msg);
 
     /**
+     * Send heart beat header
+     * @param sessionId id of the current session
+     */
+    public abstract void SendHeartBeatMessage(byte sessionId);
+
+    /**
      * This method starts a protocol currentSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
      * currentSession has been established.

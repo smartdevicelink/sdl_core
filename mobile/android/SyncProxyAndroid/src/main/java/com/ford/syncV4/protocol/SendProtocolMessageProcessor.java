@@ -56,7 +56,7 @@ public class SendProtocolMessageProcessor {
     /**
      * Executor service to process heart beat messages.
      */
-    private final ExecutorService heartbeatExecutor = Executors.newFixedThreadPool(1);
+    private final ExecutorService heartbeatExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * Process data into {@link com.ford.syncV4.protocol.ProtocolMessage}
@@ -102,6 +102,19 @@ public class SendProtocolMessageProcessor {
                     );
                 }
             });
+        } else if (serviceType == ServiceType.Heartbeat) {
+            final ProtocolFrameHeader header =
+                    ProtocolFrameHeaderFactory.createHeartbeat(serviceType, protocolVersionToSend);
+
+            heartbeatExecutor.submit(new Runnable() {
+
+                                         @Override
+                                         public void run() {
+                                             callback.onProtocolFrameToSend(header, data, 0,
+                                                     data.length);
+                                         }
+                                     }
+            );
         } else {
             final ProtocolFrameHeader header =
                     ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
@@ -126,16 +139,6 @@ public class SendProtocolMessageProcessor {
                                                           data.length);
                                               }
                                           }
-                );
-            } else if (serviceType == ServiceType.Heartbeat) {
-                heartbeatExecutor.submit(new Runnable() {
-
-                                             @Override
-                                             public void run() {
-                                                 callback.onProtocolFrameToSend(header, data, 0,
-                                                         data.length);
-                                             }
-                                         }
                 );
             } else {
                 singleMessageExecutor.submit(new Runnable() {

@@ -136,6 +136,16 @@ public class WiProProtocol extends AbstractProtocol {
         handleProtocolFrameToSend(header, data, 0, data.length);
     } // end-method
 
+    @Override
+    public void SendHeartBeatMessage(byte sessionId) {
+        final ProtocolFrameHeader heartbeat =
+                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat,
+                        getProtocolVersion());
+        final byte[] data = heartbeat.assembleHeaderBytes();
+        processProtocolMessage(ServiceType.Heartbeat, getProtocolVersion(), data, sessionId);
+    }
+
+    @Override
     public void SendMessage(final ProtocolMessage protocolMessage) {
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
         final byte sessionID = protocolMessage.getSessionID();
@@ -156,6 +166,11 @@ public class WiProProtocol extends AbstractProtocol {
             return;
         }
 
+        processProtocolMessage(serviceType, protocolVersionToSend, data, sessionID);
+    }
+
+    private void processProtocolMessage(ServiceType serviceType, byte protocolVersionToSend,
+                                        byte[] data, byte sessionID) {
         sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
                 MAX_DATA_SIZE, sessionID, getNextMessageId(),
                 new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
@@ -163,7 +178,6 @@ public class WiProProtocol extends AbstractProtocol {
                     @Override
                     public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
                                                       int offset, int length) {
-                        //Logger.d("TRACE: " + correlationId);
                         handleProtocolFrameToSend(header, data, offset, length);
                     }
 

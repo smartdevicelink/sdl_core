@@ -342,6 +342,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testHeartbeatSendDoNotResetHeartbeat() throws Exception {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection._protocol = mock(WiProProtocol.class);
         connection.sendHeartbeat(heartbeatMonitor);
         verify(heartbeatMonitor, never()).notifyTransportActivity();
     }

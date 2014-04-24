@@ -6,8 +6,6 @@ import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
-import com.ford.syncV4.protocol.ProtocolFrameHeader;
-import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -59,8 +57,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     // Thread safety locks
     private static final Object TRANSPORT_REFERENCE_LOCK = new Object();
     private static final Object PROTOCOL_REFERENCE_LOCK = new Object();
-    IHeartbeatMonitor _heartbeatMonitor;
-    private boolean _isHeartbeatTimedout = false;
+    private IHeartbeatMonitor mHeartbeatMonitor;
+    private boolean mIsHeartbeatTimedout = false;
     private NSDHelper mNSDHelper;
 
     // Id of the current active session
@@ -172,12 +170,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public IHeartbeatMonitor getHeartbeatMonitor() {
-        return _heartbeatMonitor;
+        return mHeartbeatMonitor;
     }
 
     public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
-        this._heartbeatMonitor = heartbeatMonitor;
-        _heartbeatMonitor.setListener(this);
+        mHeartbeatMonitor = heartbeatMonitor;
+        mHeartbeatMonitor.setListener(this);
     }
 
     private void stopTransportReading() {
@@ -239,9 +237,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     private void stopHeartbeatMonitor() {
-        if (_heartbeatMonitor != null) {
+        if (mHeartbeatMonitor != null) {
             Logger.d(CLASS_NAME + " Stop HeartBeat");
-            _heartbeatMonitor.stop();
+            mHeartbeatMonitor.stop();
         }
     }
 
@@ -426,8 +424,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void initialiseSession() {
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.start();
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.start();
         } else {
             // TODO :
         }
@@ -457,20 +455,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onTransportDisconnected(String info) {
-        if (!_isHeartbeatTimedout) {
+        if (!mIsHeartbeatTimedout) {
             // Pass directly to connection listener
             mConnectionListener.onTransportDisconnected(info);
         }
-        _isHeartbeatTimedout = false;
+        mIsHeartbeatTimedout = false;
     }
 
     @Override
     public void onTransportError(String info, Exception e) {
-        if (!_isHeartbeatTimedout) {
+        if (!mIsHeartbeatTimedout) {
             // Pass directly to connection listener
             mConnectionListener.onTransportError(info, e);
         }
-        _isHeartbeatTimedout = false;
+        mIsHeartbeatTimedout = false;
     }
 
     @Override
@@ -552,15 +550,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK() {
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.heartbeatACKReceived();
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.heartbeatACKReceived();
         }
     }
 
     @Override
     public void onResetHeartbeat(){
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.notifyTransportActivity();
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.notifyTransportActivity();
         }
     }
 
@@ -601,27 +599,19 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendH264(ProtocolMessage pm) {
-
-        // Do to unordered messages from blocking queue do not use it for the stream for a whiled
-        //mConnectionListener.sendOutgoingMessage(pm);
-
         sendMessage(pm);
     }
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Asked to send heartbeat");
-        final ProtocolFrameHeader heartbeat =
-                ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat,
-                        (byte) 2);
-        final byte[] bytes = heartbeat.assembleHeaderBytes();
-        onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        _protocol.SendHeartBeatMessage(getSessionId());
     }
 
     @Override
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
-        _isHeartbeatTimedout = true;
+        mIsHeartbeatTimedout = true;
         closeConnection((byte) 0, false, false);
         mConnectionListener.onHeartbeatTimedOut();
     }
