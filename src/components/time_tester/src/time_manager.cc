@@ -73,7 +73,7 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
     ph->SetTimeMetricObserver(&ph_observer);
     thread_->startWithOptions(threads::ThreadOptions());
     LOG4CXX_INFO(logger_, "Create and start sending thread");
-  }
+    }
 }
 
 void TimeManager::Stop() {
@@ -85,6 +85,7 @@ void TimeManager::Stop() {
       ::close(socket_fd_);
     }
   }
+  LOG4CXX_INFO(logger_, "TimeManager stopped");
 }
 
 void TimeManager::SendMetric(utils::SharedPtr<Metric> metric) {

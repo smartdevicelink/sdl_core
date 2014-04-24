@@ -295,16 +295,13 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint16_t transport_manager_tcp_adapter_port() const;
 
-    // Members section
-
-  protected:
-    // Methods section
-
-    // Members section
+    /**
+     * @brief Returns delimiter for SDL-generated TTS chunks
+     * @return TTS delimiter
+     */
+    const std::string& tts_delimiter() const;
 
   private:
-    // Methods section
-
     /**
      * Default constructor
      *
@@ -389,6 +386,15 @@ class Profile : public utils::Singleton<Profile> {
                        const char* const pSection,
                        const char* const pKey) const;
 
+    /**
+     * @brief Write to log content of container
+     * @param array Source array
+     * @param log Log string
+     */
+    void LogContainer(const std::vector<std::string>& container,
+                      std::string* log);
+
+
     // Members section
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
@@ -435,6 +441,7 @@ class Profile : public utils::Singleton<Profile> {
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
+    std::string                     tts_delimiter_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 
