@@ -87,10 +87,13 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
   attributes.mq_maxmsg = MSGQ_MAX_MESSAGES;
   attributes.mq_msgsize = MAX_QUEUE_MSG_SIZE;
   attributes.mq_flags = 0;
-  LOG4CXX_TRACE(logger_, "Opening " << event_mq_name);
-  event_mqd_ = mq_open(event_mq_name, flags, mode, &attributes);
 #else
   int flags = O_RDONLY;
+#endif
+  LOG4CXX_TRACE(logger_, "Opening " << event_mq_name);
+#if CREATE_MME_MQ
+  event_mqd_ = mq_open(event_mq_name, flags, mode, &attributes);
+#else
   event_mqd_ = mq_open(event_mq_name, flags);
 #endif
   if (event_mqd_ != -1) {

@@ -40,7 +40,7 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-const char* IAP2Connection::protocol = "com.qnx.eatest";  // TODO(nvaganov@luxoft.com) choose protocol name
+const char* IAP2Connection::protocol = "com.ford.sync.prot0";  // TODO(nvaganov@luxoft.com) choose protocol name
 
 IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
@@ -52,6 +52,8 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
 }
 
 bool IAP2Connection::Init() {
+#define IAP2_CONNECT 1
+#if IAP2_CONNECT
   LOG4CXX_TRACE(logger_, "iAP2: connecting to " << device_path_);
   iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);
   if (iap2_hdl_ != 0) {
@@ -61,7 +63,7 @@ bool IAP2Connection::Init() {
     LOG4CXX_ERROR(logger_, "iAP2: could not connect to " << device_path_);
     return false;
   }
-
+#endif
   LOG4CXX_TRACE(logger_, "iAP2: opening protocol " << protocol);
   iap2ea_hdl_ = iap2_eap_open(device_path_.c_str(), protocol, 0);
   if (iap2ea_hdl_ != 0) {
@@ -107,7 +109,7 @@ TransportAdapter::Error IAP2Connection::Disconnect() {
     LOG4CXX_WARN(logger_, "iAP2: could not close protocol " << protocol);
     error = TransportAdapter::FAIL;
   }
-
+#if IAP2_CONNECT
   LOG4CXX_TRACE(logger_, "iAP2: disconnecting from " << device_path_);
   if (iap2_disconnect(iap2_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP2: disconnected from " << device_path_);
@@ -116,7 +118,7 @@ TransportAdapter::Error IAP2Connection::Disconnect() {
     LOG4CXX_WARN(logger_, "iAP2: could not disconnect from " << device_path_);
     error = TransportAdapter::FAIL;
   }
-
+#endif
   controller_->DisconnectDone(device_uid_, app_handle_);
   return error;
 }
