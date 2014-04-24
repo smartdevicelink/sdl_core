@@ -15,6 +15,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private final Object HeartbeatThreadHandler_Lock = new Object();
     private final Object Listener_Lock = new Object();
     //
+    private int count = 0;
     private int interval;
     private IHeartbeatMonitorListener listener;
     private boolean ackReceived;
@@ -30,15 +31,19 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                 Logger.d(CLASS_NAME + " run()");
 
                 if (heartbeatReceived) {
-                    Logger.d(CLASS_NAME,
-                            "Heartbeat has been received, sending and scheduling heartbeat");
-                    if (listener != null) {
-                        listener.sendHeartbeatACK(HeartbeatMonitor.this);
-                    } else {
-                        Logger.w(CLASS_NAME,
-                                "Delegate is not set, scheduling heartbeat anyway");
-                    }
-                    heartbeatReceived = false;
+
+
+                        Logger.d(CLASS_NAME,
+                                "Heartbeat has been received, sending and scheduling heartbeat");
+                        if (listener != null) {
+                            listener.sendHeartbeatACK(HeartbeatMonitor.this);
+                        } else {
+                            Logger.w(CLASS_NAME,
+                                    "Delegate is not set, scheduling heartbeat anyway");
+                        }
+                        heartbeatReceived = false;
+
+
                 } else {
                     Logger.d(CLASS_NAME + " Heartbeat has not been received");
                     if (listener != null) {
@@ -47,7 +52,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     // TODO stop?
                 }
             }
-            rescheduleHeartbeat();
+
         }
 
         private void rescheduleHeartbeat() {
@@ -142,10 +147,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                                 Logger.e(CLASS_NAME + " Couldn't schedule run()");
                             }
 
-                            if (!heartbeatThreadHandler.postDelayed(
-                                    heartbeatTimeoutRunnable, interval)) {
-                                Logger.e(CLASS_NAME + " Couldn't schedule run()");
-                            }
+
 
                             Logger.d(CLASS_NAME + " Starting looper");
                             Looper.loop();
@@ -231,7 +233,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void notifyTransportInputActivity() {
-        synchronized (HeartbeatThreadHandler_Lock) {
+        /*synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThreadHandler != null) {
                 heartbeatThreadHandler.removeCallbacks(
                         heartbeatTimeoutRunnable);
@@ -240,7 +242,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     Logger.e(CLASS_NAME + " Couldn't reschedule run()");
                 }
             }
-        }
+        }*/
     }
 
     @Override
@@ -252,10 +254,15 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     }
 
     @Override
-    public void heartbeatReceived(){
+    public void heartbeatReceived() {
         synchronized (Listener_Lock) {
             Logger.d(CLASS_NAME + " Heartbeat received");
             heartbeatReceived = true;
+            count += 1;
+            if (!heartbeatThreadHandler.post(
+                    heartbeatTimeoutRunnable)) {
+                Logger.e(CLASS_NAME + " Couldn't schedule run()");
+            }
         }
     }
 }
