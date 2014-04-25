@@ -546,7 +546,10 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
           if (0 < vr_commands.length()) {
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
-            item[strings::text] = vr_commands[0].asString();
+            // Since there is no custom data from application side, SDL should
+            // construct prompt and append delimiter to each item
+            item[strings::text] = vr_commands[0].asString() +
+                                  profile::Profile::instance()->tts_delimiter();
             msg_params[strings::help_prompt][index++] = item;
           }
         }
