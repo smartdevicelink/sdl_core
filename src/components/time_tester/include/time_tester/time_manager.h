@@ -132,7 +132,6 @@ class TimeManager {
     int16_t port_;
     std::string ip_;
     int32_t socket_fd_;
-    bool is_ready_;
     threads::Thread* thread_;
     MessageQueue<utils::SharedPtr<Metric> > messages_;
     DISALLOW_COPY_AND_ASSIGN(TimeManager);

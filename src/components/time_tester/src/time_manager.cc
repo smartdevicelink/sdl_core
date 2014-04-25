@@ -44,11 +44,10 @@
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
 
-
-
 namespace time_tester {
 
-TimeManager::TimeManager():socket_fd_(0),
+TimeManager::TimeManager():
+  socket_fd_(0),
   messages_(),
   thread_(NULL),
   app_observer(this),
