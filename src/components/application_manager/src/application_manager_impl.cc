@@ -1669,7 +1669,6 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::ResetGlobalproperties(app_to_remove);
   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
