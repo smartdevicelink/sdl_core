@@ -72,6 +72,7 @@ const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
+const char* kAppResourseFolderKey = "AppResourceFolder";
 const char* kAppConfigFolderKey = "AppConfigFolder";
 const char* kLaunchHMIKey = "LaunchHMI";
 const char* kEnableRedecodingKey = "EnableRedecoding";
@@ -112,6 +113,7 @@ const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kTtsDelimiterKey = "TtsDelimiter";
+const char* kRecordingFileKey = "RecordingFile";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -121,6 +123,7 @@ const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
+const char* kDefaultRecordingFileName = "audio.8bit.wav";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -151,6 +154,7 @@ Profile::Profile()
     : launch_hmi_(true),
       app_config_folder_(),
       app_storage_folder_(),
+      app_resourse_folder_(),
       config_file_name_(kDefaultConfigFileName),
       policies_file_name_(kDefautlPoliciesTableFileName),
       hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
@@ -187,7 +191,8 @@ Profile::Profile()
       supported_diag_modes_(),
       system_files_path_(kDefaultSystemFilesPath),
       transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
-      tts_delimiter_(kDefaultTtsDelimiter) {
+      tts_delimiter_(kDefaultTtsDelimiter),
+      recording_file_(kDefaultRecordingFileName) {
 }
 
 Profile::~Profile() {
@@ -214,9 +219,12 @@ const std::string& Profile::app_config_folder() const {
 }
 
 const std::string& Profile::app_storage_folder() const {
-    return app_storage_folder_;
+  return app_storage_folder_;
 }
 
+const std::string&Profile::app_resourse_folder() const {
+  return app_resourse_folder_;
+}
 
 const std::string& Profile::policies_file_name() const {
     return policies_file_name_;
@@ -387,6 +395,10 @@ const std::string&Profile::tts_delimiter() const {
   return tts_delimiter_;
 }
 
+const std::string&Profile::recording_file() const {
+  return recording_file_;
+}
+
 void Profile::UpdateValues() {
     LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
@@ -414,6 +426,14 @@ void Profile::UpdateValues() {
                     kMainSection, kAppStorageFolderKey);
 
     LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
+
+    // Application resourse folder
+    ReadStringValue(&app_resourse_folder_,
+                    file_system::CurrentWorkingDirectory().c_str(),
+                    kMainSection, kAppResourseFolderKey);
+
+    LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
+                      kMainSection);
 
     // Application info file name
     ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
@@ -831,6 +851,12 @@ void Profile::UpdateValues() {
     LOG_UPDATED_VALUE(transport_manager_disconnect_timeout_,
                       kTransportManagerDisconnectTimeoutKey,
                       kTransportManagerSection);
+
+    // Recording file
+    ReadStringValue(&recording_file_, kDefaultRecordingFileName,
+                    kMediaManagerSection, kSystemFilesPathKey);
+
+    LOG_UPDATED_VALUE(recording_file_, kRecordingFileKey, kMediaManagerSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
