@@ -113,7 +113,8 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       saved_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
                             (*it)[strings::hmi_level].asInt());
 
-      if (saved_hmi_level == application->hmi_level()) {
+      if ((saved_hmi_level == application->hmi_level()) &&
+          (saved_hmi_level != mobile_apis::HMILevel::HMI_NONE)){
         return false;
       }
 
