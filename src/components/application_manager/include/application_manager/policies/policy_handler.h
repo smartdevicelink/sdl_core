@@ -66,7 +66,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   bool InitPolicyTable();
   bool RevertPolicyTable();
   bool SendMessageToSDK(const BinaryMessage& pt_string);
-  bool ReceiveMessageFromSDK(const BinaryMessage& pt_string);
+  bool ReceiveMessageFromSDK(const std::string& file,
+                             const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
   void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,

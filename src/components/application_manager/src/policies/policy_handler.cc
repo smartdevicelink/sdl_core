@@ -431,7 +431,8 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   return true;
 }
 
-bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
+bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
+                                          const BinaryMessage& pt_string) {
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
@@ -439,7 +440,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const BinaryMessage& pt_string) {
 
   is_exchange_in_progress_ = false;
 
-  bool ret = policy_manager_->LoadPT(pt_string);
+  bool ret = policy_manager_->LoadPT(file, pt_string);
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
