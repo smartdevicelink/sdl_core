@@ -396,15 +396,6 @@ class Profile : public utils::Singleton<Profile> {
                        const char* const pSection,
                        const char* const pKey) const;
 
-    /**
-     * @brief Write to log content of container
-     * @param array Source array
-     * @param log Log string
-     */
-    void LogContainer(const std::vector<std::string>& container,
-                      std::string* log);
-
-
     // Members section
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
