@@ -38,6 +38,17 @@
 #include "rpc_base/rpc_base.h"
 
 namespace rpc {
+
+// static
+inline PrimitiveType::ValueState PrimitiveType::InitHelper(bool is_next) {
+  return is_next ? kValid : kUninitialized;
+}
+
+// static
+inline CompositeType::InitializationState CompositeType::InitHelper(bool is_next) {
+  return is_next ? kInitialized : kUninitialized;
+}
+
 namespace impl {
 
 
@@ -243,13 +254,6 @@ struct DbusSignatureHelper<Map<T, minsize, maxsize> > {
 };
 
 template<typename T>
-struct DbusSignatureHelper<Mandatory<T> > {
-  static void DbusSignature(std::string* signature) {
-    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
-  }
-};
-
-template<typename T>
 struct DbusSignatureHelper<Optional<T> > {
   static void DbusSignature(std::string* signature) {
     (*signature) += DBUS_STRUCT_BEGIN_CHAR;
@@ -279,48 +283,49 @@ void DbusSignature(std::string* signature) {
 
 // Type constructors
 inline Boolean::Boolean(dbus::MessageReader* reader)
-  : PrimitiveType(true, reader->NextIsBool()),
+  : PrimitiveType(InitHelper(reader->NextIsBool())),
     value_(reader->TakeBool()) {
 }
 
 template<typename T, T minval, T maxval>
 inline Integer<T, minval, maxval>::Integer(dbus::MessageReader* reader)
-    : PrimitiveType(true, impl::NextIs<IntType>(*reader)),
+    : PrimitiveType(InitHelper(impl::NextIs<IntType>(*reader))),
       value_(impl::Take<IntType>(reader)) {
-  if (valid_) {
-    valid_ = range_.Includes(value_);
+  if (is_valid()) {
+    value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   }
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 inline Float<minnum, maxnum, minden, maxden>::Float(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIsDouble()),
+    : PrimitiveType(InitHelper(reader->NextIsDouble())),
       value_(reader->TakeDouble()) {
-  if (valid_) {
-    valid_ = range_.Includes(value_);
+  if (is_valid()) {
+    value_state_ = range_.Includes(value_) ? kValid : kInvalid;
   }
 }
 
 template<size_t minlen, size_t maxlen>
 inline String<minlen, maxlen>::String(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIsString()),
+    : PrimitiveType(InitHelper(reader->NextIsString())),
       value_(reader->TakeString()) {
-  if (valid_) {
-    valid_ = length_range_.Includes(value_.length());
+  if (is_valid()) {
+    value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
 }
 
 template<typename T>
 inline Enum<T>::Enum(dbus::MessageReader* reader)
-    : PrimitiveType(true, reader->NextIsInt32()),
+    : PrimitiveType(InitHelper(reader->NextIsInt32())),
       value_(EnumType(reader->TakeInt32())) {
-  if (valid_) {
-    valid_ = IsValidEnum(value_);
+  if (is_valid()) {
+    value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   }
 }
 
 template<typename T, size_t minsize, size_t maxsize>
-inline Array<T, minsize, maxsize>::Array(dbus::MessageReader* reader) {
+inline Array<T, minsize, maxsize>::Array(dbus::MessageReader* reader)
+    : CompositeType(InitHelper(reader->NextIsArray())) {
   dbus::MessageReader array_reader = reader->TakeArrayReader();
   if (array_reader.has_failed()) {
     push_back(T());
@@ -332,7 +337,8 @@ inline Array<T, minsize, maxsize>::Array(dbus::MessageReader* reader) {
 }
 
 template<typename T, size_t minsize, size_t maxsize>
-inline Map<T, minsize, maxsize>::Map(dbus::MessageReader* reader) {
+inline Map<T, minsize, maxsize>::Map(dbus::MessageReader* reader)
+    : CompositeType(InitHelper(reader->NextIsStruct())) {
   // Map key-value pairs are serialized into array
   dbus::MessageReader array_reader = reader->TakeArrayReader();
   if (array_reader.has_failed()) {

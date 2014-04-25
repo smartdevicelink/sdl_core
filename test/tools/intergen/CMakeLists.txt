@@ -1,10 +1,10 @@
 include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
 
-if (${HMI_DBUS_API})
-  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface DBUS_SUPPORT)
-else()
-  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
-endif()
+#if (${HMI_DBUS_API})
+#  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface DBUS_SUPPORT)
+#else()
+#  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
+#endif()
 
 set (TEST_HMI_INTERFACES
   common
@@ -17,11 +17,11 @@ set (TEST_HMI_INTERFACES
   vr
 )
 
-if (${HMI_DBUS_API})
-  GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS DBUS_SUPPORT)
-else()
-  GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
-endif()
+#if (${HMI_DBUS_API})
+#  GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS DBUS_SUPPORT)
+#else()
+#  GenerateInterfaceLibrary("test_hmi_interafce.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
+#endif()
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
@@ -43,16 +43,17 @@ set (SOURCES
   src/generated_interface_json_tests.cc
 )
 
-if (${HMI_DBUS_API})
-  # Build dbus tests
-  find_package(DBus)
-  include_directories(
-      ${CMAKE_SOURCE_DIR}/src/components/dbus/include
-      ${DBUS_INCLUDE_DIRS}
-  )
-  set (LIBRARIES ${LIBRARIES} DBus)
-  set (SOURCES ${SOURCES} src/generated_interface_dbus_tests.cc)
-endif ()
+# TODO(KKolodiy): tests for dbus are disabled temporarily
+#if (${HMI_DBUS_API})
+#  # Build dbus tests
+#  find_package(DBus)
+#  include_directories(
+#      ${CMAKE_SOURCE_DIR}/src/components/dbus/include
+#      ${DBUS_INCLUDE_DIRS}
+#  )
+#  set (LIBRARIES ${LIBRARIES} DBus)
+#  set (SOURCES ${SOURCES} src/generated_interface_dbus_tests.cc)
+#endif ()
 
 
-create_test(test_generated_interface "${SOURCES}" "${LIBRARIES}")
+#create_test(test_generated_interface "${SOURCES}" "${LIBRARIES}")
