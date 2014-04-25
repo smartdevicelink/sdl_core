@@ -633,7 +633,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-	AMMetricObserver* metric_observer_;
+    AMMetricObserver* metric_observer_;
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

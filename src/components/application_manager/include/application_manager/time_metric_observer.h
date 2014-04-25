@@ -50,9 +50,9 @@ class AMMetricObserver {
     TimevalStruct end;
     utils::SharedPtr<smart_objects::SmartObject> message;
   };
-  typedef utils::SharedPtr<MessageMetric> MessageMetricPtr;
+  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
 
-  virtual void OnMessage(MessageMetricPtr) = 0;
+  virtual void OnMessage(MessageMetricSharedPtr) = 0;
   virtual ~AMMetricObserver(){}
 };
 }  // application_manager

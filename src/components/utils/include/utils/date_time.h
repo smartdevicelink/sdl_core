@@ -46,15 +46,15 @@ class DateTime {
 
     static TimevalStruct getCurrentTime();
 
-    // return MICROSECONDS count
-    static int64_t getmSecs(const TimevalStruct& time);
     // return MILLISECONDS count
+    static int64_t getmSecs(const TimevalStruct& time);
+    // return MICROSECONDS count
     static int64_t getuSecs(const TimevalStruct& time);
 
-    // return MICROSECONDS count between sinceTime value and current time
+    // return MILLISECONDS count between sinceTime value and current time
     static int64_t calculateTimeSpan(const TimevalStruct& sinceTime);
 
-    // return MICROSECONDS count between time1 and time2
+    // return MILLISECONDS count between time1 and time2
     static int64_t calculateTimeDiff(const TimevalStruct& time1,
                                      const TimevalStruct& time2);
 };

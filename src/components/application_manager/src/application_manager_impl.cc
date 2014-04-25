@@ -1471,7 +1471,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-  AMMetricObserver::MessageMetricPtr metric(new AMMetricObserver::MessageMetric());
+  AMMetricObserver::MessageMetricSharedPtr metric(new AMMetricObserver::MessageMetric());
   metric->begin = date_time::DateTime::getCurrentTime();
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
     new smart_objects::SmartObject);

@@ -41,14 +41,14 @@ namespace time_tester {
 class TimeManager;
 
 class ProtocolHandlerObserver: public protocol_handler::PHMetricObserver {
-public:
+ public:
   explicit ProtocolHandlerObserver(TimeManager* time_manager);
 
   virtual void StartMessageProcess(uint32_t message_id);
 
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 
-private:
+ private:
   TimeManager* time_manager_;
   std::map<uint32_t, TimevalStruct> time_starts;
 };
