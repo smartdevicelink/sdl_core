@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,8 @@ namespace time_tester {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
 
-TimeManager::TimeManager():socket_fd_(0),
+TimeManager::TimeManager():
+  socket_fd_(0),
   messages_(),
   thread_(NULL),
   app_observer(this),

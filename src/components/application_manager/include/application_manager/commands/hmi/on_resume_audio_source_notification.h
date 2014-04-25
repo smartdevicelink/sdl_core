@@ -30,30 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_
 
+#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include "application_manager/application_impl.h"
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "json/json.h"
-#include "utils/shared_ptr.h"
-#include "utils/date_time.h"
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
-class AMMetricObserver {
- public:
-  struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
-    utils::SharedPtr<smart_objects::SmartObject> message;
-  };
-  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
+namespace commands {
 
-  virtual void OnMessage(MessageMetricSharedPtr) = 0;
-  virtual ~AMMetricObserver(){}
+/**
+ * @brief OnResumeAudioSourceNotification command class
+ **/
+class OnResumeAudioSourceNotification : public NotificationToHMI {
+ public:
+  /**
+   * @brief OnResumeAudioSourceNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnResumeAudioSourceNotification(const MessageSharedPtr& message);
+
+  /**
+   * @brief OnResumeAudioSourceNotification class destructor
+   **/
+  virtual ~OnResumeAudioSourceNotification();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+
+  DISALLOW_COPY_AND_ASSIGN(OnResumeAudioSourceNotification);
 };
-}  // application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_

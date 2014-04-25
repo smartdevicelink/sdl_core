@@ -40,7 +40,6 @@
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
-
 #include "metric.h"
 #include "application_manager_observer.h"
 #include "application_manager/application_manager_impl.h"
@@ -87,7 +86,6 @@ class TimeManager {
     volatile bool stop_flag_;
     DISALLOW_COPY_AND_ASSIGN(Streamer);
   };
-
   DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
 }  // namespace time_manager

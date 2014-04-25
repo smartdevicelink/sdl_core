@@ -30,30 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_TIME_METRIC_OBSERVER_H_
+#include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
+#include "interfaces/MOBILE_API.h"
 
-
-#include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
-#include "json/json.h"
-#include "utils/shared_ptr.h"
-#include "utils/date_time.h"
-
-namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
-class AMMetricObserver {
- public:
-  struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
-    utils::SharedPtr<smart_objects::SmartObject> message;
-  };
-  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
+namespace commands {
 
-  virtual void OnMessage(MessageMetricSharedPtr) = 0;
-  virtual ~AMMetricObserver(){}
-};
-}  // application_manager
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_
+OnResumeAudioSourceNotification::OnResumeAudioSourceNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
+}
+
+OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {
+}
+
+void OnResumeAudioSourceNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnResumeAudioSourceNotification::Run");
+  SendNotification();
+}
+
+}  // namespace commands
+
+}  // namespace application_manager
+

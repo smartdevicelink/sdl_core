@@ -44,14 +44,13 @@ namespace components  {
 namespace utils  {
   TEST(DateTimeTest, GetCurrentTime) {
     const TimevalStruct time1 = date_time::DateTime::getCurrentTime();
-    ASSERT_NE(time1.tv_sec,  0);
-    ASSERT_NE(time1.tv_usec, 0);
+    ASSERT_NE(0, time1.tv_sec);
+    ASSERT_GE(time1.tv_usec, 0);
 
     const TimevalStruct time2 = date_time::DateTime::getCurrentTime();
-    ASSERT_NE(time2.tv_sec,  0);
-    ASSERT_NE(time2.tv_usec, 0);
+    ASSERT_NE(0, time2.tv_sec);
+    ASSERT_GE(time2.tv_usec, 0);
     ASSERT_GE(time2.tv_sec,  time1.tv_sec);
-    ASSERT_GE(time2.tv_usec, time2.tv_usec);
   }
 
   TEST(DateTimeTest, GetmSecs) {
@@ -100,18 +99,26 @@ namespace utils  {
     time2.tv_sec  = 3;
     time2.tv_usec = 4 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
 
+    //time2 to time1
     TimevalStruct diff1;
     diff1.tv_sec  = time2.tv_sec  - time1.tv_sec;
     diff1.tv_usec = time2.tv_usec - time1.tv_usec;
 
-    ASSERT_EQ(date_time::DateTime::getmSecs(diff1),
+    const int64_t mSecDiff = static_cast<int64_t>(diff1.tv_sec) * 1000
+        + diff1.tv_usec / 1000;
+
+    ASSERT_EQ(mSecDiff,
               date_time::DateTime::calculateTimeDiff(time2, time1));
 
+    //time1 to time2
     TimevalStruct diff2;
     diff2.tv_sec  = time1.tv_sec  - time2.tv_sec;
     diff2.tv_usec = time1.tv_usec - time2.tv_usec;
 
-    ASSERT_EQ(date_time::DateTime::getmSecs(diff2),
+    const int64_t mSecDiff2 = static_cast<int64_t>(diff2.tv_sec) * 1000
+        + diff2.tv_usec / 1000;
+
+    ASSERT_EQ(mSecDiff2,
               date_time::DateTime::calculateTimeDiff(time1, time2));
   }
 }  // namespace utils

@@ -64,6 +64,7 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
 #include "application_manager/commands/hmi/on_put_file_notification.h"
+#include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
 #include "application_manager/commands/hmi/get_system_info_request.h"
@@ -1950,6 +1951,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnPutFile: {
       command.reset(new commands::OnPutFileNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnResumeAudioSource: {
+      command.reset(new commands::OnResumeAudioSourceNotification(message));
       break;
     }
     case hmi_apis::FunctionID::UI_SetDisplayLayout: {

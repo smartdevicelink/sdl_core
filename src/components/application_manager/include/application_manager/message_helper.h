@@ -233,6 +233,7 @@ class MessageHelper {
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
     static void SendActivateAppToHMI(uint32_t const app_id);
+    static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
     static void GetDeviceInfoForApp(uint32_t connection_key,

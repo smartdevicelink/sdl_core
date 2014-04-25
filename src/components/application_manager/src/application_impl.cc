@@ -389,13 +389,12 @@ void ApplicationImpl::CleanupFiles() {
 
     for (std::vector<std::string>::const_iterator it = files.begin();
          it != files.end(); ++it) {
-      app_files_it = app_files_.find(*it);
-
+      std::string file_name = directory_name;
+      file_name += "/";
+      file_name += *it;
+      app_files_it = app_files_.find(file_name);
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
-          std::string file_name = directory_name;
-          file_name += "/";
-          file_name += *it;
           file_system::DeleteFile(file_name);
       }
     }

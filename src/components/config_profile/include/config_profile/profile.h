@@ -73,6 +73,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& app_storage_folder() const;
 
     /**
+     * @brief Return application resourse folder
+     */
+    const std::string& app_resourse_folder() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -380,6 +385,11 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& tts_delimiter() const;
 
+    /**
+     * @brief Returns recording file name
+     */
+    const std::string& recording_file() const;
+
   private:
     /**
      * Default constructor
@@ -461,6 +471,7 @@ class Profile : public utils::Singleton<Profile> {
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
+    std::string                     app_resourse_folder_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
@@ -504,6 +515,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+    std::string                     recording_file_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

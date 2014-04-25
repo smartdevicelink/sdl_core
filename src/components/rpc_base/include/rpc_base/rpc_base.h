@@ -93,7 +93,8 @@ class PrimitiveType {
     kInvalid,
     kValid
   };
-  PrimitiveType(ValueState value_state);
+  explicit PrimitiveType(ValueState value_state);
+  static ValueState InitHelper(bool is_next);
   static ValueState InitHelper(const Json::Value* value,
                                bool (Json::Value::*type_check)() const);
  protected:
@@ -113,7 +114,8 @@ class CompositeType {
     kInitialized,
     kInvalidInitialized
   };
-  CompositeType(InitializationState init_state);
+  explicit CompositeType(InitializationState init_state);
+  static InitializationState InitHelper(bool is_next);
   static InitializationState InitHelper(const Json::Value* value,
                                bool (Json::Value::*type_check)() const);
  protected:

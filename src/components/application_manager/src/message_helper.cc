@@ -1173,9 +1173,6 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
     smart_objects::SmartObject* message = new smart_objects::SmartObject(
         smart_objects::SmartType_Map);
-    if (!message) {
-        return;
-    }
 
     application_manager::ApplicationConstSharedPtr app =
         application_manager::ApplicationManagerImpl::instance()
@@ -1201,6 +1198,29 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
     }
 
     ApplicationManagerImpl::instance()->ManageHMICommand(message);
+}
+
+void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
+  LOG4CXX_WARN(logger_, "SendOnResumeAudioSourceToHMI app_id: " << app_id);
+
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  application_manager::ApplicationConstSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()
+      ->application(app_id);
+  if (!app.valid()) {
+      LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
+      return;
+  }
+
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnResumeAudioSource;
+  (*message)[strings::params][strings::message_type] = MessageType::kNotification;
+  (*message)[strings::params][strings::correlation_id] =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  (*message)[strings::msg_params][strings::app_id] = app_id;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
 void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
@@ -2020,15 +2040,6 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
         return mobile_apis::Result::INVALID_DATA;
     }
 
-    const HMICapabilities& hmi_capabilities = ApplicationManagerImpl::instance()
-            ->hmi_capabilities();
-    mobile_apis::ImageType::eType image_type =
-        static_cast<mobile_apis::ImageType::eType>(image[strings::image_type]
-                .asInt());
-    if (!hmi_capabilities.VerifyImageType(image_type)) {
-        return mobile_apis::Result::UNSUPPORTED_RESOURCE;
-    }
-
     image[strings::value] = full_file_path;
 
     return mobile_apis::Result::SUCCESS;
@@ -2074,7 +2085,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
     smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
                 smart_objects::SmartType_Array);
-    bool flag_unsuported_resource = false;
 
     int32_t j = 0;
     for (int32_t i = 0; i < request_soft_buttons.length(); ++i) {
@@ -2087,15 +2097,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
             if (request_soft_buttons[i].keyExists(strings::image)) {
                 mobile_apis::Result::eType verification_result = VerifyImage(
                             request_soft_buttons[i][strings::image], app);
-
                 if (mobile_apis::Result::SUCCESS != verification_result) {
-                    if (mobile_apis::Result::UNSUPPORTED_RESOURCE
-                            == verification_result) {
-                        request_soft_buttons[i].erase(strings::image);
-                        flag_unsuported_resource = true;
-                    } else {
-                        return mobile_apis::Result::INVALID_DATA;
-                    }
+                  return mobile_apis::Result::INVALID_DATA;
                 }
             } else {
                 return mobile_apis::Result::INVALID_DATA;
@@ -2132,13 +2135,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
                             request_soft_buttons[i][strings::image], app);
 
                 if (mobile_apis::Result::SUCCESS != verification_result) {
-                    if (mobile_apis::Result::UNSUPPORTED_RESOURCE
-                            == verification_result) {
-                        request_soft_buttons[i].erase(strings::image);
-                        flag_unsuported_resource = true;
-                    } else {
-                        return mobile_apis::Result::INVALID_DATA;
-                    }
+                  return mobile_apis::Result::INVALID_DATA;
+
                 }
             }
             break;
@@ -2150,12 +2148,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         }
 
         soft_buttons[j] = request_soft_buttons[i];
-
-        if (!soft_buttons[j].keyExists(strings::system_action)) {
-            soft_buttons[j][strings::system_action] =
-                mobile_apis::SystemAction::DEFAULT_ACTION;
-        }
-
         ++j;
     }
 
@@ -2164,11 +2156,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     if (0 == request_soft_buttons.length()) {
         message_params.erase(strings::soft_buttons);
     }
-    if (flag_unsuported_resource) {
-        return mobile_apis::Result::UNSUPPORTED_RESOURCE;
-    } else {
-        return mobile_apis::Result::SUCCESS;
-    }
+    return mobile_apis::Result::SUCCESS;
 }
 
 // TODO(AK): change printf to logger

@@ -545,7 +545,7 @@ TEST(ValidatedTypes, TestMapDbusSignature) {
 
 TEST(ValidatedTypes, TestMandatoryEnumDbusSignature) {
   std::string sign;
-  DbusSignature< Mandatory<Enum<TestEnum> > >(&sign);
+  DbusSignature< Enum<TestEnum> >(&sign);
   ASSERT_EQ(sign, "i");
 }
 

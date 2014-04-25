@@ -340,6 +340,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
 ./src/commands/hmi/on_put_file_notification.cc
+./src/commands/hmi/on_resume_audio_source_notification.cc
 ./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
