@@ -1702,20 +1702,19 @@ void ApplicationManagerImpl::UnregisterApplication(
       break;
     }
   }
-
   ApplicationSharedPtr app_to_remove;
-  // VSlobodyanik: Maybe dead lock, if not installed braces
   {
     sync_primitives::AutoLock lock(applications_list_lock_);
 
-    std::set<ApplicationSharedPtr>::const_iterator it =
-        application_list_.begin();
+    std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
     for (;it != application_list_.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
       }
     }
-  }
+    application_list_.erase(app_to_remove);
+ }
+
   if (!app_to_remove) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
@@ -1731,9 +1730,8 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-
   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
-  application_list_.erase(app_to_remove);
+
   request_ctrl_.terminateAppRequests(app_id);
 
   return;

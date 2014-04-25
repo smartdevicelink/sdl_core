@@ -79,7 +79,11 @@ ApplicationImpl::~ApplicationImpl() {
 
   subscribed_buttons_.clear();
   subscribed_vehicle_info_.clear();
-
+  if (is_perform_interaction_active()) {
+    set_perform_interaction_active(0);
+    set_perform_interaction_mode(-1);
+    DeletePerformInteractionChoiceSetMap();
+  }
   CleanupFiles();
 }
 
