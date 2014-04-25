@@ -57,5 +57,9 @@ TransportAdapter::Error MmeTransportAdapter::Init() {
   return error;
 }
 
+bool MmeTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
+  return true;
+}
+
 }  // namespace transport_adapter
 }  // namespace transport_manager

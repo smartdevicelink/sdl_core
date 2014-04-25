@@ -352,6 +352,7 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
     if (size != -1) {
       LOG4CXX_DEBUG(logger_, "Received " << size << " bytes from " << MmeDeviceScanner::event_mq_name);
       char code = buffer_[0];
+      LOG4CXX_DEBUG(logger_, "code = " << (int) code);
       switch (code) {
 #define SDL_MSG_IPOD_DEVICE_CONNECT 0x1A
         case SDL_MSG_IPOD_DEVICE_CONNECT: {

@@ -73,10 +73,6 @@ if (BUILD_MME_SUPPORT)
     src/mme/iap_connection.cc
     src/mme/iap2_connection.cc
   )
-  add_definitions(-DMME_SUPPORT)
-  if (MME_MQ)
-    add_definitions(-DMME_MQ)
-  endif(MME_MQ)
 endif(BUILD_MME_SUPPORT)
 
 add_library("TransportManager" ${SOURCES})
@@ -90,7 +86,9 @@ endif(BUILD_USB_SUPPORT)
 if (BUILD_MME_SUPPORT)
   target_link_libraries ("TransportManager" ipod)
   target_link_libraries ("TransportManager" iap2client)
-  target_link_libraries ("TransportManager" mme)
+  if(NOT MME_MQ)
+    target_link_libraries ("TransportManager" mme)
+  endif()
   target_link_libraries ("TransportManager" qdb)
 endif(BUILD_MME_SUPPORT)
 
