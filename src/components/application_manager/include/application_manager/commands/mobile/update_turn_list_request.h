@@ -80,9 +80,6 @@ class UpdateTurnListRequest : public CommandRequestImpl {
    */
   bool CheckTurnListArray();
 
-  // members
-  mobile_apis::Result::eType  result_;
-
   DISALLOW_COPY_AND_ASSIGN(UpdateTurnListRequest);
 };
 

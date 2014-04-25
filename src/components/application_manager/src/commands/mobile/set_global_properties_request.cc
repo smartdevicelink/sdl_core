@@ -308,9 +308,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
           && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
               hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+          || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
               && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
               && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
     mobile_apis::Result::eType result_code;

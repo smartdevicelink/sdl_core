@@ -111,8 +111,7 @@ void PerformInteractionRequest::Run() {
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
-  if ((mobile_apis::Result::SUCCESS != verification_result) &&
-      (mobile_apis::Result::UNSUPPORTED_RESOURCE != verification_result)) {
+  if (mobile_apis::Result::SUCCESS != verification_result) {
     LOG4CXX_ERROR_EXT(
         logger_,
         "MessageHelper::VerifyImageFiles return " << verification_result);
@@ -386,8 +385,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   bool result = false;
   int32_t hmi_response_code =
       message[strings::params][hmi_response::code].asInt();
-  if (hmi_apis::Common_Result::SUCCESS ==
-      hmi_apis::Common_Result::eType(hmi_response_code)) {
+  if ((hmi_apis::Common_Result::SUCCESS ==
+      static_cast<hmi_apis::Common_Result::eType>(hmi_response_code)) ||
+      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+          static_cast<hmi_apis::Common_Result::eType>(hmi_response_code))) {
     if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     } else {

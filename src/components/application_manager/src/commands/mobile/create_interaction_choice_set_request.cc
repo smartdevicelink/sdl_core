@@ -67,17 +67,10 @@ void CreateInteractionChoiceSetRequest::Run() {
   mobile_apis::Result::eType verification_result =
       MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
 
-  mobile_apis::Result::eType  result_ = mobile_apis::Result::SUCCESS;
   if (mobile_apis::Result::SUCCESS != verification_result) {
-    if (mobile_apis::Result::INVALID_DATA == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
-      SendResponse(false, verification_result);
-      return;
-    }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
-      result_ = verification_result;
-    }
+    LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+    SendResponse(false, verification_result);
+    return;
   }
 
   const int32_t choice_set_id = (*message_)[strings::msg_params]
@@ -98,7 +91,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
   SendVRAddCommandRequest(app);
-  SendResponse(true, result_);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
   app->UpdateHash();
 }
 

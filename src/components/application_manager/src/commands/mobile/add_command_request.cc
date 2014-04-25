@@ -345,8 +345,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
                      (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
                      ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_)) ||
-                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
+                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_ ||
+                      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_)) ||
+                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+                         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_ ) &&
                      (hmi_apis::Common_Result::SUCCESS == vr_result_));
 
       if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
