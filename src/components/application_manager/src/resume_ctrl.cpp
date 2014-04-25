@@ -121,6 +121,9 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
         restored_hmi_level = app_mngr_->PutApplicationInFull(application);
       } else if (saved_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
         restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
+        if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
+          MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+        }
       } else {
         restored_hmi_level = saved_hmi_level;
       }
@@ -546,7 +549,7 @@ void ResumeCtrl::onTimer() {
         ApplicationManagerImpl::instance()->application((*it).first);
     if (!app.get()) {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << (*it).first);
-      break;
+      continue;
     }
 
     RestoreApplicationHMILevel(app);

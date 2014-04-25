@@ -35,14 +35,13 @@
 
 
 #include <string>
-#include "log4cxx/logger.h"
 
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
-
+#include "utils/logger.h"
 #include "metric.h"
 #include "application_manager_observer.h"
 #include "application_manager/application_manager_impl.h"
