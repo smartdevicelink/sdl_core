@@ -600,6 +600,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             Logger.d(CLASS_NAME + " Asked to send heartbeat");
             final ProtocolFrameHeader heartbeat =
                     ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
+            heartbeat.setSessionID(getSessionId());
             final byte[] bytes = heartbeat.assembleHeaderBytes();
             onProtocolMessageBytesToSend(bytes, 0, bytes.length);
         }
@@ -620,6 +621,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             final ProtocolFrameHeader heartbeat =
                     ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
                             _protocol.getProtocolVersion());
+            heartbeat.setSessionID(getSessionId());
             final byte[] bytes = heartbeat.assembleHeaderBytes();
             onProtocolMessageBytesToSend(bytes, 0, bytes.length);
         }
