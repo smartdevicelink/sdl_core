@@ -390,6 +390,8 @@ class Application : public virtual InitialApplicationData,
     virtual bool has_been_activated() const = 0;
 
     virtual const Version& version() const = 0;
+    virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;
+    virtual uint32_t hmi_app_id() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
     virtual const std::string folder_name() const = 0;

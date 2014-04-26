@@ -45,6 +45,9 @@ ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message)
     (*message)[strings::msg_params][strings::info] =
         (*message)[strings::params][hmi_response::message];
   }
+
+  // Replace HMI app id with Mobile connection id
+  ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*(message.get()));
 }
 
 ResponseFromHMI::~ResponseFromHMI() {

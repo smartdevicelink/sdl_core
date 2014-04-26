@@ -39,8 +39,10 @@ namespace time_tester {
 std::string ProtocolHandlerMectic::GetStyledString() {
   Json::Value result;
   result[strings::logger] = "ProtocolHandler";
-  result[strings::begin]  = date_time::DateTime::getuSecs(message_metric->begin);
-  result[strings::end]    = date_time::DateTime::getuSecs(message_metric->end);
+  result[strings::begin] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
+  result[strings::end] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
   result[strings::message_id] = message_metric->message_id;
   result[strings::connection_key] = message_metric->connection_key;
   return result.toStyledString();

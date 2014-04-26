@@ -130,6 +130,10 @@ const Version& ApplicationImpl::version() const {
   return version_;
 }
 
+void ApplicationImpl::set_hmi_application_id(uint32_t hmi_app_id) {
+  hmi_app_id_ = hmi_app_id;
+}
+
 const std::string& ApplicationImpl::name() const {
   return app_name_;
 }

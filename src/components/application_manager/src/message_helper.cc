@@ -1223,6 +1223,16 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
+std::string MessageHelper::GetDeviceMacAddressForHandle(
+    const uint32_t device_handle) {
+
+  std::string device_mac_address = "";
+  connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
+      device_handle, NULL, NULL, &device_mac_address);
+
+  return device_mac_address;
+}
+
 void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
         policy::DeviceParams* device_info) {
     if (!device_info) {
