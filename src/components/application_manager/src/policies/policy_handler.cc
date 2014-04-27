@@ -70,12 +70,7 @@ PolicyHandler::~PolicyHandler() {
 }
 
 PolicyManager* PolicyHandler::LoadPolicyLibrary() {
-  return LoadPolicyLibrary("./");
-}
-
-PolicyManager* PolicyHandler::LoadPolicyLibrary(const std::string& path) {
-  std::string filename = path + kLibrary;
-  dl_handle_ = dlopen(filename.c_str(), RTLD_LAZY);
+  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
   char* error_string = dlerror();
   if (error_string == NULL) {

@@ -59,7 +59,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
  public:
   virtual ~PolicyHandler();
   PolicyManager* LoadPolicyLibrary();
-  PolicyManager* LoadPolicyLibrary(const std::string& path);
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
