@@ -637,7 +637,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
         _isHeartbeatTimedout = true;
-        closeConnection((byte) 0, true, true);
+        closeConnection((byte) 0, false, true);
         mConnectionListener.onHeartbeatTimedOut();
     }
 
