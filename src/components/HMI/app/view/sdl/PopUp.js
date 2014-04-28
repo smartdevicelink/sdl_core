@@ -49,6 +49,8 @@ SDL.PopUp = Em.ContainerView.create({
         'this.active:active_state:inactive_state'
     ],
 
+    popUpId: 0,
+
     /**
      * Callback function to return result of made action by user
      */
@@ -95,7 +97,7 @@ SDL.PopUp = Em.ContainerView.create({
     deactivate: function(event) {
         this.set('active', false);
 
-        if (this.callback) {
+        if (this.callback && event) {
             this.callback(event.buttonAction);
         }
 
@@ -112,11 +114,13 @@ SDL.PopUp = Em.ContainerView.create({
         } else {
             this.set('buttons', true);
             setTimeout(function(){
-                SDL.PopUp.deactivate()
+                SDL.PopUp.deactivate();
             },
             3000);
         }
 
         this.set('content', message);
+
+        return ++this.popUpId;
     }
 });

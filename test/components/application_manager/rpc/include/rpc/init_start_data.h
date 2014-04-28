@@ -54,6 +54,7 @@ namespace am = application_manager;
 namespace smart = NsSmartDeviceLink::NsSmartObjects;
 namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
 
+namespace test {
 /**
  * @brief Initialize TransportManager, ProtocolHandlerImpl, ConnectionHandlerImpl
  * ApplicationManagerImpl, MessageBrokerAdapter
@@ -64,5 +65,12 @@ void InitStartData();
  * @brief Registration application
  */
 void RegApp();
+
+/**
+ * @brief Activate application
+ */
+void ActivateApp();
+
+}  // namespace test
 
 #endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_START_DATA_H_

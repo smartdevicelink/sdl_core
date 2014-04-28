@@ -34,6 +34,8 @@
  */
 
 #include "connection_handler/device.h"
+#include "encryption/hashing.h"
+#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -41,31 +43,29 @@
  */
 namespace connection_handler {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr Device::logger_ = log4cxx::LoggerPtr(
-                                       log4cxx::Logger::getLogger("ConnectionHandler"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 Device::Device(DeviceHandle device_handle,
                const std::string& user_friendly_name,
                const std::string& mac_address)
-  : device_handle_(device_handle),
-    user_friendly_name_(user_friendly_name),
-    mac_address_(mac_address) {
+    : device_handle_(device_handle),
+      user_friendly_name_(user_friendly_name),
+      mac_address_(mac_address) {
+    mac_address_ = encryption::MakeHash(mac_address);
 }
 
 Device::~Device() {
 }
 
 DeviceHandle Device::device_handle() const {
-  return device_handle_;
+    return device_handle_;
 }
 
 std::string Device::user_friendly_name() const {
-  return user_friendly_name_;
+    return user_friendly_name_;
 }
 
 std::string Device::mac_address() const {
-  return mac_address_;
+    return mac_address_;
 }
 }/* namespace connection_handler */

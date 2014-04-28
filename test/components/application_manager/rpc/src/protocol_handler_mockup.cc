@@ -128,7 +128,9 @@ namespace test {
     (*message_to_app).set_connection_key(
         (*request_)[jsn::S_PARAMS][am::strings::connection_key].asInt());
     (*message_to_app).set_message_type(application_manager::kRequest);
-
+    (*message_to_app).set_protocol_version(
+        static_cast<application_manager::ProtocolVersion>
+            ((*request_)[jsn::S_PARAMS][am::strings::protocol_version].asInt()));
     NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonSDLRPCv2::
         toString((*request_), str);
 

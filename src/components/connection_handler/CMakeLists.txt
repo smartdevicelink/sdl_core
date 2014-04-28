@@ -4,6 +4,7 @@ include_directories (
   ../protocol_handler/include/
   ../config_profile/include/
   ../utils/include/
+  ../../thirdPartyLibs/encryption/include
 )
 
 set (SOURCES

@@ -336,18 +336,14 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
 
             this.updateSoftButtons(params.softButtons);
 
-            // Magic number is a count of Preset Buttons on HMI = 6
-            if (params.customPresets) {
-                for (var i = 0; i < 8; i++) {
-                    if (params.customPresets[i] != '' || params.customPresets[i] != null) {
-                        this.appInfo.set('customPresets.' + i, params.customPresets[i]);
-                    } else {
-                        this.appInfo.set('customPresets.' + i, 'Preset' + i);
-                    }
+            // Magic number is a count of Preset Buttons on HMI = 8
+            for (var i = 0; i < 8; i++) {
+                if (!params.customPresets || (params.customPresets[i] == '' || params.customPresets[i] == null)) {
+                    this.appInfo.set('customPresets.' + i, 'PRESET_' + i);
+                } else {
+                    this.appInfo.set('customPresets.' + i, params.customPresets[i]);
                 }
-                this.set('mediaPreset', true);
-            } else {
-                this.set('mediaPreset', false);
             }
+            this.set('mediaPreset', true);
         }
     });

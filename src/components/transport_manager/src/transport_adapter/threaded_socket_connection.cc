@@ -38,12 +38,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 ThreadedSocketConnection::ThreadedSocketConnection(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,

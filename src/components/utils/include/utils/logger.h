@@ -1,9 +1,5 @@
 /**
- * \file LOG4CXXLogger.hpp
- * \brief Definitions required by logger.
- * Stores device information
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,17 +29,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
 
-#ifndef LOG4CXXLOGGER_HPP_
+#ifdef ENABLE_LOG
   #include <errno.h>
   #include <string.h>
   #include <log4cxx/logger.h>
   #include <log4cxx/propertyconfigurator.h>
+#endif // ENABLE_LOG
 
-namespace log4cxx
-{
-
+namespace log4cxx {
 #ifdef ENABLE_LOG
+    #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
+      namespace { \
+        CREATE_LOGGERPTR_LOCAL(logger_var, logger_name); \
+      }
+
+    #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
+      log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
+
+    #define INIT_LOGGER(file_name) \
+      log4cxx::PropertyConfigurator::configure(file_name);
+
+    // without this line log4cxx threads continue using some instances destroyed by exit()
+    #define DEINIT_LOGGER() \
+      log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -68,7 +80,17 @@ namespace log4cxx
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
-#else
+
+#else // ENABLE_LOG is OFF
+
+    #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
+
+    #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+
+    #define INIT_LOGGER(file_name)
+
+    #define DEINIT_LOGGER(file_name)
+
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_INFO
@@ -112,11 +134,7 @@ namespace log4cxx
 
     #define LOG4CXX_TRACE_ENTER(logger)
     #define LOG4CXX_TRACE_EXIT(logger)
-
 #endif // ENABLE_LOG
-}
 
-#define LOG4CXXLOGGER_HPP_
-
-
-#endif /* LOG4CXXLOGGER_HPP_ */
+}  // namespace log4cxx
+#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_

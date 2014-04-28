@@ -72,6 +72,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& app_storage_folder() const;
 
     /**
+     * @brief Return application resourse folder
+     */
+    const std::string& app_resourse_folder() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -100,6 +105,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns port for audio streaming
       */
     const uint16_t& audio_streaming_port() const;
+
+    /**
+      * @brief Returns port for time reports
+      */
+    const uint16_t& time_testing_port() const;
 
     /**
      * @brief Returns policies file name
@@ -290,16 +300,18 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint16_t transport_manager_tcp_adapter_port() const;
 
-    // Members section
+    /**
+     * @brief Returns delimiter for SDL-generated TTS chunks
+     * @return TTS delimiter
+     */
+    const std::string& tts_delimiter() const;
 
-  protected:
-    // Methods section
-
-    // Members section
+    /**
+     * @brief Returns recording file name
+     */
+    const std::string& recording_file() const;
 
   private:
-    // Methods section
-
     /**
      * Default constructor
      *
@@ -359,7 +371,7 @@ class Profile : public utils::Singleton<Profile> {
                          const char* const pKey) const;
 
     /**
-     * @brief Reads an int32_t value from the profile
+     * @brief Reads an uint16/32/64_t value from the profile
      *
      * @param value         Result value
      * @param default_value Value to use key wasn't found
@@ -367,22 +379,34 @@ class Profile : public utils::Singleton<Profile> {
      * @param pKey          The key whose value needs to be read out
      *
      * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
+     * (then the value is changed to default)
      */
-    bool ReadIntValue(int32_t* value,
-                      int32_t  default_value,
-                      const char* const pSection,
-                      const char* const pKey) const;
+    bool ReadUIntValue(uint16_t* value,
+                       uint16_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint32_t* value,
+                       uint32_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint64_t* value,
+                       uint64_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
 
     // Members section
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
+    std::string                     app_resourse_folder_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
+    uint16_t                        time_testing_port_;
     std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;
@@ -411,7 +435,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        delete_file_in_none_;
     uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
-    int32_t                         heart_beat_timeout_;
+    uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
     uint32_t                        transport_manager_disconnect_timeout_;
@@ -419,6 +443,8 @@ class Profile : public utils::Singleton<Profile> {
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
+    std::string                     tts_delimiter_;
+    std::string                     recording_file_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

@@ -45,11 +45,13 @@
 #include "cppgen/literal_generator.h"
 #include "cppgen/message_handle_with_method.h"
 #include "cppgen/module_manager.h"
+#include "cppgen/naming_convention.h"
 #include "cppgen/struct_type_constructor.h"
 #include "cppgen/struct_type_dbus_serializer.h"
 #include "cppgen/struct_type_from_json_method.h"
 #include "cppgen/struct_type_is_initialized_method.h"
 #include "cppgen/struct_type_is_valid_method.h"
+#include "cppgen/struct_type_report_erros_method.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "model/constant.h"
@@ -142,7 +144,14 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
   CppFile& header_file = module_manager_->HeaderForStruct(*strct);
   DeclareExternalTypes(*preferences_, &header_file.global_namespace());
   ostream& o = header_file.types_ns().os();
-  const char* base_class_name = "CompositeType";
+  std::string base_class_name = "CompositeType";
+  if (strct->frankenstruct()) {
+    base_class_name = RpcTypeNameGenerator(
+                        &strct->interface(),
+                        preferences_,
+                        strct->frankenstruct(),
+                        false).result();
+  }
   DeclareStructureBegin(o, strct->name(), base_class_name,
                         Comment(strct->description()));
   {
@@ -165,14 +174,15 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     }
     if (preferences_->generate_dbus) {
       StructTypeFromDbusReaderConstructor(
-            preferences_, strct, true).Declare(&o, true);
+            preferences_, strct, true, base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(strct, true).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            strct, true).Declare(&o, true);
     }
     StructTypeIsValidMethod(strct).Declare(&o, true);
     StructTypeIsInitializedMethod(strct).Declare(&o, true);
-    StructTypeIsEmptyMethod(strct).Declare(&o, true);
+    StructTypeStructEmptyMethod(strct).Declare(&o, true);
+    StructTypeReportErrosMethod(strct).Declare(&o, true);
   }
   {
     Section priv("private", &o);
@@ -229,7 +239,7 @@ void DeclarationGenerator::GenerateCodeForStructField(
                             preferences_,
                             field.type(),
                             field_is_optional).result();
-  o << " " << field.name() << ";";
+  o << " " << AvoidKeywords(field.name()) << ";";
   if (!field.description().empty()) {
     o << " " << Comment(field.description());
   }
@@ -275,15 +285,16 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
       StructTypeToJsonMethod(&request).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &request, false).Declare(&o, true);
+      StructTypeFromDbusReaderConstructor(preferences_, &request, false,
+                                          base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(&request, false).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            &request, false).Declare(&o, true);
     }
     StructTypeIsValidMethod(&request).Declare(&o, true);
     StructTypeIsInitializedMethod(&request).Declare(&o, true);
-    StructTypeIsEmptyMethod(&request).Declare(&o, true);
+    StructTypeStructEmptyMethod(&request).Declare(&o, true);
+    StructTypeReportErrosMethod(&request).Declare(&o, true);
     MessageHandleWithMethod(request.name()).Declare(&o, true);
     FunctionIdMethod(&request).Define(&o, true);
     FunctionStringIdMethod(&request).Define(&o, true);
@@ -326,8 +337,8 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
 
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &response, false).Declare(&o, true);
+      StructTypeFromDbusReaderConstructor(preferences_, &response, false,
+                                          base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(&response, false).Declare(&o , true);
 
       StructTypeDbusMessageSignatureMethod(preferences_,
@@ -335,7 +346,8 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
     }
     StructTypeIsValidMethod(&response).Declare(&o, true);
     StructTypeIsInitializedMethod(&response).Declare(&o, true);
-    StructTypeIsEmptyMethod(&response).Declare(&o, true);
+    StructTypeStructEmptyMethod(&response).Declare(&o, true);
+    StructTypeReportErrosMethod(&response).Declare(&o, true);
     MessageHandleWithMethod(response.name()).Declare(&o, true);
     FunctionIdMethod(&response).Define(&o, true);
     FunctionStringIdMethod(&response).Define(&o, true);
@@ -378,15 +390,16 @@ void DeclarationGenerator::GenerateCodeForNotification(
       StructTypeToJsonMethod(&notification).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &notification, false).Declare(&o , true);
+      StructTypeFromDbusReaderConstructor(preferences_, &notification, false,
+                                          base_class_name).Declare(&o , true);
       StructTypeToDbusWriterMethod(&notification, false).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            &notification, false).Declare(&o, true);
     }
     StructTypeIsValidMethod(&notification).Declare(&o, true);
     StructTypeIsInitializedMethod(&notification).Declare(&o, true);
-    StructTypeIsEmptyMethod(&notification).Declare(&o, true);
+    StructTypeStructEmptyMethod(&notification).Declare(&o, true);
+    StructTypeReportErrosMethod(&notification).Declare(&o, true);
     MessageHandleWithMethod(notification.name()).Declare(&o, true);
     FunctionIdMethod(&notification).Define(&o, true);
     FunctionStringIdMethod(&notification).Define(&o, true);

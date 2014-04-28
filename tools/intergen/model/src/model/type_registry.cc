@@ -186,12 +186,23 @@ bool TypeRegistry::AddStruct(const pugi::xml_node& xml_struct) {
     return true;
   }
   std::string name = xml_struct.attribute("name").value();
+  const Type* frankenmap = NULL;
+  if (!xml_struct.attribute("type").empty()) {
+    if (!GetContainer(xml_struct,
+                      &frankenmap,
+                      false,
+                      false)) {
+      std::cerr << "Invalid frankenstruct: " << name << std::endl;
+      return false;
+    }
+  }
   Description description = CollectDescription(xml_struct);
   if (IsRegisteredStruct(name)) {
     std::cerr << "Duplicate structure: " << name << std::endl;
     return false;
   }
-  structs_.push_back(new Struct(interface_, name, scope, description));
+  structs_.push_back(new Struct(interface_, name, frankenmap,
+                                scope, description));
   struct_by_name_[name] = structs_.back();
   if (!AddStructureFields(structs_.back(), xml_struct)) {
     return false;
@@ -246,7 +257,7 @@ bool TypeRegistry::GetContainer(const pugi::xml_node& params, const Type** type,
         return true;
       }
     } else {
-      std::cerr << "Incorrect array size range: " << minsize_str << ", "
+      std::cerr << "Incorrect container size range: " << minsize_str << ", "
                 << maxsize_str << std::endl;
     }
   }

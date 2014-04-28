@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <cctype>
 #include <memory>
+#include <set>
 
 #include "model/interface.h"
 #include "utils/string_utils.h"
@@ -219,6 +220,78 @@ std::string Capitalize(const std::string& str) {
   string res = str;
   res[0] = std::toupper(res[0]);
   return res;
+}
+
+std::string AvoidKeywords(const std::string& name) {
+  static const char* keywords_init[] = {
+    "asm",
+    "bool",
+    "catch",
+    "class",
+    "const_cast",
+    "default",
+    "delete",
+    "dynamic_cast",
+    "explicit",
+    "false",
+    "final",
+    "friend",
+    "inline",
+    "mutable",
+    "namespace",
+    "new",
+    "operator",
+    "override",
+    "private",
+    "protected",
+    "public",
+    "reinterpret_cast",
+    "static_cast",
+    "template",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeid",
+    "typename",
+    "using",
+    "virtual",
+    // std map functions to avoid collisions in frankenstruct
+    "at",
+    "begin",
+    "cbegin",
+    "cend",
+    "clear",
+    "count",
+    "crbegin",
+    "crend",
+    "emplace",
+    "emplace_hint",
+    "empty",
+    "end",
+    "equal_range",
+    "erase",
+    "find",
+    "get_allocator",
+    "insert",
+    "key_comp",
+    "lower_bound",
+    "max_size",
+    "rbegin",
+    "rend",
+    "size",
+    "swap",
+    "upper_bound",
+    "value_comp",
+  };
+  static const std::set<std::string> keywords(
+      keywords_init,
+      keywords_init + sizeof(keywords_init) / sizeof(keywords_init[0]));
+  if (keywords.count(name) != 0) {
+    return name + "_";
+  } else {
+    return name;
+  }
 }
 
 }  // namespace codegen

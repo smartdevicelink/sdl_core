@@ -1,8 +1,5 @@
-/**
-* \file request_watchdog.h
-* \brief DateTime class source file.
-*
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -42,33 +39,41 @@ namespace date_time {
 int32_t const DateTime::MILLISECONDS_IN_SECOND;
 int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;
 
-struct timeval DateTime::getCurrentTime() {
-  struct timeval currentTime;
-  struct timezone timeZone;
+TimevalStruct DateTime::getCurrentTime() {
+  TimevalStruct currentTime;
+  timezone timeZone;
 
   gettimeofday(&currentTime, &timeZone);
 
   return currentTime;
 }
 
-int32_t DateTime::calculateTimeSpan(struct timeval sinceTime) {
-  struct timeval currentTime, timeDifference;
-  struct timezone timeZone;
+int64_t DateTime::getmSecs(const TimevalStruct &time) {
+  return static_cast<int64_t>(time.tv_sec) * MILLISECONDS_IN_SECOND
+      + time.tv_usec / MICROSECONDS_IN_MILLISECONDS;
+}
 
-  gettimeofday(&currentTime, &timeZone);
+int64_t DateTime::getuSecs(const TimevalStruct &time) {
+  return static_cast<int64_t>(time.tv_sec) * MILLISECONDS_IN_SECOND
+      * MICROSECONDS_IN_MILLISECONDS + time.tv_usec;
+}
 
-  timeDifference.tv_sec = currentTime.tv_sec - sinceTime.tv_sec;
+int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
+  return calculateTimeDiff(getCurrentTime(), sinceTime);
+}
 
-  timeDifference.tv_usec = currentTime.tv_usec - sinceTime.tv_usec;
+int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
+                                    const TimevalStruct &time2){
+  TimevalStruct timeDifference;
+  timeDifference.tv_sec = time1.tv_sec - time2.tv_sec;
+  timeDifference.tv_usec = time1.tv_usec - time2.tv_usec;
 
   if ( timeDifference.tv_usec < 0 ) {
     timeDifference.tv_sec--;
     timeDifference.tv_usec += MILLISECONDS_IN_SECOND
                             * MICROSECONDS_IN_MILLISECONDS;
   }
-
-  return timeDifference.tv_sec * MILLISECONDS_IN_SECOND
-       + timeDifference.tv_usec / MICROSECONDS_IN_MILLISECONDS;
+  return getmSecs(timeDifference);
 }
 
 }  // namespace date_time

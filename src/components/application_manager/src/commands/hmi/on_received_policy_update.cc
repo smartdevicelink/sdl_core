@@ -55,7 +55,7 @@ void OnReceivedPolicyUpdate::Run() {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_content);
+  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_path, file_content);
 }
 
 }  // namespace commands

@@ -59,18 +59,19 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
  public:
   virtual ~PolicyHandler();
   PolicyManager* LoadPolicyLibrary();
-  PolicyManager* LoadPolicyLibrary(const std::string& path);
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
   bool InitPolicyTable();
   bool RevertPolicyTable();
   bool SendMessageToSDK(const BinaryMessage& pt_string);
-  bool ReceiveMessageFromSDK(const BinaryMessage& pt_string);
+  bool ReceiveMessageFromSDK(const std::string& file,
+                             const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
   void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions);
+                            const Permissions& permissions,
+                            const HMILevel& default_hmi);
   /**
    * @brief Checks, if policy update is necessary for application
    */
@@ -257,11 +258,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  static log4cxx::LoggerPtr logger_;
   threads::Thread retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
   PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
+  bool on_ignition_check_done_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
@@ -274,6 +275,11 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * Used for limiting device consent request per PTS/PTU session
    */
   bool is_exchange_in_progress_;
+
+  /**
+   * @brief Holds device ids, which were unpaired
+   */
+  DeviceIds unpaired_device_ids_;
 
   inline PolicyManager* CreateManager();
 

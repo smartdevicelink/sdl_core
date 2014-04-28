@@ -126,6 +126,13 @@ SDL.SDLAppModel = Em.Object.extend({
         softButtons: [],
 
         /**
+         * Array of Soft Buttons
+         *
+         * @type {Array}
+         */
+        turnListSoftButtons: [],
+
+        /**
          * Array of Objects for TBTTurnList
          *
          * @type {Array}

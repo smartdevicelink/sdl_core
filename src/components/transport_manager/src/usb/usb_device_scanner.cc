@@ -37,8 +37,12 @@
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/usb/common.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 class AoaInitSequence : public UsbControlTransferSequence {
  public:

@@ -48,6 +48,8 @@ class MessageWriter;
 }  // namespace dbus
 
 namespace rpc {
+class ValidationReport;
+
 template<typename T> class Range;
 class PrimitiveType;
 class CompositeType;
@@ -84,13 +86,15 @@ class PrimitiveType {
  public:
   bool is_initialized() const;
   bool is_valid() const;
+  void ReportErrors(ValidationReport* report) const;
  protected:
   enum ValueState {
     kUninitialized,
     kInvalid,
     kValid
   };
-  PrimitiveType(ValueState value_state);
+  explicit PrimitiveType(ValueState value_state);
+  static ValueState InitHelper(bool is_next);
   static ValueState InitHelper(const Json::Value* value,
                                bool (Json::Value::*type_check)() const);
  protected:
@@ -103,13 +107,15 @@ class PrimitiveType {
 class CompositeType {
  public:
   void mark_initialized();
+  void ReportErrors(ValidationReport* report) const;
  protected:
   enum InitializationState {
     kUninitialized,
     kInitialized,
     kInvalidInitialized
   };
-  CompositeType(InitializationState init_state);
+  explicit CompositeType(InitializationState init_state);
+  static InitializationState InitHelper(bool is_next);
   static InitializationState InitHelper(const Json::Value* value,
                                bool (Json::Value::*type_check)() const);
  protected:
@@ -247,12 +253,14 @@ class Array : public std::vector<T>, public CompositeType {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
 class Map : public std::map<std::string, T>, public CompositeType  {
  public:
   // Types
+  typedef Map<T, minsize, maxsize> Frankenbase;
   typedef std::map<std::string, T> MapType;
  public:
   // Methods
@@ -273,6 +281,7 @@ class Map : public std::map<std::string, T>, public CompositeType  {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T>
@@ -280,6 +289,7 @@ class Nullable : public T {
  public:
   // Methods
   Nullable();
+  explicit Nullable(dbus::MessageReader* reader);
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Nullable(Json::Value* value);
   explicit Nullable(const Json::Value* value);
@@ -295,6 +305,7 @@ class Nullable : public T {
   bool is_initialized() const;
   bool is_null() const;
   void set_to_null();
+  void ReportErrors(ValidationReport* report) const;
  private:
   bool marked_null_;
 };
@@ -325,6 +336,7 @@ class Optional {
 
   bool is_valid() const;
   bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
  private:
   T value_;
 };

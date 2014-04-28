@@ -36,6 +36,9 @@
 #include "rpc_base.h"
 
 #include <cassert>
+#include <cstdio>
+
+#include "rpc_base/validation_report.h"
 
 namespace rpc {
 
@@ -80,6 +83,27 @@ inline bool PrimitiveType::is_valid() const {
   return value_state_ == kValid;
 }
 
+inline void PrimitiveType::ReportErrors(ValidationReport* report) const {
+  switch (value_state_) {
+    case kUninitialized: {
+      report->set_validation_info("value is not initialized");
+      break;
+    }
+    case kInvalid: {
+      report->set_validation_info("value initialized incorrectly");
+      break;
+    }
+    case kValid: {
+      // No error
+      break;
+    }
+    default: {
+      assert(!"Unexpected value state");
+      break;
+    }
+  }
+}
+
 /*
  * CompositeType base class
  */
@@ -91,6 +115,25 @@ inline CompositeType::CompositeType(InitializationState init_state)
     : initialization_state__(init_state) {
 }
 
+inline void CompositeType::ReportErrors(ValidationReport* report) const {
+  switch (initialization_state__) {
+    case kUninitialized: {
+      report->set_validation_info("object is not initialized");
+      break;
+    }
+    case kInvalidInitialized: {
+      report->set_validation_info("object initialized incorrectly");
+      break;
+    }
+    case kInitialized: {
+      // No error
+      break;
+    }
+    default:
+      assert(!"Unexpected initialization state");
+      break;
+  }
+}
 
 /*
  * Boolean class
@@ -224,7 +267,7 @@ Enum<T>::Enum()
 
 template<typename T>
 Enum<T>::Enum(EnumType value)
-    : PrimitiveType(IsValidEnum(value_) ? kValid : kInvalid),
+    : PrimitiveType(IsValidEnum(value) ? kValid : kInvalid),
       value_(value) {
 }
 
@@ -301,6 +344,29 @@ bool Array<T, minsize, maxsize>::is_initialized() const {
   return false;
 }
 
+template<typename T, size_t minsize, size_t maxsize>
+void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
+  if (this->empty()) {
+    CompositeType::ReportErrors(report);
+  } else {
+    if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+      report->set_validation_info("array has invalid size");
+    } else {
+      // No error
+    }
+  }
+  for (size_t i = 0; i != this->size(); ++i) {
+    const T& elem = this->operator [](i);
+    if (!elem.is_valid()) {
+      char elem_idx[32] = {};
+      snprintf(elem_idx, 32, "[%zu]", i);
+      ValidationReport& elem_report =
+          report->ReportSubobject(elem_idx);
+      elem.ReportErrors(&elem_report);
+    }
+  }
+}
+
 /*
  * Map class
  */
@@ -373,6 +439,27 @@ bool Map<T, minsize, maxsize>::is_initialized() const {
   return false;
 }
 
+template<typename T, size_t minsize, size_t maxsize>
+void Map<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
+  if (this->empty()) {
+    CompositeType::ReportErrors(report);
+  } else {
+    if (!Range<size_t>(minsize, maxsize).Includes(this->size())) {
+      report->set_validation_info("map has invalid size");
+    } else {
+      // No error
+    }
+  }
+  for (typename Map::const_iterator i = this->begin();
+      i != this->end(); ++i) {
+    if (!i->second.is_valid()) {
+      std::string elem_name = "[\"" + i->first + "\"]";
+      ValidationReport& elem_report = report->ReportSubobject(elem_name);
+      i->second.ReportErrors(&elem_report);
+    }
+  }
+}
+
 /*
  * Nullable class
  */
@@ -413,6 +500,15 @@ bool Nullable<T>::is_null() const {
 template<typename T>
 void Nullable<T>::set_to_null() {
   marked_null_ = true;
+}
+
+template<typename T>
+void Nullable<T>::ReportErrors(ValidationReport* report) const {
+  if (marked_null_) {
+    // No error
+  } else {
+    T::ReportErrors(report);
+  }
 }
 
 /*
@@ -461,6 +557,15 @@ bool Optional<T>::is_valid() const {
 template<typename T>
 bool Optional<T>::is_initialized() const {
   return value_.is_initialized();
+}
+
+template<typename T>
+void Optional<T>::ReportErrors(ValidationReport* report) const {
+  if (!is_initialized()) {
+    // No error
+  } else {
+    value_.ReportErrors(report);
+  }
 }
 
 }  // namespace rpc

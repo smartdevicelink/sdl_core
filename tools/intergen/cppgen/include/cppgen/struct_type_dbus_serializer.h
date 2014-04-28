@@ -58,7 +58,8 @@ class StructTypeFromDbusReaderConstructor : public CppStructConstructor {
  public:
   StructTypeFromDbusReaderConstructor(const TypePreferences* preferences,
                                       const Struct* strct,
-                                      bool substructure);
+                                      bool substructure,
+                                      const std::string& base_class_name);
   ~StructTypeFromDbusReaderConstructor();
  private:
   // CppFunction interface

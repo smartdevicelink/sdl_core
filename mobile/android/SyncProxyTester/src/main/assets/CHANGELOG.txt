@@ -1,4 +1,5 @@
 [CW16]
+* SyncProxyTester: Crashes when executing RegisterAppInterface auto-tests with wrong type of parameters
 + SyncProxyTester: Use 'test_data' folder of mobile device to storing and reading PTU / PTS
 * SyncProxyAndroid SDK: Audio and video streaming doesn't work if mobile App use protocol v2
 + SyncProxyTester: Do not auto-scroll logs when user scrolling log view

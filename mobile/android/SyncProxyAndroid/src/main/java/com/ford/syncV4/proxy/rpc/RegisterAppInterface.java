@@ -40,11 +40,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getAppName() {
-        return (String) parameters.get(Names.appName);
+    public Object getAppName() {
+        return parameters.get(Names.appName);
     }
 
-    public void setAppName(String appName) {
+    public void setAppName(Object appName) {
         if (appName != null) {
             parameters.put(Names.appName, appName);
         } else {
@@ -83,11 +83,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getNgnMediaScreenAppName() {
-        return (String) parameters.get(Names.ngnMediaScreenAppName);
+    public Object getNgnMediaScreenAppName() {
+        return parameters.get(Names.ngnMediaScreenAppName);
     }
 
-    public void setNgnMediaScreenAppName(String ngnMediaScreenAppName) {
+    public void setNgnMediaScreenAppName(Object ngnMediaScreenAppName) {
         if (ngnMediaScreenAppName != null) {
             parameters.put(Names.ngnMediaScreenAppName, ngnMediaScreenAppName);
         } else {
@@ -120,11 +120,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public Boolean getIsMediaApplication() {
-        return (Boolean) parameters.get(Names.isMediaApplication);
+    public Object getIsMediaApplication() {
+        return parameters.get(Names.isMediaApplication);
     }
 
-    public void setIsMediaApplication(Boolean isMediaApplication) {
+    public void setIsMediaApplication(Object isMediaApplication) {
         if (isMediaApplication != null) {
             parameters.put(Names.isMediaApplication, isMediaApplication);
         } else {
@@ -220,11 +220,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getAppID() {
-        return (String) parameters.get(Names.appID);
+    public Object getAppID() {
+        return parameters.get(Names.appID);
     }
 
-    public void setAppID(String appID) {
+    public void setAppID(Object appID) {
         if (appID != null) {
             parameters.put(Names.appID, appID);
         } else {

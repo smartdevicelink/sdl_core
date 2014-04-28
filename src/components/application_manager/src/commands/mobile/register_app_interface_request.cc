@@ -142,8 +142,8 @@ void RegisterAppInterfaceRequest::Run() {
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-        correlation_id(),
-        default_timeout());
+                                                             correlation_id(),
+                                                             default_timeout());
   }
 
   ApplicationSharedPtr application =
@@ -182,16 +182,30 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->RegisterApplication(
-                               message_);
-
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
-                      msg_params[strings::app_name].asString() << "  hasn't been registered!");
+                      msg_params[strings::app_name].asString() <<
+                      "  hasn't been registered!");
   } else {
+
+    // For resuming application need to restore hmi_app_id from resumeCtrl
+    const std::string mobile_app_id = msg_params[strings::app_id].asString();
+    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+
+    // there is side affect with 2 mobile app with the same mobile app_id
+    if (resumer.IsApplicationSaved(mobile_app_id)) {
+      app->set_hmi_application_id(resumer.GetHMIApplicationID(mobile_app_id));
+    } else {
+      app->set_hmi_application_id(
+          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+    }
+
     app->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
 
@@ -224,25 +238,18 @@ void RegisterAppInterfaceRequest::Run() {
     }    
 
     // Add device to policy table and set device info, if any
-    policy::DeviceParams device_params;
-    application_manager::MessageHelper::GetDeviceInfoForHandle(app->device(),
-        &device_params);
+    std::string device_mac_address =
+        application_manager::MessageHelper::GetDeviceMacAddressForHandle(app->device());
     policy::DeviceInfo device_info;
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }
 
-    policy::PolicyHandler::instance()->SetDeviceInfo(
-      device_params.device_mac_address, device_info);
+    policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
+                                                     device_info);
 
-    // TODO(AOleyni): Find other criteria of ignition on instead of number of
-    // registered applications
-    // Check policy update on first application registration after ignition on
-    if (1
-        == application_manager::ApplicationManagerImpl::instance()->applications()
-        .size()) {
-      policy::PolicyHandler::instance()->PTExchangeAtIgnition();
-    }
+    // Check policy update on ignition on, if it was not done before
+    policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
     policy::PolicyHandler::instance()->CheckAppPolicyState(
@@ -271,7 +278,6 @@ void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
     }
   }
 }
-
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   mobile_apis::Result::eType result) {
@@ -332,7 +338,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   if (hmi_capabilities.display_capabilities()) {
-
     response_params[hmi_response::display_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -369,10 +374,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
     if (hmi_capabilities.display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
-
       display_caps[hmi_response::graphic_supported] = true;
     } else {
-
       display_caps[hmi_response::graphic_supported] = false;
     }
 
@@ -443,30 +446,29 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const char* add_info = "";
   bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
   if (resumption) {
-
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-    const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
-    if (!resumer.CheckApplicationHash(mobile_app_id,
-                                      hash_id)) {
+    if (!resumer.CheckApplicationHash(application, hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
-      LOG4CXX_WARN(logger_, "Hash does not maches");
-      add_info = "Hash does not maches";
+      LOG4CXX_WARN(logger_, "Hash does not matches");
+      add_info = "Hash does not matches";
     } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       result = mobile_apis::Result::RESUME_FAILED;
       LOG4CXX_WARN(logger_, "Persistent data is missed");
       add_info = "Persistent data is missed";
     } else {
-      add_info = " Resume Succesed";
+      add_info = " Resume Succeed";
     }
   }
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()), resumption);
+
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(
+      *(application.get()), resumption);
+
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
-
 }
 
 mobile_apis::Result::eType
@@ -781,7 +783,6 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   return false;
 }
-
 
 }  // namespace commands
 

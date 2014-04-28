@@ -53,14 +53,11 @@ FFW.UI = FFW.RPCObserver.create({
     appID: 1,
 
     onRecordStartSubscribeRequestID: -1,
-    onShowNotificationSubscribeRequestID: -1,
 
     onRecordStartUnsubscribeRequestID: -1,
-    onShowNotificationUnsubscribeRequestID: -1,
 
     // const
     onRecordStartNotification: "UI.OnRecordStart",
-    onShowNotificationNotification: "UI.ShowNotification",
 
     /**
      * ids for requests AudioPassThru
@@ -95,7 +92,6 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // subscribe to notifications
-        this.onShowNotificationSubscribeRequestID = this.client.subscribeToNotification(this.onShowNotificationNotification);
         this.onRecordStartSubscribeRequestID = this.client.subscribeToNotification(this.onRecordStartNotification);
     },
 
@@ -108,7 +104,6 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         // unsubscribe from notifications
-        this.onShowNotificationUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onShowNotificationNotification);
         this.onRecordStartUnsubscribeRequestID = this.client.unsubscribeFromNotification(this.onRecordStartNotification);
     },
 
@@ -148,10 +143,6 @@ FFW.UI = FFW.RPCObserver.create({
         Em.Logger.log("FFW.UI.onRPCNotification");
         this._super();
 
-        if (notification.method == this.onShowNotificationNotification) {
-            // to do
-        }
-
         if (notification.method == this.onRecordStartNotification) {
             // to do
         }
@@ -171,6 +162,8 @@ FFW.UI = FFW.RPCObserver.create({
                 {
 
                     SDL.SDLModel.onUIAlert(request.params, request.id);
+
+                    SDL.SDLController.onSystemContextChange(request.params.appID);
 
                     break;
                 }
@@ -232,6 +225,8 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLModel.uiPerformInteraction(request);
 
+                    SDL.SDLController.onSystemContextChange();
+
                     break;
                 }
                 case "UI.SetMediaClockTimer":
@@ -251,12 +246,16 @@ FFW.UI = FFW.RPCObserver.create({
 
                     SDL.SDLModel.uiSlider(request);
 
+                    SDL.SDLController.onSystemContextChange();
+
                     break;
                 }
                 case "UI.ScrollableMessage":
                 {
 
                     SDL.SDLModel.onSDLScrolableMessage(request, request.id);
+
+                    SDL.SDLController.onSystemContextChange();
 
                     break;
                 }
@@ -315,34 +314,174 @@ FFW.UI = FFW.RPCObserver.create({
                             "result": {
                                 "displayCapabilities": {
                                     "displayType": "GEN2_8_DMA",
-                                    "textFields": [
-                                        "mainField1",
-                                        "mainField2",
-                                        "mainField3",
-                                        "mainField4",
-                                        "statusBar",
-                                        "mediaClock",
-                                        "mediaTrack",
-                                        "alertText1",
-                                        "alertText2",
-                                        "alertText3",
-                                        "scrollableMessageBody",
-                                        "initialInteractionText",
-                                        "navigationText1",
-                                        "navigationText2",
-                                        "ETA",
-                                        "totalDistance",
-                                        "navigationText",
-                                        "audioPassThruDisplayText1",
-                                        "audioPassThruDisplayText2",
-                                        "sliderHeader",
-                                        "sliderFooter",
-                                        "notificationText",
-                                        "menuName",
-                                        "secondaryText",
-                                        "tertiaryText",
-                                        "timeToDestination",
-                                        "turnText"
+                                    "textFields": [{
+                                            "name": "mainField1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField3",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField4",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "statusBar",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mediaClock",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mediaTrack",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText3",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "scrollableMessageBody",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "initialInteractionText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "ETA",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "totalDistance",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "audioPassThruDisplayText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "audioPassThruDisplayText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "sliderHeader",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "sliderFooter",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "notificationText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "menuName",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "secondaryText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "tertiaryText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "timeToDestination",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "turnText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "menuTitle",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        }
                                     ],
                                     "imageFields": [
                                         {
@@ -505,7 +644,7 @@ FFW.UI = FFW.RPCObserver.create({
                                     ],
                                     "graphicSupported": true,
                                     "imageCapabilities": ["DYNAMIC", "STATIC"],
-                                    "templatesAvailable": ["TEMPLATE"],
+                                    "templatesAvailable": [request.params.displayLayout],
                                     "screenParams": {
                                         "resolution": {
                                             "resolutionWidth": 800,
@@ -632,6 +771,8 @@ FFW.UI = FFW.RPCObserver.create({
                     this.performAudioPassThruRequestID = request.id;
                     SDL.SDLModel.UIPerformAudioPassThru(request.params);
 
+                    SDL.SDLController.onSystemContextChange();
+
                     break;
                 }
                 case "UI.EndAudioPassThru":
@@ -696,34 +837,174 @@ FFW.UI = FFW.RPCObserver.create({
                         "result": {
                             "displayCapabilities": {
                                 "displayType": "GEN2_8_DMA",
-                                "textFields": [
-                                    "mainField1",
-                                    "mainField2",
-                                    "mainField3",
-                                    "mainField4",
-                                    "statusBar",
-                                    "mediaClock",
-                                    "mediaTrack",
-                                    "alertText1",
-                                    "alertText2",
-                                    "alertText3",
-                                    "scrollableMessageBody",
-                                    "initialInteractionText",
-                                    "navigationText1",
-                                    "navigationText2",
-                                    "ETA",
-                                    "totalDistance",
-                                    "navigationText",
-                                    "audioPassThruDisplayText1",
-                                    "audioPassThruDisplayText2",
-                                    "sliderHeader",
-                                    "sliderFooter",
-                                    "notificationText",
-                                    "menuName",
-                                    "secondaryText",
-                                    "tertiaryText",
-                                    "timeToDestination",
-                                    "turnText"
+                                "textFields": [{
+                                        "name": "mainField1",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "mainField2",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "mainField3",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "mainField4",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "statusBar",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "mediaClock",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "mediaTrack",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "alertText1",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "alertText2",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "alertText3",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "scrollableMessageBody",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "initialInteractionText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "navigationText1",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "navigationText2",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "ETA",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "totalDistance",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "navigationText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "audioPassThruDisplayText1",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "audioPassThruDisplayText2",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "sliderHeader",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "sliderFooter",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "notificationText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "menuName",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "secondaryText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "tertiaryText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "timeToDestination",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "turnText",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    },
+                                    {
+                                        "name": "menuTitle",
+                                        "characterSet": "TYPE2SET",
+                                        "width": 500,
+                                        "rows": 1
+                                    }
                                 ],
                                 "imageFields": [
                                     {
@@ -943,7 +1224,7 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ClosePopUp":
                 {
 
-                    SDL.SDLController.closePopUp();
+                    SDL.SDLController.closePopUp(request.params.methodName);
 
 
                     Em.Logger.log("FFW." + request.method + "Response");
@@ -965,15 +1246,6 @@ FFW.UI = FFW.RPCObserver.create({
                 {
 
                     //SDL.SDLModel.ShowVrHelp(request.params);
-
-                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-
-                    break;
-                }
-                case "UI.ShowKeyboard":
-                {
-
-                    SDL.SDLModel.uiShowKeyboard(request.params);
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -1264,8 +1536,6 @@ FFW.UI = FFW.RPCObserver.create({
             };
         }
 
-        SDL.SDLModel.set('performInteractionSession', null);
-
         this.client.send(JSONMessage);
     },
 
@@ -1296,7 +1566,7 @@ FFW.UI = FFW.RPCObserver.create({
      * @param {String}
      *            systemContextValue
      */
-    OnSystemContext: function (systemContextValue) {
+    OnSystemContext: function (systemContextValue, appID) {
 
         Em.Logger.log("FFW.UI.OnSystemContext");
 
@@ -1308,6 +1578,11 @@ FFW.UI = FFW.RPCObserver.create({
                 "systemContext": systemContextValue
             }
         };
+
+        if (appID) {
+            JSONMessage.params.appID = appID;
+        }
+
         this.client.send(JSONMessage);
     },
 

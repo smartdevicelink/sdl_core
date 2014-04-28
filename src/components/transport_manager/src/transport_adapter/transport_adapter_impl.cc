@@ -34,6 +34,8 @@
 
 #include "config_profile/profile.h"
 
+#include "utils/logger.h"
+
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
@@ -41,11 +43,9 @@
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
 
-log4cxx::LoggerPtr logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
@@ -59,7 +59,8 @@ TransportAdapterImpl::TransportAdapterImpl(
       connections_mutex_(),
       device_scanner_(device_scanner),
       server_connection_factory_(server_connection_factory),
-      client_connection_listener_(client_connection_listener) {
+      client_connection_listener_(client_connection_listener),
+      metric_observer_(NULL) {
   pthread_mutex_init(&devices_mutex_, 0);
   pthread_mutex_init(&connections_mutex_, 0);
 }
@@ -425,6 +426,9 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
                                            RawMessageSptr message) {
+  if (metric_observer_) {
+    metric_observer_->StartRawMsg(message.get());
+  }
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
@@ -559,6 +563,14 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   } else {
     return "";
   }
+}
+
+void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
+  metric_observer_ = observer;
+}
+
+TMMetricObserver* TransportAdapterImpl::GetTimeMetricObserver() {
+  return metric_observer_;
 }
 
 void TransportAdapterImpl::Store() const {

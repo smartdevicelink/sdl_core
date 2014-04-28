@@ -45,8 +45,6 @@ FFW.BasicCommunication = FFW.RPCObserver
 
 
         onPutFileSubscribeRequestID: -1,
-allowSDLFunctionalityRequestID: -1,
-
         onSystemErrorSubscribeRequestID: -1,
         onStatusUpdateSubscribeRequestID: -1,
         onAppPermissionChangedSubscribeRequestID: -1,
@@ -55,10 +53,11 @@ allowSDLFunctionalityRequestID: -1,
         onAppUnregisteredSubscribeRequestID: -1,
         onPlayToneSubscribeRequestID: -1,
         onSDLCloseSubscribeRequestID: -1,
-onSDLConsentNeededSubscribeRequestID: -1,
+        onSDLConsentNeededSubscribeRequestID: -1,
+        onResumeAudioSourceSubscribeRequestID: -1,
 
         onPutFileUnsubscribeRequestID: -1,
-onSystemErrorUnsubscribeRequestID: -1,
+        onSystemErrorUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
         onFileRemovedUnsubscribeRequestID: -1,
@@ -66,7 +65,8 @@ onSystemErrorUnsubscribeRequestID: -1,
         onAppUnregisteredUnsubscribeRequestID: -1,
         onPlayToneUnsubscribeRequestID: -1,
         onSDLCloseUnsubscribeRequestID: -1,
-onSDLConsentNeededUnsubscribeRequestID: -1,
+        onSDLConsentNeededUnsubscribeRequestID: -1,
+        onResumeAudioSourceUnsubscribeRequestID: -1,
 
         // const
         onSystemErrorNotification: "SDL.OnSystemError",
@@ -78,7 +78,9 @@ onSDLConsentNeededUnsubscribeRequestID: -1,
         onAppUnregisteredNotification: "BasicCommunication.OnAppUnregistered",
         onPlayToneNotification: "BasicCommunication.PlayTone",
         onSDLCloseNotification: "BasicCommunication.OnSDLClose",
-onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
+        onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
+        onResumeAudioSourceNotification: "BasicCommunication.OnResumeAudioSource",
+
 
         /**
          * init object
@@ -116,7 +118,7 @@ onSDLConsentNeededNotification: "SDL.OnSDLConsentNeeded",
             // subscribe to notifications
             this.onPutFileSubscribeRequestID = this.client
                 .subscribeToNotification(this.onPutFileNotification);
-this.onSystemErrorSubscribeRequestID = this.client
+            this.onSystemErrorSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSystemErrorNotification);
             this.onStatusUpdateSubscribeRequestID = this.client
                 .subscribeToNotification(this.onStatusUpdateNotification);
@@ -132,9 +134,10 @@ this.onSystemErrorSubscribeRequestID = this.client
                 .subscribeToNotification(this.onPlayToneNotification);
             this.onSDLCloseSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSDLCloseNotification);
-this.onSDLConsentNeededSubscribeRequestID = this.client
+            this.onSDLConsentNeededSubscribeRequestID = this.client
                 .subscribeToNotification(this.onSDLConsentNeededNotification);
-
+            this.onResumeAudioSourceSubscribeRequestID = this.client
+                .subscribeToNotification(this.onResumeAudioSourceNotification);
         },
 
         /**
@@ -149,7 +152,7 @@ this.onSDLConsentNeededSubscribeRequestID = this.client
 
             this.onPutFileUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onPutFileNotification);
-this.onSystemErrorUnsubscribeRequestID = this.client
+            this.onSystemErrorUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSystemErrorNotification);
             this.onStatusUpdateUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onStatusUpdateNotification);
@@ -165,8 +168,10 @@ this.onSystemErrorUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
             this.onSDLCloseUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLCloseNotification);
-this.onSDLConsentNeededUnsubscribeRequestID = this.client
+            this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLConsentNeededNotification);
+            this.onResumeAudioSourceUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onResumeAudioSourceNotification);
         },
 
         /**
@@ -250,7 +255,15 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         });
                     } else {
 
-                        SDL.SDLController.getApplicationModel(appID).turnOnSDL();
+                        if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
+                            SDL.States.goToStates('info.apps');
+                        }
+
+                        if (SDL.SDLModel.stateLimited == appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
+
+                        SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
                     }
 
                     delete SDL.SDLModel.activateAppRequestsList[response.id];
@@ -352,6 +365,11 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
 
             }
+            if (notification.method == this.onResumeAudioSourceNotification) {
+
+                SDL.SDLModel.stateLimited = notification.params.device;
+                SDL.VRPopUp.updateVR();
+            }
         },
 
         /**
@@ -376,15 +394,6 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                 if (request.method == "BasicCommunication.AllowDeviceToConnect") {
                     this.AllowDeviceToConnect(request.id, request.method, allow);
                 }
-                if (request.method == "BasicCommunication.UpdateAppList") {
-                    if (SDL.States.info.active) {
-                        SDL.SDLController
-                            .onGetAppList(request.params.applications);
-                    }
-                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
-                }
                 if (request.method == "BasicCommunication.UpdateDeviceList") {
                     SDL.SDLModel.onGetDeviceList(request.params);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
@@ -407,7 +416,9 @@ this.onSDLConsentNeededUnsubscribeRequestID = this.client
                         SDL.States.goToStates('info.apps');
                     }
 
-                    SDL.SDLModel.stateLimited = null;
+                    if (SDL.SDLModel.stateLimited == request.params.appID) {
+                        SDL.SDLModel.stateLimited = null;
+                    }
 
                     SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);

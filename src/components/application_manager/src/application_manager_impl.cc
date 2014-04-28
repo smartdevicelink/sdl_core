@@ -29,9 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/application_manager_impl.h"
-
 #include <climits>
 #include <string>
 #include <fstream>
@@ -52,13 +49,11 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#include <time.h>
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr ApplicationManagerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("ApplicationManager"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
@@ -153,6 +148,35 @@ ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
   return ApplicationSharedPtr();
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
+    int32_t hmi_app_id) const {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::set<ApplicationSharedPtr>::const_iterator it =
+    application_list_.begin();
+  for (; it != application_list_.end(); ++it) {
+    if ((*it)->hmi_app_id() == hmi_app_id) {
+      return (*it);
+    }
+  }
+  return ApplicationSharedPtr();
+}
+
+ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
+    const std::string& policy_app_id) const {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    if (policy_app_id.compare((*it)->mobile_app_id()->asString()) == 0) {
+      return *it;
+    }
+  }
+  return ApplicationSharedPtr();
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::active_application() const {
   // TODO(DK) : check driver distraction
   for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
@@ -210,21 +234,6 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
     }
   }
   return result;
-}
-
-ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
-    const std::string& policy_app_id) const {
-  sync_primitives::AutoLock lock(applications_list_lock_);
-
-  std::vector<ApplicationSharedPtr> result;
-  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
-       application_list_.end() != it;
-       ++it) {
-    if (policy_app_id.compare((*it)->mobile_app_id()->asString()) == 0) {
-      return *it;
-    }
-  }
-  return ApplicationSharedPtr();
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
@@ -747,7 +756,6 @@ void ApplicationManagerImpl::RemoveDevice(
   const connection_handler::DeviceHandle& device_handle) {
 }
 
-
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) const {
   ApplicationSharedPtr app = application(connection_key);
 
@@ -786,6 +794,52 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
 
 uint32_t ApplicationManagerImpl::GenerateGrammarID() {
   return rand();
+}
+
+uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
+  uint32_t hmi_app_id = rand();
+  while (resume_ctrl_.IsHMIApplicationIdExist(hmi_app_id)) {
+    hmi_app_id = rand();
+  }
+
+  return hmi_app_id;
+}
+
+void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
+    smart_objects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+            ApplicationManagerImpl::instance()->application(
+                message[strings::app_id].asUInt());
+    if (application.valid()) {
+      message[strings::app_id] = application->hmi_app_id();
+    }
+  } else {
+      std::set<std::string> keys = message.enumerate();
+      std::set<std::string>::const_iterator key = keys.begin();
+      for (; key != keys.end(); ++key) {
+        ReplaceMobileByHMIAppId(message[*key]);
+      }
+   }
+}
+
+void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
+    smart_objects::SmartObject& message) {
+  if (message.keyExists(strings::app_id)) {
+    ApplicationSharedPtr application =
+            ApplicationManagerImpl::instance()->application_by_hmi_app(
+                message[strings::app_id].asUInt());
+
+    if (application.valid()) {
+      message[strings::app_id] = application->app_id();
+    }
+  } else {
+      std::set<std::string> keys = message.enumerate();
+      std::set<std::string>::const_iterator key = keys.begin();
+      for (; key != keys.end(); ++key) {
+        ReplaceHMIByMobileAppId(message[*key]);
+      }
+   }
 }
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(
@@ -1473,7 +1527,8 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
-
+  AMMetricObserver::MessageMetricSharedPtr metric(new AMMetricObserver::MessageMetric());
+  metric->begin = date_time::DateTime::getCurrentTime();
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
     new smart_objects::SmartObject);
 
@@ -1486,9 +1541,14 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+  metric->message = so_from_mobile;
 
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
+  }
+  metric->end = date_time::DateTime::getCurrentTime();
+  if (metric_observer_) {
+    metric_observer_->OnMessage(metric);
   }
 }
 
@@ -1544,6 +1604,10 @@ mobile_apis::MOBILE_API& ApplicationManagerImpl::mobile_so_factory() {
 
 HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
+}
+
+void ApplicationManagerImpl::SetTimeMetricObserver(AMMetricObserver *observer) {
+  metric_observer_ = observer;
 }
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {
@@ -1639,29 +1703,35 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
   }
 
-  sync_primitives::AutoLock lock(applications_list_lock_);
-
   ApplicationSharedPtr app_to_remove;
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  for (;it != application_list_.end(); ++it) {
-    if ((*it)->app_id() == app_id) {
-      app_to_remove = *it;
+  // VSlobodyanik: Maybe dead lock, if not installed braces
+  {
+    sync_primitives::AutoLock lock(applications_list_lock_);
+
+    std::set<ApplicationSharedPtr>::const_iterator it =
+        application_list_.begin();
+    for (;it != application_list_.end(); ++it) {
+      if ((*it)->app_id() == app_id) {
+        app_to_remove = *it;
+      }
     }
   }
   if (!app_to_remove) {
     LOG4CXX_INFO(logger_, "Application is already unregistered.");
     return;
   }
+
   if (is_resuming) {
     resume_ctrl_.SaveApplication(app_to_remove);
   }
+
   if (audio_pass_thru_active_) {
     // May be better to put this code in MessageHelper?
     end_audio_pass_thru();
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::ResetGlobalproperties(app_to_remove);
+
   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
   application_list_.erase(app_to_remove);
   request_ctrl_.terminateAppRequests(app_id);
@@ -1726,7 +1796,6 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
   hmi_handler_->SendMessageToHMI(message);
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 }
-
 
 void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
   mobile_apis::AudioStreamingState::eType state =

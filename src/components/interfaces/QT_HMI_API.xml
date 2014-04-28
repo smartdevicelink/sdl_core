@@ -447,6 +447,9 @@
   <element name="tertiaryText">
     <description> Tertiary text for Choice</description>
   </element>
+  <element name="menuTitle">
+    <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
+  </element>
   <element name="timeToDestination"/>
   <!-- TO DO to be removed -->
   <element name="turnText"/>
@@ -946,10 +949,10 @@
 
 <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
+    <element name="HTTP" />   
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
 </enum>
@@ -1058,7 +1061,32 @@
   </element>
 </enum>
 
+<enum name="CharacterSet">
+  <description>The list of potential character sets</description>
+  <element name="TYPE2SET">
+    <description>See [@TODO: create file ref]</description>
+  </element>
+  <element name="TYPE5SET">
+    <description>See [@TODO: create file ref]</description>
+  </element>
+  <element name="CID1SET">
+    <description>See [@TODO: create file ref]</description>
+  </element>
+  <element name="CID2SET">
+    <description>See [@TODO: create file ref]</description>
+  </element>
+</enum>
+
 <!-- End of IVI part-->
+
+<enum name="AppPriority">
+  <element name="EMERGENCY"/>
+  <element name="NAVIGATION"/>
+  <element name="VOICE_COMMUNICATION"/>
+  <element name="COMMUNICATION"/>
+  <element name="NORMAL"/>
+  <element name="NONE"/>
+</enum>
 
 <!-- Policies -->
 <enum name="UpdateResult">
@@ -1096,7 +1124,7 @@
   </param>
   </struct>
   <struct name="ServiceInfo">
-    <param name="servicyType" type="String" mandatory="true">
+    <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
     <param name="policyAppId" type="String" mandatory="false">
@@ -1104,6 +1132,21 @@
     </param>
   </struct>
 <!-- End of Policies -->
+
+<struct name="TextField">
+  <param name="name" type="Common.TextFieldName">
+    <description>The name that identifies the field. See TextFieldName.</description>
+  </param>
+  <param name="characterSet" type="Common.CharacterSet">
+    <description>The character set that is supported in this field. See CharacterSet.</description>
+  </param>
+  <param name="width" type="Integer" minvalue="1" maxvalue="500">
+    <description>The number of characters in one row of this field.</description>
+  </param>
+  <param name="rows" type="Integer" minvalue="1" maxvalue="3">
+    <description>The number of rows of this field.</description>
+  </param>
+</struct>
 
 <struct name="ButtonCapabilities">
     <description>Contains the information about capabilities of a button.</description>
@@ -1193,7 +1236,7 @@
     <param name="softButtonID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Value which must be returned via OnButtonPress / OnButtonEvent</description>
     </param>
-    <param name="systemAction" type="Common.SystemAction" mandatory="false">
+    <param name="systemAction" type="Common.SystemAction" mandatory="true">
       <description>Parameter indicates whether clicking a SoftButton must call a specific system action.  See SystemAction</description>
     </param>
  </struct>
@@ -1342,7 +1385,7 @@
   <param name="displayType" type="Common.DisplayType" mandatory="true">
     <description>The type of the display. See DisplayType</description>
   </param>
-  <param name="textFields" type="Common.TextFieldName" minsize="0" maxsize="100" array="true" mandatory="true">
+  <param name="textFields" type="Common.TextField" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all fields for text displaying supported by HU. See TextFieldName.</description>
     <description>If there are no textfields supported, the empty array must be returned</description>
   </param>
@@ -1427,7 +1470,7 @@
     	Desired keypress mode.
     	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
-  </param>
+  </param> 
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -1819,6 +1862,12 @@
     <function name="OnStartDeviceDiscovery" messagetype="notification">
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
+    <function name="OnResumeAudioSource" messagetype="notification">
+      <description>This method must be invoked by SDL to update audio state.</description>
+      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+        <description>The ID of app to be resumed audio source.</description>
+      </param>
+    </function>
     <function name="UpdateDeviceList" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change device list.</description>
       <param name="deviceList" type="Common.DeviceInfo" mandatory="true" array="true" minsize="0" maxsize="100">
@@ -1839,9 +1888,6 @@
         <description>ID of the application.</description>
       </param>
     </function>
-    <function name="OnUpdateDeviceList" messagetype="notification">
-      <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
-    </function>
     <function name="AllowDeviceToConnect" messagetype="request">
         <description>Request from SmartDeviceLink to HMI to get the permissions of new device connection.</description>
         <param name="device" type="Common.DeviceInfo" mandatory="true"/>
@@ -1861,16 +1907,13 @@
         <description>The name and ID of the device the list of registered applications is required for.</description>
       </param>
     </function>
-    <function name="UpdateAppList" messagetype="request">
-      <description>Issued by SDL to notify HMI about new applications registered.</description>
-      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
-    </function>
-    <function name="UpdateAppList" messagetype="response">
-    </function>
     <function name="ActivateApp" messagetype="request">
       <description>Request from SDL to HMI to bring specified application to front on UI e.g make it HMI status 'FULL'.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of deactivated application.</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
     <function name="ActivateApp" messagetype="response">
@@ -1909,8 +1952,11 @@
           May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
-      <param name="resume" type="Boolean" mandatory="false">
-        <description>The information about resumption application. </description>
+      <param name="resumeVrGrammars" type="Boolean" mandatory="false">
+        <description>The flag if VR grammars resume is required</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification">
@@ -1945,6 +1991,7 @@
     </function>
     <!-- Policies -->
 
+    <!-- SyncP RPC-->
     <function name="OnSystemRequest" messagetype="notification" >
       <description>
         An asynchronous request from the system for specific data from the device or the cloud or response to a request from the device or cloud
@@ -1953,7 +2000,7 @@
       <param name="requestType" type="Common.RequestType" mandatory="true">
         <description>The type of system request.</description>
       </param>
-      <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
+      <param name="url" type="String" maxlength="1000" minlength="1" mandatory="false">
         <description>Optional array of URL(s) for HTTP requests.</description>
       </param>
       <param name="fileType" type="Common.FileType" mandatory="false">
@@ -1967,19 +2014,52 @@
       </param>
       <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       </param>
-      <param name="fileName" type="String" maxlength="255" mandatory="true">
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
         <description>File reference name.</description>
       </param>
-      <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-        <description>
-          Full Size of file. sends in first OnPutFile notification if file is splited
-          into many PutFiles
-        </description>
-      </param>
-      <param name="appID" type="String" maxlength="50" mandatory="true">
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
         <description>ID of application that requested this RPC.</description>
       </param>
     </function>
+    <function name="SystemRequest" messagetype="request">
+      <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
+      <param name="requestType" type="Common.RequestType" mandatory="true">
+          <description>The type of system request.</description>
+      </param>
+      <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+          <description>The path to file.</description>
+      </param>
+      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
+        <description>ID of application that requested this RPC.</description>
+      </param>
+    </function>
+    <function name="SystemRequest" messagetype="response">
+    </function>
+    <function name="PolicyUpdate" messagetype="request">
+      <description>
+        From: SDL
+        To: SYNCP Manager
+        Asks SYNCP Manager to send given Policy Table snapshot to the backend
+      </description>
+      <param name="file" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>
+          Location of policy table snapshot
+        </description>
+      </param>
+      <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+        <description>
+          Send attempt timeout in seconds
+        </description>
+      </param>
+      <param name="retry" type="Integer" minvalue="0" maxvalue="65535" array="true" minsize="1" maxsize="5" mandatory="true">
+        <description>
+          Array of delays to wait after failed atempts
+        </description>
+      </param>
+    </function>
+    <function name="PolicyUpdate" messagetype="response">
+    </function>
+    <!-- End of SyncP RPC-->
 
     <function name="OnSDLClose" messagetype="notification">
       <description>SDL must notify HMI about finish working application</description>
@@ -2026,20 +2106,6 @@
     </param>
   </function>
 
-  <function name="SystemRequest" messagetype="request">
-    <description>An asynchronous request from the device; binary data can be included in hybrid part of message for some requests (such as Authentication requests)</description>
-    <param name="requestType" type="Common.RequestType" mandatory="true">
-      <description>The type of system request.</description>
-    </param>
-    <param name="fileName" type="String" maxlength="255" mandatory="true">
-      <description>The path to file.</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="false">
-      <description>ID of application that requested this RPC.</description>
-    </param>
-   </function>
-   <function name="SystemRequest" messagetype="response">
-   </function>
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>
@@ -2141,7 +2207,7 @@
     <param name="timeout" type="Integer" mandatory="true">
       <description>Timeout initiate timeoutPrompt</description>
     </param>
-    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="true">
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
         IDs of the specific compiled grammars for this voice interaction.
       </description>
@@ -2309,7 +2375,7 @@
     <param name="alertStrings" type="Common.TextFieldStruct" mandatory="true" array="true" minsize="0" maxsize="3">
       <description>Array of lines of alert text fields. See TextFieldStruct. Uses alertText1, alertText2, alertText3.</description>
     </param>
-    <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000" defvalue="5000">
+    <param name="duration" type="Integer" mandatory="true" minvalue="3000" maxvalue="10000">
       <description>Timeout in milliseconds.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" mandatory="false" minsize="0" maxsize="4" array="true">
@@ -2325,14 +2391,6 @@
   <function name="Alert" messagetype="response">
     <param name="tryAgainTime" type="Integer" mandatory="false" minvalue="0" maxvalue="2000000000">
       <description>Amount of time (in milliseconds) that SDL must wait before resending an alert. Must be provided if another system event or overlay currently has a higher priority than this alert.</description>
-    </param>
-  </function>
-  <function name="ShowNotification" messagetype="notification">
-    <description>Initiated by SDL in order to notify user about some actions, i.e. while waiting for updates from server etc.</description>
-    <param name="text" type="Common.TextFieldStruct" mandatory="true"/>
-    <param name="icon" type="Common.Image" mandatory="false"/>
-    <param name="timeout" type="Integer" mandatory="true">
-      <description>Pop-up is expected to be shown before time specified with timeout is up and then closed by HMI or closed upon ClosePopUp request from SDL.</description>
     </param>
   </function>
   <function name="Show" messagetype="request">
@@ -2521,9 +2579,15 @@
     </param>
   </function>
   <function name="OnSystemContext" messagetype="notification">
-    <description>Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu); switches to VR; pop-up appears on screen etc.</description>
+    <description>
+      Notification must be initiated by HMI when the user changes the context of application: goes to menu (in-application menu or system menu);
+      switches to VR; pop-up appears on screen etc.
+    </description>
     <param name="systemContext" type="Common.SystemContext" mandatory="true">
       <description>The context the application is brought into.</description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>ID of application that is related to this RPC.</description>
     </param>
   </function>
   <function name="GetCapabilities" messagetype="request">
@@ -2645,33 +2709,6 @@
       <description>Provides additional human readable info regarding the result.</description>
     </param>
   </function>
-  <function name="ShowKeyboard" messagetype="request">
-    <description>Configures and populates on-screen keyboard.</description>
-    <param name="language" type="Common.Language" mandatory="true">
-      <description>The keyboard language.</description>
-    </param>
-    <param name="keyboardLayout" type="Common.KeyboardLayout" mandatory="true" >
-      <description>Desired keyboard layout.</description>
-    </param>
-    <param name="sendDynamicEntry" type="Boolean" mandatory="false">
-      <description>In this mode, all keypresses will be sent as they occur.</description>
-      <description>If disabled, entire string of text will be returned only once submitted by user.</description>
-      <description>If omitted, this value will be set to FALSE.</description>
-    </param>
-    <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>Array of keyboard characters to enable.</description>
-      <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
-      <description>If omitted, the entire keyboard will be enabled.</description>
-    </param>
-    <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
-      <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-    </param>
-  </function>
-  <function name="ShowKeyboard" messagetype="response">
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-  </function>
   <function name="OnKeyboardInput" messagetype="notification">
     <description>On-screen keyboard event.</description>
     <description>Can be full string or individual keypresses depending on keyboard mode.</description>
@@ -2729,7 +2766,7 @@
     <param name="messageText" type="Common.TextFieldStruct" mandatory="true">
       <description>Body of text that can include newlines and tabs. Uses scrollableMessageBody.</description>
     </param>
-    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" defvalue="30000" mandatory="true">
+    <param name="timeout" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
       <description>Timeout in milliseconds. The message should be displayed until the time defined is up.</description>
     </param>
     <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
@@ -2753,6 +2790,12 @@
     </param>
     <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
       <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+    </param>
+    <param name="muteAudio" type="Boolean" mandatory="true">
+      <description>
+        Defines if the current audio source should be muted during the APT session. If not, the audio source will play without interruption.
+        If omitted, the value is set to true.
+      </description>
     </param>
   </function>
   <function name="PerformAudioPassThru" messagetype="response">
@@ -2987,8 +3030,7 @@
       </description>
     </param>
   </function>
-
-<!--Qt HMI version of GetVehicleData-->
+  <!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3263,9 +3305,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of GetVehicleData-->
+  <!--end Qt HMI version of GetVehicleData-->
 
-<!--Qt HMI version of OnVehicleData-->
+  <!--Qt HMI version of OnVehicleData-->
   <function name="OnGpsData" messagetype="notification">
     <param name="gps" type="Common.GPSData" mandatory="true">
       <description>See GPSData</description>
@@ -3391,9 +3433,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of OnVehicleData-->
+  <!--end Qt HMI version of OnVehicleData-->
 
-<!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <!--Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
   <function name="SubscribeGps" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3918,8 +3960,9 @@
       <description>Information related to the MyKey feature</description>
     </param>
   </function>
-<!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
+  <!--end Qt HMI version of SubscribeVehicleData/UnsubscribeVehicleData-->
 </interface>
+
 
  <!-- Policies -->
 <interface name="SDL" version="1.0" date="2014-03-12">
@@ -3938,6 +3981,9 @@
         <description>If app permissions were reduced (isAppPermissionsRevoked == true), then this array specifies list of removed permissions. </description>
       </param>
     <param name="isAppRevoked" type="Boolean" mandatory="true"/>
+    <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
   </function>
 
   <function name="GetUserFriendlyMessage" messagetype="request" scope="internal">
@@ -3965,6 +4011,27 @@
       </param>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
+
+    <!-- SyncP RPC-->
+    <function name="OnReceivedPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notification sent to SDL when SYNCP Manager receives and decrypts updated policy table
+      </description>
+      <param name="policyfile" type="String" minlength="1" maxlength="255" mandatory="true">
+        <description>Location of decrypted policy table Json file on target</description>
+      </param>
+    </function>
+
+    <function name="OnPolicyUpdate" messagetype="notification">
+      <description>
+        From: SYNCP Manager
+        To: SDL
+        Notifies SDL to supply a new "PolicyUpdate" request with more recent snapshot data
+      </description>
+    </function>
+    <!-- End of SyncP RPC-->
 
     <function name="GetListOfPermissions"  messagetype="request">
       <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
@@ -4001,6 +4068,9 @@
       </param>
       <param name="appUnauthorized" type="Boolean" mandatory="false">
         <description>When present and set to true (should be if present) then this means that application was not authorized (nickname check failed.)</description>
+      </param>
+      <param name="priority" type="Common.AppPriority" mandatory="false">
+        <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
 
@@ -4039,10 +4109,10 @@
 
     <function name="GetURLS" messagetype="request" scope="internal">
       <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
-      <param name="service" type="Common.ServiceInfo" mandatory="true"/>
+      <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
-      <param name="urls" type="String" array="true" mandatory="false" minsize="1" maxsize="100" maxlength="500"/>
+      <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
 </interface>
 </interfaces>

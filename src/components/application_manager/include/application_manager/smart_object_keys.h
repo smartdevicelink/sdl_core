@@ -52,6 +52,8 @@ const char default_app_id[] = "default";
 const char msg_params[] = "msg_params";
 const char info[] = "info";
 const char app_id[] = "appID";
+const char hmi_app_id[] = "hmiAppID";
+const char device_mac[] = "deviceMAC";
 const char url[] = "url";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
@@ -123,6 +125,7 @@ const char max_duration[] = "maxDuration";
 const char sampling_rate[] = "samplingRate";
 const char bits_per_sample[] = "bitsPerSample";
 const char audio_type[] = "audioType";
+const char mute_audio[] = "muteAudio";
 const char button_name[] = "buttonName";
 const char button_event_mode[] = "buttonEventMode";
 const char button_press_mode[] = "buttonPressMode";
@@ -181,6 +184,7 @@ const char device_name[] = "deviceName";
 const char reason[] = "reason";
 const char available[] = "available";
 const char text[] = "text";
+const char character_set[] = "characterSet";
 
 // vehicle info
 const char gps[] = "gps";
@@ -217,6 +221,7 @@ const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
 const char prerecorded_speech[] = "prerecordedSpeech";
 const char supported_diag_modes[] = "supportedDiagModes";
+const char priority[] = "priority";
 
 //resuming
 const char application_commands[] = "applicationCommands";
@@ -229,6 +234,8 @@ const char application_subscribtions[] = "subscribtions";
 const char application_files[] = "applicationFiles";
 const char application_show[] = "applicationShow";
 const char resumption[] = "resumption";
+const char resume_vr_grammars[] = "resumeVrGrammars";
+
 const char ign_off_count[] = "ign_off_count";
 const char connection_info[] = "connection_info";
 const char is_download_complete[] = "is_download_complete";

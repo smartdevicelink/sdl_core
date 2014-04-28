@@ -228,10 +228,12 @@ bool Enum::AddConstant(const std::string& name, const int64_t value,
  */
 Struct::Struct(const Interface* interface,
                const std::string& name,
+               const Type* frankenmap,
                Scope scope,
                const Description& description)
     : interface_(interface),
       name_(name),
+      frankenmap_(frankenmap),
       scope_(scope),
       description_(description) {
   assert(interface_);
@@ -283,6 +285,10 @@ const Type* Struct::Field::type() const {
 
 const Interface& Struct::interface() const {
   return *interface_;
+}
+
+const Type* Struct::frankenstruct() const {
+  return frankenmap_;
 }
 
 const std::string& Struct::name() const {

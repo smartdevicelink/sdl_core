@@ -37,7 +37,6 @@ set (LIBRARIES
     ConfigProfile
     formatters
     jsoncpp
-    log4cxx
 )
 
 if (EXTENDED_MEDIA_MODE)
@@ -47,4 +46,7 @@ endif()
 
 create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
 
+if(ENABLE_LOG)
+  target_link_libraries("test_MediaManager" log4cxx)
+endif()
 # vim: set ts=2 sw=2 et:

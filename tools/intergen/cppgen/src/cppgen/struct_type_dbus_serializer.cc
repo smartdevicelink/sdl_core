@@ -31,6 +31,7 @@
 
 #include "cppgen/struct_type_dbus_serializer.h"
 
+#include "cppgen/naming_convention.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "utils/safeformat.h"
@@ -87,19 +88,26 @@ void StructTypeDbusMessageSignatureMethod::DefineBody(std::ostream* os) const {
 StructTypeFromDbusReaderConstructor::StructTypeFromDbusReaderConstructor(
     const TypePreferences* preferences,
     const Struct* strct,
-    bool substructure)
+    bool substructure,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()),
       preferences_(preferences),
       strct_(strct),
       substructure_(substructure) {
   Add(Parameter("reader__", "dbus::MessageReader*"));
+  std::string base_initializer = "reader__";
+  if (!strct->frankenstruct()) {
+    base_initializer = "InitHelper(true)";
+  }
+  Add(Initializer(base_class_name, base_initializer));
   // In case of non-substructure use initializer list to initialize fields
   // From MessageReader passed in
   if (!substructure_) {
     const Struct::FieldsList& fields = strct->fields();
     for (Struct::FieldsList::const_iterator i = fields.begin(), end = fields.end();
          i != end; ++i) {
-      Add(Initializer(i->name(), "reader__"));
+      Add(Initializer(AvoidKeywords(i->name()),
+                      "reader__"));
     }
   }
 }
