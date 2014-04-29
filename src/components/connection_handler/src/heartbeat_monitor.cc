@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connection_handler/heartbeat_monitor.h"
+#include <unistd.h>
 #include "connection_handler/connection.h"
 #include "utils/logger.h"
 

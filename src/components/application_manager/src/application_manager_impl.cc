@@ -1070,13 +1070,17 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     mobile_so_factory().attachSchema(*message);
 
     if (policy_manager_) {
+      const std::string stringified_functionID =
+          MessageHelper::StringifiedFunctionID(function_id);
       LOG4CXX_INFO(
         logger_,
-        "Checking permissions for  " << app->mobile_app_id()->asString() << " in " << MessageHelper::StringifiedHMILevel(app->hmi_level()) << " rpc " << MessageHelper::StringifiedFunctionID(function_id));
+        "Checking permissions for  " << app->mobile_app_id()->asString()  <<
+        " in " << MessageHelper::StringifiedHMILevel(app->hmi_level()) <<
+        " rpc " << stringified_functionID);
       policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
           app->mobile_app_id()->asString(),
           MessageHelper::StringifiedHMILevel(app->hmi_level()),
-          MessageHelper::StringifiedFunctionID(function_id));
+          stringified_functionID);
 
       if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE
           && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
@@ -1085,7 +1089,9 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
       if (result.hmi_level_permitted != policy::kRpcAllowed) {
         LOG4CXX_WARN(logger_, "Request blocked by policies. "
-                     << "FunctionID: "
+                     << "Function: "
+                     << stringified_functionID
+                     << ", FunctionID: "
                      << static_cast<int32_t>(function_id)
                      << " Application HMI status: "
                      << static_cast<int32_t>(app->hmi_level()));
@@ -1300,7 +1306,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
           || ((output.validate() != smart_objects::Errors::OK)
               && (output.validate() !=
                   smart_objects::Errors::UNEXPECTED_PARAMETER))) {
-        LOG4CXX_WARN(logger_, "Failed to parse string to smart object");
+        LOG4CXX_WARN(logger_, "Failed to parse string to smart object :"
+                     << message.json_message());
         utils::SharedPtr<smart_objects::SmartObject> response(
           MessageHelper::CreateNegativeResponse(
             message.connection_key(), message.function_id(),
