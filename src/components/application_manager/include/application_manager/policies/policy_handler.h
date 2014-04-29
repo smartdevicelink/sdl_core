@@ -72,10 +72,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   void OnPermissionsUpdated(const std::string& policy_app_id,
                             const Permissions& permissions,
                             const HMILevel& default_hmi);
-  /**
-   * @brief Checks, if policy update is necessary for application
-   */
-  void CheckAppPolicyState(const std::string& application_id);
 
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
@@ -177,7 +173,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * application
    * @param policy_app_id Application id
    */
-  void OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
+    std::string OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table

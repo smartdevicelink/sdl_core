@@ -236,6 +236,21 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
   return result;
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
+    const std::string& policy_app_id) const {
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::vector<ApplicationSharedPtr> result;
+  for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+       application_list_.end() != it;
+       ++it) {
+    if (policy_app_id.compare((*it)->mobile_app_id()->asString()) == 0) {
+      return *it;
+    }
+  }
+  return ApplicationSharedPtr();
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
@@ -365,9 +380,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   application_list_.insert(application);
 
-  // TODO(PV): add asking user to allow application
-  // BasicCommunication_AllowApp
-  // application->set_app_allowed(result);
   return application;
 }
 
@@ -1419,8 +1431,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
   std::string output_string;
   switch (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE)
           .asInt()) {
-    case 0:
-      {
+    case 0: {
         if (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_VERSION).asInt() == 1) {
           if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
               output_string)) {
@@ -1710,14 +1721,14 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
   ApplicationSharedPtr app_to_remove;
   {
-    sync_primitives::AutoLock lock(applications_list_lock_);
+  sync_primitives::AutoLock lock(applications_list_lock_);
 
-    std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-    for (;it != application_list_.end(); ++it) {
-      if ((*it)->app_id() == app_id) {
-        app_to_remove = *it;
-      }
+  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
+  for (;it != application_list_.end(); ++it) {
+    if ((*it)->app_id() == app_id) {
+      app_to_remove = *it;
     }
+  }
     application_list_.erase(app_to_remove);
  }
 

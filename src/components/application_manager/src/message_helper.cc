@@ -406,18 +406,17 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   return mobile_apis::HMILevel::INVALID_ENUM;
 }
 
-const char* MessageHelper::StringifiedHMILevel(
+std::string MessageHelper::StringifiedHMILevel(
     mobile_apis::HMILevel::eType hmi_level) {
-    switch (hmi_level) {
-    case mobile_apis::HMILevel::HMI_FULL:
-        return hmi_levels::kFull;
-    case mobile_apis::HMILevel::HMI_LIMITED:
-        return hmi_levels::kLimited;
-    case mobile_apis::HMILevel::HMI_BACKGROUND:
-        return hmi_levels::kBackground;
-    case mobile_apis::HMILevel::HMI_NONE:
-        return hmi_levels::kNone;
-    default:
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  typedef std::map<mobile_apis::HMILevel::eType, std::string> EnumMap;
+  const EnumMap& enum_map =
+    TEnumSchemaItem<mobile_apis::HMILevel::eType>::getEnumElementsStringRepresentation();
+  EnumMap::const_iterator found = enum_map.find(hmi_level);
+  if (found != enum_map.end()) {
+    const std::string& enum_name = found->second;
+    return enum_name;
+  } else {
         return "";
     }
 }
@@ -508,8 +507,8 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const s
         commands::CommandImpl::hmi_protocol_type_;
       (*request)[strings::params][strings::function_id] =
         static_cast<int>(vehicle_data_args[*it]);
-      ApplicationManagerImpl::instance()->ManageHMICommand(request);
-    }
+    ApplicationManagerImpl::instance()->ManageHMICommand(request);
+}
 #endif
 }
 
@@ -1719,7 +1718,6 @@ bool MessageHelper::SendStopAudioPathThru() {
 void MessageHelper::SendPolicySnapshotNotification(
     unsigned int connection_key, const std::vector<uint8_t>& policy_data,
     const std::string& url, int timeout) {
-    printf("\n\t\t\t\tSendPolicySnapshotNotification\n");
     smart_objects::SmartObject* pt_notification = new smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     smart_objects::SmartObject& content = *pt_notification;
@@ -2109,8 +2107,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
                 mobile_apis::Result::eType verification_result = VerifyImage(
                             request_soft_buttons[i][strings::image], app);
                 if (mobile_apis::Result::SUCCESS != verification_result) {
-                  return mobile_apis::Result::INVALID_DATA;
-                }
+                        return mobile_apis::Result::INVALID_DATA;
+                    }
             } else {
                 return mobile_apis::Result::INVALID_DATA;
             }
@@ -2146,10 +2144,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
                             request_soft_buttons[i][strings::image], app);
 
                 if (mobile_apis::Result::SUCCESS != verification_result) {
-                  return mobile_apis::Result::INVALID_DATA;
+                        return mobile_apis::Result::INVALID_DATA;
 
+                    }
                 }
-            }
             break;
         }
         default: {
@@ -2167,8 +2165,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     if (0 == request_soft_buttons.length()) {
         message_params.erase(strings::soft_buttons);
     }
-    return mobile_apis::Result::SUCCESS;
-}
+        return mobile_apis::Result::SUCCESS;
+    }
 
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {

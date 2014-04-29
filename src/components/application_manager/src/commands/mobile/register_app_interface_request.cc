@@ -235,7 +235,7 @@ void RegisterAppInterfaceRequest::Run() {
           app->set_allowed_support_navigation(true);
         }
       }
-    }    
+    }
 
     // Add device to policy table and set device info, if any
     std::string device_mac_address =
@@ -252,7 +252,7 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
-    policy::PolicyHandler::instance()->CheckAppPolicyState(
+    policy::PolicyHandler::instance()->policy_manager()->CheckAppPolicyState(
       msg_params[strings::app_id].asString());
 
     SendRegisterAppInterfaceResponseToMobile();
@@ -286,10 +286,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   if (!params) {
     std::string mobile_app_id =
-        (*message_)[strings::msg_params][strings::app_id].asString();
+      (*message_)[strings::msg_params][strings::app_id].asString();
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
-        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
+      policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
+      usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
@@ -767,7 +767,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
   int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asInt();
+                          .asInt();
 
   const std::set<ApplicationSharedPtr>& applications =
     ApplicationManagerImpl::instance()->applications();
