@@ -602,13 +602,13 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result = policy::PolicyHandler::instance()->policy_manager()
+  const bool init_result = policy::PolicyHandler::instance()->policy_manager()
                      ->GetInitialAppData(
                        message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
                        &app_hmi_types);
 
   if (!init_result) {
-    LOG4CXX_INFO(logger_, "Error during initial application data check.");
+    LOG4CXX_ERROR(logger_, "Error during initial application data check.");
     return mobile_apis::Result::INVALID_DATA;
   }
 
@@ -617,7 +617,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
           app_nicknames.begin(), app_nicknames.end(),
           message[strings::msg_params][strings::app_name].asString());
     if (app_nicknames.end() == it) {
-      LOG4CXX_INFO(logger_,
+      LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
       return mobile_apis::Result::INVALID_DATA;
