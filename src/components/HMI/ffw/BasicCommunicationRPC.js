@@ -400,6 +400,14 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.id,
                         request.method);
                 }
+                if (request.method == "BasicCommunication.UpdateAppList") {
+                    if (SDL.States.info.active) {
+                        SDL.SDLController.onGetAppList(request.params.applications);
+                    }
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
                     this.OnReceivedPolicyUpdate(request.params.fileName);

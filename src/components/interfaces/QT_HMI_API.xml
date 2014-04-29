@@ -1870,7 +1870,7 @@
     </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
-      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+      <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
       </param>
     </function>
@@ -2231,7 +2231,7 @@
     <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>ID of of the command (list of strings)</description>
     </param>
-    <param name="appID" type="Integer" mandatory="false">
+    <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
