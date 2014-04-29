@@ -1165,9 +1165,8 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
         hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered;
 
     message[strings::params][strings::message_type] = MessageType::kNotification;
-    // we put hmi_app_id because applicaton list does not contain application on this momment
-    // and ReplaceHMIByMobileAppId function will be unable to replace app_id to hmi_app_id
-    message[strings::msg_params][strings::app_id] = app->hmi_app_id();
+    message[strings::msg_params][strings::app_id] = app->app_id();
+
     ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 

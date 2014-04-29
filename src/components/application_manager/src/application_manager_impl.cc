@@ -807,14 +807,11 @@ uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
 
 void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
     smart_objects::SmartObject& message) {
-
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
             ApplicationManagerImpl::instance()->application(
                 message[strings::app_id].asUInt());
     if (application.valid()) {
-      LOG4CXX_INFO(logger_, "ReplaceMobileByHMIAppId from " << message[strings::app_id].asInt()
-                   << " to " << application->hmi_app_id());
       message[strings::app_id] = application->hmi_app_id();
     }
   } else {
@@ -834,8 +831,6 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
                 message[strings::app_id].asUInt());
 
     if (application.valid()) {
-      LOG4CXX_INFO(logger_, "ReplaceHMIByMobileAppId from " << message[strings::app_id].asInt()
-                   << " to " << application->app_id());
       message[strings::app_id] = application->app_id();
     }
   } else {
@@ -905,7 +900,6 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   LOG4CXX_INFO_EXT(
     logger_,
     "OnServiceEndedCallback " << type  << " in session " << session_key);
-
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
@@ -1740,10 +1734,6 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   request_ctrl_.terminateAppRequests(app_id);
 
-//  {
-//    sync_primitives::AutoLock lock(applications_list_lock_);
-
-//  }
   return;
 }
 
