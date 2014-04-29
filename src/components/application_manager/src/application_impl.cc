@@ -280,11 +280,12 @@ bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
 
-void ApplicationImpl::set_protocol_version(ProtocolVersion protocol_version) {
+void ApplicationImpl::set_protocol_version(
+    const ProtocolVersion& protocol_version) {
   protocol_version_ = protocol_version;
 }
 
-ProtocolVersion ApplicationImpl::protocol_version() {
+ProtocolVersion ApplicationImpl::protocol_version() const {
   return protocol_version_;
 }
 

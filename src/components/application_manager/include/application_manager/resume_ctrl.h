@@ -48,6 +48,7 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include "utils/timer_thread.h"
 
 namespace application_manager {
 

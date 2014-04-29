@@ -1497,6 +1497,8 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
   DCHECK(message);
   utils::SharedPtr<Message> outgoing_message;
 
+  LOG4CXX_INFO(logger_, "Service type." << message->service_type());
+
   if (message->service_type() != protocol_handler::kRpc
       &&
       message->service_type() != protocol_handler::kBulk) {
