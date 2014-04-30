@@ -309,7 +309,7 @@ class TransportAdapterImpl : public TransportAdapter,
                              const ConnectError& error);
 
   /**
-   * @brief Remome specified device and all its connections
+   * @brief Remove specified device and all its connections
    * @param device_handle Device unique identifier.
    * @param error Error class that contains details of this error situation.
    */
