@@ -603,16 +603,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   std::vector<uint8_t> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  {
-    sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-    if (!audio_pass_thru_active_) {
-      LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
-                    " when PassThrough is not active");
-
-      return;
-    }
+  if (!audio_pass_thru_active_) {
+    LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
+                  " when PassThrough is not active");
+    return;
   }
-
   smart_objects::SmartObject* on_audio_pass = NULL;
   on_audio_pass = new smart_objects::SmartObject();
 
