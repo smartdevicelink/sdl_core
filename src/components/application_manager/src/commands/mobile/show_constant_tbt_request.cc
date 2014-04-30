@@ -83,12 +83,25 @@ void ShowConstantTBTRequest::Run() {
 
 
   mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles(msg_params, app);
+      mobile_apis::Result::SUCCESS;
+  if (msg_params.keyExists(strings::turn_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        msg_params[strings::turn_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
+  }
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
-    SendResponse(false, verification_result);
-    return;
+  if (msg_params.keyExists(strings::next_turn_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        msg_params[strings::next_turn_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
   }
 
   msg_params[strings::app_id] = app->app_id();

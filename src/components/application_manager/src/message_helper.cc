@@ -2054,6 +2054,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     return mobile_apis::Result::SUCCESS;
 }
 
+mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
+        smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
+  mobile_apis::Result::eType verification_result_image=
+      mobile_apis::Result::SUCCESS;
+  for (uint32_t i = 0; i < message.length(); ++i) {
+    if (message[i].keyExists(strings::image)) {
+      verification_result_image =  VerifyImage(message[i][strings::image],app);
+      if (mobile_apis::Result::SUCCESS != verification_result_image) {
+        return verification_result_image;
+      }
+    }
+  }
+  return mobile_apis::Result::SUCCESS;
+}
+
 bool MessageHelper::VerifySoftButtonText(
     smart_objects::SmartObject& soft_button) {
     std::string text = soft_button[strings::text].asString();

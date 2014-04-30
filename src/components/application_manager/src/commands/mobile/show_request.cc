@@ -77,12 +77,25 @@ void ShowRequest::Run() {
   }
 
   mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+      mobile_apis::Result::SUCCESS;
+  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+    verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::graphic], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
+  }
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
+    verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::secondary_graphic], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
+    }
   }
 
   if (!CheckMenuFieldsNames()) {

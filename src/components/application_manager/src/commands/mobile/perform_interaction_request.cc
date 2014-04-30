@@ -106,15 +106,15 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
+        (*message_)[strings::msg_params][strings::vr_help], app)) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImageVrHelpItems return INVALID_DATA!");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
   }
 
   smart_objects::SmartObject& choice_list =
