@@ -1877,12 +1877,7 @@
         <description>The ID of app to be resumed audio source.</description>
       </param>
     </function>
--    <function name="UpdateAppList" messagetype="request">
--      <description>Issued by SDL to notify HMI about new applications registered.</description>
--      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
--    </function>
--    <function name="UpdateAppList" messagetype="response">
--    </function>    <function name="UpdateAppList" messagetype="request">
+    <function name="UpdateAppList" messagetype="request">
       <description>Issued by SDL to notify HMI about new applications registered.</description>
       <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
     </function>
