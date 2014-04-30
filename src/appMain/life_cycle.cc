@@ -104,6 +104,7 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
+  connection_handler_->SetProtocolHandler(protocol_handler_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
@@ -251,13 +252,6 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
-#ifdef TIME_TESTER
-  if (time_tester_) {
-    time_tester_->Stop();
-    delete time_tester_;
-    time_tester_ = NULL;
-  }
-#endif //TIME_TESTER
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -337,6 +331,15 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
+
+#ifdef TIME_TESTER
+  // It's important to delete tester Obcervers after TM adapters destruction
+  if (time_tester_) {
+    time_tester_->Stop();
+    delete time_tester_;
+    time_tester_ = NULL;
+  }
+#endif //TIME_TESTER
 }
 
 void LifeCycle::StopComponentsOnSignal(int32_t params) {

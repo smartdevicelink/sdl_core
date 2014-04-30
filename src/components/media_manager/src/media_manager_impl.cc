@@ -183,7 +183,8 @@ void MediaManagerImpl::StartMicrophoneRecording(
     }
   }
   const std::string predefined_rec_file =
-      profile::Profile::instance()->app_storage_folder() + "/audio.8bit.wav";
+      profile::Profile::instance()->app_resourse_folder() + "/" +
+      profile::Profile::instance()->recording_file();
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(predefined_rec_file, buf)) {
     if (file_system::Write(file_path, buf)) {

@@ -58,8 +58,6 @@ PerformInteractionRequest::PerformInteractionRequest(
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
-  subscribe_on_event(
-      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -108,16 +106,15 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if ((mobile_apis::Result::SUCCESS != verification_result) &&
-      (mobile_apis::Result::UNSUPPORTED_RESOURCE != verification_result)) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
+        (*message_)[strings::msg_params][strings::vr_help], app)) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImageVrHelpItems return INVALID_DATA!");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
   }
 
   smart_objects::SmartObject& choice_list =
@@ -221,11 +218,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
       ProcessPerformInteractionResponse(event.smart_object());
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
-      LOG4CXX_INFO(logger_, "Received OnAppUnregistered event");
-      ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
@@ -359,19 +351,6 @@ void PerformInteractionRequest::ProcessVRResponse(
   }
 }
 
-void PerformInteractionRequest::ProcessAppUnregisteredNotification
-  (const smart_objects::SmartObject& message) {
-  LOG4CXX_INFO(logger_,
-               "PerformInteractionRequest::ProcessAppUnregisteredNotification");
-  const uint32_t app_id = connection_key();
-  if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
-    DisablePerformInteraction();
-  } else {
-    LOG4CXX_INFO(logger_, "Notification was sent from another application");
-  }
-}
-
-
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
@@ -386,8 +365,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   bool result = false;
   int32_t hmi_response_code =
       message[strings::params][hmi_response::code].asInt();
-  if (hmi_apis::Common_Result::SUCCESS ==
-      hmi_apis::Common_Result::eType(hmi_response_code)) {
+  if ((hmi_apis::Common_Result::SUCCESS ==
+      static_cast<hmi_apis::Common_Result::eType>(hmi_response_code)) ||
+      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
+          static_cast<hmi_apis::Common_Result::eType>(hmi_response_code))) {
     if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     } else {
@@ -546,7 +527,10 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
           if (0 < vr_commands.length()) {
             // copy only first synonym
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
-            item[strings::text] = vr_commands[0].asString();
+            // Since there is no custom data from application side, SDL should
+            // construct prompt and append delimiter to each item
+            item[strings::text] = vr_commands[0].asString() +
+                                  profile::Profile::instance()->tts_delimiter();
             msg_params[strings::help_prompt][index++] = item;
           }
         }

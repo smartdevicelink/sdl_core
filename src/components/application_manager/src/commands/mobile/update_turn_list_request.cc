@@ -44,8 +44,7 @@ namespace application_manager {
 namespace commands {
 
 UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message),
-   result_(mobile_apis::Result::INVALID_ENUM) {
+ : CommandRequestImpl(message) {
 }
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {
@@ -63,32 +62,29 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    mobile_apis::Result::eType processing_result =
-        MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
-    if (mobile_apis::Result::SUCCESS != processing_result) {
-      if (mobile_apis::Result::INVALID_DATA == processing_result) {
-        LOG4CXX_ERROR(logger_, "INVALID_DATA!");
-        SendResponse(false, processing_result);
-        return;
-      }
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-        LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-        result_ = processing_result;
-      }
-    }
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, processing_result);
+    return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
+    smart_objects::SmartObject& turn_list_array =
+        ((*message_)[strings::msg_params][strings::turn_list]);
+    for (uint32_t i = 0; i < turn_list_array.length(); ++i) {
+      if((turn_list_array[i].keyExists(strings::turn_icon)) &&
+          (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImage(
+              turn_list_array[i][strings::turn_icon], app))) {
+        LOG4CXX_ERROR_EXT(
+            logger_,
+            "MessageHelper::VerifyImage return INVALID_DATA");
+        SendResponse(false, mobile_apis::Result::INVALID_DATA);
+        return;
+      }
+    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -141,11 +137,13 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
+      HMICapabilities& hmi_capabilities =
+          ApplicationManagerImpl::instance()->hmi_capabilities();
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != result_) {
-        result_code = result_;
-      }
+      bool result = (mobile_apis::Result::SUCCESS == result_code) ||
+          ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
+          (hmi_capabilities.is_ui_cooperating()));
+
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;

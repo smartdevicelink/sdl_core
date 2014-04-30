@@ -151,19 +151,20 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
-     * \param connection_handle Connection identifier whithin which session has to be started.
+     * \param connection_handle Connection identifier within which session has to be started.
      * \param sessionId Identifier of the session to be started
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t& session_id,
+      const uint8_t& protocol_version,
       const protocol_handler::ServiceType& service_type);
 
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
-     * \param connection_handle Connection identifier whithin which session exists
+     * \param connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
@@ -178,7 +179,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
      * whithin which session exists and session number.
-     * \param  connection_handle Connection identifier whithin which session exists
+     * \param  connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session
      * \return int32_t Unique key for session
      */
@@ -223,7 +224,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
 
     /**
-     * \brief Method which should start devices discoveryng
+     * \brief Method which should start devices discovering
      */
     virtual void StartDevicesDiscovery();
 
@@ -238,9 +239,27 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
     /*
+     * Function used by HearbeatMonitior to close session on HB timeout
+     * \param connection_handle Connection handler within which session exists
+     * \param session_id Identifier of the session to be ended
+     * \param ServiceList list of services which associated with session
+     */
+    virtual void CloseSession(ConnectionHandle connection_handle,
+                              uint8_t session_id,
+                              const ServiceList& service_list);
+
+    void SetProtocolHandler(protocol_handler::ProtocolHandler* handler);
+
+    /*
+     * Send heartbeat message to mobile app
+     */
+    virtual void SendHeartBeat(ConnectionHandle connection_handle,
+                               uint8_t session_id);
+
+    /*
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
-    void KeepConnectionAlive(uint32_t connection_key);
+    void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
   private:
     /**
      * \brief Default class constructor
@@ -287,6 +306,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Cleans connection list on destruction
      */
     utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
+
+    protocol_handler::ProtocolHandler* protocol_handler_;
 
     DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);

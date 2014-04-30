@@ -1010,6 +1010,7 @@ SDL.SDLModel = Em.Object.create({
             if (!exist) {
                 SDL.SDLModel.connectedDevices[params.deviceList[i].id] = {
                     "name": params.deviceList[i].name,
+                    "id": params.deviceList[i].id,
                     "sdlFunctionality": {
                         "popUpId": null,
                         "allowed": false

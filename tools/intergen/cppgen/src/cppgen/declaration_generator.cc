@@ -174,7 +174,7 @@ void DeclarationGenerator::GenerateCodeForStruct(const Struct* strct) {
     }
     if (preferences_->generate_dbus) {
       StructTypeFromDbusReaderConstructor(
-            preferences_, strct, true).Declare(&o, true);
+            preferences_, strct, true, base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(strct, true).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            strct, true).Declare(&o, true);
@@ -285,8 +285,8 @@ void DeclarationGenerator::GenerateCodeForRequest(const Request& request,
       StructTypeToJsonMethod(&request).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &request, false).Declare(&o, true);
+      StructTypeFromDbusReaderConstructor(preferences_, &request, false,
+                                          base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(&request, false).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            &request, false).Declare(&o, true);
@@ -337,8 +337,8 @@ void DeclarationGenerator::GenerateCodeForResponse(const Response& response) {
 
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &response, false).Declare(&o, true);
+      StructTypeFromDbusReaderConstructor(preferences_, &response, false,
+                                          base_class_name).Declare(&o, true);
       StructTypeToDbusWriterMethod(&response, false).Declare(&o , true);
 
       StructTypeDbusMessageSignatureMethod(preferences_,
@@ -390,8 +390,8 @@ void DeclarationGenerator::GenerateCodeForNotification(
       StructTypeToJsonMethod(&notification).Declare(&o , true);
     }
     if (preferences_->generate_dbus) {
-      StructTypeFromDbusReaderConstructor(preferences_,
-                                          &notification, false).Declare(&o , true);
+      StructTypeFromDbusReaderConstructor(preferences_, &notification, false,
+                                          base_class_name).Declare(&o , true);
       StructTypeToDbusWriterMethod(&notification, false).Declare(&o , true);
       StructTypeDbusMessageSignatureMethod(preferences_,
                                            &notification, false).Declare(&o, true);
