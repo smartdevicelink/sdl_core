@@ -156,14 +156,14 @@ class MessageHelper {
      * is not possible
      */
     static mobile_api::HMILevel::eType StringToHMILevel(
-        const std::string& hmi_level);
+      const std::string& hmi_level);
 
     /*
     * @brief Used to obtain string representation of app's
     * HMI Level.
     * @param hmi_level Desired HMI Level
     */
-    static const char* StringifiedHMILevel(
+    static std::string StringifiedHMILevel(
       mobile_apis::HMILevel::eType hmi_level);
 
     /*
@@ -346,7 +346,7 @@ class MessageHelper {
      * @param correlation_id Correlation id from request
      */
     static void SendUpdateSDLResponse(const std::string& result,
-                                            uint32_t correlation_id);
+                                      uint32_t correlation_id);
 
     /**
      * @brief Send OnStatusUpdate to HMI on policy update status change
@@ -414,7 +414,10 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImageFiles(
-      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+
+    static mobile_apis::Result::eType VerifyImageVrHelpItems(
+        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 
@@ -435,8 +438,8 @@ class MessageHelper {
      * @return Common language string representation
      */
     static std::string CommonLanguageToString(
-        hmi_apis::Common_Language::eType language);
-private:
+      hmi_apis::Common_Language::eType language);
+  private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
 

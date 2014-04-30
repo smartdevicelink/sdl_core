@@ -58,7 +58,7 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
   uint32_t message_id = m->message_id;
   std::map<uint32_t, TimevalStruct>::const_iterator it = time_starts.find(message_id);
   if (it == time_starts.end()) {
-    LOG4CXX_ERROR(logger_, "Cant find start time for message" << message_id);
+    LOG4CXX_WARN(logger_, "Cant find start time for message" << message_id);
     return;
   }
   m->begin= time_starts[message_id];

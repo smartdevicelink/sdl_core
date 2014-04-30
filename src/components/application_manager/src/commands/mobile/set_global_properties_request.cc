@@ -81,18 +81,30 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  // Check for image file(s) in vrHelpItem
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::menu_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return " << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
   }
-
+  // Check for image file(s) in vrHelpItem
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
+        (*message_)[strings::msg_params][strings::vr_help], app)) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return INVALID_DATA!" );
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+  }
 
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(

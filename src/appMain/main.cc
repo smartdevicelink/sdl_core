@@ -73,7 +73,7 @@ const char kApplicationVersion[] = "Develop";
 #ifdef __QNX__
 bool Execute(std::string command, const char * const *) {
   if (system(command.c_str()) == -1) {
-    LOG4CXX_INFO(logger, "Can't start HMI!");
+    LOG4CXX_FATAL(logger, "Can't start HMI!");
     return false;
   }
   return true;
@@ -85,13 +85,13 @@ bool Execute(std::string file, const char * const * argv) {
 
   switch (pid_hmi) {
     case -1: {  // Error
-      LOG4CXX_INFO(logger, "fork() failed!");
+      LOG4CXX_FATAL(logger, "fork() failed!");
       return false;
     }
     case 0: {  // Child process
       int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
       if (0 > fd_dev0) {
-        LOG4CXX_WARN(logger, "Open dev0 failed!");
+        LOG4CXX_FATAL(logger, "Open dev0 failed!");
         return false;
       }
       // close input/output file descriptors.
@@ -129,7 +129,7 @@ bool InitHmi() {
 
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
+  LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
   return false;
 }
 
@@ -137,7 +137,7 @@ std::ifstream file_str;
 file_str.open("hmi_link");
 
 if (!file_str.is_open()) {
-  LOG4CXX_INFO(logger, "File with HMI link was not opened!");
+  LOG4CXX_FATAL(logger, "File with HMI link was not opened!");
   return false;
 }
 
@@ -154,7 +154,7 @@ LOG4CXX_INFO(logger,
 file_str.close();
 
 if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
+  LOG4CXX_FATAL(logger, "HMI index.html doesn't exist!");
   return false;
 }
 

@@ -67,15 +67,18 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+  if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyImage((*message_)[strings::msg_params]
+                                               [strings::cmd_icon], app);
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return " << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
   }
 
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {

@@ -33,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
+
 #include <cstring>
 #include <cstdlib>
 

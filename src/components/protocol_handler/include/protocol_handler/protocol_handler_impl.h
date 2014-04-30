@@ -179,6 +179,11 @@ class ProtocolHandlerImpl
      */
     void SetTimeMetricObserver(PHMetricObserver* observer);
 
+    /*
+     * Prepare and send heartbeat message to mobile
+     */
+    void SendHeartBeat(int32_t connection_id, uint8_t session_id);
+
   protected:
 
     /**

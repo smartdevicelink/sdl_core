@@ -235,7 +235,7 @@ void RegisterAppInterfaceRequest::Run() {
           app->set_allowed_support_navigation(true);
         }
       }
-    }    
+    }
 
     // Add device to policy table and set device info, if any
     std::string device_mac_address =
@@ -252,8 +252,14 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
-    policy::PolicyHandler::instance()->CheckAppPolicyState(
-      msg_params[strings::app_id].asString());
+    // TODO(KKolodiy): need remove policy_manager
+    policy::PolicyManager* policy_manager =
+        policy::PolicyHandler::instance()->policy_manager();
+    if (!policy_manager) {
+      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+      return;
+    }
+    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -286,10 +292,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   if (!params) {
     std::string mobile_app_id =
-        (*message_)[strings::msg_params][strings::app_id].asString();
+      (*message_)[strings::msg_params][strings::app_id].asString();
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
-        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
+      policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
+      usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
@@ -602,13 +608,19 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result = policy::PolicyHandler::instance()->policy_manager()
-                     ->GetInitialAppData(
+  // TODO(KKolodiy): need remove method policy_manager
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return mobile_apis::Result::REJECTED;
+  }
+  const bool init_result = policy_manager->GetInitialAppData(
                        message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
                        &app_hmi_types);
 
   if (!init_result) {
-    LOG4CXX_INFO(logger_, "Error during initial application data check.");
+    LOG4CXX_ERROR(logger_, "Error during initial application data check.");
     return mobile_apis::Result::INVALID_DATA;
   }
 
@@ -617,7 +629,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
           app_nicknames.begin(), app_nicknames.end(),
           message[strings::msg_params][strings::app_name].asString());
     if (app_nicknames.end() == it) {
-      LOG4CXX_INFO(logger_,
+      LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
       return mobile_apis::Result::INVALID_DATA;
@@ -767,7 +779,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
   int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asInt();
+                          .asInt();
 
   const std::set<ApplicationSharedPtr>& applications =
     ApplicationManagerImpl::instance()->applications();

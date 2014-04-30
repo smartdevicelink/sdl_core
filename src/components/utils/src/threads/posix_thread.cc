@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
+
 #include <limits.h>
 #include <stddef.h>
 

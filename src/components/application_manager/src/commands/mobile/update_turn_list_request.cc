@@ -71,15 +71,20 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
+    smart_objects::SmartObject& turn_list_array =
+        ((*message_)[strings::msg_params][strings::turn_list]);
+    for (uint32_t i = 0; i < turn_list_array.length(); ++i) {
+      if((turn_list_array[i].keyExists(strings::turn_icon)) &&
+          (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImage(
+              turn_list_array[i][strings::turn_icon], app))) {
+        LOG4CXX_ERROR_EXT(
+            logger_,
+            "MessageHelper::VerifyImage return INVALID_DATA");
+        SendResponse(false, mobile_apis::Result::INVALID_DATA);
+        return;
+      }
+    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

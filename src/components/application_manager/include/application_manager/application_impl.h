@@ -111,8 +111,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
 
-  virtual void set_protocol_version(ProtocolVersion protocol_version);
-  virtual ProtocolVersion protocol_version();
+  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
+  virtual ProtocolVersion protocol_version() const;
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
