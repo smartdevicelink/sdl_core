@@ -44,7 +44,6 @@ public class WiProProtocol extends AbstractProtocol {
 
     public WiProProtocol(IProtocolListener protocolListener) {
         super(protocolListener);
-        setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }
 
     public void StartProtocolSession(byte sessionId) {
@@ -108,6 +107,15 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
+    public void SendHeartBeatAckMessage(byte sessionId) {
+        final ProtocolFrameHeader heartbeatAck =
+                ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
+                        getProtocolVersion());
+        final byte[] data = heartbeatAck.assembleHeaderBytes();
+        processProtocolMessage(ServiceType.Heartbeat, getProtocolVersion(), data, sessionId);
+    }
+
+    @Override
     public void SendMessage(final ProtocolMessage protocolMessage) {
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
         final byte sessionID = protocolMessage.getSessionID();
@@ -156,16 +164,6 @@ public class WiProProtocol extends AbstractProtocol {
                     }
                 }
         );
-    }
-
-    @Override
-    public void setProtocolVersion(byte version) {
-        super.setProtocolVersion(version);
-    }
-
-    @Override
-    public byte getProtocolVersion() {
-        return super.getProtocolVersion();
     }
 
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
@@ -256,8 +254,7 @@ public class WiProProtocol extends AbstractProtocol {
             int moreBytesLeft = receivedBytesLength - receivedBytesReadPos;
             if (moreBytesLeft > 0) {
                 byte[] moreBytes = new byte[moreBytesLeft];
-                System.arraycopy(receivedBytes, receivedBytesReadPos,
-                        moreBytes, 0, moreBytesLeft);
+                System.arraycopy(receivedBytes, receivedBytesReadPos, moreBytes, 0, moreBytesLeft);
                 HandleReceivedBytes(moreBytes, moreBytesLeft);
             }
         }

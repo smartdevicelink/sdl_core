@@ -622,14 +622,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
-        if (_protocol != null) {
-            Logger.d(CLASS_NAME + " Asked to send heartbeat");
-            final ProtocolFrameHeader heartbeat =
-                    ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
-            heartbeat.setSessionID(getSessionId());
-            final byte[] bytes = heartbeat.assembleHeaderBytes();
-            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
-        }
+        Logger.d(CLASS_NAME + " Asked to send heartbeat");
+        _protocol.SendHeartBeatMessage(getSessionId());
     }
 
     @Override
@@ -642,15 +636,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor) {
-        if (_protocol != null) {
-            Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
-            final ProtocolFrameHeader heartbeat =
-                    ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
-                            _protocol.getProtocolVersion());
-            heartbeat.setSessionID(getSessionId());
-            final byte[] bytes = heartbeat.assembleHeaderBytes();
-            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
-        }
+        Logger.d(CLASS_NAME + " Asked to send heartbeat ack");
+        _protocol.SendHeartBeatAckMessage(getSessionId());
     }
 
     public byte getSessionId() {

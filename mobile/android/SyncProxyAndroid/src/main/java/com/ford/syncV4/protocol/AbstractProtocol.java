@@ -40,6 +40,7 @@ public abstract class AbstractProtocol {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
         _protocolListener = protocolListener;
+        setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }// end-ctor
 
 
@@ -97,6 +98,12 @@ public abstract class AbstractProtocol {
     public abstract void SendHeartBeatMessage(byte sessionId);
 
     /**
+     * Send heart beat ack header
+     * @param sessionId id of the current session
+     */
+    public abstract void SendHeartBeatAckMessage(byte sessionId);
+
+    /**
      * This method starts a protocol currentSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
      * currentSession has been established.
@@ -122,7 +129,8 @@ public abstract class AbstractProtocol {
     public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
 
     // This method is called whenever the protocol receives a complete frame
-    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data, MessageFrameAssembler assembler) {
+    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
+                                               MessageFrameAssembler assembler) {
         if (data != null) {
             Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
         } else {
@@ -140,7 +148,6 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
-
         resetHeartbeatAck();
         composeMessage(header, data, offset, length);
     }
@@ -336,5 +343,6 @@ public abstract class AbstractProtocol {
 
     protected void resetDataStructureToProtocolVersion() {
         mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+        mHeaderBufWritePos = 0;
     }
 }
