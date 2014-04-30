@@ -252,8 +252,14 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
-    policy::PolicyHandler::instance()->policy_manager()->CheckAppPolicyState(
-      msg_params[strings::app_id].asString());
+    // TODO(KKolodiy): need remove policy_manager
+    policy::PolicyManager* policy_manager =
+        policy::PolicyHandler::instance()->policy_manager();
+    if (!policy_manager) {
+      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+      return;
+    }
+    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -602,8 +608,14 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  const bool init_result = policy::PolicyHandler::instance()->policy_manager()
-                     ->GetInitialAppData(
+  // TODO(KKolodiy): need remove method policy_manager
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return mobile_apis::Result::REJECTED;
+  }
+  const bool init_result = policy_manager->GetInitialAppData(
                        message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
                        &app_hmi_types);
 

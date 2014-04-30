@@ -47,6 +47,7 @@
 #include "smart_objects/enum_schema_item.h"
 #include "utils/file_system.h"
 #include "utils/macro.h"
+#include "utils/logger.h"
 
 namespace application_manager {
 
@@ -335,8 +336,14 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
                 .tts_name());
     }
     std::string priority;
-    policy::PolicyHandler::instance()->policy_manager()->GetPriority(
-        application_impl.mobile_app_id()->asString(), &priority);
+    // TODO(KKolodiy): need remove method policy_manager
+    policy::PolicyManager* policy_manager =
+        policy::PolicyHandler::instance()->policy_manager();
+    if (!policy_manager) {
+      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+      return;
+    }
+    policy_manager->GetPriority(application_impl.mobile_app_id()->asString(), &priority);
     if (!priority.empty()) {
         message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
     }
@@ -1190,8 +1197,14 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
     (*message)[strings::msg_params][strings::app_id] = app_id;
 
     std::string priority;
-    policy::PolicyHandler::instance()->policy_manager()->GetPriority(
-        app->mobile_app_id()->asString(), &priority);
+    // TODO(KKolodiy): need remove method policy_manager
+    policy::PolicyManager* policy_manager =
+        policy::PolicyHandler::instance()->policy_manager();
+    if (!policy_manager) {
+      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+      return;
+    }
+    policy_manager->GetPriority(app->mobile_app_id()->asString(), &priority);
 
     if (!priority.empty()) {
         (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
