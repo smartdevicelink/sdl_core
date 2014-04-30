@@ -373,7 +373,8 @@ void PolicyHandler::OnPendingPermissionChange(
     case mobile_apis::HMILevel::HMI_FULL:
     case mobile_apis::HMILevel::HMI_LIMITED:
     case mobile_apis::HMILevel::HMI_BACKGROUND: {
-      if (permissions.isAppPermissionsRevoked) {
+      if (permissions.isAppPermissionsRevoked
+          || permissions.appUnauthorized) {
         application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
           app->app_id(), permissions);
         policy_manager_->RemovePendingPermissionChanges(policy_app_id);
@@ -423,7 +424,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
 }
 
 bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
-                                          const BinaryMessage& pt_string) {
+    const BinaryMessage& pt_string) {
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
@@ -448,7 +449,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
       hmi_apis::FunctionID::VehicleInfo_GetVehicleData, correlation_id);
 #endif
 #ifdef HMI_DBUS_API
-      hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
+    hmi_apis::FunctionID::VehicleInfo_GetOdometer, correlation_id);
 #endif
     std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
@@ -774,6 +775,20 @@ void PolicyHandler::OnSystemError(int code) {
       LOG4CXX_WARN(logger_, "System error is unknown");
     }
   }
+}
+
+std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
+  application_manager::ApplicationSharedPtr app =
+    application_manager::ApplicationManagerImpl::instance()
+    ->application_by_policy_id(policy_app_id);
+
+  if (!app) {
+    LOG4CXX_WARN(
+      logger_,
+      "Connection_key not found for application_id:" << policy_app_id);
+    return "";
+  }
+  return  app->name();
 }
 
 }  //  namespace policy

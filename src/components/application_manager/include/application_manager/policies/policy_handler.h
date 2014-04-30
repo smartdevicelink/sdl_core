@@ -214,6 +214,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   uint32_t GetAppIdForSending();
 
+  std::string GetAppName(const std::string& policy_app_id);
+
  protected:
   /**
    * Starts next retry exchange policy table
