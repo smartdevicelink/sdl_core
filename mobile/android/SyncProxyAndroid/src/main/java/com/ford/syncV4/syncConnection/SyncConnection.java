@@ -6,6 +6,8 @@ import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
+import com.ford.syncV4.protocol.ProtocolFrameHeader;
+import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -42,7 +44,7 @@ import java.util.Hashtable;
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
  * and Session management methods.
- *
+ * <p/>
  * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
  * connection
  */
@@ -89,6 +91,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Set {@link com.ford.syncV4.test.TestConfig} object
+     *
      * @param mTestConfig {@link com.ford.syncV4.test.TestConfig}
      */
     public void setTestConfig(TestConfig mTestConfig) {
@@ -99,7 +102,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
      */
     public void init(BaseTransportConfig transportConfig) {
         init(transportConfig, null);
@@ -109,8 +112,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      * Initialize transport with provided configuration and transport instance
      *
      * @param transportConfig configuration of the transport to be used, refer to
-     * {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport an instance of transport (Bluetooth, USB, WiFi)
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         // Initialize the transport
@@ -157,8 +160,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
             // Apply a value which has been set for the Test Cases
             if (mTestConfig != null) {
-                ((WiProProtocol) _protocol).set_TEST_ProtocolMinVersion(mTestConfig.getProtocolMinVersion());
-                ((WiProProtocol) _protocol).set_TEST_ProtocolMaxVersion(mTestConfig.getProtocolMaxVersion());
+                _protocol.set_TEST_ProtocolMinVersion(mTestConfig.getProtocolMinVersion());
+                _protocol.set_TEST_ProtocolMaxVersion(mTestConfig.getProtocolMaxVersion());
             }
         }
 
@@ -199,6 +202,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     // If transport is still connected, sent EndProtocolSessionMessage
                     if (sendFinishMessages) {
                         _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
+                        stopHeartbeatMonitor();
                     }
                 }
             }
@@ -213,9 +217,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }*/
 
         Logger.d("Close connection:" + keepConnection);
-        if (!keepConnection) {
-            stopHeartbeatMonitor();
-        }
         synchronized (TRANSPORT_REFERENCE_LOCK) {
 
             stopH264();
@@ -339,6 +340,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Start a connection of the provided or specified transport
+     *
      * @throws SyncException
      */
     public void startTransport() throws SyncException {
@@ -424,12 +426,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void initialiseSession() {
+        startProtocolSession();
+    }
+
+    public void startHeartbeatTimer() {
         if (mHeartbeatMonitor != null) {
             mHeartbeatMonitor.start();
-        } else {
-            // TODO :
         }
-        startProtocolSession();
     }
 
     private void startProtocolSession() {
@@ -447,10 +450,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     /**
      * Return the version of protocol
+     *
      * @return byte value of the protocol version
      */
     public byte getProtocolVersion() {
-        return ((WiProProtocol) _protocol).getProtocolVersion();
+        return _protocol.getProtocolVersion();
     }
 
     @Override
@@ -556,9 +560,23 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onResetHeartbeat(){
+    public void onProtocolHeartbeat() {
         if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.notifyTransportActivity();
+            mHeartbeatMonitor.heartbeatReceived();
+        }
+    }
+
+    @Override
+    public void onResetHeartbeatAck() {
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.notifyTransportOutputActivity();
+        }
+    }
+
+    @Override
+    public void onResetHeartbeat() {
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.notifyTransportInputActivity();
         }
     }
 
@@ -604,16 +622,35 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
-        Logger.d(CLASS_NAME + " Asked to send heartbeat");
-        _protocol.SendHeartBeatMessage(getSessionId());
+        if (_protocol != null) {
+            Logger.d(CLASS_NAME + " Asked to send heartbeat");
+            final ProtocolFrameHeader heartbeat =
+                    ProtocolFrameHeaderFactory.createHeartbeat(ServiceType.Heartbeat, _protocol.getProtocolVersion());
+            heartbeat.setSessionID(getSessionId());
+            final byte[] bytes = heartbeat.assembleHeaderBytes();
+            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        }
     }
 
     @Override
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
         mIsHeartbeatTimedout = true;
-        closeConnection((byte) 0, false, false);
+        closeConnection((byte) 0, false, true);
         mConnectionListener.onHeartbeatTimedOut();
+    }
+
+    @Override
+    public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor) {
+        if (_protocol != null) {
+            Logger.d(CLASS_NAME + " Asked to send heartbeat ACK");
+            final ProtocolFrameHeader heartbeat =
+                    ProtocolFrameHeaderFactory.createHeartbeatACK(ServiceType.Heartbeat,
+                            _protocol.getProtocolVersion());
+            heartbeat.setSessionID(getSessionId());
+            final byte[] bytes = heartbeat.assembleHeaderBytes();
+            onProtocolMessageBytesToSend(bytes, 0, bytes.length);
+        }
     }
 
     public byte getSessionId() {

@@ -1,5 +1,4 @@
-/**
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -43,6 +42,5 @@ class Metric {
     virtual std::string GetStyledString() = 0;
     virtual ~Metric(){}
 };
-
-}
+}  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_

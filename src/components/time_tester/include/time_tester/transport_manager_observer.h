@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -35,22 +35,20 @@
 
 #include "transport_manager/time_metric_observer.h"
 #include "utils/message_queue.h"
+#include "utils/date_time.h"
 
 namespace time_tester {
 
 class TimeManager;
 
 class TransportManagerObserver: public transport_manager::TMMetricObserver {
-
-  public:
-
-    explicit TransportManagerObserver(TimeManager* time_manager);
-    virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
-    virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
-private:
-    TimeManager* time_manager_;
-    std::map<const protocol_handler::RawMessage*, time_t> time_starts;
+ public:
+  explicit TransportManagerObserver(TimeManager* time_manager);
+  virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
+  virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
+ private:
+  TimeManager* time_manager_;
+  std::map<const protocol_handler::RawMessage*, TimevalStruct> time_starts;
 };
-
-}
+}  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_OBSERVER_H_

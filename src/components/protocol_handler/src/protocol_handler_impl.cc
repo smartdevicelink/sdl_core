@@ -301,6 +301,21 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
   return RESULT_OK;
 }
 
+void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
+                                               uint8_t session_id) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      SERVICE_TYPE_ZERO, FRAME_DATA_HEART_BEAT, session_id,
+      0, 0));
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
                                                  bool final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -362,10 +377,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr& message,
 
 void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   LOG4CXX_TRACE_ENTER(logger_);
-  connection_handler::ConnectionHandlerImpl* connection_handler =
-      connection_handler::ConnectionHandlerImpl::instance();
-  // Connection handler should be accessed from TM thread only
-  connection_handler->KeepConnectionAlive(tm_message->connection_key());
 
   if (tm_message) {
     LOG4CXX_INFO_EXT(
@@ -762,6 +773,10 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
                    "Received heart beat for connection " << connection_id);
       return HandleControlMessageHeartBeat(connection_id, *(packet.get()));
     }
+    case FRAME_DATA_HEART_BEAT_ACK: {
+      LOG4CXX_INFO(logger_, "Received heart beat ack from mobile app"
+          " for connection " << connection_id);
+    }
     default:
       LOG4CXX_WARN(
           logger_,
@@ -821,7 +836,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    static_cast<int>(packet.protocol_version()));
 
   int32_t session_id = session_observer_->OnSessionStartedCallback(
-      connection_id, packet.session_id(),
+      connection_id, packet.session_id(), packet.protocol_version(),
       ServiceTypeFromByte(packet.service_type()));
 
   if (-1 != session_id) {
@@ -853,6 +868,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 void ProtocolHandlerImpl::Handle(
     const impl::RawFordMessageFromMobile& message) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  connection_handler::ConnectionHandlerImpl* connection_handler =
+        connection_handler::ConnectionHandlerImpl::instance();
+    connection_handler->KeepConnectionAlive(message->connection_key(),
+                                            message->session_id());
 
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||

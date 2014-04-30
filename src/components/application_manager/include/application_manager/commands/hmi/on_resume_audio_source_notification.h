@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,25 +30,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_
 
-#include "transport_manager/common.h"
-#include "utils/date_time.h"
+#include "application_manager/commands/hmi/notification_to_hmi.h"
+#include "application_manager/application_impl.h"
 
-namespace transport_manager {
+namespace application_manager {
 
-class TMMetricObserver {
+namespace commands {
+
+/**
+ * @brief OnResumeAudioSourceNotification command class
+ **/
+class OnResumeAudioSourceNotification : public NotificationToHMI {
  public:
-  struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
-    size_t data_size;
-  };
-  virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
-  virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
+  /**
+   * @brief OnResumeAudioSourceNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnResumeAudioSourceNotification(const MessageSharedPtr& message);
 
-  virtual ~TMMetricObserver(){}
+  /**
+   * @brief OnResumeAudioSourceNotification class destructor
+   **/
+  virtual ~OnResumeAudioSourceNotification();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+
+  DISALLOW_COPY_AND_ASSIGN(OnResumeAudioSourceNotification);
 };
-}  // transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_RESUME_AUDIO_SOURCE_NOTIFICATION_H_

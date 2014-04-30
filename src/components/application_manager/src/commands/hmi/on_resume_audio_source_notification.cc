@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,25 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
+#include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
+#include "interfaces/MOBILE_API.h"
 
-#include "transport_manager/common.h"
-#include "utils/date_time.h"
+namespace application_manager {
 
-namespace transport_manager {
+namespace commands {
 
-class TMMetricObserver {
- public:
-  struct MessageMetric {
-    TimevalStruct begin;
-    TimevalStruct end;
-    size_t data_size;
-  };
-  virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
-  virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
+OnResumeAudioSourceNotification::OnResumeAudioSourceNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
+}
 
-  virtual ~TMMetricObserver(){}
-};
-}  // transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
+OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {
+}
+
+void OnResumeAudioSourceNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnResumeAudioSourceNotification::Run");
+  SendNotification();
+}
+
+}  // namespace commands
+
+}  // namespace application_manager
+

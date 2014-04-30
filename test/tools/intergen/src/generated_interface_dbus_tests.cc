@@ -75,7 +75,7 @@ TEST(GeneratedInterfaceDbusTests, TestDbusAddSubMenuSerializatioDeserialization)
     notification::DummyNotification dn;
     TdStruct tds;
     tds.resArrMap["Hello"].push_back(R_SUCCESS);
-    tds.optionalResArrMap["World"].push_back(R_INVALID_DATA);
+    (*tds.optionalResArrMap)["World"].push_back(R_INVALID_DATA);
     dn.tds.push_back(tds);
     ASSERT_TRUE(dn.is_valid());
     dn.ToDbusWriter(&writer);
@@ -88,7 +88,7 @@ TEST(GeneratedInterfaceDbusTests, TestDbusAddSubMenuSerializatioDeserialization)
     ASSERT_FALSE(reader.has_failed());
     ASSERT_FALSE(reader.HasNext());
     ASSERT_EQ(dn.tds[0].resArrMap["Hello"][0], R_SUCCESS);
-    ASSERT_EQ(dn.tds[0].optionalResArrMap["World"][0], R_INVALID_DATA);
+    ASSERT_EQ((*dn.tds[0].optionalResArrMap)["World"][0], R_INVALID_DATA);
   }
 }
 

@@ -42,63 +42,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     private static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
     private static final int FRAME_SIZE_SHIFT = 100;
     private static final int EXECUTOR_SERVICE_SLEEP_TIME = 150;
-    private static final IProtocolListener DUMMY_PROTOCOL_LISTENER =
-            new IProtocolListener() {
-                @Override
-                public void onProtocolMessageBytesToSend(byte[] msgBytes,
-                                                         int offset,
-                                                         int length) {
-                }
-
-                @Override
-                public void onProtocolMessageReceived(ProtocolMessage msg) {
-                }
-
-                @Override
-                public void onProtocolSessionStarted(Session session,
-                                                     byte version,
-                                                     String correlationID) {
-                }
-
-                @Override
-                public void onProtocolServiceEnded(ServiceType serviceType,
-                                                   byte sessionID,
-                                                   String correlationID) {
-                }
-
-                @Override
-                public void onProtocolHeartbeatACK() {
-                }
-
-                @Override
-                public void onResetHeartbeat() {
-
-                }
-
-                @Override
-                public void onProtocolError(String info, Exception e) {
-                }
-
-                @Override
-                public void onMobileNavAckReceived(int frameReceivedNumber) {
-
-                }
-
-                @Override
-                public void onProtocolAppUnregistered() {
-
-                }
-
-                @Override
-                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-
-                }
-
-                @Override
-                public void onStartServiceNackReceived(ServiceType serviceType) {
-
-                }
-            };
+    @SuppressWarnings("unused")
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
     private WiProProtocol wiProProtocol;
@@ -380,9 +324,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     }
 
     public void testReadingHashIDFromStartSessionACK() throws Throwable {
-        // null as a listener won't work
-        final WiProProtocol protocol = new WiProProtocol(DUMMY_PROTOCOL_LISTENER);
-
         final ByteArrayOutputStream StartSessionACKMessageStream =
                 new ByteArrayOutputStream(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
 
@@ -394,8 +335,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         StartSessionACKMessageStream.write(msgHashID);
 
         final byte[] StartSessionACKMessage = StartSessionACKMessageStream.toByteArray();
-        protocol.HandleReceivedBytes(StartSessionACKMessage, StartSessionACKMessage.length);
-        Assert.assertEquals("HashID is incorrect", 0x1234CDEF, protocol.hashID);
+        wiProProtocol.HandleReceivedBytes(StartSessionACKMessage, StartSessionACKMessage.length);
+        Assert.assertEquals("HashID is incorrect", 0x1234CDEF, wiProProtocol.hashID);
     }
 
     public void testSendingHashIDWithEndSession() throws IOException {
@@ -469,7 +410,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onProtocolHeartbeat() {
+
+            }
+
+            @Override
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -494,6 +440,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         };
@@ -594,7 +545,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onProtocolHeartbeat() {
+
+            }
+
+            @Override
+            public void onResetHeartbeatAck() {
 
             }
 
@@ -620,6 +576,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onStartServiceNackReceived(ServiceType serviceType) {
+
+            }
+
+            @Override
+            public void onResetHeartbeat() {
 
             }
         });
@@ -746,8 +707,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
-        verify(protocolListener).onResetHeartbeat();
+        protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
+        verify(protocolListener).onResetHeartbeatAck();
     }
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {

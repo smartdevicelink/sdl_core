@@ -32,6 +32,7 @@
 
 #include "dbus/dbus_adapter.h"
 #include <dbus/dbus.h>
+#include <sstream>
 #include "formatters/CSmartFactory.hpp"
 #include "utils/logger.h"
 
