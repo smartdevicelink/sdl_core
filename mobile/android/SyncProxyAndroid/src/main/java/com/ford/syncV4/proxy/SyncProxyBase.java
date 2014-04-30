@@ -92,11 +92,11 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.CommonUtils;
-import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.DeviceInfoManager;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -451,6 +451,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private TimerTask _currentReconnectTimerTask = null;
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
+    private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
     private IProtocolMessageHolder protocolMessageHolder =
@@ -972,6 +973,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 final HeartbeatMonitor heartbeatMonitor = 
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
+                heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
 
                 currentSession.setSessionId((byte) 0);
@@ -2936,6 +2938,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void initializeSession() {
         // Initialize a start session procedure
         mSyncConnection.initialiseSession();
+    }
+
+    public static void isHeartbeatAck(boolean isHearBeatAck) {
+        SyncProxyBase.heartBeatAck = isHearBeatAck;
     }
 
     // Private Class to Interface with SyncConnection

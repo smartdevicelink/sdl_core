@@ -17,6 +17,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     //
     private int count = 0;
     private int interval;
+    private boolean isHeartbeatAck = true;
     private IHeartbeatMonitorListener listener;
     private boolean ackReceived;
     private boolean heartbeatReceived;
@@ -33,15 +34,15 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                 if (heartbeatReceived) {
 
 
-                        Logger.d(CLASS_NAME,
-                                "Heartbeat has been received, sending and scheduling heartbeat");
-                        if (listener != null) {
-                            listener.sendHeartbeatACK(HeartbeatMonitor.this);
-                        } else {
-                            Logger.w(CLASS_NAME,
-                                    "Delegate is not set, scheduling heartbeat anyway");
-                        }
-                        heartbeatReceived = false;
+                    Logger.d(CLASS_NAME,
+                            "Heartbeat has been received, sending and scheduling heartbeat");
+                    if (listener != null) {
+                        listener.sendHeartbeatACK(HeartbeatMonitor.this);
+                    } else {
+                        Logger.w(CLASS_NAME,
+                                "Delegate is not set, scheduling heartbeat anyway");
+                    }
+                    heartbeatReceived = false;
 
 
                 } else {
@@ -254,13 +255,19 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     @Override
     public void heartbeatReceived() {
         synchronized (Listener_Lock) {
-            Logger.d(CLASS_NAME + " Heartbeat received");
-            heartbeatReceived = true;
-            count += 1;
-            if (!heartbeatThreadHandler.post(
-                    heartbeatTimeoutRunnable)) {
-                Logger.e(CLASS_NAME + " Couldn't schedule run()");
+            if (isHeartbeatAck) {
+                Logger.d(CLASS_NAME + " Heartbeat received");
+                heartbeatReceived = true;
+                count += 1;
+                if (!heartbeatThreadHandler.post(
+                        heartbeatTimeoutRunnable)) {
+                    Logger.e(CLASS_NAME + " Couldn't schedule run()");
+                }
             }
         }
+    }
+
+    public void isSendHeartbeatAck(boolean heartBeatAck) {
+        isHeartbeatAck = heartBeatAck;
     }
 }

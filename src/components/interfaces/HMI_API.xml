@@ -949,10 +949,10 @@
 
 <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />   
+    <element name="HTTP" />
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />       
-    <element name="AUTH_CHALLENGE" />       
+    <element name="AUTH_REQUEST" />
+    <element name="AUTH_CHALLENGE" />
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
 </enum>
@@ -1104,6 +1104,10 @@
   <enum name="ConsentSource">
     <element name="GUI"/>
     <element name="VUI" />
+  </enum>
+  <enum name="DeviceState">
+    <element name="UNKNOWN"/>
+    <element name="UNPAIRED"/>
   </enum>
   <struct name="UserFriendlyMessage" scope="internal">
     <param name="messageCode" type="String" mandatory="true"/>
@@ -1472,7 +1476,7 @@
     	Desired keypress mode.
     	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
-  </param> 
+  </param>
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -3714,6 +3718,10 @@
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
       <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
+    </function>
+    <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
+      <param name="deviceState" type="Common.DeviceState"/>
+      <param name="deviceInternalId" type="String" />
     </function>
 </interface>
 </interfaces>
