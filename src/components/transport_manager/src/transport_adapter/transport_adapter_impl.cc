@@ -380,6 +380,32 @@ void TransportAdapterImpl::ConnectionCreated(
   pthread_mutex_unlock(&connections_mutex_);
 }
 
+void TransportAdapterImpl::DeviceDisconnected(const DeviceUID& device_handle,
+                                              const DisconnectDeviceError& error) {
+
+  ApplicationList app_list = GetApplicationList(device_handle);
+  for (ApplicationList::const_iterator i = app_list.begin(); i != app_list.end(); ++i) {
+    ApplicationHandle app_handle = *i;
+    for (TransportAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it) {
+      TransportAdapterListener* listener = *it;
+      listener->OnUnexpectedDisconnect(this, device_handle, app_handle, CommunicationError());
+    }
+  }
+
+  pthread_mutex_lock(&connections_mutex_);
+  for (TransportAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it) {
+    TransportAdapterListener* listener = *it;
+    listener->OnDisconnectDeviceDone(this, device_handle);
+  }
+  for (ApplicationList::const_iterator i = app_list.begin(); i != app_list.end(); ++i) {
+    ApplicationHandle app_handle = *i;
+    connections_.erase(std::make_pair(device_handle, app_handle));
+  }
+  pthread_mutex_unlock(&connections_mutex_);
+
+  RemoveDevice(device_handle);
+}
+
 void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle) {
   bool device_disconnected = true;
@@ -405,19 +431,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
   pthread_mutex_unlock(&connections_mutex_);
 
   if (device_disconnected) {
-    pthread_mutex_lock(&devices_mutex_);
-    DeviceMap::iterator it = devices_.find(device_id); //ykazakov: there is no erase for const iterator for QNX
-    if (it != devices_.end()) {
-      DeviceSptr device = it->second;
-      if (!device->keep_on_disconnect()) {
-        devices_.erase(it);
-        for (TransportAdapterListenerList::iterator it = listeners_.begin();
-             it != listeners_.end(); ++it) {
-          (*it)->OnDeviceListUpdated(this);
-        }
-      }
-    }
-    pthread_mutex_unlock(&devices_mutex_);
+    RemoveDevice(device_id);
   }
 
   Store();
@@ -623,6 +637,22 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
     }
   }
   return errors_occured ? OK : FAIL;
+}
+
+void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
+  pthread_mutex_lock(&devices_mutex_);
+  DeviceMap::iterator i = devices_.find(device_handle); //ykazakov: there is no erase for const iterator on QNX
+  if (i != devices_.end()) {
+    DeviceSptr device = i->second;
+    if (!device->keep_on_disconnect()) {
+      devices_.erase(i);
+      for (TransportAdapterListenerList::iterator it = listeners_.begin(); it != listeners_.end(); ++it) {
+        TransportAdapterListener* listener = *it;
+        listener->OnDeviceListUpdated(this);
+      }
+    }
+  }
+  pthread_mutex_unlock(&devices_mutex_);
 }
 
 }  // namespace transport_adapter

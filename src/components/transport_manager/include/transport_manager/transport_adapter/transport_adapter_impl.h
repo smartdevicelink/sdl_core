@@ -309,6 +309,14 @@ class TransportAdapterImpl : public TransportAdapter,
                              const ConnectError& error);
 
   /**
+   * @brief Remome specified device and all its connections
+   * @param device_handle Device unique identifier.
+   * @param error Error class that contains details of this error situation.
+   */
+  virtual void DeviceDisconnected(const DeviceUID& device_handle,
+                                  const DisconnectDeviceError& error);
+
+  /**
    * @brief Delete specified connection from the container(map) of connections
    *and launch event in the device adapter listener.
    *
@@ -424,6 +432,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about connecting applications on device
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
+
+  /**
+   * @brief Remove specified device
+   * @param device_handle Device unique identifier.
+   */
+  void RemoveDevice(const DeviceUID& device_handle);
 
   /**
    * @brief Listener for device adapter notifications.

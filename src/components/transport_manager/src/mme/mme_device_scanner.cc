@@ -157,7 +157,7 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
       std::string product;
       bool attached;
       if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
-        if (true || attached) {
+        if (attached) {
           std::string device_name = vendor + " " + product;
           MmeDevicePtr mme_device(new MmeDevice(mount_point, protocol, device_name, unique_device_id));
           devices.insert(std::make_pair(msid, mme_device));
@@ -235,11 +235,25 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
 }
 
 void MmeDeviceScanner::OnDeviceLeft(msid_t msid) {
+  bool erased;
   devices_lock_.Ackquire();
-  bool erased = devices_.erase(msid) > 0;
+  DeviceContainer::iterator i = devices_.find(msid);
+  if (i != devices_.end()) {
+    MmeDevicePtr mme_device = i->second;
+    DeviceUID device_id = mme_device->unique_device_id();
+    controller_->DeviceDisconnected(device_id, DisconnectDeviceError());
+    devices_.erase(i);
+    erased = true;
+  }
+  else {
+    erased = false;
+  }
   devices_lock_.Release();
   if (erased) {
     NotifyDevicesUpdated();
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Cannot remove device with msid = " << msid);
   }
 }
 
@@ -371,6 +385,7 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           else {
             LOG4CXX_WARN(logger_, "Error occured while sending message to " << MmeDeviceScanner::ack_mq_name << ", errno = " << errno);
           }
+          break;
         }
 #define SDL_MSG_IPOD_DEVICE_DISCONNECT 0x1C
         case SDL_MSG_IPOD_DEVICE_DISCONNECT: {
@@ -389,6 +404,7 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           else {
             LOG4CXX_WARN(logger_, "Error occured while sending message to " << MmeDeviceScanner::ack_mq_name << ", errno = " << errno);
           }
+          break;
         }
       }
     }
