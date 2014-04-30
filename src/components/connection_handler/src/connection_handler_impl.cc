@@ -432,7 +432,8 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  //transport_manager_->SearchDevices();
+
+  transport_manager_->SearchDevices();
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
