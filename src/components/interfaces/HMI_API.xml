@@ -3721,7 +3721,8 @@
     </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
       <param name="deviceState" type="Common.DeviceState" mandatory="true" />
-      <param name="deviceInternalId" type="String" mandatory="true" />
+      <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
+      <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
 </interface>
 </interfaces>

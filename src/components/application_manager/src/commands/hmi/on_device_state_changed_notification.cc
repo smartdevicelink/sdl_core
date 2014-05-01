@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/on_device_state_changed_notification.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -39,8 +40,8 @@ namespace application_manager {
 namespace commands {
 
 OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+  const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
 OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {
@@ -52,7 +53,13 @@ void OnDeviceStateChangedNotification::Run() {
   if ((*message_)[strings::msg_params]["deviceState"]
       == hmi_apis::Common_DeviceState::UNPAIRED) {
     std::string device_id = (*message_)[strings::msg_params]["deviceInternalId"]
-        .asString();
+                            .asString();
+    if (device_id.empty()) {
+      if ((*message_)[strings::msg_params].keyExists("deviceId")) {
+        device_id = MessageHelper::GetDeviceMacAddressForHandle(
+                      (*message_)[strings::msg_params]["deviceId"]["id"].asInt());
+      }
+    }
     policy::PolicyHandler::instance()->RemoveDevice(device_id);
   }
 }
