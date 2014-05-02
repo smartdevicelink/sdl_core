@@ -71,6 +71,11 @@ PolicyHandler::~PolicyHandler() {
 }
 
 PolicyManager* PolicyHandler::LoadPolicyLibrary() {
+  if (profile::Profile::instance()->policy_turn_off()) {
+    LOG4CXX_WARN(logger_, "System is configured to work without policy functionality.");
+    policy_manager_ = NULL;
+    return NULL;
+  }
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
   char* error_string = dlerror();
@@ -78,7 +83,6 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
     policy_manager_ = CreateManager();
     policy_manager_->set_listener(this);
 #if defined (EXTENDED_POLICY)
-    //exchange_handler_ = new PTExchangeHandlerImpl(this);
     exchange_handler_ = new PTExchangeHandlerExt(this);
 #else
     exchange_handler_ = new PTExchangeHandlerImpl(this);
