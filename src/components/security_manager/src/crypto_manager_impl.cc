@@ -65,12 +65,14 @@ bool CryptoManagerImpl::Init(Mode mode,
 
   mode_ = mode;
   const SSL_METHOD *method;
+  // TODO (EZamakhov) : add TLS1.0 protocolo
   switch (protocol) {
     case SSLv3:
       method = mode == SERVER ?
           SSLv3_server_method() :
           SSLv3_client_method();
       break;
+    // FIXME (EZamakhov) : fix build for QNX 6.5.0
     case TLSv1_1:
       method = mode == SERVER ?
           TLSv1_1_server_method() :
