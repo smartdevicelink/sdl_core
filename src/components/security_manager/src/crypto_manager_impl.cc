@@ -64,25 +64,40 @@ bool CryptoManagerImpl::Init(Mode mode,
   instance_count_++;
 
   mode_ = mode;
+  const bool is_server = (mode == SERVER);
+#if OPENSSL_VERSION_NUMBER < 0x1000100f
+  SSL_METHOD *method;
+#else
   const SSL_METHOD *method;
+#endif
   // TODO (EZamakhov) : add TLS1.0 protocolo
   switch (protocol) {
     case SSLv3:
-      method = mode == SERVER ?
+      method = is_server ?
           SSLv3_server_method() :
           SSLv3_client_method();
       break;
     // FIXME (EZamakhov) : fix build for QNX 6.5.0
     case TLSv1_1:
-      method = mode == SERVER ?
+#if OPENSSL_VERSION_NUMBER < 0x1000100f
+      LOG4CXX_FATAL(logger_, "OpenSSL has no TLSv1_1 with version lower 1.0.1");
+      return false;
+#else
+      method = is_server ?
           TLSv1_1_server_method() :
           TLSv1_1_client_method();
       break;
+#endif
     case TLSv1_2:
-      method = mode == SERVER ?
+#if OPENSSL_VERSION_NUMBER < 0x1000100f
+      LOG4CXX_FATAL(logger_, "OpenSSL has no TLSv1_2 with version lower 1.0.1");
+      return false;
+#else
+      method = is_server ?
           TLSv1_2_server_method() :
           TLSv1_2_client_method();
       break;
+#endif
     default:
       LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
       return false;

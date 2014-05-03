@@ -119,7 +119,7 @@ bool LifeCycle::StartComponents() {
 
   std::string ciphers_list;
   profile::Profile::instance()->ReadStringValue(
-        &ciphers_list, "ALL", security_manager::SecurityManager::ConfigSection(), "CipherList");
+        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManager::ConfigSection(), "CipherList");
 
   bool verify_peer;
   profile::Profile::instance()->ReadBoolValue(
@@ -130,6 +130,7 @@ bool LifeCycle::StartComponents() {
       &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
+  // TODO (EZamakhov) : use SSL_TXT_SSLV2 from ssl.h
   if (protocol_name == "TLSv1.1") {
     protocol = security_manager::TLSv1_1;
   } else if (protocol_name == "TLSv1.2") {
