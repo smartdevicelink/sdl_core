@@ -83,6 +83,12 @@ class ProtocolHandler {
      */
     virtual void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames) = 0;
 
+    /*
+     * //TODO(EZ): add brief
+     * Prepare and send heartbeat message to mobile app
+     */
+    virtual void SendHeartBeat(int32_t connection_id, uint8_t session_id) = 0;
+
   protected:
     /**
      * \brief Destructor

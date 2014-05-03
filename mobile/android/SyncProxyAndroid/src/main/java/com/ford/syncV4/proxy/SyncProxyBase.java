@@ -461,6 +461,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     private TimerTask _currentReconnectTimerTask = null;
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
+    private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
     private IProtocolMessageHolder protocolMessageHolder =
@@ -1089,6 +1090,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
                 final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
+                heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
 
                 currentSession.setSessionId((byte) 0);
@@ -3137,6 +3139,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mSyncConnection.initialiseSession();
     }
 
+    public static void isHeartbeatAck(boolean isHearBeatAck) {
+        SyncProxyBase.heartBeatAck = isHearBeatAck;
+    }
+
     // Private Class to Interface with SyncConnection
     public class SyncInterfaceBroker implements ISyncConnectionListener {
 
@@ -3242,11 +3248,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
                 Logger.i(message);
 
+<<<<<<< HEAD
 
                 if (session.hasService(ServiceType.RPC)) {
                     onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
                 }
 
+=======
+                startRPCProtocolService(session.getSessionId(), correlationID);
+                mSyncConnection.startHeartbeatTimer();
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
             }
         }
 

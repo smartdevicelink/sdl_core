@@ -1,9 +1,4 @@
-/**
- * \file connection_handlerImpl.hpp
- * \brief Connection handler class.
- * Observes TransportManager and ProtocolHandler, stores information regarding connections
- * and sessions and provides it to AppManager.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -66,6 +61,8 @@ namespace connection_handler {
 /**
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
+ * Observes TransportManager and ProtocolHandler, stores information regarding connections
+ * and sessions and provides it to AppManager.
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
   public transport_manager::TransportManagerListenerEmpty,
@@ -160,12 +157,15 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param session_id Identifier of the session to be started
      * \param service_type Type of service
      * \param is_protected would be service protected
+     * \param protocol_version Version of protocol
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
+    // TODO(EZamakhov): make version last parameter
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t& session_id,
       const protocol_handler::ServiceType& service_type,
+      const uint8_t& protocol_version,
       const bool is_protected);
 
     /**
@@ -251,7 +251,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
       const protocol_handler::ServiceType& service_type) OVERRIDE;
 
     /**
-     * \brief Method which should start devices discoveryng
+     * \brief Method which should start devices discovering
      */
     virtual void StartDevicesDiscovery();
 
@@ -267,12 +267,29 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
-    /**
-     * \brief Keep connection associated with the key from
-     * being closed by heartbeat monitor
+    /*
+     * Function used by HearbeatMonitior to close session on HB timeout
+     * \param connection_handle Connection handler within which session exists
+     * \param session_id Identifier of the session to be ended
+     * \param ServiceList list of services which associated with session
      */
-    void KeepConnectionAlive(uint32_t connection_key);
- private:
+    virtual void CloseSession(ConnectionHandle connection_handle,
+                              uint8_t session_id,
+                              const ServiceList& service_list);
+
+    void SetProtocolHandler(protocol_handler::ProtocolHandler* handler);
+
+    /*
+     * Send heartbeat message to mobile app
+     */
+    virtual void SendHeartBeat(ConnectionHandle connection_handle,
+                               uint8_t session_id);
+
+    /*
+     * Keep connection associated with the key from being closed by heartbeat monitor
+     */
+    void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
+  private:
     /**
      * \brief Default class constructor
      */

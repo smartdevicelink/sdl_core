@@ -19,17 +19,18 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
-
     public static final int MTU_SIZE = 1500;
     private final static String FailurePropagating_Msg = "Failure propagating ";
+<<<<<<< HEAD
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static final int SSL_OVERHEAD = 64;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
 
+=======
+    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     boolean _haveHeader = false;
-    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     int _headerBufWritePos = 0;
     ProtocolFrameHeader _currentHeader = null;
     byte[] _dataBuf = null;
@@ -56,6 +57,7 @@ public class WiProProtocol extends AbstractProtocol {
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }
 
+<<<<<<< HEAD
     public byte getProtocolVersion() {
         return mProtocolVersion.getCurrentVersion();
     }
@@ -97,6 +99,8 @@ public class WiProProtocol extends AbstractProtocol {
 
 
     @Override
+=======
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     public void StartProtocolSession(byte sessionId) {
 
         Logger.i("Protocol session should start: " + sessionId);
@@ -175,16 +179,20 @@ public class WiProProtocol extends AbstractProtocol {
         final byte[] data = protocolMessageConverter.getData();
         ServiceType serviceType = protocolMessageConverter.getSessionType();
 
+<<<<<<< HEAD
         processFrameToSend(serviceType, sessionID, protocolMsg.isEncrypted(), data);
     }
 
     private void processFrameToSend(ServiceType serviceType, byte sessionID, boolean encrypted, byte[] data) {
+=======
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
         // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
-                            SyncExceptionCause.SYNC_UNAVAILALBE));
+                            SyncExceptionCause.SYNC_UNAVAILALBE)
+            );
             return;
         }
 
@@ -271,7 +279,7 @@ public class WiProProtocol extends AbstractProtocol {
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
             //if (parsedProtocolVersion <= ProtocolConstants.PROTOCOL_VERSION_MAX) {
-                setProtocolVersion(parsedProtocolVersion);
+            setProtocolVersion(parsedProtocolVersion);
             //}
 
             //Nothing has been read into the buffer and version is 2
@@ -505,10 +513,16 @@ public class WiProProtocol extends AbstractProtocol {
             WiProProtocol.this.handleProtocolHeartbeatACK();
         } // end-method
 
+        private void handleProtocolHeartbeat(ProtocolFrameHeader header,
+                                                byte[] data) {
+            WiProProtocol.this.handleProtocolHeartbeat();
+        } // end-method
+
         private void handleControlFrame(ProtocolFrameHeader header, byte[] data) {
             if (header.getFrameData() == FrameDataControlFrameType.HeartbeatACK.getValue()) {
                 handleProtocolHeartbeatACK(header, data);
-                // TODO heartbeat messages currently are not handled
+            } else if (header.getFrameData() == FrameDataControlFrameType.Heartbeat.getValue()) {
+                handleProtocolHeartbeat(header, data);
             } else if (header.getFrameData() == FrameDataControlFrameType.StartService.getValue()) {
                 sendStartProtocolSessionACK(header.getServiceType(), header.getSessionID());
             } else if (header.getFrameData() == FrameDataControlFrameType.StartServiceACK.getValue()) {
@@ -635,6 +649,7 @@ public class WiProProtocol extends AbstractProtocol {
         _protocolListener.onStartServiceNackReceived(serviceType);
     }
 
+<<<<<<< HEAD
     private void updateDataStructureToProtocolVersion(byte version) {
         Logger.d(CLASS_NAME + " Data structure updated to v:" + version);
         // TODO : Incorporate SSL overhead const
@@ -653,3 +668,6 @@ public class WiProProtocol extends AbstractProtocol {
         _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     }
 }
+=======
+}
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034

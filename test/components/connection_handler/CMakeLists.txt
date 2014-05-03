@@ -27,7 +27,7 @@ set (LIBRARIES
 set (SOURCES
   ./src/connection_handler_impl_test.cc
   ./src/connection_test.cc
-  ./src/heart_beat_monitor_test.cc
+#  ./src/heart_beat_monitor_test.cc
 )
 
 create_test("test_ConnectionHandler" "${SOURCES}" "${LIBRARIES}")

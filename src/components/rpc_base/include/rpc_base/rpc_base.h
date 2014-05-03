@@ -289,6 +289,7 @@ class Nullable : public T {
  public:
   // Methods
   Nullable();
+  explicit Nullable(dbus::MessageReader* reader);
   // Need const and non-const versions to beat all-type accepting constructor
   explicit Nullable(Json::Value* value);
   explicit Nullable(const Json::Value* value);

@@ -23,7 +23,9 @@ public interface IProtocolListener {
      */
     void onProtocolHeartbeatACK();
 
-    void onResetHeartbeat();
+    void onProtocolHeartbeat();
+
+    void onResetHeartbeatAck();
 
 	// Called to indicate that a protocol error was detected in received data.
 	void onProtocolError(String info, Exception e);
@@ -35,4 +37,6 @@ public interface IProtocolListener {
     void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID);
 
     void onStartServiceNackReceived(ServiceType serviceType);
+
+    void onResetHeartbeat();
 }

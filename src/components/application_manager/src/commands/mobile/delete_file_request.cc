@@ -97,7 +97,8 @@ void DeleteFileRequest::Run() {
   }
 }
 
-void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+void DeleteFileRequest::SendFileRemovedNotification(
+    const AppFile* file) const {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 

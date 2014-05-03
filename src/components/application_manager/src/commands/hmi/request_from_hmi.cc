@@ -31,6 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -38,6 +39,9 @@ namespace commands {
 
 RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
+
+  // Replace HMI app id with Mobile connection id
+  ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*(message.get()));
 }
 
 RequestFromHMI::~RequestFromHMI() {

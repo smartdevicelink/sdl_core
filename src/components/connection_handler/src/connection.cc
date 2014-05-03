@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -36,6 +36,8 @@
 
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_packet.h"
+#include "utils/logger.h"
 #include "utils/macro.h"
 #include "security_manager/security_query.h"
 
@@ -53,13 +55,18 @@ Connection::Connection(ConnectionHandle connection_handle,
                        int32_t heartbeat_timeout)
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
-      connection_device_handle_(connection_device_handle),
-      heartbeat_monitor_(heartbeat_timeout, this) {
+      connection_device_handle_(connection_device_handle) {
   DCHECK(connection_handler_);
+
+  heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
+  heart_beat_monitor_thread_ = new threads::Thread("HeartBeatMonitorThread",
+                                                   heartbeat_monitor_);
 }
 
 Connection::~Connection() {
   session_map_.clear();
+  heart_beat_monitor_thread_->stop();
+  delete heart_beat_monitor_thread_;
 }
 
 // Finds a key not presented in std::map<unsigned char, T>
@@ -77,22 +84,28 @@ int32_t findGap(const std::map<unsigned char, T>& map) {
 }  // namespace
 
 
-int32_t Connection::AddNewSession() {
+int32_t Connection::AddNewSession(const uint8_t& protocol_version) {
   sync_primitives::AutoLock lock(session_map_lock_);
 
   int32_t result = -1;
 
-  if (session_map_.empty()) {
-    heartbeat_monitor_.BeginMonitoring();
-  }
-
-  int32_t session_id = findGap(session_map_);
+  const int32_t session_id = findGap(session_map_);
   if (session_id > 0) {
+
     /* whenever new session created RPC and Bulk services are
     established automatically */
-      // TODO: Dmitriy Trunov + Klimenko
+    // TODO: Dmitriy Trunov + Klimenko
     session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
     session_map_[session_id].service_list.push_back(protocol_handler::kBulk);
+
+    if (protocol_handler::PROTOCOL_VERSION_3 == protocol_version) {
+      heartbeat_monitor_->AddSession(session_id);
+
+      // start monitoring thread when first session with heartbeat added
+      if (session_map_.size() == 1) {
+        heart_beat_monitor_thread_->start();
+      }
+    }
 
     result = session_id;
   }
@@ -105,8 +118,9 @@ int32_t Connection::RemoveSession(uint8_t session) {
   int32_t result = -1;
   SessionMapIterator it = session_map_.find(session);
   if (session_map_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
   } else {
+    heartbeat_monitor_->RemoveSession(session);
     session_map_.erase(session);
     result = session;
   }
@@ -126,7 +140,7 @@ bool Connection::AddNewService(uint8_t session,
 
   SessionMapIterator session_it = session_map_.find(session);
   if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
@@ -154,7 +168,7 @@ bool Connection::AddNewService(uint8_t session,
         service_Rpc_it->is_protected_ = true;
       }
     } else {
-      LOG4CXX_ERROR(logger_, "Session " << static_cast<int>(session) <<
+      LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session) <<
                     " already established  service " << service_type);
       return false;
     }
@@ -177,7 +191,7 @@ bool Connection::RemoveService(
 
   SessionMapIterator session_it = session_map_.find(session);
   if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
@@ -185,7 +199,7 @@ bool Connection::RemoveService(
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), service_type);
   if (service_it == service_list.end()) {
-    LOG4CXX_ERROR(logger_, "Session " << session << " didn't established"
+    LOG4CXX_WARN(logger_, "Session " << session << " didn't established"
                   " service " << service_type);
     return false;
   }
@@ -198,7 +212,7 @@ int Connection::SetSSLContext(uint8_t sessionId,
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return security_manager::SecurityQuery::ERROR_INTERNAL;
   }
   Session& session = session_it->second;
@@ -211,7 +225,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
-    LOG4CXX_ERROR(logger_, "Session not found in this connection!");
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return NULL;
   }
   const Session& session = session_it->second;
@@ -223,7 +237,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
                                                      service_list.end(),
                                                      service_type);
   if (service_it == service_list.end()) {
-    LOG4CXX_ERROR(logger_, "Service not found in this session!");
+    LOG4CXX_WARN(logger_, "Service not found in this session!");
     return NULL;
   }
   const Service& service = *service_it;
@@ -245,12 +259,37 @@ const SessionMap Connection::session_map() const {
   return session_map_;
 }
 
-void Connection::Close() {
-  connection_handler_->CloseConnection(connection_handle_);
+void Connection::CloseSession(uint8_t session_id) {
+  size_t size;
+  ServiceList service_list;
+
+  {
+    sync_primitives::AutoLock lock(session_map_lock_);
+
+    SessionMapIterator session_it = session_map_.find(session_id);
+    if (session_it == session_map_.end()) {
+      return;
+    }
+
+    size = session_map_.size();
+    service_list = session_map_[session_id].service_list;
+  }
+
+  //Close connection if it is last session
+  if (1 == size) {
+    connection_handler_->CloseConnection(connection_handle_);
+  } else {
+    connection_handler_->CloseSession(connection_handle_, session_id,
+                                      service_list);
+  }
 }
 
-void Connection::KeepAlive() {
-  heartbeat_monitor_.KeepAlive();
+void Connection::SendHeartBeat(uint8_t session_id) {
+  connection_handler_->SendHeartBeat(connection_handle_, session_id);
 }
 
-}/* namespace connection_handler */
+void Connection::KeepAlive(uint8_t session_id) {
+  heartbeat_monitor_->KeepAlive(session_id);
+}
+
+} // namespace connection_handler

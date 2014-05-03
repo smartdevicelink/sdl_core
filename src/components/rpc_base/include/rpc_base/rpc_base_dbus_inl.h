@@ -41,7 +41,7 @@ namespace rpc {
 
 // static
 inline PrimitiveType::ValueState PrimitiveType::InitHelper(bool is_next) {
-  return is_next ? kValid : kUninitialized;
+  return is_next ? kValid : kInvalid;
 }
 
 // static
@@ -263,6 +263,16 @@ struct DbusSignatureHelper<Optional<T> > {
   }
 };
 
+template<typename T>
+struct DbusSignatureHelper<Nullable<T> > {
+  static void DbusSignature(std::string* signature) {
+    (*signature) += DBUS_STRUCT_BEGIN_CHAR;
+    (*signature) += rpc::impl::DbusTypeCode<bool>();
+    rpc::impl::DbusSignatureHelper<T>::DbusSignature(signature);
+    (*signature) += DBUS_STRUCT_END_CHAR;
+  }
+};
+
 // Helper Optional type initialization functipon
 template<typename T>
 T TakeOptional(dbus::MessageReader* reader) {
@@ -270,6 +280,14 @@ T TakeOptional(dbus::MessageReader* reader) {
   bool available = struct_reader.TakeBool();
   T value(&struct_reader);
   return available ? value : T();
+}
+
+// Helper Nullable type initialization functipon
+template<typename T>
+bool TakeNullable(dbus::MessageReader* reader) {
+  dbus::MessageReader struct_reader = reader->TakeStructReader();
+  bool is_null = struct_reader.TakeBool();
+  return is_null;
 }
 
 }  // namespace impl
@@ -351,6 +369,12 @@ inline Map<T, minsize, maxsize>::Map(dbus::MessageReader* reader)
       this->insert(typename MapType::value_type(key, T(&dictvalue_reader)));
     }
   }
+}
+
+template<typename T>
+inline Nullable<T>::Nullable(dbus::MessageReader* reader)
+  : T(reader),
+    marked_null_(impl::TakeNullable<T>(reader)){
 }
 
 template<typename T>

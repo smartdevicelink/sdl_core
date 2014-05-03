@@ -98,8 +98,8 @@ void DefinitionGenerator::GenerateCodeForStruct(const Struct* strct) {
     StructTypeToJsonMethod(strct).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        strct, true).Define(&o , false);
+    StructTypeFromDbusReaderConstructor(preferences_, strct, true,
+                                        base_class_name).Define(&o , false);
     StructTypeToDbusWriterMethod(strct, true).Define(&o , false);
     StructTypeDbusMessageSignatureMethod(preferences_,
                                          strct, true).Define(&o, false);
@@ -138,8 +138,8 @@ void DefinitionGenerator::GenerateCodeForResponse(const Response& response) {
     StructTypeToJsonMethod(&response).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &response, false).Define(&o , false);
+    StructTypeFromDbusReaderConstructor(preferences_, &response, false,
+                                        base_class_name).Define(&o , false);
     StructTypeToDbusWriterMethod(&response, false).Define(&o , false);
     StructTypeDbusMessageSignatureMethod(preferences_,
                                          &response, false).Define(&o, false);
@@ -174,8 +174,8 @@ void DefinitionGenerator::GenerateCodeForNotification(
     StructTypeToJsonMethod(&notification).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &notification, false).Define(&o, false);
+    StructTypeFromDbusReaderConstructor(preferences_, &notification, false,
+                                        base_class_name).Define(&o, false);
     StructTypeToDbusWriterMethod(&notification, false).Define(&o , false);
     StructTypeDbusMessageSignatureMethod(preferences_,
                                          &notification, false).Define(&o, false);
@@ -210,8 +210,8 @@ void DefinitionGenerator::GenerateCodeForRequest(const Request& request,
     StructTypeToJsonMethod(&request).Define(&o , false);
   }
   if (preferences_->generate_dbus) {
-    StructTypeFromDbusReaderConstructor(preferences_,
-                                        &request, false).Define(&o , false);
+    StructTypeFromDbusReaderConstructor(preferences_, &request, false,
+                                        base_class_name).Define(&o , false);
     StructTypeToDbusWriterMethod(&request, false).Define(&o , false);
     StructTypeDbusMessageSignatureMethod(preferences_,
                                          &request, false).Define(&o, false);

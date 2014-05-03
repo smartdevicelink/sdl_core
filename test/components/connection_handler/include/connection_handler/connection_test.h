@@ -36,6 +36,7 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 #include "connection_handler/connection.h"
+#include "protocol_handler/protocol_packet.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/service_type.h"
 #include "utils/shared_ptr.h"
@@ -61,7 +62,8 @@ class ConnectionTest: public ::testing::Test {
     ConnectionHandlerImpl::destroy();
   }
   void StartSession() {
-    session_id = connection_->AddNewSession();
+    using namespace protocol_handler;
+    session_id = connection_->AddNewSession(PROTOCOL_VERSION_3);
     EXPECT_NE(session_id, -1);
     const SessionMap sessionMap = connection_->session_map();
     EXPECT_FALSE(sessionMap.empty());
@@ -90,7 +92,7 @@ class ConnectionTest: public ::testing::Test {
     if (found_result) {
       const Service& service = *it;
       EXPECT_EQ(service.is_protected_, protection);
-      }
+    }
   }
 
   void RemoveService(const protocol_handler::ServiceType service_type,

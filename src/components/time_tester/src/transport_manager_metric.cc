@@ -40,8 +40,10 @@ namespace time_tester {
 std::string TransportManagerMectic::GetStyledString() {
   Json::Value result;
   result[strings::logger] = "TransportManager";
-  result[strings::begin]  = date_time::DateTime::getuSecs(message_metric->begin);
-  result[strings::end]    = date_time::DateTime::getuSecs(message_metric->end);
+  result[strings::begin] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
+  result[strings::end] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
   result[strings::data_size] = static_cast<uint32_t>(message_metric->data_size);
   return result.toStyledString();
 }

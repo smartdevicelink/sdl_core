@@ -158,7 +158,7 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
-  // protocol_handler_->set_crypto_manager(crypto_manager_);
+  connection_handler_->SetProtocolHandler(protocol_handler_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);

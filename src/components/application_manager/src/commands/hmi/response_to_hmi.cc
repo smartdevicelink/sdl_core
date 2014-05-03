@@ -39,6 +39,8 @@ namespace commands {
 
 ResponseToHMI::ResponseToHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
+  // Replace Mobile connection id with HMI app id
+  ApplicationManagerImpl::instance()->ReplaceMobileByHMIAppId(*(message.get()));
 }
 
 ResponseToHMI::~ResponseToHMI() {

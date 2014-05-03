@@ -43,7 +43,7 @@
 #include "application_manager/formatters_commands.h"
 
 #include "connection_handler/connection_test.h"
-#include "connection_handler/heart_beat_monitor_test.h"
+//#include "connection_handler/heart_beat_monitor_test.h"
 #include "connection_handler/connection_handler_impl_test.h"
 #include "security_manager/crypto_manager_impl_test.h"
 #include "security_manager/security_manager_test.h"

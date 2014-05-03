@@ -45,17 +45,18 @@ namespace security_manager_test {
   class SessionObserverMock: public protocol_handler::SessionObserver {
    public:
     MOCK_METHOD2(SetSSLContext,
-                 int( const uint32_t& key,
+                 int (const uint32_t& key,
                       security_manager::SSLContext* context));
     MOCK_METHOD2(GetSSLContext,
                  security_manager::SSLContext* (
                    const uint32_t& key,
                    const protocol_handler::ServiceType& service_type));
-    MOCK_METHOD4(OnSessionStartedCallback,
+    MOCK_METHOD5(OnSessionStartedCallback,
                  int32_t(
                    const transport_manager::ConnectionUID& connection_handle,
-                   const uint8_t& sessionId,
+                   const uint8_t& session_id,
                    const protocol_handler::ServiceType& service_type,
+                   const uint8_t& protocol_version,
                    const bool is_protected));
     MOCK_METHOD4(OnSessionEndedCallback,
                  uint32_t(
@@ -98,6 +99,8 @@ namespace security_manager_test {
                  void(protocol_handler::ProtocolObserver* observer));
     MOCK_METHOD2(SendFramesNumber,
                  void(uint32_t connection_key, int32_t number_of_frames));
+    MOCK_METHOD2(SendHeartBeat,
+                 void(int32_t connection_id, uint8_t session_id));
   };
   /*
    * MOCK implementation of security_manager::SSLContext interface

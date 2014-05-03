@@ -58,8 +58,6 @@ PerformInteractionRequest::PerformInteractionRequest(
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
-  subscribe_on_event(
-      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {
@@ -108,15 +106,15 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
+        (*message_)[strings::msg_params][strings::vr_help], app)) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImageVrHelpItems return INVALID_DATA!");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
   }
 
   smart_objects::SmartObject& choice_list =
@@ -220,11 +218,6 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_PerformInteraction: {
       LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
       ProcessPerformInteractionResponse(event.smart_object());
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered: {
-      LOG4CXX_INFO(logger_, "Received OnAppUnregistered event");
-      ProcessAppUnregisteredNotification(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
@@ -357,19 +350,6 @@ void PerformInteractionRequest::ProcessVRResponse(
     ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
   }
 }
-
-void PerformInteractionRequest::ProcessAppUnregisteredNotification
-  (const smart_objects::SmartObject& message) {
-  LOG4CXX_INFO(logger_,
-               "PerformInteractionRequest::ProcessAppUnregisteredNotification");
-  const uint32_t app_id = connection_key();
-  if (app_id == message[strings::msg_params][strings::app_id].asUInt()) {
-    DisablePerformInteraction();
-  } else {
-    LOG4CXX_INFO(logger_, "Notification was sent from another application");
-  }
-}
-
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {

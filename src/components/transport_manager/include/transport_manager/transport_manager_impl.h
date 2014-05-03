@@ -99,15 +99,15 @@ class TransportManagerImpl : public TransportManager {
     typedef utils::SharedPtr<TimerInternal> TimerInternalSharedPointer;
     TimerInternalSharedPointer timer;
     bool shutDown;
+    DeviceHandle device_handle_;
     int messages_count;
 
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id);
-
+                       const ApplicationHandle& app_id,
+                       const DeviceHandle& device_handle);
     void DisconnectFailedRoutine();
-
   };
  public:
 

@@ -74,9 +74,25 @@ class ConnectionHandler {
       connection_handler::DeviceHandle device_handle) = 0;
 
   /*
+   * //TODO(EZ):add brief
    * Close all associated sessions and close the connection pointed by handle
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) = 0;
+
+  /*
+   * //TODO(EZ):add brief
+   * Close session
+   */
+  virtual void CloseSession(ConnectionHandle connection_handle,
+                            uint8_t session_id,
+                            const ServiceList& service_list) = 0;
+
+  /*
+   * //TODO(EZ):add brief
+   * Send heartbeat to mobile app
+   */
+  virtual void SendHeartBeat(ConnectionHandle connection_handle,
+                            uint8_t session_id) = 0;
 
 
  protected:

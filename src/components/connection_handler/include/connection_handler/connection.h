@@ -1,8 +1,4 @@
-/**
- * \file Connection.hpp
- * \brief Connection class.
- * Stores connection information
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -134,7 +130,7 @@ typedef SessionMap::const_iterator SessionMapConstIterator;
 
 /**
  * \class Connection
- * \brief Connection class
+ * \brief Stores connection information
  */
 class Connection {
  public:
@@ -167,7 +163,7 @@ class Connection {
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int32_t AddNewSession();
+  int32_t AddNewSession(const uint8_t& protocol_version);
 
   /**
    * \brief Removes session from connection
@@ -223,14 +219,19 @@ class Connection {
   const SessionMap session_map() const;
 
   /**
-   * \brief Close this connection and all associated sessions
+   * \brief Close session
    */
-  void Close();
+  void CloseSession(uint8_t session_id);
 
   /**
-   * \brief Prevent this connection from being closed by heartbeat timeout
+   * \brief Prevent session from being closed by heartbeat timeout
    */
-  void KeepAlive();
+  void KeepAlive(uint8_t session_id);
+
+  /*
+   * \brief Send heartbeat to  mobile app
+   */
+  void SendHeartBeat(uint8_t session_id);
 
  private:
   /**
@@ -258,7 +259,9 @@ class Connection {
   /**
    * \brief monitor that closes connection if there is no traffic over it
    */
-  HeartBeatMonitor heartbeat_monitor_;
+  HeartBeatMonitor* heartbeat_monitor_;
+  threads::Thread* heart_beat_monitor_thread_;
+
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };
 

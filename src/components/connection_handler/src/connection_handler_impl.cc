@@ -1,9 +1,4 @@
-/**
- * \file ConnectionHandlerImpl.cpp
- * \brief Connection handler class.
- * \Observes TransportManager and ProtocolHandler, stores information regarding connections
- * \and sessions and provides it to AppManager.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -67,10 +62,10 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(
 }
 
 ConnectionHandlerImpl::ConnectionHandlerImpl()
-    : connection_handler_observer_(NULL),
-      transport_manager_(NULL),
-      protocol_handler_(NULL),
-      connection_list_deleter_(&connection_list_) {
+  : connection_handler_observer_(NULL),
+    transport_manager_(NULL),
+    protocol_handler_(NULL),
+    connection_list_deleter_(&connection_list_) {
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
@@ -214,8 +209,8 @@ void ConnectionHandlerImpl::RemoveConnection(
 
 int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID& connection_handle,
-    const uint8_t& sessionId, const protocol_handler::ServiceType& service_type,
-    const bool is_protected) {
+    const uint8_t& session_id, const protocol_handler::ServiceType& service_type,
+    const uint8_t& protocol_version, const bool is_protected) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
   int32_t new_session_id = -1;
@@ -251,19 +246,19 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 
   Connection* connection = it->second;
-  if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
-    new_session_id = connection->AddNewSession();
+  if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
+    new_session_id = connection->AddNewSession(protocol_version);
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
     }
   } else {
-    if (!connection->AddNewService(sessionId, service_type, is_protected)) {
+    if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service "
                     << static_cast<int>(service_type) << "!");
       return -1;
     }
-    new_session_id = sessionId;
+    new_session_id = session_id;
   }
 
   if (connection_handler_observer_) {
@@ -276,7 +271,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       connection->RemoveSession(new_session_id);
       new_session_id = -1;
     } else if (!success) {
-      connection->RemoveService(sessionId, service_type);
+      connection->RemoveService(session_id, service_type);
       new_session_id = -1;
     }
   }
@@ -315,10 +310,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   }
 
   if (0 != connection_handler_observer_) {
-    int32_t sessionKey = KeyFromPair(connection_handle, sessionId);
-    connection_handler_observer_->OnServiceEndedCallback(sessionKey,
+    int32_t session_key = KeyFromPair(connection_handle, sessionId);
+    connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
-    result = sessionKey;
+    result = session_key;
   }
 
   return result;
@@ -490,7 +485,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  // transport_manager_->SearchDevices();
+  transport_manager_->SearchDevices();
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -544,20 +539,59 @@ void ConnectionHandlerImpl::CloseConnection(
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  transport_manager::ConnectionUID connection_uid = ConnectionUIDFromHandle(
-      connection_handle);
-  transport_manager_->Disconnect(connection_uid);
+  transport_manager::ConnectionUID connection_uid =
+      ConnectionUIDFromHandle(connection_handle);
+  transport_manager_->DisconnectForce(connection_uid);
 }
 
-void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
+void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
+                                         uint8_t session_id,
+                                         const ServiceList& service_list) {
+  if (0 != connection_handler_observer_) {
+    ServiceListConstIterator it = service_list.begin();
+    for (;it != service_list.end(); ++it) {
+      connection_handler_observer_->OnServiceEndedCallback(session_id, it->service_type);
+    }
+  }
+
+  transport_manager::ConnectionUID connection_id =
+        ConnectionUIDFromHandle(connection_handle);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionListIterator itr = connection_list_.find(connection_id);
+
+  if (connection_list_.end() != itr) {
+    itr->second->RemoveSession(session_id);
+  }
+}
+
+void ConnectionHandlerImpl::SetProtocolHandler(
+    protocol_handler::ProtocolHandler* handler) {
+  protocol_handler_ = handler;
+}
+
+void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
+                                          uint8_t session_id) {
+
+  transport_manager::ConnectionUID connection_uid =
+      ConnectionUIDFromHandle(connection_handle);
+  if(protocol_handler_)
+    protocol_handler_->SendHeartBeat(connection_uid, session_id);
+}
+
+void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
+                                                uint8_t session_id) {
   uint32_t connection_handle = 0;
-  uint8_t session_id = 0;
-  PairFromKey(connection_key, &connection_handle, &session_id);
+  uint8_t session = 0;
+  PairFromKey(connection_key, &connection_handle, &session);
+
+  LOG4CXX_INFO(logger_, "Keep alive for session: " <<
+               static_cast<int32_t>(session_id));
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
-    it->second->KeepAlive();
+    it->second->KeepAlive(session_id);
   }
 }
 

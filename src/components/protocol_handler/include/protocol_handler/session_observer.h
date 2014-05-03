@@ -40,6 +40,7 @@
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "connection_handler/connection_handler.h"
+
 #include "security_manager/ssl_context.h"
 
 /**
@@ -66,13 +67,15 @@ public:
      * has to be started.
      * \param sessionId Identifier of the session to be ended
      * \param service_type Type of service
+     * \param protocol_version Version of protocol
      * \param is_protected would be service protected
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& sessionId,
-      const ServiceType& service_type,
+      const uint8_t& session_id,
+      const protocol_handler::ServiceType& service_type,
+      const uint8_t& protocol_version,
       const bool is_protected) = 0;
 
     /**

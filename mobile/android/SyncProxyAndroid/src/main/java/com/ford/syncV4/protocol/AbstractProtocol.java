@@ -5,7 +5,11 @@ import android.os.Environment;
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+<<<<<<< HEAD
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
+=======
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.DebugTool;
@@ -19,9 +23,11 @@ import java.util.Arrays;
 
 public abstract class AbstractProtocol {
 
-    private static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
+    protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
+    public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
 
     protected IProtocolListener _protocolListener = null;
+    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     //protected IProtocolListener ProtocolListener() { return _protocolListener; }
     // Lock to ensure all frames are sent uninterupted
     private Object _frameLock = new Object();
@@ -29,6 +35,7 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
+<<<<<<< HEAD
     protected boolean hasRPCStarted;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
@@ -40,6 +47,9 @@ public abstract class AbstractProtocol {
     }
 
     private ProtocolSecureManager protocolSecureManager;
+=======
+    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -62,6 +72,39 @@ public abstract class AbstractProtocol {
     // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
+
+    public byte getProtocolVersion() {
+        return mProtocolVersion.getCurrentVersion();
+    }
+
+    /**
+     * <b>This method is for the Test Cases only</b>
+     *
+     * @param version test protocol version
+     */
+    public void set_TEST_ProtocolMinVersion(byte version) {
+        ProtocolConstants.PROTOCOL_VERSION_MIN = version;
+        setProtocolVersion(version);
+    }
+
+    /**
+     * <b>This method is for the Test Cases only</b>
+     *
+     * @param version test protocol version
+     */
+    public void set_TEST_ProtocolMaxVersion(byte version) {
+        ProtocolConstants.PROTOCOL_VERSION_MAX = version;
+    }
+
+    public void setProtocolVersion(byte version) {
+        mProtocolVersion.setCurrentVersion(version);
+
+        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            updateDataStructureToProtocolVersion(version);
+        } else {
+            Logger.d(CLASS_NAME + " Protocol version:" + mProtocolVersion.getCurrentVersion());
+        }
+    }
 
     /**
      * This method starts a protocol currentSession. A corresponding call to the protocol
@@ -96,7 +139,7 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
-
+        resetHeartbeat();
         assembler.handleFrame(header, data);
     }
 
@@ -108,7 +151,7 @@ public abstract class AbstractProtocol {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
 
-        resetHeartbeat();
+        resetHeartbeatAck();
         composeMessage(header, data, offset, length);
     }
 
@@ -149,12 +192,19 @@ public abstract class AbstractProtocol {
         } // end-if
     }
 
+<<<<<<< HEAD
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
         byte[] frameHeader = header.assembleHeaderBytes();
         byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
         System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
         System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
         handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+=======
+    private synchronized void resetHeartbeatAck() {
+        if (_protocolListener != null) {
+            _protocolListener.onResetHeartbeatAck();
+        }
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     }
 
     private synchronized void resetHeartbeat() {
@@ -288,5 +338,27 @@ public abstract class AbstractProtocol {
 
     protected void handleProtocolHeartbeatACK() {
         _protocolListener.onProtocolHeartbeatACK();
+    }
+
+    protected void handleProtocolHeartbeat() {
+        _protocolListener.onProtocolHeartbeat();
+    }
+
+    protected void updateDataStructureToProtocolVersion(byte version) {
+        Logger.d(CLASS_NAME + " Data structure updated to v:" + version);
+        // TODO : Incorporate SSL overhead const
+        // Implement here
+
+        switch (version) {
+            case ProtocolConstants.PROTOCOL_VERSION_ONE:
+                AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_1;
+                break;
+            default:
+                AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2;
+                break;
+        }
+
+        WiProProtocol.MAX_DATA_SIZE = WiProProtocol.MTU_SIZE - AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE;
+        _headerBuf = new byte[AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE];
     }
 } // end-class

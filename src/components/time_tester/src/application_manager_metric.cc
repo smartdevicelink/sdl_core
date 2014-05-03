@@ -39,8 +39,10 @@ namespace time_tester {
 std::string ApplicationManagerMetric::GetStyledString() {
   Json::Value result;
   result[strings::logger] = "ApplicationManager";
-  result[strings::begin] = date_time::DateTime::getuSecs(message_metric->begin);
-  result[strings::end]   = date_time::DateTime::getuSecs(message_metric->end);
+  result[strings::begin] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
+  result[strings::end] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
   const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
       message_metric->message->getElement(application_manager::strings::params);
   result[strings::correlation_id] =

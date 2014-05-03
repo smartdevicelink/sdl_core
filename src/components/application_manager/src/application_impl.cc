@@ -79,7 +79,11 @@ ApplicationImpl::~ApplicationImpl() {
 
   subscribed_buttons_.clear();
   subscribed_vehicle_info_.clear();
-
+  if (is_perform_interaction_active()) {
+    set_perform_interaction_active(0);
+    set_perform_interaction_mode(-1);
+    DeletePerformInteractionChoiceSetMap();
+  }
   CleanupFiles();
 }
 
@@ -128,6 +132,10 @@ const smart_objects::SmartObject* ApplicationImpl::active_message() const {
 
 const Version& ApplicationImpl::version() const {
   return version_;
+}
+
+void ApplicationImpl::set_hmi_application_id(uint32_t hmi_app_id) {
+  hmi_app_id_ = hmi_app_id;
 }
 
 const std::string& ApplicationImpl::name() const {
@@ -272,11 +280,12 @@ bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
 
-void ApplicationImpl::set_protocol_version(ProtocolVersion protocol_version) {
+void ApplicationImpl::set_protocol_version(
+    const ProtocolVersion& protocol_version) {
   protocol_version_ = protocol_version;
 }
 
-ProtocolVersion ApplicationImpl::protocol_version() {
+ProtocolVersion ApplicationImpl::protocol_version() const {
   return protocol_version_;
 }
 
