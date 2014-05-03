@@ -61,19 +61,17 @@ void HeartBeatMonitor::threadMain() {
     AutoLock auto_lock(sessions_list_lock_);
 
     it = sessions_.begin();
-
     while (it != sessions_.end()) {
-      if (it->second.heartbeat_expiration_.tv_sec <
-          date_time::DateTime::getCurrentTime().tv_sec) {
+      if (it->second.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
         if (it->second.is_heartbeat_sent_) {
-          LOG4CXX_INFO(logger_, "Session with id "
-                       << static_cast<int32_t>(it->first) <<
-                       " timed out, closing");
-          connection_->CloseSession(it->first);
-          sessions_.erase(it++);
+          LOG4CXX_INFO(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
+          uint8_t session_id = it->first;
+          sessions_.erase(it);
+          it = sessions_.begin();
           if (sessions_.empty()) {
             stop_flag_ = true;
           }
+          connection_->CloseSession(session_id);
         } else {
           it->second.heartbeat_expiration_ =
               date_time::DateTime::getCurrentTime();

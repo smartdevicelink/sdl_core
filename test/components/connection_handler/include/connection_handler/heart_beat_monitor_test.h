@@ -39,13 +39,11 @@
 #include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
-#include "protocol_handler/protocol_packet.h"
 
 namespace test  {
 namespace components  {
 namespace protocol_handler_test {
 using namespace connection_handler;
-using namespace protocol_handler;
 
 class ConnectionHandlerMock: public ConnectionHandler {
  public:
@@ -54,11 +52,6 @@ class ConnectionHandlerMock: public ConnectionHandler {
   MOCK_METHOD0(StartTransportManager,void());
   MOCK_METHOD1(ConnectToDevice, void(DeviceHandle device_handle));
   MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
-  MOCK_METHOD3(CloseSession, void(ConnectionHandle connection_handle,
-                                  uint8_t session_id,
-                                  const ServiceList& service_list));
-  MOCK_METHOD2(SendHeartBeat, void(ConnectionHandle connection_handle,
-                                   uint8_t session_id));
 };
 
 class HeartBeatMonitorTest: public testing::Test {
@@ -69,45 +62,45 @@ class HeartBeatMonitorTest: public testing::Test {
   HeartBeatMonitorTest()
   : connection(42, 0, &connection_handler_mock, kTimeout) {
   }
+  ~HeartBeatMonitorTest() {
+  }
 };
 
 TEST_F(HeartBeatMonitorTest, TimerNotElapsed){
   EXPECT_CALL(connection_handler_mock, CloseConnection(42))
       .Times(0);
-  connection.AddNewSession(PROTOCOL_VERSION_3);
+  connection.AddNewSession();
   sleep(kTimeout - 1);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerElapsed){
   EXPECT_CALL(connection_handler_mock, CloseConnection(42));
-  connection.AddNewSession(PROTOCOL_VERSION_3);
+  connection.AddNewSession();
   sleep(kTimeout + 1);
 }
 TEST_F(HeartBeatMonitorTest, KeptAlive){
   EXPECT_CALL(connection_handler_mock, CloseConnection(42))
       .Times(0);
-  const uint32_t session_id =
-      connection.AddNewSession(PROTOCOL_VERSION_3);
+  connection.AddNewSession();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout - 1);
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive){
   EXPECT_CALL(connection_handler_mock, CloseConnection(42))
       .Times(1);
-  const uint32_t session_id =
-      connection.AddNewSession(PROTOCOL_VERSION_3);
+  connection.AddNewSession();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout - 1);
-  connection.KeepAlive(session_id);
+  connection.KeepAlive();
   sleep(kTimeout + 1);
 }
 
