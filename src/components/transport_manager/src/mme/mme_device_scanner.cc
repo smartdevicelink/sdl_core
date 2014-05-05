@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
+
 #include "utils/logger.h"
 
 #include "transport_manager/mme/mme_device_scanner.h"
@@ -368,7 +370,6 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
       char code = buffer_[0];
       LOG4CXX_DEBUG(logger_, "code = " << (int) code);
       switch (code) {
-#define SDL_MSG_IPOD_DEVICE_CONNECT 0x1A
         case SDL_MSG_IPOD_DEVICE_CONNECT: {
           MmeDeviceInfo* mme_device_info = (MmeDeviceInfo*) (&buffer_[1]);
           msid_t msid = mme_device_info->msid;
@@ -376,7 +377,6 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_CONNECT: msid = " << msid << ", name = " << name);
           parent_->OnDeviceArrived(msid);
           LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_CONNECT_ACK");
-#define SDL_MSG_IPOD_DEVICE_CONNECT_ACK 0x1B
           ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_CONNECT_ACK;
           LOG4CXX_TRACE(logger_, "Sending message to " << MmeDeviceScanner::ack_mq_name);
           if (mq_send(ack_mqd_, ack_buffer_, kAckBufferSize, 0) != -1) {
@@ -387,7 +387,6 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           }
           break;
         }
-#define SDL_MSG_IPOD_DEVICE_DISCONNECT 0x1C
         case SDL_MSG_IPOD_DEVICE_DISCONNECT: {
           MmeDeviceInfo* mme_device_info = (MmeDeviceInfo*) (&buffer_[1]);
           msid_t msid = mme_device_info->msid;
@@ -395,7 +394,6 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_DISCONNECT: msid = " << msid << ", name = " << name);
           parent_->OnDeviceLeft(msid);
           LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK");
-#define SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK 0x1D
           ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK;
           LOG4CXX_TRACE(logger_, "Sending message to " << MmeDeviceScanner::ack_mq_name);
           if (mq_send(ack_mqd_, ack_buffer_, kAckBufferSize, 0) != -1) {

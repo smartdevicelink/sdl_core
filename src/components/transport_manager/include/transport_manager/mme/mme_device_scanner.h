@@ -53,8 +53,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 #include "transport_manager/mme/mme_device.h"
-
-#define MAX_QUEUE_MSG_SIZE 4095
+#include "transport_manager/mme/pasa.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -116,14 +115,6 @@ private:
     virtual void threadMain();
 
    private:
-#pragma pack(push, 1)
-    typedef struct {
-      msid_t msid;
-      char name[256];
-      bool iAP2;
-    } MmeDeviceInfo;
-#pragma pack(pop)
-
     static const int kBufferSize = MAX_QUEUE_MSG_SIZE;
     static const int kAckBufferSize = MAX_QUEUE_MSG_SIZE;
 
