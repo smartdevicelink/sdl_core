@@ -28,6 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+cmake_minimum_required(VERSION 2.8.0)
+
+set (PROJECT smartDeviceLinkCore)
+project (${PROJECT})
+
 #Jenkins integration section
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
@@ -36,6 +41,8 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_MME_SUPPORT "Apple devices support" OFF)
+option(MME_MQ "PASA mqueue event system for Apple devices" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
@@ -113,11 +120,6 @@ endif()
 #Jenkins integration section end
 
 
-cmake_minimum_required(VERSION 2.8.0)
-
-set (PROJECT smartDeviceLinkCore)
-project (${PROJECT})
-
 #ADD_DEPENDENCIES(${PROJECT} Policy)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -150,6 +152,13 @@ endif()
 if (BUILD_BT_SUPPORT)
   add_definitions(-DBLUETOOTH_SUPPORT)
 endif()
+
+if (BUILD_MME_SUPPORT)
+  add_definitions(-DMME_SUPPORT)
+  if (MME_MQ)
+    add_definitions(-DMME_MQ)
+  endif(MME_MQ)
+endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)

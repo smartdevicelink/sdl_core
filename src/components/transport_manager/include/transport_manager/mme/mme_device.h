@@ -30,48 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_adapter.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/usb/common.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
+
+#include "utils/shared_ptr.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbAdapter::UsbAdapter()
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
-                           new UsbConnectionFactory(this), 0),
-      is_initialised_(false),
-      usb_handler_(new UsbHandler()) {
-  static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
-  static_cast<UsbConnectionFactory*>(server_connection_factory_)
-      ->SetUsbHandler(usb_handler_);
-}
+class MmeDevice : public Device {
+ public:
+  typedef enum {UnknownProtocol, IAP, IAP2} Protocol;
 
-UsbAdapter::~UsbAdapter() {}
+  MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id);
 
-DeviceType UsbAdapter::GetDeviceType() const { return "sdl-usb-aoa"; }
-
-bool UsbAdapter::IsInitialised() const {
-  return is_initialised_ && TransportAdapterImpl::IsInitialised();
-}
-
-TransportAdapter::Error UsbAdapter::Init() {
-  TransportAdapter::Error error = usb_handler_->Init();
-  if (error != TransportAdapter::OK) {
-    return error;
+  const std::string& mount_point() const {
+    return mount_point_;
   }
-  error = TransportAdapterImpl::Init();
-  if (error != TransportAdapter::OK) {
-    return error;
-  }
-  is_initialised_ = true;
-  return TransportAdapter::OK;
-}
 
-bool UsbAdapter::ToBeAutoConnected(DeviceSptr device) const {
-  return true;
-}
+  Protocol protocol() const {
+    return protocol_;
+  }
+
+ protected:
+  virtual bool IsSameAs(const Device* other_device) const;
+  virtual ApplicationList GetApplicationList() const;
+
+ private:
+  std::string mount_point_;
+  Protocol protocol_;
+};
+
+typedef utils::SharedPtr<MmeDevice> MmeDevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_

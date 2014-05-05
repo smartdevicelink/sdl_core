@@ -30,65 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_connection_factory.h"
-#include "transport_manager/usb/usb_device.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-
-#if defined(__QNXNTO__)
-#include "transport_manager/usb/qnx/usb_connection.h"
-#else
-#include "transport_manager/usb/libusb/usb_connection.h"
-#endif
-
-#include "utils/logger.h"
+#include "transport_manager/mme/mme_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-
-UsbConnectionFactory::UsbConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller), usb_handler_() {}
-
-TransportAdapter::Error UsbConnectionFactory::Init() {
-  return TransportAdapter::OK;
+MmeDevice::MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id) : Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
 }
 
-void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
-  usb_handler_ = usb_handler;
-}
-
-TransportAdapter::Error UsbConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  DeviceSptr device = controller_->FindDevice(device_uid);
-  if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    return TransportAdapter::BAD_PARAM;
-  }
-
-  UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  UsbConnection* usb_connection =
-    new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-      usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
-
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
-
-  if (usb_connection->Init()) {
-    LOG4CXX_INFO(logger_, "USB connection initialised");
-    return TransportAdapter::OK;
+bool MmeDevice::IsSameAs(const Device* other_device) const {
+  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
+  if (other_mme_device) {
+    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
   }
   else {
-    return TransportAdapter::FAIL;
+    return false;
   }
 }
 
-void UsbConnectionFactory::Terminate() {}
-
-bool UsbConnectionFactory::IsInitialised() const { return true; }
-
-UsbConnectionFactory::~UsbConnectionFactory() {}
+ApplicationList MmeDevice::GetApplicationList() const {
+  ApplicationList app_list;
+  app_list.push_back(1);
+  return app_list;
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
