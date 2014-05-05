@@ -593,7 +593,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         protocolMessage.setData(msgBytes);
         protocolMessage.setJsonSize(msgBytes.length);
         protocolMessage.setMessageType(MessageType.RPC);
-        protocolMessage.setSessionType(ServiceType.RPC);
+        protocolMessage.setServiceType(ServiceType.RPC);
         protocolMessage.setFunctionID(functionID);
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
         return protocolMessage;

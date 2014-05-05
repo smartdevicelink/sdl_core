@@ -63,7 +63,7 @@ public abstract class SyncTransport {
         } // end-lock
         // Send transport data to the siphon server
 		//SiphonServer.sendBytesFromAPP(message, offset, length);
-        Logger.d(CLASS_NAME + " Send Bytes");
+        //Logger.d(CLASS_NAME + " Bytes sent");
         return bytesWereSent;
     } // end-method
 

@@ -7,7 +7,7 @@ import java.io.InputStream;
 
 abstract public class AbstractPacketizer {
 
-    protected IStreamListener _streamListener = null;
+    protected IStreamListener mStreamListener = null;
 
     protected byte _rpcSessionID = 0;
 
@@ -30,7 +30,7 @@ abstract public class AbstractPacketizer {
     }
 
     public AbstractPacketizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
-        this._streamListener = streamListener;
+        this.mStreamListener = streamListener;
         this.is = is;
         _rpcSessionID = rpcSessionID;
     }

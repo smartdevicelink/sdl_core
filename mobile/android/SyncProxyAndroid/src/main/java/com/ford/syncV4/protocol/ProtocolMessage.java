@@ -98,7 +98,7 @@ public class ProtocolMessage {
 		return _serviceType;
 	}
 
-	public void setSessionType(ServiceType serviceType) {
+	public void setServiceType(ServiceType serviceType) {
 		this._serviceType = serviceType;
 	}
 

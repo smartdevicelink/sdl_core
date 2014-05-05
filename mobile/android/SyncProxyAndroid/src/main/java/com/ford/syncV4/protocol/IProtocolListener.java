@@ -4,6 +4,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
 
 public interface IProtocolListener {
+
 	// Called to indicate that these bytes are to be sent as part of a message.
 	// This call includes the part of the message.
 	void onProtocolMessageBytesToSend(byte[] msgBytes, int offset, int length);

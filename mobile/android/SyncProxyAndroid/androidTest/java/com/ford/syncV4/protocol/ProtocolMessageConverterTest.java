@@ -20,7 +20,7 @@ public class ProtocolMessageConverterTest extends AndroidTestCase {
         ProtocolMessage message = new ProtocolMessage();
         message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         message.setData(frame);
-        message.setSessionType(ServiceType.Mobile_Nav);
+        message.setServiceType(ServiceType.Mobile_Nav);
         ProtocolMessageConverter converter = new ProtocolMessageConverter(message, ProtocolConstants.PROTOCOL_VERSION_THREE);
         byte[] result = converter.generate().getData();
         assertTrue("for mobile nav data should be same as ProtocolMessage.data", Arrays.equals(result, frame));
@@ -31,7 +31,7 @@ public class ProtocolMessageConverterTest extends AndroidTestCase {
         ProtocolMessage message = new ProtocolMessage();
         message.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         message.setData(frame);
-        message.setSessionType(ServiceType.Audio_Service);
+        message.setServiceType(ServiceType.Audio_Service);
         ProtocolMessageConverter converter = new ProtocolMessageConverter(message, ProtocolConstants.PROTOCOL_VERSION_THREE);
         byte[] result = converter.generate().getData();
         assertTrue("for audio service data should be same as ProtocolMessage.data", Arrays.equals(result, frame));
