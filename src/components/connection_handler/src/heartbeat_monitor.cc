@@ -30,53 +30,109 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "connection_handler/heartbeat_monitor.h"
+#include <unistd.h>
 #include "connection_handler/connection.h"
 #include "utils/logger.h"
 
 namespace connection_handler {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
+using namespace sync_primitives;
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HeartBeatMonitor")
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection* connection)
     : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
       connection_(connection),
-      timer_(this, &HeartBeatMonitor::TimeOut) {
+      stop_flag_(false) {
 }
 
 HeartBeatMonitor::~HeartBeatMonitor() {
-  AssertRunningOnCreationThread();
+  LOG4CXX_TRACE_ENTER(logger_);
 }
 
-void HeartBeatMonitor::BeginMonitoring() {
-  AssertRunningOnCreationThread();
-  if (heartbeat_timeout_seconds_ != 0) {
-    LOG4CXX_INFO(logger_, "Heart beat monitor: monitoring connection "
-                 << connection_->connection_handle() << ", timeout "
-                 << heartbeat_timeout_seconds_ << " seconds");
-    timer_.start(heartbeat_timeout_seconds_);
-  } else {
-    LOG4CXX_INFO(logger_, "Heart beat monitor: disabled");
+
+void HeartBeatMonitor::threadMain() {
+   std::map<uint8_t, SessionState>::iterator it;
+
+  while (!stop_flag_) {
+    usleep(kdefault_cycle_timeout);
+
+    AutoLock auto_lock(sessions_list_lock_);
+
+    it = sessions_.begin();
+    while (it != sessions_.end()) {
+      if (it->second.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
+        if (it->second.is_heartbeat_sent_) {
+          LOG4CXX_INFO(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
+          uint8_t session_id = it->first;
+          sessions_.erase(it);
+          it = sessions_.begin();
+          if (sessions_.empty()) {
+            stop_flag_ = true;
+          }
+          connection_->CloseSession(session_id);
+        } else {
+          it->second.heartbeat_expiration_ =
+              date_time::DateTime::getCurrentTime();
+          it->second.heartbeat_expiration_.tv_sec +=
+              heartbeat_timeout_seconds_;
+
+          connection_->SendHeartBeat(it->first);
+
+          it->second.is_heartbeat_sent_ = true;
+          ++it;
+        }
+      } else {
+        ++it;
+      }
+    }
   }
 }
 
-void HeartBeatMonitor::TimeOut() {
-  LOG4CXX_INFO(logger_, "Heart beat monitor: connection "
-               << connection_->connection_handle() << " timed out, closing");
-  connection_->Close();
+void HeartBeatMonitor::AddSession(uint8_t session_id) {
+  LOG4CXX_INFO(logger_, "Add session with id" <<
+               static_cast<int32_t>(session_id));
+
+  AutoLock auto_lock(sessions_list_lock_);
+
+  SessionState session_state;
+  session_state.heartbeat_expiration_ = date_time::DateTime::getCurrentTime();
+  session_state.heartbeat_expiration_.tv_sec +=  heartbeat_timeout_seconds_;
+  session_state.is_heartbeat_sent_ = false;
+
+  sessions_[session_id] = session_state;
 }
 
-void HeartBeatMonitor::KeepAlive() {
-  AssertRunningOnCreationThread();
-  if (heartbeat_timeout_seconds_ != 0) {
-    LOG4CXX_INFO(
-        logger_,
-        "Resetting heart beat timer for connection "
-          << connection_->connection_handle());
-    timer_.stop();
-    timer_.start(heartbeat_timeout_seconds_);
+void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
+  AutoLock auto_lock(sessions_list_lock_);
+
+  if (sessions_.end() != sessions_.find(session_id)) {
+    LOG4CXX_INFO(logger_, "Remove session with id" <<
+                 static_cast<int32_t>(session_id));
+    sessions_.erase(session_id);
   }
 }
 
+void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
+  AutoLock auto_lock(sessions_list_lock_);
+
+  if (sessions_.end() != sessions_.find(session_id)) {
+    LOG4CXX_INFO(logger_, "Resetting heart beat timer for session with id"
+                 << static_cast<int32_t>(session_id));
+
+    sessions_[session_id].heartbeat_expiration_ =
+        date_time::DateTime::getCurrentTime();
+    sessions_[session_id].heartbeat_expiration_.tv_sec +=
+        heartbeat_timeout_seconds_;
+    sessions_[session_id].is_heartbeat_sent_ = false;
+  }
+}
+
+bool HeartBeatMonitor::exitThreadMain() {
+  stop_flag_ = true;
+  LOG4CXX_INFO(logger_, "exitThreadMain");
+  return true;
+}
 
 } // namespace connection_handler

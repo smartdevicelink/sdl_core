@@ -40,6 +40,9 @@ namespace commands {
 
 NotificationFromHMI::NotificationFromHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
+
+  // Replace HMI app id with Mobile connection id
+  ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*(message.get()));
 }
 
 NotificationFromHMI::~NotificationFromHMI() {

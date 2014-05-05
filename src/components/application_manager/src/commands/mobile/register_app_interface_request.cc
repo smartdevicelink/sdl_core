@@ -142,8 +142,8 @@ void RegisterAppInterfaceRequest::Run() {
     sleep(1);
     // TODO(DK): timer_->StartWait(1);
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-        correlation_id(),
-        default_timeout());
+                                                             correlation_id(),
+                                                             default_timeout());
   }
 
   ApplicationSharedPtr application =
@@ -182,16 +182,30 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->RegisterApplication(
-                               message_);
-
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
-                      msg_params[strings::app_name].asString() << "  hasn't been registered!");
+                      msg_params[strings::app_name].asString() <<
+                      "  hasn't been registered!");
   } else {
+
+    // For resuming application need to restore hmi_app_id from resumeCtrl
+    const std::string mobile_app_id = msg_params[strings::app_id].asString();
+    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+
+    // there is side affect with 2 mobile app with the same mobile app_id
+    if (resumer.IsApplicationSaved(mobile_app_id)) {
+      app->set_hmi_application_id(resumer.GetHMIApplicationID(mobile_app_id));
+    } else {
+      app->set_hmi_application_id(
+          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+    }
+
     app->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
 
@@ -221,26 +235,31 @@ void RegisterAppInterfaceRequest::Run() {
           app->set_allowed_support_navigation(true);
         }
       }
-    }    
+    }
 
     // Add device to policy table and set device info, if any
-    policy::DeviceParams device_params;
-    application_manager::MessageHelper::GetDeviceInfoForHandle(app->device(),
-        &device_params);
+    std::string device_mac_address =
+        application_manager::MessageHelper::GetDeviceMacAddressForHandle(app->device());
     policy::DeviceInfo device_info;
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }
 
-    policy::PolicyHandler::instance()->SetDeviceInfo(
-      device_params.device_mac_address, device_info);
+    policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
+                                                     device_info);
 
     // Check policy update on ignition on, if it was not done before
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
     // Check necessity of policy update for current application
-    policy::PolicyHandler::instance()->CheckAppPolicyState(
-      msg_params[strings::app_id].asString());
+    // TODO(KKolodiy): need remove policy_manager
+    policy::PolicyManager* policy_manager =
+        policy::PolicyHandler::instance()->policy_manager();
+    if (!policy_manager) {
+      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+      return;
+    }
+    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -266,7 +285,6 @@ void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   mobile_apis::Result::eType result) {
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
@@ -274,10 +292,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   if (!params) {
     std::string mobile_app_id =
-        (*message_)[strings::msg_params][strings::app_id].asString();
+      (*message_)[strings::msg_params][strings::app_id].asString();
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
-        usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
+      policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
+      usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
     return;
@@ -326,7 +344,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   if (hmi_capabilities.display_capabilities()) {
-
     response_params[hmi_response::display_capabilities] =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -363,10 +380,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
     if (hmi_capabilities.display_capabilities()->getElement(
           hmi_response::image_capabilities).length() > 0) {
-
       display_caps[hmi_response::graphic_supported] = true;
     } else {
-
       display_caps[hmi_response::graphic_supported] = false;
     }
 
@@ -437,30 +452,29 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   const char* add_info = "";
   bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
   if (resumption) {
-
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
-    const std::string& mobile_app_id = (*application->mobile_app_id()).asString();
-    if (!resumer.CheckApplicationHash(mobile_app_id,
-                                      hash_id)) {
+    if (!resumer.CheckApplicationHash(application, hash_id)) {
       result = mobile_apis::Result::RESUME_FAILED;
-      LOG4CXX_WARN(logger_, "Hash does not maches");
-      add_info = "Hash does not maches";
+      LOG4CXX_WARN(logger_, "Hash does not matches");
+      add_info = "Hash does not matches";
     } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       result = mobile_apis::Result::RESUME_FAILED;
       LOG4CXX_WARN(logger_, "Persistent data is missed");
       add_info = "Persistent data is missed";
     } else {
-      add_info = " Resume Succesed";
+      add_info = " Resume Succeed";
     }
   }
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()), resumption);
+
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(
+      *(application.get()), resumption);
+
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
-
 }
 
 mobile_apis::Result::eType
@@ -594,13 +608,19 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result = policy::PolicyHandler::instance()->policy_manager()
-                     ->GetInitialAppData(
+  // TODO(KKolodiy): need remove method policy_manager
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return mobile_apis::Result::REJECTED;
+  }
+  const bool init_result = policy_manager->GetInitialAppData(
                        message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
                        &app_hmi_types);
 
   if (!init_result) {
-    LOG4CXX_INFO(logger_, "Error during initial application data check.");
+    LOG4CXX_ERROR(logger_, "Error during initial application data check.");
     return mobile_apis::Result::INVALID_DATA;
   }
 
@@ -609,7 +629,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
           app_nicknames.begin(), app_nicknames.end(),
           message[strings::msg_params][strings::app_name].asString());
     if (app_nicknames.end() == it) {
-      LOG4CXX_INFO(logger_,
+      LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
       return mobile_apis::Result::INVALID_DATA;
@@ -759,7 +779,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
 
   int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asInt();
+                          .asInt();
 
   const std::set<ApplicationSharedPtr>& applications =
     ApplicationManagerImpl::instance()->applications();
@@ -775,7 +795,6 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   return false;
 }
-
 
 }  // namespace commands
 

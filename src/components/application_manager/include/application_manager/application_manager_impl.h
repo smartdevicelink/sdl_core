@@ -161,7 +161,7 @@ struct MessageToHmi: public utils::SharedPtr<Message> {
   }
 };
 
-// Short type names for proiritized message queues
+// Short type names for prioritized message queues
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
@@ -176,6 +176,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
     friend class ResumeCtrl;
+    friend class CommandImpl;
   public:
     ~ApplicationManagerImpl();
 
@@ -189,20 +190,21 @@ class ApplicationManagerImpl : public ApplicationManager,
     /////////////////////////////////////////////////////
 
     ApplicationSharedPtr application(int32_t app_id) const;
+    ApplicationSharedPtr application_by_policy_id(
+        const std::string& policy_app_id) const;
     inline const std::set<ApplicationSharedPtr>& applications() const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
     std::vector<ApplicationSharedPtr> applications_with_navi();
-  ApplicationSharedPtr application_by_policy_id(
-      const std::string& policy_app_id) const;
+
     /**
-          * @brief Notifies all components interested in Vehicle Data update
-          * i.e. new value of odometer etc and returns list of applications
-          * subscribed for event.
-          * @param vehicle_info Enum value of type of vehicle data
-          * @param new value (for integer values currently) of vehicle data
-          */
+     * @brief Notifies all components interested in Vehicle Data update
+     * i.e. new value of odometer etc and returns list of applications
+     * subscribed for event.
+     * @param vehicle_info Enum value of type of vehicle data
+     * @param new value (for integer values currently) of vehicle data
+     */
     std::vector<utils::SharedPtr<Application>> IviInfoUpdated(
       VehicleDataType vehicle_info, int value);
 
@@ -498,6 +500,29 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     uint32_t GenerateGrammarID();
 
+    /**
+     * Generate new HMI application ID
+     *
+     * @return New HMI application ID
+     */
+    uint32_t GenerateNewHMIAppID();
+
+    /**
+     * @brief Parse smartObject and replace mobile app Id by HMI app ID
+     *
+     * @param message Smartobject to be parsed
+     */
+    void ReplaceMobileByHMIAppId(
+        smart_objects::SmartObject& message);
+
+    /**
+     * @brief Parse smartObject and replace HMI app ID by mobile app Id
+     *
+     * @param message Smartobject to be parsed
+     */
+    void ReplaceHMIByMobileAppId(
+        smart_objects::SmartObject& message);
+
     /*
      * @brief Save binary data to specified directory
      *
@@ -585,6 +610,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
+    /**
+     * Function used only by HMI request/response/notification base classes
+     * to change HMI app id to Mobile app id and vice versa.
+     * Dot use it inside Core
+     */
+    ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
+
   private:
 
     // members
@@ -633,7 +665,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-	AMMetricObserver* metric_observer_;
+    AMMetricObserver* metric_observer_;
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

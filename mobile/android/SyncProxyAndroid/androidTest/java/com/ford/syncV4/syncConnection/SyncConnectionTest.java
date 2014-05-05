@@ -2,6 +2,7 @@ package com.ford.syncV4.syncConnection;
 
 import android.test.InstrumentationTestCase;
 
+import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.WiProProtocol;
@@ -284,23 +285,6 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 sessionIDCaptor.getValue().byteValue());
     }
 
-    // TODO : Reconsider this test case as onTransportConnected is now invoke another listener
-
-    /*public void testStartSessionWithCorrectId() throws Exception {
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.setSessionId(SESSION_ID);
-        connection.init(config);
-        connection._protocol = mock(WiProProtocol.class);
-        connection._transport = mock(SyncTransport.class);
-        when(connection._transport.getIsConnected()).thenReturn(true);
-
-        connection.onTransportConnected();
-
-        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(connection._protocol, times(1)).StartProtocolSession(sessionIDCaptor.capture());
-        assertEquals("Should start session with SESSION_ID", SESSION_ID, sessionIDCaptor.getValue().byteValue());
-    }*/
-
     public void testOnCloseSessionAudioPacketizerStops() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.setSessionId(SESSION_ID);
@@ -315,10 +299,13 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testHeartbeatMonitorStoppedIfConnectionClosedWithoutKeepConnection() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection._protocol = mock(AbstractProtocol.class);
+        connection._transport = mock(SyncTransport.class);
+        when(connection._transport.getIsConnected()).thenReturn(true);
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor());
-        connection.closeConnection((byte) 0, false, true);
+        connection.closeConnection((byte) 1, false, true);
         verify(heartbeatMonitor, times(1)).stop();
     }
 
@@ -335,15 +322,17 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.setHeartbeatMonitor(heartbeatMonitor);
-        connection.onResetHeartbeat();
-        verify(heartbeatMonitor).notifyTransportActivity();
+        connection.onResetHeartbeatAck();
+        verify(heartbeatMonitor).notifyTransportOutputActivity();
     }
 
     public void testHeartbeatSendDoNotResetHeartbeat() throws Exception {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
+        connection._protocol = mock(AbstractProtocol.class);
+        when(connection._protocol.getProtocolVersion()).thenReturn((byte) 3);
         connection.sendHeartbeat(heartbeatMonitor);
-        verify(heartbeatMonitor, never()).notifyTransportActivity();
+        verify(heartbeatMonitor, never()).notifyTransportOutputActivity();
     }
 
     public void testMaxJsonSizeInIncomingMessageShouldCallOnProtocolError() {

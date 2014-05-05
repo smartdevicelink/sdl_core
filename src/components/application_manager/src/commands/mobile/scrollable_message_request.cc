@@ -44,9 +44,7 @@ namespace commands {
 
 ScrollabelMessageRequest::ScrollabelMessageRequest(
     const MessageSharedPtr& message)
- : CommandRequestImpl(message),
-   result_(mobile_apis::Result::INVALID_ENUM) {
-
+ : CommandRequestImpl(message) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
@@ -84,15 +82,9 @@ void ScrollabelMessageRequest::Run() {
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    if (mobile_apis::Result::INVALID_DATA == processing_result) {
-      LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
-      SendResponse(false, processing_result);
-      return;
-    }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      result_ = processing_result;
-    }
+    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    SendResponse(false, processing_result);
+    return;
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -131,19 +123,16 @@ void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>
           (message[strings::params][hmi_response::code].asInt());
-
+      HMICapabilities& hmi_capabilities =
+          ApplicationManagerImpl::instance()->hmi_capabilities();
       bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code) {
+      if (mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::ABORTED == result_code) {
+        result = true;
+      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
+          hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
-      if (mobile_apis::Result::ABORTED == result_code) {
-        result = true;
-      } else
-
-      if (mobile_apis::Result::INVALID_ENUM != result_) {
-        result_code = result_;
-      }
-
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

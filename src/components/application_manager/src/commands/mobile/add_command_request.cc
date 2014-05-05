@@ -67,15 +67,18 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+  if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
+    mobile_apis::Result::eType verification_result =
+        MessageHelper::VerifyImage((*message_)[strings::msg_params]
+                                               [strings::cmd_icon], app);
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return " << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
   }
 
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
@@ -345,8 +348,10 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
                      (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
                      ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_)) ||
-                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_) &&
+                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_ ||
+                      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_)) ||
+                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+                         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_ ) &&
                      (hmi_apis::Common_Result::SUCCESS == vr_result_));
 
       if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {

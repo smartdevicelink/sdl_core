@@ -43,8 +43,7 @@ namespace application_manager {
 namespace commands {
 
 ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message),
-   result_(mobile_apis::Result::INVALID_ENUM) {
+ : CommandRequestImpl(message) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -72,35 +71,36 @@ void ShowConstantTBTRequest::Run() {
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
-  if (msg_params.keyExists(strings::soft_buttons)) {
-    mobile_apis::Result::eType processing_result =
-        MessageHelper::ProcessSoftButtons(msg_params, app);
 
-    if (mobile_apis::Result::SUCCESS != processing_result) {
-      if (mobile_apis::Result::INVALID_DATA == processing_result) {
-        LOG4CXX_ERROR(logger_, "INVALID_DATA!");
-        SendResponse(false, processing_result);
-        return;
-      }
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-        LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-        result_ = processing_result;
-      }
-    }
+  mobile_apis::Result::eType processing_result =
+      MessageHelper::ProcessSoftButtons(msg_params, app);
+
+  if (mobile_apis::Result::SUCCESS != processing_result) {
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, processing_result);
+    return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles(msg_params, app);
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    if (mobile_apis::Result::INVALID_DATA == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
+  mobile_apis::Result::eType verification_result =
+      mobile_apis::Result::SUCCESS;
+  if (msg_params.keyExists(strings::turn_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        msg_params[strings::turn_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
     }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
-      result_ = verification_result;
+  }
+
+  if (msg_params.keyExists(strings::next_turn_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        msg_params[strings::next_turn_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, verification_result);
+      return;
     }
   }
 
@@ -172,10 +172,14 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt()));
-
-      bool result = mobile_apis::Result::SUCCESS == result_code;
-      if (mobile_apis::Result::INVALID_ENUM != result_) {
-        result_code = result_;
+      HMICapabilities& hmi_capabilities =
+                ApplicationManagerImpl::instance()->hmi_capabilities();
+      bool result = false;
+      if (mobile_apis::Result::SUCCESS == result_code) {
+        result = true;
+      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
+          hmi_capabilities.is_ui_cooperating()) {
+        result = true;
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

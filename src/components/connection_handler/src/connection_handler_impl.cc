@@ -67,7 +67,8 @@ transport_manager::ConnectionUID ConnectionUIDFromHandle(ConnectionHandle handle
 ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
-    connection_list_deleter_(&connection_list_){
+    connection_list_deleter_(&connection_list_),
+    protocol_handler_(NULL) {
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
@@ -206,6 +207,7 @@ void ConnectionHandlerImpl::RemoveConnection(
  int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   const transport_manager::ConnectionUID& connection_handle,
   const uint8_t& sessionId,
+  const uint8_t& protocol_version,
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
@@ -219,7 +221,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   }
 
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
-    new_session_id = (it->second)->AddNewSession();
+    new_session_id = (it->second)->AddNewSession(protocol_version);
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
       return -1;
@@ -284,10 +286,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   }
 
   if (0 != connection_handler_observer_) {
-    int32_t sessionKey = KeyFromPair(connection_handle, sessionId);
-    connection_handler_observer_->OnServiceEndedCallback(sessionKey,
+    int32_t session_key = KeyFromPair(connection_handle, sessionId);
+    connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
-    result = sessionKey;
+    result = session_key;
   }
 
   return result;
@@ -430,7 +432,8 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
   }
-  //transport_manager_->SearchDevices();
+
+  transport_manager_->SearchDevices();
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -489,15 +492,54 @@ void ConnectionHandlerImpl::CloseConnection(ConnectionHandle connection_handle) 
   transport_manager_->Disconnect(connection_uid);
 }
 
-void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key) {
+void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
+                                         uint8_t session_id,
+                                         const ServiceList& service_list) {
+  if (0 != connection_handler_observer_) {
+    ServiceListConstIterator it = service_list.begin();
+    for (;it != service_list.end(); ++it) {
+      connection_handler_observer_->OnServiceEndedCallback(
+          session_id, static_cast<protocol_handler::ServiceType>(*it));
+    }
+  }
+
+  transport_manager::ConnectionUID connection_id =
+        ConnectionUIDFromHandle(connection_handle);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionListIterator itr = connection_list_.find(connection_id);
+
+  if (connection_list_.end() != itr) {
+    itr->second->RemoveSession(session_id);
+  }
+}
+
+void ConnectionHandlerImpl::SetProtocolHandler(
+    protocol_handler::ProtocolHandler* handler) {
+  protocol_handler_ = handler;
+}
+
+void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
+                                          uint8_t session_id) {
+
+  transport_manager::ConnectionUID connection_uid =
+      ConnectionUIDFromHandle(connection_handle);
+  protocol_handler_->SendHeartBeat(connection_uid, session_id);
+}
+
+void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
+                                                uint8_t session_id) {
   uint32_t connection_handle = 0;
-  uint8_t session_id = 0;
-  PairFromKey(connection_key, &connection_handle, &session_id);
+  uint8_t session = 0;
+  PairFromKey(connection_key, &connection_handle, &session);
+
+  LOG4CXX_INFO(logger_, "Keep alive for session: " <<
+               static_cast<int32_t>(session_id));
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
-    it->second->KeepAlive();
+    it->second->KeepAlive(session_id);
   }
 }
 

@@ -55,6 +55,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ApplicationImpl(uint32_t application_id,
                   const std::string& global_app_id,
                   usage_statistics::StatisticsManager* statistics_manager);
+
   ~ApplicationImpl();
 
   /**
@@ -76,6 +77,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool has_been_activated() const;
 
   const Version& version() const;
+  void set_hmi_application_id(uint32_t hmi_app_id);
+  inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
   const std::string folder_name() const;
@@ -108,8 +111,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
 
-  virtual void set_protocol_version(ProtocolVersion protocol_version);
-  virtual ProtocolVersion protocol_version();
+  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
+  virtual ProtocolVersion protocol_version() const;
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
@@ -147,39 +150,43 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
  private:
 
-  uint32_t hash_val_;
-  uint32_t grammar_id_;
+  uint32_t                                 hash_val_;
+  uint32_t                                 grammar_id_;
 
-
-  smart_objects::SmartObject* active_message_;
+  smart_objects::SmartObject*              active_message_;
 
   Version version_;
-  uint32_t app_id_;
-  std::string app_name_;
-  bool is_media_;
-  bool allowed_support_navigation_;
-  bool is_app_allowed_;
-  bool has_been_activated_;
-  bool tts_speak_state_;
-  bool hmi_supports_navi_streaming_;
+  uint32_t                                 hmi_app_id_;
+  uint32_t                                 app_id_;
+  std::string                              app_name_;
+  bool                                     is_media_;
+  bool                                     allowed_support_navigation_;
+  bool                                     is_app_allowed_;
+  bool                                     has_been_activated_;
+  bool                                     tts_speak_state_;
+  bool                                     hmi_supports_navi_streaming_;
 
-  mobile_api::HMILevel::eType hmi_level_;
-  uint32_t put_file_in_none_count_;
-  uint32_t delete_file_in_none_count_;
-  uint32_t list_files_in_none_count_;
-  mobile_api::SystemContext::eType system_context_;
-  mobile_api::AudioStreamingState::eType audio_streaming_state_;
-  std::string app_icon_path_;
-  connection_handler::DeviceHandle device_;
+  mobile_api::HMILevel::eType              hmi_level_;
+  uint32_t                                 put_file_in_none_count_;
+  uint32_t                                 delete_file_in_none_count_;
+  uint32_t                                 list_files_in_none_count_;
+  mobile_api::SystemContext::eType         system_context_;
+  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
+  std::string                              app_icon_path_;
+  connection_handler::DeviceHandle         device_;
 
-  ProtocolVersion protocol_version_;
-
-  AppFilesMap app_files_;
+  ProtocolVersion                          protocol_version_;
+  AppFilesMap                              app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::set<uint32_t> subscribed_vehicle_info_;
-  UsageStatistics usage_report_;
+  std::set<uint32_t>                       subscribed_vehicle_info_;
+  UsageStatistics                          usage_report_;
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
+
+uint32_t ApplicationImpl::hmi_app_id() const {
+  return hmi_app_id_;
+}
 
 uint32_t ApplicationImpl::app_id() const {
   return app_id_;

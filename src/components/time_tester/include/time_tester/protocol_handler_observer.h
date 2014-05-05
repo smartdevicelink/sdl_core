@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -36,23 +36,21 @@
 #include "protocol_handler/time_metric_observer.h"
 #include "utils/message_queue.h"
 
-
 namespace time_tester {
 
 class TimeManager;
 
 class ProtocolHandlerObserver: public protocol_handler::PHMetricObserver {
+ public:
+  explicit ProtocolHandlerObserver(TimeManager* time_manager);
 
-  public:
-    explicit ProtocolHandlerObserver(TimeManager* time_manager);
-    virtual void StartMessageProcess(uint32_t message_id);
+  virtual void StartMessageProcess(uint32_t message_id);
 
-    virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
+  virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 
-  private:
-   TimeManager* time_manager_;
-   std::map<uint32_t, time_t> time_starts;
+ private:
+  TimeManager* time_manager_;
+  std::map<uint32_t, TimevalStruct> time_starts;
 };
-
-}
+}  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_OBSERVER_H_

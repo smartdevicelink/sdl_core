@@ -67,6 +67,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_BINARY_DIR}/src/components
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
 )
 
 add_library(${target} SHARED ${SOURCES})

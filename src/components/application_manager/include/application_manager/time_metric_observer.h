@@ -38,21 +38,22 @@
 #include "application_manager/smart_object_keys.h"
 #include "json/json.h"
 #include "utils/shared_ptr.h"
+#include "utils/date_time.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace application_manager {
 
 class AMMetricObserver {
-  public:
-    struct MessageMetric {
-        time_t begin;
-        time_t end;
-        utils::SharedPtr<smart_objects::SmartObject> message;
-    };
+ public:
+  struct MessageMetric {
+    TimevalStruct begin;
+    TimevalStruct end;
+    utils::SharedPtr<smart_objects::SmartObject> message;
+  };
+  typedef utils::SharedPtr<MessageMetric> MessageMetricSharedPtr;
 
-    virtual void OnMessage(utils::SharedPtr<MessageMetric> metric) = 0;
-    virtual ~AMMetricObserver(){}
+  virtual void OnMessage(MessageMetricSharedPtr) = 0;
+  virtual ~AMMetricObserver(){}
 };
-
-}
+}  // application_manager
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_USAGE_STATISTICS_H_

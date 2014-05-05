@@ -1,3 +1,6 @@
+[CW18]
++ SyncProxyAndroid SDK: added heartbeat handling from SDL side
+
 [CW16]
 * SyncProxyTester: Crashes when executing RegisterAppInterface auto-tests with wrong type of parameters
 + SyncProxyTester: Use 'test_data' folder of mobile device to storing and reading PTU / PTS

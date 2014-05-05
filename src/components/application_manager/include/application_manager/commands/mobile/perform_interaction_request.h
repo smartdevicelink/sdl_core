@@ -104,15 +104,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   void ProcessVRResponse(const smart_objects::SmartObject& message);
 
   /*
-   * @brief Function will be called when event AppUnregistered comes
-   *
-   * @param message which will be sent to mobile side
-   *
-   */
-  void ProcessAppUnregisteredNotification
-  (const smart_objects::SmartObject& message);
-
-  /*
    * @brief Sends PerformInteraction response to mobile side
    *
    * @param message which should send to mobile side

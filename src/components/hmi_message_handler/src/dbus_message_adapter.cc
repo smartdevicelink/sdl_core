@@ -31,6 +31,7 @@
 */
 
 #include "hmi_message_handler/dbus_message_adapter.h"
+#include <sstream>
 #include "utils/logger.h"
 #include "formatters/CSmartFactory.hpp"
 

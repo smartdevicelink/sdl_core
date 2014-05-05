@@ -49,8 +49,8 @@ namespace policy {
 CREATE_LOGGERPTR_GLOBAL(logger_, "PTExchangeHandlerExt")
 
 PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
-    : PTExchangeHandler(),
-      policy_handler_(policy_handler) {
+  : PTExchangeHandler(),
+    policy_handler_(policy_handler) {
   DCHECK(policy_handler_);
 }
 
@@ -65,7 +65,7 @@ bool PTExchangeHandlerExt::StartExchange() {
     return false;
   }
   string policy_snapshot_file_name =
-      Profile::instance()->policies_snapshot_file_name();
+    Profile::instance()->policies_snapshot_file_name();
   BinaryMessageSptr pt_snapshot = policy_manager->RequestPTUpdate();
   if (pt_snapshot.valid()) {
     if (file_system::WriteBinaryFile(policy_snapshot_file_name, *pt_snapshot)) {
