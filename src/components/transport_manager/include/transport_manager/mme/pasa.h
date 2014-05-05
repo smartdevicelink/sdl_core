@@ -37,6 +37,7 @@
 // after integration with PASA
 
 #define MAX_QUEUE_MSG_SIZE 4095
+#define MSGQ_MAX_MESSAGES 128
 
 #define SDL_MSG_IPOD_DEVICE_CONNECT 0x1A
 #define SDL_MSG_IPOD_DEVICE_CONNECT_ACK 0x1B
