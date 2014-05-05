@@ -47,11 +47,7 @@ public class ConsecutiveFrameProcessor {
                         sessionID, messageID, protocolVersionToSend);
 
         // Assemble first frame.
-        int frameCount = data.length / maxDataSize;
-        if (data.length % maxDataSize > 0) {
-            frameCount++;
-        }
-        //byte[] firstFrameData = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+        int frameCount = getFrameCount(data.length, maxDataSize);
         byte[] firstFrameData = new byte[8];
         // First four bytes are data size.
         System.arraycopy(BitConverter.intToByteArray(data.length), 0, firstFrameData, 0, 4);
@@ -88,5 +84,20 @@ public class ConsecutiveFrameProcessor {
             callback.onProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
             currentOffset += bytesToWrite;
         }
+    }
+
+    /**
+     * Calculates frames number based on data size
+     *
+     * @param dataLength  incoming data length
+     * @param maxDataSize maximum size of the data in single frame
+     * @return frame count
+     */
+    public static int getFrameCount(int dataLength, int maxDataSize) {
+        int frameCount = dataLength / maxDataSize;
+        if (dataLength % maxDataSize > 0) {
+            frameCount++;
+        }
+        return frameCount;
     }
 }

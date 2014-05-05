@@ -2,9 +2,12 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.service.ConsecutiveFrameProcessor;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created with Android Studio.
@@ -80,6 +83,7 @@ public class SendProtocolMessageProcessor {
         }
 
         if (data.length > maxDataSize) {
+            //Logger.d(LOG_TAG + " BULK_DATA");
             bulkDataDataExecutor.submit(new Runnable() {
 
                 @Override
@@ -103,6 +107,7 @@ public class SendProtocolMessageProcessor {
                 }
             });
         } else if (serviceType == ServiceType.Heartbeat) {
+            //Logger.d(LOG_TAG + " HEART_BEAT");
             final ProtocolFrameHeader header =
                     ProtocolFrameHeaderFactory.createHeartbeat(serviceType, protocolVersionToSend);
 
@@ -120,6 +125,7 @@ public class SendProtocolMessageProcessor {
                             sessionID, data.length, messageId, protocolVersionToSend);
 
             if (serviceType == ServiceType.Audio_Service) {
+                //Logger.d(LOG_TAG + " AUDIO");
                 audioExecutor.submit(new Runnable() {
 
                                          @Override
@@ -130,6 +136,7 @@ public class SendProtocolMessageProcessor {
                                      }
                 );
             } else if (serviceType == ServiceType.Mobile_Nav) {
+                //Logger.d(LOG_TAG + " MOBILE_NAVI");
                 mobileNaviExecutor.submit(new Runnable() {
 
                                               @Override
@@ -140,6 +147,7 @@ public class SendProtocolMessageProcessor {
                                           }
                 );
             } else {
+                //Logger.d(LOG_TAG + " RPC");
                 singleMessageExecutor.submit(new Runnable() {
 
                                              @Override
@@ -151,5 +159,21 @@ public class SendProtocolMessageProcessor {
                 );
             }
         }
+    }
+
+    public void shutdownAllExecutors() throws InterruptedException {
+        // This will make the executor accept no new threads
+        // and finish all existing threads in the queue
+        bulkDataDataExecutor.shutdown();
+        heartbeatExecutor.shutdown();
+        audioExecutor.shutdown();
+        mobileNaviExecutor.shutdown();
+        singleMessageExecutor.shutdown();
+        // Wait until all threads are finish
+        bulkDataDataExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        heartbeatExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        audioExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        mobileNaviExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        singleMessageExecutor.awaitTermination(1, TimeUnit.SECONDS);
     }
 }
