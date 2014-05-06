@@ -197,6 +197,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   virtual void OnSystemInfoUpdateRequired();
 
   /**
+   * Removes device
+   * @param device_id id of device
+   */
+  void RemoveDevice(const std::string& device_id);
+
+  /**
    * Adds statistics info
    * @param type type of info
    */

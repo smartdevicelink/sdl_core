@@ -253,6 +253,7 @@
 #include "application_manager/commands/hmi/on_policy_update.h"
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/commands/hmi/get_urls_response.h"
+#include "application_manager/commands/hmi/on_device_state_changed_notification.h"
 
 namespace application_manager {
 
@@ -1999,6 +2000,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::SDL_OnPolicyUpdate: {
       command.reset(new commands::OnPolicyUpdate(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnDeviceStateChanged: {
+      command.reset(new commands::OnDeviceStateChangedNotification(message));
       break;
     }
   }

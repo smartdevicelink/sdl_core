@@ -354,6 +354,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_policy_update.cc
 ./src/commands/hmi/get_urls.cc
 ./src/commands/hmi/get_urls_response.cc
+./src/commands/hmi/on_device_state_changed_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

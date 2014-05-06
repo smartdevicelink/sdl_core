@@ -47,6 +47,7 @@
 #include "json/value.h"
 #include "config_profile/profile.h"
 #include "application_manager/usage_statistics.h"
+#include "policy/policy_types.h"
 
 namespace policy {
 typedef std::set<utils::SharedPtr<application_manager::Application>> ApplicationList;
@@ -789,6 +790,17 @@ std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
     return "";
   }
   return  app->name();
+}
+
+void PolicyHandler::RemoveDevice(const std::string& device_id) {
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
+
+  policy::DeviceIds devices;
+  devices.insert(device_id);
+  policy_manager_->CleanupUnpairedDevices(devices);
 }
 
 }  //  namespace policy

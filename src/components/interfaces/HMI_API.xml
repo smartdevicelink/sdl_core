@@ -3720,8 +3720,8 @@
       <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
-      <param name="deviceState" type="Common.DeviceState"/>
-      <param name="deviceInternalId" type="String" />
+      <param name="deviceState" type="Common.DeviceState" mandatory="true" />
+      <param name="deviceInternalId" type="String" mandatory="true" />
     </function>
 </interface>
 </interfaces>
