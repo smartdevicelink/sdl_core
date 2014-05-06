@@ -841,7 +841,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   } else {
     LOG4CXX_INFO_EXT(
         logger_,
-        "Refused to end session " << service_type << " type.");
+        "Refused to end session " << static_cast<int>(service_type) << " type.");
     SendEndSessionNAck(connection_id, current_session_id, packet.protocol_version(),
                        service_type);
   }
@@ -992,9 +992,10 @@ void ProtocolHandlerImpl::Handle(
 void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile& message) {
   LOG4CXX_INFO_EXT(
       logger_,
-      "Message to mobile app: connection id " <<static_cast<int>(message->connection_id()) << ";"
+      "Message to mobile app: connection id " <<
+        static_cast<int>(message->connection_id()) << ";"
       " dataSize: " << message->data_size() << " ;"
-      " protocolVersion " << message->protocol_version());
+      " protocolVersion " << static_cast<int>(message->protocol_version()));
 
   if (message.is_final) {
     sessions_last_message_id_.insert(
