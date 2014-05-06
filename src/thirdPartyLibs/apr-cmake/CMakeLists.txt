@@ -33,8 +33,11 @@ set(APR_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apr-build)
 
 file(MAKE_DIRECTORY
   ${APR_BUILD_DIRECTORY}/include/private
-  ${APR_BUILD_DIRECTORY}/tools
   ${APR_SOURCE_DIRECTORY}/include/private
+)
+
+file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
+  DESTINATION ${APR_BUILD_DIRECTORY}/tools
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -45,36 +48,19 @@ endif()
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
   COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
-)
-
-add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/tools/gen_test_char.c
-  COMMAND cp ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c tools
+  COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
   WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
 add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
   DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
-  DEPENDS ${APR_BUILD_DIRECTORY}/tools/gen_test_char.c
   COMMAND make include/private/apr_escape_test_char.h
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
-)
-
-add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/include/private/apr_escape_test_char.h
-  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
-  COMMAND cp include/private/apr_escape_test_char.h ${APR_SOURCE_DIRECTORY}/include/private
-  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
-)
-
-add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/include/apr.h
-  DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
-  COMMAND cp include/apr.h ${APR_SOURCE_DIRECTORY}/include
+  COMMAND ${CMAKE_COMMAND} -E copy include/private/apr_escape_test_char.h ${APR_SOURCE_DIRECTORY}/include/private
   WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
 add_custom_target(libapr-1 ALL make
-  DEPENDS ${APR_SOURCE_DIRECTORY}/include/private/apr_escape_test_char.h
-  DEPENDS ${APR_SOURCE_DIRECTORY}/include/apr.h
+  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
   WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
