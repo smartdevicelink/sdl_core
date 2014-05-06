@@ -217,6 +217,7 @@ void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
 }
 void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                                      const bool success) {
+  LOG4CXX_TRACE(logger_, "NotifyListenersOnHandshakeDone");
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     if ((*it)->OnHandshakeDone(connection_key, success)) {
