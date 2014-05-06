@@ -48,7 +48,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   list (APPEND SOURCES
-    ./src/usb/usb_adapter.cc
+    ./src/usb/usb_aoa_adapter.cc
     ./src/usb/usb_connection_factory.cc
     ./src/usb/usb_device_scanner.cc
   )
@@ -64,26 +64,36 @@ if (BUILD_USB_SUPPORT)
     ./src/usb/qnx/usb_connection.cc
     ./src/usb/qnx/platform_usb_device.cc
     )
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      list(APPEND SOURCES
-      ./src/usb/qnx/usb_iap_connection.cc
-      ./src/usb/qnx/usb_iap2_connection.cc
-      )
-    endif()
   endif()
 endif(BUILD_USB_SUPPORT)
+
+if (BUILD_MME_SUPPORT)
+  list (APPEND SOURCES
+    src/mme/mme_transport_adapter.cc
+    src/mme/mme_device.cc
+    src/mme/mme_device_scanner.cc
+    src/mme/mme_connection_factory.cc
+    src/mme/iap_connection.cc
+    src/mme/iap2_connection.cc
+  )
+endif(BUILD_MME_SUPPORT)
 
 add_library(${target} ${SOURCES})
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     target_link_libraries(${target} usbdi)
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      target_link_libraries(${target} ipod)
-      target_link_libraries(${target} iap2client)
-    endif()
   endif()
 endif(BUILD_USB_SUPPORT)
+
+if (BUILD_MME_SUPPORT)
+  target_link_libraries (${target} ipod)
+  target_link_libraries (${target} iap2client)
+  if(NOT MME_MQ)
+    target_link_libraries (${target} mme)
+  endif()
+  target_link_libraries (${target} qdb)
+endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
   target_link_libraries(${target} avahi-common)

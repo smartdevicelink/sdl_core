@@ -36,7 +36,7 @@ public class DefaultRPCRequestConverter implements IRPCRequestConverter {
         pm.setEncrypted(request.isDoEncryption());
         pm.setSessionID(sessionID);
         pm.setMessageType(MessageType.RPC);
-        pm.setSessionType(ServiceType.RPC);
+        pm.setServiceType(ServiceType.RPC);
         pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
         pm.setCorrID(request.getCorrelationID());
         if (request.getBulkData() != null) {

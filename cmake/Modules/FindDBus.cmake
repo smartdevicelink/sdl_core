@@ -1,3 +1,5 @@
+message("Looking for D-Bus")
+
 find_path(DBUS_INCLUDE_DIR
 	NAMES dbus/dbus.h
 	PATHS /usr/lib/dbus-1.0/include

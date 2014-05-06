@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_
 
 #include <iap2/iap2.h>
 
@@ -44,12 +44,12 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAP2Connection : public Connection {
+class IAP2Connection : public Connection {
  public:
-  UsbIAP2Connection(const DeviceUID& device_uid,
+  IAP2Connection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const char* device_path);
+    const std::string& device_path);
 
   bool Init();
 
@@ -75,7 +75,9 @@ class UsbIAP2Connection : public Connection {
 
   class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:
-    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
+    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, IAP2Connection* parent);
+
+   protected:
     virtual bool ArmEvent(struct sigevent* event);
     virtual void OnPulse();
 
@@ -84,7 +86,7 @@ class UsbIAP2Connection : public Connection {
 
     void ReceiveData();
 
-    UsbIAP2Connection* parent_;
+    IAP2Connection* parent_;
     iap2ea_hdl_t* iap2ea_hdl_;
     uint8_t buffer_[kBufferSize];
   };
@@ -93,4 +95,4 @@ class UsbIAP2Connection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP2_CONNECTION_H_

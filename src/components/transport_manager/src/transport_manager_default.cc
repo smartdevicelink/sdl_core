@@ -1,5 +1,8 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * \file transport_manager_default.cc
+ * \brief TransportManagerDefault class source file.
+ *
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config_profile/profile.h"
+
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
@@ -38,10 +43,13 @@
 #endif
 
 #ifdef USB_SUPPORT
-#include "transport_manager/usb/usb_adapter.h"
+#include "transport_manager/usb/usb_aoa_adapter.h"
 #endif
 
-#include "config_profile/profile.h"
+#ifdef MME_SUPPORT
+#include "transport_manager/mme/mme_transport_adapter.h"
+#endif
+
 
 namespace transport_manager {
 
@@ -64,7 +72,14 @@ int TransportManagerDefault::Init() {
   }
   AddTransportAdapter(ta);
 #ifdef USB_SUPPORT
-  ta = new transport_adapter::UsbAdapter();
+  ta = new transport_adapter::UsbAoaAdapter();
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+  AddTransportAdapter(ta);
+#endif
+#ifdef MME_SUPPORT
+  ta = new transport_adapter::MmeTransportAdapter();
   if (metric_observer_) {
     ta->SetTimeMetricObserver(metric_observer_);
   }

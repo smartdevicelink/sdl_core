@@ -33,10 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-
 #include <algorithm>
 
+#include "utils/logger.h"
+
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 

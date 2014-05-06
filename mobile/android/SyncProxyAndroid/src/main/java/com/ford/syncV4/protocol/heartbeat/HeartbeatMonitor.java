@@ -86,12 +86,12 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
                 if (ackReceived) {
                     Logger.d(CLASS_NAME,
-                            "ACK has been received, sending and scheduling heartbeat");
+                            " ACK has been received, sending and scheduling heartbeat");
                     if (listener != null) {
                         listener.sendHeartbeat(HeartbeatMonitor.this);
                     } else {
                         Logger.w(CLASS_NAME,
-                                "Delegate is not set, scheduling heartbeat anyway");
+                                " Delegate is not set, scheduling heartbeat anyway");
                     }
                     ackReceived = false;
                 } else {
@@ -116,11 +116,11 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                         }
                     } else {
                         Logger.i(CLASS_NAME,
-                                "The thread is interrupted; not scheduling heartbeat");
+                                " The thread is interrupted; not scheduling heartbeat");
                     }
                 } else {
                     Logger.e(CLASS_NAME,
-                            "Strange, HeartbeatThread's handler is not set; not scheduling heartbeat");
+                            " Strange, HeartbeatThread's handler is not set; not scheduling heartbeat");
                     HeartbeatMonitor.this.stop();
                 }
             }
@@ -153,7 +153,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                             Logger.d(CLASS_NAME + " Looper stopped, exiting thread");
                         } else {
                             Logger.i(CLASS_NAME,
-                                    "HeartbeatThread is run, but already interrupted");
+                                    " HeartbeatThread is run, but already interrupted");
                         }
                     }
                 }, "HeartbeatThread");

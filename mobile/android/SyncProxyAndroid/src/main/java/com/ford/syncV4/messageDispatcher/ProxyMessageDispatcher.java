@@ -6,6 +6,10 @@ import java.util.concurrent.PriorityBlockingQueue;
 import com.ford.syncV4.util.logger.Logger;
 
 public class ProxyMessageDispatcher<messageType> {
+
+    @SuppressWarnings("unused")
+    private static final String CLASS_NAME = ProxyMessageDispatcher.class.getSimpleName();
+
 	PriorityBlockingQueue<messageType> _queue = null;
 	private Thread _messageDispatchingThread = null;
 	IDispatchingStrategy<messageType> _strategy = null;
@@ -55,9 +59,11 @@ public class ProxyMessageDispatcher<messageType> {
 	public void queueMessage(messageType message) {
 		try {
 			_queue.put(message);
-		} catch(ClassCastException e) { 
+		} catch(ClassCastException e) {
+            Logger.e(CLASS_NAME + " QueueMessage ClassCastException", e);
 			_strategy.handleQueueingError("ClassCastException encountered when queueing message.", e);
 		} catch(Exception e) {
+            Logger.e(CLASS_NAME + " QueueMessage Exception", e);
 			_strategy.handleQueueingError("Exception encountered when queueing message.", e);
 		}
 	}

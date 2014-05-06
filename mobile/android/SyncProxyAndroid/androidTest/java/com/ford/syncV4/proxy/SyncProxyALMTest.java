@@ -234,7 +234,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ProtocolMessage message = new ProtocolMessage();
         message.setVersion((byte) 2);
         message.setSessionID((byte) 48);
-        message.setSessionType(ServiceType.Mobile_Nav);
+        message.setServiceType(ServiceType.Mobile_Nav);
         proxyALM.dispatchIncomingMessage(message);
     }
 

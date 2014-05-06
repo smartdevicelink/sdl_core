@@ -15,11 +15,14 @@ import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -109,11 +112,16 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
             @Override
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
                 super.onProtocolServiceStarted(serviceType,sessionID, encrypted, version, correlationID);
 =======
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+=======
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version, String correlationID) {
+>>>>>>> develop
                 super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
 >>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
