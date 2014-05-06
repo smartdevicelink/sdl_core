@@ -41,7 +41,16 @@ file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  set(CONFIGURE_FLAGS "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_recursive=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=no ac_cv_sizeof_struct_iovec=8")
+  set(CONFIGURE_FLAGS
+    "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+    "ac_cv_file__dev_zero=yes"
+    "ac_cv_func_setpgrp_void=yes"
+    "apr_cv_process_shared_works=yes"
+    "apr_cv_mutex_recursive=yes"
+    "apr_cv_mutex_robust_shared=no"
+    "apr_cv_tcp_nodelay_with_cork=no"
+    "ac_cv_sizeof_struct_iovec=8"
+  )
 else()
   set(CONFIGURE_FLAGS "")
 endif()
