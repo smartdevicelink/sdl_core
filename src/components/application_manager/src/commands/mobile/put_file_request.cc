@@ -116,7 +116,7 @@ void PutFileRequest::Run() {
   // Policy table update in json format is currently to be received via PutFile
   // TODO(PV): after latest discussion has to be changed
   if (mobile_apis::FileType::JSON == file_type_) {
-    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(binary_data);
+    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(sync_file_name_, binary_data);
   }
 
   offset_ = 0;
