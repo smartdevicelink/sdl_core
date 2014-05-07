@@ -43,7 +43,8 @@ ProtocolHandlerObserver::ProtocolHandlerObserver(TimeManager *time_manager):
   time_manager_(time_manager) {
 }
 
-void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id) {
+void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id,
+                                                  const TimevalStruct &start_time) {
   if (message_id == 0) {
     return;
   }
@@ -51,7 +52,7 @@ void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id) {
     LOG4CXX_INFO(logger_, "Message ID already wait for stop processing" << message_id);
     return;
   }
-  time_starts[message_id] = date_time::DateTime::getCurrentTime();
+  time_starts[message_id] = start_time;
 }
 
 void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> m) {

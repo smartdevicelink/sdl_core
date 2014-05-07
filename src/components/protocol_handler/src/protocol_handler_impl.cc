@@ -403,6 +403,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
 
   for (std::vector<ProtocolFramePtr>::const_iterator it =
        protocol_frames.begin(); it != protocol_frames.end(); ++it) {
+    const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
     ProtocolFramePtr frame = *it;
     const RESULT_CODE result = DecryptFrame(frame);
     if (result != RESULT_OK) {
@@ -411,7 +412,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     }
     impl::RawFordMessageFromMobile msg(*it);
     if (metric_observer_) {
-      metric_observer_->StartMessageProcess(msg->message_id());
+      metric_observer_->StartMessageProcess(msg->message_id(), start_time);
     }
     raw_ford_messages_from_mobile_.PostMessage(msg);
   }
