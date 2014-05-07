@@ -31,11 +31,42 @@
  */
 
 #include "transport_manager/mme/mme_device.h"
+#include "list"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id) : Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
+std::list<std::string> iap2Protocols; // TODO(nvaganov@luxoft.com) choose protocol name
+
+void fillIap2Protocols() {
+    iap2Protocols.push_back("com.ford.sync.prot0");
+    iap2Protocols.push_back("com.ford.sync.prot1");
+    iap2Protocols.push_back("com.ford.sync.prot2");
+    iap2Protocols.push_back("com.ford.sync.prot3");
+    iap2Protocols.push_back("com.ford.sync.prot4");
+    iap2Protocols.push_back("com.ford.sync.prot5");
+    iap2Protocols.push_back("com.ford.sync.prot6");
+}
+
+MmeDevice::MmeDevice(const std::string& mount_point,
+                     Protocol protocol, const std::string& name,
+                     const DeviceUID& unique_device_id) :
+    Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
+    last_used_app_id_ = 1; // fisrt application id at device
+    fillIap2Protocols();
+    for (std::list<std::string>::iterator it = iap2Protocols.begin(); it != iap2Protocols.end(); it++) {
+        utils::SharedPtr<threads::Thread> thr = new threads::Thread(it->c_str(),
+          new iap2_connect_thread(this) );
+        thr->start();
+        threads_.push_back(thr);
+    }
+}
+
+MmeDevice::iap2_connect_thread::iap2_connect_thread(MmeDevice* parent) {
+
+}
+
+void MmeDevice::iap2_connect_thread::threadMain() {
 }
 
 bool MmeDevice::IsSameAs(const Device* other_device) const {
