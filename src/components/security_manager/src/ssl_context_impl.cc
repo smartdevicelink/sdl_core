@@ -168,7 +168,9 @@ Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
 
 size_t CryptoManagerImpl::SSLContextImpl::
 get_max_block_size(size_t mtu) const {
-  return mtu - 29;
+  // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
+  // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
+  return mtu - 90;
 /*
   const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
 */
