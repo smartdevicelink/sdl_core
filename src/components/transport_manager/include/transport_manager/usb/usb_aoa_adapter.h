@@ -1,5 +1,8 @@
-/*
- * Copyright (c) 2014, Ford Motor Company
+/**
+ * \file usb_aoa_adapter.h
+ * \brief UsbAoaAdapter class header file.
+ *
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,48 +33,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/usb/usb_adapter.h"
-#include "transport_manager/usb/usb_device_scanner.h"
-#include "transport_manager/usb/usb_connection_factory.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER_H_
+
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-UsbAdapter::UsbAdapter()
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
-                           new UsbConnectionFactory(this), 0),
-      is_initialised_(false),
-      usb_handler_(new UsbHandler()) {
-  static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
-  static_cast<UsbConnectionFactory*>(server_connection_factory_)
-      ->SetUsbHandler(usb_handler_);
-}
+class UsbAoaAdapter : public TransportAdapterImpl {
+ public:
+  UsbAoaAdapter();
+  virtual ~UsbAoaAdapter();
 
-UsbAdapter::~UsbAdapter() {}
+ protected:
+  virtual DeviceType GetDeviceType() const;
+  virtual bool IsInitialised() const;
+  virtual TransportAdapter::Error Init();
+  virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
-DeviceType UsbAdapter::GetDeviceType() const { return "sdl-usb-aoa"; }
-
-bool UsbAdapter::IsInitialised() const {
-  return is_initialised_ && TransportAdapterImpl::IsInitialised();
-}
-
-TransportAdapter::Error UsbAdapter::Init() {
-  TransportAdapter::Error error = usb_handler_->Init();
-  if (error != TransportAdapter::OK) {
-    return error;
-  }
-  error = TransportAdapterImpl::Init();
-  if (error != TransportAdapter::OK) {
-    return error;
-  }
-  is_initialised_ = true;
-  return TransportAdapter::OK;
-}
-
-bool UsbAdapter::ToBeAutoConnected(DeviceSptr device) const {
-  return true;
-}
+ private:
+  bool is_initialised_;
+  UsbHandlerSptr usb_handler_;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER

@@ -136,21 +136,16 @@ public class ProtocolFrameHeaderFactory {
         return msg;
     }
 
-    public static ProtocolFrameHeader createHeartbeat(ServiceType serviceType,
-                                                      byte version) {
-        return createControlFrame(serviceType, version,
-                FrameDataControlFrameType.Heartbeat);
+    public static ProtocolFrameHeader createHeartbeat(ServiceType serviceType, byte version) {
+        return createControlFrame(serviceType, version, FrameDataControlFrameType.Heartbeat);
     }
 
-    public static ProtocolFrameHeader createHeartbeatACK(
-            ServiceType serviceType, byte version) {
-        return createControlFrame(serviceType, version,
-                FrameDataControlFrameType.HeartbeatACK);
+    public static ProtocolFrameHeader createHeartbeatACK(ServiceType serviceType, byte version) {
+        return createControlFrame(serviceType, version, FrameDataControlFrameType.HeartbeatACK);
     }
 
-    private static ProtocolFrameHeader createControlFrame(
-            ServiceType serviceType, byte version,
-            FrameDataControlFrameType frameData) {
+    private static ProtocolFrameHeader createControlFrame(ServiceType serviceType, byte version,
+                                                          FrameDataControlFrameType frameData) {
         ProtocolFrameHeader msg = new ProtocolFrameHeader();
         msg.setVersion(version);
         msg.setFrameType(FrameType.Control);

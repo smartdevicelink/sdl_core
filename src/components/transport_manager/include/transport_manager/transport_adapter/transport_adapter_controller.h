@@ -1,7 +1,5 @@
-/**
- * \file transport_adapter_controller.h
- * \brief TransportAdapterController class header file.
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +119,7 @@ class TransportAdapterController {
                                   const ApplicationHandle& app_handle) = 0;
 
   /**
-   * @brief Set specified connection state to FINILIZING and launch OnUnexpectedDisconnect event in the device adapter listener.
+   * @brief Set specified connection state to FINALISING and launch OnUnexpectedDisconnect event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -130,6 +128,14 @@ class TransportAdapterController {
   virtual void ConnectionAborted(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
                                  const CommunicationError& error) = 0;
+
+  /**
+   * @brief Remove specified device and all its connections
+   * @param device_handle Device unique identifier.
+   * @param error Error class that contains details of this error situation.
+   */
+  virtual void DeviceDisconnected(const DeviceUID& device_handle,
+                                  const DisconnectDeviceError& error) = 0;
 
   /**
    * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.

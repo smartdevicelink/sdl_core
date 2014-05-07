@@ -1,7 +1,5 @@
-/**
- * \file transport_adapter_impl.h
- * \brief TransportAdapterImpl class header file.
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -309,6 +307,14 @@ class TransportAdapterImpl : public TransportAdapter,
                              const ConnectError& error);
 
   /**
+   * @brief Remove specified device and all its connections
+   * @param device_handle Device unique identifier.
+   * @param error Error class that contains details of this error situation.
+   */
+  virtual void DeviceDisconnected(const DeviceUID& device_handle,
+                                  const DisconnectDeviceError& error);
+
+  /**
    * @brief Delete specified connection from the container(map) of connections
    *and launch event in the device adapter listener.
    *
@@ -424,6 +430,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about connecting applications on device
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
+
+  /**
+   * @brief Remove specified device
+   * @param device_handle Device unique identifier.
+   */
+  void RemoveDevice(const DeviceUID& device_handle);
 
   /**
    * @brief Listener for device adapter notifications.

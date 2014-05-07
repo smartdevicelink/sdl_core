@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP_CONNECTION_H_
 
 #include <ipod/ipod.h>
 
@@ -44,14 +44,12 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAPConnection : public Connection {
+class IAPConnection : public Connection {
  public:
-  UsbIAPConnection(const DeviceUID& device_uid,
+  IAPConnection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const char* device_path);
-
-  ~UsbIAPConnection();
+    const std::string& device_path);
 
   bool Init();
 
@@ -63,7 +61,7 @@ class UsbIAPConnection : public Connection {
   void OnDataReceived(RawMessageSptr message);
   void OnReceiveFailed();
   void OnSessionOpened(int session_id);
-  void OnSessionClosed();
+  void OnSessionClosed(int session_id);
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -71,13 +69,15 @@ class UsbIAPConnection : public Connection {
   std::string device_path_;
 
   ipod_hdl_t* ipod_hdl_;
-  int session_id_;
+  std::set<int> session_ids_;
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
 
   class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:
-    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, UsbIAPConnection* parent);
+    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, IAPConnection* parent);
+
+   protected:
     virtual bool ArmEvent(struct sigevent* event);
     virtual void OnPulse();
 
@@ -88,20 +88,20 @@ class UsbIAPConnection : public Connection {
 
     void ParseEvents();
     void AcceptSession(uint32_t protocol_id);
+    void AcceptSession(uint32_t protocol_id, const char* protocol_name);
     void CloseSession(uint32_t session_id);
     void ReceiveData(uint32_t session_id);
     void OpenSession(uint32_t protocol_id);
+    void OpenSession(uint32_t protocol_id, const char* protocol_name);
 
-    UsbIAPConnection* parent_;
+    IAPConnection* parent_;
     ipod_hdl_t* ipod_hdl_;
-    int session_id_;
     uint8_t buffer_[kBufferSize];
     ipod_eaf_event_t events_[kEventsBufferSize];
-    char protocol_name_[kProtocolNameSize];
   };
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP_CONNECTION_H_
+#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP_CONNECTION_H_

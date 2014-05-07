@@ -30,67 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 
-#include <iap2/iap2.h>
-
-#include "utils/threads/thread.h"
-#include "utils/threads/pulse_thread_delegate.h"
-
-#include "transport_manager/transport_adapter/connection.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/shared_ptr.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbIAP2Connection : public Connection {
+class MmeDevice : public Device {
  public:
-  UsbIAP2Connection(const DeviceUID& device_uid,
-    const ApplicationHandle& app_handle,
-    TransportAdapterController* controller,
-    const char* device_path);
+  typedef enum {UnknownProtocol, IAP, IAP2} Protocol;
 
-  bool Init();
+  MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id);
+
+  const std::string& mount_point() const {
+    return mount_point_;
+  }
+
+  Protocol protocol() const {
+    return protocol_;
+  }
 
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
-  virtual TransportAdapter::Error Disconnect();
+  virtual bool IsSameAs(const Device* other_device) const;
+  virtual ApplicationList GetApplicationList() const;
 
  private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
-
-  DeviceUID device_uid_;
-  ApplicationHandle app_handle_;
-  TransportAdapterController* controller_;
-  std::string device_path_;
-
-  iap2_hdl_t* iap2_hdl_;
-  iap2ea_hdl_t* iap2ea_hdl_;
-
-  utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  static const char* protocol;
-
-  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
-   public:
-    ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, UsbIAP2Connection* parent);
-    virtual bool ArmEvent(struct sigevent* event);
-    virtual void OnPulse();
-
-   private:
-    static const size_t kBufferSize = 1024;
-
-    void ReceiveData();
-
-    UsbIAP2Connection* parent_;
-    iap2ea_hdl_t* iap2ea_hdl_;
-    uint8_t buffer_[kBufferSize];
-  };
+  std::string mount_point_;
+  Protocol protocol_;
 };
+
+typedef utils::SharedPtr<MmeDevice> MmeDevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_IAP2_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_

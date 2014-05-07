@@ -30,32 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_ADAPTER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PASA_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PASA_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/usb/common.h"
+// These definitions are to vanish
+// after integration with PASA
+
+#define MAX_QUEUE_MSG_SIZE 4095
+#define MSGQ_MAX_MESSAGES 128
+
+#define SDL_MSG_IPOD_DEVICE_CONNECT 0x1A
+#define SDL_MSG_IPOD_DEVICE_CONNECT_ACK 0x1B
+#define SDL_MSG_IPOD_DEVICE_DISCONNECT 0x1C
+#define SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK 0x1D
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class UsbAdapter : public TransportAdapterImpl {
- public:
-  UsbAdapter();
-  virtual ~UsbAdapter();
-
- protected:
-  virtual DeviceType GetDeviceType() const;
-  virtual bool IsInitialised() const;
-  virtual TransportAdapter::Error Init();
-  virtual bool ToBeAutoConnected(DeviceSptr device) const;
-
- private:
-  bool is_initialised_;
-  UsbHandlerSptr usb_handler_;
-};
+#pragma pack(push, 1)
+typedef struct {
+  uint64_t msid;
+  char name[256];
+  bool iAP2;
+} MmeDeviceInfo;
+#pragma pack(pop)
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_USB_AOA_ADAPTER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PASA_H_

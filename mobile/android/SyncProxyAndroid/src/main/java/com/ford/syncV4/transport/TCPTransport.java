@@ -105,19 +105,19 @@ public class TCPTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset, int length) {
         TCPTransportState currentState = getCurrentState();
-        Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
-                , msgBytes.length, offset, length, currentState.name()));
+        //Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
+        //        , msgBytes.length, offset, length, currentState.name()));
 
         boolean bResult = false;
 
         if (currentState == TCPTransportState.CONNECTED) {
             synchronized (this) {
                 if (mOutputStream != null) {
-                    Logger.i("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
+                    //Logger.i("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        Logger.i("TCPTransport.sendBytesOverTransport: successfully send data");
+                        //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
                         Logger.w("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;

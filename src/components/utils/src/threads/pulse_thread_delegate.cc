@@ -79,7 +79,12 @@ void PulseThreadDelegate::threadMain() {
         }
       }
       else {
-        LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        if (run_) {
+          LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        }
+        else {
+          LOG4CXX_INFO(logger_, "QNX channel " << chid_ << " is apparently destroyed");
+        }
       }
     }
   }

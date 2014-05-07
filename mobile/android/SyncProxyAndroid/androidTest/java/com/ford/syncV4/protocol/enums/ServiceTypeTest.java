@@ -2,6 +2,9 @@ package com.ford.syncV4.protocol.enums;
 
 import android.test.AndroidTestCase;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.util.logger.Logger;
+
 import java.util.Vector;
 
 /**
@@ -57,4 +60,16 @@ public class ServiceTypeTest extends AndroidTestCase {
         assertTrue(sessionTypes.contains(ServiceType.Heartbeat));
     }
 
+
+    /*public void testMsgType() {
+        ProtocolMessage protocolMessage_A = new ProtocolMessage();
+        protocolMessage_A.setServiceType(ServiceType.RPC);
+
+        ProtocolMessage protocolMessage_B = new ProtocolMessage();
+        protocolMessage_B.setServiceType(ServiceType.Bulk_Data);
+
+        Logger.d("TRACE is " + protocolMessage_A.getServiceType().getValue() + " < " +
+                protocolMessage_B.getServiceType().getValue() + " " +
+                (protocolMessage_A.getServiceType().getValue() < protocolMessage_B.getServiceType().getValue()));
+    }*/
 }
