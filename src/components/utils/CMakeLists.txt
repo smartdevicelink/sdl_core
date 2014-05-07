@@ -38,6 +38,7 @@ else()
 endif()
 
 if(ENABLE_LOG)
-  target_link_libraries("Utils" log4cxx)
+  add_dependencies("Utils" liblog4cxx)
+  target_link_libraries("Utils" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
