@@ -255,6 +255,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                         });
                     } else {
 
+                        SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device.id;
+
                         if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
                             SDL.States.goToStates('info.apps');
                         }
@@ -812,6 +814,31 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "method": "BasicCommunication.OnAppActivated",
                 "params": {
                     "appID": appID
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Send request if device was unpaired from HMI
+         *
+         * @param {number} appID
+         */
+        OnDeviceStateChanged: function(elemet) {
+
+            Em.Logger.log("FFW.SDL.OnDeviceStateChanged");
+
+            // send notification
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnDeviceStateChanged",
+                "params": {
+                    "deviceState": "UNPAIRED",
+                    "deviceInternalId": "",
+                    "deviceId": {
+                        "name": elemet.deviceName,
+                        "id": elemet.deviceID
+                    }
                 }
             };
             this.client.send(JSONMessage);

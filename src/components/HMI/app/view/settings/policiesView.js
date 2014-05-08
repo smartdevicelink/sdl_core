@@ -114,6 +114,17 @@ SDL.PoliciesView = Em.ContainerView.create( {
                     goToState: 'policies.appPermissionsList',
                     onDown: false
                 }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'Device state change',
+                    action: 'onState',
+                    target: 'SDL.SettingsController',
+                    templateName: 'arrow',
+                    goToState: 'policies.deviceStateChange',
+                    onDown: false
+                }
             }
         ]
     })
