@@ -37,6 +37,7 @@ namespace transport_manager {
 namespace transport_adapter {
 
 std::list<std::string> iap2Protocols; // TODO(nvaganov@luxoft.com) choose protocol name
+std::string path_to_config_file = "/fs/mp/etc/mm/iap2.cfg";
 
 void fillIap2Protocols() {
     iap2Protocols.push_back("com.ford.sync.prot0");
@@ -51,22 +52,27 @@ void fillIap2Protocols() {
 MmeDevice::MmeDevice(const std::string& mount_point,
                      Protocol protocol, const std::string& name,
                      const DeviceUID& unique_device_id) :
-    Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
-    last_used_app_id_ = 1; // fisrt application id at device
+                     Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
+    last_used_app_id_ = 1;
     fillIap2Protocols();
     for (std::list<std::string>::iterator it = iap2Protocols.begin(); it != iap2Protocols.end(); it++) {
         utils::SharedPtr<threads::Thread> thr = new threads::Thread(it->c_str(),
-          new iap2_connect_thread(this) );
+          new iap2_connect_thread(this, *it) );
         thr->start();
         threads_.push_back(thr);
     }
 }
 
-MmeDevice::iap2_connect_thread::iap2_connect_thread(MmeDevice* parent) {
-
+void MmeDevice::iap2_connect_thread::threadMain() {
+    iap2ea_hdl_t* handler;
+    handler = iap2_eap_open(path_to_config_file.c_str(), protocol_name_.c_str(), 0);
+    if (!handler){
+        parent_->on_iap2SessionReady(handler);
+    }
 }
 
-void MmeDevice::iap2_connect_thread::threadMain() {
+void MmeDevice::on_iap2SessionReady(iap2ea_hdl_t* handler) {
+    iap2ea_handlers_.insert(std::make_pair(last_used_app_id_++, handler));
 }
 
 bool MmeDevice::IsSameAs(const Device* other_device) const {
