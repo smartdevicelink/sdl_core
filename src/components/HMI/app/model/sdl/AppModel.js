@@ -79,6 +79,13 @@ SDL.SDLAppModel = Em.Object.extend({
         deviceName: '',
 
         /**
+         * Chosen device id
+         *
+         * @type {String}
+         */
+        deviceID: null,
+
+        /**
          * Global properties for current application
          *
          * @type {Object}

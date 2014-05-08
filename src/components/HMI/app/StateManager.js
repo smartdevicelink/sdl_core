@@ -193,6 +193,15 @@ var StateManager = Em.StateManager.extend({
 
             appPermissions: Em.State.create({
 
+            }),
+
+            deviceStateChange: Em.State.create({
+
+                enter: function () {
+
+                    this._super();
+                    SDL.DeviceStateChangeView.showDeviceList();
+                }
             })
         })
     }),
