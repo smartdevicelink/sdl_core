@@ -73,8 +73,6 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
-        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
-        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -270,13 +268,15 @@ public class AppSetUpDialog extends DialogFragment {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
-                        setupHeartbeat(isHearBeat, isHearBeatAck);
+                        setupHeartbeat(view);
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();
     }
 
-    private void setupHeartbeat(CheckBox isHearBeat, CheckBox isHearBeatAck) {
+    private void setupHeartbeat(View view) {
+        CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         if (isHearBeat.isChecked()) {
             SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
         } else {

@@ -1105,6 +1105,12 @@
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
+
+  <enum name="DeviceState">
+    <element name="UNKNOWN"/>
+    <element name="UNPAIRED"/>
+  </enum>
+
   <struct name="UserFriendlyMessage" scope="internal">
     <param name="ttsString" type="String" mandatory="false"/>
     <param name="label" type="String" mandatory="false" />
@@ -1862,11 +1868,20 @@
     <function name="OnStartDeviceDiscovery" messagetype="notification">
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
+    <function name="OnUpdateDeviceList" messagetype="notification">
+      <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
+    </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
-      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+      <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
       </param>
+    </function>
+    <function name="UpdateAppList" messagetype="request">
+      <description>Issued by SDL to notify HMI about new applications registered.</description>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
+    </function>
+    <function name="UpdateAppList" messagetype="response">
     </function>
     <function name="UpdateDeviceList" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change device list.</description>
@@ -2225,7 +2240,7 @@
     <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>ID of of the command (list of strings)</description>
     </param>
-    <param name="appID" type="Integer" mandatory="false">
+    <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
@@ -4113,6 +4128,10 @@
     </function>
     <function name="GetURLS" messagetype="response" scope="internal">
       <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
+    </function>
+    <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
+      <param name="deviceState" type="Common.DeviceState" mandatory="true" />
+      <param name="deviceInternalId" type="String" mandatory="true" />
     </function>
 </interface>
 </interfaces>

@@ -31,6 +31,7 @@
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/smart_object_keys.h"
 
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 
@@ -55,6 +56,7 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
 }
 
 Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
+  static bool is_valid = false;
   Errors::eType result = Errors::ERROR;
 
   if (SmartType_Map == Object.getType()) {
@@ -64,7 +66,18 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (objectKeys.end() != objectKeys.find(i->first)) {
+        if (i->first == application_manager::strings::msg_params) {
+          is_valid = false;
+        }
+
         result = i->second.mSchemaItem->validate(Object.getElement(i->first));
+
+        if (i->first == application_manager::strings::msg_params) {
+          if (!is_valid) {
+            result = Errors::ERROR;
+          }
+        }
+
       } else {
         if (i->second.mIsMandatory) {
           result = Errors::MISSING_MANDATORY_PARAMETER;
@@ -85,6 +98,11 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
         }
       }
     }
+
+    if (Errors::OK == result) {
+      is_valid = true;
+    }
+
   } else {
     result = Errors::INVALID_VALUE;
   }
