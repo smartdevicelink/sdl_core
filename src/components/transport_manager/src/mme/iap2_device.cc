@@ -38,6 +38,7 @@ namespace transport_manager {
 namespace transport_adapter {
 
 std::list<std::string> iap2Protocols; // TODO(nvaganov@luxoft.com) choose protocol name
+std::string path_to_config_file = "/fs/mp/etc/mm/iap2.cfg";
 
 void fillIap2Protocols() {
     iap2Protocols.push_back("com.ford.sync.prot0");
@@ -57,7 +58,7 @@ IAP2Device::IAP2Device(const std::string& mount_point,
   fillIap2Protocols();
   for (std::list<std::string>::iterator it = iap2Protocols.begin(); it != iap2Protocols.end(); it++) {
       utils::SharedPtr<threads::Thread> thr = new threads::Thread(it->c_str(),
-        new iap2_connect_thread(this) );
+        new iap2_connect_thread(this, *it) );
       thr->start();
       threads_.push_back(thr);
   }
@@ -69,11 +70,16 @@ ApplicationList IAP2Device::GetApplicationList() const {
     return app_list;
 }
 
-IAP2Device::iap2_connect_thread::iap2_connect_thread(MmeDevice* parent) {
-
+void IAP2Device::on_iap2SessionReady(iap2ea_hdl_t* handler) {
+    iap2ea_handlers_.insert(std::make_pair(last_used_app_id_++, handler));
 }
 
 void IAP2Device::iap2_connect_thread::threadMain() {
+  iap2ea_hdl_t* handler;
+  handler = iap2_eap_open(path_to_config_file.c_str(), protocol_name_.c_str(), 0);
+  if (!handler){
+    parent_->on_iap2SessionReady(handler);
+  }
 }
 
 }  // namespace transport_adapter

@@ -45,6 +45,8 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+typedef int appId;
+
 void fillIap2Protocols();
 
 class IAP2Device : public MmeDevice {
@@ -61,16 +63,19 @@ class IAP2Device : public MmeDevice {
   virtual ApplicationList GetApplicationList() const;
 
  private:
+  void on_iap2SessionReady(iap2ea_hdl_t* handler);
+
   int last_used_app_id_;
   std::map<int, iap2ea_hdl_t*> iap2ea_handlers_;
   std::vector<utils::SharedPtr<threads::Thread> > threads_;
 
   class iap2_connect_thread : public threads::ThreadDelegate {
     public:
-      iap2_connect_thread(MmeDevice* parent);
-
-    private:
+      iap2_connect_thread(IAP2Device* parent, std::string protocol_name): parent_(parent), protocol_name_(protocol_name) {}
       void threadMain();
+    private:
+      IAP2Device* parent_;
+      std::string protocol_name_;
   };
 };
 
