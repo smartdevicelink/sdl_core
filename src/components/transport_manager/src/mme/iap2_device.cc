@@ -30,25 +30,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mme/mme_device.h"
+#include <list>
+
+#include "transport_manager/mme/iap2_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point,
-                     const std::string& name,
-                     const DeviceUID& unique_device_id) :
-    Device(name, unique_device_id), mount_point_(mount_point) {
+std::list<std::string> iap2Protocols; // TODO(nvaganov@luxoft.com) choose protocol name
+
+void fillIap2Protocols() {
+    iap2Protocols.push_back("com.ford.sync.prot0");
+    iap2Protocols.push_back("com.ford.sync.prot1");
+    iap2Protocols.push_back("com.ford.sync.prot2");
+    iap2Protocols.push_back("com.ford.sync.prot3");
+    iap2Protocols.push_back("com.ford.sync.prot4");
+    iap2Protocols.push_back("com.ford.sync.prot5");
+    iap2Protocols.push_back("com.ford.sync.prot6");
 }
 
-bool MmeDevice::IsSameAs(const Device* other_device) const {
-  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
-  if (other_mme_device) {
-    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
+IAP2Device::IAP2Device(const std::string& mount_point,
+                       const std::string& name,
+                       const DeviceUID& unique_device_id) :
+  MmeDevice(mount_point, name, unique_device_id) {
+  last_used_app_id_ = 1; // fisrt application id at device
+  fillIap2Protocols();
+  for (std::list<std::string>::iterator it = iap2Protocols.begin(); it != iap2Protocols.end(); it++) {
+      utils::SharedPtr<threads::Thread> thr = new threads::Thread(it->c_str(),
+        new iap2_connect_thread(this) );
+      thr->start();
+      threads_.push_back(thr);
   }
-  else {
-    return false;
-  }
+}
+
+ApplicationList IAP2Device::GetApplicationList() const {
+    ApplicationList app_list;
+    app_list.push_back(1);
+    return app_list;
+}
+
+IAP2Device::iap2_connect_thread::iap2_connect_thread(MmeDevice* parent) {
+
+}
+
+void IAP2Device::iap2_connect_thread::threadMain() {
 }
 
 }  // namespace transport_adapter

@@ -30,26 +30,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_DEVICE_H_
+
+#include <map>
+#include <vector>
+#include <iap2/iap2.h>
+
 #include "transport_manager/mme/mme_device.h"
+#include "utils/shared_ptr.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point,
-                     const std::string& name,
-                     const DeviceUID& unique_device_id) :
-    Device(name, unique_device_id), mount_point_(mount_point) {
-}
+void fillIap2Protocols();
 
-bool MmeDevice::IsSameAs(const Device* other_device) const {
-  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
-  if (other_mme_device) {
-    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
+class IAP2Device : public MmeDevice {
+ public:
+  IAP2Device(const std::string& mount_point,
+             const std::string& name,
+             const DeviceUID& unique_device_id);
+
+  virtual Protocol protocol() const {
+    return IAP2;
   }
-  else {
-    return false;
-  }
-}
+
+ protected:
+  virtual ApplicationList GetApplicationList() const;
+
+ private:
+  int last_used_app_id_;
+  std::map<int, iap2ea_hdl_t*> iap2ea_handlers_;
+  std::vector<utils::SharedPtr<threads::Thread> > threads_;
+
+  class iap2_connect_thread : public threads::ThreadDelegate {
+    public:
+      iap2_connect_thread(MmeDevice* parent);
+
+    private:
+      void threadMain();
+  };
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_DEVICE_H_

@@ -71,6 +71,8 @@ if (BUILD_MME_SUPPORT)
   list (APPEND SOURCES
     src/mme/mme_transport_adapter.cc
     src/mme/mme_device.cc
+    src/mme/iap_device.cc
+    src/mme/iap2_device.cc
     src/mme/mme_device_scanner.cc
     src/mme/mme_connection_factory.cc
     src/mme/iap_connection.cc

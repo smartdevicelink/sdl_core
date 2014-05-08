@@ -30,25 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mme/mme_device.h"
+#include "transport_manager/mme/iap_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point,
+IAPDevice::IAPDevice(const std::string& mount_point,
                      const std::string& name,
                      const DeviceUID& unique_device_id) :
-    Device(name, unique_device_id), mount_point_(mount_point) {
+  MmeDevice(mount_point, name, unique_device_id) {
 }
 
-bool MmeDevice::IsSameAs(const Device* other_device) const {
-  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
-  if (other_mme_device) {
-    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
-  }
-  else {
-    return false;
-  }
+ApplicationList IAPDevice::GetApplicationList() const {
+  ApplicationList app_list;
+  app_list.push_back(1);
+  return app_list;
 }
 
 }  // namespace transport_adapter

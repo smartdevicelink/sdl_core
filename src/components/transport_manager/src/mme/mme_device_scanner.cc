@@ -35,6 +35,8 @@
 #include "utils/logger.h"
 
 #include "transport_manager/mme/mme_device_scanner.h"
+#include "transport_manager/mme/iap_device.h"
+#include "transport_manager/mme/iap2_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -160,8 +162,21 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
       if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
         if (attached) {
           std::string device_name = vendor + " " + product;
-          MmeDevicePtr mme_device(new MmeDevice(mount_point, protocol, device_name, unique_device_id));
-          devices.insert(std::make_pair(msid, mme_device));
+          switch (protocol) {
+            case MmeDevice::IAP: {
+              MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id));
+              devices.insert(std::make_pair(msid, mme_device));
+              break;
+            }
+            case MmeDevice::IAP2: {
+              MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id));
+              devices.insert(std::make_pair(msid, mme_device));
+              break;
+            }
+            case MmeDevice::UnknownProtocol:
+              LOG4CXX_WARN(logger_, "Unsupported protocol for device " << device_name);
+              break;
+          }
         }
       }
     }
@@ -227,11 +242,27 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
   bool attached; // not used
   if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
     std::string device_name = vendor + " " + product;
-    MmeDevicePtr mme_device(new MmeDevice(mount_point, protocol, device_name, unique_device_id));
-    devices_lock_.Ackquire();
-    devices_.insert(std::make_pair(msid, mme_device));
-    devices_lock_.Release();
-    NotifyDevicesUpdated();
+    switch (protocol) {
+      case MmeDevice::IAP: {
+        MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id));
+        devices_lock_.Ackquire();
+        devices_.insert(std::make_pair(msid, mme_device));
+        devices_lock_.Release();
+        NotifyDevicesUpdated();
+        break;
+      }
+      case MmeDevice::IAP2: {
+        MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id));
+        devices_lock_.Ackquire();
+        devices_.insert(std::make_pair(msid, mme_device));
+        devices_lock_.Release();
+        NotifyDevicesUpdated();
+        break;
+      }
+      case MmeDevice::UnknownProtocol:
+        LOG4CXX_WARN(logger_, "Unsupported protocol for device " << device_name);
+        break;
+    }
   }
 }
 

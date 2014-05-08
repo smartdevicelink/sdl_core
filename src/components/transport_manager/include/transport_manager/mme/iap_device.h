@@ -30,26 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP_DEVICE_H_
+
 #include "transport_manager/mme/mme_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point,
-                     const std::string& name,
-                     const DeviceUID& unique_device_id) :
-    Device(name, unique_device_id), mount_point_(mount_point) {
-}
+class IAPDevice : public MmeDevice {
+public:
+ IAPDevice(const std::string& mount_point,
+            const std::string& name,
+            const DeviceUID& unique_device_id);
 
-bool MmeDevice::IsSameAs(const Device* other_device) const {
-  const MmeDevice* other_mme_device = dynamic_cast<const MmeDevice*>(other_device);
-  if (other_mme_device) {
-    return (other_mme_device->unique_device_id() == unique_device_id()) && (other_mme_device->mount_point_ == mount_point_);
-  }
-  else {
-    return false;
-  }
-}
+ virtual Protocol protocol() const {
+   return IAP;
+ }
+
+protected:
+ virtual ApplicationList GetApplicationList() const;
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP_DEVICE_H_

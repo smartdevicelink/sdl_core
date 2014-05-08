@@ -33,25 +33,16 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 
-#include "utils/shared_ptr.h"
 #include "transport_manager/transport_adapter/device.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/threads/thread.h"
-#include "map"
-#include "vector"
-#include <iap2/iap2.h>
 
 namespace transport_manager {
 namespace transport_adapter {
-
-void fillIap2Protocols();
 
 class MmeDevice : public Device {
  public:
   typedef enum {UnknownProtocol, IAP, IAP2} Protocol;
 
   MmeDevice(const std::string& mount_point,
-            Protocol protocol,
             const std::string& name,
             const DeviceUID& unique_device_id);
 
@@ -59,28 +50,13 @@ class MmeDevice : public Device {
     return mount_point_;
   }
 
-  Protocol protocol() const {
-    return protocol_;
-  }
+  virtual Protocol protocol() const = 0;
 
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
 
  private:
   std::string mount_point_;
-  Protocol protocol_;
-  int last_used_app_id_;
-  std::map<int, iap2ea_hdl_t*> iap2ea_handlers_;
-  std::vector<utils::SharedPtr<threads::Thread> > threads_;
-
-  class iap2_connect_thread : public threads::ThreadDelegate {
-    public:
-      iap2_connect_thread(MmeDevice* parent);
-
-    private:
-      void threadMain();
-  };
 };
 
 typedef utils::SharedPtr<MmeDevice> MmeDevicePtr;
