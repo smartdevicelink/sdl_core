@@ -255,7 +255,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                         });
                     } else {
 
-                        SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device.id;
+                        SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device ? response.result.device.id : null;
 
                         if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
                             SDL.States.goToStates('info.apps');
