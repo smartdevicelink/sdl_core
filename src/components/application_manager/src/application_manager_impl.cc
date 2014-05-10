@@ -81,7 +81,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     media_manager_(NULL),
-    resume_ctrl_(this) {
+    resume_ctrl_(this),
+    metric_observer_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   media_manager_ = media_manager::MediaManagerImpl::instance();
   CreatePoliciesManager();
