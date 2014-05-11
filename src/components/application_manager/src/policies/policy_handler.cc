@@ -506,6 +506,10 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     if (policy_manager_->CleanupUnpairedDevices(unpaired_device_ids_)) {
       unpaired_device_ids_.clear();
     }
+  } else  {
+    // TODO(PV): should be exchange restarted at this point?
+    LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
+    //OnPTExchangeNeeded();
   }
   return ret;
 }
