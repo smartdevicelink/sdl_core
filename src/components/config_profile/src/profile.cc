@@ -452,37 +452,6 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(server_address_, kServerAddressKey, kHmiSection);
 
-  // Policy preloaded file
-  ReadStringValue(&preloaded_pt_file_,
-                  kDefaultPreloadedPTFileName,
-                  kPolicySection, kPreloadedPTKey);
-
-  preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
-
-  LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
-
-  // Policy snapshot file
-  ReadStringValue(&policy_snapshot_file_name_,
-                  kDefaultPoliciesSnapshotFileName,
-                  kPolicySection, kPathToSnapshotKey);
-
-  policy_snapshot_file_name_ = system_files_path_ +
-                               '/' + policy_snapshot_file_name_;
-
-  LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
-                    kPolicySection);
-
-  // Turn Policy Off?
-  std::string policy_off;
-  if (ReadValue(&policy_off, kPolicySection, kPolicyOffKey) &&
-      0 == strcmp("true", policy_off.c_str())) {
-    policy_turn_off_ = true;
-  } else {
-    policy_turn_off_ = false;
-  }
-
-  LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
-
   // HMI capabilities
   ReadStringValue(&hmi_capabilities_file_name_ ,
                   kDefaultHmiCapabilitiesFileName,
@@ -867,6 +836,37 @@ void Profile::UpdateValues() {
                   kMediaManagerSection, kSystemFilesPathKey);
 
   LOG_UPDATED_VALUE(recording_file_, kRecordingFileKey, kMediaManagerSection);
+
+  // Policy preloaded file
+  ReadStringValue(&preloaded_pt_file_,
+                  kDefaultPreloadedPTFileName,
+                  kPolicySection, kPreloadedPTKey);
+
+  preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
+
+  LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
+
+  // Policy snapshot file
+  ReadStringValue(&policy_snapshot_file_name_,
+                  kDefaultPoliciesSnapshotFileName,
+                  kPolicySection, kPathToSnapshotKey);
+
+  policy_snapshot_file_name_ = system_files_path_ +
+                               '/' + policy_snapshot_file_name_;
+
+  LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
+                    kPolicySection);
+
+  // Turn Policy Off?
+  std::string policy_off;
+  if (ReadValue(&policy_off, kPolicySection, kPolicyOffKey) &&
+      0 == strcmp("true", policy_off.c_str())) {
+    policy_turn_off_ = true;
+  } else {
+    policy_turn_off_ = false;
+  }
+
+  LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

@@ -58,7 +58,7 @@ PTExchangeHandlerExt::~PTExchangeHandlerExt() {
 }
 
 bool PTExchangeHandlerExt::StartExchange() {
-  LOG4CXX_INFO(logger_, "PolicyHandler::StartExchange");
+  LOG4CXX_INFO(logger_, "PolicyHandler::StartExchangeExtended");
   PolicyManager* policy_manager = policy_handler_->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
@@ -74,7 +74,7 @@ bool PTExchangeHandlerExt::StartExchange() {
                                       policy_manager->RetrySequenceDelaysSeconds());
       return true;
     } else {
-      LOG4CXX_ERROR(logger_, "Failed to write snapshot file");
+      LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << policy_snapshot_file_name);
     }
   } else {
     LOG4CXX_ERROR(logger_, "Failed to obtain policy table snapshot");
