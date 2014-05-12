@@ -59,6 +59,7 @@ class TransportAdapterListenerImpl
     ON_SEARCH_DONE = 0,
     ON_SEARCH_FAIL,
     ON_DEVICE_LIST_UPDATED,
+    ON_APPLICATION_LIST_UPDATED,
     ON_CONNECT_DONE,
     ON_CONNECT_FAIL,
     ON_DISCONNECT_DONE,
@@ -112,6 +113,14 @@ class TransportAdapterListenerImpl
    * @param adapter Transport adapter that sent notification
    */
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
+
+  /**
+  * @brief Reaction on event, when new application started it work on device and SDL found this application
+  * @param adapter Current transport adapter
+  * @param device_handle Unique ID of connected device
+  */
+  virtual void OnApplicationListUpdated(const TransportAdapter* adapter,
+                                        const DeviceUID& device_handle);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
