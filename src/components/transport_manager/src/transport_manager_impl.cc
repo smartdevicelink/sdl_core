@@ -596,7 +596,6 @@ void TransportManagerImpl::EventListenerThread(void) {
       DeviceHandle device_handle;
       BaseError* error = current->event_error();
       RawMessageSptr data = current->data();
-      ApplicationList app_list;
       int event_type = current->event_type();
       event_queue_.erase(current);
 #ifdef USE_RWLOCK
@@ -630,8 +629,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED:
           LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
           device_handle = converter_.UidToHandle(device_id);
-          app_list = *ta->GetApplicationList(device_id);
-          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle, app_list);
+          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
           break;
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
