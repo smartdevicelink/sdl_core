@@ -280,11 +280,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   bool is_exchange_in_progress_;
 
-  /**
-   * @brief Holds device ids, which were unpaired
-   */
-  DeviceIds unpaired_device_ids_;
-
   inline PolicyManager* CreateManager();
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
