@@ -56,6 +56,9 @@ class TransportAdapterController {
    */
   virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
 
+    //!!!!!!!!!!!!!
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
+
   /**
    * @brief Search for device in container of devices, if it is not there - adds it.
    *

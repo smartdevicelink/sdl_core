@@ -78,7 +78,7 @@ class IAPDevice : public MmeDevice {
 
   typedef std::map<uint32_t, ApplicationHandle> AppContainer;
   AppContainer apps_;
-  sync_primitives::Lock apps_lock_;
+  mutable sync_primitives::Lock apps_lock_;
 
   typedef std::map<int, ApplicationHandle> AppTable;
   AppTable app_table_;

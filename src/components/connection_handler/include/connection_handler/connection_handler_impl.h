@@ -83,6 +83,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
+    //!!!!!!!!!!!!
+    virtual void OnApplicationListUpdated(DeviceHandle device_handle);
+
     /**
      * \brief Sets pointer to TransportManager.
      * \param transportManager Pointer to TransportManager object.

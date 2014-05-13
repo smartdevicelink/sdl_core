@@ -95,14 +95,15 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   connections_lock_.Acquire();
   LOG4CXX_INFO(logger_, "iAP: unregistering connection for application " << app_id);
   connections_.erase(app_id);
-  connection_lock_.Release();
+  connections_lock_.Release();
 
   app_table_lock_.Acquire();
   for (AppTable::const_iterator i = app_table_.begin(); i != app_table_.end();) {
     if (i->second == app_id) {
       int session_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-      i = app_table_.erase(i);
+      app_table_.erase(session_id);
+      break;
     }
     else {
       ++i;
@@ -115,7 +116,8 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
     if (i->second == app_id) {
       uint32_t protocol_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_id << " for application " << app_id);
-      i = apps_.erase(i);
+      apps_.erase(protocol_id);
+      break;
     }
     else {
       ++i;
@@ -173,7 +175,7 @@ void IAPDevice::OnSessionClosed(int session_id) {
     }
     connections_lock_.Release();
     LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-    app_table_.erase(i);
+    app_table_.erase(i->first);
   }
   else {
     LOG4CXX_WARN(logger_, "iAP: no application corresponding to session " << session_id);

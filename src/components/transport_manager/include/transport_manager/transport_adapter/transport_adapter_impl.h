@@ -95,6 +95,9 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error Init();
 
+  //!!!!!!!!1
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *

@@ -31,7 +31,7 @@
  */
 
 #include "utils/logger.h"
-
+#include <string>
 #include "transport_manager/mme/iap2_device.h"
 
 namespace transport_manager {
@@ -45,10 +45,10 @@ IAP2Device::IAP2Device(const std::string& mount_point,
                        TransportAdapterController* controller) :
   MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
 
-  const ProtocolNamesContainer& protocol_names = ProtocolNames();
-  for (ProtocolNamesContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
-    std:string protocol_name = *i;
-    std:string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
+  const IAP2Device::ProtocolNameContainer& protocol_names = ProtocolNames();
+  for (IAP2Device::ProtocolNameContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
+    ::std::string protocol_name = *i;
+    ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2ConnectThreadDelegate(this, protocol_name));
     LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
@@ -81,7 +81,7 @@ iap2ea_hdl_t* IAP2Device::HandlerByAppId(ApplicationHandle app_id) const {
   AppContainer::const_iterator i = apps_.find(app_id);
   if (i != apps_.end()) {
     AppRecord record = i->second;
-    handler = record->second;
+    handler = record.second;
   }
   else {
     LOG4CXX_WARN(logger_, "iAP2: no handler corresponding to application " << app_id);
@@ -105,11 +105,12 @@ const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
 
 void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler) {
   apps_lock_.Acquire();
-  ApplicationHandle app_id = ++last_app_id;
+  ApplicationHandle app_id = ++last_app_id_;
   AppRecord record = std::make_pair(protocol_name, handler);
   apps_.insert(std::make_pair(app_id, record));
   apps_lock_.Release();
 
+  controller_->ApplicationListUpdated(unique_device_id());
   // Here will be notification
   // controller_->...
 }
@@ -119,9 +120,9 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
   AppContainer::const_iterator i = apps_.find(app_id);
   if (i != apps_.end()) {
     AppRecord record = i->second;
-    std::string protocol_name = record->first;
+    std::string protocol_name = record.first;
     LOG4CXX_DEBUG(logger_, "iAP2: dropping protocol " << protocol_name << " for application " << app_id);
-    apps_.erase(i);
+    apps_.erase(i->first);
     ThreadContainer::const_iterator j = connection_threads_.find(protocol_name);
     if (j != connection_threads_.end()) {
       utils::SharedPtr<threads::Thread> thread = j->second;
@@ -145,15 +146,15 @@ IAP2Device::IAP2ConnectThreadDelegate::IAP2ConnectThreadDelegate(
 }
 
 void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
-  std:string mount_point = parent_->mount_point();
-  LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on protocol " << protocol_name);
+  std::string mount_point = parent_->mount_point();
+  LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on protocol " << protocol_name_);
   iap2ea_hdl_t* handler = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
   if (handler != 0){
-    LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on protocol " << protocol_name);
+    LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on protocol " << protocol_name_);
     parent_->OnConnect(protocol_name_, handler);
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on protocol " << protocol_name);
+    LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on protocol " << protocol_name_);
   }
 }
 

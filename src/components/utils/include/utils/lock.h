@@ -68,7 +68,7 @@ class Lock {
 
   // Ackquire the lock. Must be called only once on a thread.
   // Please consider using AutoLock to capture it.
-  void Ackquire();
+  void Acquire();
   // Release the lock. Must be called only once on a thread after lock.
   // was acquired. Please consider using AutoLock to automatically release
   // the lock
@@ -102,7 +102,7 @@ class Lock {
 class AutoLock {
  public:
   explicit AutoLock(Lock& lock)
-    : lock_(lock) { lock_.Ackquire(); }
+    : lock_(lock) { lock_.Acquire(); }
   ~AutoLock()     { lock_.Release();  }
  private:
   Lock& GetLock(){ return lock_;     }
@@ -119,7 +119,7 @@ class AutoUnlock {
  public:
   explicit AutoUnlock(AutoLock& lock)
     : lock_(lock.GetLock()) { lock_.Release(); }
-  ~AutoUnlock()             { lock_.Ackquire();  }
+  ~AutoUnlock()             { lock_.Acquire();  }
  private:
   Lock& lock_;
 

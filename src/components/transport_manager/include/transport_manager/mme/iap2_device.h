@@ -70,9 +70,10 @@ class IAP2Device : public MmeDevice {
   typedef std::list<std::string> ProtocolNameContainer;
   static const ProtocolNameContainer& ProtocolNames();
   static const ProtocolNameContainer ReadProtocolNames();
-
+ public:
   void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
   void OnDisconnect(ApplicationHandle app_id);
+ private:
 
   TransportAdapterController* controller_;
   int last_app_id_;
@@ -80,9 +81,9 @@ class IAP2Device : public MmeDevice {
   typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   AppContainer apps_;
-  sync_primitives::Lock apps_lock_;
+  mutable sync_primitives::Lock apps_lock_;
 
-  typedef std::map<std::string, utils::SharedPtr<thread::Thread> > ThreadContainer;
+  typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
   ThreadContainer connection_threads_;
 
   class IAP2ConnectThreadDelegate : public threads::ThreadDelegate {

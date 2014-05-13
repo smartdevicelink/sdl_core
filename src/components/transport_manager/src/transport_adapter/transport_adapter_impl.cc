@@ -116,6 +116,13 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
   return error;
 }
 
+void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
+    for (TransportAdapterListenerList::iterator it = listeners_.begin();
+         it != listeners_.end(); ++it) {
+      (*it)->OnApplicationListUpdated(this, device_handle);
+    }
+}
+
 TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
   if (device_scanner_ == NULL) {

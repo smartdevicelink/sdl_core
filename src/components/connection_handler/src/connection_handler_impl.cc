@@ -71,6 +71,10 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
     protocol_handler_(NULL) {
 }
 
+void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle){
+    transport_manager_->ConnectDevice(device_handle);
+}
+
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ConnectionHandlerImpl.");
 }

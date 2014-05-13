@@ -485,7 +485,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
-    retry_sequence_lock_.Ackquire();
+    retry_sequence_lock_.Acquire();
     retry_sequence_.stop();
     retry_sequence_lock_.Release();
     int32_t correlation_id =
@@ -551,7 +551,7 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
     }
   }
 
-  retry_sequence_lock_.Ackquire();
+  retry_sequence_lock_.Acquire();
   retry_sequence_.stop();
   policy_manager_->ResetRetrySequence();
   retry_sequence_.start();

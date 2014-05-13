@@ -164,12 +164,12 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
           std::string device_name = vendor + " " + product;
           switch (protocol) {
             case MmeDevice::IAP: {
-              MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id));
+              MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id, controller_));
               devices.insert(std::make_pair(msid, mme_device));
               break;
             }
             case MmeDevice::IAP2: {
-              MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id));
+              MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id, controller_));
               devices.insert(std::make_pair(msid, mme_device));
               break;
             }
@@ -180,7 +180,7 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
         }
       }
     }
-    devices_lock_.Ackquire();
+    devices_lock_.Acquire();
     devices_.swap(devices);
     devices_lock_.Release();
     NotifyDevicesUpdated();
@@ -245,15 +245,15 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
     switch (protocol) {
       case MmeDevice::IAP: {
         MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id, controller_));
-        devices_lock_.Ackquire();
+        devices_lock_.Acquire();
         devices_.insert(std::make_pair(msid, mme_device));
         devices_lock_.Release();
         NotifyDevicesUpdated();
         break;
       }
       case MmeDevice::IAP2: {
-        MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id));
-        devices_lock_.Ackquire();
+        MmeDevicePtr mme_device(new IAP2Device(mount_point, device_name, unique_device_id, controller_));
+        devices_lock_.Acquire();
         devices_.insert(std::make_pair(msid, mme_device));
         devices_lock_.Release();
         NotifyDevicesUpdated();
@@ -268,7 +268,7 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
 
 void MmeDeviceScanner::OnDeviceLeft(msid_t msid) {
   bool erased;
-  devices_lock_.Ackquire();
+  devices_lock_.Acquire();
   DeviceContainer::iterator i = devices_.find(msid);
   if (i != devices_.end()) {
     MmeDevicePtr mme_device = i->second;
@@ -291,7 +291,7 @@ void MmeDeviceScanner::OnDeviceLeft(msid_t msid) {
 
 void MmeDeviceScanner::NotifyDevicesUpdated() {
   DeviceVector devices;
-  devices_lock_.Ackquire();
+  devices_lock_.Acquire();
   for (DeviceContainer::const_iterator i = devices_.begin(); i != devices_.end(); ++i) {
     MmeDevicePtr mme_device = i->second;
     DeviceSptr device = MmeDevicePtr::static_pointer_cast<Device>(mme_device);
