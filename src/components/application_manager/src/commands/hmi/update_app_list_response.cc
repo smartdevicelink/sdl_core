@@ -29,46 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/activate_app_response.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/commands/hmi/update_app_list_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ActivateAppResponse::ActivateAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+UpdateAppListResponse::UpdateAppListResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
 }
 
-ActivateAppResponse::~ActivateAppResponse() {
+UpdateAppListResponse::~UpdateAppListResponse() {
 }
 
-void ActivateAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    int32_t correlation_id = ResponseFromHMI::correlation_id();
-    // Mobile id is converted to HMI id for HMI requests
-    const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
-        application_id(correlation_id);
-    if (!hmi_app_id) {
-      LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
-      return;
-    }
-    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
-                                       application_by_hmi_app(hmi_app_id);
-    if (application) {
-      ApplicationManagerImpl::instance()->ActivateApplication(application);
-    } else {
-      LOG4CXX_ERROR(logger_, "Application can't be activated.");
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Error result code"<<code);
-  }
+void UpdateAppListResponse::Run() {
+  LOG4CXX_INFO(logger_, "UpdateAppListResponse::Run");
+
+  // TODO(PV): add check
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+

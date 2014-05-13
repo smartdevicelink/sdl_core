@@ -29,46 +29,42 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/activate_app_response.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/commands/hmi/on_device_state_changed_notification.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-ActivateAppResponse::ActivateAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
+  const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
-ActivateAppResponse::~ActivateAppResponse() {
+OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {
 }
 
-void ActivateAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    int32_t correlation_id = ResponseFromHMI::correlation_id();
-    // Mobile id is converted to HMI id for HMI requests
-    const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
-        application_id(correlation_id);
-    if (!hmi_app_id) {
-      LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
-      return;
+void OnDeviceStateChangedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnDeviceStateChangedNotification::Run");
+
+  if ((*message_)[strings::msg_params]["deviceState"]
+      == hmi_apis::Common_DeviceState::UNPAIRED) {
+    std::string device_id = (*message_)[strings::msg_params]["deviceInternalId"]
+                            .asString();
+    if (device_id.empty()) {
+      if ((*message_)[strings::msg_params].keyExists("deviceId")) {
+        device_id = MessageHelper::GetDeviceMacAddressForHandle(
+                      (*message_)[strings::msg_params]["deviceId"]["id"].asInt());
+      }
     }
-    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
-                                       application_by_hmi_app(hmi_app_id);
-    if (application) {
-      ApplicationManagerImpl::instance()->ActivateApplication(application);
-    } else {
-      LOG4CXX_ERROR(logger_, "Application can't be activated.");
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Error result code"<<code);
+    policy::PolicyHandler::instance()->RemoveDevice(device_id);
   }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+

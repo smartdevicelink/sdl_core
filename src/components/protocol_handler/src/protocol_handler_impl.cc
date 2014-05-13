@@ -187,11 +187,6 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
-  if (!observer) {
-    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
-    return;
-  }
-
   session_observer_ = observer;
 }
 

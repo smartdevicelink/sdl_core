@@ -85,6 +85,7 @@ void TimeManager::Stop() {
       ::close(socket_fd_);
     }
   }
+  messages_.Reset();
   LOG4CXX_INFO(logger_, "TimeManager stopped");
 }
 

@@ -81,7 +81,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     media_manager_(NULL),
-    resume_ctrl_(this) {
+    resume_ctrl_(this),
+    metric_observer_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   media_manager_ = media_manager::MediaManagerImpl::instance();
   CreatePoliciesManager();
@@ -515,41 +516,33 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
 
-  if (true == profile::Profile::instance()->launch_hmi()) {
-    utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
       MessageHelper::CreateModuleInfoSO(
-        static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
-    ManageHMICommand(is_vr_ready);
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
+  ManageHMICommand(is_vr_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
-    ManageHMICommand(is_tts_ready);
+  ManageHMICommand(is_tts_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
-    ManageHMICommand(is_ui_ready);
+  ManageHMICommand(is_ui_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
       MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::Navigation_IsReady));
-    ManageHMICommand(is_navi_ready);
+          hmi_apis::FunctionID::Navigation_IsReady));
+  ManageHMICommand(is_navi_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
       MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::VehicleInfo_IsReady));
-    ManageHMICommand(is_ivi_ready);
+          hmi_apis::FunctionID::VehicleInfo_IsReady));
+  ManageHMICommand(is_ivi_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
+  utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
       MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::Buttons_GetCapabilities));
-    ManageHMICommand(button_capabilities);
-  }
-
-  if (!connection_handler_) {
-    LOG4CXX_WARN(logger_, "Connection handler is not set.");
-  } else {
-    connection_handler_->StartTransportManager();
-  }
+          hmi_apis::FunctionID::Buttons_GetCapabilities));
+  ManageHMICommand(button_capabilities);
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -611,16 +604,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   std::vector<uint8_t> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  {
-    sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-    if (!audio_pass_thru_active_) {
-      LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
-                    " when PassThrough is not active");
-
-      return;
-    }
+  if (!audio_pass_thru_active_) {
+    LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
+                  " when PassThrough is not active");
+    return;
   }
-
   smart_objects::SmartObject* on_audio_pass = NULL;
   on_audio_pass = new smart_objects::SmartObject();
 

@@ -121,7 +121,8 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
-
+  //start transport manager
+  transport_manager_->Visibility(true);
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
@@ -252,13 +253,6 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 void LifeCycle::StopComponents() {
-#ifdef TIME_TESTER
-  if (time_tester_) {
-    time_tester_->Stop();
-    delete time_tester_;
-    time_tester_ = NULL;
-  }
-#endif //TIME_TESTER
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
