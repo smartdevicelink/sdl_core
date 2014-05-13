@@ -244,7 +244,7 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
     std::string device_name = vendor + " " + product;
     switch (protocol) {
       case MmeDevice::IAP: {
-        MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id));
+        MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id, controller_));
         devices_lock_.Ackquire();
         devices_.insert(std::make_pair(msid, mme_device));
         devices_lock_.Release();

@@ -33,23 +33,87 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP_DEVICE_H_
 
+#include <map>
+#include <ipod/ipod.h>
+
+#include "utils/threads/thread.h"
+#include "utils/threads/pulse_thread_delegate.h"
+#include "utils/lock.h"
+
 #include "transport_manager/mme/mme_device.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
+class IAPConnection;
+
 class IAPDevice : public MmeDevice {
-public:
- IAPDevice(const std::string& mount_point,
+ public:
+  IAPDevice(const std::string& mount_point,
             const std::string& name,
-            const DeviceUID& unique_device_id);
+            const DeviceUID& unique_device_id,
+            TransportAdapterController* controller);
 
- virtual Protocol protocol() const {
-   return IAP;
- }
+  ~IAPDevice();
 
-protected:
- virtual ApplicationList GetApplicationList() const;
+  virtual Protocol protocol() const {
+    return IAP;
+  }
+
+ protected:
+  virtual ApplicationList GetApplicationList() const;
+
+ private:
+  ipod_hdl_t* RegisterConnection(ApplicationHandle app_id, IAPConnection* connection);
+  void UnregisterConnection(ApplicationHandle app_id);
+  void OnSessionOpened(uint32_t protocol_id, int session_id);
+  void OnSessionClosed(int session_id);
+  void OnDataReady(int session_id);
+
+  TransportAdapterController* controller_;
+  ipod_hdl_t* ipod_hdl_;
+  utils::SharedPtr<threads::Thread> receiver_thread_;
+  ApplicationHandle last_app_id_;
+
+  typedef std::map<uint32_t, ApplicationHandle> AppContainer;
+  AppContainer apps_;
+  sync_primitives::Lock apps_lock_;
+
+  typedef std::map<int, ApplicationHandle> AppTable;
+  AppTable app_table_;
+  sync_primitives::Lock app_table_lock_;
+
+  typedef std::map<ApplicationHandle, IAPConnection*> ConnectionContainer;
+  ConnectionContainer connections_;
+  sync_primitives::Lock connections_lock_;
+
+  class IAPEventThreadDelegate : public threads::PulseThreadDelegate {
+   public:
+    IAPEventThreadDelegate(ipod_hdl_t* ipod_hdl, IAPDevice* parent);
+
+   protected:
+    virtual bool ArmEvent(struct sigevent* event);
+    virtual void OnPulse();
+
+   private:
+    static const size_t kEventsBufferSize = 32;
+    static const int kProtocolNameSize = 256;
+
+    void ParseEvents();
+    void AcceptSession(uint32_t protocol_id);
+    void AcceptSession(uint32_t protocol_id, const char* protocol_name);
+    void CloseSession(uint32_t session_id);
+    void DataReady(uint32_t session_id);
+    void OpenSession(uint32_t protocol_id);
+    void OpenSession(uint32_t protocol_id, const char* protocol_name);
+
+    IAPDevice* parent_;
+    ipod_hdl_t* ipod_hdl_;
+    ipod_eaf_event_t events_[kEventsBufferSize];
+  };
+
+  friend class IAPConnection;
 };
 
 }  // namespace transport_adapter

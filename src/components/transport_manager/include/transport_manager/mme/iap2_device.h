@@ -34,47 +34,64 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_IAP2_DEVICE_H_
 
 #include <map>
-#include <vector>
+#include <list>
+#include <string>
 #include <iap2/iap2.h>
 
 #include "transport_manager/mme/mme_device.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "utils/shared_ptr.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread.h"
+#include "utils/lock.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-
-typedef int appId;
-
-void fillIap2Protocols();
 
 class IAP2Device : public MmeDevice {
  public:
   IAP2Device(const std::string& mount_point,
              const std::string& name,
-             const DeviceUID& unique_device_id);
+             const DeviceUID& unique_device_id,
+             TransportAdapterController* controller);
+
+  ~IAP2Device();
 
   virtual Protocol protocol() const {
     return IAP2;
   }
 
+  iap2ea_hdl_t* HandlerByAppId(ApplicationHandle app_id) const;
+
  protected:
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  void on_iap2SessionReady(iap2ea_hdl_t* handler);
+  typedef std::list<std::string> ProtocolNameContainer;
+  static const ProtocolNameContainer& ProtocolNames();
+  static const ProtocolNameContainer ReadProtocolNames();
 
-  int last_used_app_id_;
-  std::map<int, iap2ea_hdl_t*> iap2ea_handlers_;
-  std::vector<utils::SharedPtr<threads::Thread> > threads_;
+  void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
+  void OnDisconnect(ApplicationHandle app_id);
 
-  class iap2_connect_thread : public threads::ThreadDelegate {
+  TransportAdapterController* controller_;
+  int last_app_id_;
+
+  typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
+  typedef std::map<ApplicationHandle, AppRecord> AppContainer;
+  AppContainer apps_;
+  sync_primitives::Lock apps_lock_;
+
+  typedef std::map<std::string, utils::SharedPtr<thread::Thread> > ThreadContainer;
+  ThreadContainer connection_threads_;
+
+  class IAP2ConnectThreadDelegate : public threads::ThreadDelegate {
     public:
-      iap2_connect_thread(IAP2Device* parent, std::string protocol_name): parent_(parent), protocol_name_(protocol_name) {}
+      IAP2ConnectThreadDelegate(IAP2Device* parent, const std::string& protocol_name);
       void threadMain();
     private:
       IAP2Device* parent_;
+      std::string mount_point_;
       std::string protocol_name_;
   };
 };

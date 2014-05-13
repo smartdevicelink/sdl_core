@@ -35,70 +35,44 @@
 
 #include <ipod/ipod.h>
 
-#include "utils/threads/thread.h"
-#include "utils/threads/pulse_thread_delegate.h"
-
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
+class IAPDevice;
+
 class IAPConnection : public Connection {
  public:
   IAPConnection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const std::string& device_path);
+    IAPDevice* parent);
 
-  bool Init();
+  void Init();
 
  protected:
   virtual TransportAdapter::Error SendData(RawMessageSptr message);
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
+  static const size_t kBufferSize = 1024;
+
+  void ReceiveData(int session_id);
   void OnSessionOpened(int session_id);
   void OnSessionClosed(int session_id);
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
-  std::string device_path_;
-
+  IAPDevice* parent_;
   ipod_hdl_t* ipod_hdl_;
+  uint8_t buffer_[kBufferSize];
+
   std::set<int> session_ids_;
 
-  utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
-   public:
-    ReceiverThreadDelegate(ipod_hdl_t* ipod_hdl, IAPConnection* parent);
-
-   protected:
-    virtual bool ArmEvent(struct sigevent* event);
-    virtual void OnPulse();
-
-   private:
-    static const size_t kBufferSize = 1024;
-    static const size_t kEventsBufferSize = 32;
-    static const int kProtocolNameSize = 256;
-
-    void ParseEvents();
-    void AcceptSession(uint32_t protocol_id);
-    void AcceptSession(uint32_t protocol_id, const char* protocol_name);
-    void CloseSession(uint32_t session_id);
-    void ReceiveData(uint32_t session_id);
-    void OpenSession(uint32_t protocol_id);
-    void OpenSession(uint32_t protocol_id, const char* protocol_name);
-
-    IAPConnection* parent_;
-    ipod_hdl_t* ipod_hdl_;
-    uint8_t buffer_[kBufferSize];
-    ipod_eaf_event_t events_[kEventsBufferSize];
-  };
+  friend class IAPDevice;
 };
 
 }  // namespace transport_adapter

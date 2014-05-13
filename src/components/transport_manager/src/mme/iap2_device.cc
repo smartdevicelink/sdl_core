@@ -30,55 +30,129 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <list>
+#include "utils/logger.h"
 
 #include "transport_manager/mme/iap2_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-std::list<std::string> iap2Protocols; // TODO(nvaganov@luxoft.com) choose protocol name
-std::string path_to_config_file = "/fs/mp/etc/mm/iap2.cfg";
-
-void fillIap2Protocols() {
-    iap2Protocols.push_back("com.ford.sync.prot0");
-    iap2Protocols.push_back("com.ford.sync.prot1");
-    iap2Protocols.push_back("com.ford.sync.prot2");
-    iap2Protocols.push_back("com.ford.sync.prot3");
-    iap2Protocols.push_back("com.ford.sync.prot4");
-    iap2Protocols.push_back("com.ford.sync.prot5");
-    iap2Protocols.push_back("com.ford.sync.prot6");
-}
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 IAP2Device::IAP2Device(const std::string& mount_point,
                        const std::string& name,
-                       const DeviceUID& unique_device_id) :
-  MmeDevice(mount_point, name, unique_device_id) {
-  last_used_app_id_ = 1; // fisrt application id at device
-  fillIap2Protocols();
-  for (std::list<std::string>::iterator it = iap2Protocols.begin(); it != iap2Protocols.end(); it++) {
-      utils::SharedPtr<threads::Thread> thr = new threads::Thread(it->c_str(),
-        new iap2_connect_thread(this, *it) );
-      thr->start();
-      threads_.push_back(thr);
+                       const DeviceUID& unique_device_id,
+                       TransportAdapterController* controller) :
+  MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
+
+  const ProtocolNamesContainer& protocol_names = ProtocolNames();
+  for (ProtocolNamesContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
+    std:string protocol_name = *i;
+    std:string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
+    utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
+      new IAP2ConnectThreadDelegate(this, protocol_name));
+    LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
+    thread->start();
+    connection_threads_.insert(std::make_pair(protocol_name, thread));
+  }
+}
+
+IAP2Device::~IAP2Device() {
+  for (ThreadContainer::const_iterator i = connection_threads_.begin(); i != connection_threads_.end(); ++i) {
+    utils::SharedPtr<threads::Thread> thread = i->second;
+    thread->stop();
   }
 }
 
 ApplicationList IAP2Device::GetApplicationList() const {
-    ApplicationList app_list;
-    app_list.push_back(1);
-    return app_list;
+  ApplicationList app_list;
+  apps_lock_.Acquire();
+  for (AppContainer::const_iterator i = apps_.begin(); i != apps_.end(); ++i) {
+    ApplicationHandle app_id = i->first;
+    app_list.push_back(app_id);
+  }
+  apps_lock_.Release();
+  return app_list;
 }
 
-void IAP2Device::on_iap2SessionReady(iap2ea_hdl_t* handler) {
-    iap2ea_handlers_.insert(std::make_pair(last_used_app_id_++, handler));
-}
-
-void IAP2Device::iap2_connect_thread::threadMain() {
+iap2ea_hdl_t* IAP2Device::HandlerByAppId(ApplicationHandle app_id) const {
   iap2ea_hdl_t* handler;
-  handler = iap2_eap_open(path_to_config_file.c_str(), protocol_name_.c_str(), 0);
-  if (!handler){
-    parent_->on_iap2SessionReady(handler);
+  apps_lock_.Acquire();
+  AppContainer::const_iterator i = apps_.find(app_id);
+  if (i != apps_.end()) {
+    AppRecord record = i->second;
+    handler = record->second;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: no handler corresponding to application " << app_id);
+    handler = 0;
+  }
+  apps_lock_.Release();
+  return handler;
+}
+
+const IAP2Device::ProtocolNameContainer& IAP2Device::ProtocolNames() {
+  static ProtocolNameContainer protocol_names = ReadProtocolNames();
+  return protocol_names;
+}
+
+const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
+  ProtocolNameContainer protocol_names;
+  protocol_names.push_back("com.ford.sync.prot0");
+  protocol_names.push_back("com.ford.sync.prot1");
+  return protocol_names;
+}
+
+void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler) {
+  apps_lock_.Acquire();
+  ApplicationHandle app_id = ++last_app_id;
+  AppRecord record = std::make_pair(protocol_name, handler);
+  apps_.insert(std::make_pair(app_id, record));
+  apps_lock_.Release();
+  // Here will be notification
+  // controller_->...
+}
+
+void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
+  apps_lock_.Acquire();
+  AppContainer::const_iterator i = apps_.find(app_id);
+  if (i != apps_.end()) {
+    AppRecord record = i->second;
+    std::string protocol_name = record->first;
+    LOG4CXX_DEBUG(logger_, "iAP2: dropping protocol " << protocol_name << " for application " << app_id);
+    apps_.erase(i);
+    ThreadContainer::const_iterator j = connection_threads_.find(protocol_name);
+    if (j != connection_threads_.end()) {
+      utils::SharedPtr<threads::Thread> thread = j->second;
+      LOG4CXX_INFO(logger_, "iAP2: restarting connection thread for protocol " << protocol_name);
+      thread->start();
+    }
+    else {
+      LOG4CXX_WARN(logger_, "iAP2: no connection thread corresponding to protocol " << protocol_name);
+    }
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: no protocol corresponding to application " << app_id);
+  }
+  apps_lock_.Release();
+}
+
+IAP2Device::IAP2ConnectThreadDelegate::IAP2ConnectThreadDelegate(
+  IAP2Device* parent,
+  const std::string& protocol_name): parent_(parent),
+  protocol_name_(protocol_name) {
+}
+
+void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
+  std:string mount_point = parent_->mount_point();
+  LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on protocol " << protocol_name);
+  iap2ea_hdl_t* handler = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
+  if (handler != 0){
+    LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on protocol " << protocol_name);
+    parent_->OnConnect(protocol_name_, handler);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on protocol " << protocol_name);
   }
 }
 
