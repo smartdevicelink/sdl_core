@@ -3,7 +3,6 @@ package com.ford.syncV4.protocol;
 import android.os.Environment;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
-import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
@@ -54,7 +53,7 @@ public abstract class AbstractProtocol {
     // it for transmission over the transport.  The results of this processing will
     // be sent to the onProtocolMessageBytesToSend() method on protocol listener
     // interface.  Note that the ProtocolMessage itself contains information
-    // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
+    // about the type of message (e.g. RPC, BULK, etc.) and the protocol syncSession
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
 
@@ -104,9 +103,9 @@ public abstract class AbstractProtocol {
     public abstract void SendHeartBeatAckMessage(byte sessionId);
 
     /**
-     * This method starts a protocol currentSession. A corresponding call to the protocol
+     * This method starts a protocol syncSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
-     * currentSession has been established.
+     * syncSession has been established.
      *
      * @param sessionId ID of the current active session
      */
@@ -114,9 +113,9 @@ public abstract class AbstractProtocol {
 
     public abstract void StartProtocolService(ServiceType serviceType, Session session);
 
-    // This method ends a protocol currentSession.  A corresponding call to the protocol
+    // This method ends a protocol syncSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
-    // currentSession has ended.
+    // syncSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
@@ -268,7 +267,7 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolMessageReceived(message);
     }
 
-    // This method handles the end of a protocol currentSession. A callback is
+    // This method handles the end of a protocol syncSession. A callback is
     // sent to the protocol listener.
     protected void handleProtocolServiceEnded(ServiceType serviceType,
                                               byte sessionID, String correlationID) {
@@ -276,25 +275,24 @@ public abstract class AbstractProtocol {
     }
 
     /**
-     * This method handles the startup of a protocol currentSession. A callback is sent to the
+     * This method handles the startup of a protocol syncSession. A callback is sent to the
      * protocol listener.
      *
      * @param serviceType
-     * @param sessionID
+     * @param sessionId
      * @param version
-     * @param correlationID
+     * @param correlationId
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version,
-                                                String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID);
-        _protocolListener.onProtocolSessionStarted(session, version, correlationID);
+                                                byte sessionId, byte version,
+                                                String correlationId) {
+        _protocolListener.onProtocolSessionStarted(sessionId, version, correlationId);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionID, byte version, String correlationID) {
         if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create RPC service without creating syncSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);

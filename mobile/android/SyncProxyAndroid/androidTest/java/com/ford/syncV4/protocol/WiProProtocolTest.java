@@ -394,7 +394,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
+            public void onProtocolSessionStarted(byte sessionId,
                                                  byte version,
                                                  String correlationID) {
             }
@@ -526,11 +526,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                assertEquals("currentSession id should be SESSION_ID", SESSION_ID, session.getSessionId());
-                Service service = session.getServiceList().get(0);
-                assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-                assertEquals("service should belong to the currentSession", session, service.getSession());
+            public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID) {
+                assertEquals("syncSession id should be SESSION_ID", SESSION_ID, sessionId);
                 passed[0] = true;
             }
 
@@ -599,13 +596,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol(mock).new MessageFrameAssembler();
-        ArgumentCaptor<Session> sessionTypeCaptor = ArgumentCaptor.forClass(Session.class);
+        ArgumentCaptor<Byte> sessionId = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolSessionStarted(sessionTypeCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
-        assertEquals(0, sessionTypeCaptor.getValue().getSessionId());
-        assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue().getServiceList().get(0).getServiceType());
+        Mockito.verify(mock).onProtocolSessionStarted(sessionId.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        assertEquals((byte)0x00, (byte)sessionId.getValue());
     }
 
     public void testStartServiceACK_Mobile_Nav_FrameReceived() throws Exception {

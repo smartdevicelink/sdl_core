@@ -524,9 +524,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(Session session,
-                                         byte version, String correlationID) {
-        mConnectionListener.onProtocolSessionStarted(session, version, correlationID);
+    public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID) {
+        mConnectionListener.onProtocolSessionStarted(sessionId, version, correlationID);
     }
 
     @Override

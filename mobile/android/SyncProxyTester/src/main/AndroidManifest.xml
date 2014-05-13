@@ -24,6 +24,7 @@
         android:debuggable="true"
         android:icon="@drawable/fiesta"
         android:name=".MainApp"
+        android:theme="@style/AppTheme"
         android:label="@string/tester_app_name" >
 
         <activity

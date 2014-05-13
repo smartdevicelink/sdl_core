@@ -24,7 +24,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
+            public void onProtocolSessionStarted(byte sessionId,
                                                  byte version,
                                                  String correlationID) {
             }
@@ -117,7 +117,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
+            public void onProtocolSessionStarted(byte sessionId,
                                                  byte version,
                                                  String correlationID) {
             }

@@ -17,9 +17,8 @@
         </TableRow>
 
         <TableRow
-            android:id="@+id/LinearLayout03"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"></TableRow>
+            android:layout_height="wrap_content"/>
     </TableLayout>
 
     <TableLayout
@@ -27,7 +26,6 @@
         android:layout_height="wrap_content">
 
         <TableRow
-            android:id="@+id/LinearLayout03"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
@@ -36,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Play/Pause"></Button>
+                android:text="Play/Pause"/>
         </TableRow>
 
         <TableRow
@@ -50,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:enabled="true"
-                android:text="Send Message"></Button>
+                android:text="Send Message"/>
         </TableRow>
 
         <TableRow
@@ -71,6 +69,7 @@
             android:layout_width="fill_parent"
             android:paddingTop="5dip"
             android:layout_height="wrap_content">
+
             <fragment
                 android:id="@+id/audioFragment"
                 android:name="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
@@ -80,20 +79,18 @@
 
         </TableRow>
 
-
     </TableLayout>
 
     <ScrollView
         android:id="@+id/scrollConsole"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="gone"></ScrollView>
+        android:visibility="gone"/>
 
     <ListView
         android:id="@+id/messageList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:visibility="visible"></ListView>
-
+        android:visibility="visible"/>
 
 </LinearLayout>

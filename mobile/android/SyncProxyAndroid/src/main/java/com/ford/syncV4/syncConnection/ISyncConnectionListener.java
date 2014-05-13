@@ -19,7 +19,7 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
+	public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID);
 	
 	public void onProtocolServiceEnded(ServiceType serviceType,
                                        byte sessionID, String correlationID);

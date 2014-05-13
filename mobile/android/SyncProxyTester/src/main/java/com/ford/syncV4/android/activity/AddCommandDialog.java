@@ -98,7 +98,7 @@ public class AddCommandDialog extends DialogFragment {
 
                         AddCommand addCommand = RPCRequestFactory.buildAddCommand();
                         addCommand.setCorrelationID(((SyncProxyTester) getActivity())
-                                .getCorrelationid());
+                                .getNextCorrelationIdForCurrentFragment());
                         addCommand.setCmdID(cmdID);
 
                         if (chkUseMenuParams.isChecked()) {

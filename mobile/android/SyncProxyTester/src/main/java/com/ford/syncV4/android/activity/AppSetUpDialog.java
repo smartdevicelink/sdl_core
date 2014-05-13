@@ -48,8 +48,11 @@ public class AppSetUpDialog extends DialogFragment {
 
     private static final String LOG_TAG = "AppSetUpDialog";
 
-    public static AppSetUpDialog newInstance() {
+    public static AppSetUpDialog newInstance(int appId) {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
+        Bundle args = new Bundle();
+        args.putInt(Const.ARG_APP_ID, appId);
+        appSetupDialog.setArguments(args);
         return appSetupDialog;
     }
 
@@ -269,7 +272,8 @@ public class AppSetUpDialog extends DialogFragment {
                         }
 
                         setupHeartbeat(view);
-                        ((SyncProxyTester) getActivity()).onSetUpDialogResult();
+                        int appId = getArguments().getInt(Const.ARG_APP_ID);
+                        ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
                     }
                 }).setView(view).show();
     }

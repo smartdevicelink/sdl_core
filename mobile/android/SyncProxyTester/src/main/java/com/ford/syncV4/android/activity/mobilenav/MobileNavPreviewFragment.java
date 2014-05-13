@@ -24,7 +24,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, true);
+        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, false);
     }
 
     @Override

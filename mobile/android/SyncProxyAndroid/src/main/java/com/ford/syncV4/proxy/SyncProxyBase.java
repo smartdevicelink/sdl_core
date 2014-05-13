@@ -81,7 +81,6 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
-import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
@@ -159,8 +158,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // Proxy State Variables
     protected Boolean _appInterfaceRegisterd = false;
-    protected Boolean _haveReceivedFirstFocusLevel = false;
-    protected Boolean _haveReceivedFirstFocusLevelFull = false;
+
+    // These variables are not used
+    //protected Boolean _haveReceivedFirstFocusLevel = false;
+    //protected Boolean _haveReceivedFirstFocusLevelFull = false;
+    //protected SyncInterfaceAvailability _syncIntefaceAvailablity = null;
+    //Boolean _haveReceivedFirstNonNoneHMILevel = false;
+
     protected Boolean _proxyDisposed = false;
 
     public SyncConnectionState getSyncConnectionState() {
@@ -172,7 +176,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected SyncConnectionState _syncConnectionState = null;
-    protected SyncInterfaceAvailability _syncIntefaceAvailablity = null;
 
     public SyncMsgVersion getSyncMsgVersion() throws SyncException {
         return _syncMsgVersion;
@@ -298,9 +301,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     SyncConnection mSyncConnection;
 
-    // RPC Session ID
-    protected Session currentSession = Session.createSession(ServiceType.RPC, Session.DEFAULT_SESSION_ID);
-    Boolean _haveReceivedFirstNonNoneHMILevel = false;
+    /**
+     * Keep track of all opened Sync Sessions. Need to be "protected" in order to support
+     * UnitTesting
+     */
+    protected final Session syncSession = new Session();
 
     public proxyListenerType getProxyListener() {
         return _proxyListener;
@@ -839,7 +844,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public byte getMobileNavSessionID() {
-        return currentSession.getSessionId();
+        return syncSession.getSessionId();
     }
 
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
@@ -952,17 +957,18 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _appInterfaceRegisterd;
     }
 
-    private void initState() throws SyncException {
+    // This method is not used
+    /*private void initState() throws SyncException {
         // Reset all of the flags and state variables
-        _haveReceivedFirstNonNoneHMILevel = false;
-        _haveReceivedFirstFocusLevel = false;
-        _haveReceivedFirstFocusLevelFull = false;
-        _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
-    }
+        //_haveReceivedFirstNonNoneHMILevel = false;
+        //_haveReceivedFirstFocusLevel = false;
+        //_haveReceivedFirstFocusLevelFull = false;
+        //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+    }*/
 
     // Function to initialize new proxy connection
     public void initializeProxy() throws SyncException {
-        initState();
+        //initState();
 
         internalRequestCorrelationIDs = new HashSet<Integer>();
 
@@ -976,10 +982,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
 
-                currentSession.setSessionId((byte) 0);
-                mSyncConnection.setSessionId(currentSession.getSessionId());
+                //syncSession.setSessionId((byte) 0);
+                //mSyncConnection.setSessionId(syncSession.getSessionId());
+                mSyncConnection.setSessionId(Session.DEFAULT_SESSION_ID);
 
-                //mSyncConnection.setSessionId(currentSession.getSessionId());
+                //mSyncConnection.setSessionId(syncSession.getSessionId());
 
                 /**
                  * TODO : Set TestConfig for the Connection
@@ -1003,10 +1010,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
 
-            //Logger.d("Close Sync connection:" + currentSession.getSessionId() + ", " +
-            //        "N:" + currentSession.getServicesNumber() + ", keep:" + keepConnection);
+            //Logger.d("Close Sync connection:" + syncSession.getSessionId() + ", " +
+            //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
 
-            mSyncConnection.closeConnection(currentSession.getSessionId(), keepConnection);
+            mSyncConnection.closeConnection(syncSession.getSessionId(), keepConnection);
             if (mSyncConnection.getSessionId() != 0) {
                 mSyncConnection.setSessionId((byte) 0);
             }
@@ -1018,7 +1025,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void stopSession() {
-        currentSession.stopSession();
+        syncSession.stopSession();
     }
 
     @Deprecated
@@ -1083,7 +1090,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol currentSession, and frees any resources used by the proxy.
+     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol syncSession, and frees any resources used by the proxy.
      */
     public void dispose() throws SyncException {
         if (_proxyDisposed) {
@@ -1147,7 +1154,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Unregisters the application from SYNC, and closes the currentSession.
+     * Unregisters the application from SYNC, and closes the syncSession.
      * Optionally, closes the transport connection.
      */
     public void closeSession(boolean keepConnection) {
@@ -1181,8 +1188,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void scheduleInitializeProxy() {
-        Logger.d("Scheduling proxy initialization");
-        if (currentSession.isServicesEmpty()) {
+        Logger.d("Scheduling proxy init, services count:" + syncSession.getServiceList());
+        if (syncSession.isServicesEmpty()) {
             Logger.d("Service list is empty. Scheduling proxy initialization canceled");
             return;
         }
@@ -1215,7 +1222,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Opens a currentSession, and registers the application. The connection must be
+     * Opens a syncSession, and registers the application. The connection must be
      * already opened.
      *
      * @throws SyncException if a transport connection is not opened
@@ -1226,7 +1233,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     SyncExceptionCause.SYNC_CONNECTION_FAILED);
         }
 
-        initState();
+        //initState();
         mSyncConnection.onTransportConnected();
     }
 
@@ -1236,10 +1243,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
 
-            if (message.getSessionID() != currentSession.getSessionId()) {
-                Logger.w("Message is not from current session");
-                return;
-            }
+            //if (message.getSessionID() != syncSession.getSessionId()) {
+            //    Logger.w("Message is not from current session");
+            //    return;
+            //}
 
             // Dispatching logic
             if (message.getServiceType().equals(ServiceType.RPC)) {
@@ -1411,7 +1418,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     rpcRequestConverterFactory.getConverterForRequest(request);
             List<ProtocolMessage> protocolMessages =
                     converter.getProtocolMessages(request,
-                            currentSession.getSessionId(), _jsonRPCMarshaller,
+                            syncSession.getSessionId(), _jsonRPCMarshaller,
                             mSyncConnection.getProtocolVersion());
 
             if (protocolMessages.size() > 0) {
@@ -1423,7 +1430,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
         } catch (OutOfMemoryError e) {
-            Logger.i("OutOfMemory exception while sending request " + request.getFunctionName());
+            Logger.e("OutOfMemory exception while sending request " + request.getFunctionName());
             throw new SyncException("OutOfMemory exception while sending request " +
                     request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
         }
@@ -1529,6 +1536,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         if (requestType == RequestType.HTTP) {
             if (fileType == FileType.BINARY) {
+                Logger.d(LOG_TAG + " PolicyTableSnapshot url:" + msg.getUrl());
                 processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
             } else {
                 final Vector<String> urls = msg.getUrl();
@@ -1745,9 +1753,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         queueInternalMessage(message);
     }
 
-    private void startRPCProtocolService(final byte sessionID, final String correlationID) {
-        currentSession.setSessionId(sessionID);
-        addIfNotExsistRpcServiceToSession();
+    private void startProtocolSession(final byte sessionID, final String correlationID) {
+        syncSession.setSessionId(sessionID);
+        if (!syncSession.hasService(ServiceType.RPC)) {
+            Service service = new Service();
+            service.setServiceType(ServiceType.RPC);
+            service.setSession(syncSession);
+            syncSession.addService(service);
+        }
+
         mSyncConnection.setSessionId(sessionID);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1762,15 +1776,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         restartRPCProtocolSession();
-    }
-
-    private void addIfNotExsistRpcServiceToSession() {
-        if (!currentSession.hasService(ServiceType.RPC)) {
-            Service service = new Service();
-            service.setServiceType(ServiceType.RPC);
-            service.setSession(currentSession);
-            currentSession.addService(service);
-        }
     }
 
     private void restartRPCProtocolSession() {
@@ -1900,19 +1905,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void createService(byte sessionID, ServiceType serviceType) {
-        if (sessionID != currentSession.getSessionId()) {
+        if (sessionID != syncSession.getSessionId()) {
             throw new IllegalArgumentException("can't create service with sessionID " + sessionID);
         }
-        Service service = currentSession.createService(serviceType);
-        currentSession.addService(service);
+        Service service = syncSession.createService(serviceType);
+        syncSession.addService(service);
     }
 
     public void stopMobileNaviService() {
-        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Mobile_Nav)) {
+        if (removeServiceFromSession(syncSession.getSessionId(), ServiceType.Mobile_Nav)) {
             Logger.i("Mobile Navi Service is going to stop, " +
-                    "sesId:" + currentSession.getSessionId());
+                    "sesId:" + syncSession.getSessionId());
             try {
-                getSyncConnection().closeMobileNaviService(currentSession.getSessionId());
+                getSyncConnection().closeMobileNaviService(syncSession.getSessionId());
             } catch (NullPointerException e) {
                 Logger.e(e.toString());
             }
@@ -1920,11 +1925,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void stopAudioService() {
-        if (removeServiceFromSession(currentSession.getSessionId(), ServiceType.Audio_Service)) {
+        if (removeServiceFromSession(syncSession.getSessionId(), ServiceType.Audio_Service)) {
             Logger.i("Mobile Audio service is going to stop, " +
-                    "sesId:" + currentSession.getSessionId());
+                    "sesId:" + syncSession.getSessionId());
             try {
-                getSyncConnection().closeAudioService(currentSession.getSessionId());
+                getSyncConnection().closeAudioService(syncSession.getSessionId());
             } catch (NullPointerException e) {
                 Logger.e(e.toString());
             }
@@ -1935,7 +1940,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         List<Service> servicePool = getServicePool();
         for (Service service : servicePool) {
             if ((service.getSession().getSessionId() == sessionID) && (serviceType.equals(service.getServiceType()))) {
-                currentSession.removeService(service);
+                syncSession.removeService(service);
                 return true;
             }
         }
@@ -1963,7 +1968,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startH264() {
         OutputStream stream = null;
         if (mSyncConnection != null) {
-            stream = mSyncConnection.startH264(currentSession.getSessionId());
+            stream = mSyncConnection.startH264(syncSession.getSessionId());
         }
         return stream;
     }
@@ -1977,7 +1982,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public OutputStream startAudioDataTransfer() {
         OutputStream stream = null;
         if (mSyncConnection != null) {
-            stream = mSyncConnection.startAudioDataTransfer(currentSession.getSessionId());
+            stream = mSyncConnection.startAudioDataTransfer(syncSession.getSessionId());
         }
         return stream;
     }
@@ -2812,11 +2817,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // TODO: Need to refactor it
     public List<Service> getServicePool() {
-        return currentSession.getServiceList();
+        return syncSession.getServiceList();
     }
 
     public boolean hasServiceInServicesPool(ServiceType serviceType) {
-        return !currentSession.isServicesEmpty() && currentSession.hasService(serviceType);
+        return !syncSession.isServicesEmpty() && syncSession.hasService(serviceType);
     }
 
     /**
@@ -2825,14 +2830,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @return number of Services in current Session
      */
     public int getServicesNumber() {
-        return currentSession.getServicesNumber();
+        return syncSession.getServicesNumber();
     }
 
     /**
      * @return id of te current session
      */
     public int getSessionId() {
-        return currentSession.getSessionId();
+        return syncSession.getSessionId();
     }
 
     public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
@@ -2949,16 +2954,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onTransportConnected() {
+            final int sessionIdsNumber = syncSession.getSessionIdsNumber();
             if (_callbackToUIThread) {
                 // Run in UI thread
                 _mainUIHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        _proxyListener.onStartSession(currentSession.getSessionId());
+                        for (int i = 0; i < sessionIdsNumber; i++) {
+                            _proxyListener.onStartSession(syncSession.getSessionIdAt(i));
+                        }
+
                     }
                 });
             } else {
-                _proxyListener.onStartSession(currentSession.getSessionId());
+                for (int i = 0; i < sessionIdsNumber; i++) {
+                    _proxyListener.onStartSession(syncSession.getSessionIdAt(i));
+                }
             }
 
             initializeSession();
@@ -3033,17 +3044,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-            if (session.hasService(ServiceType.RPC)) {
-                String message = "RPC Session started, sessionId:" + session.getSessionId() +
-                        ", correlationID:" + correlationID +
-                        ", protocol version:" + (int) version +
-                        ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
-                Logger.i(message);
+        public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID) {
+            String message = "RPC Session started, sessionId:" + sessionId +
+                    ", correlationID:" + correlationID +
+                    ", protocol version:" + (int) version +
+                    ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
+            Logger.i(message);
 
-                startRPCProtocolService(session.getSessionId(), correlationID);
-                mSyncConnection.startHeartbeatTimer();
-            }
+            startProtocolSession(sessionId, correlationID);
+            mSyncConnection.startHeartbeatTimer();
         }
 
         @Override
@@ -3130,12 +3139,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Restore interrupted Services
      */
     public void restoreServices() {
-        if (!currentSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
-            if (currentSession.hasService(ServiceType.Mobile_Nav)) {
-                mSyncConnection.startMobileNavService(currentSession);
+        if (!syncSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
+            if (syncSession.hasService(ServiceType.Mobile_Nav)) {
+                mSyncConnection.startMobileNavService(syncSession);
             }
-            if (currentSession.hasService(ServiceType.Audio_Service)) {
-                mSyncConnection.startAudioService(currentSession);
+            if (syncSession.hasService(ServiceType.Audio_Service)) {
+                mSyncConnection.startAudioService(syncSession);
             }
         }
     }

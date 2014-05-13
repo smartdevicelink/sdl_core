@@ -325,7 +325,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
 
     /**
-     * This callback is to inform SPT that session i going to be started
+     * This callback is to inform SPT that session is going to be started
      * @param sessionID Id of the session to start with
      */
     public void onStartSession(byte sessionID);

@@ -2,10 +2,18 @@ package com.ford.syncV4.android.constants;
 
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
-/** Stores application-wide constants. */
+/**
+ * Stores application-wide constants.
+ */
 public class Const {
+
 	// Shared preference name for protocol properties
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
+
+    /**
+     * The fragment argument representing the application Id associate with the fragment.
+     */
+    public static final String ARG_APP_ID = "ARG_APP_ID";
 
 	// Protocol properties
 	public static final String PREFS_KEY_PROTOCOL_MIN_VERSION = "protocolMinVersion";

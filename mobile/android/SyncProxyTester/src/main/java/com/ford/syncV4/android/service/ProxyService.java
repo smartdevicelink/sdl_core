@@ -154,7 +154,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     private static final int POLICIES_TEST_COMMAND = 101;
 
     private SyncProxyALM mSyncProxy;
-    private LogAdapter mLogAdapter;
+    private final Vector<LogAdapter> mLogAdapters = new Vector<LogAdapter>();
     private ModuleTest mTesterMain;
     private MediaPlayer mEmbeddedAudioPlayer;
     private Boolean playingAudio = false;
@@ -414,7 +414,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             }
         }
 
-        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapter);
+        // TODO : Add LogAdapters
+        //OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapters);
+        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(null);
 
         mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
         mSyncProxy.setTestConfigCallback(this);
@@ -456,7 +458,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public void sendPolicyTableUpdate(FileType fileType, RequestType requestType) {
-        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, requestType, mLogAdapter);
+        // TODO : Add LogAdapters
+        //PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, requestType, mLogAdapters);
+        PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, requestType, null);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
@@ -538,9 +542,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         msg.setCorrelationID(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(msg, true);
-        }
+        createMessageForAdapter(msg, Log.DEBUG);
         mSyncProxy.sendRPCRequest(msg);
     }
 
@@ -585,16 +587,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public void startModuleTest() {
-        mTesterMain = new ModuleTest(this, mLogAdapter);
+        // TODO : Add LogAdapters
+        //mTesterMain = new ModuleTest(this, mLogAdapters);
+        mTesterMain = new ModuleTest(this, null);
     }
 
     public void waiting(boolean waiting) {
         mWaitingForResponse = waiting;
     }
 
-    public void setLogAdapter(LogAdapter logAdapter) {
-        // TODO : Reconsider. Implement log message dispatching instead
-        mLogAdapter = logAdapter;
+    /**
+     * Add {@link com.ford.syncV4.android.adapters.LogAdapter} instance
+     * @param logAdapter {@link com.ford.syncV4.android.adapters.LogAdapter}
+     */
+    public void addLogAdapter(LogAdapter logAdapter) {
+        mLogAdapters.add(logAdapter);
     }
 
     public int getNextCorrelationID() {
@@ -682,7 +689,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 if (hmiFull) {
                     if (firstHMIStatusChange) {
                         showLockMain();
-                        mTesterMain = new ModuleTest(this, mLogAdapter);
+                        // TODO : Add LogAdapters
+                        //mTesterMain = new ModuleTest(this, mLogAdapters);
+                        mTesterMain = new ModuleTest(this, null);
                         //mTesterMain = ModuleTest.getModuleTestInstance();
 
                         // Process an init state of the predefined requests here, assume that if
@@ -696,11 +705,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                                 show("Sync Proxy", "Tester Ready");
                             }
                         } catch (SyncException e) {
-                            if (mLogAdapter == null)
-                                Logger.w(TAG, "LogAdapter is null");
-                            if (mLogAdapter != null)
-                                mLogAdapter.logMessage("Error sending show", Log.ERROR, e, true);
-                            else Logger.e(TAG + " Error sending show", e);
+                            createErrorMessageForAdapter("Error sending show");
                         }
                     }
                 }
@@ -757,7 +762,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mTesterMain.restart(null);
                 break;
             case POLICIES_TEST_COMMAND:
-                PoliciesTest.runPoliciesTest(this, mLogAdapter);
+                // TODO : Add LogAdapters
+                //PoliciesTest.runPoliciesTest(this, mLogAdapters);
+                PoliciesTest.runPoliciesTest(this, null);
                 break;
             default:
                 break;
@@ -792,9 +799,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     reset();
                 }
             }
-            /*if ((SyncExceptionCause.SYNC_PROXY_CYCLED != cause) && mLogAdapter != null) {
-                mLogAdapter.logMessage("onProxyClosed: " + info, Logger.ERROR, e, true);
-            }*/
         }
     }
 
@@ -1498,7 +1502,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             mProxyServiceEvent.onServiceEnd(serviceType);
         }
         if (serviceType == ServiceType.RPC) {
-            mLogAdapter.logMessage("RPC service stopped", true);
+            createMessageForAdapter("RPC service stopped", Log.DEBUG);
 
             if (mProxyServiceEvent != null) {
                 mProxyServiceEvent.onDisposeComplete();
@@ -1525,8 +1529,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onStartSession(byte sessionID) {
-        mLogAdapter.logMessage("Session going to start, " +
-                "protocol version: " + syncProxyGetWiProVersion(), true);
+        createMessageForAdapter("Session going to start, " +
+                "protocol version: " + syncProxyGetWiProVersion(), Log.DEBUG);
     }
 
     /**
@@ -1628,9 +1632,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             }
 
             encodedSyncPDataHeaderfromGPS = encodedSyncPDataHeader;
-            if (mLogAdapter != null) {
-                SyncProxyTester.setESN(tempESN);
-            }
+            SyncProxyTester.setESN(tempESN);
             if (PoliciesTesterActivity.getInstance() != null) {
                 PoliciesTesterActivity.setESN(tempESN);
                 PoliciesTesterActivity.setHeader(encodedSyncPDataHeader);
@@ -1729,11 +1731,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void commandListFiles() {
         try {
             mSyncProxy.listFiles(getNextCorrelationID());
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("ListFiles sent", true);
-            }
+            createMessageForAdapter("ListFiles sent", Log.DEBUG);
         } catch (SyncException e) {
-            mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
+            createErrorMessageForAdapter("ListFiles send error: " + e);
         }
     }
 
@@ -2010,6 +2010,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             } else {
                 mSyncProxy.initializeProxy();
             }
+        } else {
+            Logger.w(TAG + " OpenSession, proxy NULL");
         }
     }
 
@@ -2195,22 +2197,23 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private void createErrorMessageForAdapter(Object messageObject, Throwable throwable) {
-        if (mLogAdapter == null) {
-            Logger.w(TAG, "LogAdapter is null");
-        }
-        if (mLogAdapter != null) {
-            if (throwable != null) {
-                mLogAdapter.logMessage(messageObject, Log.ERROR, throwable, true);
-            } else {
-                mLogAdapter.logMessage(messageObject, Log.ERROR, true);
-            }
-        } else {
+        if (mLogAdapters.isEmpty()) {
+            Logger.w(TAG, "LogAdapters are empty");
             if (throwable != null) {
                 Logger.e(TAG + " " + messageObject.toString(), throwable);
             } else {
                 Logger.e(TAG, messageObject.toString());
             }
+            return;
         }
+        for (LogAdapter logAdapter : mLogAdapters) {
+            if (throwable != null) {
+                logAdapter.logMessage(messageObject, Log.ERROR, throwable, true);
+            } else {
+                logAdapter.logMessage(messageObject, Log.ERROR, true);
+            }
+        }
+
     }
 
     private void createInfoMessageForAdapter(Object messageObject) {
@@ -2222,18 +2225,19 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private void createMessageForAdapter(Object messageObject, Integer type) {
-        if (mLogAdapter == null) {
-            Logger.w(TAG, "LogAdapter is null");
-        }
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage(messageObject, type, true);
-        } else {
+        if (mLogAdapters.isEmpty()) {
+            Logger.w(TAG, "LogAdapters are empty");
             if (type == Log.DEBUG) {
                 Logger.d(TAG, messageObject.toString());
             } else if (type == Log.INFO) {
                 Logger.i(TAG, messageObject.toString());
             }
+            return;
         }
+        for (LogAdapter logAdapter : mLogAdapters) {
+            logAdapter.logMessage(messageObject, type, true);
+        }
+
     }
 
     @Override

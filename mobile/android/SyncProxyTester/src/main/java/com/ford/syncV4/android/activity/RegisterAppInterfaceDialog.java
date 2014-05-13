@@ -114,7 +114,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getCorrelationid());
+                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
 
                         if (useSyncMsgVersion.isChecked()) {
                             SyncMsgVersion version = new SyncMsgVersion();

@@ -23,7 +23,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_audio_service_preview, container, true);
+        return inflater.inflate(R.layout.activity_audio_service_preview, container, false);
     }
 
     @Override

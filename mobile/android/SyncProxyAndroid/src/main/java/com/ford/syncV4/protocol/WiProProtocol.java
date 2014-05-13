@@ -72,9 +72,9 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionID, byte version,
-                                             String correlationID) {
-        super.handleProtocolSessionStarted(serviceType, sessionID, version, correlationID);
+    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, byte version,
+                                             String correlationId) {
+        super.handleProtocolSessionStarted(serviceType, sessionId, version, correlationId);
 
         Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
@@ -84,8 +84,8 @@ public class WiProProtocol extends AbstractProtocol {
     public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
         byte sessionId = session.getSessionId();
         if (sessionId == 0) {
-            throw new IllegalArgumentException("currentSession id 0 should be used to start " +
-                    "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
+            throw new IllegalArgumentException("syncSession id 0 should be used to start " +
+                    "syncSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
         sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(), sessionId);
     }
@@ -128,7 +128,7 @@ public class WiProProtocol extends AbstractProtocol {
         final byte[] data = protocolMessageConverter.getData();
         final ServiceType serviceType = protocolMessageConverter.getServiceType();
 
-        // Get the message lock for this protocol currentSession
+        // Get the message lock for this protocol syncSession
         Object messageLock = _messageLocks.get(sessionId);
         if (messageLock == null) {
             handleProtocolError("Error sending protocol message to SYNC.",
