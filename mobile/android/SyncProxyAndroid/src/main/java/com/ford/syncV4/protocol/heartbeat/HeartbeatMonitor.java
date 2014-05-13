@@ -157,6 +157,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                         }
                     }
                 }, "HeartbeatThread");
+                heartbeatThread.setPriority(Thread.MAX_PRIORITY);
                 heartbeatThread.start();
             } else {
                 Logger.d(CLASS_NAME + " HeartbeatThread is already started; doing nothing");
@@ -254,13 +255,13 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatReceived() {
+        Logger.d(CLASS_NAME + " Heartbeat received, isHeartbeatAck:" + isHeartbeatAck);
         synchronized (Listener_Lock) {
             if (isHeartbeatAck) {
-                Logger.d(CLASS_NAME + " Heartbeat received");
+                Logger.d(CLASS_NAME + " Heartbeat start do post");
                 heartbeatReceived = true;
                 count += 1;
-                if (!heartbeatThreadHandler.post(
-                        heartbeatTimeoutRunnable)) {
+                if (!heartbeatThreadHandler.post(heartbeatTimeoutRunnable)) {
                     Logger.e(CLASS_NAME + " Couldn't schedule run()");
                 }
             }

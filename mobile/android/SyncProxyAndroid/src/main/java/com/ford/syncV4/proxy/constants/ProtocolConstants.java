@@ -45,7 +45,7 @@ public class ProtocolConstants {
     /**
      * Define Protocol maximum support version
      */
-    public static /*final*/ byte PROTOCOL_VERSION_MAX = PROTOCOL_VERSION_TWO;
+    public static /*final*/ byte PROTOCOL_VERSION_MAX = PROTOCOL_VERSION_THREE;
 
     /**
      * Size of the message header of the Protocol version 1

@@ -47,6 +47,7 @@
 #include "json/value.h"
 #include "config_profile/profile.h"
 #include "application_manager/usage_statistics.h"
+#include "policy/policy_types.h"
 
 namespace policy {
 typedef std::set<utils::SharedPtr<application_manager::Application>> ApplicationList;
@@ -70,6 +71,11 @@ PolicyHandler::~PolicyHandler() {
 }
 
 PolicyManager* PolicyHandler::LoadPolicyLibrary() {
+  if (profile::Profile::instance()->policy_turn_off()) {
+    LOG4CXX_WARN(logger_, "System is configured to work without policy functionality.");
+    policy_manager_ = NULL;
+    return NULL;
+  }
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
   char* error_string = dlerror();
@@ -77,7 +83,6 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
     policy_manager_ = CreateManager();
     policy_manager_->set_listener(this);
 #if defined (EXTENDED_POLICY)
-    //exchange_handler_ = new PTExchangeHandlerImpl(this);
     exchange_handler_ = new PTExchangeHandlerExt(this);
 #else
     exchange_handler_ = new PTExchangeHandlerImpl(this);
@@ -105,13 +110,19 @@ PolicyManager* PolicyHandler::CreateManager() {
 bool PolicyHandler::InitPolicyTable() {
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
-  DCHECK(policy_manager_);
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
   return policy_manager_->LoadPTFromFile(preloaded_file);
 }
 
 bool PolicyHandler::RevertPolicyTable() {
   LOG4CXX_INFO(logger_, "Removing user consent records in policy table.");
-  DCHECK(policy_manager_);
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
   return policy_manager()->ResetUserConsent();
 }
 
@@ -181,6 +192,10 @@ uint32_t PolicyHandler::GetAppIdForSending() {
 }
 
 DeviceConsent PolicyHandler::GetDeviceForSending(DeviceParams& device_params) {
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return kDeviceDisallowed;
+  }
   uint32_t app_id = 0;
   uint32_t app_id_previous = 0;
   while (true) {
@@ -232,13 +247,20 @@ const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
                                   const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy_manager_->SetDeviceInfo(device_id, device_info);
 }
 
 void PolicyHandler::OnAppPermissionConsent(
   const PermissionConsent& permissions) {
   LOG4CXX_INFO(logger_, "OnAppPermissionConsent");
-  DCHECK(policy_manager_);
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   if (!permissions.policy_app_id.empty()) {
     policy_manager_->SetUserConsentForApp(permissions);
   }
@@ -248,6 +270,10 @@ void PolicyHandler::OnGetUserFriendlyMessage(
   const std::vector<std::string>& message_codes, const std::string& language,
   uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnGetUserFriendlyMessage");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   std::vector<UserFriendlyMessage> result = policy_manager_
       ->GetUserFriendlyMessages(message_codes, language);
   // Send response to HMI with gathered data
@@ -258,6 +284,10 @@ void PolicyHandler::OnGetUserFriendlyMessage(
 void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
     const uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnGetListOfPermissions");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
@@ -282,6 +312,10 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnGetStatusUpdate");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy::PolicyTableStatus status = policy_manager_->GetPolicyTableStatus();
   application_manager::MessageHelper::SendGetStatusUpdateResponse(
     ConvertUpdateStatus(status), correlation_id);
@@ -313,6 +347,10 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   LOG4CXX_INFO(logger_, "OnSystemInfoChanged");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy_manager_->SetSystemLanguage(language);
 }
 
@@ -320,11 +358,19 @@ void PolicyHandler::OnGetSystemInfo(const std::string& ccpu_version,
                                     const std::string& wers_country_code,
                                     const std::string& language) {
   LOG4CXX_INFO(logger_, "OnGetSystemInfo");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy_manager_->SetSystemInfo(ccpu_version, wers_country_code, language);
 }
 
 void PolicyHandler::OnSystemInfoUpdateRequired() {
   LOG4CXX_INFO(logger_, "OnSystemInfoUpdateRequired");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   application_manager::MessageHelper::SendGetSystemInfoRequest();
 }
 
@@ -389,30 +435,33 @@ void PolicyHandler::OnPendingPermissionChange(
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   LOG4CXX_INFO(logger_, "PolicyHandler::SendMessageToSDK");
-
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
   is_exchange_in_progress_ = true;
 
   std::string url;
   uint32_t app_id = last_used_app_ids_.back();
-  if (policy_manager_) {
-    application_manager::ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application(app_id);
 
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "There is no registered application with "
-                   "connection key '" << app_id << "'");
-      return false;
-    }
+  application_manager::ApplicationSharedPtr app =
+    application_manager::ApplicationManagerImpl::instance()
+    ->application(app_id);
 
-    const std::string& mobile_app_id = app->mobile_app_id()->asString();
-    if (mobile_app_id.empty()) {
-      LOG4CXX_WARN(logger_, "Application with connection key '" << app_id << "'"
-                   " has no application id.");
-      return false;
-    }
-    url = policy_manager_->GetUpdateUrl(PolicyServiceTypes::POLICY);
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "There is no registered application with "
+                 "connection key '" << app_id << "'");
+    return false;
   }
+
+  const std::string& mobile_app_id = app->mobile_app_id()->asString();
+  if (mobile_app_id.empty()) {
+    LOG4CXX_WARN(logger_, "Application with connection key '" << app_id << "'"
+                 " has no application id.");
+    return false;
+  }
+  url = policy_manager_->GetUpdateUrl(PolicyServiceTypes::POLICY);
+
   LOG4CXX_INFO(
     logger_,
     "Update url is " << url << " for application " << application_manager::ApplicationManagerImpl::instance()-> application(app_id)->name());
@@ -511,12 +560,20 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
 
 void PolicyHandler::StartNextRetry() {
   DCHECK(exchange_handler_);
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   exchange_handler_->StartExchange();
 }
 
 void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     uint32_t device_id) {
   LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   if (device_id) {
     DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForHandle(device_id,
@@ -568,21 +625,26 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
 
 void PolicyHandler::OnIgnitionCycleOver() {
   LOG4CXX_INFO(logger_, "OnIgnitionCycleOver");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy_manager_->IncrementIgnitionCycles();
 }
 
 void PolicyHandler::KmsChanged(int kms) {
   LOG4CXX_INFO(logger_, "PolicyHandler::KmsChanged " << kms << " kilometers");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   PTExchangeAtOdometer(kms);
 }
 
 void PolicyHandler::OnActivateApp(uint32_t connection_key,
                                   uint32_t correlation_id) {
   LOG4CXX_INFO(logger_, "OnActivateApp");
-  if (!policy_manager_) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return;
-  }
+
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
@@ -592,36 +654,42 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
   std::string policy_app_id = app->mobile_app_id()->asString();
 
-  AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
-                                 policy_app_id);
+  AppPermissions permissions(policy_app_id);
+
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+  } else {
+    permissions = policy_manager_->GetAppPermissionsChanges(
+                    policy_app_id);
 #if defined(EXTENDED_POLICY)
-  application_manager::UsageStatistics& usage = app->usage_report();
+    application_manager::UsageStatistics& usage = app->usage_report();
 
-  usage.RecordAppUserSelection();
+    usage.RecordAppUserSelection();
 
-  DeviceConsent consent = GetDeviceForSending(permissions.deviceInfo);
-  permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
+    DeviceConsent consent = GetDeviceForSending(permissions.deviceInfo);
+    permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
 
-  if (permissions.appRevoked) {
-    usage.RecordRunAttemptsWhileRevoked();
-  }
+    if (permissions.appRevoked) {
+      usage.RecordRunAttemptsWhileRevoked();
+    }
 
-  // If isSDLAllowed is false, we should provide device params for user consent
-  if (!permissions.isSDLAllowed) {
-    pending_device_handles_.push_back(permissions.deviceInfo.device_handle);
-  }
+    // If isSDLAllowed is false, we should provide device params for user consent
+    if (!permissions.isSDLAllowed) {
+      pending_device_handles_.push_back(permissions.deviceInfo.device_handle);
+    }
 #else
-  permissions.isSDLAllowed = true;
+    permissions.isSDLAllowed = true;
 #endif
 
-  if (permissions.isSDLAllowed &&
-      PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
-    StartPTExchange();
+    if (permissions.isSDLAllowed &&
+        PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
+      StartPTExchange();
+    }
+    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
       correlation_id);
-  policy_manager_->RemovePendingPermissionChanges(policy_app_id);
 }
 
 void PolicyHandler::PTExchangeAtIgnition() {
@@ -669,6 +737,10 @@ void PolicyHandler::PTExchangeAtOdometer(int kilometers) {
 
 void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
   LOG4CXX_TRACE(logger_, "PT exchange at user request");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   policy::PolicyTableStatus status = policy_manager_->GetPolicyTableStatus();
   if (status == policy::StatusUpdateRequired) {
     OnPTExchangeNeeded();
@@ -744,6 +816,10 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 }
 
 void PolicyHandler::AddStatisticsInfo(int type) {
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   switch (static_cast<hmi_apis::Common_StatisticsType::eType>(type)) {
     case hmi_apis::Common_StatisticsType::iAPP_BUFFER_FULL: {
       usage_statistics::GlobalCounter count_of_iap_buffer_full(
@@ -758,6 +834,10 @@ void PolicyHandler::AddStatisticsInfo(int type) {
 }
 
 void PolicyHandler::OnSystemError(int code) {
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
   switch (static_cast<hmi_apis::Common_SystemError::eType>(code)) {
     case hmi_apis::Common_SystemError::SYNC_REBOOTED: {
       usage_statistics::GlobalCounter count_of_sync_reboots(
@@ -789,6 +869,18 @@ std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
     return "";
   }
   return  app->name();
+}
+
+void PolicyHandler::RemoveDevice(const std::string& device_id) {
+  LOG4CXX_INFO(logger_, "PolicyHandler::RemoveDevice");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
+
+  policy::DeviceIds devices;
+  devices.insert(device_id);
+  policy_manager_->CleanupUnpairedDevices(devices);
 }
 
 }  //  namespace policy

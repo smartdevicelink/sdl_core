@@ -231,6 +231,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
                 if (_transport != null) {
                     _transport.disconnect();
+
+                    // TODO : Add here 'shutdownAllExecutors' of the 'SendProtocolMessageProcessor'
+                    // TODO : method call
                 }
                 _transport = null;
             }

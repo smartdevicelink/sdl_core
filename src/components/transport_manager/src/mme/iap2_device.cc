@@ -109,6 +109,7 @@ void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handl
   AppRecord record = std::make_pair(protocol_name, handler);
   apps_.insert(std::make_pair(app_id, record));
   apps_lock_.Release();
+
   // Here will be notification
   // controller_->...
 }

@@ -345,5 +345,6 @@ class Optional {
 
 // Template methods implementation
 #include "rpc_base_inl.h"
+#include "rpc_base_json_inl.h"
 
 #endif /* VALIDATED_TYPES_H_ */

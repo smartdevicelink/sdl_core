@@ -68,7 +68,6 @@ class IAP2Connection : public Connection {
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
   IAP2Device* parent_;
-
   iap2ea_hdl_t* iap2ea_hdl_;
   uint8_t buffer_[kBufferSize];
 
