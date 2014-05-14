@@ -87,7 +87,7 @@ bool System::Execute(bool wait) {
   int ret = spawnvp(mode, command_.c_str(), argv);
 
   if (ret == -1) {
-    LOG4CXX_FATAL(logger_, "Can't execute command!");
+    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
     return false;
   }
   return true;
@@ -127,8 +127,7 @@ bool System::Execute(bool wait) {
 
       // Execute the program.
       if (execvp(command_.c_str(), argv) == -1) {
-        LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                                 "execvp() failed! Can't execute command!");
+        LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
         _exit(EXIT_FAILURE);
       }
 
