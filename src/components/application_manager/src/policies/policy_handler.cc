@@ -488,6 +488,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     retry_sequence_lock_.Ackquire();
     retry_sequence_.stop();
     retry_sequence_lock_.Release();
+    policy_manager_->CleanupUnpairedDevices();
     int32_t correlation_id =
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
@@ -503,9 +504,6 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
     application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
-    if (policy_manager_->CleanupUnpairedDevices(unpaired_device_ids_)) {
-      unpaired_device_ids_.clear();
-    }
   } else  {
     // TODO(PV): should be exchange restarted at this point?
     LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
@@ -882,9 +880,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
     return;
   }
 
-  policy::DeviceIds devices;
-  devices.insert(device_id);
-  policy_manager_->CleanupUnpairedDevices(devices);
+  policy_manager_->MarkUnpairedDevice(device_id);
 }
 
 }  //  namespace policy
