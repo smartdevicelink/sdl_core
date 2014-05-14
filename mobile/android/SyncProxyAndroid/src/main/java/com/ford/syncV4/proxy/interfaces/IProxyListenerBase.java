@@ -68,7 +68,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * @param notification - Contains information about the HMI Level,
 	 * system context and audio streaming state.
 	 */
-	public void onOnHMIStatus(OnHMIStatus notification);
+	public void onOnHMIStatus(byte sessionId, OnHMIStatus notification);
 
 	/**
 	 * onProxyClosed has different functionality for the different models.
@@ -318,7 +318,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     void onRegisterAppRequest(RegisterAppInterface msg);
 
-    public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
+    public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg);
 
     public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason);
 

@@ -60,6 +60,7 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
@@ -125,18 +126,19 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.test.ITestConfigCallback;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.Base64;
-import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Vector;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting, ITestConfigCallback {
@@ -173,6 +175,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     // This manager provide functionality to process RPC requests which are involved in app resumption
     private RPCRequestsResumableManager mRpcRequestsResumableManager =
             new RPCRequestsResumableManager();
+
+    /**
+     * Map of the existed syncProxyTester applications, mobile application Id is a Key
+     */
+    private final HashMap<Integer, RegisterAppInterface> appInterfaceHashMap =
+            new HashMap<Integer, RegisterAppInterface>();
+
+
     // This Config object stores all the necessary data for SDK testing
     private TestConfig mTestConfig = new TestConfig();
 
@@ -299,13 +309,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
             boolean result = startProxy();
             Logger.i(TAG + " Proxy complete result:" + result);
-            /*if (result) {
-                try {
-                    mSyncProxy.openSession();
-                } catch (SyncException e) {
-                    Logger.e(CLASS_NAME, "ProxyService - OpenSession", e);
-                }
-            }*/
         }
     }
 
@@ -627,7 +630,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onOnHMIStatus(OnHMIStatus notification) {
+    public void onOnHMIStatus(byte sessionId, OnHMIStatus notification) {
         createDebugMessageForAdapter(notification);
         //createDebugMessageForAdapter("HMI level:" + notification.getHmiLevel());
 
@@ -696,7 +699,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                         // Process an init state of the predefined requests here, assume that if
                         // hashId is not null means this is resumption
-                        if (mSyncProxy.getHashId() == null) {
+                        if (mSyncProxy.getHashId(sessionId) == null) {
                             initializePredefinedView();
                         }
                     } else {
@@ -715,7 +718,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                     // Process an init state of the predefined requests here, assume that if
                     // hashId is not null means this is resumption
-                    if (mSyncProxy.getHashId() == null) {
+                    if (mSyncProxy.getHashId(sessionId) == null) {
                         try {
                             // upload turn icons
                             sendIconFromResource(R.drawable.turn_left);
@@ -1478,12 +1481,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+    public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg) {
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
                         msg.getLanguage(), msg.getHmiDisplayLanguage());
         createDebugMessageForAdapter(message);
-        mSyncProxy.resetLanguagesDesired(msg.getLanguage(), msg.getHmiDisplayLanguage());
+        mSyncProxy.resetLanguagesDesired(sessionId, msg.getLanguage(), msg.getHmiDisplayLanguage());
     }
 
     @Override
@@ -2003,10 +2006,54 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
     }
 
-    public void syncProxyOpenSession() throws SyncException {
+    public void syncProxyOpenSession(int syncAppId) throws SyncException {
         if (mSyncProxy != null) {
             if (mSyncProxy.getIsConnected()) {
-                mSyncProxy.openSession();
+
+                RegisterAppInterface registerAppInterface = appInterfaceHashMap.get(syncAppId);
+                if (registerAppInterface == null) {
+
+                    mSyncProxy.mRegisterAppInterfaceCorrelationId += 1;
+
+                    SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+                    boolean isMediaApp = settings.getBoolean(
+                            Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
+                    boolean isNaviApp = settings.getBoolean(
+                            Const.PREFS_KEY_ISNAVIAPP, Const.PREFS_DEFAULT_ISNAVIAPP);
+
+                    Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
+
+                    // Apply custom AppId in case of such possibility selected
+                    TransportType transportType = AppPreferencesManager.getTransportType();
+                    String appId = AppIdManager.getAppIdByTransport(transportType);
+                    if (AppPreferencesManager.getIsCustomAppId()) {
+                        appId = AppPreferencesManager.getCustomAppId();
+                    }
+
+                    String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+                            Const.PREFS_DEFAULT_APPNAME);
+                    Language lang = Language.valueOf(settings.getString(
+                            Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+                    Language hmiLang = Language.valueOf(settings.getString(
+                            Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+
+                    registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
+                    registerAppInterface.setAppName(appName);
+                    registerAppInterface.setLanguageDesired(lang);
+                    registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
+                    registerAppInterface.setAppID(appId);
+                    registerAppInterface.setIsMediaApplication(isMediaApp);
+                    registerAppInterface.setAppType(appHMITypes);
+
+                    appInterfaceHashMap.put(syncAppId, registerAppInterface);
+                }
+
+                for (int key : appInterfaceHashMap.keySet()) {
+                    registerAppInterface = appInterfaceHashMap.get(key);
+                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
+                    mSyncProxy.openSession();
+                }
+
             } else {
                 mSyncProxy.initializeProxy();
             }

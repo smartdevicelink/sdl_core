@@ -46,7 +46,7 @@ import com.ford.syncV4.util.logger.Logger;
  */
 public class AppSetUpDialog extends DialogFragment {
 
-    private static final String LOG_TAG = "AppSetUpDialog";
+    private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
 
     public static AppSetUpDialog newInstance(int appId) {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
@@ -234,11 +234,6 @@ public class AppSetUpDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (AppPreferencesManager.getIsCustomAppId()) {
-                            AppPreferencesManager.setCustomAppId(
-                                    customAppIdEditView.getText().toString().trim());
-                        }
-
                         saveProtocolVersion(view);
 
                         boolean isMedia = mediaCheckBox.isChecked();
@@ -253,9 +248,14 @@ public class AppSetUpDialog extends DialogFragment {
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
                         boolean mNSDPrefValue = mIsNSDSupported && nsdToggle.isChecked();
+
                         // save the configs
-                        boolean success = prefs
-                                .edit()
+
+                        if (AppPreferencesManager.getIsCustomAppId()) {
+                            AppPreferencesManager.setCustomAppId(
+                                    customAppIdEditView.getText().toString().trim());
+                        }
+                        boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)

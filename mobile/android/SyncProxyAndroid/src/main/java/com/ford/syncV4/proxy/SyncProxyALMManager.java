@@ -2434,8 +2434,8 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onOnHMIStatus(OnHMIStatus notification) {
-			_lifecycleListener.onOnHMIStatus(notification);
+		public void onOnHMIStatus(byte sessionId, OnHMIStatus notification) {
+			_lifecycleListener.onOnHMIStatus(sessionId, notification);
 		}
 
 		@Override
@@ -2588,7 +2588,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+        public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg) {
 
         }
 

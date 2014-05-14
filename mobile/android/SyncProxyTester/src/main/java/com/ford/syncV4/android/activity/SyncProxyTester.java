@@ -78,7 +78,6 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
-import com.lamerman.SelectionMode;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -88,6 +87,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -288,13 +289,17 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         mStreamCommandsExecutorService = Executors.newFixedThreadPool(3);
     }
 
-    public void onSetUpDialogResult(final int appId) {
+    /**
+     *
+     * @param syncAppId Id of the SyncProxyTester application instance
+     */
+    public void onSetUpDialogResult(final int syncAppId) {
         setUpReceiver();
         showProtocolPropertiesInTitle();
         if (mBoundProxyService != null) {
-            initProxyService(appId);
+            initProxyService(syncAppId);
             try {
-                mBoundProxyService.syncProxyOpenSession();
+                mBoundProxyService.syncProxyOpenSession(syncAppId);
             } catch (SyncException e) {
                 Logger.e("SyncProxy Open Session error", e);
             }
@@ -304,7 +309,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 public void onServiceBindComplete() {
                     Logger.i("Service Bind Complete");
                     getProxyService();
-                    initProxyService(appId);
+                    initProxyService(syncAppId);
 
                     mBoundProxyService.startProxyIfNetworkConnected();
                 }
@@ -343,9 +348,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 mBluetoothDeviceManager.initState();
                 mSyncReceiver.setBluetoothReceiverCallback(mBluetoothDeviceManager);
             }
-
+            registerReceiver(mSyncReceiver, intentFilter);
         }
-        registerReceiver(mSyncReceiver, intentFilter);
     }
 
     @Override

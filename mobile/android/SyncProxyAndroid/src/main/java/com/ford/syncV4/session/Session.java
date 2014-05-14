@@ -75,6 +75,18 @@ public class Session {
         return sessionId;
     }
 
+    public byte getNextSessionId() {
+        // Always return a 0 as a new Session Id
+        return 0;
+
+        /*if (getServicesNumber() == 0) {
+            return 0;
+        }
+        byte nextSessionId = (byte) (getSessionId() + 1);
+        setSessionId(nextSessionId);
+        return nextSessionId;*/
+    }
+
     public void addService(Service service) {
         Logger.i(CLASS_NAME + " Add " + service + ", contains:" + serviceList.contains(service));
         if (serviceList.contains(service)) {

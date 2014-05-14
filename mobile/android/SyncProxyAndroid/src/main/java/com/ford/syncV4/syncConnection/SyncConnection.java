@@ -428,8 +428,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void initialiseSession() {
-        startProtocolSession();
+    public void initialiseSession(byte sessionId) {
+        startProtocolSession(sessionId);
     }
 
     public void startHeartbeatTimer() {
@@ -438,7 +438,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    private void startProtocolSession() {
+    private void startProtocolSession(byte sessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -446,8 +446,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            Logger.d(CLASS_NAME + " StartProtocolSession, id:" + mSessionId);
-            _protocol.StartProtocolSession(mSessionId);
+            Logger.d(CLASS_NAME + " StartProtocolSession, id:" + sessionId);
+            _protocol.StartProtocolSession(sessionId);
         }
     }
 
