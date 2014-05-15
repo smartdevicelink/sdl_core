@@ -557,10 +557,24 @@ SDL.SDLController = Em.Object
                 "params": {
                     "menuParams":{
                         "parentID": 0,
-                        "menuName": "Exit",
+                        "menuName": "Exit 'DRIVER_DISTRACTION_VIOLATION'",
                         "position": 0
                     },
                     cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
+
+            exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit 'USER_EXIT'",
+                        "position": 0
+                    },
+                    cmdID: -2
                 }
             };
 
