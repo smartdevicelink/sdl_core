@@ -3243,17 +3243,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         ", protocol version:" + (int) version +
                         ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
                 Logger.i(message);
-
-<<<<<<< HEAD
-
-                if (session.hasService(ServiceType.RPC)) {
-                    onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
-                }
-
-=======
-                startRPCProtocolService(session.getSessionId(), correlationID);
+                onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
                 mSyncConnection.startHeartbeatTimer();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
             }
         }
 

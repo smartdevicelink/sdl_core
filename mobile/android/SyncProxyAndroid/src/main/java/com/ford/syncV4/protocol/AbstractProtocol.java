@@ -6,11 +6,11 @@ import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
-<<<<<<< HEAD
+
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
-=======
+
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.DebugTool;
@@ -38,7 +38,7 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
-<<<<<<< HEAD
+
     protected boolean hasRPCStarted;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
@@ -50,9 +50,9 @@ public abstract class AbstractProtocol {
     }
 
     private ProtocolSecureManager protocolSecureManager;
-=======
+
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -216,19 +216,18 @@ public abstract class AbstractProtocol {
         }
     }
 
-<<<<<<< HEAD
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
         byte[] frameHeader = header.assembleHeaderBytes();
         byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
         System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
         System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
         handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
-=======
+    }
+
     private synchronized void resetHeartbeatAck() {
         if (_protocolListener != null) {
             _protocolListener.onResetHeartbeatAck();
         }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     }
 
     private synchronized void resetHeartbeat() {

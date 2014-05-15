@@ -11,6 +11,9 @@ import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
+    public final static String CLASS_NAME = H264Packetizer.class.getSimpleName();
+
+    private byte[] tail = null;
     private Thread thread = null;
     private boolean encrypt;
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
@@ -80,10 +83,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setSessionID(_rpcSessionID);
         pm.setServiceType(_serviceType);
         pm.setFunctionID(0);
-        pm.setCorrID(0);
+        pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);
 
-        _streamListener.sendH264(pm);
+        mStreamListener.sendH264(pm);
         return pm;
     }
 
