@@ -197,10 +197,20 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
+  uint8_t protocolVersion;
+
+  if (0 == profile::Profile::instance()->heart_beat_timeout()) {
+    protocolVersion = PROTOCOL_VERSION_2;
+    LOG4CXX_INFO(logger_, "Heart beat timeout == 0 => SET PROTOCOL_VERSION_2");
+  } else {
+    protocolVersion = PROTOCOL_VERSION_3;
+    LOG4CXX_INFO(logger_, "Heart beat timeout != 0 => SET PROTOCOL_VERSION_3");
+  }
+
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-      service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
-      0, hash_code));
+    protocolVersion, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+    service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
+    0, hash_code));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
