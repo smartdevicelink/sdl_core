@@ -31,12 +31,13 @@
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
-#include "application_manager/smart_object_keys.h"
 
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+const char *kMsgParams = "msg_params";
 
 CObjectSchemaItem::SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create()),
@@ -66,14 +67,14 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (objectKeys.end() != objectKeys.find(i->first)) {
-        if (i->first == application_manager::strings::msg_params) {
+        if (kMsgParams == i->first) {
           is_valid = false;
         }
 
         result = i->second.mSchemaItem->validate(Object.getElement(i->first));
 
-        if (i->first == application_manager::strings::msg_params) {
-          if (!is_valid) {
+        if (kMsgParams == i->first) {
+          if ((!is_valid) && ( 0 < (*i->second.mSchemaItem).GetMemberSize())) {
             result = Errors::ERROR;
           }
         }
@@ -84,7 +85,7 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
         }
       }
 
-      if (Errors::OK != result) {
+      if ((Errors::OK != result) && (Errors::UNEXPECTED_PARAMETER != result)) {
         break;
       }
     }
@@ -94,17 +95,18 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
           k != objectKeys.end(); ++k) {
         if (mMembers.end() == mMembers.find(*k)) {
           result = Errors::UNEXPECTED_PARAMETER;
-          break;
+        } else {
+          is_valid = true;
         }
       }
     }
 
-    if (Errors::OK == result) {
-      is_valid = true;
-    }
-
   } else {
     result = Errors::INVALID_VALUE;
+  }
+
+  if (Errors::OK == result) {
+    is_valid = true;
   }
 
   return result;
@@ -186,6 +188,10 @@ void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
       }
     }  // for
   }
+}
+
+uint32_t CObjectSchemaItem::GetMemberSize() {
+  return mMembers.size();
 }
 
 CObjectSchemaItem::CObjectSchemaItem(

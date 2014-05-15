@@ -336,6 +336,8 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
         .tts_name());
   }
   std::string priority;
+  message[strings::msg_params][strings::priority] =
+        hmi_apis::Common_AppPriority::NORMAL;
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
     policy::PolicyHandler::instance()->policy_manager();

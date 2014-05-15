@@ -1,7 +1,6 @@
 include_directories (
   ./include
   ../utils/include/
-  ../application_manager/include
 )
 
 set (SOURCES

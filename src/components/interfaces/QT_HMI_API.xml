@@ -1976,7 +1976,7 @@
       <param name="resumeVrGrammars" type="Boolean" mandatory="false">
         <description>The flag if VR grammars resume is required</description>
       </param>
-      <param name="priority" type="Common.AppPriority" mandatory="false">
+      <param name="priority" type="Common.AppPriority" mandatory="true">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
