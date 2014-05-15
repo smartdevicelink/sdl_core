@@ -34,17 +34,11 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     @Override
     public void dataStreamingStarted() {
-        mDataStreamingButton.setEnabled(false);
         mDataStreamingButton.setText("Data is streaming");
     }
 
     @Override
     public void dataStreamingStopped() {
-        if (mSessionCheckBoxState.getState() == CheckBoxStateValue.ON) {
-            mDataStreamingButton.setEnabled(true);
-        } else {
-            mDataStreamingButton.setEnabled(false);
-        }
         mDataStreamingButton.setText("Start File Streaming");
     }
 
@@ -79,7 +73,6 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
     protected void setStateOff() {
         mFileStreamingLogic.resetStreaming();
         mSessionCheckBoxState.setStateOff();
-        mDataStreamingButton.setEnabled(false);
     }
 
     /**

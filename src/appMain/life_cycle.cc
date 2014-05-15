@@ -1,7 +1,7 @@
 /**
 * \file signals.cc
 * \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,13 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
+#include "security_manager/crypto_manager_impl.h"
 #include "resumption/last_state.h"
 
 using threads::Thread;
 
 namespace main_namespace {
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
@@ -55,6 +57,8 @@ LifeCycle::LifeCycle()
   , protocol_handler_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
+  , crypto_manager_(NULL)
+  , security_manager_(NULL)
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
@@ -97,6 +101,57 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
 
+  security_manager_ = new security_manager::SecurityManager();
+
+  std::string cert_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &cert_filename, "mycert.pem",
+        security_manager::SecurityManager::ConfigSection(), "CertificatePath");
+
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", security_manager::SecurityManager::ConfigSection(), "SSLMode");
+  crypto_manager_ = new security_manager::CryptoManagerImpl();
+
+  std::string key_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &key_filename, "mykey.pem", security_manager::SecurityManager::ConfigSection(), "KeyPath");
+
+  std::string ciphers_list;
+  profile::Profile::instance()->ReadStringValue(
+        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManager::ConfigSection(), "CipherList");
+
+  bool verify_peer;
+  profile::Profile::instance()->ReadBoolValue(
+        &verify_peer, false, security_manager::SecurityManager::ConfigSection(), "VerifyPeer");
+
+  std::string protocol_name;
+  profile::Profile::instance()->ReadStringValue(
+      &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
+
+  security_manager::Protocol protocol;
+  // TODO (EZamakhov) : use SSL_TXT_SSLV2 from ssl.h
+  if (protocol_name == "TLSv1.1") {
+    protocol = security_manager::TLSv1_1;
+  } else if (protocol_name == "TLSv1.2") {
+    protocol = security_manager::TLSv1_2;
+  } else if (protocol_name == "SSLv3") {
+    protocol = security_manager::SSLv3;
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol_name);
+    return false;
+  }
+
+  if (!crypto_manager_->Init(
+      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          protocol,
+          cert_filename,
+          key_filename,
+          ciphers_list,
+          verify_peer)) {
+    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+  }
+
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
 
@@ -108,10 +163,17 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
+  connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
+
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
 
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
@@ -277,11 +339,19 @@ void LifeCycle::StopComponents() {
   media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  // TODO(EZamakhov): set_session_observer(NULL) do nothing
   protocol_handler_->set_session_observer(NULL);
   connection_handler::ConnectionHandlerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  crypto_manager_->Finish();
+  delete crypto_manager_;
+
+  LOG4CXX_INFO(logger_, "Destroying Security Manager");
+  delete security_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER

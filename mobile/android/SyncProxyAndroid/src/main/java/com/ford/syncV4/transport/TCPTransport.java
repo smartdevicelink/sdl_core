@@ -2,6 +2,7 @@ package com.ford.syncV4.transport;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.BufferedInputStream;
@@ -60,7 +61,15 @@ public class TCPTransport extends SyncTransport {
     /**
      * Instance of the server socket
      */
-    private ServerSocket mServerSocket = null;
+    private  ServerSocket mServerSocket = null;
+
+    public synchronized InputStream getInputStream() {
+        return mInputStream;
+    }
+
+    public synchronized OutputStream getOutputStream() {
+        return mOutputStream;
+    }
 
     /**
      * Instance of the input stream. Used to read data from ApplinkCore

@@ -34,8 +34,6 @@
 #ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_TEST_H_
 #define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_TEST_H_
 
-#include <pulse/simple.h>
-#include <pulse/error.h>
 #include <net/if.h>
 #include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"

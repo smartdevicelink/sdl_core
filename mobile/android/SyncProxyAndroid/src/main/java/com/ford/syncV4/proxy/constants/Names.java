@@ -432,7 +432,7 @@ public class Names {
     public static final String menuIcon = "menuIcon";
     public static final String keyboardProperties = "keyboardProperties";
     public static final String secondaryText = "secondaryText";
-    public static String tertiaryText = "tertiaryText";
+    public static final String tertiaryText = "tertiaryText";
     public static final String keypressMode = "keypressMode";
     public static final String progressIndicator = "progressIndicator";
     public static final String systemFile = "systemFile";
@@ -460,6 +460,7 @@ public class Names {
     public static final String messageDataResult = "messageDataResult";
     public static final String hashID = "hashID";
     public static final String OnHashChange = "OnHashChange";
+    public static final String isRoot = "isRoot";
 
     /**
      * v4_protocol_v3_0_revP

@@ -2,7 +2,7 @@
  * \file SmartDeviceLinkRawMessage.h
  * \brief SmartDeviceLinkRawMessage class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,21 +49,21 @@
 namespace protocol_handler {
 /**
  * \class SmartDeviceLinkRawMessage
- * \brief Class-wraper for information about message for interchanging
+ * \brief Class-wrapper for information about message for interchanging
  * between components.
  */
 class RawMessage {
   public:
     /**
      * \brief Constructor
-     * \param connectionKey Identifier of connection within wich message
+     * \param connection_key Identifier of connection within which message
      * is transferred
      * \param protocolVersion Version of protocol of the message
      * \param data Message string
      * \param dataSize Message size
      */
-    RawMessage(int32_t connectionKey, uint32_t protocolVersion,
-               uint8_t* data_param, uint32_t dataSize,
+    RawMessage(uint32_t connection_key, uint32_t protocolVersion,
+               const uint8_t * const data_param, uint32_t dataSize,
                uint8_t type = ServiceType::kRpc);
 
     /**
@@ -74,7 +74,7 @@ class RawMessage {
     /**
      * \brief Getter for connection identifier
      */
-    int32_t connection_key() const;
+    uint32_t connection_key() const;
 
     void set_connection_key(uint32_t);
 
@@ -86,7 +86,7 @@ class RawMessage {
     /**
      * \brief Getter for message size
      */
-    uint32_t data_size() const;
+    size_t data_size() const;
 
     /**
      * \brief Getter for protocol version
@@ -114,7 +114,7 @@ class RawMessage {
      * \brief Connection Identifier
      * Obtained from \saCconnection_handler
      */
-    int32_t connection_key_;
+    uint32_t connection_key_;
 
     /**
      * \brief Message string
@@ -124,11 +124,11 @@ class RawMessage {
     /**
      * \brief Size of message
      */
-    uint32_t data_size_;
+    size_t data_size_;
 
     /**
      * \brief Version of SmartDeviceLink protocol (currently 1,2)
-     * used for tranferring message.
+     * used for transferring message.
      */
     uint32_t protocol_version_;
 
@@ -143,12 +143,6 @@ class RawMessage {
      *
      */
     bool waiting_;
-
-    /**
-     * \brief Specifies if this is binary data
-     * (used by ProtocolObserver).
-     */
-    bool fully_binary_;
 
     /**
      * \brief Id of connection (for service messages like start/end session)

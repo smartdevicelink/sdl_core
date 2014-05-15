@@ -42,8 +42,10 @@ static const size_t kRpcTypeBits       = 4;
 static const size_t kRpcFunctionIdBits = 32 - kRpcTypeBits;
 static const size_t kCorellationIdBits = 32;
 static const size_t kJsonSizeBits      = 32;
-static const size_t PayloadHeaderBits =
-    kRpcTypeBits + kRpcFunctionIdBits + kCorellationIdBits + kJsonSizeBits;
+static const size_t PayloadHeaderBits  = kRpcTypeBits +
+                                         kRpcFunctionIdBits +
+                                         kCorellationIdBits +
+                                         kJsonSizeBits;
 }
 
 namespace protocol_handler {
@@ -77,21 +79,23 @@ void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload,
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header) {
-  return os<<"(ProtocolPayloadHeaderV2"
-           <<"  rpc_type: "<<payload_header.rpc_type
-           <<", rpc_function_id: "<<payload_header.rpc_function_id
-           <<", corellation_id: "<<payload_header.corellation_id
-           <<", json_size: "<<payload_header.json_size
-           <<")";
+std::ostream& operator<<(std::ostream& os,
+                         const ProtocolPayloadHeaderV2& payload_header) {
+  return os << "(ProtocolPayloadHeaderV2"     << "  rpc_type: "
+            << payload_header.rpc_type        << ", rpc_function_id: "
+            << payload_header.rpc_function_id << ", corellation_id: "
+            << payload_header.corellation_id  << ", json_size: "
+            << payload_header.json_size       << ")";
 }
 
 std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload) {
-  return os<<"(ProtocolPayloadV2"
-           <<"  header: "<<payload.header
-           <<", json (bytes): "<<payload.json.size()
-           <<", data (bytes): "<<payload.data.size()
-           <<")";
+  return os << "(ProtocolPayloadV2" << "  header: " << payload.header
+            << ", json (bytes): "   << payload.json.size() << ", data (bytes): "
+            << payload.data.size()  << ")";
 }
 
-} // namespace protocol_handler
+size_t ProtocolPayloadV2SizeBits() {
+  return PayloadHeaderBits;
+}
+
+}  // namespace protocol_handler

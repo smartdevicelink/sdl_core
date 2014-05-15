@@ -1,8 +1,5 @@
-/**
- * \file ProtocolPacket.cpp
- * \brief ProtocolPacket class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * \file ProtocolPacket.cpp
+ * \brief ProtocolPacket class source file.
+ */
+
 #include <stdint.h>
 #include <memory.h>
 #include "protocol_handler/protocol_packet.h"
@@ -40,42 +42,39 @@
 namespace protocol_handler {
 
 ProtocolPacket::ProtocolPacket()
-    : packet_(0),
-      total_packet_size_(0),
-      data_offset_(0),
+    : data_offset_(0),
       packet_id_(0),
-      connection_key_(0)  {
+      connection_id_(0)  {
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_key,
-                               uint8_t version, bool compress,
+ProtocolPacket::ProtocolPacket(uint8_t connection_id,
+                               uint8_t version, bool protection,
                                uint8_t frameType,
                                uint8_t serviceType,
                                uint8_t frameData, uint8_t sessionID,
                                uint32_t dataSize, uint32_t messageID,
                                const uint8_t* data,
                                uint32_t packet_id)
-    : packet_(0),
-      total_packet_size_(0),
-      data_offset_(0),
+    : data_offset_(0),
       packet_id_(packet_id),
-      connection_key_(connection_key) {
-  packet_header_.messageId = messageID;
+      connection_id_(connection_id) {
+  packet_header_.version = version;
+  packet_header_.protection_flag = protection;
+  packet_header_.frameType = frameType;
+  packet_header_.serviceType = serviceType;
+  packet_header_.frameData = frameData;
   packet_header_.sessionId = sessionID;
-  RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
-                  sessionID, dataSize, messageID, data);
-  if (result != RESULT_OK) {
-    NOTREACHED();
-  }
+  packet_header_.dataSize = dataSize;
+  packet_header_.messageId = messageID;
+  set_data(data, dataSize);
+  DCHECK(MAXIMUM_FRAME_DATA_SIZE >= dataSize);
 }
 
-ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
                                uint32_t data_size)
-  : packet_(0),
-    total_packet_size_(0),
-    data_offset_(0),
+  : data_offset_(0),
     packet_id_(0),
-    connection_key_(connection_key) {
+    connection_id_(connection_id) {
     RESULT_CODE result = deserializePacket(data_param, data_size);
     if (result != RESULT_OK) {
       NOTREACHED();
@@ -83,81 +82,51 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
 }
 
 ProtocolPacket::~ProtocolPacket() {
-  packet_ = 0;
-  total_packet_size_ = 0;
   packet_id_ = 0;
-  if (packet_data_.data) {
-    delete packet_data_.data;
-    packet_data_.data = 0;
-  }
+  delete[] packet_data_.data;
 }
 
 // Serialization
-RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
-                                            bool compress,
-                                            uint8_t frameType,
-                                            uint8_t serviceType,
-                                            uint8_t frameData,
-                                            uint8_t sessionID,
-                                            uint32_t dataSize,
-                                            uint32_t messageID,
-                                            const uint8_t* data) {
-
-  if (packet_) {
-    delete[] packet_;
-    packet_ = 0;
-    total_packet_size_ = 0;
-  }
+RawMessagePtr ProtocolPacket::serializePacket() {
+  const uint8_t protectionF = packet_header_.protection_flag ? 0x1 : 0x0;
+  const uint8_t firstByte =
+      ((packet_header_.version << 4) & 0xF0) |
+      ((protectionF << 3) & 0x08) |
+      (packet_header_.frameType & 0x07);
 
   uint8_t offset = 0;
-  uint8_t compressF = 0x0;
-  packet_ = new uint8_t[MAXIMUM_FRAME_DATA_SIZE];
-  if (compress) {
-    compressF = 0x1;
-  }
-  uint8_t firstByte = ((version << 4) & 0xF0) | ((compressF << 3) & 0x08)
-      | (frameType & 0x07);
+  uint8_t packet[MAXIMUM_FRAME_DATA_SIZE];
+  packet[offset++] = firstByte;
+  packet[offset++] = packet_header_.serviceType;
+  packet[offset++] = packet_header_.frameData;
+  packet[offset++] = packet_header_.sessionId;
 
-  packet_[offset++] = firstByte;
-  packet_[offset++] = serviceType;
-  packet_[offset++] = frameData;
-  packet_[offset++] = sessionID;
+  packet[offset++] = packet_header_.dataSize >> 24;
+  packet[offset++] = packet_header_.dataSize >> 16;
+  packet[offset++] = packet_header_.dataSize >> 8;
+  packet[offset++] = packet_header_.dataSize;
 
-  packet_[offset++] = dataSize >> 24;
-  packet_[offset++] = dataSize >> 16;
-  packet_[offset++] = dataSize >> 8;
-  packet_[offset++] = dataSize;
-
-  if (version != PROTOCOL_VERSION_1) {
-    packet_[offset++] = messageID >> 24;
-    packet_[offset++] = messageID >> 16;
-    packet_[offset++] = messageID >> 8;
-    packet_[offset++] = messageID;
+  if (packet_header_.version != PROTOCOL_VERSION_1) {
+    packet[offset++] = packet_header_.messageId >> 24;
+    packet[offset++] = packet_header_.messageId >> 16;
+    packet[offset++] = packet_header_.messageId >> 8;
+    packet[offset++] = packet_header_.messageId;
   }
 
-  total_packet_size_ = offset;
+  DCHECK((offset + packet_data_.totalDataBytes) <= MAXIMUM_FRAME_DATA_SIZE);
 
-  if (data) {
-    if ((offset + dataSize) <= MAXIMUM_FRAME_DATA_SIZE) {
-      memcpy(packet_ + offset, data, dataSize);
-      total_packet_size_ += dataSize;
-    } else {
-      delete[] packet_;
-      packet_ = 0;
-      total_packet_size_ = 0;
-      return RESULT_FAIL;
-    }
+  size_t total_packet_size = offset;
+  if (packet_data_.data) {
+    memcpy(packet + offset, packet_data_.data, packet_data_.totalDataBytes);
+    total_packet_size += packet_data_.totalDataBytes;
   }
 
-  return RESULT_OK;
-}
+  const RawMessagePtr out_message(
+        new RawMessage(
+          connection_id(), packet_header_.version,
+          packet, total_packet_size, packet_header_.serviceType) );
 
-uint8_t * ProtocolPacket::packet() const {
-  return packet_;
-}
-
-uint32_t ProtocolPacket::packet_size() const {
-  return total_packet_size_;
+  return out_message;
 }
 
 uint32_t ProtocolPacket::packet_id() const {
@@ -188,9 +157,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
   packet_header_.version = firstByte >> 4u;
 
   if (firstByte & 0x08u) {
-    packet_header_.compress = true;
+    packet_header_.protection_flag = true;
   } else {
-    packet_header_.compress = false;
+    packet_header_.protection_flag = false;
   }
 
   packet_header_.frameType = firstByte & 0x07u;
@@ -251,8 +220,12 @@ uint8_t ProtocolPacket::protocol_version() const {
   return packet_header_.version;
 }
 
-bool ProtocolPacket::is_compress() const {
-  return packet_header_.compress;
+bool ProtocolPacket::protection_flag() const {
+  return packet_header_.protection_flag;
+}
+
+void ProtocolPacket::set_protection_flag(const bool protection) {
+  packet_header_.protection_flag = protection;
 }
 
 uint8_t ProtocolPacket::frame_type() const {
@@ -294,12 +267,22 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
   }
 }
 
+void ProtocolPacket::set_data(
+    const uint8_t * const new_data, const size_t new_data_size) {
+  if (new_data_size && new_data) {
+    packet_header_.dataSize = packet_data_.totalDataBytes = new_data_size;
+    delete[] packet_data_.data;
+    packet_data_.data = new uint8_t[packet_data_.totalDataBytes];
+    memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
+  }
+}
+
 uint32_t ProtocolPacket::total_data_bytes() const {
   return packet_data_.totalDataBytes;
 }
 
-uint8_t ProtocolPacket::connection_key() const {
-  return connection_key_;
+uint8_t ProtocolPacket::connection_id() const {
+  return connection_id_;
 }
 
 // End of Deserialization

@@ -21,9 +21,8 @@ import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.util.logger.Logger;
+import com.ford.syncV4.transport.TCPTransportConfig;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -74,7 +73,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         when(proxyALM.mSyncConnection.getProtocolVersion())
                 .thenReturn(ProtocolConstants.PROTOCOL_VERSION_THREE);
 
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         List<Service> serviceList = proxyALM.getServicePool();
         assertTrue(proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
         assertEquals(sessionID, serviceList.get(0).getSession().getSessionId());
@@ -82,28 +81,28 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.stopMobileNaviService();
         assertEquals("pool should be empty", false, proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
     }
 
     public void testMobileNavServiceEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
 
     public void testRPCServiceAddedToPoolOnStart() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertEquals("pool should has RPC service", 1, proxyALM.getServicePool().size());
     }
 
     public void testRPCServiceEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
@@ -111,10 +110,10 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testAllServicesEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }
@@ -177,9 +176,9 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void setSyncConnection(SyncConnection syncConnection) {
-                if (syncConnection != null) {
-                    super.setSyncConnection(syncConnection);
+            public void setSyncConnection(SyncConnection value) {
+                if (value != null) {
+                    super.setSyncConnection(value);
                 }
             }
         };
@@ -191,10 +190,10 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         when(proxyALM.mSyncConnection.getProtocolVersion())
                 .thenReturn(ProtocolConstants.PROTOCOL_VERSION_THREE);
 
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
-                session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         Service audioService = new Service();
         audioService.setSession(session);
         audioService.setServiceType(ServiceType.Audio_Service);
@@ -208,11 +207,11 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         when(proxyALM.mSyncConnection.getProtocolVersion())
                 .thenReturn(ProtocolConstants.PROTOCOL_VERSION_THREE);
 
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
-                session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        Mockito.verify(proxyListenerMock, times(1)).onAudioServiceStart();
+                session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        Mockito.verify(proxyListenerMock, times(1)).onAudioServiceStart(false, sessionID);
     }
 
     public void testAudioServiceRemovedFromPoolOnStopAudioService() throws Exception {
@@ -221,12 +220,12 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         when(proxyALM.mSyncConnection.getProtocolVersion())
                 .thenReturn(ProtocolConstants.PROTOCOL_VERSION_THREE);
 
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav,
-                session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
-                session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.stopAudioService();
         Service mobileNaviService = new Service();
         mobileNaviService.setSession(session);
@@ -243,21 +242,22 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferClassConnectionMethod() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.mSyncConnection = mock(SyncConnection.class);
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.startAudioDataTransfer();
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
+        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(boolean.class);
+        verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture(), encryptionCaptor.capture());
     }
 
     public void testStartAudioDataTransferReturnsStream() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.mSyncConnection = mock(SyncConnection.class);
-        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID)).thenReturn(new PipedOutputStream());
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        when(proxyALM.mSyncConnection.startAudioDataTransfer(sessionID, false)).thenReturn(new PipedOutputStream());
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, session.getSessionId(), false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         OutputStream stream = proxyALM.startAudioDataTransfer();
         assertNotNull("stream should not be null", stream);
     }
@@ -272,7 +272,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testCloseSessionCalledWithRightSessionID() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.mSyncConnection = mock(SyncConnection.class);
-        Session session = Session.createSession(ServiceType.RPC, sessionID);
+        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.closeSession(false);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
@@ -335,7 +335,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testScheduleInitializeProxyNotCalledIfServiceListIsEmpty() throws Exception {
         assertNotNull(proxy);
-        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.currentSession.stopSession();
         proxy.scheduleInitializeProxy();
         TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
@@ -344,7 +344,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testScheduleInitializeProxyCalledIfServiceListIsNotEmpty() throws Exception {
         assertNotNull(proxy);
-        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.scheduleInitializeProxy();
         TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
         assertNotNull("timerTask should not be null", timerTask);
@@ -352,21 +352,21 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     public void testInCaseSessionRestartedRpcServiceShouldBeRecreated() throws Exception {
         assertNotNull(proxy);
-        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.closeSession(false);
         proxy.setSyncConnection(mock(SyncConnection.class));
-        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertFalse(proxy.currentSession.isServicesEmpty());
         assertTrue(proxy.currentSession.hasService(ServiceType.RPC));
     }
 
     public void testSessionHasOnlyOneRPCService() throws Exception {
         assertNotNull(proxy);
-        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID);
+        proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.closeSession(false);
         proxy.setSyncConnection(mock(SyncConnection.class));
-        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertEquals("only one rpc service should be in service list", 1, proxy.currentSession.getServiceList().size());
     }
 
@@ -374,10 +374,10 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertNotNull(proxy);
 
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC,
-                sessionID), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID,
+                sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID,
+        proxy.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         Hashtable<String, Object> params = new Hashtable<String, Object>();
 
@@ -482,7 +482,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     }
 
     public void testSyncConnectionSessionIdIsSetToNullAfterStopSession() throws Exception {
-        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+        proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxy.closeSession(true);
         byte realSessionId = proxy.getSyncConnection().getSessionId();
         assertEquals(0, realSessionId);

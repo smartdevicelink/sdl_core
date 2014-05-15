@@ -322,6 +322,10 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+if(BUILD_TESTS)
+    add_definitions(-DBUILD_TESTS)
+endif()
+
 # --- ThirdPartyLibs
 add_subdirectory(./src/thirdPartyLibs)
 

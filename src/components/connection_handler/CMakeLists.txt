@@ -3,6 +3,7 @@ include_directories (
   ../transport_manager/include/
   ../protocol_handler/include/
   ../config_profile/include/
+  ../security_manager/include/
   ../utils/include/
   ../../thirdPartyLibs/encryption/include
 )
@@ -15,7 +16,8 @@ set (SOURCES
 )
 
 set(LIBRARIES
-    ConfigProfile
+  ConfigProfile
 )
 
-add_library("connectionHandler" ${SOURCES})
+add_library(connectionHandler ${SOURCES})
+target_link_libraries(connectionHandler encryption)

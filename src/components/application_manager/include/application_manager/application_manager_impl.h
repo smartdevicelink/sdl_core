@@ -394,21 +394,21 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-  virtual void OnMessageReceived(
-      const protocol_handler::RawMessagePtr& message);
+    virtual void OnMessageReceived(const protocol_handler::
+                                   RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-  virtual void OnMobileMessageSent(
-      const protocol_handler::RawMessagePtr& message);
+    virtual void OnMobileMessageSent(const protocol_handler::
+                                     RawMessagePtr message);
 
-  void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
+    void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
-  bool OnServiceStartedCallback(
+    bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key, const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
@@ -588,7 +588,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const protocol_handler::RawMessagePtr& message);
+      const protocol_handler::RawMessagePtr message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);

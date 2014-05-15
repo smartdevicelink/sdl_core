@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sstream>
 
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
@@ -360,8 +361,8 @@ const std::string& Profile::app_info_storage() const {
     return app_info_storage_;
 }
 
-const int32_t Profile::heart_beat_timeout() const {
-    return heart_beat_timeout_;
+int32_t Profile::heart_beat_timeout() const {
+  return heart_beat_timeout_;
 }
 
 const std::string& Profile::preloaded_pt_file() const {
@@ -869,48 +870,105 @@ void Profile::UpdateValues() {
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
                         const char* const pKey) const {
-    bool ret = false;
+  DCHECK(value);
+  bool ret = false;
 
-    char buf[INI_LINE_LEN + 1];
-    *buf = '\0';
-    if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
-            && ('\0' != *buf)) {
-        const int32_t tmpVal = atoi(buf);
-        if (0 == tmpVal) {
-            *value = false;
-        } else {
-            *value = true;
-        }
-
-        ret = true;
+  char buf[INI_LINE_LEN + 1];
+  *buf = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
+      && ('\0' != *buf)) {
+    const int32_t tmpVal = atoi(buf);
+    if (0 == tmpVal) {
+        *value = false;
+    } else {
+        *value = true;
     }
 
-    return ret;
+    ret = true;
+  }
+  return ret;
 }
 
 bool Profile::ReadValue(std::string* value, const char* const pSection,
                         const char* const pKey) const {
-    bool ret = false;
+  DCHECK(value);
+  bool ret = false;
 
-    char buf[INI_LINE_LEN + 1];
-    *buf = '\0';
-    if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
-            && ('\0' != *buf)) {
-        *value = buf;
-        ret = true;
-    }
-
-    return ret;
+  char buf[INI_LINE_LEN + 1];
+  *buf = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
+      && ('\0' != *buf)) {
+    *value = buf;
+    ret = true;
+  }
+  return ret;
 }
 
 bool Profile::ReadStringValue(std::string* value, const char* default_value,
                               const char* const pSection,
                               const char* const pKey) const {
-    if (!ReadValue(value, pSection, pKey)) {
-        *value = default_value;
-        return false;
-    }
+  DCHECK(value);
+  if (!ReadValue(value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  }
+  return true;
+}
+
+bool Profile::ReadIntValue(int32_t* value, const int32_t default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  DCHECK(value);
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    *value = atoi(string_value.c_str());
     return true;
+  }
+}
+
+bool Profile::ReadBoolValue(bool* value, const bool default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  DCHECK(value);
+  bool read_value;
+  const bool result = ReadValue(&read_value, pSection, pKey);
+  *value = result ? read_value : default_value;
+  return result;
+}
+
+std::list<int> Profile::ReadIntContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const {
+  const std::list<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::list<int> value_list;
+  for (std::list<std::string>::const_iterator it = string_list.begin();
+       string_list.end() != it; ++it) {
+    value_list.push_back(strtol(it->c_str(), NULL, 16));
+    }
+  return value_list;
+}
+
+std::list<std::string> Profile::ReadStringContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const {
+  std::string string;
+  const bool result = ReadValue(&string, pSection, pKey);
+  if (out_result)
+    *out_result = result;
+  std::list<std::string> value_container;
+  if (result) {
+    std::istringstream iss(string);
+    std::string temp_str;
+    while (iss) {
+      if (!getline( iss, temp_str, ',' )) break;
+      value_container.push_back(temp_str);
+    }
+  }
+  return value_container;
 }
 
 bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
@@ -970,4 +1028,21 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
     }
 }
 
+void Profile::LogContainer(const std::vector<std::string>& container,
+                           std::string* log) {
+  if (container.empty()) {
+    return;
+  }
+  if (NULL == log) {
+    return;
+  }
+  std::vector<std::string>::const_iterator it = container.begin();
+  std::vector<std::string>::const_iterator it_end = container.end();
+  for (; it != it_end-1; ++it) {
+    log->append(*it);
+    log->append(" ; ");
+  }
+
+  log->append(container.back());
+}
 }  //  namespace profile

@@ -66,7 +66,7 @@ void VideoStreamToFileAdapter::Init() {
 
 void VideoStreamToFileAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::SendData "
                << application_key);
 

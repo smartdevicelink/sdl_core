@@ -46,16 +46,16 @@ endif()
 set(3RD_PARTY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/3rd_party")
 
 # --- libapr-1
-add_subdirectory(apr-cmake)
+#add_subdirectory(apr-cmake)
 
 # --- libexpat
-add_subdirectory(expat-2.1.0)
+#add_subdirectory(expat-2.1.0)
 
 # --- apr-util
-add_subdirectory(apr-util-cmake)
+#add_subdirectory(apr-util-cmake)
 
 # --- log4cxx
-add_subdirectory(apache-log4cxx-cmake)
+#add_subdirectory(apache-log4cxx-cmake)
 
 # D-Bus
-add_subdirectory(dbus-cmake)
+#add_subdirectory(dbus-cmake)

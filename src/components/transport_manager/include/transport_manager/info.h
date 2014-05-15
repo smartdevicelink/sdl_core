@@ -91,7 +91,7 @@ class DeviceInfo : public Info {
  protected:
 
   /**
-   * @brief Variable that hold MAC adress of device.
+   * @brief Variable that hold MAC address of device.
    */
   std::string mac_address_;
 
@@ -106,7 +106,7 @@ class DeviceInfo : public Info {
    * @brief Constructor.
    *
    * @param device_handle Handle of device.
-   * @param mac_adress MAC adress of device.
+   * @param mac_adress MAC address of device.
    * @param name Name of device.
    */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,

@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -48,6 +48,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     private TCPTransportConfig config;
 
     public SyncConnectionTest() {
+
     }
 
     @Override
@@ -74,8 +75,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Mobile_Nav, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO, false);
+
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -96,7 +98,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+        connection.startMobileNavService(session, false);
+        //protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
         assertTrue(passed[0]);
     }
 
@@ -111,6 +114,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
                                                  byte version, String correlationID) {
                 super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
@@ -199,9 +203,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         byte sessionID = 0x0A;
         Session session = new Session();
         session.setSessionId(sessionID);
-        ProtocolFrameHeader header =
-                ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID,
-                        ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO, false);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {
@@ -221,22 +224,23 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.init(config);
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
+
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-        protocol.StartProtocolService(ServiceType.Audio_Service, session);
+        connection._protocol.StartProtocolService(ServiceType.Audio_Service, session, false);
         assertTrue(isPassed[0]);
     }
 
     public void testStartAudioDataTransferReturnsOutputStream() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID, false);
         assertNotNull("output stream should be created", stream);
     }
 
     public void testStartAudioDataTransferCreatesAudioPacketizer() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
         assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
     }
 
@@ -255,7 +259,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferSetsSessionID() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals("session id should be equal SESSION_ID", SESSION_ID, packetizer.getSessionID());
     }
@@ -305,7 +309,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor());
+<<<<<<< HEAD
+        connection.closeConnection((byte) 0, false, true);
+        //assertNull("heartbeat monitor should be stopped and null", connection.getHeartbeatMonitor());
+=======
         connection.closeConnection((byte) 1, false, true);
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
         verify(heartbeatMonitor, times(1)).stop();
     }
 
@@ -315,7 +324,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         assertNotNull(connection.getHeartbeatMonitor());
         connection.closeConnection((byte) 0, true, true);
         verify(connection.getHeartbeatMonitor(), never()).stop();
-        assertNotNull("heartbeat monitor should not be null",connection.getHeartbeatMonitor());
+        assertNotNull("heartbeat monitor should not be null", connection.getHeartbeatMonitor());
     }
 
     public void testHeartbeatMonitorResetOnHeartbeatReset() throws Exception {

@@ -35,24 +35,23 @@
 
 #include "protocol_handler/raw_message.h"
 
+#include <memory.h>
+
 #include "protocol_handler/message_priority.h"
 
 namespace protocol_handler {
 
-RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
-                       uint8_t* data_param, uint32_t data_sz,
+RawMessage::RawMessage(uint32_t connection_key, uint32_t protocolVersion,
+                       const uint8_t *const data_param, uint32_t data_sz,
                        uint8_t type)
-  : connection_key_(connectionKey),
+  : connection_key_(connection_key),
+    data_size_(data_sz) ,
     protocol_version_(protocolVersion),
     service_type_(ServiceTypeFromByte(type)),
-    waiting_(false),
-    fully_binary_(false),
-    data_size_(data_sz) {
+    waiting_(false) {
   if (data_sz > 0) {
     data_ = new uint8_t[data_sz];
-    for (uint32_t i = 0; i < data_sz; ++i) {
-      data_[i] = data_param[i];
-    }
+    memcpy(data_, data_param, sizeof(*data_) * data_sz);
   } else {
     data_ = 0;
   }
@@ -65,7 +64,7 @@ RawMessage::~RawMessage() {
   }
 }
 
-int32_t RawMessage::connection_key() const {
+uint32_t RawMessage::connection_key() const {
   return connection_key_;
 }
 
@@ -77,7 +76,7 @@ uint8_t* RawMessage::data() const {
   return data_;
 }
 
-uint32_t RawMessage::data_size() const {
+size_t RawMessage::data_size() const {
   return data_size_;
 }
 

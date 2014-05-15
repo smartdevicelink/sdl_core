@@ -36,6 +36,7 @@ set(LIBRARIES
   ProtocolHandler
   connectionHandler
   TransportManager
+  SecurityManager
   HMIMessageHandler
   MessageBroker  
   ${BROKER_LIBRARIES}
@@ -74,6 +75,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
+  ../components/security_manager/include
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
@@ -89,6 +91,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
 )
@@ -144,8 +147,16 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini policy_table.json
-    hmi_capabilities.json sdl_preloaded_pt.json
+  FILES log4cxx.properties
+        audio.8bit.wav
+        test.txt
+        smartDeviceLink.ini
+        policy_table.json
+        hmi_capabilities.json
+        policy_table.json
+        sdl_preloaded_pt.json
+        ${CMAKE_SOURCE_DIR}/mycert.pem
+        ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
 if (${WEB_HMI})

@@ -158,4 +158,4 @@ class ThreadedSocketConnection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION
+#endif  //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION

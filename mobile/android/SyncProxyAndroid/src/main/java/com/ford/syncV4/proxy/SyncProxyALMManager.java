@@ -2559,7 +2559,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNaviStart() {
+        public void onMobileNaviStart(boolean encrypted, byte sessionId) {
 
         }
 
@@ -2608,7 +2608,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAudioServiceStart() {
+        public void onAudioServiceStart(boolean encrypted, byte sessionID) {
 
         }
 
@@ -2623,12 +2623,22 @@ public class SyncProxyALMManager {
         }
 
         @Override
+        public void onRPCServiceStart(boolean encrypted, byte sessionID) {
+
+        }
+
+        @Override
         public void onStartServiceNackReceived(ServiceType serviceType) {
 
         }
 
         @Override
         public void onHashChange(OnHashChange onHashChange) {
+
+        }
+
+        @Override
+        public void onSecureServiceStart() {
 
         }
 

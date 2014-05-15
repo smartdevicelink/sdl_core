@@ -8,6 +8,7 @@ include_directories (
   ../utils/include/
   ../formatters/include/
   ../protocol_handler/include/
+  ../security_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../media_manager/include/

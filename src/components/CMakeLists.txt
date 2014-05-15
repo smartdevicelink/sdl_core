@@ -49,6 +49,9 @@ add_subdirectory(./connection_handler)
 # --- Utils
 add_subdirectory(./utils)
 
+# --- Security manager
+add_subdirectory(./security_manager)
+#
 # --- Policy_impl
 add_subdirectory(./policy)
 

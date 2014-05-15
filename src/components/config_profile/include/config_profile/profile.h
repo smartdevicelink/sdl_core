@@ -33,9 +33,10 @@
 #ifndef SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 #define SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_
 
+#include <stdint.h>
 #include <string>
 #include <vector>
-#include <stdint.h>
+#include <list>
 #include "utils/macro.h"
 #include "utils/singleton.h"
 
@@ -262,7 +263,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    const int32_t heart_beat_timeout() const;
+    int32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file
@@ -299,6 +300,84 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns port for TCP transport adapter
      */
     uint16_t transport_manager_tcp_adapter_port() const;
+
+    /**
+     * @brief Reads a string value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadStringValue(std::string* value,
+                         const char* default_value,
+                         const char* const pSection,
+                         const char* const pKey) const;
+
+    /**
+     * @brief Reads an int32_t value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadIntValue(int32_t* value,
+                      int32_t  default_value,
+                      const char* const pSection,
+                      const char* const pKey) const;
+    /**
+     * @brief Reads an bool value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is equal \c default_value)
+     */
+    bool ReadBoolValue(bool *value,
+                       const bool default_value,
+                       const char * const pSection,
+                       const char * const pKey) const;
+    /**
+     * @brief Reads an container of string values from the profile,
+     * which handle as "Value1, Value2, Value3"
+     *
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     * @param out_result    Pointer to bool value for result reading Section
+     * (could be NULL)
+     *
+     * @return container of values or empty continer
+     * if could not read the value out of the profile
+     */
+    std::list<std::string> ReadStringContainer(
+        const char * const pSection,
+        const char * const pKey,
+        bool* out_result) const;
+    /**
+     * @brief Reads an container of hex int values from the profile,
+     * which handle as "0x01, 0xA0, 0XFF"
+     *
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     * @param out_result    Pointer to bool value for result reading Section
+     * (could be NULL)
+     *
+     * @return container of values or empty continer
+     * if could not read the value out of the profile
+     */
+    std::list<int> ReadIntContainer(const char * const pSection,
+                                    const char * const pKey,
+                                    bool* out_result) const;
 
     /**
      * @brief Returns delimiter for SDL-generated TTS chunks
@@ -340,7 +419,8 @@ class Profile : public utils::Singleton<Profile> {
                    const char* const pKey) const;
 
     /**
-     * @brief Reads a string value from the profile
+     * @brief Reads a string value from the profile and interpret it
+     * as \c true on "true" value or as \c false on any other value
      *
      * @param value      The value to return
      * @param pSection   The section to read the value in
@@ -352,23 +432,6 @@ class Profile : public utils::Singleton<Profile> {
     bool ReadValue(std::string* value,
                    const char* const pSection,
                    const char* const pKey) const;
-
-
-    /**
-     * @brief Reads a string value from the profile
-     *
-     * @param value         Result value
-     * @param default_value Value to use key wasn't found
-     * @param pSection      The section to read the value in
-     * @param pKey          The key whose value needs to be read out
-     *
-     * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
-     */
-    bool ReadStringValue(std::string* value,
-                         const char* default_value,
-                         const char* const pSection,
-                         const char* const pKey) const;
 
     /**
      * @brief Reads an uint16/32/64_t value from the profile
@@ -395,6 +458,14 @@ class Profile : public utils::Singleton<Profile> {
                        uint64_t default_value,
                        const char* const pSection,
                        const char* const pKey) const;
+
+    /**
+     * @brief Write to log content of container
+     * @param array Source array
+     * @param log Log string
+     */
+    void LogContainer(const std::vector<std::string>& container,
+                      std::string* log);
 
     // Members section
     bool                            launch_hmi_;
@@ -446,11 +517,9 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     tts_delimiter_;
     std::string                     recording_file_;
 
-    DISALLOW_COPY_AND_ASSIGN(Profile);
-
     FRIEND_BASE_SINGLETON_CLASS(Profile);
+    DISALLOW_COPY_AND_ASSIGN(Profile);
 };
-
 }  //  namespace profile
 
 #endif  // SRC_COMPONENTS_CONFIG_PROFILE_INCLUDE_CONFIG_PROFILE_PROFILE_H_

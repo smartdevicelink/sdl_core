@@ -65,13 +65,14 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
     private IOnSystemRequestHandler handlerMock;
     private IJsonRPCMarshaller marshaller;
     private int maxDataSize;
+    private IProxyListenerALMTesting proxyListenerMock;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         TestCommon.setupMocking(this);
 
-        IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
+        proxyListenerMock = mock(IProxyListenerALMTesting.class);
         protocolMock = mock(WiProProtocol.class);
         connectionMock = createNewSyncConnectionMock();
 
@@ -170,13 +171,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
                 isNull(FileType.class));
     }
 
-    /**
-     *
-     * This test case is good for a production version of the SDK, but, as we do Test version of
-     * the SDK this Test Case is useless
-     *
-     */
-    /*public void testOnSystemRequestWithRequestTypeHTTPShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeHTTPShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -193,17 +188,10 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+    }
 
-        verifyZeroInteractions(proxyListenerMock);
-    }*/
-
-    /**
-     *
-     * This test case is good for a production version of the SDK, but, as we do Test version of
-     * the SDK this Test Case is useless
-     *
-     */
-    /*public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -215,9 +203,8 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
-    }*/
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+    }
 
     public void testOnSystemRequestWithRequestTypeHTTPShouldNotCrashWhenHandlerNotSet()
             throws InterruptedException {
@@ -369,13 +356,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
                 eq(length), isNull(FileType.class));
     }
 
-    /**
-     *
-     * This test case is good for a production version of the SDK, but, as we do Test version of
-     * the SDK this Test Case is useless
-     *
-     */
-    /*public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeFileResumeShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -397,17 +378,10 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+    }
 
-        verifyZeroInteractions(proxyListenerMock);
-    }*/
-
-    /**
-     *
-     * This test case is good for a production version of the SDK, but, as we do Test version of
-     * the SDK this Test Case is useless
-     *
-     */
-    /*public void testOnSystemRequestWithRequestTypeFileResumeWithoutParametersShouldNotCallProxyListener()
+    public void testOnSystemRequestWithRequestTypeFileResumeWithoutParametersShouldCallProxyListener()
             throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -419,9 +393,8 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-
-        verifyZeroInteractions(proxyListenerMock);
-    }*/
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+    }
 
     public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCrashWhenHandlerNotSet()
             throws InterruptedException {

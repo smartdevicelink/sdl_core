@@ -1,10 +1,5 @@
-/**
- * \file connection_handlerImpl.hpp
- * \brief Connection handler class.
- * Observes TransportManager and ProtocolHandler, stores information regarding connections
- * and sessions and provides it to AppManager.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,9 +36,11 @@
 #include <map>
 #include <list>
 #include <string>
+#include <vector>
 
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
@@ -64,6 +61,8 @@ namespace connection_handler {
 /**
  * \class ConnectionHandlerImpl
  * \brief SmartDeviceLink connection_handler main class
+ * Observes TransportManager and ProtocolHandler, stores information regarding connections
+ * and sessions and provides it to AppManager.
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
   public transport_manager::TransportManagerListenerEmpty,
@@ -89,6 +88,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      **/
     virtual void set_transport_manager(
       transport_manager::TransportManager* transport_mngr);
+
+    void set_protocol_handler(
+        protocol_handler::ProtocolHandler* protocol_handler);
 
     /**
      * \brief Connects to all services of device
@@ -152,14 +154,19 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier within which session has to be started.
-     * \param sessionId Identifier of the session to be started
+     * \param session_id Identifier of the session to be started
+     * \param service_type Type of service
+     * \param is_protected would be service protected
+     * \param protocol_version Version of protocol
      * \return int32_t Id (number) of new session if successful otherwise -1.
      */
+    // TODO(EZamakhov): make version last parameter
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t& session_id,
+      const protocol_handler::ServiceType& service_type,
       const uint8_t& protocol_version,
-      const protocol_handler::ServiceType& service_type);
+      const bool is_protected);
 
     /**
      * \brief Callback function used by ProtocolHandler
@@ -178,7 +185,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Creates unique identifier of session (can be used as hash)
      * from given connection identifier
-     * whithin which session exists and session number.
+     * within which session exists and session number.
      * \param  connection_handle Connection identifier within which session exists
      * \param sessionId Identifier of the session
      * \return int32_t Unique key for session
@@ -190,7 +197,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      * \brief Returns connection identifier and session number from given session key
      * \param key Unique key used by other components as session identifier
-     * \param connection_handle Returned: Connection identifier whithin which session exists
+     * \param connection_handle Returned: Connection identifier within which session exists
      * \param sessionId Returned: Number of session
      */
     virtual void PairFromKey(uint32_t key,
@@ -222,19 +229,41 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
+    /**
+     * \brief Sets crypto context of connection
+     * \param key Unique key used by other components as session identifier
+     * \param context SSLContext to be set
+     * \return \c SecurityQuery::ProtectSessionResult value
+     */
+    int SetSSLContext(
+      const uint32_t& key,
+      security_manager::SSLContext* context) OVERRIDE;
+  /**
+   * \brief Gets crypto context of connection, use service_type to get NULL
+   * SSLContex for not protected services or ControlService (0x0)
+   * to get current SSLContext of connection
+   * \param key Unique key used by other components as session identifier
+   * \param service_type Type of service
+   * \return \ref SSLContext of connection
+   */
+  security_manager::SSLContext* GetSSLContext(
+      const uint32_t& key,
+      const protocol_handler::ServiceType& service_type) OVERRIDE;
 
     /**
      * \brief Method which should start devices discovering
      */
     virtual void StartDevicesDiscovery();
 
-    /*
-     * Close all associated sessions and close the connection associated with the key
+    /**
+     * \brief Close all associated sessions and close
+     * the connection associated with the key
      */
     virtual void CloseConnection(uint32_t key);
 
-    /*
-     * Close all associated sessions and close the connection pointed by handle
+    /**
+     * \brief Close all associated sessions and close the
+     * connection pointed by handle
      */
     virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
@@ -287,6 +316,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     transport_manager::TransportManager* transport_manager_;
 
+    protocol_handler::ProtocolHandler* protocol_handler_;
+
     /**
      * \brief List of devices
      */
@@ -300,17 +331,24 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /**
      *  \brief Lock for applications list
      */
-    sync_primitives::Lock connection_list_lock_;
+    mutable sync_primitives::Lock connection_list_lock_;
 
-    /*
+    /**
      * \brief Cleans connection list on destruction
      */
     utils::StlMapDeleter<ConnectionList> connection_list_deleter_;
 
-    protocol_handler::ProtocolHandler* protocol_handler_;
-
-    DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
+    /*
+     * Methods for test usage
+     */
+ public:
+    ConnectionList& getConnectionList();
+    void addDeviceConnection(
+        const transport_manager::DeviceInfo& device_info,
+        const transport_manager::ConnectionUID& connection_id);
+ private:
     FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
+    DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 };
 }/* namespace connection_handler */
 

@@ -3,16 +3,37 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
-
     <CheckBox
         android:id="@+id/audioServiceCheckBox"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:checked="false"
-        android:enabled="false"
-        android:hint="Turn On Audio Service"
+        android:text="@string/service_check_view_on"
+        />
+
+    <Button
+        android:id="@+id/audio_service_secure_checkbox_view"
+        android:text="@string/start_secure_service"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/audio_service_not_service_secure_button_view"
+        android:text="@string/start_not_secure_service"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/audio_service_secure_checkbox_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/audio_service_status_text_view"
+        android:layout_width="match_parent"
+        android:text="Service State:"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/audio_service_not_service_secure_button_view"
         />
 
     <Button
@@ -20,9 +41,8 @@
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
         android:id="@+id/audio_file_streaming"
-        android:layout_below="@+id/audioServiceCheckBox"
-        android:enabled="false"
+        android:layout_below="@+id/audio_service_status_text_view"
+        android:enabled="true"
         android:layout_centerHorizontal="true" />
-
 
 </RelativeLayout>

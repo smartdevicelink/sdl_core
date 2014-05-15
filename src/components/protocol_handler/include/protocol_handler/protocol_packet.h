@@ -2,7 +2,7 @@
  * \file ProtocolPacket.h
  * \brief ProtocolPacket class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include "utils/macro.h"
+#include "protocol_handler/raw_message.h"
 
 /**
  *\namespace NsProtocolHandler
@@ -69,9 +70,14 @@ const uint8_t PROTOCOL_VERSION_2 = 0x02;
 const uint8_t PROTOCOL_VERSION_3 = 0x03;
 
 /**
- *\brief Constant: flag of no compression
+ *\brief Constant: flag of protection
  */
-const bool COMPRESS_OFF = false;
+const bool PROTECTION_ON = true;
+
+/**
+ *\brief Constant: flag of no protection
+ */
+const bool PROTECTION_OFF = false;
 
 /**
  *\brief Constant: Control type of frame used in protocol header.
@@ -93,32 +99,6 @@ const uint8_t FRAME_TYPE_FIRST = 0x02;
  *\brief protocol header.
  */
 const uint8_t FRAME_TYPE_CONSECUTIVE = 0x03;
-
-
-/**
- *\brief Constant: Frame type for HeartBeat
- */
-const uint8_t SERVICE_TYPE_ZERO = 0x00;
-
-/**
- *\brief Constant: RPC type of session
- */
-const uint8_t SERVICE_TYPE_RPC = 0x07;
-
-/**
- *\brief Constant: Raw PCM audio service
- */
-const uint8_t SERVICE_TYPE_AUDIO = 0x0A;
-
-/**
- * \brief Constant: Mobile Navi type of session for map streaming
- */
-const uint8_t SERVICE_TYPE_NAVI = 0x0B;
-
-/**
- *\brief Constant: Bulk data type of session (hybrid)
- */
-const uint8_t SERVICE_TYPE_BULK = 0x0F;
 
 /**
  *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
@@ -174,9 +154,9 @@ const uint8_t FRAME_DATA_MAX_VALUE = 0xFF;
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum size of one frame excluding
- *\brief frame header.
+ *\brief frame header (used Ethernet MTU as default target transport)
  */
-const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1488;
+const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1500;
 
 /**
  *\brief If FRAME_TYPE_CONSECUTIVE: Constant: Marks last frame in mutliframe
@@ -210,6 +190,7 @@ enum RESULT_CODE {
   RESULT_XML_PARSING = 13,
   RESULT_RESEND_ACK = 14,
   RESULT_DEFRERRED = 15,
+  RESULT_ENCRYPTION_FAILED = 16,
   RESULT_UNKNOWN = 255
 };
 
@@ -224,7 +205,7 @@ struct ProtocolHeader {
    */
   ProtocolHeader()
     : version(0x00),
-      compress(0x00),
+      protection_flag(PROTECTION_OFF),
       frameType(0x00),
       serviceType(0x00),
       frameData(0x00),
@@ -239,9 +220,9 @@ struct ProtocolHeader {
   uint8_t version;
 
   /**
-   *\brief Compression flag
+   *\brief protection flag
    */
-  bool compress;
+  bool protection_flag;
 
   /**
    *\brief Type of frame (Single/First/Consecutive)
@@ -301,20 +282,22 @@ class ProtocolPacket {
     ProtocolPacket();
 
     /**
-     * \brief Cconstructor
+     * \brief Constructor
      *
      * \param connectionKey Identifier of connection within wich message
      * is transferred
+     * \param connection_id - Connection Identifier
      * \param data Message string
      * \param dataSize Message size
      */
-    ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
+    ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
                    uint32_t data_size);
 
     /**
      * \brief Constructor
+     * \param connection_id - Connection Identifier
      * \param version Version of protocol
-     * \param compress Compression flag
+     * \param protection Protection flag
      * \param frameType Type of frame (Single/First/Consecutive)
      * \param serviceType Type of session (RPC/Bulk data)
      * \param frameData Information about frame: start/end session, number of
@@ -324,8 +307,8 @@ class ProtocolPacket {
      * \param messageID ID of message or hash code - only for second protocol
      * \param data Message string if provided
      */
-    ProtocolPacket(uint8_t connection_key,
-                   uint8_t version, bool compress, uint8_t frameType,
+    ProtocolPacket(uint8_t connection_id,
+                   uint8_t version, bool protection, uint8_t frameType,
                    uint8_t serviceType, uint8_t frameData,
                    uint8_t sessionId, uint32_t dataSize,
                    uint32_t messageID, const uint8_t* data = 0,
@@ -338,25 +321,9 @@ class ProtocolPacket {
     /*Serialization*/
     /**
      * \brief Serializes info about message into protocol header.
-     * \param version Version of protocol
-     * \param compress Compression flag
-     * \param frameType Type of frame (Single/First/Consecutive)
-     * \param serviceType Type of session (RPC/Bulk data)
-     * \param frameData Information about frame: start/end session, number of
-     * frame, etc
-     * \param sessionID Number of frame within connection
-     * \param dataSize Size of message string
-     * \param messageID ID of message or hash code - only for second protocol
-     * \param data Message string if provided
-     * \return \saRESULT_CODE Status of serialization
+     * \return RawMessagePtr with all data (header and message)
      */
-    RESULT_CODE serializePacket(uint8_t version, bool compress,
-                                uint8_t frameType,
-                                uint8_t serviceType,
-                                uint8_t frameData, uint8_t sessionId,
-                                uint32_t dataSize, uint32_t messageID,
-                                const uint8_t* data = 0);
-
+    RawMessagePtr serializePacket();
     /**
      * \brief Appends message frame to existing message in
      * recieving multiframe messages.
@@ -365,12 +332,6 @@ class ProtocolPacket {
      * \return \saRESULT_CODE Status of serialization
      */
     RESULT_CODE appendData(uint8_t* chunkData, uint32_t chunkDataSize);
-
-    /**
-     * \brief Getter of serialized message with protocol header
-     * \return uint8_t * Message string or 0 if not serialized properly.
-     */
-    uint8_t* packet() const;
 
     /**
      * \brief Getter of message ID
@@ -404,9 +365,14 @@ class ProtocolPacket {
     uint8_t protocol_version() const;
 
     /**
-     * \brief Getter of compression flag
+     * \brief Getter of protection flag
      */
-    bool is_compress() const;
+    bool protection_flag() const;
+
+    /**
+     * \brief Setter of protection flag
+     */
+    void set_protection_flag(const bool protection);
 
     /**
      * \brief Getter of frame type (single/first/etc)
@@ -449,6 +415,12 @@ class ProtocolPacket {
     void set_total_data_bytes(uint32_t dataBytes);
 
     /**
+     *\brief Setter for new data
+     */
+    void set_data(const uint8_t* const  new_data,
+                        const size_t new_data_size);
+
+    /**
      *\brief Getter for size of multiframe message
      */
     uint32_t total_data_bytes() const;
@@ -457,18 +429,9 @@ class ProtocolPacket {
     /**
     * \brief Getter for Connection Identifier
     */
-    uint8_t connection_key() const;
+    uint8_t connection_id() const;
 
   private:
-    /**
-     *\brief Serialized message string
-     */
-    uint8_t* packet_;
-
-    /**
-     *\brief Serialized message string size
-     */
-    uint32_t total_packet_size_;
 
     /**
      *\brief Protocol header
@@ -476,7 +439,7 @@ class ProtocolPacket {
     ProtocolHeader packet_header_;
 
     /**
-     *\brief Message body
+     *\brief Message body (without header)
      */
     ProtocolData packet_data_;
 
@@ -494,7 +457,7 @@ class ProtocolPacket {
     * \brief Connection Identifier
     * Obtained from connection_handler
     */
-    uint8_t connection_key_;
+    uint8_t connection_id_;
 
     DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
 };

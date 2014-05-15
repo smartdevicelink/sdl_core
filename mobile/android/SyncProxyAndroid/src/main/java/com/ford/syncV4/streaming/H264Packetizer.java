@@ -11,10 +11,8 @@ import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
-    public final static String CLASS_NAME = H264Packetizer.class.getSimpleName();
-
-    private byte[] tail = null;
     private Thread thread = null;
+    private boolean encrypt;
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
     private int mCorrelationId = 0;
@@ -23,10 +21,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         return thread;
     }
 
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID,
-                          ServiceType serviceType) throws IOException {
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType, boolean encrypt) throws IOException {
         super(streamListener, is, rpcSessionID);
         _serviceType = serviceType;
+        this.encrypt = encrypt;
     }
 
     public void start() throws IOException {
@@ -82,10 +80,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setSessionID(_rpcSessionID);
         pm.setServiceType(_serviceType);
         pm.setFunctionID(0);
-        pm.setCorrID(getNextCorrelationId());
+        pm.setCorrID(0);
         pm.setData(frameData, frameData.length);
 
-        mStreamListener.sendH264(pm);
+        _streamListener.sendH264(pm);
         return pm;
     }
 

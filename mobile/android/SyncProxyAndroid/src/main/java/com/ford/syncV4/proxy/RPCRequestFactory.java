@@ -44,6 +44,10 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
+/**
+ * This class provides the functionality to create messages of
+ * {@link com.ford.syncV4.proxy.RPCMessage} type
+ */
 public class RPCRequestFactory {
 
     private static final String LOG_TAG = RPCRequestFactory.class.getSimpleName();

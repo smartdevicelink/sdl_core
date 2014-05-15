@@ -38,6 +38,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.MainApp;
@@ -130,6 +131,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
@@ -215,8 +217,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private final int MNU_HASH_ID_SETUP = 19;
     private final int MNU_FEEDBACK = 20;
     private ModuleTest mTesterMain;
-    private ScrollView _scroller = null;
-    private ListView mListview = null;
+    private ListView mListView = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
     private ArrayAdapter<Integer> mCommandAdapter = null;
     private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
@@ -316,14 +317,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     private Handler mBluetoothStopProxyServiceTimeOutHandler;
     /**
-     * progress dialog of the Exit Application
+     * progress dialog of the Application
      */
-    private ProgressDialog mExitProgressDialog;
+    private ProgressDialog mProgressDialog;
     /**
      * UI Handler to perform actions in UI Thread
      */
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
     private final static String APP_SETUP_DIALOG_TAG = "AppSetupDialogTag";
+    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
@@ -345,6 +347,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     private ProxyService mBoundProxyService;
     private ExecutorService mStreamCommandsExecutorService;
 
+
     public static SyncProxyTester getInstance() {
         return _activity;
     }
@@ -364,7 +367,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     public void runInUIThread(Runnable runnable) {
         mUIHandler.post(runnable);
     }
-    
+
     private ArrayAdapter<String> adapter;
 
     @Override
@@ -382,10 +385,61 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         mStreamCommandsExecutorService = Executors.newFixedThreadPool(3);
 
-        _scroller = (ScrollView) findViewById(R.id.scrollConsole);
-
         findViewById(R.id.btnSendMessage).setOnClickListener(this);
         findViewById(R.id.btnPlayPause).setOnClickListener(this);
+
+        CheckBox checkBoxRpcEncode = (CheckBox) findViewById(R.id.rpc_secure_checkbox);
+        checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MessageFilter.setEncrypt(isChecked);
+            }
+        });
+
+        final Spinner spinner = (Spinner) findViewById(R.id.secure_error_spinner);
+        ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(this,
+                android.R.layout.simple_spinner_item, SecurityInternalError.values());
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+
+        Button sendSecureError = (Button) findViewById(R.id.secure_error_msg_button);
+        sendSecureError.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcSecureCheckBoxView = (Button) findViewById(R.id.rpc_service_secure_button_view);
+        rpcSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcNotSecureCheckBoxView = (Button) findViewById(R.id.rpc_non_secure_button_view);
+        rpcNotSecureCheckBoxView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCNotSecureCheckBox();
+            }
+        });
+
+        // Process Services
+        Button buttonServicesView = (Button) findViewById(R.id.btnServices);
+        buttonServicesView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                View servicesLayout = findViewById(R.id.services_layout_view);
+                servicesLayout.setVisibility((servicesLayout.getVisibility() == View.GONE) ?
+                        View.VISIBLE : View.GONE);
+            }
+        });
 
         resetAdapters();
 
@@ -400,11 +454,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         mLogAdapter = new LogAdapter("SyncProxyTester", false, this, R.layout.row,
                 new ArrayList<Object>());
 
-        mListview = (ListView) findViewById(R.id.messageList);
-        mListview.setClickable(true);
-        mListview.setAdapter(mLogAdapter);
-        mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-        mListview.setOnItemClickListener(new OnItemClickListener() {
+        mListView = (ListView) findViewById(R.id.messageList);
+        mListView.setClickable(true);
+        mListView.setAdapter(mLogAdapter);
+        mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        mListView.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Object listObj = parent.getItemAtPosition(position);
                 if (listObj instanceof RPCMessage) {
@@ -464,27 +518,46 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     public void onSetUpDialogResult() {
-        setUpReceiver();
-        showProtocolPropertiesInTitle();
-        if (mBoundProxyService != null) {
-            initProxyService();
-            try {
-                mBoundProxyService.syncProxyOpenSession();
-            } catch (SyncException e) {
-                Logger.e(SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
-            }
-        } else {
-            MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
-                @Override
-                public void onServiceBindComplete() {
-                    Logger.d("Service Bind Complete");
-                    getProxyService();
-                    initProxyService();
 
-                    mBoundProxyService.startProxyIfNetworkConnected();
+
+        getProgressDialog(getString(R.string.init_dialog_title)).show();
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+
+                if (mBoundProxyService != null) {
+                    initProxyService();
+                    try {
+                        mBoundProxyService.syncProxyOpenSession();
+                    } catch (SyncException e) {
+                        Logger.e(SyncProxyTester.class.getSimpleName() + " syncProxyOpenSession", e);
+                    }
+                } else {
+                    MainApp.getInstance().bindProxyToMainApp(new IProxyServiceBinder() {
+                        @Override
+                        public void onServiceBindComplete() {
+                            Logger.d("Service Bind Complete");
+                            getProxyService();
+                            initProxyService();
+
+                            mBoundProxyService.startProxyIfNetworkConnected();
+                        }
+                    });
                 }
-            });
-        }
+
+                MainApp.getInstance().runInUIThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setUpReceiver();
+                        showProtocolPropertiesInTitle();
+
+                        getProgressDialog(getString(R.string.init_dialog_title)).dismiss();
+                    }
+                });
+            }
+        });
     }
 
     private void setUpReceiver() {
@@ -496,16 +569,25 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(ProxyService.ROOTED_DEVICE_INTENT);
 
         if (mSyncReceiver == null) {
             mSyncReceiver = new SyncReceiver();
 
             mSyncReceiver.setSyncReceiver(new ISyncReceiver() {
+
                 @Override
                 public void onReceive() {
                     if (mBoundProxyService != null) {
                         mBoundProxyService.pauseAnnoyingRepetitiveAudio();
                     }
+                }
+
+                @Override
+                public void onRootedDevice() {
+                    DialogFragment rootedDeviceAlertView = RootedDeviceAlertView.newInstance();
+                    rootedDeviceAlertView.setCancelable(false);
+                    rootedDeviceAlertView.show(getFragmentManager(), ROOTED_DEVICE_ALERT_DIALOG_TAG);
                 }
             });
 
@@ -604,19 +686,19 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     private void dismissExitDialog() {
-        runInUIThread(new Runnable() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
             public void run() {
-                getExitDialog().dismiss();
+                getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
             }
         });
     }
 
     private void closeApplication() {
         MainApp.getInstance().unbindProxyFromMainApp();
-        runInUIThread(new Runnable() {
+        MainApp.getInstance().runInUIThread(new Runnable() {
             @Override
             public void run() {
-                getExitDialog().dismiss();
+                getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
                 exitApp();
             }
         });
@@ -647,8 +729,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId) {
-        mLogAdapter.logMessage("Service '" + serviceType + "' started, " +
+
+    public void onServiceStart(ServiceType serviceType, byte sessionId, final boolean encrypted) {
+        mLogAdapter.logMessage("Service '" + serviceType + "' started" +
                 "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
 
         if (mBoundProxyService == null) {
@@ -665,7 +748,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                        fragment.setAudioServiceStateOn(outputStream);
+                        fragment.setAudioServiceStateOn(outputStream, encrypted);
                     }
                 }
             });
@@ -677,16 +760,30 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     if (outputStream != null) {
                         MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
                                 getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                        fragment.setMobileNaviStateOn(outputStream);
+                        fragment.setMobileNaviStateOn(outputStream, encrypted);
                     }
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
+            notifyRPCServiceStarted(encrypted);
             mServicesCounter.set(0);
             rpcSession.setSessionId(sessionId);
         }
-
         mServicesCounter.incrementAndGet();
+    }
+
+    private void notifyRPCServiceStarted(final boolean encrypted) {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView rpcState = (TextView) findViewById(R.id.rpc_service_state);
+                if (encrypted) {
+                    rpcState.setText("Service is cyphered");
+                } else {
+                    rpcState.setText("Service is Not cyphered");
+                }
+            }
+        });
     }
 
     @Override
@@ -903,7 +1000,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
             case PROXY_START:
                 if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                     BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-                    if (!mBtAdapter.isEnabled()) {
+                    if (mBtAdapter != null && !mBtAdapter.isEnabled()) {
                         mBtAdapter.enable();
                     }
 
@@ -968,12 +1065,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 stopProxyServiceOnExit();
                 break;
             case MNU_TOGGLE_CONSOLE:
-                if (_scroller.getVisibility() == ScrollView.VISIBLE) {
-                    _scroller.setVisibility(ScrollView.GONE);
-                    mListview.setVisibility(ListView.VISIBLE);
+                if (mListView.getVisibility() == ScrollView.VISIBLE) {
+                    mListView.setVisibility(ListView.GONE);
                 } else {
-                    _scroller.setVisibility(ScrollView.VISIBLE);
-                    mListview.setVisibility(ListView.GONE);
+                    mListView.setVisibility(ListView.VISIBLE);
                 }
                 return true;
             case MNU_CLEAR:
@@ -1194,6 +1289,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 final Spinner spnSpeakType3 = (Spinner) layout.findViewById(R.id.spnSpeakType3);
                                 final Spinner spnSpeakType4 = (Spinner) layout.findViewById(R.id.spnSpeakType4);
 
+                                final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.speak_do_encrypt_view);
+
                                 ArrayAdapter<SpeechCapabilities> speechSpinnerAdapter = new ArrayAdapter<SpeechCapabilities>(
                                         adapter.getContext(), android.R.layout.simple_spinner_item, SpeechCapabilities.values());
                                 int textCapabilityPos = speechSpinnerAdapter.getPosition(SpeechCapabilities.TEXT);
@@ -1209,8 +1306,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 builder = new AlertDialog.Builder(mContext);
                                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        Speak msg = new Speak();
-                                        msg.setCorrelationID(getCorrelationid());
+                                        Speak speak = new Speak();
+                                        speak.setCorrelationID(getCorrelationid());
                                         String speak1 = txtSpeakText1.getText().toString();
                                         String speak2 = txtSpeakText2.getText().toString();
                                         String speak3 = txtSpeakText3.getText().toString();
@@ -1229,10 +1326,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         if (speak4.length() > 0) {
                                             chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
                                         }
-                                        msg.setTtsChunks(chunks);
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        speak.setTtsChunks(chunks);
+                                        speak.setDoEncryption(doEncryptView.isChecked());
+                                        dispatchMessageToService(speak);
+
                                     }
                                 });
                                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1264,9 +1361,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setCorrelationID(corrId);
                                             msg.setButtonName(buttonName);
                                             mLogAdapter.logMessage(msg, true);
-                                            if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                                            }
+                                            dispatchMessageToService(msg);
                                         }
                                         isButtonSubscribed[which] = !isButtonSubscribed[which];
                                     }
@@ -1301,9 +1396,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCorrelationID(getCorrelationid());
                                         int commandSetID = mChoiceSetAdapter.getItem(which);
                                         msg.setInteractionChoiceSetID(commandSetID);
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                         if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
                                             Logger.w("Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
                                         }
@@ -1380,9 +1474,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         }
                                         currentSoftButtons = null;
                                         chkIncludeSoftButtons = null;
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                     }
                                 });
                                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1425,9 +1518,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setLanguage((Language) spnLanguage.getSelectedItem());
                                         msg.setHmiDisplayLanguage((Language) spnHmiDisplayLanguage.getSelectedItem());
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
                                     }
                                 });
                                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1451,9 +1542,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         DeleteFile msg = new DeleteFile();
                                         msg.setSyncFileName(syncFileName);
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
                                         mPutFileAdapter.remove(syncFileName);
                                     }
                                 });
@@ -1483,9 +1572,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         SetAppIcon msg = new SetAppIcon();
                                         msg.setSyncFileName(syncFileName);
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                     }
                                 });
                                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1503,9 +1591,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                 //EndAudioPassThru
                                 EndAudioPassThru msg = new EndAudioPassThru();
                                 msg.setCorrelationID(getCorrelationid());
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
-                                }
+                                dispatchMessageToService(msg);
+
                             } else if (adapter.getItem(which).equals(VehicleDataSubscriptions)) {
                                 sendVehicleDataSubscriptions();
                             } else if (adapter.getItem(which).equals(Names.GetVehicleData)) {
@@ -1533,9 +1620,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                             msg.setDidLocation(didlocations);
                                             msg.setCorrelationID(getCorrelationid());
-                                            if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                                            }
+                                            dispatchMessageToService(msg);
+
                                         } catch (NumberFormatException e) {
                                             SafeToast.showToastAnyThread("Couldn't parse number");
                                         }
@@ -1643,9 +1729,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                         }
                                         currentSoftButtons = null;
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                     } else {
                                         SafeToast.showToastAnyThread("No TTS Chunks entered");
                                     }
@@ -1673,13 +1758,10 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setCorrelationID(getCorrelationid());
                                     int cmdID = mCommandAdapter.getItem(which);
                                     msg.setCmdID(cmdID);
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
-
+                                    dispatchMessageToService(msg);
                                     if (_latestDeleteCommandCmdID != null) {
                                         Logger.w("Latest deleteCommand should be null, but it is " +
-                                                        _latestDeleteCommandCmdID);
+                                                _latestDeleteCommandCmdID);
                                     }
                                     _latestDeleteCommandCmdID = cmdID;
                                 }
@@ -1703,12 +1785,12 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                             final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
                             final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
+                            final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
 
                             chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
                             SoftButton sb1 = new SoftButton();
-                            sb1.setSoftButtonID(
-                                    SyncProxyTester.getNewSoftButtonId());
+                            sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
                             sb1.setText("ReRoute");
                             sb1.setType(SoftButtonType.SBT_TEXT);
                             sb1.setIsHighlighted(false);
@@ -1727,9 +1809,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             btnSoftButtons.setOnClickListener(new OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    IntentHelper
-                                            .addObjectForKey(currentSoftButtons,
-                                                    Const.INTENTHELPER_KEY_OBJECTSLIST);
+                                    IntentHelper.addObjectForKey(currentSoftButtons,
+                                            Const.INTENTHELPER_KEY_OBJECTSLIST);
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
                                     startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
@@ -1740,32 +1821,31 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     try {
-                                        Alert msg = new Alert();
-                                        msg.setCorrelationID(getCorrelationid());
-                                        msg.setAlertText1(txtAlertField1.getText().toString());
-                                        msg.setAlertText2(txtAlertField2.getText().toString());
-                                        msg.setAlertText3(txtAlertField3.getText().toString());
+                                        Alert alert = new Alert();
+                                        alert.setCorrelationID(getCorrelationid());
+                                        alert.setAlertText1(txtAlertField1.getText().toString());
+                                        alert.setAlertText2(txtAlertField2.getText().toString());
+                                        alert.setAlertText3(txtAlertField3.getText().toString());
                                         if (useDuration.isChecked()) {
-                                            msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
+                                            alert.setDuration(Integer.parseInt(txtDuration.getText().toString()));
                                         }
-                                        msg.setPlayTone(chkPlayTone.isChecked());
-                                        msg.setProgressIndicator(useProgressIndicator.isChecked());
+                                        alert.setPlayTone(chkPlayTone.isChecked());
+                                        alert.setProgressIndicator(useProgressIndicator.isChecked());
 
                                         String toSpeak = txtSpeak.getText().toString();
                                         if (toSpeak.length() > 0) {
                                             Vector<TTSChunk> ttsChunks = TTSChunkFactory
-                                                    .createSimpleTTSChunks(
-                                                            toSpeak);
-                                            msg.setTtsChunks(ttsChunks);
+                                                    .createSimpleTTSChunks(toSpeak);
+                                            alert.setTtsChunks(ttsChunks);
                                         }
                                         if (chkIncludeSoftButtons.isChecked() &&
                                                 (currentSoftButtons != null) &&
                                                 (currentSoftButtons.size() > 0)) {
-                                            msg.setSoftButtons(currentSoftButtons);
+                                            alert.setSoftButtons(currentSoftButtons);
                                         }
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        alert.setDoEncryption(doEncryptView.isChecked());
+                                        dispatchMessageToService(alert);
+
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
                                     }
@@ -1812,16 +1892,15 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             DeleteSubMenu msg = new DeleteSubMenu();
                                             msg.setCorrelationID(getCorrelationid());
                                             msg.setMenuID(menu.getSubMenuId());
-                                            if (mBoundProxyService != null) {
-                                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                                            }
-
+                                            dispatchMessageToService(msg);
                                             if (_latestDeleteSubmenu != null) {
                                                 Logger.w("Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
+
                                             }
                                             _latestDeleteSubmenu = menu;
                                         }
-                                    });
+                                    }
+                            );
                             builder.show();
                         }
 
@@ -1863,9 +1942,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     setVehicleDataParam(msg, GetVehicleData.class, setterName);
 
                                     msg.setCorrelationID(getCorrelationid());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
+                                    dispatchMessageToService(msg);
                                 }
                             });
                             builder.show();
@@ -1891,9 +1968,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
                                         msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
                                     }
@@ -1916,7 +1992,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                             addSubMenuDialogFragment.show(getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
                         }
 
-                        private void sendSystemRequest(){
+                        private void sendSystemRequest() {
                             DialogFragment fragment = SystemRequestDialog.newInstance();
                             fragment.show(getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
                         }
@@ -1975,9 +2051,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             msg.setBulkData(data);
                                             request = msg;
                                         }
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(request);
-                                        }
+                                        dispatchMessageToService(request);
                                     } else {
                                         Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
                                     }
@@ -2118,9 +2192,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 msg.setSoftButtons(new Vector<SoftButton>());
                                             }
                                         }
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
+
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
                                     }
@@ -2330,9 +2403,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                         msg.setCustomPresets(new Vector<String>(Arrays.
                                                 asList(customPresetsList)));
                                     }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
+                                    dispatchMessageToService(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2443,7 +2514,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     msg.setInteractionMode(
                                             interactionModeAdapter.getItem(
                                                     interactionModeSpinner
-                                                            .getSelectedItemPosition()));
+                                                            .getSelectedItemPosition()
+                                            )
+                                    );
                                     msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                     if (helpPromptCheck.isChecked()) {
@@ -2500,10 +2573,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                                 .getItem(interactionLayoutSpinner
                                                         .getSelectedItemPosition()));
                                     }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
-
+                                    dispatchMessageToService(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2598,10 +2668,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                             }
                                         }
                                         currentSoftButtons = null;
-
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
                                     } else {
                                         Toast.makeText(mContext, "Both fields are empty, nothing to send",
                                                 Toast.LENGTH_LONG).show();
@@ -2708,9 +2775,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
                                         msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                         msg.setCorrelationID(getCorrelationid());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
-                                        }
+                                        dispatchMessageToService(msg);
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
                                     }
@@ -2829,9 +2894,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                                     SetDisplayLayout msg = new SetDisplayLayout();
                                     msg.setCorrelationID(getCorrelationid());
                                     msg.setDisplayLayout(editDisplayLayout.getText().toString());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                                    }
+                                    dispatchMessageToService(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2849,15 +2912,20 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         private void sendGenericRequest() {
                             GenericRequest msg = new GenericRequest();
                             msg.setCorrelationID(getCorrelationid());
-                            if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequest(msg);
-                            }
+                            dispatchMessageToService(msg);
                         }
                     })
                     .setNegativeButton("Close", null)
                     .show();
         } else if (v == findViewById(R.id.btnPlayPause)) {
             mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
+        }
+    }
+
+    private void dispatchMessageToService(RPCRequest msg) {
+        MessageFilter.filter(msg);
+        if (mBoundProxyService != null) {
+            mBoundProxyService.syncProxySendRPCRequest(msg);
         }
     }
 
@@ -2931,9 +2999,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 } catch (NumberFormatException e) {
                     // skip setting start time if parsing failed
                 }
-                if (mBoundProxyService != null) {
-                    mBoundProxyService.syncProxySendRPCRequest(msg);
-                }
+                dispatchMessageToService(msg);
             }
         });
         builder.setNegativeButton("Cancel",
@@ -2941,7 +3007,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -3001,9 +3068,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                         }
                         msg.setMessageData(data);
                     }
-                    if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxySendRPCRequest(msg);
-                    }
+                    dispatchMessageToService(msg);
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");
                 }
@@ -3014,7 +3079,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -3160,7 +3226,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
         if (mLatestAddCommand != null) {
             Logger.w("Latest addCommand should be null, but it is " + mLatestAddCommand.first +
-                            " / " + mLatestAddCommand.second);
+                    " / " + mLatestAddCommand.second);
+
         }
         Integer parentID = null;
         if (addCommand.getMenuParams() != null) {
@@ -3177,9 +3244,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     public void onPerformAudioPassThruDialogResult(PerformAudioPassThru performAudioPassThru) {
         latestPerformAudioPassThruMsg = performAudioPassThru;
-        if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(performAudioPassThru);
-        }
+        dispatchMessageToService(performAudioPassThru);
     }
 
     /**
@@ -3190,9 +3255,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      */
     public void onRegisterAppInterfaceDialogResult(RegisterAppInterface registerAppInterface) {
         if (mBoundProxyService != null) {
-            if (mBoundProxyService.isSyncProxyConnected()) {
-                mBoundProxyService.syncProxySendRPCRequest(registerAppInterface);
-            } else {
+            dispatchMessageToService(registerAppInterface);
+            if (!mBoundProxyService.isSyncProxyConnected()) {
                 // This may happen if "UnregisterAppInterface" command has been sent manually
                 // from the SPT
 
@@ -3222,8 +3286,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                 // complete!
                 mBoundProxyService.getTestConfig().setDoKeepUSBTransportConnected(true);
             }
-
-            mBoundProxyService.syncProxySendRPCRequest(rpcRequest);
+            dispatchMessageToService(rpcRequest);
         }
     }
 
@@ -3435,7 +3498,8 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
                     "Output file "
                             + (outFile != null ? outFile.toString()
                             : "'unknown'")
-                            + " can't be opened for writing", e);
+                            + " can't be opened for writing", e
+            );
         } catch (IOException e) {
             logToConsoleAndUI("Can't write to output file", e);
         }
@@ -3495,9 +3559,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
             if ((Result.RETRY == result) && (latestPerformAudioPassThruMsg != null)) {
                 latestPerformAudioPassThruMsg.setCorrelationID(getCorrelationid());
-                if (mBoundProxyService != null) {
-                    mBoundProxyService.syncProxySendRPCRequest(latestPerformAudioPassThruMsg);
-                }
+                dispatchMessageToService(latestPerformAudioPassThruMsg);
             }
         }
     }
@@ -3653,11 +3715,11 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         startActivityForResult(intent, REQUEST_CHOOSE_XML_TEST);
     }
 
-    public void startMobileNaviService() {
+    public void startMobileNaviService(boolean cyphered) {
         if (isProxyReadyForWork()) {
             if (mBoundProxyService != null) {
                 mLogAdapter.logMessage("Should start Mobile Navi Service", true);
-                mBoundProxyService.syncProxyStartMobileNavService(rpcSession);
+                mBoundProxyService.syncProxyStartMobileNavService(rpcSession, cyphered);
             } else {
                 mLogAdapter.logMessage("Could not start mobile nav Service", true);
             }
@@ -3714,6 +3776,51 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         });
     }
 
+    /**
+     * Process a state of the "Start Secure RPC Service" checkbox
+     */
+    private void processRPCSecureCheckBox() {
+        Logger.d("Start Secure RPC service");
+        startRPCService(true);
+    }
+
+    private void processRPCNotSecureCheckBox() {
+        Logger.d("Start Not Secure RPC service");
+        startRPCService(false);
+    }
+
+    /**
+     * Starts to encrypt Audio Service
+     */
+    public void startAudioServiceEncryption() {
+        Logger.d("Audio Service start encrypt");
+        startAudioService(true);
+    }
+
+    /**
+     * Stops to encrypt Audio Service
+     */
+    public void startNotSecureAudioService() {
+        Logger.d("Audio Service start not encrypt");
+        startAudioService(false);
+    }
+
+    /**
+     * Starts to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviServiceEncryption() {
+        Logger.d("Mobile Navi Service start encrypt");
+        startMobileNaviService(true);
+    }
+
+    /**
+     * Stops to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviNotEncryptedService() {
+        Logger.d("Mobile Navi Service start not encrypt");
+        startMobileNaviService(false);
+    }
+
     public boolean isProxyReadyForWork() {
         if (mBoundProxyService == null) {
             return false;
@@ -3733,14 +3840,26 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         return true;
     }
 
-    public void startAudioService() {
+    public void startRPCService(final boolean encrypted) {
+        if (isProxyReadyForWork()) {
+            mLogAdapter.logMessage("Should start RPC service", true);
+            mStreamCommandsExecutorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    mBoundProxyService.syncProxyStartRPCService(rpcSession, encrypted);
+                }
+            });
+        }
+    }
+
+    public void startAudioService(final boolean encrypted) {
         if (isProxyReadyForWork()) {
             mLogAdapter.logMessage("Should start Mobile Audio service", true);
 
             mStreamCommandsExecutorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    mBoundProxyService.syncProxyStartAudioService(rpcSession);
+                    mBoundProxyService.syncProxyStartAudioService(rpcSession, encrypted);
                 }
             });
         }
@@ -3800,8 +3919,9 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
     /**
      * Exit from Activity
      */
-    private void exitApp() {
+    public void exitApp() {
         Logger.i("Exit " + SyncProxyTester.class.getSimpleName() + "\n\n");
+
         isFirstActivityRun = true;
         //stopService(new Intent(this, ProxyService.class));
         super.finish();
@@ -3815,7 +3935,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
      * Stops the proxy service.
      */
     private void stopProxyServiceOnExit() {
-        getExitDialog().show();
+        getProgressDialog(getString(R.string.exit_dialog_title)).show();
 
         if (mStopProxyServiceTimeOutHandler == null) {
             mStopProxyServiceTimeOutHandler = new Handler();
@@ -3867,14 +3987,14 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         });
     }
 
-    private ProgressDialog getExitDialog() {
-        if (mExitProgressDialog == null) {
-            mExitProgressDialog = new ProgressDialog(this);
-            mExitProgressDialog.setTitle(R.string.exit_dialog_title);
-            mExitProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            mExitProgressDialog.setIndeterminate(true);
+    private ProgressDialog getProgressDialog(String title) {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setProgressStyle(mProgressDialog.STYLE_SPINNER);
+            mProgressDialog.setIndeterminate(true);
         }
-        return mExitProgressDialog;
+        mProgressDialog.setTitle(title);
+        return mProgressDialog;
     }
 
     /**
@@ -3885,7 +4005,7 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
         public void run() {
             Logger.w("Exit App timer callback");
             mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
-            getExitDialog().dismiss();
+            getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
             exitApp();
             android.os.Process.killProcess(android.os.Process.myPid());
         }
@@ -3923,8 +4043,6 @@ public class SyncProxyTester extends FragmentActivity implements OnClickListener
 
     public void onSystemRequestDialogResult(SystemRequest systemRequest) {
         systemRequest.setCorrelationID(getCorrelationid());
-        if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(systemRequest);
-        }
+        dispatchMessageToService(systemRequest);
     }
 }

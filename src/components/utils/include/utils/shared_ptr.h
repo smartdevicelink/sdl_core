@@ -53,6 +53,8 @@ namespace utils {
 template<typename ObjectType>
 class SharedPtr {
   public:
+    //std smart pointer compability
+    typedef ObjectType element_type;
     /**
      * @brief Constructor.
      *
@@ -279,6 +281,7 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_c
 
 template<typename ObjectType> ObjectType*
 utils::SharedPtr<ObjectType>::operator->(void) const {
+  DCHECK(mObject);
   return mObject;
 }
 

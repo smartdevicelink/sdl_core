@@ -6,14 +6,20 @@ import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+<<<<<<< HEAD
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
+=======
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
+import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
@@ -32,7 +38,21 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
+<<<<<<< HEAD
+    protected boolean hasRPCStarted;
+
+    public synchronized ProtocolSecureManager getProtocolSecureManager() {
+        return protocolSecureManager;
+    }
+
+    public synchronized void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
+        this.protocolSecureManager = protocolSecureManager;
+    }
+
+    private ProtocolSecureManager protocolSecureManager;
+=======
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -42,7 +62,6 @@ public abstract class AbstractProtocol {
         _protocolListener = protocolListener;
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }// end-ctor
-
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
@@ -112,12 +131,13 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolService(ServiceType serviceType, Session session);
+    public abstract void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered);
 
     // This method ends a protocol currentSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
     // currentSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
+
 
     // TODO REMOVE
     // This method sets the interval at which heartbeat protocol messages will be
@@ -153,16 +173,35 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        if (header.getFrameData() == FrameDataControlFrameType.StartService.value()) {
-            Logger.d("TRACE-StartService");
-        }
-        if (data != null) {
-            if (offset >= data.length) {
-                throw new IllegalArgumentException("offset should not be more then length");
-            }
-            byte[] dataChunk;
-            if (offset + length >= data.length) {
-                dataChunk = Arrays.copyOfRange(data, offset, data.length);
+        synchronized (_frameLock) {
+            Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
+            if (data != null) {
+                if (offset >= data.length) {
+                    throw new IllegalArgumentException("offset should not be more then length");
+                }
+                byte[] dataChunkNotCyphered = null;
+                if (offset + length >= data.length) {
+                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, data.length);
+                } else {
+                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
+                }
+
+                if (getProtocolSecureManager() != null) {
+                    try {
+                        byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
+                        header.setDataSize(dataChunk.length);
+                        sendMessage(header, dataChunk);
+                    } catch (IOException e) {
+                        getProtocolSecureManager().reportAnError(e);
+                        DebugTool.logError("Error data coding", e);
+                    } catch (InterruptedException e) {
+                        getProtocolSecureManager().reportAnError(e);
+                        DebugTool.logError("Error data coding", e);
+                    }
+                } else {
+                    sendMessage(header, dataChunkNotCyphered);
+                }
+
             } else {
                 dataChunk = Arrays.copyOfRange(data, offset, offset + length);
             }
@@ -177,10 +216,19 @@ public abstract class AbstractProtocol {
         }
     }
 
+<<<<<<< HEAD
+    private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
+        byte[] frameHeader = header.assembleHeaderBytes();
+        byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+        System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+        System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+        handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+=======
     private synchronized void resetHeartbeatAck() {
         if (_protocolListener != null) {
             _protocolListener.onResetHeartbeatAck();
         }
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     }
 
     private synchronized void resetHeartbeat() {
@@ -288,21 +336,17 @@ public abstract class AbstractProtocol {
      * @param correlationID
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version,
-                                                String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID);
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
+        Session session = Session.createSession(serviceType, sessionID, encrypted);
         _protocolListener.onProtocolSessionStarted(session, version, correlationID);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
-        if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
-        }
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

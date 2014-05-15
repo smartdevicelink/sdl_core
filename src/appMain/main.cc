@@ -1,7 +1,7 @@
 /**
  * \file appMain.cc
  * \brief SmartDeviceLink main application sources
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,7 +215,9 @@ int32_t main(int32_t argc, char** argv) {
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
 
-  main_namespace::LifeCycle::instance()->StartComponents();
+  if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    return 1;
+  }
 
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
@@ -239,7 +241,7 @@ int32_t main(int32_t argc, char** argv) {
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");
-#endif // #ifndef NO_HMI
+#endif  // #ifndef NO_HMI
     }
   }
   // --------------------------------------------------------------------------

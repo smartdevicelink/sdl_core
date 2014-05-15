@@ -9,16 +9,22 @@ import com.ford.syncV4.transport.TransportType;
 
 import junit.framework.TestCase;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static org.mockito.Mockito.mock;
 
 /**
- * Created by u on 2013-09-30.
+ * Created by u on 2013-09-30
  */
 public class SyncConnectionUSBTest extends TestCase {
+
     private boolean requiredMethodCalled;
 
     public void testOnProtocolAppUnregisteredStopsTransport() {
+
         final ITransportListener transportListener = new ITransportListener() {
+
             @Override
             public void onTransportBytesReceived(byte[] receivedBytes,
                                                  int receivedBytesLength) {
@@ -42,9 +48,19 @@ public class SyncConnectionUSBTest extends TestCase {
             }
         };
 
-        final SyncTransport fakeTransport =
-                new SyncTransport(transportListener) {
-                    @Override
+        final SyncTransport fakeTransport = new SyncTransport(transportListener) {
+
+            @Override
+            public InputStream getInputStream() {
+                return null;
+            }
+
+            @Override
+            public OutputStream getOutputStream() {
+                return null;
+            }
+
+            @Override
                     protected boolean sendBytesOverTransport(byte[] msgBytes,
                                                              int offset,
                                                              int length) {
@@ -71,8 +87,7 @@ public class SyncConnectionUSBTest extends TestCase {
                 };
 
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.init(new BTTransportConfig());
-        connection._transport = fakeTransport;
+        connection.init(new BTTransportConfig(), fakeTransport);
         connection.onProtocolServiceEnded(ServiceType.RPC, (byte) 0, "");
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }

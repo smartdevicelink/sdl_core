@@ -180,12 +180,11 @@
     <string name="setdisplaylayout_displayLayoutDefault">ONSCREEN_PRESETS</string>
     <string name="title_activity_mobile_nav_preview">MobileNavPreviewActivity</string>
     <string name="action_settings">Settings</string>
-    <string name="video_streaming_hint">Turn On Video Streaming</string>
-    <string name="mobile_navi_hint">Turn On Mobile Service</string>
-    <string name="audio_service_hint">Turn On Audio Service</string>
-    <string name="mobile_navi_check_box_on">Mobile Service Running</string>
-    <string name="audio_service_on">Audio Service Running</string>
-    <string name="video_check_box_on">Video Streaming running</string>
+    <string name="service_check_view_on">Turn On</string>
+    <string name="service_check_view_off">Turn Off</string>
+    <string name="secure_service_send_rpc">Send Start Secure RPC</string>
+    <string name="not_secure_service_send_rpc">Send Start Not Secure RPC</string>
+    <string name="secure_service_check_view_off">Turn Secure Off</string>
     <string name="mobileNavi">MobileNavi (video source:)</string>
 
     <string name="title_activity_keyboard_properties">KeyboardProperties</string>
@@ -231,6 +230,7 @@
     <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
     <string name="registerappinterface_useAppID">App ID</string>
     <string name="registerappinterface_appIDDefault">8675309</string>
+    <string name="register_app_interface_is_rooted">Rooted Device</string>
     <string name="menuName">Menu Name</string>
     <string name="menuIcon">Menu Icon</string>
 
@@ -275,6 +275,7 @@
     <string name="putfile_length">Length</string>
 
     <string name="exit_dialog_title">Exit Application</string>
+    <string name="init_dialog_title">Init Application</string>
     <string name="app_setup_dialog_title">Please set up application properties</string>
     <string name="nsd_use_label">Network Service Discovery:</string>
     <string name="nsd_unsupported_api_level_text">NSD is supported from Android 4.1 Jellybean</string>
@@ -287,7 +288,13 @@
     <string name="policy_file_update_auto_replay_label">Policy File Update auto replay</string>
     <string name="use_request_type">Use request type</string>
 
+    <string name="do_encrypt">Do encrypt command?</string>
+    <string name="rpc_service_state">RPC Service State:</string>
+    <string name="start_secure_service">Send Start Secure Service</string>
+    <string name="start_not_secure_service">Send Start Not Secure Service</string>
+
     <string name="system_request_use_file_name">Use file name</string>
     <string name="system_request_file_name_label">System Request file name:</string>
+    <string name="secure_error_button">Send Secure Error</string>
 
 </resources>

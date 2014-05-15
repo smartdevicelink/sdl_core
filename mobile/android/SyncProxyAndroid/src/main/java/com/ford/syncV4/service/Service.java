@@ -11,6 +11,7 @@ public class Service {
     // TODO: Reconsider this field, probably, as alternative, create 'sessionId' field here
     private Session session;
     private ServiceType serviceType;
+    private boolean encrypted;
 
     public void setSession(Session session) {
         this.session = session;
@@ -33,6 +34,7 @@ public class Service {
         return "Service{" +
                 "currentSession=" + session +
                 ", serviceType=" + serviceType +
+                ", encrypted=" + encrypted +
                 '}';
     }
 
@@ -56,5 +58,13 @@ public class Service {
         int result = session != null ? session.hashCode() : 0;
         result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
         return result;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
     }
 }

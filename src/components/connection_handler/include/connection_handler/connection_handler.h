@@ -2,7 +2,7 @@
  * \file connection_handler.hpp
  * \brief Connection handler interface class.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@
  */
 namespace connection_handler {
 /**
- * \class ConnectionHandler
+ * \class ConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler interface class
  */
 class ConnectionHandler {
@@ -74,11 +74,13 @@ class ConnectionHandler {
       connection_handler::DeviceHandle device_handle) = 0;
 
   /*
+   * //TODO(EZ):add brief
    * Close all associated sessions and close the connection pointed by handle
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) = 0;
 
   /*
+   * //TODO(EZ):add brief
    * Close session
    */
   virtual void CloseSession(ConnectionHandle connection_handle,
@@ -86,6 +88,7 @@ class ConnectionHandler {
                             const ServiceList& service_list) = 0;
 
   /*
+   * //TODO(EZ):add brief
    * Send heartbeat to mobile app
    */
   virtual void SendHeartBeat(ConnectionHandle connection_handle,

@@ -59,9 +59,9 @@ class ProtocolObserver {
      * when new message is received from Mobile Application.
      * \param message Message with supporting params received
      */
-    virtual void OnMessageReceived(const RawMessagePtr& message) = 0;
+    virtual void OnMessageReceived(const RawMessagePtr message) = 0;
 
-    virtual void OnMobileMessageSent(const RawMessagePtr& message)  = 0;
+    virtual void OnMobileMessageSent(const RawMessagePtr message)  = 0;
 
 
   protected:

@@ -26,6 +26,7 @@ import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.enums.Language;
@@ -60,6 +61,10 @@ public class AppSetUpDialog extends DialogFragment {
                 getActivity().LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
+        String[] services = new String[]{ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
+        ArrayAdapter<String> cypherProtocolAdapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_spinner_item, services);
+        cypherProtocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
@@ -73,14 +78,20 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
+<<<<<<< HEAD
+        final CheckBox isHeartBeatBox = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
+=======
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
         final RadioGroup videoSourceGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupVideoSource);
         final EditText appNameEditText = (EditText) view.findViewById(R.id.selectprotocol_appName);
+
         final Spinner langSpinner = (Spinner) view.findViewById(R.id.selectprotocol_lang);
         final Spinner hmiLangSpinner = (Spinner) view.findViewById(R.id.selectprotocol_hmiLang);
         final RadioGroup transportGroup = (RadioGroup) view.findViewById(
@@ -109,6 +120,14 @@ public class AppSetUpDialog extends DialogFragment {
 
         final CheckBox autoSetAppIconCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkAutoSetAppIcon);
+
+        doDeviceRootCheckView.setChecked(AppPreferencesManager.getDoDeviceRootCheck());
+        doDeviceRootCheckView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppPreferencesManager.setDoDeviceRootCheck(isChecked);
+            }
+        });
 
         ipAddressLayout.setVisibility(View.GONE);
         portLayout.setVisibility(View.GONE);
@@ -176,6 +195,7 @@ public class AppSetUpDialog extends DialogFragment {
         langSpinner.setAdapter(langAdapter);
         hmiLangSpinner.setAdapter(langAdapter);
 
+
         // display current configs
         final SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
         boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
@@ -186,6 +206,7 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_DEFAULT_NAVI_VIDEOSOURCE);
         String appName = prefs.getString(Const.PREFS_KEY_APPNAME,
                 Const.PREFS_DEFAULT_APPNAME);
+
         Language lang = Language.valueOf(prefs.getString(Const.PREFS_KEY_LANG,
                 Const.PREFS_DEFAULT_LANG));
         Language hmiLang = Language.valueOf(prefs.getString(
@@ -200,11 +221,17 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_KEY_AUTOSETAPPICON,
                 Const.PREFS_DEFAULT_AUTOSETAPPICON);
 
+        final boolean isHeartbeat = prefs.getBoolean(
+                Const.PREFS_KEY_HEARTBEAT,
+                Const.PREFS_DEFAULT_HEARTBEAT);
+
+        isHeartBeatBox.setChecked(isHeartbeat);
         mediaCheckBox.setChecked(isMedia);
         naviCheckBox.setChecked(isNavi);
         appNameEditText.setText(appName);
         langSpinner.setSelection(langAdapter.getPosition(lang));
         hmiLangSpinner.setSelection(langAdapter.getPosition(hmiLang));
+
         ipAddressEditText.setText(ipAddress);
         tcpPortEditText.setText(String.valueOf(tcpPort));
         nsdToggle.setChecked(prefs.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false));
@@ -248,6 +275,16 @@ public class AppSetUpDialog extends DialogFragment {
                         String appName = appNameEditText.getText().toString();
                         String lang = ((Language) langSpinner.getSelectedItem()).name();
                         String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
+
+                        int transportType = Const.Transport.KEY_USB;
+                        switch (transportGroup.getCheckedRadioButtonId()) {
+                            case R.id.selectprotocol_radioWiFi:
+                                transportType = Const.Transport.KEY_TCP;
+                                break;
+                            case R.id.selectprotocol_radioBT:
+                                transportType = Const.Transport.KEY_BLUETOOTH;
+                                break;
+                        }
                         String ipAddress = ipAddressEditText.getText().toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
@@ -265,12 +302,17 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
+                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHeartBeatBox.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
+<<<<<<< HEAD
+                        setupHeartbeat(isHeartBeatBox);
+=======
                         setupHeartbeat(isHearBeat, isHearBeatAck);
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();

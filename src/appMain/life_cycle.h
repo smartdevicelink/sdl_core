@@ -1,7 +1,7 @@
 /**
 * \file signals.cc
 * \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -82,6 +82,8 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    security_manager::CryptoManager* crypto_manager_;
+    security_manager::SecurityManager* security_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif //TIME_TESTER

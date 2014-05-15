@@ -17,6 +17,8 @@ include_directories (
   ../../../../src/components/application_manager/include
   ../../../../src/components/protocol_handler/include
   ../../../../src/components/hmi_message_handler/include
+  #../../../../src/components/mobile_message_handler/include/
+  ../../../../src/components/security_manager/include
   ../../../../src/components/transport_manager/include
   ../../../../src/components/connection_handler/include
   ../../../../src/components/utils/include

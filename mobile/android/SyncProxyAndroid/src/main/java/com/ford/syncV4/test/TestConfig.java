@@ -36,6 +36,11 @@ public class TestConfig {
     private String mCustomHashId;
 
     /**
+     * Allow to skip Root Device check in case of, for example, Android emulator
+     */
+    public boolean mDoRootDeviceCheck;
+
+    /**
      * Indicates whether or not it is necessary to call
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} just right after RPC Session is
      * established
@@ -140,6 +145,21 @@ public class TestConfig {
      */
     public void setDoCallRegisterAppInterface(boolean mDoCallRegisterAppInterface) {
         this.mDoCallRegisterAppInterface = mDoCallRegisterAppInterface;
+    }
+
+    /**
+     * @return whether to process Root Device check procedure, boolean value
+     */
+    public boolean isDoRootDeviceCheck() {
+        return mDoRootDeviceCheck;
+    }
+
+    /**
+     * Set whether or not to process Root Device check procedure
+     * @param mDoRootDeviceCheck boolean value
+     */
+    public void setDoRootDeviceCheck(boolean mDoRootDeviceCheck) {
+        this.mDoRootDeviceCheck = mDoRootDeviceCheck;
     }
 
     /**

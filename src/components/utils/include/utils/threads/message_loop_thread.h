@@ -64,6 +64,8 @@ class MessageLoopThread {
      * from it's queue. After calling this method message is discarded.
      */
     virtual void Handle(const Message& message) = 0;
+
+    virtual ~Handler(){}
   };
 
   /*

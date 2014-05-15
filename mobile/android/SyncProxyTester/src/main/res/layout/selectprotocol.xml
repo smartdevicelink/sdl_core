@@ -45,14 +45,23 @@
         </LinearLayout>
 
         <LinearLayout
+<<<<<<< HEAD
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+=======
 
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
+                android:layout_marginRight="15dp"
+=======
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
                 android:text="Heartbeat"
                 android:visibility="visible"
                 android:id="@+id/heartbeat"
@@ -61,10 +70,17 @@
             <CheckBox
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+<<<<<<< HEAD
+                android:text="Detect Root"
+                android:visibility="visible"
+                android:id="@+id/root_detection_view" />
+
+=======
                 android:text="ACK"
                 android:visibility="visible"
                 android:id="@+id/heartbeatAck"
                 android:checked="true" />
+>>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
         </LinearLayout>
 
         <CheckBox

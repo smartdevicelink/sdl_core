@@ -3,11 +3,11 @@ include_directories (
   ../utils/include/
   ../transport_manager/include/
   ../connection_handler/include/
+  ../security_manager/include/
   ../config_profile/include/
 )
 
 set (SOURCES
-    ./src/applink_protocol.cc
     ./src/rpc_type.cc
     ./src/raw_message.cc
     ./src/protocol_handler_impl.cc

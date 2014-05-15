@@ -72,7 +72,7 @@ class ProtocolHandler {
      * \param final_message tells whether message's
      * connection must be closed when message is processed
      */
-    virtual void SendMessageToMobileApp(const RawMessagePtr& message,
+    virtual void SendMessageToMobileApp(const RawMessagePtr message,
                                         bool final_message) = 0;
 
     /**
@@ -81,9 +81,10 @@ class ProtocolHandler {
      * \param number_of_frames Number of frames processed by
      * streaming server and displayed to user.
      */
-    virtual void SendFramesNumber(int32_t connection_key, int32_t number_of_frames) = 0;
+    virtual void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames) = 0;
 
     /*
+     * //TODO(EZ): add brief
      * Prepare and send heartbeat message to mobile app
      */
     virtual void SendHeartBeat(int32_t connection_id, uint8_t session_id) = 0;

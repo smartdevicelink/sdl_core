@@ -33,6 +33,7 @@ public class DefaultRPCRequestConverter implements IRPCRequestConverter {
         ProtocolMessage pm = new ProtocolMessage();
         pm.setVersion(protocolVersion);
         pm.setData(msgBytes);
+        pm.setEncrypted(request.isDoEncryption());
         pm.setSessionID(sessionID);
         pm.setMessageType(MessageType.RPC);
         pm.setServiceType(ServiceType.RPC);

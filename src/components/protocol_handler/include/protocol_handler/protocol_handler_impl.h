@@ -2,7 +2,7 @@
  * \file protocol_handler.h
  * \brief ProtocolHandlerImpl class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
+#include "security_manager/security_manager.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -85,19 +86,22 @@ namespace impl {
  * when we have them.
  */
 struct RawFordMessageFromMobile: public ProtocolFramePtr {
-  explicit RawFordMessageFromMobile(const ProtocolFramePtr& message)
+  explicit RawFordMessageFromMobile(const ProtocolFramePtr message)
       : ProtocolFramePtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
-  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
-      get()->service_type())).OrderingValue(); }
+  size_t PriorityOrder() const {
+    return MessagePriority::FromServiceType(
+          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
 };
 
 struct RawFordMessageToMobile: public ProtocolFramePtr {
-  explicit RawFordMessageToMobile(const ProtocolFramePtr& message, bool final_message)
+  explicit RawFordMessageToMobile(const ProtocolFramePtr message,
+                                  bool final_message)
       : ProtocolFramePtr(message), is_final(final_message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
-  size_t PriorityOrder() const { return MessagePriority::FromServiceType(ServiceTypeFromByte(
-      get()->service_type())).OrderingValue(); }
+  size_t PriorityOrder() const {
+    return MessagePriority::FromServiceType(
+          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
   // Signals whether connection to mobile must be closed after processing this message
   bool is_final;
 };
@@ -107,7 +111,7 @@ typedef threads::MessageLoopThread<
                utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<
                utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
-}
+}  // namespace impl
 
 /**
  * \class ProtocolHandlerImpl
@@ -158,10 +162,17 @@ class ProtocolHandlerImpl
     void set_session_observer(SessionObserver* observer);
 
     /**
+     * \brief Sets pointer for SecurityManager layer for managing protection routine
+     * \param security_manager Pointer to object of the class implementing
+     * ISessionObserver
+     */
+    void set_security_manager(security_manager::SecurityManager *security_manager);
+
+    /**
      * \brief Method for sending message to Mobile Application
      * \param message Message with params to be sent to Mobile App
      */
-    void SendMessageToMobileApp(const RawMessagePtr& message,
+    void SendMessageToMobileApp(const RawMessagePtr message,
                                 bool final_message) OVERRIDE;
 
     /**
@@ -170,7 +181,7 @@ class ProtocolHandlerImpl
      * \param number_of_frames Number of frames processed by
      * streaming server and displayed to user.
      */
-    void SendFramesNumber(int32_t connection_key, int32_t number_of_frames);
+    void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames);
 
     /**
      * @brief Setup observer for time metric.
@@ -185,11 +196,9 @@ class ProtocolHandlerImpl
     void SendHeartBeat(int32_t connection_id, uint8_t session_id);
 
   protected:
-
     /**
      * \brief Sends acknowledgement of starting session to mobile application
      * with session number and hash code for second version of protocol
-     * \param connection_handle Identifier of connection within which session
      * was started
      * \param session_id ID of session to be sent to mobile application
      * \param protocol_version Version of protocol used for communication
@@ -197,30 +206,30 @@ class ProtocolHandlerImpl
      * to be sent to
      * mobile app for using when ending session
      * \param service_type Type of session: RPC or BULK Data. RPC by default
+     * \param protection Protection flag
      */
-    void SendStartSessionAck(
-      ConnectionID connection_id,
-      uint8_t session_id,
-      uint8_t protocol_version,
-      uint32_t hash_code = 0,
-      uint8_t service_type = SERVICE_TYPE_RPC);
+    void SendStartSessionAck(ConnectionID connection_id,
+                             uint8_t session_id,
+                             uint8_t protocol_version,
+                             uint32_t hash_code,
+                             uint8_t service_type,
+                             bool encrypted);
 
     /**
      * \brief Sends fail of starting session to mobile application
-     * \param connection_handle Identifier of connection within which session
-     * ment to be started
      * \param session_id ID of session to be sent to mobile application
      * \param protocol_version Version of protocol used for communication
      * \param service_type Type of session: RPC or BULK Data. RPC by default
      */
-    void SendStartSessionNAck(
-      ConnectionID connection_id,
-      uint8_t session_id,
-      uint8_t protocol_version,
-      uint8_t service_type = SERVICE_TYPE_RPC);
+    void SendStartSessionNAck(ConnectionID connection_id,
+                              uint8_t session_id,
+                              uint8_t protocol_version,
+                              uint8_t service_type);
 
     /**
      * \brief Sends acknowledgement of end session/service to mobile application
+     * with session number and hash code for second version of protocol.
+     * \param connection_id Identifier of connection whithin which session
      * with session number and hash code for second version of protocol
      * \param connection_handle Identifier of connection within which session
      * was started
@@ -240,7 +249,7 @@ class ProtocolHandlerImpl
 
     /**
      * \brief Sends fail of ending session to mobile application
-     * \param connection_handle Identifier of connection within which
+     * \param connection_id Identifier of connection within which
      * session exists
      * \param session_id ID of session ment to be ended
      * \param protocol_version Version of protocol used for communication
@@ -291,7 +300,7 @@ class ProtocolHandlerImpl
      **/
     virtual void OnTMMessageSendFailed(
       const transport_manager::DataSendError& error,
-      const RawMessagePtr& message);
+      const RawMessagePtr message);
 
     virtual void OnConnectionEstablished(
         const transport_manager::DeviceInfo& device_info,
@@ -302,10 +311,10 @@ class ProtocolHandlerImpl
 
     /**
      * @brief Notifies subscribers about message
-     * recieved from mobile device.
+     * received from mobile device.
      * @param message Message with already parsed header.
      */
-    void NotifySubscribers(const RawMessagePtr& message);
+    void NotifySubscribers(const RawMessagePtr message);
 
     /**
      * \brief Sends message which size permits to send it in one frame.
@@ -316,18 +325,15 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param compress Compression flag
      * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendSingleFrameMessage(
-      ConnectionID connection_id,
+    RESULT_CODE SendSingleFrameMessage(ConnectionID connection_id,
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      const uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
-      const bool compress,
       const bool is_final_message);
 
     /**
@@ -339,32 +345,25 @@ class ProtocolHandlerImpl
      * \param service_type Type of session, RPC or BULK Data
      * \param data_size Size of message excluding protocol header
      * \param data Message string
-     * \param compress Compression flag
      * \param max_data_size Maximum allowed size of single frame.
      * \param is_final_message if is_final_message = true - it is last message
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendMultiFrameMessage(
-      ConnectionID connection_id,
+    RESULT_CODE SendMultiFrameMessage(ConnectionID connection_id,
       const uint8_t session_id,
       uint32_t protocol_version,
       const uint8_t service_type,
-      const uint32_t data_size,
+      size_t data_size,
       const uint8_t* data,
-      const bool compress,
-      const uint32_t max_data_size,
+      const size_t max_data_size,
       const bool is_final_message);
 
     /**
      * \brief Sends message already containing protocol header.
-     * \param connection_handle Identifier of connection through which message
-     * is to be sent.
-     * \param packet Message with protocol header.
+     * \param packet Message with protocol header
      * \return \saRESULT_CODE Status of operation
      */
-    RESULT_CODE SendFrame(
-      ConnectionID connection_id,
-      const ProtocolPacket& packet);
+    RESULT_CODE SendFrame(const ProtocolFramePtr packet);
 
     /**
      * \brief Handles received message.
@@ -375,8 +374,18 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
+    /**
+     * \brief Handles message received in single frame.
+     * \param connection_handle Identifier of connection through which message
+     * is received.
+     * \param packet Frame of message with protocol header.
+     * \return \saRESULT_CODE Status of operation
+     */
+    RESULT_CODE HandleSingleFrameMessage(
+        ConnectionID connection_id ,
+        const ProtocolFramePtr packet);
     /**
      * \brief Handles message received in multiple frames. Collects all frames
      * of message.
@@ -387,7 +396,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleMultiFrameMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
     /**
      * \brief Handles message received in single frame.
@@ -398,7 +407,7 @@ class ProtocolHandlerImpl
      */
     RESULT_CODE HandleControlMessage(
       ConnectionID connection_id ,
-      const ProtocolFramePtr& packet);
+      const ProtocolFramePtr packet);
 
     RESULT_CODE HandleControlMessageEndSession(
       ConnectionID connection_id ,
@@ -424,6 +433,13 @@ class ProtocolHandlerImpl
     void Handle(const impl::RawFordMessageFromMobile& message);
     // CALLED ON raw_ford_messages_to_mobile_ thread!
     void Handle(const impl::RawFordMessageToMobile& message);
+
+    /**
+     * \brief Encryption/Decryption methodes for SecureSecvice check
+     * \param packet frame of message to encrypted/decrypted
+     */
+    RESULT_CODE EncryptFrame(ProtocolFramePtr packet);
+    RESULT_CODE DecryptFrame(ProtocolFramePtr packet);
   private:
     /**
      *\brief Pointer on instance of class implementing IProtocolObserver
@@ -472,6 +488,7 @@ class ProtocolHandlerImpl
 
     class IncomingDataHandler;
     std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
+    security_manager::SecurityManager *security_manager_;
 
     // Thread that pumps non-parsed messages coming from mobile side.
     impl::FromMobileQueue raw_ford_messages_from_mobile_;

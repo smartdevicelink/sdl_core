@@ -5,14 +5,15 @@ import android.content.res.Resources;
 import android.widget.CheckBox;
 
 /**
- * Created by Andrew Batutin on 8/30/13.
+ * Created by Andrew Batutin on 8/30/13
  */
 public class CheckBoxState {
 
     protected final CheckBox item;
     protected CheckBoxStateValue state;
-    protected String hintString;
-    protected String textString;
+    //protected String hintString;
+    protected String textStringOff;
+    protected String textStringOn;
     protected Context context;
 
     public CheckBoxState(CheckBox item, Context context) {
@@ -42,15 +43,15 @@ public class CheckBoxState {
     }
 
     public void setStateOff() {
-        getItem().setText("");
-        getItem().setHint(hintString);
+        getItem().setText(textStringOn);
+        //getItem().setHint(hintString);
         getItem().setEnabled(true);
         getItem().setChecked(false);
         setState(CheckBoxStateValue.OFF);
     }
 
     public void setStateOn() {
-        getItem().setText(textString);
+        getItem().setText(textStringOff);
         getItem().setEnabled(true);
         getItem().setChecked(true);
         setState(CheckBoxStateValue.ON);

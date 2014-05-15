@@ -8,6 +8,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerBase;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
+import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
 import com.ford.syncV4.proxy.rpc.AlertResponse;
 import com.ford.syncV4.proxy.rpc.ChangeRegistrationResponse;
@@ -62,6 +63,7 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
+import com.ford.syncV4.proxy.rpc.enums.ButtonPressMode;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.SyncConnectionState;
 import com.ford.syncV4.proxy.rpc.enums.SyncDisconnectedReason;
@@ -75,12 +77,34 @@ import java.util.Hashtable;
  */
 public class RPCMessageHandler implements IRPCMessageHandler {
 
+    private static final String LOG_TAG = "RPCMessageHandler";
+
     private static final String CLASS_NAME = RPCMessageHandler.class.getSimpleName();
 
     private SyncProxyBase syncProxyBase;
+    private CertificateRecallProcessor mCertificateRecallProcessor;
 
-    public RPCMessageHandler(SyncProxyBase syncProxyBase) {
+    public RPCMessageHandler(final SyncProxyBase syncProxyBase) {
         this.syncProxyBase = syncProxyBase;
+        mCertificateRecallProcessor = new CertificateRecallProcessor();
+        mCertificateRecallProcessor.setProcessorCallback(new CertificateRecallProcessor.ICertificateRecallProcessor() {
+            @Override
+            public void onRecall() {
+
+                // TODO : Implement logic here
+                Logger.i(LOG_TAG, "Certificate Recall");
+
+                Alert alert = new Alert();
+                alert.setAlertText1("Certificate Recall");
+                alert.setCorrelationID(1);
+
+                try {
+                    syncProxyBase.sendRPCRequest(alert);
+                } catch (SyncException e) {
+                    Logger.e(LOG_TAG, "Alert error:" + e);
+                }
+            }
+        });
     }
 
     @Override
@@ -1001,6 +1025,13 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 // OnButtonPress
 
                 final OnButtonPress msg = new OnButtonPress(hash);
+
+                if (msg.getButtonPressMode() == ButtonPressMode.SHORT) {
+
+                    // Set Process Listener temporary for concrete event
+                    mCertificateRecallProcessor.process(hash);
+                }
+
                 if (getCallbackToUIThread()) {
                     // Run in UI thread
                     getMainUIHandler().post(new Runnable() {
