@@ -948,7 +948,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          *
          * @params {Number}
          */
-        ExitApplication: function(appID) {
+        ExitApplication: function(appID, reason) {
 
             Em.Logger.log("FFW.BasicCommunication.OnExitApplication");
 
@@ -958,6 +958,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "jsonrpc": "2.0",
                 "method": "BasicCommunication.OnExitApplication",
                 "params": {
+                    "reason": reason,
                     "appID": appID
                 }
             };
