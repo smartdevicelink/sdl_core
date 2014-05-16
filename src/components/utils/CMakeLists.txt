@@ -15,7 +15,6 @@ set (SOURCES
     ./src/lock_posix.cc
     ./src/date_time.cc
     ./src/signals_linux.cc
-    ./src/system.cc
 )
 
 if (BUILD_BACKTRACE_SUPPORT)

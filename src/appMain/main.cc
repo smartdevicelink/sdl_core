@@ -33,6 +33,8 @@
  */
 
 #include <sys/stat.h>
+#include <signal.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
@@ -46,7 +48,6 @@
 #include "./life_cycle.h"
 
 #include "utils/signals.h"
-#include "utils/system.h"
 #include "config_profile/profile.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
@@ -63,11 +64,61 @@
 CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
 namespace {
 
-const std::string kBrowser = "/usr/bin/chromium-browser";
-const std::string kBrowserName = "chromium-browser";
-const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
-const std::string kLocalHostAddress = "127.0.0.1";
-const std::string kApplicationVersion = "Develop";
+const char kBrowser[] = "/usr/bin/chromium-browser";
+const char kBrowserName[] = "chromium-browser";
+const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
+const char kLocalHostAddress[] = "127.0.0.1";
+const char kApplicationVersion[] = "Develop";
+
+#ifdef __QNX__
+bool Execute(std::string command, const char * const *) {
+  if (system(command.c_str()) == -1) {
+    LOG4CXX_FATAL(logger, "Can't start HMI!");
+    return false;
+  }
+  return true;
+}
+#else
+bool Execute(std::string file, const char * const * argv) {
+  // Create a child process.
+  pid_t pid_hmi = fork();
+
+  switch (pid_hmi) {
+    case -1: {  // Error
+      LOG4CXX_FATAL(logger, "fork() failed!");
+      return false;
+    }
+    case 0: {  // Child process
+      int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+      if (0 > fd_dev0) {
+        LOG4CXX_FATAL(logger, "Open dev0 failed!");
+        return false;
+      }
+      // close input/output file descriptors.
+      close(STDIN_FILENO);
+      close(STDOUT_FILENO);
+      close(STDERR_FILENO);
+
+      // move input/output to /dev/null.
+      dup2(fd_dev0, STDIN_FILENO);
+      dup2(fd_dev0, STDOUT_FILENO);
+      dup2(fd_dev0, STDERR_FILENO);
+
+      // Execute the program.
+      if (execvp(file.c_str(), const_cast<char* const *>(argv)) == -1) {
+        LOG4CXX_ERROR_WITH_ERRNO(logger, "execvp() failed! Can't start HMI!");
+        _exit(EXIT_FAILURE);
+      }
+
+      return true;
+    }
+    default: { /* Parent process */
+      LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
+      return true;
+    }
+  }
+}
+#endif
 
 #ifdef WEB_HMI
 /**
@@ -106,8 +157,12 @@ if (stat(hmi_link.c_str(), &sb) == -1) {
   LOG4CXX_FATAL(logger, "HMI index.html doesn't exist!");
   return false;
 }
-  return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
-      .Execute();
+
+  std::string kBin = kBrowser;
+  const char* const kParams[4] = {kBrowserName, kBrowserParams,
+      hmi_link.c_str(), NULL};
+
+  return Execute(kBin, kParams);
 }
 #endif  // WEB_HMI
 
@@ -124,7 +179,7 @@ bool InitHmi() {
     return false;
   }
 
-  return utils::System(kStartHmi).Execute();
+  return Execute(kStartHmi, NULL);
 }
 #endif  // QT_HMI
 
@@ -173,7 +228,8 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->launch_hmi()) {
-    if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
+    if (profile::Profile::instance()->server_address() ==
+        std::string(kLocalHostAddress)) {
       LOG4CXX_INFO(logger, "Start HMI on localhost");
 
 #ifndef NO_HMI
