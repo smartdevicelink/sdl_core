@@ -114,7 +114,8 @@ const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kTTSDelimiterKey = "TTSDelimiter";
-const char* kRecordingFileKey = "RecordingFile";
+const char* kRecordingFileNameKey = "RecordingFileName";
+const char* kRecordingFileSourceKey = "RecordingFileSource";
 const char* kPolicyOffKey = "PolicySwitchOff";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
@@ -124,7 +125,8 @@ const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
-const char* kDefaultRecordingFileName = "audio.8bit.wav";
+const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
+const char* kDefaultRecordingFileName = "record.wav";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -193,7 +195,8 @@ Profile::Profile()
     system_files_path_(kDefaultSystemFilesPath),
     transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
     tts_delimiter_(kDefaultTtsDelimiter),
-    recording_file_(kDefaultRecordingFileName) {
+    recording_file_source_(kDefaultRecordingFileSourceName),
+    recording_file_name_(kDefaultRecordingFileName) {
 }
 
 Profile::~Profile() {
@@ -396,8 +399,12 @@ const std::string& Profile::tts_delimiter() const {
   return tts_delimiter_;
 }
 
-const std::string& Profile::recording_file() const {
-  return recording_file_;
+const std::string& Profile::recording_file_source() const {
+  return recording_file_source_;
+}
+
+const std::string&Profile::recording_file_name() const {
+  return recording_file_name_;
 }
 
 void Profile::UpdateValues() {
@@ -832,10 +839,17 @@ void Profile::UpdateValues() {
                     kTransportManagerSection);
 
   // Recording file
-  ReadStringValue(&recording_file_, kDefaultRecordingFileName,
-                  kMediaManagerSection, kSystemFilesPathKey);
+  ReadStringValue(&recording_file_name_, kDefaultRecordingFileName,
+                  kMediaManagerSection, kRecordingFileNameKey);
 
-  LOG_UPDATED_VALUE(recording_file_, kRecordingFileKey, kMediaManagerSection);
+  LOG_UPDATED_VALUE(recording_file_name_, kRecordingFileNameKey, kMediaManagerSection);
+
+  // Recording file source
+  ReadStringValue(&recording_file_source_, kDefaultRecordingFileSourceName,
+                  kMediaManagerSection, kRecordingFileSourceKey);
+
+  LOG_UPDATED_VALUE(recording_file_source_, kRecordingFileSourceKey,
+                    kMediaManagerSection);
 
   // Policy preloaded file
   ReadStringValue(&preloaded_pt_file_,

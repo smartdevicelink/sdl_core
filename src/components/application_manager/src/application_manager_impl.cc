@@ -591,10 +591,10 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
     int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
     int32_t bits_per_sample, int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {
+  if (NULL != media_manager_) {    
     media_manager_->StartMicrophoneRecording(
       session_key,
-      std::string("record.wav"),
+      profile::Profile::instance()->recording_file_name(),
       max_duration);
   }
 }
