@@ -152,12 +152,6 @@ int32_t main(int32_t argc, char** argv) {
   gst_init(&argc, &argv);
 #endif
 
-#ifdef __QNX__
-  if (!utils::System("./init_policy_qnx.sh").Execute(true)) {
-    LOG4CXX_ERROR(logger, "Failed initialization of policy database");
-  }
-#endif  // __QNX__
-
   // --------------------------------------------------------------------------
   // Components initialization
   if ((argc > 1)&&(0 != argv)) {

@@ -88,7 +88,7 @@ bool System::Execute(bool wait) {
   delete[] argv;
 
   if (ret == -1) {
-    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
+    LOG4CXX_FATAL(logger_, "Can't execute command!");
     return false;
   }
   return true;
@@ -128,7 +128,8 @@ bool System::Execute(bool wait) {
 
       // Execute the program.
       if (execvp(command_.c_str(), argv) == -1) {
-        LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
+        LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                                 "execvp() failed! Can't execute command!");
         _exit(EXIT_FAILURE);
       }
       delete[] argv;
