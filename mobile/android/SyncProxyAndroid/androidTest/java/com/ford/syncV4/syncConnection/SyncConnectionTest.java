@@ -15,14 +15,11 @@ import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.BitConverter;
-import com.ford.syncV4.util.logger.Logger;
 
 import org.mockito.ArgumentCaptor;
 
 import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -112,9 +109,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
-                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+                                                 boolean encrypted, byte version, String correlationID) {
+                super.onProtocolServiceStarted(serviceType, sessionID, false, version, correlationID);
+
                 assertEquals("Correlation ID is empty string so far", "", correlationID);
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
@@ -240,7 +237,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferCreatesAudioPacketizer() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID, false);
         assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
     }
 
@@ -259,7 +256,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferSetsSessionID() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(config);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID,false);
+        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID, false);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals("session id should be equal SESSION_ID", SESSION_ID, packetizer.getSessionID());
     }
@@ -309,12 +306,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         IHeartbeatMonitor heartbeatMonitor = mock(IHeartbeatMonitor.class);
         connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor());
-<<<<<<< HEAD
-        connection.closeConnection((byte) 0, false, true);
-        //assertNull("heartbeat monitor should be stopped and null", connection.getHeartbeatMonitor());
-=======
+
         connection.closeConnection((byte) 1, false, true);
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         verify(heartbeatMonitor, times(1)).stop();
     }
 
@@ -356,9 +350,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
         final byte maxByte = (byte) 0xFF;
         final byte[] bytes =
-                { 0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
+                {0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00 };
+                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00};
         connection.onTransportBytesReceived(bytes, bytes.length);
 
         ArgumentCaptor<Throwable> throwableArgumentCaptor =

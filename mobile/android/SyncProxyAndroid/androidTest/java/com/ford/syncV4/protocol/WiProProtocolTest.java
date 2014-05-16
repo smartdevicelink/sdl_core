@@ -451,14 +451,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -596,14 +593,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
@@ -729,13 +723,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-<<<<<<< HEAD
-        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
-        verify(protocolListener).onResetHeartbeat();
-=======
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
         verify(protocolListener).onResetHeartbeatAck();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
     }
 
 
