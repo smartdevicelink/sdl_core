@@ -222,6 +222,7 @@ int Connection::SetSSLContext(uint8_t sessionId,
 
 security_manager::SSLContext* Connection::GetSSLContext(
     uint8_t sessionId, const protocol_handler::ServiceType &service_type) const {
+  LOG4CXX_TRACE(logger_, "Connection::GetSSLContext");
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::const_iterator session_it = session_map_.find(sessionId);
   if (session_it == session_map_.end()) {
@@ -243,6 +244,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   const Service& service = *service_it;
   if (!service.is_protected_)
     return NULL;
+  LOG4CXX_TRACE(logger_, "SSLContext is " << session.ssl_context);
   return session.ssl_context;
 }
 

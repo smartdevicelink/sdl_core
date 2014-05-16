@@ -217,6 +217,7 @@ void SecurityManager::RemoveListener(SecurityManagerListener * const listener) {
 }
 void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                                      const bool success) {
+  LOG4CXX_TRACE(logger_, "NotifyListenersOnHandshakeDone");
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
     if ((*it)->OnHandshakeDone(connection_key, success)) {
@@ -339,7 +340,8 @@ void SecurityManager::SendData(
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
   // FIXME(EZ): move to SecurityQuery class
-  header.query_id  = LE_TO_BE32(header.query_id << 8);
+  uint32_t tmp = header.query_id << 8;
+  header.query_id  = LE_TO_BE32(tmp);
   header.json_size = LE_TO_BE32(header.json_size);
 
   const size_t header_size = sizeof(header);

@@ -38,8 +38,8 @@
 
 #ifdef __QNX__
 #include <gulliver.h>
-#define BE_TO_LE32(x) ENDIAN_SWAP32((x));
-#define LE_TO_BE32(x) ENDIAN_SWAP32((x));
+#define BE_TO_LE32(x) ENDIAN_SWAP32(&(x));
+#define LE_TO_BE32(x) ENDIAN_SWAP32(&(x));
 #else
 #include <byteswap.h>
 #define BE_TO_LE32(x) bswap_32(x)

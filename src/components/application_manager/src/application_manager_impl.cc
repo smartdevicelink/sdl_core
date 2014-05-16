@@ -886,7 +886,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
       break;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Unknown type of service to be started.");
+      LOG4CXX_WARN(logger_, "Unknown type of service " << int(type) << " to be started.");
       break;
     }
   }
@@ -922,8 +922,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
       break;
     }
     default:
-      LOG4CXX_WARN(logger_, "Unknown type of service to be ended.")
-      ;
+      LOG4CXX_WARN(logger_, "Unknown type of service " << int(type) << " to be ended.");
       break;
   }
 }
