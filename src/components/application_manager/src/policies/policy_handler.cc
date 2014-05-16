@@ -447,7 +447,7 @@ BinaryMessageSptr PolicyHandler::AddHttpHeader(const BinaryMessageSptr& pt_strin
   packet["HTTPRequest"]["headers"]["ReadTimeout"] = Json::Value(policy_manager_->TimeoutExchange());
   packet["HTTPRequest"]["headers"]["InstanceFollowRedirects"] = Json::Value(false);
   packet["HTTPRequest"]["headers"]["charset"] = Json::Value("utf-8");
-  packet["HTTPRequest"]["headers"]["Content_Length"] = Json::Value(pt_string->size());
+  packet["HTTPRequest"]["headers"]["Content_Length"] = Json::Value(static_cast<int>(pt_string->size()));
   packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
   packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::arrayValue);
   packet["HTTPRequest"]["body"]["data"][0] = Json::Value(std::string(pt_string->begin(),
