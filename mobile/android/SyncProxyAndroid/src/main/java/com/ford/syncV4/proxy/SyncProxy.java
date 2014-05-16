@@ -285,7 +285,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId(sessionId), getDeviceInfo());
+                getHashId(appName), getDeviceInfo(), sessionId);
 	}
 	
 	/**
@@ -344,7 +344,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * 
 	 * @return Boolean isConnected
 	 */
-	public Boolean getIsConnected() {
+	public boolean getIsConnected() {
 		return super.getIsConnected();
 	}
 }

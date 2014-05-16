@@ -19,11 +19,14 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 public class SyncServiceBaseFragment extends Fragment implements ServicePreviewFragmentInterface,
                                                                  ConnectionListener {
 
+    @SuppressWarnings("unused")
     private static final String TAG = SyncServiceBaseFragment.class.getSimpleName();
 
     protected Button mDataStreamingButton;
     protected CheckBoxState mSessionCheckBoxState;
     protected FileStreamingLogic mFileStreamingLogic;
+
+    private String mAppId = "";
 
     @Override
     public void onProxyClosed() {
@@ -63,17 +66,25 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         removeListeners();
     }
 
+    public String getAppId() {
+        return mAppId;
+    }
+
+    public void setAppId(String value) {
+        mAppId = value;
+    }
+
     protected void startBaseFileStreaming(int resourceId) {
         mFileStreamingLogic.setFileResID(resourceId);
         mFileStreamingLogic.startFileStreaming();
     }
 
-    protected boolean hasServiceInServicesPool(ServiceType serviceType) {
+    protected boolean hasServiceInServicesPool(String appId, ServiceType serviceType) {
         if (serviceType == null) {
             return false;
         }
         ProxyService proxyService = MainApp.getInstance().getBoundProxyService();
-        return proxyService != null && proxyService.hasServiceInServicesPool(serviceType);
+        return proxyService != null && proxyService.hasServiceInServicesPool(appId, serviceType);
     }
 
     protected void setStateOff() {

@@ -76,7 +76,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         List<Service> serviceList = proxyALM.getServicePool();
         assertTrue(proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
-        assertEquals(SESSION_ID, serviceList.get(0).getSession().getSessionId());
+        assertEquals(SESSION_ID, serviceList.get(0).getSessionId().getSessionId());
     }
 
     public void testMobileNavSessionRemovedFromPoolListOnStop() throws Exception {
@@ -201,7 +201,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         Service audioService = new Service();
-        audioService.setSession(session);
+        audioService.setSessionId(session);
         audioService.setServiceType(ServiceType.Audio_Service);
         assertTrue("pool should have AudioService ",
                 proxyALM.hasServiceInServicesPool(ServiceType.Audio_Service));
@@ -236,12 +236,12 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 session.getSessionId(), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         proxyALM.stopAudioService();
         Service mobileNaviService = new Service();
-        mobileNaviService.setSession(session);
+        mobileNaviService.setSessionId(session);
         mobileNaviService.setServiceType(ServiceType.Mobile_Nav);
         assertTrue("pool should have Mobile nav service ",
                 proxyALM.hasServiceInServicesPool(ServiceType.Mobile_Nav));
         Service audioService = new Service();
-        audioService.setSession(session);
+        audioService.setSessionId(session);
         audioService.setServiceType(ServiceType.Audio_Service);
         assertFalse("pool should not have Audio service ",
                 proxyALM.getServicePool().contains(audioService));
@@ -384,7 +384,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertEquals("only one rpc service should be in service list", 1,
-                proxy.syncSession.getServiceList().size());
+                proxy.syncSession.getServicesList().size());
     }
 
     public void testUnregisterAppResponseTriggersStopServicesAndSession() throws Exception {
@@ -559,7 +559,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         if (!proxy.syncSession.hasService(ServiceType.RPC)) {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
-            service.setSession(proxy.syncSession);
+            service.setSessionId(proxy.syncSession);
             proxy.syncSession.setSessionId(SESSION_ID);
             proxy.syncSession.addService(service);
         }

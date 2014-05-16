@@ -27,7 +27,7 @@ public class SessionTest extends AndroidTestCase{
         Session session = new Session();
         Service service = new Service();
         session.addService(service);
-        List<Service> services = session.getServiceList();
+        List<Service> services = session.getServicesList();
         assertEquals("service should be at list",service, services.get(0));
     }
 
@@ -37,21 +37,21 @@ public class SessionTest extends AndroidTestCase{
         session.addService(service);
         boolean res = session.removeService(service);
         assertTrue("element should be removed", res);
-        assertEquals("service list should be empty",0, session.getServiceList().size());
+        assertEquals("service list should be empty",0, session.getServicesList().size());
     }
 
     public void testInitialSessionCreationCreatesRPCService() throws Exception {
         Session session = Session.createSession(ServiceType.RPC, (byte) 0);
-        Service service = session.getServiceList().get(0);
+        Service service = session.getServicesList().get(0);
         assertEquals("syncSession id should be SESSION_ID", (byte) 0, session.getSessionId());
         assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-        assertEquals("service should belong to the syncSession", session, service.getSession());
+        assertEquals("service should belong to the syncSession", session, service.getSessionId());
     }
 
     public void testRemoveServiceRemovesService() throws Exception {
         Session session = Session.createSession(ServiceType.RPC, (byte) 0);
         Service service = new Service();
-        service.setSession(session);
+        service.setSessionId(session);
         service.setServiceType(ServiceType.RPC);
         assertTrue("service should be removed", session.removeService(service));
     }
@@ -59,7 +59,7 @@ public class SessionTest extends AndroidTestCase{
     public void testStopSessionClearsServiceList() throws Exception {
         Session session = Session.createSession(ServiceType.RPC, (byte) 10);
         session.stopSession();
-        assertEquals("service list should be 0",  0, session.getServiceList().size());
+        assertEquals("service list should be 0",  0, session.getServicesList().size());
         assertEquals("session id should be 0",0, session.getSessionId());
     }
 

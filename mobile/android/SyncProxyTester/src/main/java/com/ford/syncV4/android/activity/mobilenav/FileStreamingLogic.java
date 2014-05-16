@@ -10,7 +10,7 @@ import java.io.OutputStream;
 
 public class FileStreamingLogic {
 
-    private static final String TAG = "FileStreamingLogic";
+    private static final String TAG = FileStreamingLogic.class.getSimpleName();
 
     private StaticFileReader staticFileReader;
     private OutputStream outputStream;
@@ -22,6 +22,7 @@ public class FileStreamingLogic {
     private boolean mIsStreamingInProgress;
 
     public FileStreamingLogic(ServicePreviewFragmentInterface mobileNavPreviewFragment) {
+        Logger.d(TAG + " Constructor, hashCode:" + hashCode());
         context = mobileNavPreviewFragment;
     }
 

@@ -306,7 +306,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onSystemRequestResponse(SystemRequestResponse response);
 
-    public void onMobileNaviStart();
+    public void onMobileNaviStart(String appId, byte sessionId);
 
     public void onMobileNavAckReceived(int frameReceivedNumber);
 
@@ -316,25 +316,24 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onOnSystemRequest(OnSystemRequest notification);
 
-    void onRegisterAppRequest(RegisterAppInterface msg);
+    public void onRegisterAppRequest(byte sessionId, RegisterAppInterface msg);
 
     public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg);
 
     public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason);
 
-    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
+    public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
 
     /**
      * This callback is to inform SPT that session is going to be started
-     * @param sessionID Id of the session to start with
      */
-    public void onStartSession(byte sessionID);
+    public void onStartSession();
 
-    public void onSessionStarted(byte sessionID, String correlationID);
+    public void onSessionStarted(String appId, byte sessionId);
 
-    public void onAudioServiceStart();
+    public void onAudioServiceStart(String appId, byte sessionId);
 
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType);
 
     /**
      * Notification containing an updated hashID which can be used over connection cycles
@@ -342,9 +341,10 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * Sent after initial registration and subsequently after any change in the calculated hash
      * of all persisted app data.
      *
+     * @param sessionId Id of the Session for the particular Notification
      * @param onHashChange {@link com.ford.syncV4.proxy.rpc.OnHashChange} notification
      */
-    public void onHashChange(OnHashChange onHashChange);
+    public void onHashChange(byte sessionId, OnHashChange onHashChange);
 
     /**
      * Provide a callback to listener in case of USB problem

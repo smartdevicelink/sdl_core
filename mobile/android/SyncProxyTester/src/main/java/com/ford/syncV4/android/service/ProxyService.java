@@ -60,7 +60,6 @@ import com.ford.syncV4.proxy.rpc.DeleteCommandResponse;
 import com.ford.syncV4.proxy.rpc.DeleteFileResponse;
 import com.ford.syncV4.proxy.rpc.DeleteInteractionChoiceSetResponse;
 import com.ford.syncV4.proxy.rpc.DeleteSubMenuResponse;
-import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.DiagnosticMessageResponse;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPDataResponse;
 import com.ford.syncV4.proxy.rpc.EndAudioPassThruResponse;
@@ -140,10 +139,11 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting, ITestConfigCallback {
 
-    static final String TAG = "SyncProxyTester";
+    static final String TAG = ProxyService.class.getSimpleName();
 
     public static final int HEARTBEAT_INTERVAL = 5000;
     public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
@@ -179,12 +179,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     /**
      * Map of the existed syncProxyTester applications, mobile application Id is a Key
      */
-    private final HashMap<Integer, RegisterAppInterface> appInterfaceHashMap =
-            new HashMap<Integer, RegisterAppInterface>();
+    private final HashMap<String, RegisterAppInterface> appInterfaceHashMap =
+            new HashMap<String, RegisterAppInterface>();
 
+    private String mActiveAppId = "";
 
     // This Config object stores all the necessary data for SDK testing
     private TestConfig mTestConfig = new TestConfig();
+
+    private final AtomicInteger mSessionsCounter = new AtomicInteger(0);
 
     @Override
     public void onCreate() {
@@ -312,6 +315,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
     }
 
+    public String getActiveAppId() {
+        return mActiveAppId;
+    }
+
+    public void setActiveAppId(String value) {
+        Logger.d(TAG + " set AppId:" + value);
+        mActiveAppId = value;
+        if (mSyncProxy != null) {
+            mSyncProxy.setActiveAppId(value);
+        }
+    }
+
     /**
      * @return an object which contains Testing configuration data
      */
@@ -361,20 +376,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 syncMsgVersion.setMajorVersion(2);
                 syncMsgVersion.setMinorVersion(2);
                 Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
-                BaseTransportConfig config = null;
+                BaseTransportConfig transportConfig = null;
                 TransportType transportType = AppPreferencesManager.getTransportType();
                 String appID = AppIdManager.getAppIdByTransport(transportType);
                 switch (transportType) {
                     case BLUETOOTH:
-                        config = new BTTransportConfig();
+                        transportConfig = new BTTransportConfig();
                         break;
                     case TCP:
-                        config = new TCPTransportConfig(tcpPort, ipAddress);
-                        ((TCPTransportConfig) config).setIsNSD(mIsNSD);
-                        ((TCPTransportConfig) config).setApplicationContext(this);
+                        transportConfig = new TCPTransportConfig(tcpPort, ipAddress);
+                        ((TCPTransportConfig) transportConfig).setIsNSD(mIsNSD);
+                        ((TCPTransportConfig) transportConfig).setApplicationContext(this);
                         break;
                     case USB:
-                        config = new USBTransportConfig(getApplicationContext());
+                        transportConfig = new USBTransportConfig(getApplicationContext());
                         break;
                 }
 
@@ -406,7 +421,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-                        config, mTestConfig);
+                        transportConfig, mTestConfig);
             } catch (SyncException e) {
                 Logger.e(TAG, e.toString());
                 //error creating proxy, returned proxy = null
@@ -421,6 +436,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         //OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapters);
         OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(null);
 
+        mSyncProxy.setActiveAppId(mActiveAppId);
         mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
         mSyncProxy.setTestConfigCallback(this);
 
@@ -510,8 +526,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mSyncProxy.getSessionId();
     }
 
-    public boolean hasServiceInServicesPool(ServiceType serviceType) {
-        return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(serviceType);
+    public boolean hasServiceInServicesPool(String appId, ServiceType serviceType) {
+        return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(appId, serviceType);
     }
 
     private void initializePredefinedView() {
@@ -631,8 +647,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onOnHMIStatus(byte sessionId, OnHMIStatus notification) {
-        createDebugMessageForAdapter(notification);
-        //createDebugMessageForAdapter("HMI level:" + notification.getHmiLevel());
+        //Logger.d(TAG + " OnHMIStatusChange AppId:" + mActiveAppId);
+
+        createDebugMessageForAdapter(sessionId, notification);
 
         switch (notification.getSystemContext()) {
             case SYSCTXT_MAIN:
@@ -647,7 +664,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         switch (notification.getAudioStreamingState()) {
             case AUDIBLE:
-                if (playingAudio) playAnnoyingRepetitiveAudio();
+                if (playingAudio) {
+                    playAnnoyingRepetitiveAudio();
+                }
                 break;
             case NOT_AUDIBLE:
                 pauseAnnoyingRepetitiveAudio();
@@ -657,7 +676,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
 
         final HMILevel curHMILevel = notification.getHmiLevel();
-        final Boolean appInterfaceRegistered = mSyncProxy.getAppInterfaceRegistered();
+        final boolean appInterfaceRegistered = mSyncProxy.getAppInterfaceRegistered(mActiveAppId);
 
         if ((HMILevel.HMI_NONE == curHMILevel) && appInterfaceRegistered) {
             if (!isModuleTesting()) {
@@ -699,16 +718,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                         // Process an init state of the predefined requests here, assume that if
                         // hashId is not null means this is resumption
-                        if (mSyncProxy.getHashId(sessionId) == null) {
+                        if (mSyncProxy.getHashId(mActiveAppId) == null) {
                             initializePredefinedView();
                         }
                     } else {
                         try {
-                            if (mTesterMain != null && !mWaitingForResponse && mTesterMain.getXMLTestThreadContext() != null) {
+                            if (mTesterMain != null && !mWaitingForResponse &&
+                                    mTesterMain.getXMLTestThreadContext() != null) {
                                 show("Sync Proxy", "Tester Ready");
                             }
                         } catch (SyncException e) {
-                            createErrorMessageForAdapter("Error sending show");
+                            createErrorMessageForAdapter(sessionId, "Error sending show");
                         }
                     }
                 }
@@ -718,16 +738,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                     // Process an init state of the predefined requests here, assume that if
                     // hashId is not null means this is resumption
-                    if (mSyncProxy.getHashId(sessionId) == null) {
-                        try {
-                            // upload turn icons
-                            sendIconFromResource(R.drawable.turn_left);
-                            sendIconFromResource(R.drawable.turn_right);
-                            sendIconFromResource(R.drawable.turn_forward);
-                            sendIconFromResource(R.drawable.action);
-                        } catch (SyncException e) {
-                            Logger.w(TAG + "Failed to put images", e);
-                        }
+                    if (mSyncProxy.getHashId(mActiveAppId) == null) {
+                        // upload turn icons
+                        //Logger.d("Upload Icons");
+                        sendIconFromResource(R.drawable.turn_left);
+                        sendIconFromResource(R.drawable.turn_right);
+                        sendIconFromResource(R.drawable.turn_forward);
+                        sendIconFromResource(R.drawable.action);
                     }
                 }
             }
@@ -735,10 +752,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onHashChange(OnHashChange onHashChange) {
-        createDebugMessageForAdapter(onHashChange);
+    public void onHashChange(byte sessionId, OnHashChange onHashChange) {
+        createDebugMessageForAdapter(sessionId, onHashChange);
 
-        LastUsedHashIdsManager lastUsedHashIdsManager = MainApp.getInstance().getLastUsedHashIdsManager();
+        LastUsedHashIdsManager lastUsedHashIdsManager =
+                MainApp.getInstance().getLastUsedHashIdsManager();
         lastUsedHashIdsManager.addNewId(onHashChange.getHashID());
     }
 
@@ -751,7 +769,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mWaitingForResponse && mTesterMain.getXMLTestThreadContext() != null;
     }
 
-    private void sendIconFromResource(int resource) throws SyncException {
+    public void sendIconFromResource(int resource) {
         commandPutFile(FileType.GRAPHIC_PNG,
                 getResources().getResourceEntryName(resource) + ICON_FILENAME_SUFFIX,
                 AppUtils.contentsOfResource(resource), getNextCorrelationID(), true);
@@ -1415,16 +1433,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onMobileNaviStart() {
+    public void onMobileNaviStart(String appId, byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, sessionId, appId);
         }
     }
 
     @Override
-    public void onAudioServiceStart() {
+    public void onAudioServiceStart(String appId, byte sessionId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, (byte) -1);
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, sessionId, appId);
         }
     }
 
@@ -1436,9 +1454,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onStartServiceNackReceived(ServiceType serviceType) {
+    public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onStartServiceNackReceived(serviceType);
+            mProxyServiceEvent.onStartServiceNackReceived(appId, sessionId, serviceType);
         }
     }
 
@@ -1475,9 +1493,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onRegisterAppRequest(RegisterAppInterface msg) {
-        Logger.i(TAG, "OnRegisterAppRequest: " + msg.toString());
-        createDebugMessageForAdapter(msg);
+    public void onRegisterAppRequest(byte sessionId, RegisterAppInterface msg) {
+        createDebugMessageForAdapter(sessionId, msg);
     }
 
     @Override
@@ -1495,20 +1512,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onProtocolServiceEnded(final ServiceType serviceType, final Byte version,
-                                       final String correlationID) {
-        String response = "EndService Ack received; Session Type " + serviceType.getName() + "; " +
-                "Session ID " + version + "; Correlation ID " + correlationID;
-        createDebugMessageForAdapter(response);
+    public void onProtocolServiceEnded(final ServiceType serviceType, final byte sessionId) {
+        String response = " EndServiceAck received serType:" + serviceType.getName() +
+                ", sesId:" + sessionId;
+        createDebugMessageForAdapter(sessionId, response);
 
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceEnd(serviceType);
         }
         if (serviceType == ServiceType.RPC) {
-            createMessageForAdapter("RPC service stopped", Log.DEBUG);
+            createDebugMessageForAdapter(sessionId, " RPC service stopped");
 
             if (mProxyServiceEvent != null) {
-                mProxyServiceEvent.onDisposeComplete();
+                if (mSessionsCounter.decrementAndGet() == 0) {
+                    mProxyServiceEvent.onDisposeComplete();
+                }
             }
 
             if (mCloseSessionCallback != null) {
@@ -1518,10 +1536,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onSessionStarted(final byte sessionID, final String correlationID) {
-        Logger.d(TAG, "SessionStart:" + sessionID + ", mProxyServiceEvent:" + mProxyServiceEvent);
+    public void onSessionStarted(String appId, byte sessionId) {
+        Logger.d(TAG, " SessionStart:" + sessionId + ", AppId:" + appId);
+        mSessionsCounter.incrementAndGet();
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionId, appId);
         }
     }
 
@@ -1531,8 +1550,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onStartSession(byte sessionID) {
-        createMessageForAdapter("Session going to start, " +
+    public void onStartSession() {
+        createMessageForAdapter(Session.DEFAULT_SESSION_ID, " Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion(), Log.DEBUG);
     }
 
@@ -1659,8 +1678,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onRegisterAppInterfaceResponse(RegisterAppInterfaceResponse response) {
-        createDebugMessageForAdapter(response);
+    public void onRegisterAppInterfaceResponse(byte sessionId, RegisterAppInterfaceResponse response) {
+        createDebugMessageForAdapter(sessionId, response);
 
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
@@ -1670,18 +1689,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
 
         try {
-            processRegisterAppInterfaceResponse(response);
+            processRegisterAppInterfaceResponse(sessionId, response);
         } catch (SyncException e) {
             createErrorMessageForAdapter("Can not process RAIResponse:" + e.getMessage());
         }
     }
 
     @Override
-    public void onUnregisterAppInterfaceResponse(UnregisterAppInterfaceResponse response) {
-        createDebugMessageForAdapter(response);
+    public void onUnregisterAppInterfaceResponse(byte sessionId,
+                                                 UnregisterAppInterfaceResponse response) {
+        createDebugMessageForAdapter(sessionId, response);
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+                    response.getResultCode()));
             synchronized (mTesterMain.getXMLTestThreadContext()) {
                 mTesterMain.getXMLTestThreadContext().notify();
             }
@@ -2000,13 +2021,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
     }
 
-    public void syncProxyCloseSession(boolean keepConnection) {
+    public void syncProxyCloseSession(String appId) throws SyncException {
         if (mSyncProxy != null) {
-            mSyncProxy.closeSession(keepConnection);
+            mSyncProxy.closeSession(appId, false);
         }
     }
 
-    public void syncProxyOpenSession(int syncAppId) throws SyncException {
+    public void syncProxyOpenSession(String syncAppId) throws SyncException {
         if (mSyncProxy != null) {
             if (mSyncProxy.getIsConnected()) {
 
@@ -2045,14 +2066,23 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     registerAppInterface.setIsMediaApplication(isMediaApp);
                     registerAppInterface.setAppType(appHMITypes);
 
-                    appInterfaceHashMap.put(syncAppId, registerAppInterface);
-                }
+                    SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+                    syncMsgVersion.setMajorVersion(2);
+                    syncMsgVersion.setMinorVersion(2);
+                    registerAppInterface.setSyncMsgVersion(syncMsgVersion);
 
-                for (int key : appInterfaceHashMap.keySet()) {
-                    registerAppInterface = appInterfaceHashMap.get(key);
+                    appInterfaceHashMap.put(syncAppId, registerAppInterface);
+
                     mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
                     mSyncProxy.openSession();
                 }
+
+                // TODO : Implement when reconnect
+                /*for (String key : appInterfaceHashMap.keySet()) {
+                    registerAppInterface = appInterfaceHashMap.get(key);
+                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
+                    mSyncProxy.openSession();
+                }*/
 
             } else {
                 mSyncProxy.initializeProxy();
@@ -2062,21 +2092,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
     }
 
-    public void syncProxyStartAudioService(Session session) {
+    public void syncProxyStartAudioService(byte sessionId) {
+        // TODO : Set 'startAudioService' in the SyncProxyBase
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startAudioService(session);
+            mSyncProxy.getSyncConnection().startAudioService(sessionId);
         }
     }
 
-    public void syncProxyStopAudioService() {
+    public void syncProxyStopAudioService(byte sessionId) {
         if (mSyncProxy != null) {
-            mSyncProxy.stopAudioService();
+            mSyncProxy.stopAudioService(sessionId);
         }
     }
 
-    public OutputStream syncProxyStartAudioDataTransfer() {
+    public OutputStream syncProxyStartAudioDataTransfer(byte sessionId) {
         if (mSyncProxy != null) {
-            return mSyncProxy.startAudioDataTransfer();
+            return mSyncProxy.startAudioDataTransfer(sessionId);
         }
         return null;
     }
@@ -2162,22 +2193,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return ProtocolConstants.PROTOCOL_VERSION_UNDEFINED;
     }
 
-    public void syncProxyStartMobileNavService(Session session) {
+    public void syncProxyStartMobileNavService(byte sessionId) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.getSyncConnection().startMobileNavService(session);
+            mSyncProxy.getSyncConnection().startMobileNavService(sessionId);
         }
     }
 
-    public OutputStream syncProxyStartH264() {
+    public OutputStream syncProxyStartH264(byte sessionId) {
         if (mSyncProxy != null) {
-            return mSyncProxy.startH264();
+            return mSyncProxy.startH264(sessionId);
         }
         return null;
     }
 
-    public void syncProxyStopMobileNaviService() {
+    public void syncProxyStopMobileNaviService(byte sessionId) {
         if (mSyncProxy != null) {
-            mSyncProxy.stopMobileNaviService();
+            mSyncProxy.stopMobileNaviService(sessionId);
         }
     }
 
@@ -2207,7 +2238,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      *
      * @param response {@link com.ford.syncV4.proxy.rpc.RegisterAppInterfaceResponse} object
      */
-    private void processRegisterAppInterfaceResponse(RegisterAppInterfaceResponse response)
+    private void processRegisterAppInterfaceResponse(byte sessionId,
+                                                     RegisterAppInterfaceResponse response)
             throws SyncException {
 
         if (!response.getSuccess()) {
@@ -2230,7 +2262,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         // Restore a PutFile which has not been sent
         resendUnsentPutFiles();
         // Restore Services
-        mSyncProxy.restoreServices();
+        mSyncProxy.restoreServices(sessionId);
     }
 
     // TODO: Reconsider this section, this is a first step to optimize log procedure
@@ -2239,13 +2271,21 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * Logger section. Send log message to adapter and log it to the ADB
      */
 
+    private void createErrorMessageForAdapter(byte sessionId, Object messageObject) {
+        createErrorMessageForAdapter(sessionId, messageObject, null);
+    }
+
     private void createErrorMessageForAdapter(Object messageObject) {
         createErrorMessageForAdapter(messageObject, null);
     }
 
     private void createErrorMessageForAdapter(Object messageObject, Throwable throwable) {
+        createErrorMessageForAdapter(Session.UNDEFINED_SESSION_ID, messageObject, throwable);
+    }
+
+    private void createErrorMessageForAdapter(byte sessionId, Object messageObject, Throwable throwable) {
         if (mLogAdapters.isEmpty()) {
-            Logger.w(TAG, "LogAdapters are empty");
+            Logger.w(TAG, "LogAdapters are empty, sessionId:" + sessionId);
             if (throwable != null) {
                 Logger.e(TAG + " " + messageObject.toString(), throwable);
             } else {
@@ -2254,26 +2294,43 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         for (LogAdapter logAdapter : mLogAdapters) {
-            if (throwable != null) {
-                logAdapter.logMessage(messageObject, Log.ERROR, throwable, true);
+            if (sessionId == Session.UNDEFINED_SESSION_ID) {
+                if (throwable != null) {
+                    logAdapter.logMessage(messageObject, Log.ERROR, throwable, true);
+                } else {
+                    logAdapter.logMessage(messageObject, Log.ERROR, true);
+                }
             } else {
-                logAdapter.logMessage(messageObject, Log.ERROR, true);
+                if (logAdapter.getSessionId() == sessionId) {
+                    if (throwable != null) {
+                        logAdapter.logMessage(messageObject, Log.ERROR, throwable, true);
+                    } else {
+                        logAdapter.logMessage(messageObject, Log.ERROR, true);
+                    }
+                }
             }
         }
-
     }
 
     private void createInfoMessageForAdapter(Object messageObject) {
-        createMessageForAdapter(messageObject, Log.INFO);
+        createMessageForAdapter(Session.UNDEFINED_SESSION_ID, messageObject, Log.INFO);
+    }
+
+    private void createDebugMessageForAdapter(byte sessionId, Object messageObject) {
+        createMessageForAdapter(sessionId, messageObject, Log.DEBUG);
     }
 
     private void createDebugMessageForAdapter(Object messageObject) {
-        createMessageForAdapter(messageObject, Log.DEBUG);
+        createMessageForAdapter(Session.UNDEFINED_SESSION_ID, messageObject, Log.DEBUG);
     }
 
     private void createMessageForAdapter(Object messageObject, Integer type) {
+        createMessageForAdapter(Session.UNDEFINED_SESSION_ID, messageObject, type);
+    }
+
+    private void createMessageForAdapter(byte sessionId, Object messageObject, Integer type) {
         if (mLogAdapters.isEmpty()) {
-            Logger.w(TAG, "LogAdapters are empty");
+            Logger.w(TAG, "LogAdapters are empty, sessionId:" + sessionId);
             if (type == Log.DEBUG) {
                 Logger.d(TAG, messageObject.toString());
             } else if (type == Log.INFO) {
@@ -2282,9 +2339,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         for (LogAdapter logAdapter : mLogAdapters) {
-            logAdapter.logMessage(messageObject, type, true);
+            if (sessionId == Session.UNDEFINED_SESSION_ID) {
+                logAdapter.logMessage(messageObject, type, true);
+            } else {
+                if (logAdapter.getSessionId() == sessionId) {
+                    logAdapter.logMessage(messageObject, type, true);
+                }
+            }
         }
-
     }
 
     @Override

@@ -15,10 +15,9 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import java.io.OutputStream;
 
 /**
- * Created by Andrew Batutin on 1/23/14.
+ * Created by Andrew Batutin on 1/23/14
  */
 public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -44,8 +43,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    onMobileNaviCheckBoxAction(view);
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -55,19 +54,15 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mSessionCheckBoxState.setStateOff();
     }
 
-    public void onMobileNaviCheckBoxAction(View v) {
-        changeMobileNaviCheckBoxState();
-    }
-
-    private void changeMobileNaviCheckBoxState() {
+    private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startAudioService();
+            tester.startAudioService(getAppId());
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopAudioService();
+            tester.stopAudioService(getAppId());
             mSessionCheckBoxState.setStateOff();
             mDataStreamingButton.setEnabled(false);
         }

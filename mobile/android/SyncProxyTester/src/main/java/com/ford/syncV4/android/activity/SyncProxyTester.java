@@ -25,12 +25,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment;
 import com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment;
+import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.adapters.SectionsPagerAdapter;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.constants.MenuConstants;
@@ -48,6 +50,7 @@ import com.ford.syncV4.android.service.ICloseSession;
 import com.ford.syncV4.android.service.IProxyServiceBinder;
 import com.ford.syncV4.android.service.IProxyServiceEvent;
 import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
@@ -87,8 +90,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -112,7 +113,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public static final String JOIN_STRING = ",";
     public final static int REQUEST_CHOOSE_XML_TEST = 51;
-    private static SyncProxyTester _activity;
+    private static SyncProxyTester sActivityInstance;
     private static byte[] _ESN;
     /**
      * Autoincrementing id for new softbuttons.
@@ -196,7 +197,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     private ExecutorService mStreamCommandsExecutorService;
 
     public static SyncProxyTester getInstance() {
-        return _activity;
+        return sActivityInstance;
     }
 
     public static void setESN(byte[] ESN) {
@@ -225,12 +226,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ArrayAdapter<String> adapter;
-    private ActionBar actionBar;
+    private ActionBar mActionBar;
 
     /**
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    private ViewPager mViewPager;
+    private ImageView mImageView;
 
     /**
      * Action Tab section - start
@@ -241,6 +243,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
         mViewPager.setCurrentItem(tab.getPosition());
+
+        PlaceholderFragment fragment = getCurrentActiveFragment();
+        if (fragment == null) {
+            Logger.w("Current active fragment is NULL");
+            return;
+        }
+        mBoundProxyService.setActiveAppId(fragment.getAppId());
     }
 
     @Override
@@ -261,11 +270,17 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Logger.d(LOG_TAG + " On Create");
+
+        sActivityInstance = this;
+
         setContentView(R.layout.activity_main);
 
+        mImageView = (ImageView) findViewById(R.id.logo_view);
+
         // Set up the action bar.
-        actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        mActionBar = getSupportActionBar();
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -281,7 +296,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
+                mActionBar.setSelectedNavigationItem(position);
             }
         });
 
@@ -293,11 +308,23 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      *
      * @param syncAppId Id of the SyncProxyTester application instance
      */
-    public void onSetUpDialogResult(final int syncAppId) {
+    public void onSetUpDialogResult(final String syncAppId) {
+
+        final PlaceholderFragment fragment = getCurrentActiveFragment();
+        if (fragment == null) {
+            Logger.e("Current active Fragment is NULL");
+            return;
+        }
+
+        Logger.d("Current active Fragment '" + syncAppId + "'");
+
+        fragment.setAppId(syncAppId);
+
         setUpReceiver();
         showProtocolPropertiesInTitle();
         if (mBoundProxyService != null) {
-            initProxyService(syncAppId);
+            mBoundProxyService.setActiveAppId(syncAppId);
+            initProxyService(fragment.getLogAdapter());
             try {
                 mBoundProxyService.syncProxyOpenSession(syncAppId);
             } catch (SyncException e) {
@@ -309,8 +336,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 public void onServiceBindComplete() {
                     Logger.i("Service Bind Complete");
                     getProxyService();
-                    initProxyService(syncAppId);
+                    initProxyService(fragment.getLogAdapter());
 
+                    mBoundProxyService.setActiveAppId(syncAppId);
                     mBoundProxyService.startProxyIfNetworkConnected();
                 }
             });
@@ -380,12 +408,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
                 mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
 
-        if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Audio_Service)) {
-            stopAudioService();
+        // TODO : Iterate over all AppId
+        /*if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Audio_Service)) {
+            //stopAudioService();
         }
         if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Mobile_Nav)) {
-            stopMobileNavService();
-        }
+            //stopMobileNavService();
+        }*/
 
         if (mBoundProxyService != null) {
             mBoundProxyService.destroyService();
@@ -480,20 +509,64 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId) {
+    public void onServiceStart(ServiceType serviceType, byte sessionId, String appId) {
 
-        // TODO : Implement callback to Fragment
-
-        /*mLogAdapter.logMessage("Service '" + serviceType + "' started, " +
-                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
-
-        if (mBoundProxyService == null) {
-            mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                    "' service can not " + "start with NULL Proxy Service", Log.WARN);
+        final PlaceholderFragment fragment = getFragmentByAppId(appId);
+        if (fragment == null) {
+            Logger.w("OnServiceStart, Fragment with AppId'" + appId + "' is null");
             return;
         }
 
+        if (mBoundProxyService == null) {
+            //mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
+            //        "' service can not " + "start with NULL Proxy Service", Log.WARN);
+            Logger.w(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
+                            "' service can not " + "start with NULL Proxy Service");
+            return;
+        }
+
+        Logger.d(LOG_TAG + " Fragment '" + fragment + "' associated with " +
+                "sessionId:" + sessionId + " appId:" + appId);
+
+        if (fragment == getCurrentActiveFragment()) {
+            mBoundProxyService.setActiveAppId(appId);
+        }
+
+        fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
+
         if (serviceType == ServiceType.Audio_Service) {
+            MainApp.getInstance().runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    OutputStream outputStream = mBoundProxyService
+                            .syncProxyStartAudioDataTransfer(fragment.getSessionId());
+                    if (outputStream == null) {
+                        return;
+                    }
+                    fragment.setAudioServiceStateOn(outputStream);
+                }
+            });
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            MainApp.getInstance().runInUIThread(new Runnable() {
+                @Override
+                public void run() {
+                    OutputStream outputStream = mBoundProxyService
+                            .syncProxyStartH264(fragment.getSessionId());
+                    if (outputStream == null) {
+                        return;
+                    }
+                    fragment.setMobileNaviStateOn(outputStream);
+                }
+            });
+        } else if (serviceType == ServiceType.RPC) {
+            // Assign Session Id to the associated Fragment (by AppId)
+            fragment.setSessionId(sessionId);
+        }
+
+
+
+        /*if (serviceType == ServiceType.Audio_Service) {
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
@@ -532,29 +605,42 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
-    public void onStartServiceNackReceived(final ServiceType serviceType) {
+    public void onStartServiceNackReceived(final String appId, final byte sessionId, final ServiceType serviceType) {
 
         // TODO : Implement callback to Fragment
+        final PlaceholderFragment fragment = getFragmentByAppId(appId);
+        if (fragment == null) {
+            Logger.w("OnStartServiceNack, Fragment with AppId'" + appId + "' is null");
+            return;
+        }
 
-        /*mLogAdapter.logMessage("Start Service '" + serviceType + "' Nack received", true);
+        if (mBoundProxyService == null) {
+            //mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
+            //        "' service can not " + "start with NULL Proxy Service", Log.WARN);
+            Logger.w(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
+                    "' service can not " + "start with NULL Proxy Service");
+            return;
+        }
+
+        fragment.getLogAdapter().logMessage("Start Service '" + serviceType + "' Nack received",
+                true);
 
         MainApp.getInstance().runInUIThread(new Runnable() {
             @Override
             public void run() {
                 if (serviceType == ServiceType.Mobile_Nav) {
-                    MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
-                            getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                    fragment.setStateOff();
+                    fragment.setMobileNaviStateOff();
                 } else if (serviceType == ServiceType.Audio_Service) {
-                    AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
-                            getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                    fragment.setStateOff();
+                    fragment.setAudioServiceStateOff();
                 }
             }
-        });*/
+        });
     }
 
     public int getNextCorrelationIdForCurrentFragment() {
+        if (getCurrentActiveFragment() == null) {
+            return 0;
+        }
         return getCurrentActiveFragment().getCorrelationId();
     }
 
@@ -594,7 +680,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
         removeListeners();
 
-        _activity = null;
+        sActivityInstance = null;
         if (mBoundProxyService != null) {
             mBoundProxyService.addLogAdapter(null);
         }
@@ -634,7 +720,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem menuItem = menu.findItem(MenuConstants.MNU_WAKELOCK);
+        MenuItem menuItem = menu.findItem(MenuConstants.MENU_WAKE_LOCK);
         if (menuItem != null) {
             menuItem.setChecked(!AppPreferencesManager.getDisableLockFlag());
         }
@@ -649,39 +735,80 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_add_session_instance) {
-            addFragment();
-            return true;
+        switch (id) {
+            case R.id.action_add_session_instance:
+                addFragment();
+                return true;
+            case R.id.action_app_version:
+                new AlertDialog.Builder(this)
+                        .setTitle("App version")
+                        .setMessage("Ver:" + AppUtils.getApplicationVersion() +
+                                ", Code:" + String.valueOf(AppUtils.getCodeVersionNumber()) +
+                                "\n" + AppUtils.getBuildInfo() + "\n\nCHANGELOG:\n" +
+                                AppUtils.getChangeLog())
+                        .setNeutralButton(android.R.string.ok, null).create().show();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void addFragment() {
+    public void closeSession(final String appId, final int position) throws SyncException {
+        if (mBoundProxyService != null) {
+            mBoundProxyService.setCloseSessionCallback(new ICloseSession() {
+
+                @Override
+                public void onCloseSessionComplete() {
+                    //finishActivity();
+                    Logger.d("Session of the '" + appId + "' is closed");
+
+                    MainApp.getInstance().runInUIThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            removeFragment(position);
+                        }
+                    });
+                }
+            });
+            mBoundProxyService.syncProxyCloseSession(appId);
+        }
+    }
+
+    private void addFragment() {
         mSectionsPagerAdapter.incrementCounter();
 
         // Create a tab with text corresponding to the page title defined by
         // the adapter. Also specify this Activity object, which implements
         // the TabListener interface, as the callback (listener) for when
         // this tab is selected.
-        actionBar.addTab(actionBar.newTab()
+        mActionBar.addTab(mActionBar.newTab()
                         .setText(mSectionsPagerAdapter.getPageTitle(mSectionsPagerAdapter.getCount()))
                         .setTabListener(this)
         );
 
-        //mImageView.setVisibility(View.GONE);
+        mViewPager.setCurrentItem(mSectionsPagerAdapter.getCount());
+
+        mImageView.setVisibility(View.GONE);
         mViewPager.setVisibility(View.VISIBLE);
     }
 
-    public void closeSession(int appId) {
-        if (mBoundProxyService != null) {
-            mBoundProxyService.setCloseSessionCallback(new ICloseSession() {
-                @Override
-                public void onCloseSessionComplete() {
-                    finishActivity();
-                }
-            });
-            mBoundProxyService.syncProxyCloseSession(true);
+    private void removeFragment(int position) {
+        mSectionsPagerAdapter.decrementCounter();
+        //mSectionsPagerAdapter.removeFragmentFromList(position);
+
+        /*if (mSectionsPagerAdapter.getCount() > 0) {
+            mViewPager.setCurrentItem(0);
+            mActionBar.setSelectedNavigationItem(0);
+        }*/
+
+        mActionBar.removeTabAt(position);
+
+        if (mSectionsPagerAdapter.getCount() == 0) {
+            mImageView.setVisibility(View.VISIBLE);
+            mViewPager.setVisibility(View.GONE);
         }
+
+        mViewPager.setAdapter(null);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
     private void finishActivity() {
@@ -696,6 +823,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             SafeToast.showToastAnyThread("Start the app on SYNC first");
         }
         mTesterMain.restart(filePath);
+    }
+
+    public int getFragmentsCount() {
+        return mSectionsPagerAdapter.getCount();
     }
 
 /*	public void startSyncProxyService() {
@@ -799,9 +930,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         return adapter;
     }
 
-    private void initProxyService(int appId) {
-        Logger.d(LOG_TAG, "Current Fragment at " + appId + " " + getFragmentAt(appId));
-        mBoundProxyService.addLogAdapter(getFragmentAt(appId).getLogAdapter());
+    private void initProxyService(LogAdapter logAdapter) {
+        mBoundProxyService.addLogAdapter(logAdapter);
         mBoundProxyService.setProxyServiceEvent(this);
     }
 
@@ -1434,18 +1564,28 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
     }
 
-    public void startMobileNaviService() {
-        if (isProxyReadyForWork()) {
+    public void startMobileNaviService(final String appId) {
 
-            // TODO : Implement callback to Fragment
+        mStreamCommandsExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!isProxyReadyForWork()) {
+                    return;
+                }
+                // TODO : Need to transfer AppId into SDK
+                PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Start Mobile Navi service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should start Mobile Navi service", true);
 
-            /*if (mBoundProxyService != null) {
-                mLogAdapter.logMessage("Should start Mobile Navi Service", true);
-                mBoundProxyService.syncProxyStartMobileNavService(rpcSession);
-            } else {
-                mLogAdapter.logMessage("Could not start mobile nav Service", true);
-            }*/
-        }
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStartMobileNavService(fragment.getSessionId());
+            }
+        });
     }
 
     public void onMobileNaviError(String errorMsg) {
@@ -1488,20 +1628,27 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
     }
 
-    public void stopMobileNavService() {
+    public void stopMobileNavService(final String appId) {
+
         mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                if (isProxyReadyForWork()) {
-
-                    // TODO : Implement callback to Fragment
-                    //mLogAdapter.logMessage("Should stop Mobile Navi service", true);
-
-                    if (mBoundProxyService != null) {
-                        mBoundProxyService.syncProxyStopMobileNaviService();
-                    }
-                    closeMobileNaviOutputStream();
+                if (!isProxyReadyForWork()) {
+                    return;
                 }
+                // TODO : Need to transfer AppId into SDK
+                final PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Stop Audio Service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should stop Audio service", true);
+
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStopMobileNaviService(fragment.getSessionId());
+                closeMobileNaviOutputStream();
             }
         });
     }
@@ -1525,33 +1672,51 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         return true;
     }
 
-    public void startAudioService() {
-        if (isProxyReadyForWork()) {
+    public void startAudioService(final String appId) {
 
-            // TODO : Implement callback to Fragment
-            //mLogAdapter.logMessage("Should start Mobile Audio service", true);
-
-            mStreamCommandsExecutorService.submit(new Runnable() {
-                @Override
-                public void run() {
-                    mBoundProxyService.syncProxyStartAudioService(rpcSession);
-                }
-            });
-        }
-    }
-
-    public void stopAudioService() {
         mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                if (isProxyReadyForWork()) {
-
-                    // TODO : Implement callback to Fragment
-                    //mLogAdapter.logMessage("Should stop Mobile Audio service", true);
-
-                    mBoundProxyService.syncProxyStopAudioService();
-                    closeAudioOutputStream();
+                if (!isProxyReadyForWork()) {
+                    return;
                 }
+                // TODO : Need to transfer AppId into SDK
+                PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Start Audio Service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should start Audio service", true);
+
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStartAudioService(fragment.getSessionId());
+            }
+        });
+    }
+
+    public void stopAudioService(final String appId) {
+
+        mStreamCommandsExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!isProxyReadyForWork()) {
+                    return;
+                }
+                // TODO : Need to transfer AppId into SDK
+                final PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Stop Audio Service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should stop Audio service", true);
+
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStopAudioService(fragment.getSessionId());
+                closeAudioOutputStream();
             }
         });
     }
@@ -1595,7 +1760,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 .findFragmentByTag("android:switcher:" + R.id.pager + ":" + index);
         // based on the current position you can then cast the fragment to the correct
         // class and call the method:
-        if (mViewPager.getCurrentItem() == 0 && fragment != null) {
+        if (fragment != null) {
             return ((PlaceholderFragment) fragment);
         }
         return null;
@@ -1607,10 +1772,42 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                         mViewPager.getCurrentItem());
         // based on the current position you can then cast the fragment to the correct
         // class and call the method:
-        if (mViewPager.getCurrentItem() == 0 && fragment != null) {
+        if (fragment != null) {
             return ((PlaceholderFragment) fragment);
         }
         return null;
+    }
+
+    private PlaceholderFragment getFragmentWithoutSessionId() {
+        PlaceholderFragment fragment = null;
+        int pagesCount = mViewPager.getAdapter().getCount();
+        for (int i = 0; i < pagesCount; i++) {
+            fragment = (PlaceholderFragment) getSupportFragmentManager()
+                    .findFragmentByTag("android:switcher:" + R.id.pager + ":" + i);
+            if (fragment == null) {
+                continue;
+            }
+            if (fragment.getSessionId() == 0) {
+                return fragment;
+            }
+        }
+        return fragment;
+    }
+
+    private PlaceholderFragment getFragmentByAppId(String appId) {
+        PlaceholderFragment fragment = null;
+        int pagesCount = mViewPager.getAdapter().getCount();
+        for (int i = 0; i < pagesCount; i++) {
+            fragment = (PlaceholderFragment) getSupportFragmentManager()
+                    .findFragmentByTag("android:switcher:" + R.id.pager + ":" + i);
+            if (fragment == null) {
+                continue;
+            }
+            if (fragment.getAppId().equals(appId)) {
+                return fragment;
+            }
+        }
+        return fragment;
     }
 
     /**
@@ -1653,13 +1850,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
         mStopServicesTimeOutHandler.postDelayed(mEndServicesPostDelayedCallback, EXIT_TIMEOUT);
 
-        if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Audio_Service)) {
-            stopAudioService();
+        // TODO : Iterate over all AppId
+        /*if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Audio_Service)) {
+            //stopAudioService();
         }
 
         if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Mobile_Nav)) {
-            stopMobileNavService();
-        }
+            //stopMobileNavService();
+        }*/
 
         if (mServicesCounter.get() == 1) {
             executeDestroyService();

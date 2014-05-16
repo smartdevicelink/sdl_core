@@ -2559,7 +2559,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNaviStart() {
+        public void onMobileNaviStart(String appId, byte sessionId) {
 
         }
 
@@ -2583,7 +2583,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onRegisterAppRequest(RegisterAppInterface msg) {
+        public void onRegisterAppRequest(byte sessionId, RegisterAppInterface msg) {
 
         }
 
@@ -2598,17 +2598,17 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
+        public void onProtocolServiceEnded(ServiceType serviceType, byte version) {
 
         }
 
         @Override
-        public void onSessionStarted(byte sessionID, String correlationID) {
+        public void onSessionStarted(String appId, byte sessionId) {
 
         }
 
         @Override
-        public void onAudioServiceStart() {
+        public void onAudioServiceStart(String appId, byte sessionId) {
 
         }
 
@@ -2623,17 +2623,17 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onStartServiceNackReceived(ServiceType serviceType) {
+        public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType) {
 
         }
 
         @Override
-        public void onHashChange(OnHashChange onHashChange) {
+        public void onHashChange(byte sessionId, OnHashChange onHashChange) {
 
         }
 
         @Override
-        public void onStartSession(byte sessionID) {
+        public void onStartSession() {
 
         }
 

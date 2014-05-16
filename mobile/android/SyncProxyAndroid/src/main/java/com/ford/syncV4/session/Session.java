@@ -2,12 +2,12 @@ package com.ford.syncV4.session;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.service.Service;
-import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Vector;
+import java.util.Set;
 
 /**
  * Created by Andrew Batutin on 1/21/14
@@ -16,12 +16,12 @@ import java.util.Vector;
 public class Session {
 
     public static final byte DEFAULT_SESSION_ID = 0;
+    public static final byte UNDEFINED_SESSION_ID = Byte.MIN_VALUE;
 
-    public static Session createSession(ServiceType serviceType, byte sessionID) {
+    public static Session createSession(ServiceType serviceType, byte sessionId) {
         Session session = new Session();
-        session.setSessionId(sessionID);
+        session.setSessionId(sessionId);
         Service service = new Service();
-        service.setSession(session);
         service.setServiceType(serviceType);
         session.addService(service);
         return session;
@@ -29,35 +29,69 @@ public class Session {
 
     private static final String CLASS_NAME = Session.class.getSimpleName();
 
-    private static final Vector<SyncConnection> shareConnections = new Vector<SyncConnection>();
-
     /**
-     * Collection of the Session Id's
+     * Collection of the Session Id's mapped to App Id
      */
-    private final Vector<Byte> sessionIds = new Vector<Byte>();
+    private final Hashtable<String, Byte> sessionIds = new Hashtable<String, Byte>();
 
     private byte sessionId = DEFAULT_SESSION_ID;
-    private final List<Service> serviceList = new ArrayList<Service>();
+    private final List<Service> servicesList = new ArrayList<Service>();
 
     /**
-     * Add Session Id to the Collection
+     * Assign Session Id to the first available Session
      * @param value session id
+     * @return AppId associated with the assigned Session
      */
-    public void addSessionId(byte value) {
-        sessionIds.add(value);
-        Logger.d(CLASS_NAME + " add sessionId:" + value);
+    public String updateSessionId(byte value) {
+        for (String key: sessionIds.keySet()) {
+            if (sessionIds.get(key) == DEFAULT_SESSION_ID) {
+                sessionIds.put(key, value);
+                Logger.d("Assign sessionId:" + value + " to AppId:" + key);
+                return key;
+            }
+        }
+        Logger.w("No Session Id assignments has been done!, sessionId:" + value);
+        return "";
     }
 
     /**
-     * Get Session Id from Collection at specified index
-     * @param value index of the Session Id at the Collection
-     * @return Session Id, or 0 if such position does not exists
+     * Add new Session Id associated with a provided AppId
+     * @param appId AppId
      */
-    public byte getSessionIdAt(int value) {
-        if (value >=0 && value < sessionIds.size()) {
-            return sessionIds.get(value);
+    public void addSessionId(String appId) {
+        Logger.d("Add sessionId:" + DEFAULT_SESSION_ID + " to AppId:" + appId);
+        sessionIds.put(appId, DEFAULT_SESSION_ID);
+    }
+
+    /**
+     * Get Session Id associated with AppId
+     * @param appId
+     * @return
+     */
+    public byte getSessionIdByAppId(String appId) {
+        if (sessionIds.containsKey(appId)) {
+            return sessionIds.get(appId);
         }
-        return (byte)(0x00);
+        return DEFAULT_SESSION_ID;
+    }
+
+    public Set<String> getSessionIdsKeys() {
+        return sessionIds.keySet();
+    }
+
+    public String getAppIdBySessionId(byte sessionId) {
+        for (String key : sessionIds.keySet()) {
+            if (key == null) {
+                continue;
+            }
+            if (sessionIds.get(key) == null) {
+                continue;
+            }
+            if (sessionIds.get(key).equals(sessionId)) {
+                return key;
+            }
+        }
+        return "";
     }
 
     /**
@@ -75,36 +109,33 @@ public class Session {
         return sessionId;
     }
 
-    public byte getNextSessionId() {
-        // Always return a 0 as a new Session Id
-        return 0;
-
-        /*if (getServicesNumber() == 0) {
-            return 0;
-        }
-        byte nextSessionId = (byte) (getSessionId() + 1);
-        setSessionId(nextSessionId);
-        return nextSessionId;*/
+    public boolean hasSessionId(byte sessionId) {
+        return sessionIds.contains(sessionId);
     }
 
     public void addService(Service service) {
-        Logger.i(CLASS_NAME + " Add " + service + ", contains:" + serviceList.contains(service));
-        if (serviceList.contains(service)) {
+        Logger.i(CLASS_NAME + " Add " + service + ", contains:" + servicesList.contains(service));
+        if (servicesList.contains(service)) {
             return;
         }
-        serviceList.add(service);
+        servicesList.add(service);
     }
 
-    public List<Service> getServiceList() {
-        return serviceList;
+    public List<Service> getServicesList() {
+        return servicesList;
     }
 
-    public boolean hasService(ServiceType serviceType) {
-        if (serviceList.isEmpty()) {
+    public boolean hasService(String appId, ServiceType serviceType) {
+        byte sessionId = getSessionIdByAppId(appId);
+        return hasService(sessionId, serviceType);
+    }
+
+    public boolean hasService(byte sessionId, ServiceType serviceType) {
+        if (servicesList.isEmpty()) {
             return false;
         }
-        for (Service service : serviceList) {
-            if (service.getServiceType() == serviceType) {
+        for (Service service : servicesList) {
+            if (service.getSessionId() == sessionId && service.getServiceType() == serviceType) {
                 return true;
             }
         }
@@ -112,21 +143,21 @@ public class Session {
     }
 
     public int getServicesNumber() {
-        return serviceList.size();
+        return servicesList.size();
     }
 
     public boolean isServicesEmpty() {
-        return serviceList.isEmpty();
+        return servicesList.isEmpty();
     }
 
     @Override
     public String toString() {
         return "Session{" +
-                "sessionId=" + sessionId + ", serviceList size=" + serviceList.size() + '}';
+                "sessionId=" + sessionId + ", servicesList size=" + servicesList.size() + '}';
     }
 
     public boolean removeService(Service service) {
-        boolean result = serviceList.remove(service);
+        boolean result = servicesList.remove(service);
         Logger.i(CLASS_NAME + " Remove " + service.getServiceType() + ", complete:" + result);
         return result;
     }
@@ -135,13 +166,23 @@ public class Session {
         Logger.i(CLASS_NAME + " Create " + serviceType);
         Service service = new Service();
         service.setServiceType(serviceType);
-        service.setSession(this);
         return service;
     }
 
-    public void stopSession() {
-        serviceList.clear();
-        sessionId = 0;
-        Logger.i(CLASS_NAME + " Stop " + toString());
+    public void stopSession(String appId) {
+        byte sessionId = getSessionIdByAppId(appId);
+        List<Service> tobeRemoved = new ArrayList<Service>();
+        for (Service service : servicesList) {
+            if (service.getSessionId() == sessionId) {
+                tobeRemoved.add(service);
+            }
+        }
+        for (Service service: tobeRemoved) {
+            servicesList.remove(service);
+        }
+        tobeRemoved.clear();
+        sessionIds.remove(appId);
+
+        Logger.i(CLASS_NAME + " Stop appId:" + appId);
     }
 }

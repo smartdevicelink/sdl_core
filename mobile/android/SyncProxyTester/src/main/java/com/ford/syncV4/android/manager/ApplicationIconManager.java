@@ -57,13 +57,13 @@ public class ApplicationIconManager {
                 mAwaitingInitIconResponseCorrelationID, true);
     }
 
-    public void setAppIcon(ProxyService proxyService, int receivedCorrelationid) {
+    public void setAppIcon(ProxyService proxyService, int receivedCorrelationId) {
         if (isApplicationIconSet()) {
             Logger.d(TAG + " Application Icon has been set up before");
             return;
         }
 
-        if (mAwaitingInitIconResponseCorrelationID != receivedCorrelationid) {
+        if (mAwaitingInitIconResponseCorrelationID != receivedCorrelationId) {
             Logger.d(TAG + " Application Icon set up correlation Id's does not match");
             return;
         }
@@ -76,6 +76,7 @@ public class ApplicationIconManager {
         proxyService.syncProxySendRPCRequest(setAppIcon);
 
         Logger.i(TAG + " Application Icon set up complete");
+
         mAwaitingInitIconResponseCorrelationID = -1;
     }
 }

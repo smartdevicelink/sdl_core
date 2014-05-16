@@ -14,13 +14,4 @@ public abstract class BaseTransportConfig {
      * transport configuration.
 	 */
 	public abstract TransportType getTransportType();
-
-    /**
-     * Indicate whether the application want to share connection with others.
-     *
-     * @return
-     */
-    public boolean shareConnection() {
-        return shareConnection;
-    }
 }

@@ -111,10 +111,9 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     if (syncProxyBase.isRegisterAppInterfaceCorrelationIdProtected(responseCorrelationID) &&
                             syncProxyBase.getAdvancedLifecycleManagementEnabled() &&
                             functionName.equals(Names.RegisterAppInterface)) {
-                        final RegisterAppInterfaceResponse msg =
-                                new RegisterAppInterfaceResponse(hash);
+                        final RegisterAppInterfaceResponse msg = new RegisterAppInterfaceResponse(hash);
                         if (msg.getSuccess()) {
-                            syncProxyBase.setAppInterfaceRegisterd(true);
+                            syncProxyBase.setAppInterfaceRegistered(sessionId, true);
                         }
 
                         //_autoActivateIdReturned = msg.getAutoActivateID();
@@ -135,24 +134,18 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
                         // If registerAppInterface failed, exit with OnProxyUnusable
                         if (!msg.getSuccess()) {
-                            syncProxyBase.notifyProxyClosed(
-                                    "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: ",
-                                    new SyncException(
-                                            "Unable to register app interface. Review values passed to the SyncProxy constructor. RegisterAppInterface result code: " +
-                                                    msg.getResultCode(),
-                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR
-                                    )
-                            );
+                            String errorMsg = "Unable to register app interface. Review values" +
+                                    "passed to the SyncProxy constructor." +
+                                    "RegisterAppInterface result code: ";
+                            syncProxyBase.notifyProxyClosed(errorMsg,
+                                    new SyncException(errorMsg + msg.getResultCode(),
+                                            SyncExceptionCause.SYNC_REGISTRATION_ERROR));
                         }
-
                         syncProxyBase.processRegisterAppInterfaceResponse(sessionId, msg);
                     } else if (syncProxyBase.isPolicyCorrelationIdProtected(responseCorrelationID) &&
                                     functionName.equals(Names.OnEncodedSyncPData)) {
                         // OnEncodedSyncPData
-
-                        final OnEncodedSyncPData msg =
-                                new OnEncodedSyncPData(hash);
-
+                        final OnEncodedSyncPData msg = new OnEncodedSyncPData(hash);
                         // If url is null, then send notification to the app, otherwise, send to URL
                         if (msg.getUrl() != null) {
                             // URL has data, attempt to post request to external server
@@ -161,8 +154,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                         @Override
                                         public void run() {
                                             syncProxyBase.sendEncodedSyncPDataToUrl(
-                                                    msg.getUrl(), msg.getData(),
-                                                    msg.getTimeout());
+                                                    msg.getUrl(), msg.getData(), msg.getTimeout());
                                         }
                                     };
 
@@ -176,10 +168,9 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 }
 
                 if (functionName.equals(Names.RegisterAppInterface)) {
-                    final RegisterAppInterfaceResponse msg =
-                            new RegisterAppInterfaceResponse(hash);
+                    final RegisterAppInterfaceResponse msg = new RegisterAppInterfaceResponse(hash);
                     if (msg.getSuccess()) {
-                        syncProxyBase.setAppInterfaceRegisterd(true);
+                        syncProxyBase.setAppInterfaceRegistered(sessionId, true);
                     }
 
                     //_autoActivateIdReturned = msg.getAutoActivateID();
@@ -1074,7 +1065,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 syncProxyBase.handleOnSystemRequest(hash);
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
-                syncProxyBase.setAppInterfaceRegisterd(false);
+                syncProxyBase.setAppInterfaceRegistered(sessionId, false);
                 synchronized (syncProxyBase.APP_INTERFACE_REGISTERED_LOCK) {
                     syncProxyBase.APP_INTERFACE_REGISTERED_LOCK.notify();
                 }
@@ -1122,11 +1113,11 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     getMainUIHandler().post(new Runnable() {
                         @Override
                         public void run() {
-                            getProxyListener().onHashChange(onHashChange);
+                            getProxyListener().onHashChange(sessionId, onHashChange);
                         }
                     });
                 } else {
-                    getProxyListener().onHashChange(onHashChange);
+                    getProxyListener().onHashChange(sessionId, onHashChange);
                 }
             } else {
                 try {

@@ -6,8 +6,6 @@ import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.AbstractProtocol;
 import com.ford.syncV4.protocol.IProtocolListener;
-import com.ford.syncV4.protocol.ProtocolFrameHeader;
-import com.ford.syncV4.protocol.ProtocolFrameHeaderFactory;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
@@ -70,6 +68,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     static final Object END_PROTOCOL_SERVICE_RPC_LOCK = new Object();
 
     private boolean mIsInit = false;
+    private Session mSyncSession;
 
     /**
      * Test Cases fields
@@ -84,9 +83,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      *
      * @param listener Sync connection listener.
      */
-    public SyncConnection(ISyncConnectionListener listener) {
+    public SyncConnection(Session session, ISyncConnectionListener listener) {
         mConnectionListener = listener;
         mIsInit = false;
+        mSyncSession = session;
     }
 
     /**
@@ -181,34 +181,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         mHeartbeatMonitor.setListener(this);
     }
 
-    private void stopTransportReading() {
-        if (_transport != null) {
-            _transport.stopReading();
-        }
-    }
-
     public void closeConnection(byte rpcSessionID, boolean keepConnection) {
         closeConnection(rpcSessionID, keepConnection, true);
     }
 
-    public void closeConnection(byte rpcSessionID, boolean keepConnection,
-                                boolean sendFinishMessages) {
-        if (rpcSessionID != 0) {
-            synchronized (PROTOCOL_REFERENCE_LOCK) {
-                if (!getIsConnected()) {
-                    return;
-                }
-                if (_protocol != null) {
-                    // If transport is still connected, sent EndProtocolSessionMessage
-                    if (sendFinishMessages) {
-                        _protocol.EndProtocolService(ServiceType.RPC, rpcSessionID);
-                        stopHeartbeatMonitor();
-                    }
-                }
-            }
-
-            waitForRpcEndServiceACK();
-        }
+    public void closeConnection(byte sessionId, boolean keepConnection, boolean sendFinishMessages) {
+        closeSession(sessionId, sendFinishMessages);
 
         /*synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!keepConnection) {
@@ -237,6 +215,25 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 }
                 _transport = null;
             }
+        }
+    }
+
+    public void closeSession(byte sessionId, boolean sendFinishMessages) {
+        if (sessionId != Session.DEFAULT_SESSION_ID && sessionId != Session.UNDEFINED_SESSION_ID) {
+            synchronized (PROTOCOL_REFERENCE_LOCK) {
+                if (!getIsConnected()) {
+                    return;
+                }
+                if (_protocol != null) {
+                    // If transport is still connected, sent EndProtocolSessionMessage
+                    if (sendFinishMessages) {
+                        _protocol.EndProtocolService(ServiceType.RPC, sessionId);
+                        stopHeartbeatMonitor();
+                    }
+                }
+            }
+
+            waitForRpcEndServiceACK();
         }
     }
 
@@ -280,7 +277,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void closeAudioService(byte sessionID) {
+    public void closeAudioService(byte sessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -288,7 +285,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            _protocol.EndProtocolService(ServiceType.Audio_Service, sessionID);
+            _protocol.EndProtocolService(ServiceType.Audio_Service, sessionId);
         }
         waitForAudioEndServiceACK();
     }
@@ -374,7 +371,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _protocol.SendMessage(msg);
     }
 
-    public void startMobileNavService(Session session) {
+    public void startMobileNavService(byte sessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -382,11 +379,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
         }
     }
 
-    public void startAudioService(Session session) {
+    public void startAudioService(byte sessionId) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -394,7 +391,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Audio_Service, session);
+            _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId);
         }
     }
 
@@ -501,8 +498,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         mConnectionListener.onProtocolMessageReceived(msg);
 
         // Unblock USB reader thread by this method
-        FunctionID functionID = new FunctionID();
-        String functionName = functionID.getFunctionName(msg.getFunctionID());
+        String functionName = FunctionID.getFunctionName(msg.getFunctionID());
         if (functionName == null) {
             return;
         }
@@ -524,30 +520,35 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID) {
-        mConnectionListener.onProtocolSessionStarted(sessionId, version, correlationID);
+    public void onProtocolSessionStarted(byte sessionId, byte version) {
+        mConnectionListener.onProtocolSessionStarted(sessionId, version);
     }
 
     @Override
-    public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID,
-                                       String correlationID) {
-        mConnectionListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
+    public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        mConnectionListener.onProtocolServiceEnded(serviceType, sessionId);
         processEndService(serviceType);
     }
 
     private void processEndService(ServiceType serviceType) {
-        if (_transport != null && serviceType.equals(ServiceType.RPC)) {
+        if (_transport == null ) {
+            Logger.w("ProcessEndService transport null");
+            return;
+        }
+        if (serviceType.equals(ServiceType.RPC)) {
             synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
                 END_PROTOCOL_SERVICE_RPC_LOCK.notifyAll();
             }
 
-            processTransportStopReading();
+            if (mSyncSession.getSessionIdsNumber() == 1) {
+                processTransportStopReading();
+            }
 
-        } else if (_transport != null && serviceType.equals(ServiceType.Mobile_Nav)) {
+        } else if (serviceType.equals(ServiceType.Mobile_Nav)) {
             synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
                 END_PROTOCOL_SERVICE_VIDEO_LOCK.notifyAll();
             }
-        } else if (_transport != null && serviceType.equals(ServiceType.Audio_Service)) {
+        } else if (serviceType.equals(ServiceType.Audio_Service)) {
             synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
                 END_PROTOCOL_SERVICE_AUDIO_LOCK.notifyAll();
             }
@@ -593,18 +594,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version);
     }
 
     @Override
-    public void onMobileNavAckReceived(int frameReceivedNumber) {
-        mConnectionListener.onMobileNavAckReceived(frameReceivedNumber);
+    public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
+        mConnectionListener.onMobileNavAckReceived(sessionId, frameReceivedNumber);
     }
 
     @Override
-    public void onStartServiceNackReceived(ServiceType serviceType) {
-        mConnectionListener.onStartServiceNackReceived(serviceType);
+    public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
+        mConnectionListener.onStartServiceNackReceived(sessionId, serviceType);
     }
 
     /**
@@ -658,7 +659,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private void processTransportStopReading() {
         if (_transport == null) {
-            Logger.w(CLASS_NAME + " Process Transport Stop Reading - transport is NULL");
+            Logger.w("ProcessTransportStopReading transport null");
             return;
         }
 

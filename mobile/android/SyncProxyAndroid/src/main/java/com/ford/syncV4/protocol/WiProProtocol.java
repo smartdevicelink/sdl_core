@@ -18,7 +18,7 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    int hashID = 0;
+    Hashtable<Byte, Integer> hashID = new Hashtable<Byte, Integer>();
 
     protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
 
@@ -72,22 +72,22 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, byte version,
-                                             String correlationId) {
-        super.handleProtocolSessionStarted(serviceType, sessionId, version, correlationId);
+    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, byte version) {
+        super.handleProtocolSessionStarted(serviceType, sessionId, version);
 
         Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
     }
 
     @Override
-    public void StartProtocolService(ServiceType serviceType, Session session) throws IllegalArgumentException {
-        byte sessionId = session.getSessionId();
-        if (sessionId == 0) {
+    public void StartProtocolService(ServiceType serviceType, byte sessionId)
+            throws IllegalArgumentException {
+        if (sessionId == Session.DEFAULT_SESSION_ID) {
             throw new IllegalArgumentException("syncSession id 0 should be used to start " +
                     "syncSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
-        sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(), sessionId);
+        sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(),
+                sessionId);
     }
 
     @Override
@@ -102,8 +102,9 @@ public class WiProProtocol extends AbstractProtocol {
 
     @Override
     public void EndProtocolService(ServiceType serviceType, byte sessionId) {
-        sendProtocolMessageProcessor.processEndService(serviceType, hashID, getProtocolVersion(),
-                sessionId);
+        Logger.d("End Service hashId:" + hashID.get(sessionId) + " sesId:" + sessionId);
+        sendProtocolMessageProcessor.processEndService(serviceType, hashID.get(sessionId),
+                getProtocolVersion(), sessionId);
     }
 
     @Override
@@ -363,55 +364,53 @@ public class WiProProtocol extends AbstractProtocol {
 
         private void handleControlFrame(ProtocolFrameHeader header) {
             byte frameData = header.getFrameData();
-            Logger.d(CLASS_NAME + " ControlFrame:" + header.toString());
+            byte sessionId = header.getSessionID();
+            Logger.d(CLASS_NAME + " " + header.toString());
             if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
                 handleProtocolHeartbeatACK();
             } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {
                 handleProtocolHeartbeat();
             } else if (frameData == FrameDataControlFrameType.StartService.getValue()) {
                 sendProtocolMessageProcessor.processStartSessionAck(header.getServiceType(),
-                        getProtocolVersion(), header.getSessionID());
+                        getProtocolVersion(), sessionId);
             } else if (frameData == FrameDataControlFrameType.StartServiceACK.getValue()) {
                 // Use this sessionID to create a message lock
-                Object messageLock = _messageLocks.get(header.getSessionID());
+                Object messageLock = _messageLocks.get(sessionId);
                 if (messageLock == null) {
                     messageLock = new Object();
-                    _messageLocks.put(header.getSessionID(), messageLock);
+                    _messageLocks.put(sessionId, messageLock);
                 }
                 //hashID = BitConverter.intFromByteArray(data, 0);
                 if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-                    hashID = header.getMessageID();
+                    hashID.put(sessionId, header.getMessageID());
                 }
                 inspectStartServiceACKHeader(header);
             } else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue()) {
-                handleStartServiceNackFrame(header.getServiceType());
+                handleStartServiceNackFrame(sessionId, header.getServiceType());
             } else if (frameData == FrameDataControlFrameType.EndService.getValue()) {
-                handleEndSessionFrame(header);
+                handleEndSessionFrame(sessionId, header);
             } else if (frameData == FrameDataControlFrameType.EndServiceNACK.getValue()) {
                 //Logger.d(CLASS_NAME + " End Service NACK");
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() &&
                     frameData == FrameDataControlFrameType.MobileNaviACK.getValue()) {
-                handleMobileNavAckReceived(header);
+                handleMobileNavAckReceived(sessionId, header.getMessageID());
             } else if (frameData == FrameDataControlFrameType.EndServiceACK.getValue()) {
-                handleEndSessionFrame(header);
-            } else {
-                Logger.w(CLASS_NAME + " Unknown frame data:" + frameData + ", service type:" +
-                        header.getServiceType());
-            }
-        } // end-method
-
-        private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
-            if (header.getServiceType().equals(ServiceType.RPC)) {
-                handleProtocolSessionStarted(header.getServiceType(),
-                        header.getSessionID(), getProtocolVersion(), "");
-            } else {
-                handleProtocolServiceStarted(header.getServiceType(),
-                        header.getSessionID(), getProtocolVersion(), "");
+                handleEndSessionFrame(sessionId, header);
             }
         }
 
-        private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
-            _protocolListener.onMobileNavAckReceived(header.getMessageID());
+        private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
+            if (header.getServiceType().equals(ServiceType.RPC)) {
+                handleProtocolSessionStarted(header.getServiceType(), header.getSessionID(),
+                        getProtocolVersion());
+            } else {
+                handleProtocolServiceStarted(header.getServiceType(), header.getSessionID(),
+                        getProtocolVersion());
+            }
+        }
+
+        private void handleMobileNavAckReceived(byte sessionId, int messageId) {
+            _protocolListener.onMobileNavAckReceived(sessionId, messageId);
         }
 
         private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
@@ -461,18 +460,17 @@ public class WiProProtocol extends AbstractProtocol {
 
     } // end-class
 
-    private void handleEndSessionFrame(ProtocolFrameHeader header) {
-        Logger.d(CLASS_NAME + " EndServiceACKHeader v:" + header.getVersion());
+    private void handleEndSessionFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            if (hashID == header.getMessageID()) {
-                handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
+            if (hashID.get(sessionId) == header.getMessageID()) {
+                handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
             }
         } else {
-            handleProtocolServiceEnded(header.getServiceType(), header.getSessionID(), "");
+            handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
         }
     }
 
-    private void handleStartServiceNackFrame(ServiceType serviceType) {
-        _protocolListener.onStartServiceNackReceived(serviceType);
+    private void handleStartServiceNackFrame(byte sessionId, ServiceType serviceType) {
+        _protocolListener.onStartServiceNackReceived(sessionId, serviceType);
     }
 }

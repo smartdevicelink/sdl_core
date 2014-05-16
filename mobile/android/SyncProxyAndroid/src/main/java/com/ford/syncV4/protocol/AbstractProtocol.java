@@ -6,7 +6,6 @@ import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -111,7 +110,7 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolService(ServiceType serviceType, Session session);
+    public abstract void StartProtocolService(ServiceType serviceType, byte sessionId);
 
     // This method ends a protocol syncSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
@@ -269,9 +268,8 @@ public abstract class AbstractProtocol {
 
     // This method handles the end of a protocol syncSession. A callback is
     // sent to the protocol listener.
-    protected void handleProtocolServiceEnded(ServiceType serviceType,
-                                              byte sessionID, String correlationID) {
-        _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
+    protected void handleProtocolServiceEnded(ServiceType serviceType, byte sessionID) {
+        _protocolListener.onProtocolServiceEnded(serviceType, sessionID);
     }
 
     /**
@@ -281,23 +279,21 @@ public abstract class AbstractProtocol {
      * @param serviceType
      * @param sessionId
      * @param version
-     * @param correlationId
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionId, byte version,
-                                                String correlationId) {
-        _protocolListener.onProtocolSessionStarted(sessionId, version, correlationId);
+                                                byte sessionId, byte version) {
+        _protocolListener.onProtocolSessionStarted(sessionId, version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, byte version) {
         if (serviceType.equals(ServiceType.RPC)) {
             throw new IllegalArgumentException("Can't create RPC service without creating syncSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

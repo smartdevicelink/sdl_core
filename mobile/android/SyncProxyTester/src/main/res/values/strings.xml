@@ -290,5 +290,6 @@
     <string name="system_request_use_file_name">Use file name</string>
     <string name="system_request_file_name_label">System Request file name:</string>
     <string name="main_menu_add_session_label">Add Session</string>
+    <string name="main_menu_app_version">App version</string>
 
 </resources>

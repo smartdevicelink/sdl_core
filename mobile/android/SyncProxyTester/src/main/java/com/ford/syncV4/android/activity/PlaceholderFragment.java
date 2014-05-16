@@ -41,6 +41,7 @@ import com.ford.syncV4.android.module.GenericRequest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.utils.AppUtils;
+import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
@@ -98,6 +99,7 @@ import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
 import com.lamerman.SelectionMode;
 
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -167,15 +169,18 @@ public class PlaceholderFragment extends Fragment {
 
     private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
 
-    private ScrollView _scroller = null;
-    private ListView mListview = null;
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
 
     private boolean[] isButtonSubscribed = null;
     private boolean[] isVehicleDataSubscribed = null;
     private int mAutoIncCorrId = 0;
-    private int mAppId = 0;
+    private int mTabId = 0;
+    private String mAppId = "";
+    /**
+     * Session Id associated with concrete instance of this Fragment
+     */
+    private byte mSessionId = 0;
     private Integer _latestDeleteCommandCmdID = null;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
@@ -238,15 +243,26 @@ public class PlaceholderFragment extends Fragment {
         return autoIncChoiceId++;
     }
 
+    public String getAppId() {
+        return mAppId;
+    }
+
+    public void setAppId(String value) {
+        mAppId = value;
+        mLogAdapter.setAppId(mAppId);
+        mMobileNavPreviewFragment.setAppId(mAppId);
+        mAudioServicePreviewFragment.setAppId(mAppId);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAppId = getArguments().getInt(Const.ARG_APP_ID);
-        String autoIncCorrId = mAppId + "000";
+        mTabId = getArguments().getInt(Const.ARG_APP_ID);
+        String autoIncCorrId = mTabId + "000";
         mAutoIncCorrId = Integer.valueOf(autoIncCorrId);
 
-        Logger.d(LOG_TAG + " On Create, init corId:" + mAutoIncCorrId);
+        Logger.d(LOG_TAG + " On Create, init corId:" + mAutoIncCorrId + ", AppId:" + mAppId);
 
         mVehicleDataType = new ArrayAdapter<VehicleDataType>(getActivity(),
                 android.R.layout.simple_spinner_item, VehicleDataType.values());
@@ -256,15 +272,14 @@ public class PlaceholderFragment extends Fragment {
                 android.R.layout.simple_spinner_item, ImageType.values());
         imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mLogAdapter = new LogAdapter("SyncProxyTester", false, getActivity(), R.layout.row,
-                new ArrayList<Object>());
+        mLogAdapter = new LogAdapter("SyncProxyTester", false, R.layout.row, new ArrayList<Object>());
 
         if (isFirstActivityRun) {
-            DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance(mAppId - 1);
+            DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance();
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
             appSetupDialogFragment.setCancelable(false);
         } else {
-            ((SyncProxyTester) getActivity()).onSetUpDialogResult(mAppId - 1);
+            ((SyncProxyTester) getActivity()).onSetUpDialogResult(getAppId());
         }
         isFirstActivityRun = false;
     }
@@ -291,75 +306,24 @@ public class PlaceholderFragment extends Fragment {
             }
         });
 
-        if (_scroller == null) {
-            _scroller = (ScrollView) rootView.findViewById(R.id.scrollConsole);
-        }
-
-        if (mListview == null) {
-            mListview = (ListView) rootView.findViewById(R.id.messageList);
-            mListview.setClickable(true);
-            mListview.setAdapter(mLogAdapter);
-            mListview.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-            mListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object listObj = parent.getItemAtPosition(position);
-                if (listObj instanceof RPCMessage) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    String rawJSON;
-
-                    Integer corrId = -1;
-                    if (listObj instanceof RPCRequest) {
-                        corrId = ((RPCRequest) listObj).getCorrelationID();
-                    } else if (listObj instanceof RPCResponse) {
-                        corrId = ((RPCResponse) listObj).getCorrelationID();
-                    }
-
-                    try {
-                        byte protocolVersion =
-                                ((SyncProxyTester) getActivity()).mBoundProxyService
-                                        .syncProxyGetWiProVersion();
-                        rawJSON = ((RPCMessage) listObj).serializeJSON(protocolVersion).toString(2);
-                        builder.setTitle("Raw JSON" + (corrId != -1 ?
-                                " (Corr ID " + corrId + ")" : ""));
-                    } catch (Exception e) {
-                        try {
-                            rawJSON = ((RPCMessage) listObj).getFunctionName() +
-                                    " (" + ((RPCMessage) listObj).getMessageType() + ")";
-                        } catch (Exception e1) {
-                            rawJSON = "Undefined";
-                        }
-                    }
-                    builder.setMessage(rawJSON);
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-                    AlertDialog ad = builder.create();
-                    ad.show();
-                } else if (listObj instanceof String) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setMessage(listObj.toString());
-                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
-                    AlertDialog ad = builder.create();
-                    ad.show();
-                }
-                }
-            });
-        }
+        ListView listView = (ListView) rootView.findViewById(R.id.messageList);
+        listView.setClickable(true);
+        listView.setAdapter(mLogAdapter);
+        listView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                listClickHandler(parent.getItemAtPosition(position));
+            }
+        });
 
         resetAdapters();
 
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        /*FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.video_fragment_holder, mMobileNavPreviewFragment,
                 MOBILE_NAV_FRAGMENT_TAG);
         transaction.replace(R.id.audio_fragment_holder, mAudioServicePreviewFragment,
                 AUDIO_FRAGMENT_TAG);
-        transaction.commit();
+        transaction.commit();*/
 
         return rootView;
     }
@@ -368,51 +332,82 @@ public class PlaceholderFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Logger.d(LOG_TAG + " On Activity Created");
-
-        //_activity = this;
+        Logger.d(LOG_TAG + " On Activity Created " + mAppId);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        Logger.d(LOG_TAG + " On Resume " + mAppId);
+
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.video_fragment_holder, mMobileNavPreviewFragment,
+                MOBILE_NAV_FRAGMENT_TAG);
+        transaction.replace(R.id.audio_fragment_holder, mAudioServicePreviewFragment,
+                AUDIO_FRAGMENT_TAG);
+        transaction.commit();
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
+        Logger.d(LOG_TAG + " On Pause " + mAppId);
+
         saveMessageSelectCount();
+
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.remove(mMobileNavPreviewFragment);
+        transaction.remove(mAudioServicePreviewFragment);
+        transaction.commit();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        Logger.d(LOG_TAG + " On Destroy View " + mAppId);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        Logger.d(LOG_TAG + " On Detach " + mAppId);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        menu.add(0, MenuConstants.PROXY_START, 0, "Proxy Start");
-        menu.add(0, MenuConstants.MENU_ADD_SESSION, 0, "Session Instances");
-        menu.add(0, MenuConstants.MNU_TOGGLE_CONSOLE, 0, "Toggle Console");
-        menu.add(0, MenuConstants.MNU_CLEAR, 0, "Clear Messages");
-        menu.add(0, MenuConstants.MNU_EXIT, 0, "Exit");
-        //menu.add(0, MNU_TOGGLE_MEDIA, 0, "Toggle Media");
-        menu.add(0, MenuConstants.MNU_APP_VERSION, 0, "App version");
-        menu.add(0, MenuConstants.MNU_CLOSESESSION, 0, "Close Session");
-        menu.add(0, MenuConstants.MNU_HASH_ID_SETUP, 0, "HashId setup");
-        menu.add(0, MenuConstants.MNU_CLEAR_FUNCTIONS_USAGE, 0, "Reset functions usage");
-        menu.add(0, MenuConstants.XML_TEST, 0, "XML Test");
-        menu.add(0, MenuConstants.POLICIES_TEST, 0, "Policies Test");
-        menu.add(0, MenuConstants.MNU_SET_UP_POLICY_FILES, 0, "Set Up Policy files");
-        MenuItem menuitem = menu.add(0, MenuConstants.MNU_WAKELOCK, 0, "Lock screen while testing");
+        int menuSize = menu.size();
+        int nextMenuItemOrder = menu.getItem(menuSize - 1).getOrder() + 1;
+        menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
+        menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
+        menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
+        int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
+        if (tabsCount == 1) {
+            menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
+        }
+        menu.add(0, MenuConstants.MENU_CLOSE_SESSION, nextMenuItemOrder++, "Close Session");
+        //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
+        menu.add(0, MenuConstants.MENU_HASH_ID_SETUP, nextMenuItemOrder++, "HashId setup");
+        menu.add(0, MenuConstants.MENU_CLEAR_FUNCTIONS_USAGE, nextMenuItemOrder++, "Reset functions usage");
+        menu.add(0, MenuConstants.MENU_XML_TEST, nextMenuItemOrder++, "XML Test");
+        menu.add(0, MenuConstants.MENU_POLICIES_TEST, nextMenuItemOrder++, "Policies Test");
+        menu.add(0, MenuConstants.MENU_SET_UP_POLICY_FILES, nextMenuItemOrder++, "Set Up Policy files");
+        MenuItem menuitem = menu.add(0, MenuConstants.MENU_WAKE_LOCK, nextMenuItemOrder++, "Lock screen while testing");
         menuitem.setCheckable(true);
         menuitem.setChecked(!AppPreferencesManager.getDisableLockFlag());
-        menu.add(0, MenuConstants.MNU_FEEDBACK, 0, "Feedback");
+        menu.add(0, MenuConstants.MENU_FEEDBACK, nextMenuItemOrder, "Feedback");
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case MenuConstants.PROXY_START:
+            case MenuConstants.MENU_PROXY_START:
                 if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                     BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (!mBtAdapter.isEnabled()) {
@@ -458,10 +453,10 @@ public class PlaceholderFragment extends Fragment {
                     }
                 });
                 return true;
-            case MenuConstants.XML_TEST:
+            case MenuConstants.MENU_XML_TEST:
                 openXmlFilePathDialog();
                 break;
-            case MenuConstants.POLICIES_TEST:
+            case MenuConstants.MENU_POLICIES_TEST:
                 if (PoliciesTesterActivity.getInstance() == null) {
                     Intent i = new Intent(getActivity(), PoliciesTesterActivity.class);
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -473,61 +468,51 @@ public class PlaceholderFragment extends Fragment {
                 }
                 //PoliciesTest.runPoliciesTest();
                 break;
-            case MenuConstants.MNU_SET_UP_POLICY_FILES:
+            case MenuConstants.MENU_SET_UP_POLICY_FILES:
                 DialogFragment mPolicyFilesSetUpDialog = PolicyFilesSetUpDialog.newInstance();
                 mPolicyFilesSetUpDialog.show(getActivity().getFragmentManager(),
                         POLICY_FILES_SETUP_DIALOG_TAG);
                 break;
-            case MenuConstants.MNU_EXIT:
+            case MenuConstants.MENU_EXIT:
                 ((SyncProxyTester) getActivity()).stopProxyServiceOnExit();
                 break;
-            case MenuConstants.MNU_TOGGLE_CONSOLE:
-                if (_scroller.getVisibility() == ScrollView.VISIBLE) {
-                    _scroller.setVisibility(ScrollView.GONE);
-                    mListview.setVisibility(ListView.VISIBLE);
+            case MenuConstants.MENU_TOGGLE_CONSOLE:
+                ListView listView = (ListView) getView().findViewById(R.id.messageList);
+                if (listView.getVisibility() == ScrollView.GONE) {
+                    listView.setVisibility(ListView.VISIBLE);
                 } else {
-                    _scroller.setVisibility(ScrollView.VISIBLE);
-                    mListview.setVisibility(ListView.GONE);
+                    listView.setVisibility(ListView.GONE);
                 }
                 return true;
-            case MenuConstants.MNU_CLEAR:
+            case MenuConstants.MENU_CLEAR:
                 mLogAdapter.clear();
                 return true;
-            case MenuConstants.MNU_TOGGLE_MEDIA:
+            case MenuConstants.MENU_TOGGLE_MEDIA:
                 SharedPreferences settings = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
                 boolean isMediaApp = settings.getBoolean(Const.PREFS_KEY_ISMEDIAAPP,
                         Const.PREFS_DEFAULT_ISMEDIAAPP);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putBoolean(Const.PREFS_KEY_ISMEDIAAPP, !isMediaApp);
-
-                // Don't forget to commit your edits!!!
                 editor.commit();
-                //super.finish();
                 return true;
-            case MenuConstants.MNU_CLOSESESSION:
-                ((SyncProxyTester) getActivity()).closeSession(mAppId);
+            case MenuConstants.MENU_CLOSE_SESSION:
+                try {
+                    ((SyncProxyTester) getActivity()).closeSession(mAppId, mTabId - 1);
+                } catch (SyncException e) {
+                    Logger.e("Close Session error:" + e.getMessage());
+                }
                 return true;
-            case MenuConstants.MNU_APP_VERSION: {
-                new AlertDialog.Builder(getActivity())
-                        .setTitle("App version")
-                        .setMessage("Ver:" + AppUtils.getApplicationVersion() +
-                                ", Code:" + String.valueOf(AppUtils.getCodeVersionNumber()) +
-                                "\n" + AppUtils.getBuildInfo() + "\n\nCHANGELOG:\n" +
-                                AppUtils.getChangeLog())
-                        .setNeutralButton(android.R.string.ok, null).create().show();
-                break;
-            }
-            case MenuConstants.MNU_CLEAR_FUNCTIONS_USAGE:
+            case MenuConstants.MENU_CLEAR_FUNCTIONS_USAGE:
                 clearMessageSelectCount();
                 break;
-            case MenuConstants.MNU_WAKELOCK:
+            case MenuConstants.MENU_WAKE_LOCK:
                 AppPreferencesManager.toggleDisableLock();
                 break;
-            case MenuConstants.MNU_HASH_ID_SETUP:
+            case MenuConstants.MENU_HASH_ID_SETUP:
                 DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
                 hashIdSetUpDialog.show(getActivity().getFragmentManager(), HASH_ID_SET_UP_DIALOG_TAG);
                 break;
-            case MenuConstants.MNU_FEEDBACK:
+            case MenuConstants.MENU_FEEDBACK:
                 DialogFragment feedbackDialog = FeedbackDialog.newInstance();
                 feedbackDialog.show(getActivity().getFragmentManager(), FEEDBACK_DIALOG_TAG);
                 break;
@@ -604,6 +589,87 @@ public class PlaceholderFragment extends Fragment {
      */
     public int getCorrelationId() {
         return mAutoIncCorrId++;
+    }
+
+    public byte getSessionId() {
+        return mSessionId;
+    }
+
+    public void setSessionId(byte value) {
+        mSessionId = value;
+        mLogAdapter.setSessionId(mSessionId);
+    }
+
+    public void setAudioServiceStateOn(OutputStream outputStream) {
+        if (mAudioServicePreviewFragment != null) {
+            mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream);
+        }
+    }
+
+    public void setMobileNaviStateOn(OutputStream outputStream) {
+        if (mMobileNavPreviewFragment != null) {
+            mMobileNavPreviewFragment.setMobileNaviStateOn(outputStream);
+        }
+    }
+
+    public void setAudioServiceStateOff() {
+        if (mAudioServicePreviewFragment != null) {
+            mAudioServicePreviewFragment.setStateOff();
+        }
+    }
+
+    public void setMobileNaviStateOff() {
+        if (mMobileNavPreviewFragment != null) {
+            mMobileNavPreviewFragment.setStateOff();
+        }
+    }
+
+    private void listClickHandler(Object listObj) {
+        if (listObj instanceof RPCMessage) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            String rawJSON;
+
+            Integer corrId = -1;
+            if (listObj instanceof RPCRequest) {
+                corrId = ((RPCRequest) listObj).getCorrelationID();
+            } else if (listObj instanceof RPCResponse) {
+                corrId = ((RPCResponse) listObj).getCorrelationID();
+            }
+
+            try {
+                byte protocolVersion =
+                        ((SyncProxyTester) getActivity()).mBoundProxyService
+                                .syncProxyGetWiProVersion();
+                rawJSON = ((RPCMessage) listObj).serializeJSON(protocolVersion).toString(2);
+                builder.setTitle("Raw JSON" + (corrId != -1 ?
+                        " (Corr ID " + corrId + ")" : ""));
+            } catch (Exception e) {
+                try {
+                    rawJSON = ((RPCMessage) listObj).getFunctionName() +
+                            " (" + ((RPCMessage) listObj).getMessageType() + ")";
+                } catch (Exception e1) {
+                    rawJSON = "Undefined";
+                }
+            }
+            builder.setMessage(rawJSON);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog ad = builder.create();
+            ad.show();
+        } else if (listObj instanceof String) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(listObj.toString());
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
+            AlertDialog ad = builder.create();
+            ad.show();
+        }
     }
 
     /**

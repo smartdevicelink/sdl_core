@@ -18,8 +18,8 @@ public class ServiceTest extends AndroidTestCase {
     public void testServiceIdIsSet() throws Exception {
         Service service = new Service();
         Session session = new Session();
-        service.setSession(session);
-        assertEquals("service id should be 1", session, service.getSession());
+        service.setSessionId(session);
+        assertEquals("service id should be 1", session, service.getSessionId());
     }
 
     public void testServiceTypeIsSet() throws Exception {

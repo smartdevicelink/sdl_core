@@ -48,11 +48,8 @@ public class AppSetUpDialog extends DialogFragment {
 
     private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
 
-    public static AppSetUpDialog newInstance(int appId) {
+    public static AppSetUpDialog newInstance() {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
-        Bundle args = new Bundle();
-        args.putInt(Const.ARG_APP_ID, appId);
-        appSetupDialog.setArguments(args);
         return appSetupDialog;
     }
 
@@ -125,7 +122,11 @@ public class AppSetUpDialog extends DialogFragment {
         customAppIdView.setChecked(AppPreferencesManager.getIsCustomAppId());
 
         final EditText customAppIdEditView = (EditText) view.findViewById(R.id.selectprotocol_appId);
-        customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        if (!AppPreferencesManager.getIsCustomAppId()) {
+            processCustomAppIdCheck(view, customAppIdView.isChecked());
+        } else {
+            customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        }
         /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -251,9 +252,9 @@ public class AppSetUpDialog extends DialogFragment {
 
                         // save the configs
 
+                        String appId = customAppIdEditView.getText().toString().trim();
                         if (AppPreferencesManager.getIsCustomAppId()) {
-                            AppPreferencesManager.setCustomAppId(
-                                    customAppIdEditView.getText().toString().trim());
+                            AppPreferencesManager.setCustomAppId(appId);
                         }
                         boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
@@ -272,7 +273,6 @@ public class AppSetUpDialog extends DialogFragment {
                         }
 
                         setupHeartbeat(view);
-                        int appId = getArguments().getInt(Const.ARG_APP_ID);
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
                     }
                 }).setView(view).show();

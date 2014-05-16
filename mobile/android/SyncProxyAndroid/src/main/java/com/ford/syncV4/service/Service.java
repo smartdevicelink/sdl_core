@@ -1,27 +1,26 @@
 package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 /**
- * Created by Andrew Batutin on 1/21/14.
+ * Created by Andrew Batutin on 1/21/14
+ * Co-author Chernyshov Yuriy
  */
 public class Service {
 
-    // TODO: Reconsider this field, probably, as alternative, create 'sessionId' field here
-    private Session session;
+    private byte sessionId;
     private ServiceType serviceType;
 
-    public void setSession(Session session) {
-        this.session = session;
+    public void setSessionId(byte value) {
+        sessionId = value;
     }
 
-    public Session getSession() {
-        return session;
+    public byte getSessionId() {
+        return sessionId;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+    public void setServiceType(ServiceType value) {
+        serviceType = value;
     }
 
     public ServiceType getServiceType() {
@@ -30,13 +29,10 @@ public class Service {
 
     @Override
     public String toString() {
-        return "Service{" +
-                "syncSession=" + session +
-                ", serviceType=" + serviceType +
-                '}';
+        return "Service {sessionId:" + sessionId + ", serviceType:" + serviceType + "}";
     }
 
-    @Override
+    /*@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -45,7 +41,7 @@ public class Service {
 
         if (serviceType != null ? !serviceType.equals(service.serviceType) : service.serviceType != null)
             return false;
-        if (session != null ? !session.equals(service.session) : service.session != null)
+        if (sessionId != null ? !sessionId.equals(service.sessionId) : service.sessionId != null)
             return false;
 
         return true;
@@ -53,8 +49,8 @@ public class Service {
 
     @Override
     public int hashCode() {
-        int result = session != null ? session.hashCode() : 0;
+        int result = sessionId != null ? sessionId.hashCode() : 0;
         result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
         return result;
-    }
+    }*/
 }

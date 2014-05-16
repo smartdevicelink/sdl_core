@@ -32,8 +32,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapterCustom {
         this.mResources = mResources;
     }
 
-
-
     @Override
     public PlaceholderFragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.

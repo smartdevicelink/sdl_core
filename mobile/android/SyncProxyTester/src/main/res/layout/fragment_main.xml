@@ -14,13 +14,14 @@
         android:id="@+id/btnPlayPause"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/app_regular_text_color"
         android:text="Play/Pause" />
 
     <Button
         android:id="@+id/btnSendMessage"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:enabled="true"
+        android:textColor="@color/app_regular_text_color"
         android:text="Send Message" />
 
     <LinearLayout

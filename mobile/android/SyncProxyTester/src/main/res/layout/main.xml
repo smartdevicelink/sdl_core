@@ -81,12 +81,6 @@
 
     </TableLayout>
 
-    <ScrollView
-        android:id="@+id/scrollConsole"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:visibility="gone"/>
-
     <ListView
         android:id="@+id/messageList"
         android:layout_width="fill_parent"

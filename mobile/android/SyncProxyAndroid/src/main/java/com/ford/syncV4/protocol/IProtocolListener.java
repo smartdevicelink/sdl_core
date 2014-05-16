@@ -14,10 +14,10 @@ public interface IProtocolListener {
 	void onProtocolMessageReceived(ProtocolMessage msg);
 
 	// Called to indicate that a protocol syncSession has been started (from either side)
-	void onProtocolSessionStarted(byte sessionId, byte version, String correlationID);
+	void onProtocolSessionStarted(byte sessionId, byte version);
 
 	// Called to indicate that a protocol syncSession has ended (from either side)
-	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID /*, String info, Exception ex*/);
+	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID);
 
     /**
      * Called when a protocol heartbeat ACK message has been received from SYNC.
@@ -31,13 +31,13 @@ public interface IProtocolListener {
 	// Called to indicate that a protocol error was detected in received data.
 	void onProtocolError(String info, Exception e);
 
-    void onMobileNavAckReceived(int frameReceivedNumber);
+    void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
 
     void onProtocolAppUnregistered();
 
-    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
+    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
 
-    void onStartServiceNackReceived(ServiceType serviceType);
+    void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 
     void onResetHeartbeat();
 }
