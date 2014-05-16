@@ -50,7 +50,7 @@ namespace utils {
 
 CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
 
-struct CString : public std::unary_function<const std::string&, char *> {
+struct GetCString {
   char * operator ()(const std::string& string) {
     return const_cast<char*>(string.c_str());
   }
@@ -79,12 +79,13 @@ System& System::Add(const std::string& arg) {
 
 bool System::Execute(bool wait) {
   size_t size = argv_.size();
-  char * argv[size + 1];
-  std::transform(argv_.begin(), argv_.end(), argv, CString());
+  char * *argv = new char*[size + 1];
+  std::transform(argv_.begin(), argv_.end(), argv, GetCString());
   argv[size] = NULL;
 
   int mode = wait ? P_WAIT : P_NOWAIT;
   int ret = spawnvp(mode, command_.c_str(), argv);
+  delete[] argv;
 
   if (ret == -1) {
     LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
@@ -96,11 +97,6 @@ bool System::Execute(bool wait) {
 #else  // __QNX__
 
 bool System::Execute(bool wait) {
-  size_t size = argv_.size();
-  char * argv[size + 1];
-  std::transform(argv_.begin(), argv_.end(), argv, CString());
-  argv[size] = NULL;
-
   // Create a child process.
   pid_t pid_command = fork();
 
@@ -125,11 +121,17 @@ bool System::Execute(bool wait) {
       dup2(fd_dev0, STDOUT_FILENO);
       dup2(fd_dev0, STDERR_FILENO);
 
+      size_t size = argv_.size();
+      char * *argv = new char*[size + 1];
+      std::transform(argv_.begin(), argv_.end(), argv, GetCString());
+      argv[size] = NULL;
+
       // Execute the program.
       if (execvp(command_.c_str(), argv) == -1) {
         LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
         _exit(EXIT_FAILURE);
       }
+      delete[] argv;
 
       return true;
     }
@@ -141,7 +143,7 @@ bool System::Execute(bool wait) {
         do {
           wait_pid = waitpid(pid_command, &status, WUNTRACED | WCONTINUED);
           if (wait_pid == -1) {
-            LOG4CXX_ERROR_WITH_ERRNO(logger_,"Can't wait");
+            LOG4CXX_ERROR_WITH_ERRNO(logger_, "Can't wait");
             _exit(EXIT_FAILURE);
             return false;
           }
