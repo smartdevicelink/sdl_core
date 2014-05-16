@@ -98,8 +98,7 @@ void AlertManeuverRequest::Run() {
 
   pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_AlertManeuver,
-                     &msg_params,
-                     true);
+                 &msg_params, true);
 
   if (tts_is_ok) {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(

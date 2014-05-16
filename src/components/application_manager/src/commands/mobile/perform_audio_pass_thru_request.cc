@@ -176,7 +176,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_name] = static_cast<int32_t>
-    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT1);
+    (hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text1];
@@ -185,7 +185,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_name] = static_cast<int32_t>
-    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT2);
+    (hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text2];

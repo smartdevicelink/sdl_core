@@ -267,6 +267,7 @@ const char alert_strings[] = "alertStrings";
 const char duration[] = "duration";
 const char soft_buttons[] = "softButtons";
 const char tts_chunks[] = "ttsChunks";
+const char speak_type[] = "speakType";
 const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
 const char max_duration[] = "maxDuration";
 const char reason[] = "reason";
