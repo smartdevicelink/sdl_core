@@ -33,8 +33,11 @@
 #include "resumption/last_state.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace resumption {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
 
 void LastState::SaveToFileSystem() {
   const std::string file =
@@ -50,12 +53,12 @@ void LastState::LoadFromFileSystem() {
       profile::Profile::instance()->app_info_storage();
   std::string buffer;
   bool result = file_system::ReadFile(file, buffer);
-  if (result) {
-    Json::Reader m_reader;
-    DCHECK(m_reader.parse(buffer, dictionary));
-  } else {
-    // Error
+  Json::Reader m_reader;
+  if (result && m_reader.parse(buffer, dictionary)) {
+    LOG4CXX_INFO(logger_, "Valid last state was found.");
+    return;
   }
+  LOG4CXX_WARN(logger_, "No valid last state was found.");
 }
 
 LastState::LastState() {
