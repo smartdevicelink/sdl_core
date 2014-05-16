@@ -222,6 +222,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   std::string GetAppName(const std::string& policy_app_id);
 
+  /**
+   * Adds http header (temporary method)
+   * @param pt_string string without htt header
+   */
+  BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
+
  protected:
   /**
    * Starts next retry exchange policy table
