@@ -137,7 +137,7 @@ void ConnectionHandlerImpl::OnScanDevicesFinished() {
 
 void ConnectionHandlerImpl::OnScanDevicesFailed(
     const transport_manager::SearchDeviceError& error) {
-  LOG4CXX_WARN(logger_, error.text());
+  LOG4CXX_WARN(logger_, "Scan devices failed. " << error.text());
 }
 
 void ConnectionHandlerImpl::OnConnectionEstablished(

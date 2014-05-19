@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -29,44 +29,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "application_manager/commands/hmi/on_update_device_list.h"
+#include "application_manager/application_manager_impl.h"
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+namespace application_manager {
 
-namespace resumption {
+namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
-
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
+OnUpdateDeviceList::OnUpdateDeviceList(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {
 }
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
+OnUpdateDeviceList::~OnUpdateDeviceList() {
 }
 
-LastState::LastState() {
-  LoadFromFileSystem();
+void OnUpdateDeviceList::Run() {
+  LOG4CXX_INFO(logger_, "OnUpdateDeviceList::Run");
 }
 
-LastState::~LastState() {
-  SaveToFileSystem();
-}
+}  // namespace commands
 
-}
+}  // namespace application_manager
+

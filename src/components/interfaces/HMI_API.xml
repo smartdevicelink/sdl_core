@@ -371,6 +371,12 @@
   <element name="DYNAMIC" />
 </enum>
 
+<enum name="ApplicationToNONEReason">
+  <description>Describes the reasons of moving the app to NONE.</description>
+  <element name="DRIVER_DISTRACTION_VIOLATION" />
+  <element name="USER_EXIT" />
+</enum>
+
 <enum name="TextFieldName">
   <element name="mainField1">
     <description>The first line of first set of main fields of the persistent display; applies to "Show"</description>
@@ -1087,6 +1093,13 @@
   <element name="NORMAL"/>
   <element name="NONE"/>
 </enum>
+
+<enum name="SpeakType">
+  <description>Defines the type of the request which causes text-to-speech prompt</description> 
+  <element name="ALERT" /> 
+  <element name="SPEAK" /> 
+</enum>
+
 
 <!-- Policies -->
 <enum name="UpdateResult">
@@ -1868,11 +1881,20 @@
     <function name="OnStartDeviceDiscovery" messagetype="notification">
       <description>Initiated by HMI user for getting the list of connected devices.</description>
     </function>
+    <function name="OnUpdateDeviceList" messagetype="notification">
+      <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
+    </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
-      <param name="appID" type="Common.DeviceInfo" mandatory="true">
+      <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
       </param>
+    </function>
+    <function name="UpdateAppList" messagetype="request">
+      <description>Issued by SDL to notify HMI about new applications registered.</description>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
+    </function>
+    <function name="UpdateAppList" messagetype="response">
     </function>
     <function name="UpdateDeviceList" messagetype="request">
       <description>Request from SmartDeviceLink to HMI to change device list.</description>
@@ -1973,6 +1995,9 @@
     </function>
     <function name="OnExitApplication" messagetype="notification">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
+      <param name="reason" type="Common.ApplicationToNONEReason" mandatory="true">
+        <description>Specifies reason of moving the app to NONE</description>
+      </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the application to be exited.</description>
       </param>
@@ -2231,7 +2256,7 @@
     <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>ID of of the command (list of strings)</description>
     </param>
-    <param name="appID" type="Integer" mandatory="false">
+    <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
@@ -2310,6 +2335,9 @@
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
+    </param>
+    <param name="speakType" type="Common.SpeakType" mandatory="false">
+      <description>Defines the type of the request which causes text-to-speech</description>
     </param>
   </function>
   <function name="Speak" messagetype="response">
@@ -3720,8 +3748,9 @@
       <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal">
-      <param name="deviceState" type="Common.DeviceState"/>
-      <param name="deviceInternalId" type="String" />
+      <param name="deviceState" type="Common.DeviceState" mandatory="true" />
+      <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
+      <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
 </interface>
 </interfaces>

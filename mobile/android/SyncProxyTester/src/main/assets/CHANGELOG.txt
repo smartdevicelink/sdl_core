@@ -1,4 +1,5 @@
 [CW19]
+* SyncProxyAndroid SDK: End of Stream reached after connection to SDL established
 + SyncProxyAndroid SDK: Prioritize / paralleling message queues
 
 [CW18]

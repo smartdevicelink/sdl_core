@@ -55,5 +55,9 @@ void ISchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
                                       SmartObject& result_object) {
 }
 
+uint32_t ISchemaItem::GetMemberSize() {
+  return 0;
+}
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,43 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#include "application_manager/commands/hmi/update_app_list_request.h"
 
-namespace resumption {
+namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+namespace commands {
 
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
+UpdateAppListRequest::UpdateAppListRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
 }
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
+UpdateAppListRequest::~UpdateAppListRequest() {
 }
 
-LastState::LastState() {
-  LoadFromFileSystem();
+void UpdateAppListRequest::Run() {
+  LOG4CXX_INFO(logger_, "UpdateAppListRequest::Run");
+
+  SendRequest();
 }
 
-LastState::~LastState() {
-  SaveToFileSystem();
-}
+}  // namespace commands
 
-}
+}  // namespace application_manager
+
+

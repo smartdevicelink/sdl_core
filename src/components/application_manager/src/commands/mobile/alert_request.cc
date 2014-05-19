@@ -60,7 +60,6 @@ AlertRequest::~AlertRequest() {
 }
 
 bool AlertRequest::Init() {
-
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
@@ -218,21 +217,21 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-         TextFieldName::ALERT_TEXT1;
+        hmi_apis::Common_TextFieldName::alertText1;
      msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
          (*message_)[strings::msg_params][strings::alert_text1];
      index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-        TextFieldName::ALERT_TEXT2;
+        hmi_apis::Common_TextFieldName::alertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
     index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-         TextFieldName::ALERT_TEXT3;
+        hmi_apis::Common_TextFieldName::alertText3;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
          (*message_)[strings::msg_params][strings::alert_text3];
   }
@@ -269,6 +268,8 @@ void AlertRequest::SendSpeakRequest(int32_t app_id) {
   msg_params[hmi_request::tts_chunks] =
     (*message_)[strings::msg_params][strings::tts_chunks];
   msg_params[strings::app_id] = app_id;
+  msg_params[hmi_request::speak_type] =
+      hmi_apis::Common_SpeakType::ALERT;
   SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 

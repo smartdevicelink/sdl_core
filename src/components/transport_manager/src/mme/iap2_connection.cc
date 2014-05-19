@@ -52,7 +52,6 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
 }
 
 bool IAP2Connection::Init() {
-#define IAP2_CONNECT 1
 #if IAP2_CONNECT
   LOG4CXX_TRACE(logger_, "iAP2: connecting to " << device_path_);
   iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);

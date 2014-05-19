@@ -81,7 +81,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     media_manager_(NULL),
-    resume_ctrl_(this) {
+    resume_ctrl_(this),
+    metric_observer_(NULL) {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   media_manager_ = media_manager::MediaManagerImpl::instance();
   CreatePoliciesManager();
@@ -508,41 +509,33 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
 
-  if (true == profile::Profile::instance()->launch_hmi()) {
-    utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
+  utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
       MessageHelper::CreateModuleInfoSO(
-        static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
-    ManageHMICommand(is_vr_ready);
+          static_cast<uint32_t>(hmi_apis::FunctionID::VR_IsReady)));
+  ManageHMICommand(is_vr_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
-        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
-    ManageHMICommand(is_tts_ready);
+  utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady));
+  ManageHMICommand(is_tts_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
-        MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
-    ManageHMICommand(is_ui_ready);
+  utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady));
+  ManageHMICommand(is_ui_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::Navigation_IsReady));
-    ManageHMICommand(is_navi_ready);
+  utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::Navigation_IsReady));
+  ManageHMICommand(is_navi_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VehicleInfo_IsReady));
-    ManageHMICommand(is_ivi_ready);
+  utils::SharedPtr<smart_objects::SmartObject> is_ivi_ready(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::VehicleInfo_IsReady));
+  ManageHMICommand(is_ivi_ready);
 
-    utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::Buttons_GetCapabilities));
-    ManageHMICommand(button_capabilities);
-  }
-
-  if (!connection_handler_) {
-    LOG4CXX_WARN(logger_, "Connection handler is not set.");
-  } else {
-    connection_handler_->StartTransportManager();
-  }
+  utils::SharedPtr<smart_objects::SmartObject> button_capabilities(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::Buttons_GetCapabilities));
+  ManageHMICommand(button_capabilities);
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -594,10 +587,11 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t bits_per_sample,
                                                       int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {
-    media_manager_->StartMicrophoneRecording(session_key,
-                                             std::string("record.wav"),
-                                             max_duration);
+  if (NULL != media_manager_) {    
+    media_manager_->StartMicrophoneRecording(
+      session_key,
+      profile::Profile::instance()->recording_file_name(),
+      max_duration);
   }
 }
 
@@ -605,16 +599,11 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
     uint32_t session_key, std::vector<uint8_t> binaryData) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  {
-    sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-    if (!audio_pass_thru_active_) {
-      LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
-          " when PassThrough is not active");
-
-      return;
-    }
+  if (!audio_pass_thru_active_) {
+    LOG4CXX_ERROR(logger_, "Trying to send PassThroughNotification"
+                  " when PassThrough is not active");
+    return;
   }
-
   smart_objects::SmartObject* on_audio_pass = NULL;
   on_audio_pass = new smart_objects::SmartObject();
 
@@ -904,7 +893,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            true);
+                            false);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1159,7 +1148,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
         UnregisterApplication(connection_key,
                               mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
-                              true);
+                              false);
         return false;
       } else if (result
           == request_controller::RequestController::NONE_HMI_LEVEL_MANY_REQUESTS) {
@@ -1171,7 +1160,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
             mobile_api::AppInterfaceUnregisteredReason::REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
         UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
-                              true);
+                              false);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1670,16 +1659,22 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
+  bool is_ignition_off =
+      unregister_reason_ ==
+      mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
+
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
     UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
-                          true);
-    it = application_list_.begin();
+                          is_ignition_off);
+    it = application_list_.begin();    
   }
-  resume_controller().IgnitionOff();
+  if (is_ignition_off) {
+   resume_controller().IgnitionOff();
+  }
 }
 
 void ApplicationManagerImpl::UnregisterApplication(

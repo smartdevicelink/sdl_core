@@ -53,10 +53,45 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
-        for (int i = 0; i < messagesCount; i++) {
-            processor.process(ServiceType.Heartbeat, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+        processor.setCallback(callback);
 
+        for (int i = 0; i < messagesCount; i++) {
+            processor.processHeartbeat(ProtocolConstants.PROTOCOL_VERSION_TWO, SESSION_ID);
+        }
+
+        countDownLatch.await(1, TimeUnit.SECONDS);
+
+        processor.shutdownAllExecutors();
+
+        assertEquals(messagesCount, callbackCounter[0]);
+    }
+
+    public void testHeartbeatAckMessagesExecuted() throws InterruptedException {
+        final int messagesCount = 10;
+        final int[] callbackCounter = {0};
+        SendProtocolMessageProcessor processor = new SendProtocolMessageProcessor();
+        final CountDownLatch countDownLatch = new CountDownLatch(messagesCount);
+
+        SendProtocolMessageProcessor.ISendProtocolMessageProcessor callback =
+                new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
+                    @Override
+                    public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                      int offset, int length) {
+                        callbackCounter[0]++;
+                        countDownLatch.countDown();
+                    }
+
+                    @Override
+                    public void onProtocolFrameToSendError(SendProtocolMessageProcessor.ERROR_TYPE errorType,
+                                                           String message) {
+
+                    }
+                };
+
+        processor.setCallback(callback);
+
+        for (int i = 0; i < messagesCount; i++) {
+            processor.processHeartbeatAck(ProtocolConstants.PROTOCOL_VERSION_TWO, SESSION_ID);
         }
 
         countDownLatch.await(1, TimeUnit.SECONDS);
@@ -88,9 +123,11 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
+        processor.setCallback(callback);
+
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.RPC, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -123,9 +160,11 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
+        processor.setCallback(callback);
+
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.Mobile_Nav, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -158,9 +197,11 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
+        processor.setCallback(callback);
+
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.Audio_Service, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -194,9 +235,11 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
+        processor.setCallback(callback);
+
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.RPC, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -236,25 +279,23 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     }
                 };
 
+        processor.setCallback(callback);
+
         ServiceType serviceType;
         int dataSize;
         int bulkDataSize = 168495;
         int bulkMessagesCount = 0;
         for (int i = 0; i < messagesCount; i++) {
-            switch (CommonUtils.randInt(0, 4)) {
+            switch (CommonUtils.randInt(0, 3)) {
                 case 0:
                     serviceType = ServiceType.RPC;
                     dataSize = 0;
                     break;
                 case 1:
-                    serviceType = ServiceType.Heartbeat;
-                    dataSize = 0;
-                    break;
-                case 2:
                     serviceType = ServiceType.Mobile_Nav;
                     dataSize = 0;
                     break;
-                case 3:
+                case 2:
                     serviceType = ServiceType.Audio_Service;
                     dataSize = 0;
                     break;
@@ -265,7 +306,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     break;
             }
             processor.process(serviceType, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1, callback);
+                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 

@@ -67,7 +67,11 @@ SDL.SDLAppController = Em.Object.create({
 
             switch (element.commandID) {
                 case -1: {
-                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID);
+                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID, "DRIVER_DISTRACTION_VIOLATION");
+                    break;
+                }
+                case -2: {
+                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID, "USER_EXIT");
                     break;
                 }
                 default: {

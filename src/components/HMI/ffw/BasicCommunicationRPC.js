@@ -255,6 +255,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                         });
                     } else {
 
+                        SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device ? response.result.device.id : null;
+
                         if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
                             SDL.States.goToStates('info.apps');
                         }
@@ -396,6 +398,14 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.UpdateDeviceList") {
                     SDL.SDLModel.onGetDeviceList(request.params);
+                    this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
+                if (request.method == "BasicCommunication.UpdateAppList") {
+                    if (SDL.States.info.active) {
+                        SDL.SDLController.onGetAppList(request.params.applications);
+                    }
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -810,6 +820,31 @@ FFW.BasicCommunication = FFW.RPCObserver
         },
 
         /**
+         * Send request if device was unpaired from HMI
+         *
+         * @param {number} appID
+         */
+        OnDeviceStateChanged: function(elemet) {
+
+            Em.Logger.log("FFW.SDL.OnDeviceStateChanged");
+
+            // send notification
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnDeviceStateChanged",
+                "params": {
+                    "deviceState": "UNPAIRED",
+                    "deviceInternalId": "",
+                    "deviceId": {
+                        "name": elemet.deviceName,
+                        "id": elemet.deviceID
+                    }
+                }
+            };
+            this.client.send(JSONMessage);
+        },
+
+        /**
          * This methos is request to get list of registered apps.
          */
         OnFindApplications: function() {
@@ -913,7 +948,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          *
          * @params {Number}
          */
-        ExitApplication: function(appID) {
+        ExitApplication: function(appID, reason) {
 
             Em.Logger.log("FFW.BasicCommunication.OnExitApplication");
 
@@ -923,6 +958,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "jsonrpc": "2.0",
                 "method": "BasicCommunication.OnExitApplication",
                 "params": {
+                    "reason": reason,
                     "appID": appID
                 }
             };

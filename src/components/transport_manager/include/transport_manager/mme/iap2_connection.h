@@ -66,7 +66,10 @@ class IAP2Connection : public Connection {
   TransportAdapterController* controller_;
   std::string device_path_;
 
+#define IAP2_CONNECT 1
+#if IAP2_CONNECT
   iap2_hdl_t* iap2_hdl_;
+#endif
   iap2ea_hdl_t* iap2ea_hdl_;
 
   utils::SharedPtr<threads::Thread> receiver_thread_;

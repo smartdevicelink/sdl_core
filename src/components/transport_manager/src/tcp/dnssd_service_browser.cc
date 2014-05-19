@@ -83,7 +83,7 @@ DnssdServiceBrowser::~DnssdServiceBrowser() {
 
 void DnssdServiceBrowser::OnClientConnected() {
   initialised_ = true;
-  LOG4CXX_ERROR(logger_, "AvahiClient ready");
+  LOG4CXX_INFO(logger_, "AvahiClient ready");
 }
 
 void DnssdServiceBrowser::OnClientFailure() {

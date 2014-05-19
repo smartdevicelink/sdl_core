@@ -553,6 +553,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsHMICooperating() const;
 
+    /**
+     * Function used only by HMI request/response/notification base classes
+     * to change HMI app id to Mobile app id and vice versa.
+     * Dot use it inside Core
+     */
+    ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -608,14 +615,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
-
-    /**
-     * Function used only by HMI request/response/notification base classes
-     * to change HMI app id to Mobile app id and vice versa.
-     * Dot use it inside Core
-     */
-    ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
 
   private:
 

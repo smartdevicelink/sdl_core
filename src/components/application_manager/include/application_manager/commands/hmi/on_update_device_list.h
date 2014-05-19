@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,43 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UPDATE_DEVICE_LIST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UPDATE_DEVICE_LIST_H_
 
-namespace resumption {
+#include "application_manager/commands/hmi/notification_from_hmi.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+namespace application_manager {
 
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
-}
+namespace commands {
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
-}
+/**
+ * @brief OnUpdateDeviceList command class
+ **/
+class OnUpdateDeviceList : public NotificationFromHMI {
+ public:
+  /**
+   * @brief OnUpdateDeviceList class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnUpdateDeviceList(const MessageSharedPtr& message);
 
-LastState::LastState() {
-  LoadFromFileSystem();
-}
+  /**
+   * @brief OnUpdateDeviceList class destructor
+   **/
+  virtual ~OnUpdateDeviceList();
 
-LastState::~LastState() {
-  SaveToFileSystem();
-}
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnUpdateDeviceList);
+};
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_UPDATE_DEVICE_LIST_H_

@@ -63,19 +63,20 @@ template<typename T, size_t minsize, size_t maxsize> class Array;
 template<typename T, size_t minsize, size_t maxsize> class Map;
 template<typename T> class Nullable;
 template<typename T> class Optional;
+template<typename T> class Stringifyable;
 
 template<typename T>
 class Range {
- public:
-  // Methods
-  Range(const T min, const T max);
-  T min() const;
-  T max() const;
-  template<typename U>
-  bool Includes(U val) const;
- private:
-  T min_;
-  T max_;
+  public:
+    // Methods
+    Range(const T min, const T max);
+    T min() const;
+    T max() const;
+    template<typename U>
+    bool Includes(U val) const;
+  private:
+    T min_;
+    T max_;
 };
 
 /*
@@ -83,267 +84,295 @@ class Range {
  * tell whether descendant object was initialized
  */
 class PrimitiveType {
- public:
-  bool is_initialized() const;
-  bool is_valid() const;
-  void ReportErrors(ValidationReport* report) const;
- protected:
-  enum ValueState {
-    kUninitialized,
-    kInvalid,
-    kValid
-  };
-  explicit PrimitiveType(ValueState value_state);
-  static ValueState InitHelper(bool is_next);
-  static ValueState InitHelper(const Json::Value* value,
-                               bool (Json::Value::*type_check)() const);
- protected:
-  ValueState value_state_;
+  public:
+    bool is_initialized() const;
+    bool is_valid() const;
+    void ReportErrors(ValidationReport* report) const;
+  protected:
+    enum ValueState {
+      kUninitialized,
+      kInvalid,
+      kValid
+    };
+    explicit PrimitiveType(ValueState value_state);
+    static ValueState InitHelper(bool is_next);
+    static ValueState InitHelper(const Json::Value* value,
+                                 bool (Json::Value::*type_check)() const);
+  protected:
+    ValueState value_state_;
 };
 
 /*
  * Base class for all composite types (arrays and all user-defined types)
  */
 class CompositeType {
- public:
-  void mark_initialized();
-  void ReportErrors(ValidationReport* report) const;
- protected:
-  enum InitializationState {
-    kUninitialized,
-    kInitialized,
-    kInvalidInitialized
-  };
-  explicit CompositeType(InitializationState init_state);
-  static InitializationState InitHelper(bool is_next);
-  static InitializationState InitHelper(const Json::Value* value,
-                               bool (Json::Value::*type_check)() const);
- protected:
-  InitializationState initialization_state__;
+  public:
+    void mark_initialized();
+    void ReportErrors(ValidationReport* report) const;
+  protected:
+    enum InitializationState {
+      kUninitialized,
+      kInitialized,
+      kInvalidInitialized
+    };
+    explicit CompositeType(InitializationState init_state);
+    static InitializationState InitHelper(bool is_next);
+    static InitializationState InitHelper(const Json::Value* value,
+                                          bool (Json::Value::*type_check)() const);
+  protected:
+    InitializationState initialization_state__;
 };
 
 /*
  * Class that holds primitive boolean value. It is always valid.
  */
 class Boolean : public PrimitiveType {
- public:
-  // Types
-  typedef bool ValueType;
- public:
-  // Methods
-  Boolean();
-  explicit Boolean(bool value);
-  explicit Boolean(const Json::Value* value);
-  explicit Boolean(dbus::MessageReader* reader);
-  Boolean(const Json::Value* value, bool def_value);
-  Boolean& operator=(bool new_val);
-  operator bool() const;
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Types
+    typedef bool ValueType;
+  public:
+    // Methods
+    Boolean();
+    explicit Boolean(bool value);
+    explicit Boolean(const Json::Value* value);
+    explicit Boolean(dbus::MessageReader* reader);
+    Boolean(const Json::Value* value, bool def_value);
+    Boolean& operator=(bool new_val);
+    operator bool() const;
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-private:
-  // Fields
-  ValueType value_;
+  private:
+    // Fields
+    ValueType value_;
 };
 
 template<typename T, T minval, T maxval>
 class Integer : public PrimitiveType {
- public:
-  // Types
-  typedef T IntType;
- public:
-  // Methods
-  Integer();
-  explicit Integer(IntType value);
-  explicit Integer(const Json::Value* value);
-  explicit Integer(dbus::MessageReader* reader);
-  Integer(const Json::Value* value, IntType def_value);
-  Integer& operator=(IntType new_val);
-  operator IntType() const;
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Types
+    typedef T IntType;
+  public:
+    // Methods
+    Integer();
+    explicit Integer(IntType value);
+    explicit Integer(const Json::Value* value);
+    explicit Integer(dbus::MessageReader* reader);
+    Integer(const Json::Value* value, IntType def_value);
+    Integer& operator=(IntType new_val);
+    operator IntType() const;
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
- private:
-  IntType value_;
-  static const Range<T> range_;
+  private:
+    IntType value_;
+    static const Range<T> range_;
 };
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 class Float : public PrimitiveType {
- public:
-  // Methods
-  Float();
-  explicit Float(double value);
-  explicit Float(const Json::Value* value);
-  explicit Float(dbus::MessageReader* reader);
-  Float(const Json::Value* value, double def_value);
-  Float& operator=(double new_val);
-  operator double() const;
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Methods
+    Float();
+    explicit Float(double value);
+    explicit Float(const Json::Value* value);
+    explicit Float(dbus::MessageReader* reader);
+    Float(const Json::Value* value, double def_value);
+    Float& operator=(double new_val);
+    operator double() const;
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
- private:
-  double value_;
-  static const Range<double> range_;
+  private:
+    double value_;
+    static const Range<double> range_;
 };
 
 template<size_t minlen, size_t maxlen>
 class String : public PrimitiveType {
- public:
-  // Methods
-  String();
-  explicit String(const std::string& value);
-  explicit String(const char* value);
-  explicit String(const Json::Value* value);
-  explicit String(dbus::MessageReader* reader);
-  String(const Json::Value* value, const std::string& def_value);
-  String& operator=(const std::string& new_val);
-  operator const std::string&() const;
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Methods
+    String();
+    explicit String(const std::string& value);
+    explicit String(const char* value);
+    explicit String(const Json::Value* value);
+    explicit String(dbus::MessageReader* reader);
+    String(const Json::Value* value, const std::string& def_value);
+    String& operator=(const std::string& new_val);
+    operator const std::string& () const;
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
- private:
-  std::string value_;
-  static const Range<size_t> length_range_;
+  private:
+    std::string value_;
+    static const Range<size_t> length_range_;
 };
 
 template<typename T>
 class Enum : public PrimitiveType {
- public:
-  // Types
-  typedef T EnumType;
- public:
-  // Methods
-  Enum();
-  explicit Enum(EnumType value);
-  explicit Enum(const Json::Value* value);
-  explicit Enum(dbus::MessageReader* reader);
-  Enum(const Json::Value* value, EnumType def_value);
-  Enum& operator=(EnumType new_val);
-  operator EnumType() const;
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Types
+    typedef T EnumType;
+  public:
+    // Methods
+    Enum();
+    explicit Enum(EnumType value);
+    explicit Enum(const Json::Value* value);
+    explicit Enum(dbus::MessageReader* reader);
+    Enum(const Json::Value* value, EnumType def_value);
+    Enum& operator=(EnumType new_val);
+    operator EnumType() const;
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
- private:
-  // Fields
-  EnumType value_;
+  private:
+    // Fields
+    EnumType value_;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
 class Array : public std::vector<T>, public CompositeType {
- public:
-  // Types
-  typedef std::vector<T> ArrayType;
- public:
-  // Methods
-  Array();
-  // Need const and non-const versions to beat all-type accepting constructor
-  explicit Array(Json::Value* value);
-  explicit Array(const Json::Value* value);
-  explicit Array(dbus::MessageReader* reader);
-  template<typename U>
-  explicit Array(const U& value);
-  template<typename U>
-  Array& operator=(const U& that);
-  using ArrayType::push_back;
-  template<typename U>
-  void push_back(const U& value);
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Types
+    typedef std::vector<T> ArrayType;
+  public:
+    // Methods
+    Array();
+    // Need const and non-const versions to beat all-type accepting constructor
+    explicit Array(Json::Value* value);
+    explicit Array(const Json::Value* value);
+    explicit Array(dbus::MessageReader* reader);
+    template<typename U>
+    explicit Array(const U& value);
+    template<typename U>
+    Array& operator=(const U& that);
+    using ArrayType::push_back;
+    template<typename U>
+    void push_back(const U& value);
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  bool is_valid() const;
-  bool is_initialized() const;
-  void ReportErrors(ValidationReport* report) const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T, size_t minsize, size_t maxsize>
 class Map : public std::map<std::string, T>, public CompositeType  {
- public:
-  // Types
-  typedef Map<T, minsize, maxsize> Frankenbase;
-  typedef std::map<std::string, T> MapType;
- public:
-  // Methods
-  Map();
-  // Need const and non-const versions to beat all-type accepting constructor
-  explicit Map(Json::Value* value);
-  explicit Map(const Json::Value* value);
-  explicit Map(dbus::MessageReader* reader);
-  template<typename U>
-  explicit Map(const U& value);
-  template<typename U>
-  Map& operator=(const U& that);
-  using MapType::insert;
-  template<typename U>
-  void insert(const std::pair<std::string, U>& value);
-  Json::Value ToJsonValue() const;
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+  public:
+    // Types
+    typedef Map<T, minsize, maxsize> Frankenbase;
+    typedef std::map<std::string, T> MapType;
+  public:
+    // Methods
+    Map();
+    // Need const and non-const versions to beat all-type accepting constructor
+    explicit Map(Json::Value* value);
+    explicit Map(const Json::Value* value);
+    explicit Map(dbus::MessageReader* reader);
+    template<typename U>
+    explicit Map(const U& value);
+    template<typename U>
+    Map& operator=(const U& that);
+    using MapType::insert;
+    template<typename U>
+    void insert(const std::pair<std::string, U>& value);
+    Json::Value ToJsonValue() const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  bool is_valid() const;
-  bool is_initialized() const;
-  void ReportErrors(ValidationReport* report) const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    void ReportErrors(ValidationReport* report) const;
 };
 
 template<typename T>
 class Nullable : public T {
- public:
-  // Methods
-  Nullable();
-  explicit Nullable(dbus::MessageReader* reader);
-  // Need const and non-const versions to beat all-type accepting constructor
-  explicit Nullable(Json::Value* value);
-  explicit Nullable(const Json::Value* value);
-  template<typename U>
-  explicit Nullable(const U& value);
-  template<typename U>
-  Nullable(const Json::Value* value, const U& def_value);
-  template<typename U>
-  Nullable& operator=(const U& new_val);
-  Json::Value ToJsonValue() const;
+  public:
+    // Methods
+    Nullable();
+    explicit Nullable(dbus::MessageReader* reader);
+    // Need const and non-const versions to beat all-type accepting constructor
+    explicit Nullable(Json::Value* value);
+    explicit Nullable(const Json::Value* value);
+    template<typename U>
+    explicit Nullable(const U& value);
+    template<typename U>
+    Nullable(const Json::Value* value, const U& def_value);
+    template<typename U>
+    Nullable& operator=(const U& new_val);
+    Json::Value ToJsonValue() const;
 
-  bool is_valid() const;
-  bool is_initialized() const;
-  bool is_null() const;
-  void set_to_null();
-  void ReportErrors(ValidationReport* report) const;
- private:
-  bool marked_null_;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool is_null() const;
+    void set_to_null();
+    void ReportErrors(ValidationReport* report) const;
+  private:
+    bool marked_null_;
+};
+
+template<typename T>
+class Stringifyable : public T {
+  public:
+    // Methods
+    Stringifyable();
+    explicit Stringifyable(dbus::MessageReader* reader);
+    // Need const and non-const versions to beat all-type accepting constructor
+    explicit Stringifyable(Json::Value* value);
+    explicit Stringifyable(const Json::Value* value);
+    template<typename U>
+    explicit Stringifyable(const U& value);
+    template<typename U>
+    Stringifyable(const Json::Value* value, const U& def_value);
+    template<typename U>
+    Stringifyable& operator=(const U& new_val);
+    Json::Value ToJsonValue() const;
+
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool is_string() const;
+    std::string get_string() const;
+    void set_to_string(const std::string& input);
+    void ReportErrors(ValidationReport* report) const;
+  private:
+    std::string predefined_string_;
 };
 
 template<typename T>
 class Optional {
- public:
-  // Methods
-  Optional();
-  explicit Optional(dbus::MessageReader* reader);
-  template<typename U>
-  explicit Optional(const U& value);
-  template<typename U>
-  Optional(const Json::Value* value,const U& def_value);
-  Json::Value ToJsonValue() const;
+  public:
+    // Methods
+    Optional();
+    explicit Optional(dbus::MessageReader* reader);
+    template<typename U>
+    explicit Optional(const U& value);
+    template<typename U>
+    Optional(const Json::Value* value, const U& def_value);
+    Json::Value ToJsonValue() const;
 
-  void ToDbusWriter(dbus::MessageWriter* writer) const;
+    void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  // Pointer semantics
-  T& operator*();
-  const T& operator*() const;
-  T* operator->();
-  const T* operator->() const;
-  // For pointer-like 'if (optional_value)' tests
-  // Better than operator bool because bool can be implicitly
-  // casted to integral types
-  operator const void*() const;
+    // Pointer semantics
+    T& operator*();
+    const T& operator*() const;
+    T* operator->();
+    const T* operator->() const;
+    // For pointer-like 'if (optional_value)' tests
+    // Better than operator bool because bool can be implicitly
+    // casted to integral types
+    operator const void* () const;
 
-  bool is_valid() const;
-  bool is_initialized() const;
-  void ReportErrors(ValidationReport* report) const;
- private:
-  T value_;
+    bool is_valid() const;
+    bool is_initialized() const;
+    void ReportErrors(ValidationReport* report) const;
+  private:
+    T value_;
 };
 
 }  // namespace rpc
 
 // Template methods implementation
 #include "rpc_base_inl.h"
+#include "rpc_base_json_inl.h"
 
 #endif /* VALIDATED_TYPES_H_ */

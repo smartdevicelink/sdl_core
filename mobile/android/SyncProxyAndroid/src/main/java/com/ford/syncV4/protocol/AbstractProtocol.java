@@ -169,6 +169,7 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+<<<<<<< HEAD
 
             Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
             if (data != null) {
@@ -198,6 +199,23 @@ public abstract class AbstractProtocol {
                     sendMessage(header, dataChunkNotCyphered);
                 }
 
+=======
+        if (data != null && data.length > 0) {
+            if (offset >= data.length) {
+                throw new IllegalArgumentException("offset should not be more then length");
+            }
+            byte[] dataChunk;
+            if (offset + length >= data.length) {
+                dataChunk = Arrays.copyOfRange(data, offset, data.length);
+            } else {
+                dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+            }
+            byte[] frameHeader = header.assembleHeaderBytes();
+            byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+            System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+            System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+            handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+>>>>>>> develop
         } else {
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);

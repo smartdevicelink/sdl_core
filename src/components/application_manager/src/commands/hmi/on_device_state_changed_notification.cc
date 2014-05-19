@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,43 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#include "application_manager/commands/hmi/on_device_state_changed_notification.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
+#include "interfaces/HMI_API.h"
 
-namespace resumption {
+namespace application_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+namespace commands {
 
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
+OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
+  const MessageSharedPtr& message)
+  : NotificationFromHMI(message) {
 }
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
+OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {
+}
+
+void OnDeviceStateChangedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnDeviceStateChangedNotification::Run");
+
+  if ((*message_)[strings::msg_params]["deviceState"]
+      == hmi_apis::Common_DeviceState::UNPAIRED) {
+    std::string device_id = (*message_)[strings::msg_params]["deviceInternalId"]
+                            .asString();
+    if (device_id.empty()) {
+      if ((*message_)[strings::msg_params].keyExists("deviceId")) {
+        device_id = MessageHelper::GetDeviceMacAddressForHandle(
+                      (*message_)[strings::msg_params]["deviceId"]["id"].asInt());
+      }
+    }
+    policy::PolicyHandler::instance()->RemoveDevice(device_id);
   }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
 }
 
-LastState::LastState() {
-  LoadFromFileSystem();
-}
+}  // namespace commands
 
-LastState::~LastState() {
-  SaveToFileSystem();
-}
+}  // namespace application_manager
 
-}

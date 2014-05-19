@@ -157,10 +157,6 @@ void MediaManagerImpl::StartMicrophoneRecording(
       application(application_key);
   std::string file_path = profile::Profile::instance()->app_storage_folder();
   file_path += "/";
-  file_path += app->folder_name();
-  file_system::CreateDirectory(file_path);
-
-  file_path += "/";
   file_path += output_file;
   from_mic_listener_ = new FromMicRecorderListener(file_path);
 #if defined(EXTENDED_MEDIA_MODE)
@@ -182,21 +178,21 @@ void MediaManagerImpl::StartMicrophoneRecording(
       LOG4CXX_WARN(logger_, "Could not remove file " << output_file);
     }
   }
-  const std::string predefined_rec_file =
+  const std::string record_file_source =
       profile::Profile::instance()->app_resourse_folder() + "/" +
-      profile::Profile::instance()->recording_file();
+      profile::Profile::instance()->recording_file_source();
   std::vector<uint8_t> buf;
-  if (file_system::ReadBinaryFile(predefined_rec_file, buf)) {
+  if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
       LOG4CXX_INFO(logger_,
-        "File " << predefined_rec_file << " copied to " << output_file);
+        "File " << record_file_source << " copied to " << output_file);
     }
     else {
       LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
     }
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not read file " << predefined_rec_file);
+    LOG4CXX_WARN(logger_, "Could not read file " << record_file_source);
   }
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
