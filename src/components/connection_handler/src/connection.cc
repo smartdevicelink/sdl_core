@@ -169,7 +169,7 @@ bool Connection::AddNewService(uint8_t session,
       }
     } else {
       LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session) <<
-                    " already established  service " << service_type);
+                    " already established service " << service_type);
       return false;
     }
   } else {
