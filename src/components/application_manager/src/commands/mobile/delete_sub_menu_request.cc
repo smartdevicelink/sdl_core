@@ -95,6 +95,8 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
           smart_objects::SmartType_Map);
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       msg_params[strings::app_id] = app->app_id();
+      msg_params[strings::grammar_id] = app->get_grammar_id();
+      msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
     }
