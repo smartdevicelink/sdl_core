@@ -71,13 +71,8 @@ public abstract class SyncTransport {
             bytesWereSent = sendBytesOverTransport(message, offset, length);
         } // end-lock
         // Send transport data to the siphon server
-<<<<<<< HEAD
         //SiphonServer.sendBytesFromAPP(message, offset, length);
         Logger.d(CLASS_NAME + " Send Bytes");
-=======
-		//SiphonServer.sendBytesFromAPP(message, offset, length);
-        //Logger.d(CLASS_NAME + " Bytes sent");
->>>>>>> develop
         return bytesWereSent;
     } // end-method
 

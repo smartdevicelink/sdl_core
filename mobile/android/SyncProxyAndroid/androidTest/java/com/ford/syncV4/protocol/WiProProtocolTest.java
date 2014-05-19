@@ -37,90 +37,12 @@ import static org.mockito.Mockito.when;
  */
 public class WiProProtocolTest extends InstrumentationTestCase {
 
-<<<<<<< HEAD
-    public static final int MESSAGE_ID = 1;
-    public static final byte SESSION_ID = (byte) 48;
-    public static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
-    public static final int FRAME_SIZE_SHIFT = 100;
-    public static final IProtocolListener DUMMY_PROTOCOL_LISTENER =
-            new IProtocolListener() {
-                @Override
-                public void onProtocolMessageBytesToSend(byte[] msgBytes,
-                                                         int offset,
-                                                         int length) {
-                }
-
-                @Override
-                public void onProtocolMessageReceived(ProtocolMessage msg) {
-                }
-
-                @Override
-                public void onProtocolSessionStarted(Session session,
-                                                     byte version,
-                                                     String correlationID) {
-                }
-
-                @Override
-                public void onProtocolServiceEnded(ServiceType serviceType,
-                                                   byte sessionID,
-                                                   String correlationID) {
-                }
-
-                @Override
-                public void onProtocolHeartbeatACK() {
-                }
-
-                @Override
-                public void onProtocolHeartbeat() {
-
-                }
-
-                @Override
-                public void onResetHeartbeatAck() {
-
-                }
-
-                @Override
-                public void onProtocolError(String info, Exception e) {
-                }
-
-                @Override
-                public void onMobileNavAckReceived(int frameReceivedNumber) {
-
-                }
-
-                @Override
-                public void onProtocolAppUnregistered() {
-
-                }
-
-                @Override
-                public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
-
-                }
-
-                @Override
-                public void onStartServiceNackReceived(ServiceType serviceType) {
-
-                }
-
-<<<<<<< HEAD
-
-=======
-                @Override
-                public void onResetHeartbeat() {
-
-                }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
-            };
-=======
     private static final int MESSAGE_ID = 1;
     private static final byte SESSION_ID = (byte) 48;
     private static final byte FRAME_SEQUENCE_NUMBER = (byte) 1;
     private static final int FRAME_SIZE_SHIFT = 100;
     private static final int EXECUTOR_SERVICE_SLEEP_TIME = 150;
     @SuppressWarnings("unused")
->>>>>>> develop
     private static final String TAG = WiProProtocolTest.class.getSimpleName();
     Method currentCheckMethod;
     private WiProProtocol wiProProtocol;
@@ -529,14 +451,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
@@ -674,14 +593,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID, false,
                 ProtocolConstants.PROTOCOL_VERSION_THREE, "");
@@ -746,11 +662,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
         try {
             messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-<<<<<<< HEAD
-        } catch (IllegalArgumentException exp) {
-=======
         }catch (IllegalArgumentException exp){
->>>>>>> develop
             assertTrue(" should not get here", false);
         }
     }
@@ -811,13 +723,9 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-<<<<<<< HEAD
-        protocol.handleProtocolFrameToSend(frameHeader, null, 0, 0);
-        verify(protocolListener).onResetHeartbeat();
-=======
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
         verify(protocolListener).onResetHeartbeatAck();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
     }
 
 
@@ -840,16 +748,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         byte[] expectedResult = new byte[frameHeaderArray.length + data.length];
         System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
         System.arraycopy(data, 0, expectedResult, frameHeaderArray.length, data.length);
-<<<<<<< HEAD
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
-=======
 
         // Take in count that messages are going to be sent with ExecutorService
         Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
->>>>>>> develop
     }
 
     public void testFrameHeaderSendWithNoData() throws Exception {
@@ -891,16 +795,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         byte[] expectedResult = new byte[frameHeaderArray.length + 20];
         System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
         System.arraycopy(data, 20, expectedResult, frameHeaderArray.length, 20);
-<<<<<<< HEAD
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
-=======
 
         // Take in count that messages are going to be sent with ExecutorService
         Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
->>>>>>> develop
     }
 
     public void testFrameHeaderAndDataSendWithPartialChunkWithLengthToBig() throws Exception {
@@ -922,15 +822,11 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         byte[] expectedResult = new byte[frameHeaderArray.length + 10];
         System.arraycopy(frameHeaderArray, 0, expectedResult, 0, frameHeaderArray.length);
         System.arraycopy(data, 90, expectedResult, frameHeaderArray.length, 10);
-<<<<<<< HEAD
-        verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0, expectedResult.length);
-=======
 
         // Take in count that messages are going to be sent with ExecutorService
         Thread.sleep(EXECUTOR_SERVICE_SLEEP_TIME);
 
         verify(protocolListener, times(1)).onProtocolMessageBytesToSend(expectedResult, 0,
                 expectedResult.length);
->>>>>>> develop
     }
 }

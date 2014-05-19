@@ -78,13 +78,10 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
-<<<<<<< HEAD
-        final CheckBox isHeartBeatBox = (CheckBox) view.findViewById(R.id.heartbeat);
-        final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
-=======
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+        final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
+
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -225,7 +222,9 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_KEY_HEARTBEAT,
                 Const.PREFS_DEFAULT_HEARTBEAT);
 
-        isHeartBeatBox.setChecked(isHeartbeat);
+
+        isHearBeat.setChecked(isHeartbeat);
+
         mediaCheckBox.setChecked(isMedia);
         naviCheckBox.setChecked(isNavi);
         appNameEditText.setText(appName);
@@ -302,17 +301,14 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
-                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHeartBeatBox.isChecked())
+                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHearBeat.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
-<<<<<<< HEAD
-                        setupHeartbeat(isHeartBeatBox);
-=======
                         setupHeartbeat(isHearBeat, isHearBeatAck);
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();

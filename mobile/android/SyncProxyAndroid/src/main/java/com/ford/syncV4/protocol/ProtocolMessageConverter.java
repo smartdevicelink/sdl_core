@@ -2,12 +2,8 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-<<<<<<< HEAD
 import com.ford.syncV4.service.secure.SecureServiceRequestResponseSeqNumberHolder;
 
-=======
-import com.ford.syncV4.util.logger.Logger;
->>>>>>> develop
 
 /**
  * Created by Andrew Batutin on 8/21/13

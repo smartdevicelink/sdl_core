@@ -811,14 +811,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         public void handleQueueingError(String info, Exception ex) {
                             handleErrorsFromOutgoingMessageDispatcher(info, ex);
                         }
-<<<<<<< HEAD
-                    }
-            );
-        }
-=======
                     });
         //}
->>>>>>> develop
     }
 
     private void setupInternalProxyMessageDispatcher() {
@@ -1088,18 +1082,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null) {
-<<<<<<< HEAD
-
-                setSyncConnection(new SyncConnection(_interfaceBroker));
-
-                mSyncConnection = getSyncConnection();
-
-                final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor();
-=======
                 mSyncConnection = new SyncConnection(_interfaceBroker);
                 final HeartbeatMonitor heartbeatMonitor = 
                         new HeartbeatMonitor();
->>>>>>> develop
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
                 mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
@@ -3258,17 +3243,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         ", protocol version:" + (int) version +
                         ", negotiated protocol version: " + getSyncConnection().getProtocolVersion();
                 Logger.i(message);
-
-<<<<<<< HEAD
-
-                if (session.hasService(ServiceType.RPC)) {
-                    onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
-                }
-
-=======
-                startRPCProtocolService(session.getSessionId(), correlationID);
+                onRPCProtocolServiceStarted(session.getSessionId(), correlationID);
                 mSyncConnection.startHeartbeatTimer();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
             }
         }
 
@@ -3309,7 +3285,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
 
-<<<<<<< HEAD
+        @Override
+        public void sendOutgoingMessage(ProtocolMessage protocolMessage) {
+            queueOutgoingMessage(protocolMessage);
+        }
+
         private void handleServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, String correlationID) {
             if (serviceType == ServiceType.Mobile_Nav) {
                 startMobileNaviService(sessionID, correlationID, encrypted);
@@ -3318,11 +3298,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else if (serviceType == ServiceType.RPC) {
                 onRPCServiceStarted(sessionID, correlationID, encrypted);
             }
-=======
-        @Override
-        public void sendOutgoingMessage(ProtocolMessage protocolMessage) {
-            queueOutgoingMessage(protocolMessage);
->>>>>>> develop
         }
     }
 

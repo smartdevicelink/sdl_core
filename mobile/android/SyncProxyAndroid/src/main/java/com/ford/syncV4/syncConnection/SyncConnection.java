@@ -588,19 +588,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    @Override
-<<<<<<< HEAD
-    public void onResetHeartbeat() {
-=======
+    
     public void onProtocolHeartbeat() {
-<<<<<<< HEAD
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
-        if (_heartbeatMonitor != null) {
-            _heartbeatMonitor.heartbeatReceived();
-=======
         if (mHeartbeatMonitor != null) {
             mHeartbeatMonitor.heartbeatReceived();
->>>>>>> develop
         }
     }
 

@@ -32,10 +32,6 @@ public interface ISyncConnectionListener {
 
     public void onStartServiceNackReceived(ServiceType serviceType);
 
-<<<<<<< HEAD
-
-}
-=======
     /**
      * Sends {@link com.ford.syncV4.protocol.ProtocolMessage} to the
      * {@link com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher} queue
@@ -44,4 +40,3 @@ public interface ISyncConnectionListener {
      */
     public void sendOutgoingMessage(ProtocolMessage protocolMessage);
 }
->>>>>>> develop

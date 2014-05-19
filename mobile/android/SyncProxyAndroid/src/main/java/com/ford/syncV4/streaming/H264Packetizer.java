@@ -11,15 +11,11 @@ import java.util.Arrays;
 
 public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
-<<<<<<< HEAD
-    private Thread thread = null;
-    private boolean encrypt;
-=======
     public final static String CLASS_NAME = H264Packetizer.class.getSimpleName();
 
     private byte[] tail = null;
     private Thread thread = null;
->>>>>>> develop
+    private boolean encrypt;
     private ByteBuffer byteBuffer = ByteBuffer.allocate(MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE);
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
     private int mCorrelationId = 0;
@@ -28,12 +24,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         return thread;
     }
 
-<<<<<<< HEAD
     public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType, boolean encrypt) throws IOException {
-=======
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID,
-                          ServiceType serviceType) throws IOException {
->>>>>>> develop
         super(streamListener, is, rpcSessionID);
         _serviceType = serviceType;
         this.encrypt = encrypt;
@@ -92,17 +83,10 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setSessionID(_rpcSessionID);
         pm.setServiceType(_serviceType);
         pm.setFunctionID(0);
-<<<<<<< HEAD
-        pm.setCorrID(0);
-        pm.setEncrypted(encrypt);
-        pm.setData(frameData, frameData.length);
-        _streamListener.sendH264(pm);
-=======
         pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);
 
         mStreamListener.sendH264(pm);
->>>>>>> develop
         return pm;
     }
 

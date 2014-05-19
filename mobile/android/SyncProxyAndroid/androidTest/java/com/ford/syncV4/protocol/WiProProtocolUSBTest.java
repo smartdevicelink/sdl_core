@@ -72,14 +72,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         };
 
         requiredMethodCalled = false;
@@ -171,14 +168,11 @@ public class WiProProtocolUSBTest extends TestCase {
 
             }
 
-<<<<<<< HEAD
-
-=======
             @Override
             public void onResetHeartbeat() {
 
             }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);

@@ -6,7 +6,6 @@ import java.util.Vector;
 
 public class ServiceType extends ByteEnumer {
 
-<<<<<<< HEAD
     public static final byte HEARTBEAT_SERVICE_ID = (byte) 0;
     public static final byte RPC_SERVICE_ID = (byte) 0x07;
     public static final byte BULK_DATA_SERVICE_ID = (byte) 0xF;
@@ -22,18 +21,10 @@ public class ServiceType extends ByteEnumer {
     
 
     private static Vector sVector = new Vector();
-=======
-    private static Vector theList = new Vector();
-
-    public static Vector getList() {
-        return theList;
-    }
->>>>>>> develop
 
     protected ServiceType(byte value, String name) {
         super(value, name);
     }
-<<<<<<< HEAD
     //TODO rename to control service
     public final static ServiceType Heartbeat = new ServiceType(HEARTBEAT_SERVICE_ID,
             HEARTBEAT_SERVICE_NAME);
@@ -65,28 +56,5 @@ public class ServiceType extends ByteEnumer {
 
     public static boolean containsService(ServiceType serviceType) {
         return sVector.contains(serviceType);
-=======
-
-    public final static ServiceType Heartbeat = new ServiceType((byte) 0, "Heartbeat_Service");
-    public final static ServiceType RPC = new ServiceType((byte) 0x07, "RPC");
-    public final static ServiceType Bulk_Data = new ServiceType((byte) 0xF, "Bulk_Data");
-    public final static ServiceType Mobile_Nav = new ServiceType((byte) 0xB, "Mobile_Nav");
-    public final static ServiceType Audio_Service = new ServiceType((byte) 10, "Audio_Service");
-
-    static {
-        theList.addElement(RPC);
-        theList.addElement(Bulk_Data);
-        theList.addElement(Mobile_Nav);
-        theList.addElement(Audio_Service);
-        theList.addElement(Heartbeat);
-    }
-
-    public static ServiceType valueOf(byte passedButton) {
-        return (ServiceType) get(theList, passedButton);
-    }
-
-    public static ServiceType[] values() {
-        return (ServiceType[]) theList.toArray();
->>>>>>> develop
     }
 }

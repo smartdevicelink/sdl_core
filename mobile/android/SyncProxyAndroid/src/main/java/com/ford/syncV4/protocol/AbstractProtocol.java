@@ -3,14 +3,10 @@ package com.ford.syncV4.protocol;
 import android.os.Environment;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
-import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
-<<<<<<< HEAD
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
-=======
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.DebugTool;
@@ -25,10 +21,10 @@ import java.util.Arrays;
 public abstract class AbstractProtocol {
 
     protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
-
+    public static final int SSL_OVERHEAD = 64;
     public static final int MTU_SIZE = 1500;
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
-    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
+    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
 
     protected IProtocolListener _protocolListener = null;
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
@@ -38,7 +34,7 @@ public abstract class AbstractProtocol {
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
     private static FileOutputStream videoOutputFileStream;
-<<<<<<< HEAD
+
     protected boolean hasRPCStarted;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
@@ -50,9 +46,9 @@ public abstract class AbstractProtocol {
     }
 
     private ProtocolSecureManager protocolSecureManager;
-=======
+
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
+
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -173,8 +169,7 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-<<<<<<< HEAD
-        synchronized (_frameLock) {
+
             Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
             if (data != null) {
                 if (offset >= data.length) {
@@ -203,45 +198,24 @@ public abstract class AbstractProtocol {
                     sendMessage(header, dataChunkNotCyphered);
                 }
 
-=======
-        if (header.getFrameData() == FrameDataControlFrameType.StartService.value()) {
-            Logger.d("TRACE-StartService");
-        }
-        if (data != null) {
-            if (offset >= data.length) {
-                throw new IllegalArgumentException("offset should not be more then length");
-            }
-            byte[] dataChunk;
-            if (offset + length >= data.length) {
-                dataChunk = Arrays.copyOfRange(data, offset, data.length);
->>>>>>> develop
-            } else {
-                dataChunk = Arrays.copyOfRange(data, offset, offset + length);
-            }
-            byte[] frameHeader = header.assembleHeaderBytes();
-            byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-            System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-            System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
-            handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
         } else {
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
         }
     }
 
-<<<<<<< HEAD
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
         byte[] frameHeader = header.assembleHeaderBytes();
         byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
         System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
         System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
         handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
-=======
+    }
+
     private synchronized void resetHeartbeatAck() {
         if (_protocolListener != null) {
             _protocolListener.onResetHeartbeatAck();
         }
->>>>>>> cba24a2f62f819b14b46478178a6666eb1cc9034
     }
 
     private synchronized void resetHeartbeat() {
@@ -394,7 +368,7 @@ public abstract class AbstractProtocol {
                 break;
         }
 
-        MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
+        MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
         mHeaderBuf = new byte[AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE];
     }
 
