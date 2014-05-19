@@ -91,6 +91,11 @@ bool System::Execute(bool wait) {
     LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
     return false;
   }
+
+  if (wait) {
+    return WEXITSTATUS(ret) == 0;
+  }
+
   return true;
 }
 
@@ -148,6 +153,7 @@ bool System::Execute(bool wait) {
             return false;
           }
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+        return WEXITSTATUS(status) == 0;
       }
 
       return true;

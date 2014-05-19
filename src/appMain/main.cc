@@ -152,12 +152,6 @@ int32_t main(int32_t argc, char** argv) {
   gst_init(&argc, &argv);
 #endif
 
-#ifdef __QNX__
-  if (!utils::System("./init_policy_qnx.sh").Execute(true)) {
-    LOG4CXX_ERROR(logger, "Failed initialization of policy database");
-  }
-#endif  // __QNX__
-
   // --------------------------------------------------------------------------
   // Components initialization
   if ((argc > 1)&&(0 != argv)) {
@@ -165,6 +159,16 @@ int32_t main(int32_t argc, char** argv) {
   } else {
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
+
+#ifdef __QNX__
+  if (!profile::Profile::instance()->policy_turn_off()) {
+    if (!utils::System("./init_policy.sh").Execute(true)) {
+      LOG4CXX_ERROR(logger, "Failed initialization of policy database");
+      DEINIT_LOGGER();
+      exit(EXIT_FAILURE);
+    }
+  }
+#endif  // __QNX__
 
   main_namespace::LifeCycle::instance()->StartComponents();
 
