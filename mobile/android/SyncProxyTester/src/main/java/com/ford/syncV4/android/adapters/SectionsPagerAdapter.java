@@ -37,9 +37,15 @@ public class SectionsPagerAdapter extends FragmentPagerAdapterCustom {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
 
-        PlaceholderFragment fragment = PlaceholderFragment.newInstance(position + 1);
-        fragments.add(fragment);
-        Log.d(LOG_TAG, "Add Fragment to List, size:" + fragments.size());
+        PlaceholderFragment fragment;
+        if (fragments.size() - 1 < position) {
+            fragment = PlaceholderFragment.newInstance(position + 1);
+            fragments.add(fragment);
+        } else {
+            fragment = fragments.get(position);
+        }
+
+        Log.d(LOG_TAG, "Add Fragment hash:" + fragment.hashCode() + " to List");
 
         return fragment;
     }
@@ -52,7 +58,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapterCustom {
     @Override
     public CharSequence getPageTitle(int position) {
         Locale locale = Locale.getDefault();
-        return "Session:" + mCounter;
+        return "Tab:" + mCounter;
     }
 
     public void incrementCounter() {
@@ -66,15 +72,16 @@ public class SectionsPagerAdapter extends FragmentPagerAdapterCustom {
     }
 
     public void removeFragmentFromList(int position) {
-        PlaceholderFragment fragment = fragments.get(position);
-        if (fragment == null) {
-            Log.w(LOG_TAG, "Fragment is NULL");
-            return;
-        }
+
+        //PlaceholderFragment fragment = fragments.get(position);
+        //removeFragment(fragment.getAppId());
+
+        //fragments.remove(position);
+
         //fragment.onDestroy();
         //fragments.add(position, null);
         //destroyItem(null, position, fragment);
 
-        Log.d(LOG_TAG, "Fragment is " + fragment.hashCode() + " removed, pos:" + position);
+        //Log.d(LOG_TAG, "Fragment is " + fragment.hashCode() + " removed, pos:" + position);
     }
 }

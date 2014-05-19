@@ -519,13 +519,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mSyncProxy.getServicesNumber();
     }
 
-    /**
-     * @return Id of the current session;
-     */
-    public int getSessionId() {
-        return mSyncProxy.getSessionId();
-    }
-
     public boolean hasServiceInServicesPool(String appId, ServiceType serviceType) {
         return mSyncProxy != null && mSyncProxy.hasServiceInServicesPool(appId, serviceType);
     }
@@ -2123,8 +2116,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         try {
-            if (request.getFunctionName().equals(Names.RegisterAppInterface) &&
-                    getSessionId() == 0) {
+            if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
                 syncProxySendRegisterRequest((RegisterAppInterface) request);
             } else {
                 createDebugMessageForAdapter(request);

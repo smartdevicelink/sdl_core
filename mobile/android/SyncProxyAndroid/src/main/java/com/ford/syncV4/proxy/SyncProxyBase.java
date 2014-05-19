@@ -882,10 +882,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _interfaceBroker;
     }
 
-    public byte getMobileNavSessionID() {
-        return syncSession.getSessionId();
-    }
-
     public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
         SyncPDataSender syncPDataSender = new SyncPDataSender(getPoliciesCorrelationId());
         syncPDataSender.sendEncodedPData(urlString, encodedSyncPData, timeout,
@@ -1170,11 +1166,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void closeSession(String appId, boolean keepServices) throws SyncException {
-        Logger.d("Close appId:'" + appId);
+        Logger.d("Close appId:" + appId);
         // Should we wait for the interface to be unregistered?
         boolean waitForInterfaceUnregistered = false;
         synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (mAppInterfaceRegistered.get(appId) && mSyncConnection != null &&
+            Boolean isAppInterfaceRegistered = mAppInterfaceRegistered.get(appId);
+            if (isAppInterfaceRegistered == null) {
+                isAppInterfaceRegistered = false;
+            }
+            if (isAppInterfaceRegistered && mSyncConnection != null &&
                     mSyncConnection.getIsConnected()) {
                 waitForInterfaceUnregistered = true;
                 unregisterAppInterfacePrivate(getUnregisterAppInterfaceCorrelationId());
@@ -1438,12 +1438,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // error checking.
     // FIXME: return to private?
     void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
+
+        // TODO : Modify it to get AppId as parameter
+        byte sessionId = syncSession.getSessionIdByAppId(mActiveAppId);
+
         try {
             final IRPCRequestConverter converter =
                     rpcRequestConverterFactory.getConverterForRequest(request);
             List<ProtocolMessage> protocolMessages =
                     converter.getProtocolMessages(request,
-                            syncSession.getSessionId(), _jsonRPCMarshaller,
+                            sessionId, _jsonRPCMarshaller,
                             mSyncConnection.getProtocolVersion());
 
             if (protocolMessages.size() > 0) {

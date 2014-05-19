@@ -9,6 +9,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ford.syncV4.android.activity.PlaceholderFragment;
+
+import java.util.List;
+
 /**
  * Created with Android Studio.
  * User: Yuriy Chernyshov
@@ -47,7 +51,16 @@ public abstract class FragmentPagerAdapterCustom extends PagerAdapter {
         // Do we already have this fragment?
         String name = makeFragmentName(container.getId(), itemId);
         Fragment fragment = mFragmentManager.findFragmentByTag(name);
-        Log.d(TAG, "Init Item:" + fragment);
+        /*if (fragment != null) {
+            mCurTransaction.remove(fragment);
+            mFragmentManager.beginTransaction();
+            fragment = null;
+        }*/
+
+        Log.d(TAG, "Init Item:" + fragment + " name:" + name);
+        if (mFragmentManager.getFragments() != null) {
+            Log.d(TAG, "Fragments size:" + mFragmentManager.getFragments().size());
+        }
         if (fragment != null) {
             Log.v(TAG, "Attaching item #" + itemId + ": f=" + fragment);
             mCurTransaction.attach(fragment);
@@ -128,6 +141,19 @@ public abstract class FragmentPagerAdapterCustom extends PagerAdapter {
      */
     public long getItemId(int position) {
         return position;
+    }
+
+    public void removeFragment(String appId) {
+        /*if (mCurTransaction == null) {
+            mCurTransaction = mFragmentManager.beginTransaction();
+        }
+        List<Fragment> fragments = mFragmentManager.getFragments();
+        for (Fragment fragment : fragments) {
+            if (((PlaceholderFragment) fragment).getAppId().equals(appId)) {
+                mCurTransaction.remove(fragment);
+                break;
+            }
+        }*/
     }
 
     private static String makeFragmentName(int viewId, long id) {

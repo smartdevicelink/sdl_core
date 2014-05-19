@@ -249,6 +249,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             Logger.w("Current active fragment is NULL");
             return;
         }
+        Logger.d("Current active fragment hash:" + fragment.hashCode());
         mBoundProxyService.setActiveAppId(fragment.getAppId());
     }
 
@@ -319,6 +320,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         Logger.d("Current active Fragment '" + syncAppId + "'");
 
         fragment.setAppId(syncAppId);
+
+        mActionBar.getSelectedTab().setText(syncAppId);
 
         setUpReceiver();
         showProtocolPropertiesInTitle();
@@ -754,6 +757,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     public void closeSession(final String appId, final int position) throws SyncException {
         if (mBoundProxyService != null) {
+            Logger.d("Session of the '" + appId + "' and pos '" + position + "' is going to be closed");
             mBoundProxyService.setCloseSessionCallback(new ICloseSession() {
 
                 @Override
@@ -792,13 +796,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     private void removeFragment(int position) {
-        mSectionsPagerAdapter.decrementCounter();
-        //mSectionsPagerAdapter.removeFragmentFromList(position);
+        /*mSectionsPagerAdapter.decrementCounter();
+        mSectionsPagerAdapter.removeFragmentFromList(position);
 
-        /*if (mSectionsPagerAdapter.getCount() > 0) {
+        *//*if (mSectionsPagerAdapter.getCount() > 0) {
             mViewPager.setCurrentItem(0);
             mActionBar.setSelectedNavigationItem(0);
-        }*/
+        }*//*
 
         mActionBar.removeTabAt(position);
 
@@ -808,7 +812,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
 
         mViewPager.setAdapter(null);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setAdapter(mSectionsPagerAdapter);*/
     }
 
     private void finishActivity() {

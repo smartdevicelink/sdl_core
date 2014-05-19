@@ -277,7 +277,7 @@ public class PlaceholderFragment extends Fragment {
         if (isFirstActivityRun) {
             DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance();
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
-            appSetupDialogFragment.setCancelable(false);
+            //appSetupDialogFragment.setCancelable(false);
         } else {
             ((SyncProxyTester) getActivity()).onSetUpDialogResult(getAppId());
         }
