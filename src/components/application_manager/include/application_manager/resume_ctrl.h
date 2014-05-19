@@ -80,7 +80,6 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application persistent info for future resuming
      * @param application is application witch need to be saved
-     * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will save to to file system
      */
     void SaveApplication(ApplicationConstSharedPtr application);
 
@@ -113,7 +112,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool RemoveApplicationFromSaved(ApplicationConstSharedPtr application);
 
     /**
-     * @brief Save application info to FileSystem
+     * @brief Increments ignition counter for all registered applications
      */
     void IgnitionOff();
 

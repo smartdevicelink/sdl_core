@@ -895,7 +895,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            true);
+                            false);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1152,7 +1152,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
         UnregisterApplication(connection_key,
                               mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
-                              true);
+                              false);
         return false;
       } else if (result ==
                  request_controller::RequestController::
@@ -1165,7 +1165,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
           REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
         UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
-                              true);
+                              false);
         return false;
       } else {
         LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
@@ -1673,16 +1673,22 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   hmi_cooperating_ = false;
 
+  bool is_ignition_off =
+      unregister_reason_ ==
+      mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
+
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
     UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
-                          true);
-    it = application_list_.begin();
+                          is_ignition_off);
+    it = application_list_.begin();    
   }
-  resume_controller().IgnitionOff();
+  if (is_ignition_off) {
+   resume_controller().IgnitionOff();
+  }
 }
 
 void ApplicationManagerImpl::UnregisterApplication(
