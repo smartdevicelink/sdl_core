@@ -95,16 +95,11 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-<<<<<<< HEAD
-        connection.startMobileNavService(session, false);
-        //protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
-=======
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, session, false);
 
         // wait for processing
         Thread.sleep(50);
 
->>>>>>> develop
         assertTrue(passed[0]);
     }
 
@@ -229,18 +224,11 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection.init(config);
         when(connection.getIsConnected()).thenReturn(true);
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
-<<<<<<< HEAD
-
-        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
-        connection._protocol.StartProtocolService(ServiceType.Audio_Service, session, false);
-=======
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        protocol.StartProtocolService(ServiceType.Audio_Service, session);
+        protocol.StartProtocolService(ServiceType.Audio_Service, session, false);
 
         // wait for processing
         Thread.sleep(50);
-
->>>>>>> develop
         assertTrue(isPassed[0]);
     }
 

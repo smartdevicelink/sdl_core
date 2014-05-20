@@ -60,8 +60,8 @@
             android:layout_width="fill_parent"
             android:layout_height="1dp"/>
 
-<<<<<<< HEAD
 
+    <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -98,40 +98,7 @@
                 android:id="@+id/root_detection_view" />
 
         </LinearLayout>
-=======
-        <TextView
-            android:text="Heart Beat:"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
 
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Heartbeat from Mobile"
-            android:visibility="visible"
-            android:id="@+id/heartbeat"
-            android:checked="true" />
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ACK to SDL from Mobile"
-            android:visibility="visible"
-            android:id="@+id/heartbeatAck"
-            android:checked="true" />
-
-        <View
-            android:background="@android:color/white"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"/>
->>>>>>> develop
 
         <CheckBox
             android:id="@+id/selectprotocol_checkMedia"

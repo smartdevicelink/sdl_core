@@ -78,13 +78,12 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
-<<<<<<< HEAD
+
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
 
-=======
->>>>>>> develop
+
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -310,12 +309,8 @@ public class AppSetUpDialog extends DialogFragment {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
-<<<<<<< HEAD
-                        setupHeartbeat(isHearBeat, isHearBeatAck);
-
-=======
                         setupHeartbeat(view);
->>>>>>> develop
+
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult();
                     }
                 }).setView(view).show();
