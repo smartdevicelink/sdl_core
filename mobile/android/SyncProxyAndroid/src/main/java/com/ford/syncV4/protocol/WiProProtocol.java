@@ -20,8 +20,6 @@ import java.util.Hashtable;
 public class WiProProtocol extends AbstractProtocol {
 
     private final static String FailurePropagating_Msg = "Failure propagating ";
-    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
-
     boolean _haveHeader = false;
     int _headerBufWritePos = 0;
     ProtocolFrameHeader _currentHeader = null;

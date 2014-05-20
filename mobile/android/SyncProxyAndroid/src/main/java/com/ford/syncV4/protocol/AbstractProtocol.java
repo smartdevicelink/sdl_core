@@ -46,7 +46,7 @@ public abstract class AbstractProtocol {
 
     private ProtocolSecureManager protocolSecureManager;
 
-    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
+    protected ProtocolVersion mProtocolVersion = new ProtocolVersion();
 
 
     // Caller must provide a non-null IProtocolListener interface reference.

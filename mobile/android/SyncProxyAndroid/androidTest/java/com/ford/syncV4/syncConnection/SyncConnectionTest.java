@@ -204,7 +204,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         Session session = new Session();
         session.setSessionId(sessionID);
 
-        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, ProtocolConstants.PROTOCOL_VERSION_TWO, false);
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service, sessionID, ProtocolConstants.PROTOCOL_VERSION_THREE, false);
         header.setSessionID(sessionID);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class)) {

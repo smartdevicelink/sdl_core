@@ -82,6 +82,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
         };
         wiProProtocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
+        byte res = wiProProtocol.getProtocolVersion();
     }
 
     public void testSendMobileNavSmallFrameProtocolMessageSucceed() throws Exception {
@@ -331,7 +332,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void testReadingHashIDFromStartSessionACK() throws Throwable {
         final ByteArrayOutputStream StartSessionACKMessageStream =
                 new ByteArrayOutputStream(ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);
-
+        wiProProtocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         final byte[] msgFirstBytes = new byte[]{0x20, 0x07, 0x02, 0x00};
         StartSessionACKMessageStream.write(msgFirstBytes);
         final byte[] msgDataSize = new byte[]{0x00, 0x00, 0x00, 0x00};
