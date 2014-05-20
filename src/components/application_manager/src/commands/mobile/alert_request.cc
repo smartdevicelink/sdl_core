@@ -250,11 +250,20 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     msg_params[strings::progress_indicator] =
       (*message_)[strings::msg_params][strings::progress_indicator];
   }
+
+  // PASA Alert type
+  msg_params[strings::alert_type] = hmi_apis::Common_AlertType::UI;
+  if (awaiting_tts_speak_response_) {
+    msg_params[strings::alert_type] = hmi_apis::Common_AlertType::BOTH;
+  }
+
+  // check out if there are alert strings or soft buttons
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
+
     flag_other_component_sent_ = true;
+    SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
-  SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
 void AlertRequest::SendSpeakRequest(int32_t app_id) {
