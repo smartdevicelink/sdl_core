@@ -57,8 +57,11 @@ TransportAdapterImpl::TransportAdapterImpl(
       connections_mutex_(),
       device_scanner_(device_scanner),
       server_connection_factory_(server_connection_factory),
-      client_connection_listener_(client_connection_listener),
-      metric_observer_(NULL) {
+      client_connection_listener_(client_connection_listener)
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+{
   pthread_mutex_init(&devices_mutex_, 0);
   pthread_mutex_init(&connections_mutex_, 0);
 }
@@ -438,9 +441,11 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
                                            RawMessageSptr message) {
+#ifdef TIME_TESTER
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
   }
+#endif  // TIME_TESTER
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
@@ -577,13 +582,17 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   }
 }
 
+#ifdef TIME_TESTER
 void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
 
+#ifdef TIME_TESTER
 TMMetricObserver* TransportAdapterImpl::GetTimeMetricObserver() {
   return metric_observer_;
 }
+#endif  // TIME_TESTER
 
 void TransportAdapterImpl::Store() const {
 }
