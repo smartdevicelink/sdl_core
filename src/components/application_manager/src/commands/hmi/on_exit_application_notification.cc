@@ -79,4 +79,3 @@ void OnExitApplicationNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

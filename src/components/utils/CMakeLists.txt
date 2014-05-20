@@ -16,6 +16,7 @@ set (SOURCES
     ./src/date_time.cc
     ./src/signals_linux.cc
     ./src/system.cc
+    ./src/resource_usage.cc
 )
 
 if (BUILD_BACKTRACE_SUPPORT)

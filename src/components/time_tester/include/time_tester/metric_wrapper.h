@@ -34,13 +34,22 @@
 #define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
 
 #include <string>
+#include "utils/resource_usage.h"
+#include "json/json.h"
 
 namespace time_tester {
 
-class Metric {
+class MetricWrapper {
+  utils::ResourseUsage* resources;
   public:
-    virtual std::string GetStyledString() = 0;
-    virtual ~Metric(){}
+    MetricWrapper();
+    bool grabResources();
+    virtual std::string GetStyledString();
+    ~MetricWrapper();
+  protected:
+    virtual Json::Value GetJsonMetric();
 };
+
+
 }  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
