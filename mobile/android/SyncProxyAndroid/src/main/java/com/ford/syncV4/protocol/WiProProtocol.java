@@ -365,7 +365,7 @@ public class WiProProtocol extends AbstractProtocol {
         private void handleControlFrame(ProtocolFrameHeader header) {
             byte frameData = header.getFrameData();
             byte sessionId = header.getSessionID();
-            Logger.d(CLASS_NAME + " " + header.toString());
+            Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
             if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
                 handleProtocolHeartbeatACK();
             } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {

@@ -387,9 +387,9 @@ public class PlaceholderFragment extends Fragment {
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
-        if (tabsCount == 1) {
+        //if (tabsCount == 1) {
             menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
-        }
+        //}
         menu.add(0, MenuConstants.MENU_CLOSE_SESSION, nextMenuItemOrder++, "Close Session");
         //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
         menu.add(0, MenuConstants.MENU_HASH_ID_SETUP, nextMenuItemOrder++, "HashId setup");

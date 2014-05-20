@@ -768,7 +768,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     MainApp.getInstance().runInUIThread(new Runnable() {
                         @Override
                         public void run() {
-                            removeFragment(position);
+                            //removeFragment(position);
                         }
                     });
                 }
@@ -796,13 +796,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     private void removeFragment(int position) {
-        /*mSectionsPagerAdapter.decrementCounter();
+        mSectionsPagerAdapter.decrementCounter();
         mSectionsPagerAdapter.removeFragmentFromList(position);
 
-        *//*if (mSectionsPagerAdapter.getCount() > 0) {
+        /*if (mSectionsPagerAdapter.getCount() > 0) {
             mViewPager.setCurrentItem(0);
             mActionBar.setSelectedNavigationItem(0);
-        }*//*
+        }*/
 
         mActionBar.removeTabAt(position);
 
@@ -812,7 +812,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
 
         mViewPager.setAdapter(null);
-        mViewPager.setAdapter(mSectionsPagerAdapter);*/
+        mViewPager.setAdapter(mSectionsPagerAdapter);
     }
 
     private void finishActivity() {

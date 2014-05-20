@@ -1441,6 +1441,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         // TODO : Modify it to get AppId as parameter
         byte sessionId = syncSession.getSessionIdByAppId(mActiveAppId);
+        Logger.d(LOG_TAG, "Send RPC sesId:" + sessionId + " active appId:" + mActiveAppId +
+            " _appId:" + _appID + " name:" + request.getFunctionName());
 
         try {
             final IRPCRequestConverter converter =
@@ -2488,7 +2490,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
             Object appID, String autoActivateID, Integer correlationID, String hashId,
-            DeviceInfo deviceInfo, byte sessionId) throws SyncException {
+            DeviceInfo deviceInfo, final byte sessionId) throws SyncException {
 
         final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
@@ -2497,10 +2499,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         sendRPCRequestPrivate(msg);
 
-        logOnRegisterAppRequest(sessionId, msg);
-    }
-
-    private void logOnRegisterAppRequest(final byte sessionId, final RegisterAppInterface msg) {
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -2973,6 +2971,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void initializeSession() {
         // Initialize a start session procedure
+        Logger.d(LOG_TAG, "Init session, id:" + mActiveAppId);
         syncSession.addSessionId(mActiveAppId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }

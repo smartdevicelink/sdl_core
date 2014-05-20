@@ -146,6 +146,9 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
+
+        Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
+
         resetHeartbeatAck();
         composeMessage(header, data, offset, length);
     }
