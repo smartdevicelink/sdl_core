@@ -45,6 +45,7 @@
 #include "utils/macro.h"
 #include "utils/date_time.h"
 #include "json/value.h"
+#include "json/writer.h"
 #include "config_profile/profile.h"
 #include "application_manager/usage_statistics.h"
 #include "policy/policy_types.h"
@@ -431,6 +432,31 @@ void PolicyHandler::OnPendingPermissionChange(
     default:
       break;
   }
+}
+
+BinaryMessageSptr PolicyHandler::AddHttpHeader(const BinaryMessageSptr& pt_string) {
+  Json::Value packet(Json::objectValue);
+  packet["HTTPRequest"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["headers"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["headers"]["ContentType"] = Json::Value("application/json");
+  packet["HTTPRequest"]["headers"]["ConnectTimeout"] = Json::Value(policy_manager_->TimeoutExchange());
+  packet["HTTPRequest"]["headers"]["DoOutput"] = Json::Value(true);
+  packet["HTTPRequest"]["headers"]["DoInput"] = Json::Value(true);
+  packet["HTTPRequest"]["headers"]["UseCaches"] = Json::Value(false);
+  packet["HTTPRequest"]["headers"]["RequestMethod"] = Json::Value("POST");
+  packet["HTTPRequest"]["headers"]["ReadTimeout"] = Json::Value(policy_manager_->TimeoutExchange());
+  packet["HTTPRequest"]["headers"]["InstanceFollowRedirects"] = Json::Value(false);
+  packet["HTTPRequest"]["headers"]["charset"] = Json::Value("utf-8");
+  packet["HTTPRequest"]["headers"]["Content_Length"] = Json::Value(static_cast<int>(pt_string->size()));
+  packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::arrayValue);
+  packet["HTTPRequest"]["body"]["data"][0] = Json::Value(std::string(pt_string->begin(),
+                                                                     pt_string->end()));
+
+  Json::FastWriter writer;
+  std::string message = writer.write(packet);
+  LOG4CXX_DEBUG(logger_, "Packet PT: " << message);
+  return new BinaryMessage(message.begin(), message.end());
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {

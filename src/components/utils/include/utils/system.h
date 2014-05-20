@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2013, Ford Motor Company
+/**
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_
 
-namespace resumption {
+#include <string>
+#include <vector>
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+namespace utils {
 
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
-}
+/**
+ * Class to execute shell scripts
+ */
+class System {
+ public:
+  /**
+   * Constructs instantiation
+   * @param command name of command for executing
+   */
+  explicit System(const std::string& command);
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
-}
+  /**
+   * Constructs instantiation
+   * @param file name of file for executing
+   * @param command name of command
+   */
+  System(const std::string& file, const std::string& command);
 
-LastState::LastState() {
-  LoadFromFileSystem();
-}
+  /**
+   * Adds argument
+   * @param arg argument of command
+   * @return itself object
+   */
+  System& Add(const std::string& arg);
 
-LastState::~LastState() {
-  SaveToFileSystem();
-}
+  /**
+   * Executes command as new child process
+   * @return true if success
+   */
+  bool Execute();
 
-}
+  /**
+   * Executes command
+   * @param wait if this flag is true then wait until command is terminated
+   * @return true if success
+   */
+  bool Execute(bool wait);
+
+ private:
+  /**
+   * Command for executing
+   */
+  std::string command_;
+
+  /**
+   * List of arguments
+   */
+  std::vector<std::string> argv_;
+};
+
+}  // utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_

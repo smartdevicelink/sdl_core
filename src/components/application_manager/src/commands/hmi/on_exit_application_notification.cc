@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -57,10 +58,22 @@ void OnExitApplicationNotification::Run() {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
-  app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-  app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
-  MessageHelper::SendHMIStatusNotification(*app_impl);
+  hmi_apis::Common_ApplicationToNONEReason::eType reason;
+  reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
+                       ((*message_)[strings::msg_params][strings::reason].asInt());
+  if (hmi_apis::Common_ApplicationToNONEReason::DRIVER_DISTRACTION_VIOLATION == reason ) {
+    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        app_impl->app_id(),
+        mobile_api::AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+    app_mgr->UnregisterApplication(
+        app_impl->app_id(), mobile_apis::Result::SUCCESS, true);
+  } else {
+    app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+    app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+    app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
+    MessageHelper::SendHMIStatusNotification(*app_impl);
+  }
+
 }
 
 }  // namespace commands

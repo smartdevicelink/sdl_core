@@ -31,6 +31,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SCHEMA_ITEM_H_
 
+#include <stdint.h>
+
 #include "smart_objects/errors.h"
 
 namespace NsSmartDeviceLink {
@@ -95,6 +97,13 @@ class ISchemaItem {
   virtual void BuildObjectBySchema(
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& pattern_object,
       NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+
+  /**
+   * @brief Get value param, depends of children
+   *
+   * @return value of any parameter
+   */
+  virtual uint32_t GetMemberSize();
 
   virtual ~ISchemaItem() {
   }
