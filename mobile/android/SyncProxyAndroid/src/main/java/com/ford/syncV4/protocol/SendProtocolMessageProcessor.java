@@ -83,7 +83,8 @@ public class SendProtocolMessageProcessor {
      */
     public void process(final ServiceType serviceType, final byte protocolVersionToSend,
                         final byte[] data, final int maxDataSize,
-                        final byte sessionID, final int messageId) {
+                        final byte sessionID, final int messageId
+                        ) {
 
         if (data == null) {
             callback.onProtocolFrameToSendError(ERROR_TYPE.DATA_NPE, "Data is NULL");
@@ -240,7 +241,7 @@ public class SendProtocolMessageProcessor {
             public void run() {
                 if (callback != null) {
                     ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                            ServiceType.RPC, sessionId, protocolVersionToSend);
+                            ServiceType.RPC, sessionId, protocolVersionToSend, false);
                     callback.onProtocolFrameToSend(header, null, 0, 0);
                 }
             }
@@ -309,7 +310,7 @@ public class SendProtocolMessageProcessor {
             public void run() {
                 if (callback != null) {
                     ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                            serviceType, sessionId, protocolVersionToSend);
+                            serviceType, sessionId, protocolVersionToSend, false);
                     callback.onProtocolFrameToSend(header, null, 0, 0);
                 }
             }

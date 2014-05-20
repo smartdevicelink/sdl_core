@@ -23,7 +23,6 @@ public class ProtocolMessage {
     public static byte RPCTYPE_REQUEST = 0x00;
     public static byte RPCTYPE_RESPONSE = 0x01;
     public static byte RPCTYPE_NOTIFICATION = 0x02;
-    private ServiceType serviceType;
 
     public boolean isEncrypted() {
         return isEncrypted;
@@ -177,6 +176,6 @@ public class ProtocolMessage {
     }
 
     public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+        this._serviceType = serviceType;
     }
 } // end-class

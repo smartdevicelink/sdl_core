@@ -2,7 +2,6 @@ package com.ford.syncV4.protocol;
 
 import android.os.Environment;
 
-import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
@@ -47,7 +46,7 @@ public abstract class AbstractProtocol {
 
     private ProtocolSecureManager protocolSecureManager;
 
-    private ProtocolVersion mProtocolVersion = new ProtocolVersion();
+    protected ProtocolVersion mProtocolVersion = new ProtocolVersion();
 
 
     // Caller must provide a non-null IProtocolListener interface reference.
@@ -71,7 +70,9 @@ public abstract class AbstractProtocol {
     // interface.  Note that the ProtocolMessage itself contains information
     // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
     // over which to send the message, etc.
-    public abstract void SendMessage(ProtocolMessage msg);
+    public abstract void SendMessage(ProtocolMessage protocolMessage, ServiceType serviceTypeToBeSecured);
+
+    public abstract void SendMessage(ProtocolMessage protocolMessage);
 
     public byte getProtocolVersion() {
         return mProtocolVersion.getCurrentVersion();
@@ -146,7 +147,7 @@ public abstract class AbstractProtocol {
 
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
-                                               MessageFrameAssembler assembler) {
+                                               WiProProtocol.MessageFrameAssembler assembler) {
         if (data != null) {
             Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
         } else {
@@ -169,8 +170,6 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-<<<<<<< HEAD
-
             Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
             if (data != null) {
                 if (offset >= data.length) {
@@ -198,24 +197,6 @@ public abstract class AbstractProtocol {
                 } else {
                     sendMessage(header, dataChunkNotCyphered);
                 }
-
-=======
-        if (data != null && data.length > 0) {
-            if (offset >= data.length) {
-                throw new IllegalArgumentException("offset should not be more then length");
-            }
-            byte[] dataChunk;
-            if (offset + length >= data.length) {
-                dataChunk = Arrays.copyOfRange(data, offset, data.length);
-            } else {
-                dataChunk = Arrays.copyOfRange(data, offset, offset + length);
-            }
-            byte[] frameHeader = header.assembleHeaderBytes();
-            byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-            System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-            System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
-            handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
->>>>>>> develop
         } else {
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
