@@ -354,22 +354,14 @@ public class WiProProtocol extends AbstractProtocol {
             } // end-if
         } // end-method
 
-        private void handleProtocolHeartbeatACK() {
-            WiProProtocol.this.handleProtocolHeartbeatACK();
-        }
-
-        private void handleProtocolHeartbeat() {
-            WiProProtocol.this.handleProtocolHeartbeat();
-        }
-
         private void handleControlFrame(ProtocolFrameHeader header) {
             byte frameData = header.getFrameData();
             byte sessionId = header.getSessionID();
             Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
             if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
-                handleProtocolHeartbeatACK();
+                WiProProtocol.this.handleProtocolHeartbeatACK(sessionId);
             } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {
-                handleProtocolHeartbeat();
+                WiProProtocol.this.handleProtocolHeartbeat(sessionId);
             } else if (frameData == FrameDataControlFrameType.StartService.getValue()) {
                 sendProtocolMessageProcessor.processStartSessionAck(header.getServiceType(),
                         getProtocolVersion(), sessionId);

@@ -22,11 +22,11 @@ public interface IProtocolListener {
     /**
      * Called when a protocol heartbeat ACK message has been received from SYNC.
      */
-    void onProtocolHeartbeatACK();
+    void onProtocolHeartbeatACK(byte sessionId);
 
-    void onProtocolHeartbeat();
+    void onProtocolHeartbeat(byte sessionId);
 
-    void onResetHeartbeatAck();
+    void onResetHeartbeatAck(byte sessionId);
 
 	// Called to indicate that a protocol error was detected in received data.
 	void onProtocolError(String info, Exception e);
@@ -39,5 +39,5 @@ public interface IProtocolListener {
 
     void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 
-    void onResetHeartbeat();
+    void onResetHeartbeat(byte sessionId);
 }

@@ -17,7 +17,6 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -1014,17 +1013,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null) {
                 mSyncConnection = new SyncConnection(syncSession, _interfaceBroker);
-                final HeartbeatMonitor heartbeatMonitor = 
-                        new HeartbeatMonitor();
-                heartbeatMonitor.setInterval(heartBeatInterval);
-                heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
-                mSyncConnection.setHeartbeatMonitor(heartbeatMonitor);
-
-                //syncSession.setSessionId((byte) 0);
-                //mSyncConnection.setSessionId(syncSession.getSessionId());
-                mSyncConnection.setSessionId(Session.DEFAULT_SESSION_ID);
-
-                //mSyncConnection.setSessionId(syncSession.getSessionId());
 
                 /**
                  * TODO : Set TestConfig for the Connection
@@ -1052,9 +1040,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
 
             mSyncConnection.closeConnection(sessionId, keepConnection);
-            if (mSyncConnection.getSessionId() != 0) {
-                mSyncConnection.setSessionId((byte) 0);
-            }
 
             if (!keepConnection) {
                 setSyncConnection(null);
@@ -1799,7 +1784,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             syncSession.addService(service);
         }
 
-        mSyncConnection.setSessionId(sessionId);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -3080,7 +3064,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             Logger.i(message);
 
             startProtocolSession(sessionId);
-            mSyncConnection.startHeartbeatTimer();
+
+            mSyncConnection.setHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
+            mSyncConnection.startHeartbeatTimer(sessionId);
         }
 
         @Override

@@ -41,7 +41,6 @@ public abstract class AbstractProtocol {
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }// end-ctor
 
-
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
     // handled internally by the protocol or propagated to the protocol listener.
@@ -134,7 +133,7 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
-        resetHeartbeat();
+        resetHeartbeat(header.getSessionID());
         assembler.handleFrame(header, data);
     }
 
@@ -149,7 +148,7 @@ public abstract class AbstractProtocol {
 
         Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
 
-        resetHeartbeatAck();
+        resetHeartbeatAck(header.getSessionID());
         composeMessage(header, data, offset, length);
     }
 
@@ -175,15 +174,15 @@ public abstract class AbstractProtocol {
         }
     }
 
-    private synchronized void resetHeartbeatAck() {
+    private synchronized void resetHeartbeatAck(byte sessionId) {
         if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeatAck();
+            _protocolListener.onResetHeartbeatAck(sessionId);
         }
     }
 
-    private synchronized void resetHeartbeat() {
+    private synchronized void resetHeartbeat(byte sessionId) {
         if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeat();
+            _protocolListener.onResetHeartbeat(sessionId);
         }
     }
 
@@ -309,12 +308,12 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolAppUnregistered();
     }
 
-    protected void handleProtocolHeartbeatACK() {
-        _protocolListener.onProtocolHeartbeatACK();
+    protected void handleProtocolHeartbeatACK(byte sessionId) {
+        _protocolListener.onProtocolHeartbeatACK(sessionId);
     }
 
-    protected void handleProtocolHeartbeat() {
-        _protocolListener.onProtocolHeartbeat();
+    protected void handleProtocolHeartbeat(byte sessionId) {
+        _protocolListener.onProtocolHeartbeat(sessionId);
     }
 
     protected void updateDataStructureToProtocolVersion(byte version) {

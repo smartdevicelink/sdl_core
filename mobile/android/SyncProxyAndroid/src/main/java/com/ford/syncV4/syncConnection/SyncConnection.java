@@ -10,6 +10,7 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
 import com.ford.syncV4.proxy.constants.Names;
@@ -57,12 +58,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     // Thread safety locks
     private static final Object TRANSPORT_REFERENCE_LOCK = new Object();
     private static final Object PROTOCOL_REFERENCE_LOCK = new Object();
-    private IHeartbeatMonitor mHeartbeatMonitor;
+    //private IHeartbeatMonitor mHeartbeatMonitor;
+    /**
+     * Table of the Heart Beat monitors (each one associated with a concrete session)
+     */
+    private final Hashtable<Byte, IHeartbeatMonitor> heartbeatMonitors =
+            new Hashtable<Byte, IHeartbeatMonitor>();
     private boolean mIsHeartbeatTimedout = false;
     private NSDHelper mNSDHelper;
 
-    // Id of the current active session
-    private byte mSessionId = Session.DEFAULT_SESSION_ID;
     static final Object END_PROTOCOL_SERVICE_AUDIO_LOCK = new Object();
     static final Object END_PROTOCOL_SERVICE_VIDEO_LOCK = new Object();
     static final Object END_PROTOCOL_SERVICE_RPC_LOCK = new Object();
@@ -172,13 +176,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         return _protocol;
     }
 
-    public IHeartbeatMonitor getHeartbeatMonitor() {
-        return mHeartbeatMonitor;
-    }
+    public void setHeartbeatMonitor(byte sessionId, int heartBeatInterval, boolean heartBeatAck) {
+        if (heartbeatMonitors.containsKey(sessionId)) {
+            heartbeatMonitors.remove(sessionId);
+        }
+        final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor(sessionId);
+        heartbeatMonitor.setInterval(heartBeatInterval);
+        heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
+        heartbeatMonitor.setListener(this);
 
-    public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
-        mHeartbeatMonitor = heartbeatMonitor;
-        mHeartbeatMonitor.setListener(this);
+        Logger.d(CLASS_NAME + " Set HB monitor, sesId:" + sessionId);
+        heartbeatMonitors.put(sessionId, heartbeatMonitor);
+
+        //mHeartbeatMonitor = heartbeatMonitor;
+        //mHeartbeatMonitor.setListener(this);
     }
 
     public void closeConnection(byte rpcSessionID, boolean keepConnection) {
@@ -228,7 +239,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     // If transport is still connected, sent EndProtocolSessionMessage
                     if (sendFinishMessages) {
                         _protocol.EndProtocolService(ServiceType.RPC, sessionId);
-                        stopHeartbeatMonitor();
+                        stopHeartbeatMonitor(sessionId);
                     }
                 }
             }
@@ -237,11 +248,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    private void stopHeartbeatMonitor() {
-        if (mHeartbeatMonitor != null) {
+    private void stopHeartbeatMonitor(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        if (heartbeatMonitor != null) {
+            Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId);
+            heartbeatMonitor.stop();
+        }
+
+        /*if (mHeartbeatMonitor != null) {
             Logger.d(CLASS_NAME + " Stop HeartBeat");
             mHeartbeatMonitor.stop();
-        }
+        }*/
     }
 
     private void waitForRpcEndServiceACK() {
@@ -429,10 +446,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         startProtocolSession(sessionId);
     }
 
-    public void startHeartbeatTimer() {
-        if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.start();
+    public void startHeartbeatTimer(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        if (heartbeatMonitor != null) {
+            heartbeatMonitor.start();
         }
+
+        /*if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.start();
+        }*/
     }
 
     private void startProtocolSession(byte sessionId) {
@@ -556,31 +578,53 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolHeartbeatACK() {
-        if (mHeartbeatMonitor != null) {
+    public void onProtocolHeartbeatACK(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        if (heartbeatMonitor != null) {
+            heartbeatMonitor.heartbeatACKReceived();
+        }
+
+        /*if (mHeartbeatMonitor != null) {
             mHeartbeatMonitor.heartbeatACKReceived();
-        }
+        }*/
     }
 
     @Override
-    public void onProtocolHeartbeat() {
-        if (mHeartbeatMonitor != null) {
+    public void onProtocolHeartbeat(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        if (heartbeatMonitor != null) {
+            heartbeatMonitor.heartbeatReceived();
+        }
+
+        /*if (mHeartbeatMonitor != null) {
             mHeartbeatMonitor.heartbeatReceived();
-        }
+        }*/
     }
 
     @Override
-    public void onResetHeartbeatAck() {
-        if (mHeartbeatMonitor != null) {
+    public void onResetHeartbeatAck(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        Logger.d(CLASS_NAME + " Reset HM at sesId:" + sessionId + " HB's number:" +
+                heartbeatMonitors.size() + " current:" + heartbeatMonitor);
+        if (heartbeatMonitor != null) {
+            heartbeatMonitor.notifyTransportOutputActivity();
+        }
+
+        /*if (mHeartbeatMonitor != null) {
             mHeartbeatMonitor.notifyTransportOutputActivity();
-        }
+        }*/
     }
 
     @Override
-    public void onResetHeartbeat() {
-        if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.notifyTransportInputActivity();
+    public void onResetHeartbeat(byte sessionId) {
+        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        if (heartbeatMonitor != null) {
+            heartbeatMonitor.notifyTransportInputActivity();
         }
+
+        /*if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.notifyTransportInputActivity();
+        }*/
     }
 
     @Override
@@ -625,36 +669,22 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendHeartbeat(IHeartbeatMonitor monitor) {
-        Logger.d(CLASS_NAME + " Asked to send heartbeat");
-        _protocol.SendHeartBeatMessage(getSessionId());
+        Logger.d(CLASS_NAME + " Asked to send heartbeat, sesId:" + monitor.getSessionId());
+        _protocol.SendHeartBeatMessage(monitor.getSessionId());
     }
 
     @Override
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
-        Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection");
+        Logger.d(CLASS_NAME + " Heartbeat timeout; closing connection, sesId:" + monitor.getSessionId());
         mIsHeartbeatTimedout = true;
         closeConnection((byte) 0, false, true);
         mConnectionListener.onHeartbeatTimedOut();
     }
 
     @Override
-    public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor) {
-        Logger.d(CLASS_NAME + " Asked to send heartbeat ack");
-        _protocol.SendHeartBeatAckMessage(getSessionId());
-    }
-
-    public byte getSessionId() {
-        return mSessionId;
-    }
-
-    /**
-     * Set ID of the current active session
-     *
-     * @param sessionId
-     */
-    public void setSessionId(byte sessionId) {
-        mSessionId = sessionId;
-        Logger.d(CLASS_NAME + " SetSessionId:" + mSessionId);
+    public void sendHeartbeatACK(IHeartbeatMonitor monitor) {
+        Logger.d(CLASS_NAME + " Asked to send heartbeat ack, sesId:" + monitor.getSessionId());
+        _protocol.SendHeartBeatAckMessage(monitor.getSessionId());
     }
 
     private void processTransportStopReading() {
