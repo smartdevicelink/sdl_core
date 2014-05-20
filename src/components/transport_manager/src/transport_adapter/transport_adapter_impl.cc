@@ -59,7 +59,7 @@ TransportAdapterImpl::TransportAdapterImpl(
       server_connection_factory_(server_connection_factory),
       client_connection_listener_(client_connection_listener)
 #ifdef TIME_TESTER
-      metric_observer_(NULL)
+      , metric_observer_(NULL)
 #endif  // TIME_TESTER
 {
   pthread_mutex_init(&devices_mutex_, 0);
