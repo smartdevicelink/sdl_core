@@ -55,7 +55,7 @@ namespace protocol_handler {
  */
 //TODO:(EZamakhov) Rename SessionObserver to SessionManager
 //TODO:(EZamakhov) Unificate interface (references)
-//TODO:(EZamakhov) cahnge brief info (callback, spaces)
+//TODO:(EZamakhov) change brief info (callback, spaces)
 //TODO:(EZamakhov) rename KeyFromPair and PairFromKey
 //TODO:(EZamakhov) Add const modifiers to const methods
 class SessionObserver {
