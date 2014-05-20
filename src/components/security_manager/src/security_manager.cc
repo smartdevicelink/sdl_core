@@ -331,8 +331,8 @@ void SecurityManager::SendInternalError(const uint32_t connection_key,
   data_sending[data_sending.size()-1] = error_id;
 
   SendData(connection_key, header, &data_sending[0], data_sending.size());
-  LOG4CXX_DEBUG(logger_, "Sent Internal error id " << error_id << " : "
-                << erorr_text << ".");
+  LOG4CXX_DEBUG(logger_, "Sent Internal error id " << static_cast<int>(error_id) << " : \""
+                << erorr_text << "\".");
 }
 
 void SecurityManager::SendData(
