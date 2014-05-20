@@ -502,15 +502,6 @@ public class WiProProtocol extends AbstractProtocol {
         }
     }
 
-    protected void handleProtocolHeartbeatACK() {
-        WiProProtocol.this.handleProtocolHeartbeatACK();
-    }
-
-    protected void handleProtocolHeartbeat() {
-        WiProProtocol.this.handleProtocolHeartbeat();
-    }
-
-
     private void handleControlFrame(ProtocolFrameHeader header) {
         byte frameData = header.getFrameData();
         //Logger.d(CLASS_NAME + " ControlFrame:" + frameData);
