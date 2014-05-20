@@ -62,7 +62,6 @@ PolicyHandler::PolicyHandler()
   : policy_manager_(0),
     dl_handle_(0),
     exchange_handler_(NULL),
-    is_exchange_in_progress_(false),
     on_ignition_check_done_(false),
     retry_sequence_("RetrySequence", new RetrySequence(this)) {
 }
@@ -465,7 +464,6 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  is_exchange_in_progress_ = true;
 
   std::string url;
   uint32_t app_id = last_used_app_ids_.back();
@@ -495,6 +493,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   application_manager::MessageHelper::SendPolicySnapshotNotification(app_id,
       pt_string,
       url, 0);
+
   return true;
 }
 
@@ -505,7 +504,12 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     return false;
   }
 
-  is_exchange_in_progress_ = false;
+  if (policy_manager_->GetPolicyTableStatus() !=
+      PolicyTableStatus::StatusUpdatePending) {
+    LOG4CXX_WARN(logger_,
+                 "Update policy is skipped because request to update was not");
+    return false;
+  }
 
   bool ret = policy_manager_->LoadPT(file, pt_string);
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
@@ -556,7 +560,8 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
     return;
   }
 
-  if (is_exchange_in_progress_) {
+  if (policy_manager_->GetPolicyTableStatus() ==
+        PolicyTableStatus::StatusUpdatePending) {
     LOG4CXX_INFO(logger_, "Starting exchange skipped, since another exchange "
                  "is in progress.");
     return;

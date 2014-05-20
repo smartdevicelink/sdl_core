@@ -279,13 +279,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   DeviceHandles pending_device_handles_;
 
-  /**
-   * @brief True, if PTS was sent, but PTU was not reseived yet,
-   * otherwise - false
-   * Used for limiting device consent request per PTS/PTU session
-   */
-  bool is_exchange_in_progress_;
-
   inline PolicyManager* CreateManager();
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
