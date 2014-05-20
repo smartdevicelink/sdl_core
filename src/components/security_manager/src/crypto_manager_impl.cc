@@ -70,7 +70,7 @@ bool CryptoManagerImpl::Init(Mode mode,
 #else
   const SSL_METHOD *method;
 #endif
-  // TODO (EZamakhov) : add TLS1.0 protocolo
+  // TODO (EZamakhov) : add TLS1.0 protocol
   switch (protocol) {
     case SSLv3:
       method = is_server ?
