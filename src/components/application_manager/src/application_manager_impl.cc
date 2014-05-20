@@ -500,6 +500,9 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
 
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
   MessageHelper::ResetGlobalproperties(app);
+  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(app->app_id(),
+      mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+  UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM, false);
 }
 
 void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {
