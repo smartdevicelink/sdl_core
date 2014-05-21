@@ -111,18 +111,18 @@ void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handl
   apps_lock_.Release();
 
   controller_->ApplicationListUpdated(unique_device_id());
-  // Here will be notification
-  // controller_->...
 }
 
 void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
+  bool removed = false;
   apps_lock_.Acquire();
-  AppContainer::const_iterator i = apps_.find(app_id);
+  AppContainer::iterator i = apps_.find(app_id);
   if (i != apps_.end()) {
     AppRecord record = i->second;
     std::string protocol_name = record.first;
     LOG4CXX_DEBUG(logger_, "iAP2: dropping protocol " << protocol_name << " for application " << app_id);
-    apps_.erase(i->first);
+    apps_.erase(i);
+    removed = true;
     ThreadContainer::const_iterator j = connection_threads_.find(protocol_name);
     if (j != connection_threads_.end()) {
       utils::SharedPtr<threads::Thread> thread = j->second;
@@ -137,6 +137,10 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
     LOG4CXX_WARN(logger_, "iAP2: no protocol corresponding to application " << app_id);
   }
   apps_lock_.Release();
+
+  if (removed) {
+    controller_->ApplicationListUpdated(unique_device_id());
+  }
 }
 
 IAP2Device::IAP2ConnectThreadDelegate::IAP2ConnectThreadDelegate(

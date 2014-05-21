@@ -98,35 +98,70 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   connections_lock_.Release();
 
   app_table_lock_.Acquire();
-  for (AppTable::const_iterator i = app_table_.begin(); i != app_table_.end();) {
+  for (AppTable::iterator prv = app_table_.begin(), i = prv; i != app_table_.end();) {
     if (i->second == app_id) {
       int session_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-      app_table_.erase(session_id);
+// The next lines
+// are just a substitution for
+// i = erase(i);
+// which isn't yet implemented
+      bool head_removed = (app_table_.begin() == i);
+      app_table_.erase(i);
+      if (head_removed) {
+        prv = app_table_.begin();
+        i = prv;
+      }
+      else {
+        i = prv;
+        ++i;
+      }
       break;
     }
     else {
+      prv = i;
       ++i;
     }
   }
   app_table_lock_.Release();
 
+  bool removed = false;
   apps_lock_.Acquire();
-  for (AppContainer::const_iterator i = apps_.begin(); i != apps_.end();) {
+  for (AppContainer::iterator prv = apps_.begin(), i = prv; i != apps_.end();) {
     if (i->second == app_id) {
       uint32_t protocol_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_id << " for application " << app_id);
-      apps_.erase(protocol_id);
+// The next lines
+// are just a substitution for
+// i = erase(i);
+// which isn't yet implemented
+      bool head_removed = (apps_.begin() == i);
+      apps_.erase(i);
+      removed = true;
+      if (head_removed) {
+        prv = apps_.begin();
+        i = prv;
+      }
+      else {
+        i = prv;
+        ++i;
+      }
       break;
     }
     else {
+      prv = i;
       ++i;
     }
   }
   apps_lock_.Release();
+
+  if (removed) {
+    controller_->ApplicationListUpdated(unique_device_id());
+  }
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
+  bool inserted = false;
   ApplicationHandle app_id;
   apps_lock_.Acquire();
   AppContainer::const_iterator i = apps_.find(protocol_id);
@@ -137,10 +172,13 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
     app_id = ++last_app_id_;
     LOG4CXX_DEBUG(logger_, "iAP: adding new application " << app_id << " on protocol " << protocol_id);
     apps_.insert(std::make_pair(protocol_id, app_id));
-    // Here will be notification
-    // controller_->...
+    inserted = true;
   }
   apps_lock_.Release();
+
+  if (inserted) {
+    controller_->ApplicationListUpdated(unique_device_id());
+  }
 
   app_table_lock_.Acquire();
   LOG4CXX_DEBUG(logger_, "iAP: adding new session " << session_id << " for application " << app_id);
@@ -161,7 +199,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
 
 void IAPDevice::OnSessionClosed(int session_id) {
   app_table_lock_.Acquire();
-  AppTable::const_iterator i = app_table_.find(session_id);
+  AppTable::iterator i = app_table_.find(session_id);
   if (i != app_table_.end()) {
     ApplicationHandle app_id = i->second;
     connections_lock_.Acquire();
@@ -175,7 +213,7 @@ void IAPDevice::OnSessionClosed(int session_id) {
     }
     connections_lock_.Release();
     LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-    app_table_.erase(i->first);
+    app_table_.erase(i);
   }
   else {
     LOG4CXX_WARN(logger_, "iAP: no application corresponding to session " << session_id);
