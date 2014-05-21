@@ -293,6 +293,24 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
+                                         uint8_t session_id) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      SERVICE_TYPE_RPC, FRAME_DATA_END_SERVICE, session_id, 0, 0));
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+  LOG4CXX_INFO(logger_, "SendEndSession() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(SERVICE_TYPE_RPC)
+               << " session_id " << static_cast<int32_t>(session_id));
+
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
                                                   uint8_t session_id,
                                                   uint32_t message_id) {
@@ -311,7 +329,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
 }
 
 void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
-                                               uint8_t session_id) {
+                                        uint8_t session_id) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
@@ -852,7 +870,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    static_cast<int>(packet.protocol_version()));
 
   int32_t session_id = session_observer_->OnSessionStartedCallback(
-      connection_id, packet.session_id(), packet.protocol_version(),
+      connection_id, packet.session_id(),
       ServiceTypeFromByte(packet.service_type()));
 
   if (-1 != session_id) {
