@@ -43,6 +43,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
+#include "utils/resource_usage.h"
 
 namespace time_tester {
 
@@ -89,7 +90,7 @@ void TimeManager::Stop() {
   LOG4CXX_INFO(logger_, "TimeManager stopped");
 }
 
-void TimeManager::SendMetric(utils::SharedPtr<Metric> metric) {
+void TimeManager::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
   messages_.push(metric);
 }
 
@@ -121,7 +122,7 @@ void TimeManager::Streamer::threadMain() {
     is_client_connected_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
-        utils::SharedPtr<Metric> metric = server_->messages_.pop();
+        utils::SharedPtr<MetricWrapper> metric = server_->messages_.pop();
         is_client_connected_ = Send(metric->GetStyledString());
       }
 

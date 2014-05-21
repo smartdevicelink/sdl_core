@@ -40,7 +40,7 @@
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
-#include "metric.h"
+#include "metric_wrapper.h"
 #include "application_manager_observer.h"
 #include "application_manager/application_manager_impl.h"
 #include "transport_manager_observer.h"
@@ -56,7 +56,7 @@ class TimeManager {
   ~TimeManager();
   void Init(protocol_handler::ProtocolHandlerImpl* ph);
   void Stop();
-  void SendMetric(utils::SharedPtr<Metric> metric);
+  void SendMetric(utils::SharedPtr<MetricWrapper> metric);
  private:
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;
@@ -67,7 +67,7 @@ class TimeManager {
   int32_t socket_fd_;
   bool is_ready_;
   threads::Thread* thread_;
-  MessageQueue<utils::SharedPtr<Metric> > messages_;
+  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
 
   class Streamer : public threads::ThreadDelegate {
    public:

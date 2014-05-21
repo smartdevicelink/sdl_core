@@ -60,7 +60,9 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+#ifdef TIME_TESTER
 #include "time_metric_observer.h"
+#endif  // TIME_TESTER
 #include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
@@ -212,12 +214,14 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     HMICapabilities& hmi_capabilities();
 
+#ifdef TIME_TESTER
     /**
      * @brief Setup observer for time metric.
      *
      * @param observer - pointer to observer
      */
     void SetTimeMetricObserver(AMMetricObserver* observer);
+#endif  // TIME_TESTER
 
     ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -665,7 +669,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
+#ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

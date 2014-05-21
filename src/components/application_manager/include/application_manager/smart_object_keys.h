@@ -116,6 +116,7 @@ const char initial_prompt[] = "initialPrompt";
 const char initial_text[] = "initialText";
 const char duration[] = "duration";
 const char progress_indicator[] = "progressIndicator";
+const char alert_type[] = "alertType";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
 const char custom_presets[] = "customPresets";

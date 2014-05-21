@@ -76,8 +76,11 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
-      connection_id_counter_(0),
-      metric_observer_(NULL) {
+      connection_id_counter_(0)
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+{
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
   pthread_rwlock_init(&message_queue_rwlock_, NULL);
@@ -713,9 +716,11 @@ void TransportManagerImpl::EventListenerThread(void) {
             break;
           }
           data->set_connection_key(connection->id);
+#ifdef TIME_TESTER
           if (metric_observer_) {
             metric_observer_->StopRawMsg(data.get());
           }
+#endif  // TIME_TESTER
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }
@@ -769,9 +774,12 @@ void TransportManagerImpl::EventListenerThread(void) {
   LOG4CXX_INFO(logger_, "Event listener thread finished");
 }
 
+#ifdef TIME_TESTER
 void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
+
 void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   if (NULL != data) {
     static_cast<TransportManagerImpl*>(data)->MessageQueueThread();

@@ -154,8 +154,12 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)),
-      metric_observer_(NULL) {
+                                   threads::ThreadOptions(kStackSize))
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+
+{
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -410,9 +414,12 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
            protocol_frames.begin();
        it != protocol_frames.end(); ++it) {
     impl::RawFordMessageFromMobile msg(*it);
+#ifdef TIME_TESTER
     if (metric_observer_) {
       metric_observer_->StartMessageProcess(msg->message_id());
     }
+#endif  // TIME_TESTER
+
     raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
@@ -653,6 +660,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       RawMessagePtr raw_message(
           new RawMessage(connection_key, packet->protocol_version(), packet->data(),
                          packet->data_size(), packet->service_type()));
+#ifdef TIME_TESTER
       if (metric_observer_) {
         PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
         metric->message_id = packet->message_id();
@@ -660,6 +668,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
         metric->raw_msg = raw_message;
         metric_observer_->EndMessageProcess(metric);
       }
+#endif
       NotifySubscribers(raw_message);
       break;
     }
@@ -743,11 +752,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       RawMessagePtr rawMessage (new RawMessage(
           key, completePacket->protocol_version(), completePacket->data(),
           completePacket->total_data_bytes(), completePacket->service_type()));
+#ifdef TIME_TESTER
       if (metric_observer_) {
         PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
         metric->raw_msg = rawMessage;
         metric_observer_->EndMessageProcess(metric);
       }
+#endif // TIME_TESTER
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -925,9 +936,12 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
         impl::RawFordMessageToMobile(ptr, false));
 }
 
+#ifdef TIME_TESTER
 void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
+
 
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const std::size_t data_size) {

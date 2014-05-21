@@ -81,8 +81,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     media_manager_(NULL),
-    resume_ctrl_(this),
-    metric_observer_(NULL) {
+    resume_ctrl_(this)
+#ifdef TIME_TESTER
+    , metric_observer_(NULL)
+#endif  // TIME_TESTER
+{
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   media_manager_ = media_manager::MediaManagerImpl::instance();
   CreatePoliciesManager();
@@ -500,6 +503,9 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
 
 void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
   MessageHelper::ResetGlobalproperties(app);
+  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(app->app_id(),
+      mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+  UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM, false);
 }
 
 void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {
@@ -1526,8 +1532,10 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message>& message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
+#ifdef TIME_TESTER
   AMMetricObserver::MessageMetricSharedPtr metric(new AMMetricObserver::MessageMetric());
   metric->begin = date_time::DateTime::getCurrentTime();
+#endif  // TIME_TESTER
   utils::SharedPtr<smart_objects::SmartObject> so_from_mobile(
     new smart_objects::SmartObject);
 
@@ -1540,15 +1548,19 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
+#ifdef TIME_TESTER
   metric->message = so_from_mobile;
+#endif  // TIME_TESTER
 
   if (!ManageMobileCommand(so_from_mobile)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
+#ifdef TIME_TESTER
   metric->end = date_time::DateTime::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }
+#endif  // TIME_TESTER
 }
 
 void ApplicationManagerImpl::ProcessMessageFromHMI(
@@ -1605,9 +1617,11 @@ HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
 }
 
+#ifdef TIME_TESTER
 void ApplicationManagerImpl::SetTimeMetricObserver(AMMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr& ptr) {
   notification_list_.push_back(ptr);
