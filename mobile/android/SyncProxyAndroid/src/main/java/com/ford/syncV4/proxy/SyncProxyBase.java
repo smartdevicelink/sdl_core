@@ -1469,7 +1469,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @return true if the response has been handled; false when the
      * corresponding request is not partial or in case of an error
      */
-    protected boolean handlePartialRPCResponse(final RPCResponse response, Hashtable hash) {
+    protected boolean handlePartialRPCResponse(final byte sessionId, final RPCResponse response,
+                                               Hashtable hash) {
         boolean success = false;
         final Integer responseCorrelationID = response.getCorrelationID();
         if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
@@ -1491,11 +1492,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             _mainUIHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    _proxyListener.onPutFileResponse(putFile);
+                                    _proxyListener.onPutFileResponse(sessionId, putFile);
                                 }
                             });
                         } else {
-                            _proxyListener.onPutFileResponse(putFile);
+                            _proxyListener.onPutFileResponse(sessionId, putFile);
                         }
                     }
 
@@ -1528,7 +1529,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return contains;
     }
 
-    protected void handleOnSystemRequest(Hashtable hash) {
+    protected void handleOnSystemRequest(final byte sessionId, Hashtable hash) {
         final OnSystemRequest msg = new OnSystemRequest(hash);
 
         if (_callbackToUIThread) {
@@ -1536,11 +1537,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onOnSystemRequest(msg);
+                    _proxyListener.onOnSystemRequest(sessionId, msg);
                 }
             });
         } else {
-            _proxyListener.onOnSystemRequest(msg);
+            _proxyListener.onOnSystemRequest(sessionId, msg);
         }
 
         final FileType fileType = msg.getFileType();
@@ -1549,14 +1550,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (requestType == RequestType.HTTP) {
             if (fileType == FileType.BINARY) {
                 Logger.d(LOG_TAG + " PolicyTableSnapshot url:" + msg.getUrl());
-                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
+                processPolicyTableSnapshot(sessionId, msg.getBulkData(), fileType, requestType);
             } else {
                 final Vector<String> urls = msg.getUrl();
                 if (urls != null) {
                     Runnable request = new Runnable() {
                         @Override
                         public void run() {
-                            onSystemRequestHandler.onFilesDownloadRequest(
+                            onSystemRequestHandler.onFilesDownloadRequest(sessionId,
                                     SyncProxyBase.this, urls, fileType);
                         }
                     };
@@ -1579,7 +1580,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 Runnable request = new Runnable() {
                     @Override
                     public void run() {
-                        onSystemRequestHandler.onFileResumeRequest(
+                        onSystemRequestHandler.onFileResumeRequest(sessionId,
                                 SyncProxyBase.this, urls.get(0), offset, length,
                                 fileType);
                     }
@@ -1595,7 +1596,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         } else if (requestType == RequestType.PROPRIETARY) {
             if (fileType == FileType.JSON) {
-                processPolicyTableSnapshot(msg.getBulkData(), fileType, requestType);
+                processPolicyTableSnapshot(sessionId, msg.getBulkData(), fileType, requestType);
             }
         }
     }
@@ -1616,7 +1617,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void onAppUnregisteredReason(final AppInterfaceUnregisteredReason reason) {
+    protected void onAppUnregisteredReason(final byte sessionId,
+                                           final AppInterfaceUnregisteredReason reason) {
         if (reason == AppInterfaceUnregisteredReason.IGNITION_OFF ||
                 reason == AppInterfaceUnregisteredReason.MASTER_RESET) {
             cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(reason));
@@ -1627,29 +1629,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             getMainUIHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    getProxyListener().onAppUnregisteredReason(reason);
+                    getProxyListener().onAppUnregisteredReason(sessionId, reason);
                 }
             });
         } else {
-            getProxyListener().onAppUnregisteredReason(reason);
+            getProxyListener().onAppUnregisteredReason(sessionId, reason);
         }
     }
 
     protected void onUnregisterAppInterfaceResponse(final byte sessionId, Hashtable hash) {
-        String appId = syncSession.getAppIdBySessionId(sessionId);
-        setHashId(appId, null);
-        stopAllServicesByAppId(appId);
-        if (syncSession.getSessionIdsNumber() == 1) {
-            closeSyncConnection(sessionId, true);
-        } else {
-            if (mSyncConnection != null) {
-                mSyncConnection.closeSession(sessionId, true);
-            }
-        }
-        stopSession(appId);
+        endSession(sessionId);
 
         // UnregisterAppInterface
-        mAppInterfaceRegistered.put(appId, false);
+        mAppInterfaceRegistered.put(syncSession.getAppIdBySessionId(sessionId), false);
         synchronized (APP_INTERFACE_REGISTERED_LOCK) {
             APP_INTERFACE_REGISTERED_LOCK.notify();
         }
@@ -1850,8 +1842,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleEndServiceAck(final ServiceType serviceType, final byte sessionId) {
-        Logger.i("EndServiceAck received serType:" + serviceType.getName() + " sesId:" + sessionId);
+    protected void handleEndService(final ServiceType serviceType, final byte sessionId) {
+
+        endSession(sessionId);
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1865,7 +1859,21 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    protected void handleMobileNavAck(int frameNumberReceived) {
+    protected void handleEndServiceAck(final ServiceType serviceType, final byte sessionId) {
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    _proxyListener.onProtocolServiceEndedAck(serviceType, sessionId);
+                }
+            });
+        } else {
+            _proxyListener.onProtocolServiceEndedAck(serviceType, sessionId);
+        }
+    }
+
+    protected void handleMobileNavAck(final byte sessionId, int frameNumberReceived) {
         Logger.i("Mobile Nav Ack received = " + frameNumberReceived);
         final int fNumber = frameNumberReceived;
         if (_callbackToUIThread) {
@@ -1873,11 +1881,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNavAckReceived(fNumber);
+                    _proxyListener.onMobileNavAckReceived(sessionId, fNumber);
                 }
             });
         } else {
-            _proxyListener.onMobileNavAckReceived(fNumber);
+            _proxyListener.onMobileNavAckReceived(sessionId, fNumber);
         }
     }
 
@@ -2949,6 +2957,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this.rpcMessageHandler = RPCMessageHandler;
     }
 
+    private void endSession(byte sessionId) {
+        String appId = syncSession.getAppIdBySessionId(sessionId);
+        stopAllServicesByAppId(appId);
+        if (syncSession.getSessionIdsNumber() == 1) {
+            closeSyncConnection(sessionId, true);
+        } else {
+            if (mSyncConnection != null) {
+                mSyncConnection.closeSession(sessionId, true);
+            }
+        }
+        stopSession(appId);
+    }
+
     // TODO : Hide this method from public when no Test Cases are need
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
@@ -3070,8 +3091,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+            Logger.i("EndServiceAck received serType:" + serviceType.getName() + " sesId:" + sessionId);
             handleEndServiceAck(serviceType, sessionId);
+        }
+
+        @Override
+        public void
+        onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+            Logger.i("EndService received serType:" + serviceType.getName() + " sesId:" + sessionId);
+            handleEndService(serviceType, sessionId);
         }
 
         @Override
@@ -3081,7 +3110,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
-            handleMobileNavAck(frameReceivedNumber);
+            handleMobileNavAck(sessionId, frameReceivedNumber);
         }
 
         @Override
@@ -3184,13 +3213,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     @Override
-    public void putSystemFile(String filename, byte[] data, FileType fileType)
+    public void putSystemFile(byte sessionId, String filename, byte[] data, FileType fileType)
             throws SyncException {
-        putSystemFile(filename, data, null, fileType);
+        putSystemFile(sessionId, filename, data, null, fileType);
     }
 
     @Override
-    public void putSystemFile(String filename, byte[] data, Integer offset,
+    public void putSystemFile(final byte sessionId, String filename, byte[] data, Integer offset,
                               FileType fileType) throws SyncException {
         final int correlationID = nextCorrelationId();
 
@@ -3207,11 +3236,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onPutFileRequest(putFile);
+                    _proxyListener.onPutFileRequest(sessionId, putFile);
                 }
             });
         } else {
-            _proxyListener.onPutFileRequest(putFile);
+            _proxyListener.onPutFileRequest(sessionId, putFile);
         }
 
         sendRPCRequest(putFile);
@@ -3240,7 +3269,28 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Test Config section
+     * Process policy file snapshot request
+     * @param snapshot bytes array of the data
+     * @param fileType type of the file
+     */
+    private void processPolicyTableSnapshot(final byte sessionId, final byte[] snapshot, final FileType fileType,
+                                            final RequestType requestType) {
+        Runnable request = new Runnable() {
+            @Override
+            public void run() {
+                onSystemRequestHandler.onPolicyTableSnapshotRequest(sessionId, SyncProxyBase.this,
+                        snapshot, fileType, requestType);
+            }
+        };
+        if (_callbackToUIThread) {
+            _mainUIHandler.post(request);
+        } else {
+            request.run();
+        }
+    }
+
+    /**
+     * Test Section
      */
 
     /**
@@ -3258,26 +3308,5 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void setTestConfigCallback(ITestConfigCallback mTestConfigCallback) {
         this.mTestConfigCallback = mTestConfigCallback;
-    }
-
-    /**
-     * Process policy file snapshot request
-     * @param snapshot bytes array of the data
-     * @param fileType type of the file
-     */
-    private void processPolicyTableSnapshot(final byte[] snapshot, final FileType fileType,
-                                            final RequestType requestType) {
-        Runnable request = new Runnable() {
-            @Override
-            public void run() {
-                onSystemRequestHandler.onPolicyTableSnapshotRequest(SyncProxyBase.this,
-                        snapshot, fileType, requestType);
-            }
-        };
-        if (_callbackToUIThread) {
-            _mainUIHandler.post(request);
-        } else {
-            request.run();
-        }
     }
 }

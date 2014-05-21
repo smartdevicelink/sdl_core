@@ -21,7 +21,9 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolSessionStarted(byte sessionId, byte version);
 	
-	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID);
+	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
+
+    public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
 	
 	public void onProtocolError(String info, Throwable e);
 

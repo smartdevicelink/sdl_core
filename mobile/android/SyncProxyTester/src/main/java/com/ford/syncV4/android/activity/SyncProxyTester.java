@@ -494,21 +494,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     public void onServiceEnd(ServiceType serviceType) {
-
-        // TODO : Implement callback to Fragment
-
-        /*mLogAdapter.logMessage("Service '" + serviceType + "' ended");
-
         if (mServicesCounter == null) {
             Logger.w("Service End -> Services counter is NULL");
             executeDestroyService();
             return;
         }
         int remainServicesNumber = mServicesCounter.decrementAndGet();
-        mLogAdapter.logMessage("Services number remained:" + remainServicesNumber);
         if (remainServicesNumber == 1) {
             executeDestroyService();
-        }*/
+        }
     }
 
     @Override
@@ -563,42 +557,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
+            // TODO : In production case - there is no need to inform a Fragment about SessionId
+            // Fragment must know only AppId (and other related information from RAI)
+
             // Assign Session Id to the associated Fragment (by AppId)
             fragment.setSessionId(sessionId);
         }
 
-
-
-        /*if (serviceType == ServiceType.Audio_Service) {
-            MainApp.getInstance().runInUIThread(new Runnable() {
-                @Override
-                public void run() {
-                    OutputStream outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer();
-                    if (outputStream != null) {
-                        AudioServicePreviewFragment fragment = (AudioServicePreviewFragment)
-                                getSupportFragmentManager().findFragmentById(R.id.audioFragment);
-                        fragment.setAudioServiceStateOn(outputStream);
-                    }
-                }
-            });
-        } else if (serviceType == ServiceType.Mobile_Nav) {
-            MainApp.getInstance().runInUIThread(new Runnable() {
-                @Override
-                public void run() {
-                    OutputStream outputStream = mBoundProxyService.syncProxyStartH264();
-                    if (outputStream != null) {
-                        MobileNavPreviewFragment fragment = (MobileNavPreviewFragment)
-                                getSupportFragmentManager().findFragmentById(R.id.videoFragment);
-                        fragment.setMobileNaviStateOn(outputStream);
-                    }
-                }
-            });
-        } else if (serviceType == ServiceType.RPC) {
-            mServicesCounter.set(0);
-            rpcSession.setSessionId(sessionId);
-        }
-
-        mServicesCounter.incrementAndGet();*/
+        mServicesCounter.incrementAndGet();
     }
 
     @Override

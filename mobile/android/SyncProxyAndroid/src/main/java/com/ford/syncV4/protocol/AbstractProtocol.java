@@ -268,10 +268,20 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolMessageReceived(message);
     }
 
-    // This method handles the end of a protocol syncSession. A callback is
-    // sent to the protocol listener.
-    protected void handleProtocolServiceEnded(ServiceType serviceType, byte sessionID) {
-        _protocolListener.onProtocolServiceEnded(serviceType, sessionID);
+    /**
+     * This method handles response of the EndService coming from SDL.
+     * A callback is sent to the protocol listener.
+     */
+    protected void handleProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        _protocolListener.onProtocolServiceEnded(serviceType, sessionId);
+    }
+
+    /**
+     * This method handles response of the EndServiceAck coming from SDL.
+     * A callback is sent to the protocol listener.
+     */
+    protected void handleProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+        _protocolListener.onProtocolServiceEndedAck(serviceType, sessionId);
     }
 
     /**

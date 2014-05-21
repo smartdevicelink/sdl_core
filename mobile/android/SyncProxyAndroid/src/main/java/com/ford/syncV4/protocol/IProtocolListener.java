@@ -16,8 +16,21 @@ public interface IProtocolListener {
 	// Called to indicate that a protocol syncSession has been started (from either side)
 	void onProtocolSessionStarted(byte sessionId, byte version);
 
-	// Called to indicate that a protocol syncSession has ended (from either side)
-	void onProtocolServiceEnded(ServiceType serviceType, byte sessionID);
+    /**
+     * Called to indicate that a protocol EndService has been received
+     *
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     * @param sessionId session identifier
+     */
+	void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
+
+    /**
+     * Called to indicate that a protocol EndServiceAck has been received
+     *
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     * @param sessionId session identifier
+     */
+    void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
 
     /**
      * Called when a protocol heartbeat ACK message has been received from SYNC.

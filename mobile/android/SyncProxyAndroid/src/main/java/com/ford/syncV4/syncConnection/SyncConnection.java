@@ -552,6 +552,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         processEndService(serviceType);
     }
 
+    @Override
+    public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+        mConnectionListener.onProtocolServiceEndedAck(serviceType, sessionId);
+        processEndService(serviceType);
+    }
+
     private void processEndService(ServiceType serviceType) {
         if (_transport == null ) {
             Logger.w("ProcessEndService transport null");

@@ -149,10 +149,11 @@ public class WiProProtocol extends AbstractProtocol {
         Logger.d(CLASS_NAME + " -> Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength) +
                 ", protocol ver:" + getProtocolVersion());
 
-        Logger.d(CLASS_NAME + " -> protocol ver:" + getProtocolVersion() + " bytes length:" + receivedBytes.length);
+        Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion() +
+                " bytes length:" + receivedBytes.length);
 
         //Check for a version difference
-        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE) {
+        //if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE) {
             byte parsedProtocolVersion = (byte) (receivedBytes[0] >>> 4);
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
@@ -170,7 +171,7 @@ public class WiProProtocol extends AbstractProtocol {
                 updateDataStructureToProtocolVersion(parsedProtocolVersion);
                 mHeaderBuf = tempHeader;
             }
-        }
+        //}
 
         // If I don't yet know the message size, grab those bytes.
         if (!mHaveHeader) {
@@ -380,14 +381,14 @@ public class WiProProtocol extends AbstractProtocol {
             } else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue()) {
                 handleStartServiceNackFrame(sessionId, header.getServiceType());
             } else if (frameData == FrameDataControlFrameType.EndService.getValue()) {
-                handleEndSessionFrame(sessionId, header);
+                handleEndServiceFrame(sessionId, header);
             } else if (frameData == FrameDataControlFrameType.EndServiceNACK.getValue()) {
                 //Logger.d(CLASS_NAME + " End Service NACK");
             } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() &&
                     frameData == FrameDataControlFrameType.MobileNaviACK.getValue()) {
                 handleMobileNavAckReceived(sessionId, header.getMessageID());
             } else if (frameData == FrameDataControlFrameType.EndServiceACK.getValue()) {
-                handleEndSessionFrame(sessionId, header);
+                handleEndServiceAckFrame(sessionId, header);
             }
         }
 
@@ -449,16 +450,25 @@ public class WiProProtocol extends AbstractProtocol {
                     (message.getFunctionID() == FunctionID
                             .getFunctionID(Names.UnregisterAppInterface));
         }
+    }
 
-    } // end-class
-
-    private void handleEndSessionFrame(byte sessionId, ProtocolFrameHeader header) {
+    private void handleEndServiceFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (hashID.get(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
             }
         } else {
             handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
+        }
+    }
+
+    private void handleEndServiceAckFrame(byte sessionId, ProtocolFrameHeader header) {
+        if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            if (hashID.get(sessionId) == header.getMessageID()) {
+                handleProtocolServiceEndedAck(header.getServiceType(), header.getSessionID());
+            }
+        } else {
+            handleProtocolServiceEndedAck(header.getServiceType(), header.getSessionID());
         }
     }
 
