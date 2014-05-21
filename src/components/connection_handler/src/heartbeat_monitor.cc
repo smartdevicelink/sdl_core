@@ -90,11 +90,15 @@ void HeartBeatMonitor::threadMain() {
   }
 }
 
-void HeartBeatMonitor::AddSession(uint8_t session_id) {
+bool HeartBeatMonitor::AddSession(uint8_t session_id) {
   LOG4CXX_INFO(logger_, "Add session with id" <<
                static_cast<int32_t>(session_id));
 
   AutoLock auto_lock(sessions_list_lock_);
+
+  if (sessions_.end() != sessions_.find(session_id)) {
+    return false;
+  }
 
   SessionState session_state;
   session_state.heartbeat_expiration_ = date_time::DateTime::getCurrentTime();
@@ -102,6 +106,16 @@ void HeartBeatMonitor::AddSession(uint8_t session_id) {
   session_state.is_heartbeat_sent_ = false;
 
   sessions_[session_id] = session_state;
+
+  LOG4CXX_INFO(logger_, "Start heartbeat for session: " <<
+               static_cast<int32_t>(session_id));
+
+  //first session added, so we need to start monitoring thread
+  if (1 == sessions_.size()) {
+    return true;
+  }
+
+  return false;
 }
 
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {

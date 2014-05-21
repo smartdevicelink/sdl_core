@@ -361,9 +361,15 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->set_version(version);
 
   application->set_mobile_app_id(message[strings::msg_params][strings::app_id]);
-  application->set_protocol_version(
-    static_cast<ProtocolVersion>(
-      message[strings::params][strings::protocol_version].asInt()));
+  ProtocolVersion protocol_version = static_cast<ProtocolVersion>(
+      message[strings::params][strings::protocol_version].asInt());
+  application->set_protocol_version(protocol_version);
+
+  if (ProtocolVersion::kV3 == protocol_version) {
+    if (connection_handler_) {
+      connection_handler_->StartSessionHeartBeat(connection_key);
+    }
+  }
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
@@ -932,6 +938,11 @@ void ApplicationManagerImpl::set_hmi_message_handler(
 void ApplicationManagerImpl::set_connection_handler(
   connection_handler::ConnectionHandler* handler) {
   connection_handler_ = handler;
+}
+
+connection_handler::ConnectionHandler*
+ApplicationManagerImpl::connection_handler() {
+  return connection_handler_;
 }
 
 void ApplicationManagerImpl::set_protocol_handler(

@@ -189,6 +189,14 @@ class ProtocolHandlerImpl
      */
     void SendHeartBeat(int32_t connection_id, uint8_t session_id);
 
+    /**
+      * \brief Sends ending session to mobile application
+      * \param connection_id Identifier of connection within which
+      * session exists
+      * \param session_id ID of session to be ended
+      */
+    void SendEndSession(int32_t connection_id, uint8_t session_id);
+
   protected:
 
     /**
