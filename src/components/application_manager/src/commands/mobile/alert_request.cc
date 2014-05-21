@@ -84,7 +84,6 @@ void AlertRequest::Run() {
     return;
   }
 
-  awaiting_ui_alert_response_ = true;
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       awaiting_tts_speak_response_ = true;
@@ -261,6 +260,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
 
+    awaiting_ui_alert_response_ = true;
     flag_other_component_sent_ = true;
     SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
