@@ -144,7 +144,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private IRPCMessageHandler rpcMessageHandler;
 
-    public int mRegisterAppInterfaceCorrelationId = REGISTER_APP_INTERFACE_CORRELATION_ID;
+    private int mRegisterAppInterfaceCorrelationId = REGISTER_APP_INTERFACE_CORRELATION_ID;
     private int mUnregisterAppInterfaceCorrelationId = UNREGISTER_APP_INTERFACE_CORRELATION_ID;
     private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
 
@@ -1139,7 +1139,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
         Logger.d("CycleProxy, disconnectedReason:" + disconnectedReason);
         try {
-            cleanProxy(disconnectedReason, false, true);
+            cleanProxy(disconnectedReason, true, true);
             scheduleInitializeProxy();
             notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled",
                     SyncExceptionCause.SYNC_PROXY_CYCLED));
@@ -1198,11 +1198,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void scheduleInitializeProxy() {
-        Logger.d("Scheduling proxy init, services count:" + syncSession.getServicesList());
-        if (syncSession.isServicesEmpty()) {
-            Logger.d("Service list is empty. Scheduling proxy initialization canceled");
-            return;
-        }
+        Logger.d("Scheduling proxy init, services count:" + syncSession.getServicesList().size());
 
         if (getCurrentReconnectTimerTask() != null) {
             Logger.d("Current reconnect task is already scheduled, canceling it first");
@@ -1228,7 +1224,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         Timer timer = getReconnectTimer();
         timer.schedule(reconnectTask, PROXY_RECONNECT_DELAY);
-
     }
 
     /**

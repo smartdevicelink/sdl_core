@@ -2066,8 +2066,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 RegisterAppInterface registerAppInterface = registerAppInterfaceHashMap.get(syncAppId);
                 if (registerAppInterface == null) {
 
-                    mSyncProxy.mRegisterAppInterfaceCorrelationId += 1;
-
                     SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
                     boolean isMediaApp = settings.getBoolean(
                             Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);

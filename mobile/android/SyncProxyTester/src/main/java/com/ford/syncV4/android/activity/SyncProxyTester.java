@@ -102,6 +102,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     @SuppressWarnings("unused")
     private static final String LOG_TAG = SyncProxyTester.class.getSimpleName();
 
+    private static final String PREFS_NAME = "SyncProxyTesterPreferences";
+    private static final String PREFS_KEY_SECTIONS_NUMBER = "PREFS_KEY_SECTIONS_NUMBER";
+
     /**
      * The name of the file where all the data coming with
      * {@link OnAudioPassThru} notifications is saved. The root directory is the
@@ -290,6 +293,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        // Restore preferences
+        /*SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        int sectionsNumber = settings.getInt(PREFS_KEY_SECTIONS_NUMBER, 0);
+        for (int i = 0; i < sectionsNumber; i++) {
+            addFragment();
+        }*/
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -639,6 +649,18 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        // We need an Editor object to make preference changes.
+        // All objects are from android.context.Context
+        /*SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt(PREFS_KEY_SECTIONS_NUMBER, mSectionsPagerAdapter.getCount());
+        editor.commit();*/
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         Logger.d(SyncProxyTester.class.getSimpleName() + " On Destroy");
@@ -655,6 +677,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
         closeAudioPassThruStream();
         closeAudioPassThruMediaPlayer();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSectionsPagerAdapter.getCount() > 0) {
+            SafeToast.showToastAnyThread(getString(R.string.exit_app_warning));
+            return;
+        }
+        super.onBackPressed();
     }
 
     public Dialog onCreateDialog(int id) {

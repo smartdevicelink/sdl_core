@@ -292,4 +292,6 @@
     <string name="main_menu_add_session_label">Add Session</string>
     <string name="main_menu_app_version">App version</string>
 
+    <string name="exit_app_warning">Use \'Exit App\' menu option</string>
+
 </resources>
