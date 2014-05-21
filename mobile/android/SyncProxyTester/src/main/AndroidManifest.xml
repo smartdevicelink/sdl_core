@@ -22,7 +22,7 @@
 
     <application
         android:debuggable="true"
-        android:icon="@drawable/fiesta"
+        android:icon="@drawable/main_logo"
         android:name=".MainApp"
         android:theme="@style/AppTheme"
         android:label="@string/tester_app_name" >

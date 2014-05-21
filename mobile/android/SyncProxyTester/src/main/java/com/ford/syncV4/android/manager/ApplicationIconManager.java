@@ -53,7 +53,7 @@ public class ApplicationIconManager {
         Logger.d(TAG + " PutFile");
         mAwaitingInitIconResponseCorrelationID = proxyService.getNextCorrelationID();
         proxyService.commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME,
-                AppUtils.contentsOfResource(R.raw.fiesta),
+                AppUtils.contentsOfResource(R.raw.main_logo),
                 mAwaitingInitIconResponseCorrelationID, true);
     }
 
