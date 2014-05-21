@@ -166,6 +166,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
             response_result_)) {
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
+    } else if ((mobile_apis::Result::SUCCESS == tts_speak_response_) &&
+              ((mobile_apis::Result::INVALID_ENUM == response_result_) &&
+              (!flag_other_component_sent_))) {
+      response_result_ = mobile_apis::Result::SUCCESS;
+      response_success_ = true;
     }
     SendResponse(response_success_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
