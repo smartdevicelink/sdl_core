@@ -63,7 +63,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
     return policy_manager_;
   }
   bool InitPolicyTable();
-  bool RevertPolicyTable();
+  bool ResetPolicyTable();
+  bool ClearUserConsent();
   bool SendMessageToSDK(const BinaryMessage& pt_string);
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string);
