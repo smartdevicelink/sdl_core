@@ -205,12 +205,14 @@ class MessageHelper {
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
+    static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
 
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
     static std::string GetDeviceMacAddressForHandle(
-        const uint32_t device_handle);
+      const uint32_t device_handle);
 
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
@@ -387,10 +389,10 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImageFiles(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 

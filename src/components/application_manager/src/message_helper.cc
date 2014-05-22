@@ -1177,7 +1177,8 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
-void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
+void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
+    hmi_apis::Common_HMILevel::eType level) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -1207,6 +1208,11 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
   }
   if (!priority.empty()) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
+  }
+
+  if (hmi_apis::Common_HMILevel::FULL != level &&
+      hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
+    (*message)[strings::msg_params]["level"] = level;
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
