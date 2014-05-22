@@ -88,6 +88,15 @@ ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnectio
   LOG4CXX_INFO(logger_, "iAP: registering new connection for application " << app_id);
   connections_.insert(std::make_pair(app_id, connection));
   connections_lock_.Release();
+  app_table_lock_.Acquire();
+  for (AppTable::const_iterator i = app_table_.begin(); i != app_table_.end(); ++i) {
+    if (i->second == app_id) {
+      int session_id = i->first;
+      LOG4CXX_DEBUG(logger_, "iAP: adding existing session " << session_id << " for application " << app_id);
+      connection->OnSessionOpened(session_id);
+    }
+  }
+  app_table_lock_.Release();
   return ipod_hdl_;
 }
 

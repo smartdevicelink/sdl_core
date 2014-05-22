@@ -70,10 +70,9 @@ class IAP2Device : public MmeDevice {
   typedef std::list<std::string> ProtocolNameContainer;
   static const ProtocolNameContainer& ProtocolNames();
   static const ProtocolNameContainer ReadProtocolNames();
- public:
+
   void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
   void OnDisconnect(ApplicationHandle app_id);
- private:
 
   TransportAdapterController* controller_;
   int last_app_id_;
@@ -95,6 +94,8 @@ class IAP2Device : public MmeDevice {
       std::string mount_point_;
       std::string protocol_name_;
   };
+
+  friend class IAP2Connection;
 };
 
 }  // namespace transport_adapter

@@ -66,14 +66,14 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 void PulseThreadDelegate::threadMain() {
   while (run_) {
     struct sigevent event;
-    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE_EAP, 0);
+    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE, 0);
     if (ArmEvent(&event)) {
       struct _pulse pulse;
       LOG4CXX_INFO(logger_, "Waiting for pulse on QNX channel " << chid_);
       if (MsgReceivePulse(chid_, &pulse, sizeof(pulse), 0) != -1) {
         LOG4CXX_INFO(logger_, "Received pulse on QNX channel " << chid_);
         switch (pulse.code) {
-          case PULSE_CODE_EAP:
+          case PULSE_CODE:
             OnPulse();
             break;
         }
