@@ -89,10 +89,11 @@ SDL.SDLAppController = Em.Object.create({
             }
 
             return;
-        }
+        } else {
 
-        FFW.UI.onCommand(element.commandID, this.model.appID);
-        SDL.OptionsView.deactivate();
+            FFW.UI.onCommand(element.commandID, this.model.appID);
+            SDL.OptionsView.deactivate();
+        }
     },
 
     /**
