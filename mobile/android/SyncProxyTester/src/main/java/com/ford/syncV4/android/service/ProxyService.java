@@ -594,9 +594,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     public void setLogAdapter(LogAdapter logAdapter) {
         // TODO : Reconsider. Implement log message dispatching instead
-        if (mLogAdapter != null) {
-            mLogAdapter = logAdapter;
-        }
+        mLogAdapter = logAdapter;
     }
 
     public int getNextCorrelationID() {
