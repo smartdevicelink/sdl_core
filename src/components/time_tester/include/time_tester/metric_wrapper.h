@@ -43,11 +43,15 @@ class MetricWrapper {
   utils::ResourseUsage* resources;
   public:
     MetricWrapper();
+    /*
+     * @brief get current cpu and memory info and store it as member
+     */
     bool grabResources();
     virtual std::string GetStyledString();
     ~MetricWrapper();
   protected:
     virtual Json::Value GetJsonMetric();
+    void Clear();
 };
 
 

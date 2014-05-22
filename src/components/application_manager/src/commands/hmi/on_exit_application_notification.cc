@@ -61,19 +61,24 @@ void OnExitApplicationNotification::Run() {
   hmi_apis::Common_ApplicationToNONEReason::eType reason;
   reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
                        ((*message_)[strings::msg_params][strings::reason].asInt());
-  if (hmi_apis::Common_ApplicationToNONEReason::DRIVER_DISTRACTION_VIOLATION == reason ) {
-    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-        app_impl->app_id(),
-        mobile_api::AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
-    app_mgr->UnregisterApplication(
-        app_impl->app_id(), mobile_apis::Result::SUCCESS, true);
-  } else {
-    app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-    app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-    app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
-    MessageHelper::SendHMIStatusNotification(*app_impl);
+  switch (reason) {
+    case hmi_apis::Common_ApplicationToNONEReason::DRIVER_DISTRACTION_VIOLATION : {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+      break;
+    }
+    case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::USER_EXIT);
+      break;
+    }
   }
-
+  app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+  app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
+  MessageHelper::SendHMIStatusNotification(*app_impl);
 }
 
 }  // namespace commands

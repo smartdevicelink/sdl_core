@@ -301,7 +301,7 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   } else if (!app) {
     LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
   } else {
-    policy_manager_->GetUserPermissionsForApp(device_params.device_mac_address,
+    policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
         app->mobile_app_id()->asString(),
         group_permissions);
   }
