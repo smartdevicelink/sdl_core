@@ -594,7 +594,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     public void setLogAdapter(LogAdapter logAdapter) {
         // TODO : Reconsider. Implement log message dispatching instead
-        mLogAdapter = logAdapter;
+        if (mLogAdapter != null) {
+            mLogAdapter = logAdapter;
+        }
     }
 
     public int getNextCorrelationID() {
@@ -1498,7 +1500,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             mProxyServiceEvent.onServiceEnd(serviceType);
         }
         if (serviceType == ServiceType.RPC) {
-            mLogAdapter.logMessage("RPC service stopped", true);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("RPC service stopped", true);
+            }
 
             if (mProxyServiceEvent != null) {
                 mProxyServiceEvent.onDisposeComplete();
@@ -1525,6 +1529,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onStartSession(byte sessionID) {
+        if (mLogAdapter == null) {
+            return;
+        }
         mLogAdapter.logMessage("Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion(), true);
     }
@@ -1733,7 +1740,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mLogAdapter.logMessage("ListFiles sent", true);
             }
         } catch (SyncException e) {
-            mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
+            if (mLogAdapter != null) {
+                mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
+            }
         }
     }
 
