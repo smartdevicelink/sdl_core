@@ -403,9 +403,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.method);
                 }
                 if (request.method == "BasicCommunication.UpdateAppList") {
-                    if (SDL.States.info.active) {
-                        SDL.SDLController.onGetAppList(request.params.applications);
-                    }
+
+                    var message = "Was found " + request.params.applications.length + " apps";
+
+                    SDL.PopUp.popupActivate(message);
+//                    if (SDL.States.info.active) {
+//                        SDL.SDLController.onGetAppList(request.params.applications);
+//                    }
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
