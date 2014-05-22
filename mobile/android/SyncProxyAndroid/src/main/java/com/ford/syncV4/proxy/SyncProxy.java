@@ -329,7 +329,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * @param correlationID
 	 * @throws SyncException
 	 */
-	public void unregisterAppInterface(Integer correlationID) throws SyncException {
+	/*public void unregisterAppInterface(Integer correlationID) throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
 			throw new SyncException("This SyncProxy object has been disposed, it is no long " +
@@ -337,7 +337,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 		}		
 				
 		unregisterAppInterfacePrivate(correlationID);
-	}
+	}*/
 	
 	/**
 	 * Returns is isConnected state of the SYNC transport.

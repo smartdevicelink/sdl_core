@@ -504,7 +504,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     public void onServiceEnd(ServiceType serviceType) {
-        if (mServicesCounter == null) {
+        /*if (mServicesCounter == null) {
             Logger.w("Service End -> Services counter is NULL");
             executeDestroyService();
             return;
@@ -512,7 +512,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         int remainServicesNumber = mServicesCounter.decrementAndGet();
         if (remainServicesNumber == 1) {
             executeDestroyService();
-        }
+        }*/
     }
 
     @Override
@@ -574,7 +574,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             fragment.setSessionId(sessionId);
         }
 
-        mServicesCounter.incrementAndGet();
+        //mServicesCounter.incrementAndGet();
     }
 
     @Override
@@ -1092,7 +1092,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     public void onPerformAudioPassThruDialogResult(PerformAudioPassThru performAudioPassThru) {
         latestPerformAudioPassThruMsg = performAudioPassThru;
         if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(performAudioPassThru);
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(performAudioPassThru);
         }
     }
 
@@ -1101,11 +1101,18 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
      *
      * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     * @param createNewSession     indicates whether to create a new session or send a request to
+     *                             existing one
      */
-    public void onRegisterAppInterfaceDialogResult(RegisterAppInterface registerAppInterface) {
+    public void onRegisterAppInterfaceDialogResult(RegisterAppInterface registerAppInterface,
+                                                   boolean createNewSession) {
         if (mBoundProxyService != null) {
             if (mBoundProxyService.isSyncProxyConnected()) {
-                mBoundProxyService.syncProxySendRPCRequest(registerAppInterface);
+                if (createNewSession) {
+                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(registerAppInterface);
+                } else {
+                    mBoundProxyService.syncProxySendRPCRequest(registerAppInterface);
+                }
             } else {
                 // This may happen if "UnregisterAppInterface" command has been sent manually
                 // from the SPT
@@ -1138,7 +1145,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 mBoundProxyService.getTestConfig().setDoKeepUSBTransportConnected(true);
             }
 
-            mBoundProxyService.syncProxySendRPCRequest(rpcRequest);
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(rpcRequest);
         }
     }
 
@@ -1414,7 +1421,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if ((Result.RETRY == result) && (latestPerformAudioPassThruMsg != null)) {
                 latestPerformAudioPassThruMsg.setCorrelationID(getCorrelationid());
                 if (mBoundProxyService != null) {
-                    mBoundProxyService.syncProxySendRPCRequest(latestPerformAudioPassThruMsg);
+                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(latestPerformAudioPassThruMsg);
                 }
             }
         }*/
@@ -1851,18 +1858,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
         mStopServicesTimeOutHandler.postDelayed(mEndServicesPostDelayedCallback, EXIT_TIMEOUT);
 
-        // TODO : Iterate over all AppId
-        /*if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Audio_Service)) {
-            //stopAudioService();
-        }
-
-        if (mBoundProxyService.hasServiceInServicesPool(ServiceType.Mobile_Nav)) {
-            //stopMobileNavService();
+        /*for (int i = 0; i < getFragmentsCount(); i++) {
+            PlaceholderFragment fragment = getFragmentAt(i);
+            if (fragment != null) {
+                stopAudioService(fragment.getAppId());
+                stopMobileNavService(fragment.getAppId());
+            }
         }*/
 
-        if (mServicesCounter.get() == 1) {
-            executeDestroyService();
-        }
+        executeDestroyService();
     }
 
     private void executeDestroyService() {
@@ -1943,7 +1947,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         // TODO : Reconsider CorId
         /*systemRequest.setCorrelationID(getCorrelationid());
         if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(systemRequest);
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(systemRequest);
         }*/
     }
 }

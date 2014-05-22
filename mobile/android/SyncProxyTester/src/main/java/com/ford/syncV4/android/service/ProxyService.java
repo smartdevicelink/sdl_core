@@ -217,7 +217,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mRpcRequestsResumableManager.setCallback(new RPCRequestsResumableManager.RPCRequestsResumableManagerCallback() {
             @Override
             public void onSendRequest(RPCRequest request) {
-                syncProxySendRPCRequest(request);
+                syncProxySendRPCRequestWithPreprocess(request);
             }
         });
 
@@ -1923,7 +1923,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         subscribeButton.setCorrelationID(correlationId);
         subscribeButton.setButtonName(buttonName);
 
-        syncProxySendRPCRequest(subscribeButton);
+        syncProxySendRPCRequestWithPreprocess(subscribeButton);
     }
 
     /**
@@ -1947,7 +1947,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
      */
     public void commandUnsubscribeVehicleInterface(UnsubscribeVehicleData unsubscribeVehicleData) {
-        syncProxySendRPCRequest(unsubscribeVehicleData);
+        syncProxySendRPCRequestWithPreprocess(unsubscribeVehicleData);
     }
 
     /**
@@ -1986,7 +1986,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                                             String menuName) {
         AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandId, menuName, vrCommands,
                 getNextCorrelationID());
-        syncProxySendRPCRequest(addCommand);
+        syncProxySendRPCRequestWithPreprocess(addCommand);
     }
 
     /**
@@ -2147,7 +2147,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      *
      * @param request object of {@link com.ford.syncV4.proxy.RPCRequest} type
      */
-    public void syncProxySendRPCRequest(RPCRequest request) {
+    public void syncProxySendRPCRequestWithPreprocess(RPCRequest request) {
         if (request == null) {
             createErrorMessageForAdapter("RPC request is NULL");
             return;
@@ -2159,6 +2159,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 createDebugMessageForAdapter(request);
                 mSyncProxy.sendRPCRequest(request);
             }
+        } catch (SyncException e) {
+            createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
+                    " send error");
+        }
+    }
+
+    public void syncProxySendRPCRequest(RPCRequest request) {
+        if (request == null) {
+            createErrorMessageForAdapter("RPC request is NULL");
+            return;
+        }
+        try {
+            createDebugMessageForAdapter(request);
+            mSyncProxy.sendRPCRequest(request);
         } catch (SyncException e) {
             createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
                     " send error");
@@ -2183,7 +2197,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             mRpcRequestsResumableManager.addRequestDisconnected(request);
         }
 
-        syncProxySendRPCRequest(request);
+        syncProxySendRPCRequestWithPreprocess(request);
     }
 
     /**
@@ -2197,7 +2211,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         //mRpcRequestsResumableManager.addPutFile(putFile);
 
-        syncProxySendRPCRequest(putFile);
+        syncProxySendRPCRequestWithPreprocess(putFile);
     }
 
     private void syncProxySendRegisterRequest(RegisterAppInterface msg) throws SyncException {
@@ -2259,7 +2273,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
         setAppIcon.setCorrelationID(getNextCorrelationID());
 
-        syncProxySendRPCRequest(setAppIcon);
+        syncProxySendRPCRequestWithPreprocess(setAppIcon);
     }
 
     private void endProtocolService(byte sessionId, ServiceType serviceType) {

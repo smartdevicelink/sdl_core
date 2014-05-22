@@ -1064,12 +1064,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _syncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
 
                 firstTimeFull = true;
-                String lastAppId = "";
-                for (String appId: syncSession.getSessionIdsKeys()) {
+
+                Set<String> appIdToBeRemoved = new HashSet<String>(syncSession.getSessionIdsKeys());
+                int counter = appIdToBeRemoved.size();
+                Logger.d("Keys to remove number:" + counter);
+                for (String appId: appIdToBeRemoved) {
                     closeSession(appId, keepServices);
-                    lastAppId = appId;
+                    if (--counter == 0) {
+                        closeSyncConnection(syncSession.getSessionIdByAppId(appId), keepConnection);
+                    }
                 }
-                closeSyncConnection(syncSession.getSessionIdByAppId(lastAppId), keepConnection);
             }
         } finally {
             Logger.i("SyncProxy cleaned.");
@@ -1152,6 +1156,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     public void closeSession(String appId, boolean keepServices) throws SyncException {
         Logger.d("Close appId:" + appId);
+
+        final byte sessionId = syncSession.getSessionIdByAppId(appId);
+
         // Should we wait for the interface to be unregistered?
         boolean waitForInterfaceUnregistered = false;
         synchronized (CONNECTION_REFERENCE_LOCK) {
@@ -1162,7 +1169,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             if (isAppInterfaceRegistered && mSyncConnection != null &&
                     mSyncConnection.getIsConnected()) {
                 waitForInterfaceUnregistered = true;
-                unregisterAppInterfacePrivate(getUnregisterAppInterfaceCorrelationId());
+
+                UnregisterAppInterface unregisterAppInterface =
+                        RPCRequestFactory.buildUnregisterAppInterface(
+                                getUnregisterAppInterfaceCorrelationId());
+
+                sendRPCRequestPrivate(sessionId, unregisterAppInterface);
             }
             // Wait for the app interface to be unregistered
             if (waitForInterfaceUnregistered) {
@@ -1178,6 +1190,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 stopAllServicesByAppId(appId);
                 stopSession(appId);
             }
+            //Logger.d("Close appId:" + appId + " complete");
         }
     }
 
@@ -1417,12 +1430,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Private sendPRCRequest method. All RPCRequests are funneled through this method after
     // error checking.
     // FIXME: return to private?
-    void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
+    void sendRPCRequestPrivate(byte sessionId, RPCRequest request) throws SyncException {
 
-        // TODO : Modify it to get AppId as parameter
-        byte sessionId = syncSession.getSessionIdByAppId(mActiveAppId);
-        Logger.d(LOG_TAG, "Send RPC sesId:" + sessionId + " active appId:" + mActiveAppId +
-            " _appId:" + _appID + " name:" + request.getFunctionName());
+        Logger.d(LOG_TAG + " Send RPC sesId:" + sessionId + " active appId:" + mActiveAppId +
+                " _appId:" + _appID + " name:" + request.getFunctionName());
 
         try {
             final IRPCRequestConverter converter =
@@ -1445,6 +1456,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             throw new SyncException("OutOfMemory exception while sending request " +
                     request.getFunctionName(), e, SyncExceptionCause.INVALID_ARGUMENT);
         }
+    }
+
+    // Private sendPRCRequest method. All RPCRequests are funneled through this method after
+    // error checking.
+    // FIXME: return to private?
+    void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
+        // TODO : Modify it to get AppId as parameter
+        byte sessionId = syncSession.getSessionIdByAppId(mActiveAppId);
+        sendRPCRequestPrivate(sessionId, request);
     }
 
     private void queueOutgoingMessage(ProtocolMessage message) {
@@ -2691,13 +2711,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void subscribeButton(ButtonName buttonName, Integer correlationID) throws SyncException {
         SubscribeButton msg = RPCRequestFactory.buildSubscribeButton(buttonName, correlationID);
         sendRPCRequest(msg);
-    }
-
-    // Protected unregisterAppInterface used to ensure no non-ALM app calls
-    // unregisterAppInterface.
-    protected void unregisterAppInterfacePrivate(Integer correlationID) throws SyncException {
-        UnregisterAppInterface msg = RPCRequestFactory.buildUnregisterAppInterface(correlationID);
-        sendRPCRequestPrivate(msg);
     }
 
     /**

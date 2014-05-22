@@ -9,6 +9,7 @@ import com.ford.syncV4.android.listener.ConnectionListener;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
  * Created with Android Studio.
@@ -30,6 +31,7 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     @Override
     public void onProxyClosed() {
+        Logger.d(TAG + " proxy closed");
         if (mFileStreamingLogic != null && mFileStreamingLogic.isStreamingInProgress()) {
             mFileStreamingLogic.cancelStreaming();
         }

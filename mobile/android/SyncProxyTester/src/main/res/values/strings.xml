@@ -231,6 +231,8 @@
     <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
     <string name="registerappinterface_useAppID">App ID</string>
     <string name="registerappinterface_appIDDefault">8675309</string>
+    <string name="registerappinterface_new_session">Create new Session</string>
+    <string name="registerappinterface_new_session_desc">When selected, a new Session will be open, otherwise, request will be sent to existing one</string>
     <string name="menuName">Menu Name</string>
     <string name="menuIcon">Menu Icon</string>
 

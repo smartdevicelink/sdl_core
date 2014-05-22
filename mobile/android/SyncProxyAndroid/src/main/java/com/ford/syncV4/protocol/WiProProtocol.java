@@ -454,6 +454,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            Logger.d("TRACE 0 sesId:" + sessionId + " " + hashID.get(sessionId) + " " + header.getMessageID());
             if (hashID.get(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
             }
@@ -464,6 +465,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceAckFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            Logger.d("TRACE 1 sesId:" + sessionId + " " + hashID.get(sessionId) + " " + header.getMessageID());
             if (hashID.get(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEndedAck(header.getServiceType(), header.getSessionID());
             }

@@ -799,7 +799,7 @@ public class PlaceholderFragment extends Fragment {
                                     }
                                     msg.setTtsChunks(chunks);
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 }
                             });
@@ -833,7 +833,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setButtonName(buttonName);
                                         mLogAdapter.logMessage(msg, true);
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                         }
                                     }
                                     isButtonSubscribed[which] = !isButtonSubscribed[which];
@@ -870,7 +870,7 @@ public class PlaceholderFragment extends Fragment {
                                     int commandSetID = mChoiceSetAdapter.getItem(which);
                                     msg.setInteractionChoiceSetID(commandSetID);
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                     if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
                                         Logger.w("Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
@@ -949,7 +949,7 @@ public class PlaceholderFragment extends Fragment {
                                     currentSoftButtons = null;
                                     chkIncludeSoftButtons = null;
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 }
                             });
@@ -994,7 +994,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setHmiDisplayLanguage((Language) spnHmiDisplayLanguage.getSelectedItem());
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 }
                             });
@@ -1020,7 +1020,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setSyncFileName(syncFileName);
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                     mPutFileAdapter.remove(syncFileName);
                                 }
@@ -1052,7 +1052,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setSyncFileName(syncFileName);
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 }
                             });
@@ -1072,7 +1072,7 @@ public class PlaceholderFragment extends Fragment {
                             EndAudioPassThru msg = new EndAudioPassThru();
                             msg.setCorrelationID(getCorrelationId());
                             if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                             }
                         } else if (adapter.getItem(which).equals(SyncProxyTester.VehicleDataSubscriptions)) {
                             sendVehicleDataSubscriptions();
@@ -1102,7 +1102,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setDidLocation(didlocations);
                                         msg.setCorrelationID(getCorrelationId());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                         }
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1212,7 +1212,7 @@ public class PlaceholderFragment extends Fragment {
                                     }
                                     currentSoftButtons = null;
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } else {
                                     SafeToast.showToastAnyThread("No TTS Chunks entered");
@@ -1242,7 +1242,7 @@ public class PlaceholderFragment extends Fragment {
                                 int cmdID = mCommandAdapter.getItem(which);
                                 msg.setCmdID(cmdID);
                                 if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
 
                                 if (_latestDeleteCommandCmdID != null) {
@@ -1331,7 +1331,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setSoftButtons(currentSoftButtons);
                                     }
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1380,7 +1380,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setCorrelationID(getCorrelationId());
                                         msg.setMenuID(menu.getSubMenuId());
                                         if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                         }
 
                                         if (_latestDeleteSubmenu != null) {
@@ -1432,7 +1432,7 @@ public class PlaceholderFragment extends Fragment {
 
                                 msg.setCorrelationID(getCorrelationId());
                                 if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
                             }
                         });
@@ -1460,7 +1460,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1544,7 +1544,7 @@ public class PlaceholderFragment extends Fragment {
                                         request = msg;
                                     }
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(request);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(request);
                                     }
                                 } else {
                                     Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
@@ -1687,7 +1687,7 @@ public class PlaceholderFragment extends Fragment {
                                         }
                                     }
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1897,7 +1897,7 @@ public class PlaceholderFragment extends Fragment {
                                             asList(customPresetsList)));
                                 }
                                 if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
                             }
                         });
@@ -2068,7 +2068,7 @@ public class PlaceholderFragment extends Fragment {
                                                     .getSelectedItemPosition()));
                                 }
                                 if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
 
                             }
@@ -2167,7 +2167,7 @@ public class PlaceholderFragment extends Fragment {
                                     currentSoftButtons = null;
 
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } else {
                                     Toast.makeText(mContext, "Both fields are empty, nothing to send",
@@ -2276,7 +2276,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2361,7 +2361,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setProperties(properties);
                                     msg.setCorrelationID(getCorrelationId());
                                     if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequest(msg);
+                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                     }
                                 } else {
                                     SafeToast.showToastAnyThread("No items selected");
@@ -2397,7 +2397,7 @@ public class PlaceholderFragment extends Fragment {
                                 msg.setCorrelationID(getCorrelationId());
                                 msg.setDisplayLayout(editDisplayLayout.getText().toString());
                                 if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequest(msg);
+                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
                             }
                         });
@@ -2417,7 +2417,7 @@ public class PlaceholderFragment extends Fragment {
                         GenericRequest msg = new GenericRequest();
                         msg.setCorrelationID(getCorrelationId());
                         if (mBoundProxyService != null) {
-                            mBoundProxyService.syncProxySendRPCRequest(msg);
+                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                         }
                     }
                 })
@@ -2497,7 +2497,7 @@ public class PlaceholderFragment extends Fragment {
                     // skip setting start time if parsing failed
                 }
                 if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
-                    ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequest(msg);
+                    ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                 }
             }
         });
@@ -2557,7 +2557,7 @@ public class PlaceholderFragment extends Fragment {
                         msg.setMessageData(data);
                     }
                     if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
-                        ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequest(msg);
+                        ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                     }
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");

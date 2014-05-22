@@ -171,8 +171,12 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
 
                         registerAppInterface.setDeviceInfo(getDeviceInfoFromView(layout));
 
+                        CheckBox createNewSessionView =
+                                (CheckBox) layout.findViewById(R.id.registerappinterface_new_session);
+
                         ((SyncProxyTester) getActivity())
-                                .onRegisterAppInterfaceDialogResult(registerAppInterface);
+                                .onRegisterAppInterfaceDialogResult(registerAppInterface,
+                                        createNewSessionView.isChecked());
                     }
                 })
                 .setNegativeButton("Cancel",
