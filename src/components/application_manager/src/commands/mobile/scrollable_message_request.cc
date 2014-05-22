@@ -91,7 +91,7 @@ void ScrollabelMessageRequest::Run() {
       smart_objects::SmartType_Map);
 
   msg_params[hmi_request::message_text][hmi_request::field_name] =
-     static_cast<int32_t>(application_manager::TextFieldName::SCROLLABLE_MSG_BODY);
+    static_cast<int32_t>(hmi_apis::Common_TextFieldName::scrollableMessageBody);
   msg_params[hmi_request::message_text][hmi_request::field_text] =
       (*message_)[strings::msg_params][strings::scroll_message_body];
   msg_params[strings::app_id] = app->app_id();

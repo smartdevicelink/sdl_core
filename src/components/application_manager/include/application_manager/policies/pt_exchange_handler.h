@@ -37,11 +37,9 @@
 
 namespace policy {
 class PTExchangeHandler {
- public:
-  virtual ~PTExchangeHandler();
-  virtual bool StartExchange() = 0;
-  // TODO(PV): exchange status; exchange completed; retry etc
-
+  public:
+    virtual ~PTExchangeHandler();
+    virtual bool StartExchange() = 0;
 };
 }  //  namespace policy
 

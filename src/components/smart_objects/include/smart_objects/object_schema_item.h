@@ -121,6 +121,13 @@ class CObjectSchemaItem : public ISchemaItem {
   virtual void BuildObjectBySchema(const SmartObject& pattern_object,
                                    SmartObject& result_object);
 
+  /**
+   * @brief Get size mMembers map
+   *
+   * @return Size of mMembers
+   */
+  virtual uint32_t GetMemberSize();
+
   virtual ~CObjectSchemaItem() {
   }
 

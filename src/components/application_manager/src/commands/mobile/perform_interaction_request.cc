@@ -406,8 +406,8 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
 
   if (mobile_apis::InteractionMode::VR_ONLY != mode) {
     msg_params[hmi_request::initial_text][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::
-                         INITIAL_INTERACTION_TEXT);
+        static_cast<int32_t>(
+            hmi_apis::Common_TextFieldName::initialInteractionText);
     msg_params[hmi_request::initial_text][hmi_request::field_text] =
         (*message_)[strings::msg_params][hmi_request::initial_text];
   }

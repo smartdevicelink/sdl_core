@@ -222,6 +222,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   std::string GetAppName(const std::string& policy_app_id);
 
+  /**
+   * Adds http header (temporary method)
+   * @param pt_string string without htt header
+   */
+  BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
+
  protected:
   /**
    * Starts next retry exchange policy table
@@ -272,18 +278,6 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @brief Contains device handles, which were sent for user consent to HMI
    */
   DeviceHandles pending_device_handles_;
-
-  /**
-   * @brief True, if PTS was sent, but PTU was not reseived yet,
-   * otherwise - false
-   * Used for limiting device consent request per PTS/PTU session
-   */
-  bool is_exchange_in_progress_;
-
-  /**
-   * @brief Holds device ids, which were unpaired
-   */
-  DeviceIds unpaired_device_ids_;
 
   inline PolicyManager* CreateManager();
 

@@ -54,33 +54,6 @@ namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
- * @brief Typedef for HMI TextFieldName type
- */
-typedef enum {
-  MAIN_FILED1 = 0,
-  MAIN_FILED2,
-  MAIN_FILED3,
-  MAIN_FILED4,
-  STATUS_BAR,
-  MEDIA_CLOCK,
-  MEDIA_TRACK,
-  ALERT_TEXT1,
-  ALERT_TEXT2,
-  ALERT_TEXT3,
-  SCROLLABLE_MSG_BODY,
-  INITIAL_INTERACTION_TEXT,
-  NAVI_TEXT1,
-  NAVI_TEXT2,
-  ETA,
-  TOTAL_DISTANCE,
-  NAVI_TEXT,
-  AUDIO_DISPLAY_TEXT1,
-  AUDIO_DISPLAY_TEXT2,
-  SLIDER_HADER,
-  SLIDER_FOOTEER
-} TextFieldName;
-
-/*
  * @brief Typedef for VehicleData
  *
  * @param const char* Name of the parameter in mobile request
@@ -232,12 +205,14 @@ class MessageHelper {
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
+    static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
 
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
     static std::string GetDeviceMacAddressForHandle(
-        const uint32_t device_handle);
+      const uint32_t device_handle);
 
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
@@ -414,10 +389,10 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImageFiles(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 

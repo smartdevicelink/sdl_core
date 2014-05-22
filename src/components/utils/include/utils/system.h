@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -30,17 +30,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_
 
 #include <string>
+#include <vector>
 
-namespace time_tester {
+namespace utils {
 
-class Metric {
-  public:
-    virtual std::string GetStyledString() = 0;
-    virtual ~Metric(){}
+/**
+ * Class to execute shell scripts
+ */
+class System {
+ public:
+  /**
+   * Constructs instantiation
+   * @param command name of command for executing
+   */
+  explicit System(const std::string& command);
+
+  /**
+   * Constructs instantiation
+   * @param file name of file for executing
+   * @param command name of command
+   */
+  System(const std::string& file, const std::string& command);
+
+  /**
+   * Adds argument
+   * @param arg argument of command
+   * @return itself object
+   */
+  System& Add(const std::string& arg);
+
+  /**
+   * Executes command as new child process
+   * @return true if success
+   */
+  bool Execute();
+
+  /**
+   * Executes command
+   * @param wait if this flag is true then wait until command is terminated
+   * @return true if success
+   */
+  bool Execute(bool wait);
+
+ private:
+  /**
+   * Command for executing
+   */
+  std::string command_;
+
+  /**
+   * List of arguments
+   */
+  std::vector<std::string> argv_;
 };
-}  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
+
+}  // utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SYSTEM_H_

@@ -104,7 +104,9 @@ SDL.Keyboard = SDL.SDLAbstractView.create({
                 break;
             }
             case "Search": {
-                this.target.set('value', "");
+                if (this.target.value == null) {
+                    this.target.set('value', "");
+                }
                 this.target.search();
                 this.deactivate();
                 break;

@@ -45,6 +45,7 @@
 #include "utils/macro.h"
 #include "utils/date_time.h"
 #include "json/value.h"
+#include "json/writer.h"
 #include "config_profile/profile.h"
 #include "application_manager/usage_statistics.h"
 #include "policy/policy_types.h"
@@ -61,7 +62,6 @@ PolicyHandler::PolicyHandler()
   : policy_manager_(0),
     dl_handle_(0),
     exchange_handler_(NULL),
-    is_exchange_in_progress_(false),
     on_ignition_check_done_(false),
     retry_sequence_("RetrySequence", new RetrySequence(this)) {
 }
@@ -301,7 +301,7 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   } else if (!app) {
     LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
   } else {
-    policy_manager_->GetUserPermissionsForApp(device_params.device_mac_address,
+    policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
         app->mobile_app_id()->asString(),
         group_permissions);
   }
@@ -433,13 +433,37 @@ void PolicyHandler::OnPendingPermissionChange(
   }
 }
 
+BinaryMessageSptr PolicyHandler::AddHttpHeader(const BinaryMessageSptr& pt_string) {
+  Json::Value packet(Json::objectValue);
+  packet["HTTPRequest"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["headers"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["headers"]["ContentType"] = Json::Value("application/json");
+  packet["HTTPRequest"]["headers"]["ConnectTimeout"] = Json::Value(policy_manager_->TimeoutExchange());
+  packet["HTTPRequest"]["headers"]["DoOutput"] = Json::Value(true);
+  packet["HTTPRequest"]["headers"]["DoInput"] = Json::Value(true);
+  packet["HTTPRequest"]["headers"]["UseCaches"] = Json::Value(false);
+  packet["HTTPRequest"]["headers"]["RequestMethod"] = Json::Value("POST");
+  packet["HTTPRequest"]["headers"]["ReadTimeout"] = Json::Value(policy_manager_->TimeoutExchange());
+  packet["HTTPRequest"]["headers"]["InstanceFollowRedirects"] = Json::Value(false);
+  packet["HTTPRequest"]["headers"]["charset"] = Json::Value("utf-8");
+  packet["HTTPRequest"]["headers"]["Content_Length"] = Json::Value(static_cast<int>(pt_string->size()));
+  packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::arrayValue);
+  packet["HTTPRequest"]["body"]["data"][0] = Json::Value(std::string(pt_string->begin(),
+                                                                     pt_string->end()));
+
+  Json::FastWriter writer;
+  std::string message = writer.write(packet);
+  LOG4CXX_DEBUG(logger_, "Packet PT: " << message);
+  return new BinaryMessage(message.begin(), message.end());
+}
+
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   LOG4CXX_INFO(logger_, "PolicyHandler::SendMessageToSDK");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  is_exchange_in_progress_ = true;
 
   std::string url;
   uint32_t app_id = last_used_app_ids_.back();
@@ -469,6 +493,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   application_manager::MessageHelper::SendPolicySnapshotNotification(app_id,
       pt_string,
       url, 0);
+
   return true;
 }
 
@@ -479,7 +504,12 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     return false;
   }
 
-  is_exchange_in_progress_ = false;
+  if (policy_manager_->GetPolicyTableStatus() !=
+      PolicyTableStatus::StatusUpdatePending) {
+    LOG4CXX_WARN(logger_,
+                 "Update policy is skipped because request to update was not");
+    return false;
+  }
 
   bool ret = policy_manager_->LoadPT(file, pt_string);
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
@@ -488,6 +518,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     retry_sequence_lock_.Ackquire();
     retry_sequence_.stop();
     retry_sequence_lock_.Release();
+    policy_manager_->CleanupUnpairedDevices();
     int32_t correlation_id =
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
@@ -503,9 +534,10 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     std::vector<std::string> vehicle_data_args;
     vehicle_data_args.push_back(application_manager::strings::odometer);
     application_manager::MessageHelper::CreateGetVehicleDataRequest(correlation_id, vehicle_data_args);
-    if (policy_manager_->CleanupUnpairedDevices(unpaired_device_ids_)) {
-      unpaired_device_ids_.clear();
-    }
+  } else  {
+    // TODO(PV): should be exchange restarted at this point?
+    LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
+    //OnPTExchangeNeeded();
   }
   return ret;
 }
@@ -528,7 +560,8 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
     return;
   }
 
-  if (is_exchange_in_progress_) {
+  if (policy_manager_->GetPolicyTableStatus() ==
+        PolicyTableStatus::StatusUpdatePending) {
     LOG4CXX_INFO(logger_, "Starting exchange skipped, since another exchange "
                  "is in progress.");
     return;
@@ -878,9 +911,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
     return;
   }
 
-  policy::DeviceIds devices;
-  devices.insert(device_id);
-  policy_manager_->CleanupUnpairedDevices(devices);
+  policy_manager_->MarkUnpairedDevice(device_id);
 }
 
 }  //  namespace policy

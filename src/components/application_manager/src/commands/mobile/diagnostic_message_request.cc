@@ -51,7 +51,8 @@ void DiagnosticMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
 
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_), true);
+                 &(*message_)[strings::msg_params], true);
+
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

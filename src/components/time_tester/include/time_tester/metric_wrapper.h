@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "resumption/last_state.h"
-#include "config_profile/profile.h"
-#include "utils/file_system.h"
-#include "utils/logger.h"
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
 
-namespace resumption {
+#include <string>
+#include "utils/resource_usage.h"
+#include "json/json.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+namespace time_tester {
 
-void LastState::SaveToFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  const std::string& str = dictionary.toStyledString();
-  const std::vector<uint8_t> char_vector_pdata(
-    str.begin(), str.end());
-  DCHECK(file_system::Write(file, char_vector_pdata));
-}
+class MetricWrapper {
+  utils::ResourseUsage* resources;
+  public:
+    MetricWrapper();
+    /*
+     * @brief get current cpu and memory info and store it as member
+     */
+    bool grabResources();
+    virtual std::string GetStyledString();
+    ~MetricWrapper();
+  protected:
+    virtual Json::Value GetJsonMetric();
+    void Clear();
+};
 
-void LastState::LoadFromFileSystem() {
-  const std::string file =
-      profile::Profile::instance()->app_info_storage();
-  std::string buffer;
-  bool result = file_system::ReadFile(file, buffer);
-  Json::Reader m_reader;
-  if (result && m_reader.parse(buffer, dictionary)) {
-    LOG4CXX_INFO(logger_, "Valid last state was found.");
-    return;
-  }
-  LOG4CXX_WARN(logger_, "No valid last state was found.");
-}
 
-LastState::LastState() {
-  LoadFromFileSystem();
-}
-
-LastState::~LastState() {
-  SaveToFileSystem();
-}
-
-}
+}  // namespace time_tester
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_MECTRIC_H_
