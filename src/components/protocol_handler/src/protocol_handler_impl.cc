@@ -299,7 +299,8 @@ void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
       PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-      SERVICE_TYPE_RPC, FRAME_DATA_END_SERVICE, session_id, 0, 0));
+      SERVICE_TYPE_RPC, FRAME_DATA_END_SERVICE, session_id, 0,
+      session_observer_->KeyFromPair(connection_id, session_id)));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
