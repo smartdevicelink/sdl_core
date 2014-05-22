@@ -47,6 +47,7 @@
 #define MAX_CMDLINE_LEN	128
 
 namespace utils {
+
 struct ResourseUsage {
   long long int utime;
   long long int stime;
@@ -118,10 +119,45 @@ class Resources {
   static ResourseUsage* getCurrentResourseUsage();
 
 private:
-  static bool readMyProcFile(std::string& output);
-  static bool getProcInfo(PidStats& output);
-  static bool getMemInfo(MemInfo& output);
-  static std::string getMyProcPath();
+
+  /*
+   * @brief reads /proc/PID/stat file on linux
+   *        do not work on QNX ( return false, output wan't be changed )
+   * @param output - storage for result string ( there will be separated content of /proc/PID/stat )
+   * @return true on succes false onb fail
+   */
+  static bool ReadStatFile(std::string& output);
+
+  /*
+   * @brief Grab information about curent process
+   * @param output - storage for result struct
+   * @return true on succes false onb fail
+   */
+  static bool GetProcInfo(PidStats& output);
+
+  /*
+   * @brief Grab process memory information
+   * @param output - storage for result struct
+   * @return true on succes false onb fail
+   */
+  static bool GetMemInfo(MemInfo& output);
+
+  /*
+   * @brief return path to /proc/PID/stat file on linux
+   *        return path to /proc/PID/as file on linux
+   * @return path to file
+   */
+  static std::string GetStatPath();
+
+  /*
+   * @brief return path to /proc/PID directry
+   * @return path to dir
+   */
+  static std::string GetProcPath();
+
+  /*
+   * path to /proc/ directory
+   */
   static const char* proc;
 };
 

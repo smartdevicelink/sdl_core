@@ -8,6 +8,7 @@ namespace time_tester {
   }
 
 bool MetricWrapper::grabResources() {
+  Clear();
   resources = utils::Resources::getCurrentResourseUsage();
   if (NULL != resources) {
     return true;
@@ -31,11 +32,15 @@ Json::Value MetricWrapper::GetJsonMetric() {
   return result;
 }
 
-MetricWrapper::~MetricWrapper() {
-  if(NULL == resources) {
+void MetricWrapper::Clear() {
+  if (NULL != resources) {
     delete resources;
     resources = NULL;
   }
+}
+
+MetricWrapper::~MetricWrapper() {
+  Clear();
 }
 
 }

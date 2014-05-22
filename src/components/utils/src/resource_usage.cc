@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <sstream>
 #include "utils/file_system.h"
 
@@ -25,12 +26,12 @@ const char* Resources::proc = "/proc/";
 
 ResourseUsage* Resources::getCurrentResourseUsage() {
   PidStats pid_stats;
-  if (false == getProcInfo(pid_stats)) {
+  if (false == GetProcInfo(pid_stats)) {
     LOG4CXX_ERROR(logger_, "Failed to get cpu proc info");
     return NULL;
   }
   MemInfo mem_info;
-  if (false == getMemInfo(mem_info)) {
+  if (false == GetMemInfo(mem_info)) {
     LOG4CXX_ERROR(logger_, "Failed to get memory info");
     return NULL;
   }
@@ -41,8 +42,8 @@ ResourseUsage* Resources::getCurrentResourseUsage() {
   return usage;
 }
 
-bool Resources::readMyProcFile(std::string& output) {
-  std::string filename = getMyProcPath();
+bool Resources::ReadStatFile(std::string& output) {
+  std::string filename = GetStatPath();
   if (false == file_system::FileExists(filename)) {
     return false;
   }
@@ -52,10 +53,10 @@ bool Resources::readMyProcFile(std::string& output) {
   return true;
 }
 
-bool Resources::getProcInfo(Resources::PidStats& output) {
+bool Resources::GetProcInfo(Resources::PidStats& output) {
 #if defined(OS_LINUX)
   std::string proc_buf;
-  if (false == readMyProcFile(proc_buf)) {
+  if (false == ReadStatFile(proc_buf)) {
     return false;
   }
   uint32_t num_succes = sscanf(proc_buf.c_str(),
@@ -119,9 +120,9 @@ bool Resources::getProcInfo(Resources::PidStats& output) {
   }
   return true;
 #elif defined(__QNXNTO__)
-  int fd = open(getMyProcPath().c_str(), O_RDONLY);
+  int fd = open(GetProcPath().c_str(), O_RDONLY);
   if (0 >= fd) {
-    LOG4CXX_ERROR(logger_, "Failed open process proc file : " << getMyProcPath() <<
+    LOG4CXX_ERROR(logger_, "Failed open process proc file : " << GetProcPath() <<
                   "; error no : " << strerror( errno ) );
     return false;
   }
@@ -131,50 +132,60 @@ bool Resources::getProcInfo(Resources::PidStats& output) {
 #endif
 }
 
-bool Resources::getMemInfo(Resources::MemInfo &output) {
+bool Resources::GetMemInfo(Resources::MemInfo &output) {
+  bool result = false;
   #if defined(OS_LINUX)
   Resources::PidStats pid_stat;
-  if (false == getProcInfo(pid_stat)) {
+  if (false == GetProcInfo(pid_stat)) {
     LOG4CXX_ERROR(logger_, "Failed to get proc info");
-    return false;
+    result = false;
+  } else {
+    output = pid_stat.rss;
+    result = true;
   }
-  output = pid_stat.rss;
-  return true;
+
 #elif defined(__QNXNTO__)
-  std::string proc_path = getMyProcPath();
-  std::string as = proc_path + std::string("/as");
+  std::string as_path = GetStatPath();
   struct stat st;
   struct _dir* proc_dir = 0;
   struct dirent* proc_entry = 0;
   if (0 == (proc_dir = opendir(proc))) {
     LOG4CXX_ERROR(logger_, "Unable to access to " << proc);
-    return false;
+    result = false;
+    return result;
   }
- // output = 0;
   if (0 == (proc_entry = readdir(proc_dir))) {
     LOG4CXX_ERROR(logger_, "Unable to read : " << proc_dir);
-    return false;
+    result = false;
+    return result;
   }
 
-  if (-1 == stat(as.c_str(), &st) || 0 == st.st_size) {
-     LOG4CXX_ERROR(logger_, "Unable to stat : " << as.c_str());
-     return false;
+  if (-1 == stat(as_path.c_str(), &st) || 0 == st.st_size) {
+     LOG4CXX_ERROR(logger_, "Unable to stat : " << as_path.c_str());
+     result = false;
+     return result;
   }
   output = st.st_size;
-  closedir(proc_dir);
-  return true;
+  result = true;
 #endif
+  return result;
 }
 
-std::string Resources::getMyProcPath() {
-  pid_t my_pid = getpid();
-  std::stringstream stream;
-  stream << proc << my_pid;
-#if defined(OS_LINUX)
-  stream<<"/stat";
-#endif
+std::string Resources::GetStatPath() {
   std::string filename;
-  stream >> filename;
+#if defined(OS_LINUX)
+  filename = GetProcPath() + "/stat";
+#elif defined(__QNXNTO__)
+  filename = GetProcPath() + "/as";
+#endif
+  return filename;
+}
+
+std::string Resources::GetProcPath() {
+  char buffer[1024];
+  pid_t my_pid = getpid();
+  snprintf(buffer, sizeof(buffer), "%s%d/", proc , my_pid);
+  std::string filename(buffer);
   return filename;
 }
 
