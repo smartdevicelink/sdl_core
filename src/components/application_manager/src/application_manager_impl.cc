@@ -749,8 +749,14 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
+void ApplicationManagerImpl::OnApplicationListUpdated(
+    const connection_handler::DeviceHandle& device_handle) {
+  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
+}
+
 void ApplicationManagerImpl::RemoveDevice(
-  const connection_handler::DeviceHandle& device_handle) {
+    const connection_handler::DeviceHandle& device_handle) {
+  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
 }
 
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) const {
