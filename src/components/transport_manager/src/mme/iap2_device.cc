@@ -30,8 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
 #include <string>
+#include <fstream>
+
+#include "utils/logger.h"
+
 #include "transport_manager/mme/iap2_device.h"
 
 namespace transport_manager {
@@ -39,12 +42,13 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+const char* IAP2Device::system_config_file_name = "/fs/mp/etc/mm/iap2.cfg";
+
 IAP2Device::IAP2Device(const std::string& mount_point,
                        const std::string& name,
                        const DeviceUID& unique_device_id,
                        TransportAdapterController* controller) :
   MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
-
   const IAP2Device::ProtocolNameContainer& protocol_names = ProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
     ::std::string protocol_name = *i;
@@ -98,8 +102,31 @@ const IAP2Device::ProtocolNameContainer& IAP2Device::ProtocolNames() {
 
 const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
   ProtocolNameContainer protocol_names;
-  protocol_names.push_back("com.ford.sync.prot0");
-  protocol_names.push_back("com.ford.sync.prot1");
+
+  LOG4CXX_TRACE(logger_, "iAP2: parsing system config file " << system_config_file_name);
+  std::ifstream system_config_file(system_config_file_name);
+  std::string line;
+  while (std::getline(system_config_file, line)) {
+    if ("[eap]" == line) { // start of EAP section
+      while (std::getline(system_config_file, line)) {
+        if (line.empty()) { // end of EAP section
+          break;
+        }
+        const size_t name_pos = 9; // protocol name start position
+        if ("protocol=" == line.substr(0, name_pos)) {
+          std::string tail = line.substr(name_pos);
+          size_t comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
+          std::string protocol_name = tail.substr(0, comma_pos);
+          LOG4CXX_DEBUG(logger_, "iAP2: adding protocol " << protocol_name);
+          protocol_names.push_back(protocol_name);
+        }
+      }
+      break;
+    }
+  }
+  system_config_file.close();
+  LOG4CXX_TRACE(logger_, "iAP2: system config file " << system_config_file_name << " parsed");
+
   return protocol_names;
 }
 

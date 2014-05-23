@@ -74,6 +74,8 @@ class IAP2Device : public MmeDevice {
   void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
   void OnDisconnect(ApplicationHandle app_id);
 
+  static const char* system_config_file_name;
+
   TransportAdapterController* controller_;
   int last_app_id_;
 
