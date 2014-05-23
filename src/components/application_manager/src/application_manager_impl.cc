@@ -1684,10 +1684,10 @@ void ApplicationManagerImpl::HeadUnitReset(
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET:
-      policy::PolicyHandler::instance()->InitPolicyTable();
+      policy::PolicyHandler::instance()->ResetPolicyTable();
       break;
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS:
-      policy::PolicyHandler::instance()->RevertPolicyTable();
+      policy::PolicyHandler::instance()->ClearUserConsent();
       break;
   }
 }

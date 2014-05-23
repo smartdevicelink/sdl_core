@@ -108,22 +108,34 @@ PolicyManager* PolicyHandler::CreateManager() {
 }
 
 bool PolicyHandler::InitPolicyTable() {
-  std::string preloaded_file =
-    profile::Profile::instance()->preloaded_pt_file();
+  LOG4CXX_TRACE(logger_, "Init policy table.");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  return policy_manager_->LoadPTFromFile(preloaded_file);
+  std::string preloaded_file =
+      profile::Profile::instance()->preloaded_pt_file();
+  return policy_manager_->InitPT(preloaded_file);
 }
 
-bool PolicyHandler::RevertPolicyTable() {
+bool PolicyHandler::ResetPolicyTable() {
+  LOG4CXX_TRACE(logger_, "Reset policy table.");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
+  std::string preloaded_file =
+      profile::Profile::instance()->preloaded_pt_file();
+  return policy_manager_->ResetPT(preloaded_file);
+}
+
+bool PolicyHandler::ClearUserConsent() {
   LOG4CXX_INFO(logger_, "Removing user consent records in policy table.");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  return policy_manager()->ResetUserConsent();
+  return policy_manager_->ResetUserConsent();
 }
 
 uint32_t PolicyHandler::GetAppIdForSending() {
@@ -302,8 +314,8 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
     LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
   } else {
     policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
-        app->mobile_app_id()->asString(),
-        group_permissions);
+                                          app->mobile_app_id()->asString(),
+                                          group_permissions);
   }
 
   application_manager::MessageHelper::SendGetListOfPermissionsResponse(
@@ -450,7 +462,7 @@ BinaryMessageSptr PolicyHandler::AddHttpHeader(const BinaryMessageSptr& pt_strin
   packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
   packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::arrayValue);
   packet["HTTPRequest"]["body"]["data"][0] = Json::Value(std::string(pt_string->begin(),
-                                                                     pt_string->end()));
+      pt_string->end()));
 
   Json::FastWriter writer;
   std::string message = writer.write(packet);
@@ -561,7 +573,7 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
   }
 
   if (policy_manager_->GetPolicyTableStatus() ==
-        PolicyTableStatus::StatusUpdatePending) {
+      PolicyTableStatus::StatusUpdatePending) {
     LOG4CXX_INFO(logger_, "Starting exchange skipped, since another exchange "
                  "is in progress.");
     return;
@@ -699,7 +711,10 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
     usage.RecordAppUserSelection();
 
-    DeviceConsent consent = GetDeviceForSending(permissions.deviceInfo);
+    application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
+        &permissions.deviceInfo);
+    DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
+                              permissions.deviceInfo.device_mac_address);
     permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
 
     if (permissions.appRevoked) {

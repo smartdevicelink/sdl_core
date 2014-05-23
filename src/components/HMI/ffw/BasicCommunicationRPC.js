@@ -426,7 +426,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
-                    if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
+                    if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
                         SDL.States.goToStates('info.apps');
                     }
 

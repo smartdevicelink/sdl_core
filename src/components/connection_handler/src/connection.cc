@@ -69,7 +69,7 @@ Connection::~Connection() {
 int32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  int8_t result = -1;
+  int32_t result = -1;
 
   const uint8_t max_connections = 255;
   int32_t size = session_map_.size();
