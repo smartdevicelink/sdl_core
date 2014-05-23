@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.AsyncTask;
 
-import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -84,9 +83,6 @@ public class FileStreamingLogic {
                     } catch (IOException e) {
                         Logger.e(TAG + " FIle streamer error", e);
                        cancelStreaming();
-                       SyncProxyTester tester = (SyncProxyTester) context.getActivity();
-
-                       tester.logError(e);
                     }
                 }
             }

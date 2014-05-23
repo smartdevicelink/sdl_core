@@ -45,7 +45,8 @@ public interface IProxyServiceEvent {
      * @param frameReceived frame received number
      * @param serviceType   a type of the service
      */
-    public void onAckReceived(int frameReceived, ServiceType serviceType);
+    public void onAckReceived(String appId, byte sessionId, int frameReceived,
+                              ServiceType serviceType);
 
     /**
      * Dispatch when Service Nack received

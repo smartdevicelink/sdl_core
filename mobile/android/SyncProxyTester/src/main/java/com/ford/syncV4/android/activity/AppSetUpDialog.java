@@ -47,9 +47,13 @@ import com.ford.syncV4.util.logger.Logger;
 public class AppSetUpDialog extends DialogFragment {
 
     private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
+    private static final String ARG_KEY_IS_TRANSPORT_VISIBLE = "ARG_KEY_IS_TRANSPORT_VISIBLE";
 
-    public static AppSetUpDialog newInstance() {
+    public static AppSetUpDialog newInstance(boolean isTransportViewVisible) {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE, isTransportViewVisible);
+        appSetupDialog.setArguments(bundle);
         return appSetupDialog;
     }
 
@@ -60,6 +64,8 @@ public class AppSetUpDialog extends DialogFragment {
                 getActivity().LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
+
+        manageConnectionSettingsView(view, getArguments().getBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE));
 
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
@@ -338,5 +344,11 @@ public class AppSetUpDialog extends DialogFragment {
 
         AppPreferencesManager.setProtocolMinVersion(protocolMinVersion);
         AppPreferencesManager.setProtocolMaxVersion(protocolMaxVersion);
+    }
+
+    private void manageConnectionSettingsView(View view, boolean isVisible) {
+        final LinearLayout transportLayout = (LinearLayout) view.findViewById(
+                R.id.app_set_up_dialog_transport_view);
+        transportLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 }

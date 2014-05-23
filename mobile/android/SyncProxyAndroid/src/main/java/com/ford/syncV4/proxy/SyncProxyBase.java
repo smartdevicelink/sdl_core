@@ -1891,16 +1891,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void handleMobileNavAck(final byte sessionId, int frameNumberReceived) {
         Logger.i("Mobile Nav Ack received = " + frameNumberReceived);
         final int fNumber = frameNumberReceived;
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNavAckReceived(sessionId, fNumber);
+                    _proxyListener.onMobileNavAckReceived(appId, sessionId, fNumber);
                 }
             });
         } else {
-            _proxyListener.onMobileNavAckReceived(sessionId, fNumber);
+            _proxyListener.onMobileNavAckReceived(appId, sessionId, fNumber);
         }
     }
 

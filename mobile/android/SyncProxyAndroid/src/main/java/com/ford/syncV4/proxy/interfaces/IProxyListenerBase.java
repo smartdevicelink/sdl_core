@@ -310,7 +310,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onMobileNaviStart(String appId, byte sessionId);
 
-    public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
+    public void onMobileNavAckReceived(String appId, byte sessionId, int frameReceivedNumber);
 
     public void onOnTouchEvent(byte sessionId, OnTouchEvent notification);
 

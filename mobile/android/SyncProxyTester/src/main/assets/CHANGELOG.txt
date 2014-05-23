@@ -1,3 +1,6 @@
+[CW21]
++ SyncProxyTester | SyncProxyAndroid SDK: Multiple Sessions support, general look and feel update
+
 [CW19]
 * SyncProxyAndroid SDK: End of Stream reached after connection to SDL established
 + SyncProxyAndroid SDK: Prioritize / paralleling message queues

@@ -862,14 +862,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * ******************************
      */
     @Override
-    public void onAddSubMenuResponse(byte sessionId, AddSubMenuResponse response) {
+    public void onAddSubMenuResponse(final byte sessionId, AddSubMenuResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         final boolean success = response.getSuccess();
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onAddSubMenuResponse(success);
+                mainActivity.onAddSubMenuResponse(sessionId, success);
             }
         });
 
@@ -883,7 +883,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onCreateInteractionChoiceSetResponse(byte sessionId,
+    public void onCreateInteractionChoiceSetResponse(final byte sessionId,
                                                      CreateInteractionChoiceSetResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
@@ -891,7 +891,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onCreateChoiceSetResponse(success);
+                mainActivity.onCreateChoiceSetResponse(sessionId, success);
             }
         });
 
@@ -905,14 +905,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onDeleteCommandResponse(byte sessionId, DeleteCommandResponse response) {
+    public void onDeleteCommandResponse(final byte sessionId, DeleteCommandResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         final boolean success = response.getSuccess();
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onDeleteCommandResponse(success);
+                mainActivity.onDeleteCommandResponse(sessionId, success);
             }
         });
 
@@ -926,7 +926,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onDeleteInteractionChoiceSetResponse(byte sessionId,
+    public void onDeleteInteractionChoiceSetResponse(final byte sessionId,
                                                      DeleteInteractionChoiceSetResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
@@ -934,7 +934,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onDeleteChoiceSetResponse(success);
+                mainActivity.onDeleteChoiceSetResponse(sessionId, success);
             }
         });
 
@@ -948,14 +948,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onDeleteSubMenuResponse(byte sessionId, DeleteSubMenuResponse response) {
+    public void onDeleteSubMenuResponse(final byte sessionId, DeleteSubMenuResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         final boolean success = response.getSuccess();
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onDeleteSubMenuResponse(success);
+                mainActivity.onDeleteSubMenuResponse(sessionId, success);
             }
         });
 
@@ -1147,14 +1147,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * *********************************
      */
     @Override
-    public void onAddCommandResponse(byte sessionId, AddCommandResponse response) {
+    public void onAddCommandResponse(final byte sessionId, AddCommandResponse response) {
         createDebugMessageForAdapter(sessionId, response);
         final SyncProxyTester mainActivity = SyncProxyTester.getInstance();
         final boolean success = response.getSuccess();
         mainActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mainActivity.onAddCommandResponse(success);
+                mainActivity.onAddCommandResponse(sessionId, success);
             }
         });
 
@@ -1481,10 +1481,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
+    public void onMobileNavAckReceived(String appId, byte sessionId, int frameReceivedNumber) {
         if (mProxyServiceEvent != null) {
-            // TODO : SessionId ???
-            mProxyServiceEvent.onAckReceived(frameReceivedNumber, ServiceType.Mobile_Nav);
+            mProxyServiceEvent.onAckReceived(appId, sessionId, frameReceivedNumber,
+                    ServiceType.Mobile_Nav);
         }
     }
 

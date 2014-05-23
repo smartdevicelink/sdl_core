@@ -152,8 +152,10 @@ public class WiProProtocol extends AbstractProtocol {
         Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion() +
                 " bytes length:" + receivedBytes.length);
 
+        // TODO : Implement proper check point of the Protocol Version
         //Check for a version difference
-        //if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE) {
+        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE ||
+                getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
             byte parsedProtocolVersion = (byte) (receivedBytes[0] >>> 4);
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
@@ -171,7 +173,7 @@ public class WiProProtocol extends AbstractProtocol {
                 updateDataStructureToProtocolVersion(parsedProtocolVersion);
                 mHeaderBuf = tempHeader;
             }
-        //}
+        }
 
         // If I don't yet know the message size, grab those bytes.
         if (!mHaveHeader) {
@@ -454,7 +456,6 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            Logger.d("TRACE 0 sesId:" + sessionId + " " + hashID.get(sessionId) + " " + header.getMessageID());
             if (hashID.get(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
             }
@@ -465,7 +466,6 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceAckFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            Logger.d("TRACE 1 sesId:" + sessionId + " " + hashID.get(sessionId) + " " + header.getMessageID());
             if (hashID.get(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEndedAck(header.getServiceType(), header.getSessionID());
             }

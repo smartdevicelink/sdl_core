@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +49,8 @@ import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.rpc.AddCommand;
+import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.AlertManeuver;
 import com.ford.syncV4.proxy.rpc.ChangeRegistration;
@@ -104,6 +108,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
@@ -148,6 +153,11 @@ public class PlaceholderFragment extends Fragment {
     private static final int SHOW_MAXSOFTBUTTONS = 8;
     private static final int CHOICESETID_UNSET = -1;
 
+    // Request id for SoftButtonsListActivity
+    private static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    // Request id for ChoiceListActivity
+    public static final int REQUEST_LIST_CHOICES = 45;
+
     /**
      * Autoincrementing id for new choices.
      */
@@ -156,10 +166,6 @@ public class PlaceholderFragment extends Fragment {
     private boolean isFirstActivityRun = true;
 
     private ArrayAdapter<VehicleDataType> mVehicleDataType = null;
-    /**
-     * Shared ArrayAdapter containing ImageType values.
-     */
-    private ArrayAdapter<ImageType> imageTypeAdapter;
     private LogAdapter mLogAdapter;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
     private ArrayAdapter<SyncSubMenu> mSubmenuAdapter = null;
@@ -167,7 +173,8 @@ public class PlaceholderFragment extends Fragment {
     private ArrayAdapter<Integer> mChoiceSetAdapter = null;
     private ArrayAdapter<String> mPutFileAdapter = null;
 
-    private Map<Integer, Integer> mCommandIdToParentSubmenuMap = null;
+    private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
+            new Hashtable<Integer, Integer>();
 
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
@@ -175,13 +182,14 @@ public class PlaceholderFragment extends Fragment {
     private boolean[] isButtonSubscribed = null;
     private boolean[] isVehicleDataSubscribed = null;
     private int mAutoIncCorrId = 0;
+    private int autoIncChoiceSetId = 1;
     private int mTabId = 0;
     private String mAppId = "";
     /**
      * Session Id associated with concrete instance of this Fragment
      */
     private byte mSessionId = 0;
-    private Integer _latestDeleteCommandCmdID = null;
+    private Integer mLatestDeleteCommandCmdID = null;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
      * filename is set after choosing.
@@ -220,6 +228,12 @@ public class PlaceholderFragment extends Fragment {
      * {@link SoftButtonsListActivity} and this activity.
      */
     private Vector<SoftButton> currentSoftButtons;
+    /**
+     * Latest SyncSubMenu, required to add the submenu from the adapter when a
+     * successful AddSubMenuResponse comes.
+     */
+    private SyncSubMenu mLatestAddSubmenu = null;
+    private Pair<Integer, Integer> mLatestAddCommand = null;
 
     /**
      * Returns a new instance of this fragment for the given section number.
@@ -268,14 +282,11 @@ public class PlaceholderFragment extends Fragment {
                 android.R.layout.simple_spinner_item, VehicleDataType.values());
         mVehicleDataType.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        imageTypeAdapter = new ArrayAdapter<ImageType>(getActivity(),
-                android.R.layout.simple_spinner_item, ImageType.values());
-        imageTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
         mLogAdapter = new LogAdapter("SyncProxyTester", false, R.layout.row, new ArrayList<Object>());
 
         if (isFirstActivityRun) {
-            DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance();
+            int fragmentsCounter = ((SyncProxyTester) getActivity()).getFragmentsCount();
+            DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance(fragmentsCounter <= 1);
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
             //appSetupDialogFragment.setCancelable(false);
         } else {
@@ -382,11 +393,11 @@ public class PlaceholderFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
 
         int menuSize = menu.size();
+        int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
         int nextMenuItemOrder = menu.getItem(menuSize - 1).getOrder() + 1;
         menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
-        int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
         //if (tabsCount == 1) {
             menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
         //}
@@ -394,7 +405,9 @@ public class PlaceholderFragment extends Fragment {
         //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
         menu.add(0, MenuConstants.MENU_HASH_ID_SETUP, nextMenuItemOrder++, "HashId setup");
         menu.add(0, MenuConstants.MENU_CLEAR_FUNCTIONS_USAGE, nextMenuItemOrder++, "Reset functions usage");
-        menu.add(0, MenuConstants.MENU_XML_TEST, nextMenuItemOrder++, "XML Test");
+        if (tabsCount == 1) {
+            menu.add(0, MenuConstants.MENU_XML_TEST, nextMenuItemOrder++, "XML Test");
+        }
         menu.add(0, MenuConstants.MENU_POLICIES_TEST, nextMenuItemOrder++, "Policies Test");
         menu.add(0, MenuConstants.MENU_SET_UP_POLICY_FILES, nextMenuItemOrder++, "Set Up Policy files");
         MenuItem menuitem = menu.add(0, MenuConstants.MENU_WAKE_LOCK, nextMenuItemOrder++, "Lock screen while testing");
@@ -521,6 +534,44 @@ public class PlaceholderFragment extends Fragment {
         return false;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        Logger.i("OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+                ", data:" + data);
+        switch (requestCode) {
+            case REQUEST_LIST_SOFTBUTTONS:
+                if (resultCode == Activity.RESULT_OK) {
+
+                    currentSoftButtons = (Vector<SoftButton>) IntentHelper.
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+
+                    if (chkIncludeSoftButtons != null) {
+                        chkIncludeSoftButtons.setChecked(true);
+                    }
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                break;
+            case REQUEST_LIST_CHOICES:
+                if (resultCode == Activity.RESULT_OK) {
+                    Vector<Choice> choices = (Vector<Choice>) IntentHelper.
+                            getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                    sendCreateInteractionChoiceSet(choices);
+                }
+                IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
+                break;
+            case Const.REQUEST_FILE_OPEN:
+                if (resultCode == Activity.RESULT_OK) {
+                    String fileName = data.getStringExtra(FileDialog.RESULT_PATH);
+                    if (txtLocalFileName != null) {
+                        txtLocalFileName.setText(fileName);
+                    }
+                }
+                break;
+        }
+    }
+
     /**
      * Called when the app is activated from HMI for the first time. ProxyService
      * automatically subscribes to buttons, so we reflect that in the subscription list.
@@ -560,18 +611,6 @@ public class PlaceholderFragment extends Fragment {
 
     public ArrayAdapter<SyncSubMenu> getSubMenuAdapter() {
         return mSubmenuAdapter;
-    }
-
-    public ArrayAdapter<Integer> getCommandAdapter() {
-        return mCommandAdapter;
-    }
-
-    public Map<Integer, Integer> getCommandIdToParentSubmenuMap() {
-        return mCommandIdToParentSubmenuMap;
-    }
-
-    public ArrayAdapter<Integer> getChoiceSetAdapter() {
-        return mChoiceSetAdapter;
     }
 
     public ArrayAdapter<String> getPutFileAdapter() {
@@ -621,6 +660,59 @@ public class PlaceholderFragment extends Fragment {
     public void setMobileNaviStateOff() {
         if (mMobileNavPreviewFragment != null) {
             mMobileNavPreviewFragment.setStateOff();
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AddCommandDialog}
+     *
+     * @param addCommand {@link com.ford.syncV4.proxy.rpc.AddCommand}
+     */
+    public void onAddCommandDialogResult(AddCommand addCommand) {
+        if (mLatestAddCommand != null) {
+            Logger.w("Latest addCommand should be null, but it is " + mLatestAddCommand.first +
+                    " / " + mLatestAddCommand.second);
+        }
+        Integer parentID = null;
+        if (addCommand.getMenuParams() != null) {
+            parentID = addCommand.getMenuParams().getParentID();
+        }
+        mLatestAddCommand = new Pair<Integer, Integer>(addCommand.getCmdID(), parentID);
+    }
+
+    /**
+     * Called when a AddCommandResponse comes. If successful, add it to the
+     * adapter.
+     */
+    public void onAddCommandResponse(boolean success) {
+        if (mLatestAddCommand != null) {
+            if (success) {
+                mCommandAdapter.add(mLatestAddCommand.first);
+                if (null != mLatestAddCommand.second) {
+                    mCommandIdToParentSubmenuMap.put(mLatestAddCommand.first,
+                            mLatestAddCommand.second);
+                }
+            }
+            mLatestAddCommand = null;
+        } else {
+            Logger.w("Latest addCommand is null");
+        }
+    }
+
+    /**
+     * Called when a DeleteCommandResponse comes. If successful, remove it from
+     * the adapter.
+     */
+    public void onDeleteCommandResponse(boolean success) {
+        if (mLatestDeleteCommandCmdID != null) {
+            if (success) {
+                mCommandAdapter.remove(mLatestDeleteCommandCmdID);
+                mCommandIdToParentSubmenuMap.remove(mLatestDeleteCommandCmdID);
+            }
+            mLatestDeleteCommandCmdID = null;
+        } else {
+            Logger.w("Latest deleteCommand is unset");
         }
     }
 
@@ -676,7 +768,7 @@ public class PlaceholderFragment extends Fragment {
      * Initializes/resets the adapters keeping created submenus, interaction
      * choice set ids, etc.
      */
-    private void resetAdapters() {
+    public void resetAdapters() {
         // set up storage for subscription records
 
         isButtonSubscribed = new boolean[ButtonName.values().length];
@@ -699,7 +791,7 @@ public class PlaceholderFragment extends Fragment {
                 android.R.layout.select_dialog_item);
         mCommandAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        mCommandIdToParentSubmenuMap = new Hashtable<Integer, Integer>();
+        mCommandIdToParentSubmenuMap.clear();
 
         mChoiceSetAdapter = new ArrayAdapter<Integer>(getActivity(),
                 android.R.layout.simple_spinner_item);
@@ -708,6 +800,105 @@ public class PlaceholderFragment extends Fragment {
         mPutFileAdapter = new ArrayAdapter<String>(getActivity(),
                 android.R.layout.select_dialog_item);
         mPutFileAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    }
+
+    /**
+     * Called when a CreateChoiceSetResponse comes. If successful, add it to the
+     * adapter. In any case, remove the key from the map.
+     */
+    public void onCreateChoiceSetResponse(boolean success) {
+        if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
+            if (success) {
+                mChoiceSetAdapter.add(mLatestCreateChoiceSetId);
+            }
+            mLatestCreateChoiceSetId = CHOICESETID_UNSET;
+        } else {
+            Logger.w("Latest createChoiceSetId is unset");
+        }
+    }
+
+    /**
+     * Called when a DeleteChoiceSetResponse comes. If successful, remove it
+     * from the adapter.
+     */
+    public void onDeleteChoiceSetResponse(boolean success) {
+        if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
+            if (success) {
+                mChoiceSetAdapter.remove(_latestDeleteChoiceSetId);
+            }
+            _latestDeleteChoiceSetId = CHOICESETID_UNSET;
+        } else {
+            Logger.w("Latest deleteChoiceSetId is unset");
+        }
+    }
+
+    /**
+     * Called when a DeleteSubMenuResponse comes. If successful, remove it from
+     * the adapter. We also need to delete all the commands that were added to
+     * this submenu.
+     */
+    public void onDeleteSubMenuResponse(boolean success) {
+        if (_latestDeleteSubmenu != null) {
+            if (success) {
+                mSubmenuAdapter.remove(_latestDeleteSubmenu);
+
+                for (Iterator<Map.Entry<Integer, Integer>> it = mCommandIdToParentSubmenuMap
+                        .entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry<Integer, Integer> entry = it.next();
+                    if (entry.getValue() == _latestDeleteSubmenu.getSubMenuId()) {
+                        mCommandAdapter.remove(entry.getKey());
+                        it.remove();
+                    }
+                }
+            }
+            _latestDeleteSubmenu = null;
+        } else {
+            Logger.w("Latest deleteSubMenu is unset");
+        }
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AddSubMenuDialog}
+     *
+     * @param addSubMenu  {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
+     * @param syncSubMenu SubMenu structure
+     */
+    public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
+        if (mLatestAddSubmenu != null) {
+            Logger.w("Latest AddSubMenu should be null, but equals to " + mLatestAddSubmenu);
+        }
+        mLatestAddSubmenu = syncSubMenu;
+    }
+
+    /**
+     * Called when a AddSubMenuResponse comes. If successful, add it to the
+     * adapter.
+     */
+    public void onAddSubMenuResponse(boolean success) {
+        if (mLatestAddSubmenu != null) {
+            if (success) {
+                mSubmenuAdapter.add(mLatestAddSubmenu);
+            }
+            mLatestAddSubmenu = null;
+        } else {
+            Logger.w("Latest addSubMenu is unset");
+        }
+    }
+
+    private void sendCreateInteractionChoiceSet(Vector<Choice> choices) {
+        ProxyService boundProxyService = ((SyncProxyTester) getActivity()).mBoundProxyService;
+        if (boundProxyService != null) {
+            int choiceSetID = autoIncChoiceSetId++;
+            boundProxyService.commandCreateInteractionChoiceSetResumable(choices, choiceSetID,
+                    getCorrelationId());
+
+            if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
+                Logger.w("Latest createChoiceSetId should be unset, but equals to " +
+                        mLatestCreateChoiceSetId);
+            }
+            mLatestCreateChoiceSetId = choiceSetID;
+        }
     }
 
     private void audioButtonListener() {
@@ -736,6 +927,8 @@ public class PlaceholderFragment extends Fragment {
         });
 
         final ProxyService mBoundProxyService = ((SyncProxyTester) getActivity()).mBoundProxyService;
+        final ArrayAdapter<ImageType> imageTypeAdapter =
+                ((SyncProxyTester) getActivity()).getImageTypeAdapter();
 
         new AlertDialog.Builder(getActivity())
                 .setTitle("Pick a Function")
@@ -926,7 +1119,7 @@ public class PlaceholderFragment extends Fragment {
                                     Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                     intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                             SCROLLABLEMESSAGE_MAXSOFTBUTTONS);
-                                    startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                    startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                                 }
                             });
 
@@ -1183,7 +1376,7 @@ public class PlaceholderFragment extends Fragment {
                                 Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                 intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                         ALERTMANEUVER_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                             }
                         });
 
@@ -1245,11 +1438,11 @@ public class PlaceholderFragment extends Fragment {
                                     mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                                 }
 
-                                if (_latestDeleteCommandCmdID != null) {
+                                if (mLatestDeleteCommandCmdID != null) {
                                     Logger.w("Latest deleteCommand should be null, but it is " +
-                                            _latestDeleteCommandCmdID);
+                                            mLatestDeleteCommandCmdID);
                                 }
-                                _latestDeleteCommandCmdID = cmdID;
+                                mLatestDeleteCommandCmdID = cmdID;
                             }
                         });
                         builder.show();
@@ -1300,7 +1493,7 @@ public class PlaceholderFragment extends Fragment {
                                                 Const.INTENTHELPER_KEY_OBJECTSLIST);
                                 Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                 intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                             }
                         });
 
@@ -1627,7 +1820,7 @@ public class PlaceholderFragment extends Fragment {
                                 Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                 intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                         SHOWCONSTANTTBT_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                             }
                         });
 
@@ -1744,7 +1937,7 @@ public class PlaceholderFragment extends Fragment {
                         Intent intent = new Intent(adapter.getContext(), ChoiceListActivity.class);
                         intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                 CREATECHOICESET_MAXCHOICES);
-                        startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_CHOICES);
+                        startActivityForResult(intent, REQUEST_LIST_CHOICES);
                     }
 
                     /**
@@ -1835,7 +2028,7 @@ public class PlaceholderFragment extends Fragment {
                                         .addObjectForKey(currentSoftButtons, Const.INTENTHELPER_KEY_OBJECTSLIST);
                                 Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                 intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, SHOW_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                             }
                         });
 
@@ -2115,7 +2308,7 @@ public class PlaceholderFragment extends Fragment {
                                 Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
                                 intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
                                         UPDATETURNLIST_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, SyncProxyTester.REQUEST_LIST_SOFTBUTTONS);
+                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
                             }
                         });
 

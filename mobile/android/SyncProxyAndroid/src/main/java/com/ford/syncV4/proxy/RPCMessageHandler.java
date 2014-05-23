@@ -133,14 +133,14 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                         syncProxyBase.setSyncConnectionState(SyncConnectionState.SYNC_CONNECTED);
 
                         // If registerAppInterface failed, exit with OnProxyUnusable
-                        if (!msg.getSuccess()) {
+                        /*if (!msg.getSuccess()) {
                             String errorMsg = "Unable to register app interface. Review values" +
                                     "passed to the SyncProxy constructor." +
                                     "RegisterAppInterface result code: ";
                             syncProxyBase.notifyProxyClosed(errorMsg,
                                     new SyncException(errorMsg + msg.getResultCode(),
                                             SyncExceptionCause.SYNC_REGISTRATION_ERROR));
-                        }
+                        }*/
                         syncProxyBase.processRegisterAppInterfaceResponse(sessionId, msg);
                     } else if (syncProxyBase.isPolicyCorrelationIdProtected(responseCorrelationID) &&
                                     functionName.equals(Names.OnEncodedSyncPData)) {
@@ -191,7 +191,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
 
                     // RegisterAppInterface
-                    if (syncProxyBase.getAdvancedLifecycleManagementEnabled()) {
+                    /*if (syncProxyBase.getAdvancedLifecycleManagementEnabled()) {
                         syncProxyBase.setSyncConnectionState(SyncConnectionState.SYNC_CONNECTED);
 
                         // If registerAppInterface failed, exit with OnProxyUnusable
@@ -205,7 +205,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     )
                             );
                         }
-                    }
+                    }*/
                     syncProxyBase.processRegisterAppInterfaceResponse(sessionId, msg);
                 } else if (functionName.equals(Names.Speak)) {
                     // SpeakResponse

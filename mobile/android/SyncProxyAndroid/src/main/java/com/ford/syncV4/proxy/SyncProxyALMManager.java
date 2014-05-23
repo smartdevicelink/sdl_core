@@ -2564,7 +2564,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
+        public void onMobileNavAckReceived(String appId, byte sessionId, int frameReceivedNumber) {
 
         }
 
