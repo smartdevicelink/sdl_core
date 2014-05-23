@@ -256,19 +256,19 @@ void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
-
-  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   app_manager_->Stop();
-  application_manager::ApplicationManagerImpl::destroy();
-
-  LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
-  transport_manager_->Stop();
-  transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  application_manager::ApplicationManagerImpl::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
+  transport_manager_->Stop();
+  transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   protocol_handler_->set_session_observer(NULL);
