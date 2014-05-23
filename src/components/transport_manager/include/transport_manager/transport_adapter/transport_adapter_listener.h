@@ -85,12 +85,15 @@ class TransportAdapterListener {
   virtual void OnDeviceListUpdated(
       const TransportAdapter* transport_adapter) = 0;
 
-   /**
-   * @brief Reaction on event, when new application started it work on device and SDL found this application
+  /**
+   * @brief Reaction on event, when new applications are started on device
+   * and SDL found this application
+   *
    * @param adapter Current transport adapter
-   * @param device_handle Unique ID of connected device
+   * @param device_handle Unique ID of device with new application list
    */
-  virtual void OnApplicationListUpdated(const TransportAdapter* adapter, const DeviceUID& device_handle) = 0;
+  virtual void OnApplicationListUpdated(const TransportAdapter* adapter,
+                                        const DeviceUID& device_handle) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,

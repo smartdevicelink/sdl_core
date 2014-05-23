@@ -629,11 +629,12 @@ void TransportManagerImpl::EventListenerThread(void) {
           OnDeviceListUpdated(ta);
           break;
         }
-        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED:
+        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED: {
           LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
           device_handle = converter_.UidToHandle(device_id);
           RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
           break;
+        }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
           device_handle = converter_.UidToHandle(device_id);
