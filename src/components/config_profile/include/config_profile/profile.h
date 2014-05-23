@@ -112,11 +112,6 @@ class Profile : public utils::Singleton<Profile> {
     const uint16_t& time_testing_port() const;
 
     /**
-     * @brief Returns policies file name
-     */
-    const std::string& policies_file_name() const;
-
-    /**
      * @brief Returns hmi capabilities file name
      */
     const std::string& hmi_capabilities_file_name() const;
@@ -192,10 +187,10 @@ class Profile : public utils::Singleton<Profile> {
       */
     const std::string& named_video_pipe_path() const;
 
-     /**
-      * @brief Returns the audio pipe path
-      */
-     const std::string& named_audio_pipe_path() const;
+    /**
+     * @brief Returns the audio pipe path
+     */
+    const std::string& named_audio_pipe_path() const;
 
     /**
      * @brief Returns time scale for max amount of requests for application
@@ -275,9 +270,15 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& policies_snapshot_file_name() const;
 
-     /*
-      * @brief Timeout in transport manager before disconnect
+    /**
+     * @brief Should Policy be turned off? (Library not loaded)
+     * @return Flag
      */
+    bool policy_turn_off() const;
+
+    /*
+     * @brief Timeout in transport manager before disconnect
+    */
     uint32_t transport_manager_disconnect_timeout() const;
 
     /*
@@ -307,9 +308,14 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& tts_delimiter() const;
 
     /**
+     * @brief Returns recording file source name
+     */
+    const std::string& recording_file_source() const;
+
+    /**
      * @brief Returns recording file name
      */
-    const std::string& recording_file() const;
+    const std::string& recording_file_name() const;
 
   private:
     /**
@@ -407,7 +413,6 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
     uint16_t                        time_testing_port_;
-    std::string                     policies_file_name_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;
     std::vector<std::string>        time_out_promt_;
@@ -438,13 +443,15 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
+    bool                            policy_turn_off_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
-    std::string                     recording_file_;
+    std::string                     recording_file_source_;
+    std::string                     recording_file_name_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

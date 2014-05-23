@@ -54,7 +54,9 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+#ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
+#endif  // TIME_TESTER
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
@@ -99,15 +101,15 @@ class TransportManagerImpl : public TransportManager {
     typedef utils::SharedPtr<TimerInternal> TimerInternalSharedPointer;
     TimerInternalSharedPointer timer;
     bool shutDown;
+    DeviceHandle device_handle_;
     int messages_count;
 
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id);
-
+                       const ApplicationHandle& app_id,
+                       const DeviceHandle& device_handle);
     void DisconnectFailedRoutine();
-
   };
  public:
 
@@ -227,13 +229,15 @@ class TransportManagerImpl : public TransportManager {
    */
   void UpdateDeviceList(TransportAdapter* ta);
 
-
+#ifdef TIME_TESTER
   /**
    * @brief Setup observer for time metric.
    *
    * @param observer - pointer to observer
    */
   void SetTimeMetricObserver(TMMetricObserver* observer);
+#endif  // TIME_TESTER
+
 
   /**
    * @brief Constructor.
@@ -382,7 +386,9 @@ class TransportManagerImpl : public TransportManager {
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
+#ifdef TIME_TESTER
   TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
  private:
   /**
    * @brief Structure that contains conversion functions (Device ID -> Device

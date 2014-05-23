@@ -104,7 +104,7 @@ void PutFileRequest::Run() {
                  &response_params);
     return;
   }
-
+  smart_objects::SmartType t = (*message_)[strings::msg_params][strings::system_file].getType();
   sync_file_name_ =
     (*message_)[strings::msg_params][strings::sync_file_name].asString();
   file_type_ =
@@ -112,6 +112,12 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
     (*message_)[strings::params][strings::binary_data].asBinary();
+
+  // Policy table update in json format is currently to be received via PutFile
+  // TODO(PV): after latest discussion has to be changed
+  if (mobile_apis::FileType::JSON == file_type_) {
+    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(sync_file_name_, binary_data);
+  }
 
   offset_ = 0;
   is_persistent_file_ = false;

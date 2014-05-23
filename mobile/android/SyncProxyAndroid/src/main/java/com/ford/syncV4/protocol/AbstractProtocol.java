@@ -3,6 +3,7 @@ package com.ford.syncV4.protocol;
 import android.os.Environment;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
+import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
@@ -18,13 +19,15 @@ import java.util.Arrays;
 public abstract class AbstractProtocol {
 
     protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
+
+    public static final int MTU_SIZE = 1500;
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
+    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
 
     protected IProtocolListener _protocolListener = null;
-    byte[] _headerBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
-    //protected IProtocolListener ProtocolListener() { return _protocolListener; }
-    // Lock to ensure all frames are sent uninterupted
-    private Object _frameLock = new Object();
+    protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+    protected int mHeaderBufWritePos = 0;
+
     private static File audioFile;
     private static File videoFile;
     private static FileOutputStream audioOutputFileStream;
@@ -37,6 +40,7 @@ public abstract class AbstractProtocol {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
         } // end-if
         _protocolListener = protocolListener;
+        setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }// end-ctor
 
 
@@ -88,6 +92,18 @@ public abstract class AbstractProtocol {
     }
 
     /**
+     * Send heart beat header
+     * @param sessionId id of the current session
+     */
+    public abstract void SendHeartBeatMessage(byte sessionId);
+
+    /**
+     * Send heart beat ack header
+     * @param sessionId id of the current session
+     */
+    public abstract void SendHeartBeatAckMessage(byte sessionId);
+
+    /**
      * This method starts a protocol currentSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
      * currentSession has been established.
@@ -113,7 +129,8 @@ public abstract class AbstractProtocol {
     public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
 
     // This method is called whenever the protocol receives a complete frame
-    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data, MessageFrameAssembler assembler) {
+    protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
+                                               MessageFrameAssembler assembler) {
         if (data != null) {
             Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
         } else {
@@ -124,40 +141,37 @@ public abstract class AbstractProtocol {
     }
 
     // This method is called whenever a protocol has an entire frame to send
-    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+    protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
+                                             int length) {
         if (data != null) {
             Logger.d(CLASS_NAME + " transmit " + data.length + " bytes");
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
-
         resetHeartbeatAck();
         composeMessage(header, data, offset, length);
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        synchronized (_frameLock) {
-            if (data != null) {
-                if (offset >= data.length) {
-                    throw new IllegalArgumentException("offset should not be more then length");
-                }
-                byte[] dataChunk = null;
-                if (offset + length >= data.length) {
-                    dataChunk = Arrays.copyOfRange(data, offset, data.length);
-                } else {
-                    dataChunk = Arrays.copyOfRange(data, offset, offset + length);
-                }
-
-                byte[] frameHeader = header.assembleHeaderBytes();
-                byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
-                System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
-                System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
-                handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
-            } else {
-                byte[] frameHeader = header.assembleHeaderBytes();
-                handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
+        if (data != null && data.length > 0) {
+            if (offset >= data.length) {
+                throw new IllegalArgumentException("offset should not be more then length");
             }
-        } // end-if
+            byte[] dataChunk;
+            if (offset + length >= data.length) {
+                dataChunk = Arrays.copyOfRange(data, offset, data.length);
+            } else {
+                dataChunk = Arrays.copyOfRange(data, offset, offset + length);
+            }
+            byte[] frameHeader = header.assembleHeaderBytes();
+            byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
+            System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
+            System.arraycopy(dataChunk, 0, commonArray, frameHeader.length, dataChunk.length);
+            handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
+        } else {
+            byte[] frameHeader = header.assembleHeaderBytes();
+            handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
+        }
     }
 
     private synchronized void resetHeartbeatAck() {
@@ -245,8 +259,7 @@ public abstract class AbstractProtocol {
 
     // This method handles protocol message bytes that are ready to send.
     // A callback is sent to the protocol listener.
-    protected void handleProtocolMessageBytesToSend(byte[] bytesToSend,
-                                                    int offset, int length) {
+    protected void handleProtocolMessageBytesToSend(byte[] bytesToSend, int offset, int length) {
         _protocolListener.onProtocolMessageBytesToSend(bytesToSend, offset, length);
     }
 
@@ -314,14 +327,19 @@ public abstract class AbstractProtocol {
 
         switch (version) {
             case ProtocolConstants.PROTOCOL_VERSION_ONE:
-                AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_1;
+                PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_1;
                 break;
             default:
-                AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2;
+                PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2;
                 break;
         }
 
-        WiProProtocol.MAX_DATA_SIZE = WiProProtocol.MTU_SIZE - AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE;
-        _headerBuf = new byte[AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE];
+        MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
+        mHeaderBuf = new byte[AbstractProtocol.PROTOCOL_FRAME_HEADER_SIZE];
     }
-} // end-class
+
+    protected void resetDataStructureToProtocolVersion() {
+        mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+        mHeaderBufWritePos = 0;
+    }
+}

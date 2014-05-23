@@ -110,7 +110,7 @@
 ==========================================================================================================
 6. Common run on Linux host (SDL + HMI).
   6.1. Go to the binary folder "cd <Project_Linux_Build_WebHMI>/bin" or <Project_Linux_Build_Qt>/bin".
-  6.2. Prepare Policy as described in Additions, p.2
+  6.2. Prepare Policy as described in Additions, p.1
   6.3. Run SDL "./smartDeviceLinkCore".
     Note: HMI shall be started automatically. Type of started HMI depends on build options described in 5.2.
 
@@ -131,12 +131,11 @@
   8.1. Log as root and make sure you are not running Photon
   8.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_WebHMI>/bin/* ./” .
   8.3. QnxServ: download 3rd party folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/3rd_party/* ./” .
-  8.4. Prepare QDB on QNX as described in Additions, p.1
-  8.5. Prepare Policy as described in Additions, p.2
-  8.6. Prepare log4cxx as described in Additions, p.3
-  8.7. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  8.4. Prepare Policy as described in Additions, p.1
+  8.5. Prepare log4cxx as described in Additions, p.2
+  8.6. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
-  8.8. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
+  8.7. LinHost: start Chrome “chromium-browser '<Project_Root_Src>/src/components/HMI/index.html'”.
     Note: in case there is no connection with Web HMI probably it is necessary to add QNX Server IP to "no_proxy" config.
 
 ==========================================================================================================
@@ -153,25 +152,16 @@
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
     Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/etc/dbus-1/session.conf"
           If not perform steps 4.2 and restart QNX server
-  9.9. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
+  9.10. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
 ===========================================================================================================
 Additions: 
-1. QDB preparation on QNX:
-    1.1 Create config file policy.ini with content:
-		  [policy]
-		  Filename=policy.sqlite
-    1.2 Execute following commands with superuser rights:
-          LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/qnx650/target/qnx6/x86/usr/lib
-          export LD_LIBRARY_PATH
-          /usr/sbin/qdb -c policy.ini
-
-2. To use library of policy (libPolicy.so) execute following commands:
+1. To use library of policy (libPolicy.so) execute following commands:
     LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
     export LD_LIBRARY_PATH
     Note: If libPolicy.so is in other place then use following format:
         LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<PATH_TO_POLICY_LIBRARY>
 
-3. To use log4cxx execute
+2. To use log4cxx execute
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<PATH_TO_3RD_PARTY_LIBS>
     e.g. export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../3rd_party/lib
 

@@ -43,16 +43,16 @@
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
-  LOG4CXX_INFO(logger_, "Setting value '" << value\
-               << "' for key '" << key\
-               << "' in section '" << section << "'.");\
-}
+    LOG4CXX_INFO(logger_, "Setting value '" << value\
+                 << "' for key '" << key\
+                 << "' in section '" << section << "'.");\
+  }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section) {\
-  LOG4CXX_INFO(logger_, "Setting value '" << std::boolalpha << value\
-               << "' for key '" << key\
-               << "' in section '" << section << "'.");\
-}
+    LOG4CXX_INFO(logger_, "Setting value '" << std::boolalpha << value\
+                 << "' for key '" << key\
+                 << "' in section '" << section << "'.");\
+  }
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
@@ -107,24 +107,26 @@ const char* kAppDirectoryQuotaKey = "AppDirectoryQuota";
 const char* kAppTimeScaleMaxRequestsKey = "AppTimeScaleMaxRequests";
 const char* kAppRequestsTimeScaleKey = "AppRequestsTimeScale";
 const char* kAppHmiLevelNoneTimeScaleMaxRequestsKey =
-    "AppHMILevelNoneTimeScaleMaxRequests";
+  "AppHMILevelNoneTimeScaleMaxRequests";
 const char* kAppHmiLevelNoneRequestsTimeScaleKey =
-    "AppHMILevelNoneRequestsTimeScale";
+  "AppHMILevelNoneRequestsTimeScale";
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kTTSDelimiterKey = "TTSDelimiter";
-const char* kRecordingFileKey = "RecordingFile";
+const char* kRecordingFileNameKey = "RecordingFileName";
+const char* kRecordingFileSourceKey = "RecordingFileSource";
+const char* kPolicyOffKey = "PolicySwitchOff";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
-const char* kDefautlPoliciesTableFileName = "policy_table.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
-const char* kDefaultRecordingFileName = "audio.8bit.wav";
+const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
+const char* kDefaultRecordingFileName = "record.wav";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -152,822 +154,836 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-    : launch_hmi_(true),
-      app_config_folder_(),
-      app_storage_folder_(),
-      app_resourse_folder_(),
-      config_file_name_(kDefaultConfigFileName),
-      policies_file_name_(kDefautlPoliciesTableFileName),
-      hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
-      server_address_(kDefaultServerAddress),
-      server_port_(kDefaultServerPort),
-      video_streaming_port_(kDefaultVideoStreamingPort),
-      audio_streaming_port_(kDefaultAudioStreamingPort),
-      time_testing_port_(kDefaultTimeTestingPort),
-      help_prompt_(),
-      time_out_promt_(),
-      min_tread_stack_size_(threads::Thread::kMinStackSize),
-      is_mixing_audio_supported_(false),
-      is_redecoding_enabled_(false),
-      max_cmd_id_(kDefaultMaxCmdId),
-      default_timeout_(kDefaultTimeout),
-      app_resuming_timeout_(kDefaultAppResumingTimeout),
-      app_dir_quota_(kDefaultDirQuota),
-      app_hmi_level_none_time_scale_max_requests_(
-        kDefaultAppHmiLevelNoneTimeScaleMaxRequests),
-      app_hmi_level_none_requests_time_scale_(
-        kDefaultAppHmiLevelNoneRequestsTimeScale),
-      app_time_scale_max_requests_(kDefaultAppTimeScaleMaxRequests),
-      app_requests_time_scale_(kDefaultAppRequestsTimeScale),
-      pending_requests_amount_(kDefaultPendingRequestsAmount),
-      put_file_in_none_(kDefaultPutFileRequestInNone),
-      delete_file_in_none_(kDefaultDeleteFileRequestInNone),
-      list_files_in_none_(kDefaultListFilesRequestInNone),
-      app_info_storage_(kDefaultAppInfoFileName),
-      heart_beat_timeout_(kDefaultHeartBeatTimeout),
-      policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
-      transport_manager_disconnect_timeout_(
-        kDefaultTransportManagerDisconnectTimeout),
-      use_last_state_(false),
-      supported_diag_modes_(),
-      system_files_path_(kDefaultSystemFilesPath),
-      transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
-      tts_delimiter_(kDefaultTtsDelimiter),
-      recording_file_(kDefaultRecordingFileName) {
+  : launch_hmi_(true),
+    app_config_folder_(),
+    app_storage_folder_(),
+    app_resourse_folder_(),
+    config_file_name_(kDefaultConfigFileName),
+    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
+    server_address_(kDefaultServerAddress),
+    server_port_(kDefaultServerPort),
+    video_streaming_port_(kDefaultVideoStreamingPort),
+    audio_streaming_port_(kDefaultAudioStreamingPort),
+    time_testing_port_(kDefaultTimeTestingPort),
+    help_prompt_(),
+    time_out_promt_(),
+    min_tread_stack_size_(threads::Thread::kMinStackSize),
+    is_mixing_audio_supported_(false),
+    is_redecoding_enabled_(false),
+    max_cmd_id_(kDefaultMaxCmdId),
+    default_timeout_(kDefaultTimeout),
+    app_resuming_timeout_(kDefaultAppResumingTimeout),
+    app_dir_quota_(kDefaultDirQuota),
+    app_hmi_level_none_time_scale_max_requests_(
+      kDefaultAppHmiLevelNoneTimeScaleMaxRequests),
+    app_hmi_level_none_requests_time_scale_(
+      kDefaultAppHmiLevelNoneRequestsTimeScale),
+    app_time_scale_max_requests_(kDefaultAppTimeScaleMaxRequests),
+    app_requests_time_scale_(kDefaultAppRequestsTimeScale),
+    pending_requests_amount_(kDefaultPendingRequestsAmount),
+    put_file_in_none_(kDefaultPutFileRequestInNone),
+    delete_file_in_none_(kDefaultDeleteFileRequestInNone),
+    list_files_in_none_(kDefaultListFilesRequestInNone),
+    app_info_storage_(kDefaultAppInfoFileName),
+    heart_beat_timeout_(kDefaultHeartBeatTimeout),
+    policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
+    policy_turn_off_(false),
+    transport_manager_disconnect_timeout_(
+      kDefaultTransportManagerDisconnectTimeout),
+    use_last_state_(false),
+    supported_diag_modes_(),
+    system_files_path_(kDefaultSystemFilesPath),
+    transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
+    tts_delimiter_(kDefaultTtsDelimiter),
+    recording_file_source_(kDefaultRecordingFileSourceName),
+    recording_file_name_(kDefaultRecordingFileName) {
 }
 
 Profile::~Profile() {
 }
 
 void Profile::config_file_name(const std::string& fileName) {
-    if (false == fileName.empty()) {
-        LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
-        config_file_name_ = fileName;
-        UpdateValues();
-    }
+  if (false == fileName.empty()) {
+    LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
+    config_file_name_ = fileName;
+    UpdateValues();
+  }
 }
 
 const std::string& Profile::config_file_name() const {
-    return config_file_name_;
+  return config_file_name_;
 }
 
 bool Profile::launch_hmi() const {
-    return launch_hmi_;
+  return launch_hmi_;
 }
 
 const std::string& Profile::app_config_folder() const {
-    return app_config_folder_;
+  return app_config_folder_;
 }
 
 const std::string& Profile::app_storage_folder() const {
   return app_storage_folder_;
 }
 
-const std::string&Profile::app_resourse_folder() const {
+const std::string& Profile::app_resourse_folder() const {
   return app_resourse_folder_;
 }
 
-const std::string& Profile::policies_file_name() const {
-    return policies_file_name_;
-}
-
 const std::string& Profile::hmi_capabilities_file_name() const {
-    return hmi_capabilities_file_name_;
+  return hmi_capabilities_file_name_;
 }
 
 const std::string& Profile::server_address() const {
-    return server_address_;
+  return server_address_;
 }
 
 const std::vector<std::string>& Profile::help_prompt() const {
-    return help_prompt_;
+  return help_prompt_;
 }
 
 const std::vector<std::string>& Profile::time_out_promt() const {
-    return time_out_promt_;
+  return time_out_promt_;
 }
 
 const std::vector<std::string>& Profile::vr_commands() const {
-    return vr_commands_;
+  return vr_commands_;
 }
 
 const uint32_t& Profile::max_cmd_id() const {
-    return max_cmd_id_;
+  return max_cmd_id_;
 }
 
 const uint32_t& Profile::default_timeout() const {
-    return default_timeout_;
+  return default_timeout_;
 }
 
 const uint32_t& Profile::app_resuming_timeout() const {
-    return app_resuming_timeout_;
+  return app_resuming_timeout_;
 }
 
 const std::string& Profile::vr_help_title() const {
-    return vr_help_title_;
+  return vr_help_title_;
 }
 
 const uint16_t& Profile::server_port() const {
-    return server_port_;
+  return server_port_;
 }
 
 const uint16_t& Profile::video_streaming_port() const {
-    return video_streaming_port_;
+  return video_streaming_port_;
 }
 
 const uint16_t& Profile::audio_streaming_port() const {
-    return audio_streaming_port_;
+  return audio_streaming_port_;
 }
 
 const uint16_t& Profile::time_testing_port() const {
-    return time_testing_port_;
+  return time_testing_port_;
 }
 
 
 const uint64_t& Profile::thread_min_stack_size() const {
-    return min_tread_stack_size_;
+  return min_tread_stack_size_;
 }
 
 bool Profile::is_mixing_audio_supported() const {
-    return is_mixing_audio_supported_;
+  return is_mixing_audio_supported_;
 }
 
 const uint32_t& Profile::app_dir_quota() const {
-    return app_dir_quota_;
+  return app_dir_quota_;
 }
 
 bool Profile::is_redecoding_enabled() const {
-    return is_redecoding_enabled_;
+  return is_redecoding_enabled_;
 }
 
 const std::string& Profile::video_server_type() const {
-    return video_consumer_type_;
+  return video_consumer_type_;
 }
 
 const std::string& Profile::audio_server_type() const {
-    return audio_consumer_type_;
+  return audio_consumer_type_;
 }
 
 const std::string& Profile::named_video_pipe_path() const {
-    return named_video_pipe_path_;
+  return named_video_pipe_path_;
 }
 
 const std::string& Profile::named_audio_pipe_path() const {
-    return named_audio_pipe_path_;
+  return named_audio_pipe_path_;
 }
 
 const uint32_t& Profile::app_hmi_level_none_time_scale() const {
-    return app_hmi_level_none_requests_time_scale_;
+  return app_hmi_level_none_requests_time_scale_;
 }
 
 const uint32_t& Profile::app_hmi_level_none_time_scale_max_requests() const {
-    return app_hmi_level_none_time_scale_max_requests_;
+  return app_hmi_level_none_time_scale_max_requests_;
 }
 
 const std::string& Profile::video_stream_file() const {
-    return video_stream_file_;
+  return video_stream_file_;
 }
 
 const std::string& Profile::audio_stream_file() const {
-    return audio_stream_file_;
+  return audio_stream_file_;
 }
 
 const uint32_t& Profile::app_time_scale() const {
-    return app_requests_time_scale_;
+  return app_requests_time_scale_;
 }
 
 const uint32_t& Profile::app_time_scale_max_requests() const {
-    return app_time_scale_max_requests_;
+  return app_time_scale_max_requests_;
 }
 
 const uint32_t& Profile::pending_requests_amount() const {
-    return pending_requests_amount_;
+  return pending_requests_amount_;
 }
 
 const uint32_t& Profile::put_file_in_none() const {
-    return put_file_in_none_;
+  return put_file_in_none_;
 }
 
 const uint32_t& Profile::delete_file_in_none() const {
-    return delete_file_in_none_;
+  return delete_file_in_none_;
 }
 
 const uint32_t& Profile::list_files_in_none() const {
-    return list_files_in_none_;
+  return list_files_in_none_;
 }
 
 const std::string& Profile::app_info_storage() const {
-    return app_info_storage_;
+  return app_info_storage_;
 }
 
 const int32_t Profile::heart_beat_timeout() const {
-    return heart_beat_timeout_;
+  return heart_beat_timeout_;
 }
 
 const std::string& Profile::preloaded_pt_file() const {
-    return preloaded_pt_file_;
+  return preloaded_pt_file_;
 }
 
 const std::string& Profile::policies_snapshot_file_name() const {
-    return policy_snapshot_file_name_;
+  return policy_snapshot_file_name_;
+}
+
+bool Profile::policy_turn_off() const {
+  return policy_turn_off_;
 }
 
 uint32_t Profile::transport_manager_disconnect_timeout() const {
-    return transport_manager_disconnect_timeout_;
+  return transport_manager_disconnect_timeout_;
 }
 
 bool Profile::use_last_state() const {
-    return use_last_state_;
+  return use_last_state_;
 }
 
 const std::string& Profile::system_files_path() const {
-    return system_files_path_;
+  return system_files_path_;
 }
 
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
-    return supported_diag_modes_;
+  return supported_diag_modes_;
 }
 
 uint16_t Profile::transport_manager_tcp_adapter_port() const {
   return transport_manager_tcp_adapter_port_;
 }
 
-const std::string&Profile::tts_delimiter() const {
+const std::string& Profile::tts_delimiter() const {
   return tts_delimiter_;
 }
 
-const std::string&Profile::recording_file() const {
-  return recording_file_;
+const std::string& Profile::recording_file_source() const {
+  return recording_file_source_;
+}
+
+const std::string&Profile::recording_file_name() const {
+  return recording_file_name_;
 }
 
 void Profile::UpdateValues() {
-    LOG4CXX_INFO(logger_, "Profile::UpdateValues");
+  LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
-    // Launch HMI parameter
-    std::string launch_value;
-    if (ReadValue(&launch_value, kHmiSection, kLaunchHMIKey) &&
-        0 == strcmp("true", launch_value.c_str())) {
-        launch_hmi_ = true;
-    } else {
-        launch_hmi_ = false;
-    }
+  // Launch HMI parameter
+  std::string launch_value;
+  if (ReadValue(&launch_value, kHmiSection, kLaunchHMIKey) &&
+      0 == strcmp("true", launch_value.c_str())) {
+    launch_hmi_ = true;
+  } else {
+    launch_hmi_ = false;
+  }
 
-    LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
+  LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
 
-    // Application config folder
-    ReadStringValue(&app_config_folder_,
-                    file_system::CurrentWorkingDirectory().c_str(),
-                    kMainSection, kAppConfigFolderKey);
+  // Application config folder
+  ReadStringValue(&app_config_folder_,
+                  file_system::CurrentWorkingDirectory().c_str(),
+                  kMainSection, kAppConfigFolderKey);
 
-    LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
+  LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
-    // Application storage folder
-    ReadStringValue(&app_storage_folder_,
-                    file_system::CurrentWorkingDirectory().c_str(),
-                    kMainSection, kAppStorageFolderKey);
+  // Application storage folder
+  ReadStringValue(&app_storage_folder_,
+                  file_system::CurrentWorkingDirectory().c_str(),
+                  kMainSection, kAppStorageFolderKey);
 
-    LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
+  LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
-    // Application resourse folder
-    ReadStringValue(&app_resourse_folder_,
-                    file_system::CurrentWorkingDirectory().c_str(),
-                    kMainSection, kAppResourseFolderKey);
+  // Application resourse folder
+  ReadStringValue(&app_resourse_folder_,
+                  file_system::CurrentWorkingDirectory().c_str(),
+                  kMainSection, kAppResourseFolderKey);
 
-    LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
-                      kMainSection);
+  LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
+                    kMainSection);
 
-    // Application info file name
-    ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
-                    kAppInfoSection,
-                    kAppInfoStorageKey);
+  // Application info file name
+  ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
+                  kAppInfoSection,
+                  kAppInfoStorageKey);
 
-    app_info_storage_ = app_storage_folder_ + "/" + app_info_storage_;
+  app_info_storage_ = app_storage_folder_ + "/" + app_info_storage_;
 
-    LOG_UPDATED_VALUE(app_info_storage_, kAppInfoStorageKey,
-                      kAppInfoSection);
+  LOG_UPDATED_VALUE(app_info_storage_, kAppInfoStorageKey,
+                    kAppInfoSection);
 
-    // Server address
-    ReadStringValue(&server_address_, kDefaultServerAddress, kHmiSection,
-                    kServerAddressKey);
+  // Server address
+  ReadStringValue(&server_address_, kDefaultServerAddress, kHmiSection,
+                  kServerAddressKey);
 
-    LOG_UPDATED_VALUE(server_address_, kServerAddressKey, kHmiSection);
+  LOG_UPDATED_VALUE(server_address_, kServerAddressKey, kHmiSection);
 
-    // Policy file name
-    ReadStringValue(&policies_file_name_,
-                    kDefautlPoliciesTableFileName,
-                    kPolicySection, kPoliciesTableKey);
+  // HMI capabilities
+  ReadStringValue(&hmi_capabilities_file_name_ ,
+                  kDefaultHmiCapabilitiesFileName,
+                  kMainSection, kHmiCapabilitiesKey);
 
-    policies_file_name_ = app_config_folder_ + '/' + policies_file_name_;
+  hmi_capabilities_file_name_ = app_config_folder_ + "/" +
+                                hmi_capabilities_file_name_;
 
-    LOG_UPDATED_VALUE(policies_file_name_, kPoliciesTableKey, kPolicySection);
+  LOG_UPDATED_VALUE(hmi_capabilities_file_name_, kHmiCapabilitiesKey,
+                    kMainSection);
 
-    // Policy preloaded file
-    ReadStringValue(&preloaded_pt_file_,
-                    kDefaultPreloadedPTFileName,
-                    kPolicySection, kPreloadedPTKey);
+  // Server port
+  ReadUIntValue(&server_port_, kDefaultServerPort, kHmiSection,
+                kServerPortKey);
 
-    preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
+  LOG_UPDATED_VALUE(server_port_, kServerPortKey, kHmiSection);
 
-    LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
+  // Video streaming port
+  ReadUIntValue(&video_streaming_port_, kDefaultVideoStreamingPort,
+                kHmiSection, kVideoStreamingPortKey);
 
-    // Policy snapshot file
-    ReadStringValue(&policy_snapshot_file_name_,
-                    kDefaultPoliciesSnapshotFileName,
-                    kPolicySection, kPathToSnapshotKey);
+  LOG_UPDATED_VALUE(video_streaming_port_, kVideoStreamingPortKey,
+                    kHmiSection);
 
-    policy_snapshot_file_name_ = system_files_path_ +
-                                 '/' + policy_snapshot_file_name_;
+  // Audio streaming port
+  ReadUIntValue(&audio_streaming_port_, kDefaultAudioStreamingPort,
+                kHmiSection, kAudioStreamingPortKey);
 
-    LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
-                      kPolicySection);
+  LOG_UPDATED_VALUE(audio_streaming_port_, kAudioStreamingPortKey,
+                    kHmiSection);
 
-    // HMI capabilities
-    ReadStringValue(&hmi_capabilities_file_name_ ,
-                    kDefaultHmiCapabilitiesFileName,
-                    kMainSection, kHmiCapabilitiesKey);
 
-    hmi_capabilities_file_name_ = app_config_folder_ + "/" +
-                                  hmi_capabilities_file_name_;
+  // Time testing port
+  ReadUIntValue(&time_testing_port_, kDefaultTimeTestingPort, kMainSection,
+                kTimeTestingPortKey);
 
-    LOG_UPDATED_VALUE(hmi_capabilities_file_name_, kHmiCapabilitiesKey,
-                      kMainSection);
+  LOG_UPDATED_VALUE(time_testing_port_, kTimeTestingPortKey, kMainSection);
 
-    // Server port
-    ReadUIntValue(&server_port_, kDefaultServerPort, kHmiSection,
-                  kServerPortKey);
+  // Minimum thread stack size
+  ReadUIntValue(&min_tread_stack_size_, threads::Thread::kMinStackSize,
+                kMainSection, kThreadStackSizeKey);
 
-    LOG_UPDATED_VALUE(server_port_, kServerPortKey, kHmiSection);
+  if (min_tread_stack_size_ < threads::Thread::kMinStackSize) {
+    min_tread_stack_size_ = threads::Thread::kMinStackSize;
+  }
 
-    // Video streaming port
-    ReadUIntValue(&video_streaming_port_, kDefaultVideoStreamingPort,
-                  kHmiSection, kVideoStreamingPortKey);
+  LOG_UPDATED_VALUE(min_tread_stack_size_, kThreadStackSizeKey, kMainSection);
 
-    LOG_UPDATED_VALUE(video_streaming_port_, kVideoStreamingPortKey,
-                      kHmiSection);
+  // Redecoding parameter
+  std::string redecoding_value;
+  if (ReadValue(&redecoding_value, kMediaManagerSection, kEnableRedecodingKey)
+      && 0 == strcmp("true", redecoding_value.c_str())) {
+    is_redecoding_enabled_ = true;
+  } else {
+    is_redecoding_enabled_ = false;
+  }
 
-    // Audio streaming port
-    ReadUIntValue(&audio_streaming_port_, kDefaultAudioStreamingPort,
-                  kHmiSection, kAudioStreamingPortKey);
+  LOG_UPDATED_BOOL_VALUE(is_redecoding_enabled_, kEnableRedecodingKey,
+                         kMediaManagerSection);
 
-    LOG_UPDATED_VALUE(audio_streaming_port_, kAudioStreamingPortKey,
-                      kHmiSection);
+  // Video consumer type
+  ReadStringValue(&video_consumer_type_, "", kMediaManagerSection,
+                  kVideoStreamConsumerKey);
 
+  LOG_UPDATED_VALUE(video_consumer_type_, kVideoStreamConsumerKey,
+                    kMediaManagerSection);
 
-    // Time testing port
-    ReadUIntValue(&time_testing_port_, kDefaultTimeTestingPort, kMainSection,
-                  kTimeTestingPortKey);
+  // Audio stream consumer
+  ReadStringValue(&audio_consumer_type_, "", kMediaManagerSection,
+                  kAudioStreamConsumerKey);
 
-    LOG_UPDATED_VALUE(time_testing_port_, kTimeTestingPortKey, kMainSection);
+  LOG_UPDATED_VALUE(audio_consumer_type_, kAudioStreamConsumerKey,
+                    kMediaManagerSection);
 
-    // Minimum thread stack size
-    ReadUIntValue(&min_tread_stack_size_, threads::Thread::kMinStackSize,
-                  kMainSection, kThreadStackSizeKey);
+  // Named video pipe path
+  ReadStringValue(&named_video_pipe_path_, "" , kMediaManagerSection,
+                  kNamedVideoPipePathKey);
 
-    if (min_tread_stack_size_ < threads::Thread::kMinStackSize) {
-        min_tread_stack_size_ = threads::Thread::kMinStackSize;
-    }
+  LOG_UPDATED_VALUE(named_video_pipe_path_, kNamedVideoPipePathKey,
+                    kMediaManagerSection);
 
-    LOG_UPDATED_VALUE(min_tread_stack_size_, kThreadStackSizeKey, kMainSection);
+  // Named audio pipe path
+  ReadStringValue(&named_audio_pipe_path_, "" , kMediaManagerSection,
+                  kNamedAudioPipePathKey);
 
-    // Redecoding parameter
-    std::string redecoding_value;
-    if (ReadValue(&redecoding_value, kMediaManagerSection, kEnableRedecodingKey)
-        && 0 == strcmp("true", redecoding_value.c_str())) {
-        is_redecoding_enabled_ = true;
-    } else {
-        is_redecoding_enabled_ = false;
-    }
+  LOG_UPDATED_VALUE(named_audio_pipe_path_, kNamedAudioPipePathKey,
+                    kMediaManagerSection);
 
-    LOG_UPDATED_BOOL_VALUE(is_redecoding_enabled_, kEnableRedecodingKey,
-                           kMediaManagerSection);
+  // Video stream file
+  ReadStringValue(&video_stream_file_, "", kMediaManagerSection,
+                  kVideoStreamFileKey);
 
-    // Video consumer type
-    ReadStringValue(&video_consumer_type_, "", kMediaManagerSection,
-                    kVideoStreamConsumerKey);
+  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
 
-    LOG_UPDATED_VALUE(video_consumer_type_, kVideoStreamConsumerKey,
-                      kMediaManagerSection);
+  LOG_UPDATED_VALUE(video_stream_file_, kVideoStreamFileKey,
+                    kMediaManagerSection);
 
-    // Audio stream consumer
-    ReadStringValue(&audio_consumer_type_, "", kMediaManagerSection,
-                    kAudioStreamConsumerKey);
+  // Audio stream file
+  ReadStringValue(&audio_stream_file_, "", kMediaManagerSection,
+                  kAudioStreamFileKey);
 
-    LOG_UPDATED_VALUE(audio_consumer_type_, kAudioStreamConsumerKey,
-                      kMediaManagerSection);
+  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
 
-    // Named video pipe path
-    ReadStringValue(&named_video_pipe_path_, "" , kMediaManagerSection,
-                    kNamedVideoPipePathKey);
+  LOG_UPDATED_VALUE(audio_stream_file_, kAudioStreamFileKey,
+                    kMediaManagerSection);
 
-    LOG_UPDATED_VALUE(named_video_pipe_path_, kNamedVideoPipePathKey,
-                      kMediaManagerSection);
+  // Mixing audio parameter
+  std::string mixing_audio_value;
+  if (ReadValue(&mixing_audio_value, kMainSection, kMixingAudioSupportedKey)
+      && 0 == strcmp("true", mixing_audio_value.c_str())) {
+    is_mixing_audio_supported_ = true;
+  } else {
+    is_mixing_audio_supported_ = false;
+  }
 
-    // Named audio pipe path
-    ReadStringValue(&named_audio_pipe_path_, "" , kMediaManagerSection,
-                    kNamedAudioPipePathKey);
+  LOG_UPDATED_BOOL_VALUE(is_mixing_audio_supported_, kMixingAudioSupportedKey,
+                         kMainSection);
 
-    LOG_UPDATED_VALUE(named_audio_pipe_path_, kNamedAudioPipePathKey,
-                      kMediaManagerSection);
+  // Maximum command id value
+  ReadUIntValue(&max_cmd_id_, kDefaultMaxCmdId, kMainSection, kMaxCmdIdKey);
 
-    // Video stream file
-    ReadStringValue(&video_stream_file_, "", kMediaManagerSection,
-                    kVideoStreamFileKey);
+  if (max_cmd_id_ < 0) {
+    max_cmd_id_ = kDefaultMaxCmdId;
+  }
 
-    video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  LOG_UPDATED_VALUE(max_cmd_id_, kMaxCmdIdKey, kMainSection);
 
-    LOG_UPDATED_VALUE(video_stream_file_, kVideoStreamFileKey,
-                      kMediaManagerSection);
+  // PutFile restrictions
+  ReadUIntValue(&put_file_in_none_, kDefaultPutFileRequestInNone,
+                kFilesystemRestrictionsSection, kPutFileRequestKey);
 
-    // Audio stream file
-    ReadStringValue(&audio_stream_file_, "", kMediaManagerSection,
-                    kAudioStreamFileKey);
+  if (put_file_in_none_ < 0) {
+    put_file_in_none_ = kDefaultPutFileRequestInNone;
+  }
 
-    audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  LOG_UPDATED_VALUE(put_file_in_none_, kPutFileRequestKey,
+                    kFilesystemRestrictionsSection);
 
-    LOG_UPDATED_VALUE(audio_stream_file_, kAudioStreamFileKey,
-                      kMediaManagerSection);
+  // DeleteFileRestrictions
+  ReadUIntValue(&delete_file_in_none_, kDefaultDeleteFileRequestInNone,
+                kFilesystemRestrictionsSection, kDeleteFileRequestKey);
 
-    // Mixing audio parameter
-    std::string mixing_audio_value;
-    if (ReadValue(&mixing_audio_value, kMainSection, kMixingAudioSupportedKey)
-        && 0 == strcmp("true", mixing_audio_value.c_str())) {
-        is_mixing_audio_supported_ = true;
-    } else {
-        is_mixing_audio_supported_ = false;
-    }
+  if (delete_file_in_none_ < 0) {
+    delete_file_in_none_ = kDefaultDeleteFileRequestInNone;
+  }
 
-    LOG_UPDATED_BOOL_VALUE(is_mixing_audio_supported_, kMixingAudioSupportedKey,
-                           kMainSection);
+  LOG_UPDATED_VALUE(delete_file_in_none_, kDeleteFileRequestKey,
+                    kFilesystemRestrictionsSection);
 
-    // Maximum command id value
-    ReadUIntValue(&max_cmd_id_, kDefaultMaxCmdId, kMainSection, kMaxCmdIdKey);
+  // ListFiles restrictions
+  ReadUIntValue(&list_files_in_none_, kDefaultListFilesRequestInNone,
+                kFilesystemRestrictionsSection, kListFilesRequestKey);
 
-    if (max_cmd_id_ < 0) {
-        max_cmd_id_ = kDefaultMaxCmdId;
-    }
+  if (list_files_in_none_ < 0) {
+    list_files_in_none_ = kDefaultListFilesRequestInNone;
+  }
 
-    LOG_UPDATED_VALUE(max_cmd_id_, kMaxCmdIdKey, kMainSection);
+  LOG_UPDATED_VALUE(list_files_in_none_, kListFilesRequestKey,
+                    kFilesystemRestrictionsSection);
 
-    // PutFile restrictions
-    ReadUIntValue(&put_file_in_none_, kDefaultPutFileRequestInNone,
-                  kFilesystemRestrictionsSection, kPutFileRequestKey);
+  // Default timeout
+  ReadUIntValue(&default_timeout_, kDefaultTimeout, kMainSection,
+                kDefaultTimeoutKey);
 
-    if (put_file_in_none_ < 0) {
-        put_file_in_none_ = kDefaultPutFileRequestInNone;
-    }
+  if (default_timeout_ <= 0) {
+    default_timeout_ = kDefaultTimeout;
+  }
 
-    LOG_UPDATED_VALUE(put_file_in_none_, kPutFileRequestKey,
-                      kFilesystemRestrictionsSection);
+  LOG_UPDATED_VALUE(default_timeout_, kDefaultTimeoutKey, kMainSection);
 
-    // DeleteFileRestrictions
-    ReadUIntValue(&delete_file_in_none_, kDefaultDeleteFileRequestInNone,
-                  kFilesystemRestrictionsSection, kDeleteFileRequestKey);
+  // Application resuming timeout
+  ReadUIntValue(&app_resuming_timeout_, kDefaultAppResumingTimeout,
+                kMainSection, kAppResumingTimeoutKey);
 
-    if (delete_file_in_none_ < 0) {
-        delete_file_in_none_ = kDefaultDeleteFileRequestInNone;
-    }
+  if (app_resuming_timeout_ <= 0) {
+    app_resuming_timeout_ = kDefaultAppResumingTimeout;
+  }
 
-    LOG_UPDATED_VALUE(delete_file_in_none_, kDeleteFileRequestKey,
-                      kFilesystemRestrictionsSection);
+  LOG_UPDATED_VALUE(app_resuming_timeout_, kAppResumingTimeoutKey,
+                    kMainSection);
 
-    // ListFiles restrictions
-    ReadUIntValue(&list_files_in_none_, kDefaultListFilesRequestInNone,
-                  kFilesystemRestrictionsSection, kListFilesRequestKey);
+  // Application directory quota
+  ReadUIntValue(&app_dir_quota_, kDefaultDirQuota, kMainSection,
+                kAppDirectoryQuotaKey);
 
-    if (list_files_in_none_ < 0) {
-        list_files_in_none_ = kDefaultListFilesRequestInNone;
-    }
+  if (app_dir_quota_ <= 0) {
+    app_dir_quota_ = kDefaultDirQuota;
+  }
 
-    LOG_UPDATED_VALUE(list_files_in_none_, kListFilesRequestKey,
-                      kFilesystemRestrictionsSection);
+  LOG_UPDATED_VALUE(app_dir_quota_, kAppDirectoryQuotaKey, kMainSection);
 
-    // Default timeout
-    ReadUIntValue(&default_timeout_, kDefaultTimeout, kMainSection,
-                  kDefaultTimeoutKey);
+  // TTS delimiter
+  // Should be gotten before any TTS prompts, since it should be appended back
+  ReadStringValue(&tts_delimiter_, kDefaultTtsDelimiter,
+                  kGlobalPropertiesSection, kTTSDelimiterKey);
 
-    if (default_timeout_ <= 0) {
-        default_timeout_ = kDefaultTimeout;
-    }
+  LOG_UPDATED_VALUE(tts_delimiter_, kTTSDelimiterKey,
+                    kGlobalPropertiesSection);
 
-    LOG_UPDATED_VALUE(default_timeout_, kDefaultTimeoutKey, kMainSection);
-
-    // Application resuming timeout
-    ReadUIntValue(&app_resuming_timeout_, kDefaultAppResumingTimeout,
-                  kMainSection, kAppResumingTimeoutKey);
-
-    if (app_resuming_timeout_ <= 0) {
-        app_resuming_timeout_ = kDefaultAppResumingTimeout;
-    }
-
-    LOG_UPDATED_VALUE(app_resuming_timeout_, kAppResumingTimeoutKey,
-                      kMainSection);
-
-    // Application directory quota
-    ReadUIntValue(&app_dir_quota_, kDefaultDirQuota, kMainSection,
-                  kAppDirectoryQuotaKey);
-
-    if (app_dir_quota_ <= 0) {
-        app_dir_quota_ = kDefaultDirQuota;
-    }
-
-    LOG_UPDATED_VALUE(app_dir_quota_, kAppDirectoryQuotaKey, kMainSection);
-
-    // TTS delimiter
-    // Should be gotten before any TTS prompts, since it should be appended back
-    ReadStringValue(&tts_delimiter_, kDefaultTtsDelimiter,
-                    kGlobalPropertiesSection, kTTSDelimiterKey);
-
-    LOG_UPDATED_VALUE(tts_delimiter_, kTTSDelimiterKey,
-                      kGlobalPropertiesSection);
-
-    // Help prompt
-    help_prompt_.clear();
-    std::string help_prompt_value;
-    if (ReadValue(&help_prompt_value, kGlobalPropertiesSection,
-                  kHelpPromptKey)) {      
-      char* str = NULL;
-      str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
-      while (str != NULL) {
-          // Default prompt should have delimiter included for each item
-          const std::string prompt_item = std::string(str)+tts_delimiter_;
-          help_prompt_.push_back(prompt_item);
-          LOG_UPDATED_VALUE(prompt_item, kHelpPromptKey,
-                            kGlobalPropertiesSection);
-          str = strtok(NULL, ",");
-      }
-    } else {
-      help_prompt_value.clear();
-      LOG_UPDATED_VALUE(help_prompt_value, kHelpPromptKey,
+  // Help prompt
+  help_prompt_.clear();
+  std::string help_prompt_value;
+  if (ReadValue(&help_prompt_value, kGlobalPropertiesSection,
+                kHelpPromptKey)) {
+    char* str = NULL;
+    str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
+    while (str != NULL) {
+      // Default prompt should have delimiter included for each item
+      const std::string prompt_item = std::string(str) + tts_delimiter_;
+      help_prompt_.push_back(prompt_item);
+      LOG_UPDATED_VALUE(prompt_item, kHelpPromptKey,
                         kGlobalPropertiesSection);
+      str = strtok(NULL, ",");
     }
-
-
-
-    // Timeout prompt
-    time_out_promt_.clear();
-    std::string timeout_prompt_value;
-    if (ReadValue(&timeout_prompt_value, kGlobalPropertiesSection,
-              kTimeoutPromptKey)) {
-      char* str = NULL;
-      str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
-      while (str != NULL) {
-          // Default prompt should have delimiter included for each item
-          const std::string prompt_item = std::string(str)+tts_delimiter_;
-          time_out_promt_.push_back(prompt_item);
-          LOG_UPDATED_VALUE(prompt_item, kTimeoutPromptKey,
-                            kGlobalPropertiesSection);
-          str = strtok(NULL, ",");
-      }      
-    } else {
-      timeout_prompt_value.clear();
-      LOG_UPDATED_VALUE(timeout_prompt_value, kTimeoutPromptKey,
-                        kGlobalPropertiesSection);
-    }
-
-    // Voice recognition help title
-    ReadStringValue(&vr_help_title_, "", kGlobalPropertiesSection,
-                    kHelpTitleKey);
-
-    LOG_UPDATED_VALUE(vr_help_title_, kHelpTitleKey,
+  } else {
+    help_prompt_value.clear();
+    LOG_UPDATED_VALUE(help_prompt_value, kHelpPromptKey,
                       kGlobalPropertiesSection);
+  }
 
-    // Voice recognition help command
-    vr_commands_.clear();
-    std::string vr_help_command_value;
-    if (ReadValue(&vr_help_command_value, kVrCommandsSection,
-                  kHelpCommandKey)) {
-      char* str = NULL;
-      str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
-      while (str != NULL) {
-          const std::string vr_item = str;
-          vr_commands_.push_back(vr_item);
-          LOG_UPDATED_VALUE(vr_item, kHelpCommandKey, kVrCommandsSection);
-          str = strtok(NULL, ",");
+
+
+  // Timeout prompt
+  time_out_promt_.clear();
+  std::string timeout_prompt_value;
+  if (ReadValue(&timeout_prompt_value, kGlobalPropertiesSection,
+                kTimeoutPromptKey)) {
+    char* str = NULL;
+    str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
+    while (str != NULL) {
+      // Default prompt should have delimiter included for each item
+      const std::string prompt_item = std::string(str) + tts_delimiter_;
+      time_out_promt_.push_back(prompt_item);
+      LOG_UPDATED_VALUE(prompt_item, kTimeoutPromptKey,
+                        kGlobalPropertiesSection);
+      str = strtok(NULL, ",");
+    }
+  } else {
+    timeout_prompt_value.clear();
+    LOG_UPDATED_VALUE(timeout_prompt_value, kTimeoutPromptKey,
+                      kGlobalPropertiesSection);
+  }
+
+  // Voice recognition help title
+  ReadStringValue(&vr_help_title_, "", kGlobalPropertiesSection,
+                  kHelpTitleKey);
+
+  LOG_UPDATED_VALUE(vr_help_title_, kHelpTitleKey,
+                    kGlobalPropertiesSection);
+
+  // Voice recognition help command
+  vr_commands_.clear();
+  std::string vr_help_command_value;
+  if (ReadValue(&vr_help_command_value, kVrCommandsSection,
+                kHelpCommandKey)) {
+    char* str = NULL;
+    str = strtok(const_cast<char*>(vr_help_command_value.c_str()), ",");
+    while (str != NULL) {
+      const std::string vr_item = str;
+      vr_commands_.push_back(vr_item);
+      LOG_UPDATED_VALUE(vr_item, kHelpCommandKey, kVrCommandsSection);
+      str = strtok(NULL, ",");
+    }
+  } else {
+    vr_help_command_value.clear();
+    LOG_UPDATED_VALUE(vr_help_command_value, kHelpCommandKey,
+                      kVrCommandsSection);
+  }
+
+  // Application time scale maximum requests
+  ReadUIntValue(&app_time_scale_max_requests_,
+                kDefaultAppTimeScaleMaxRequests,
+                kMainSection,
+                kAppTimeScaleMaxRequestsKey);
+
+  LOG_UPDATED_VALUE(app_time_scale_max_requests_, kAppTimeScaleMaxRequestsKey,
+                    kMainSection);
+
+  // Application time scale
+  ReadUIntValue(&app_requests_time_scale_, kDefaultAppRequestsTimeScale,
+                kMainSection, kAppRequestsTimeScaleKey);
+
+  LOG_UPDATED_VALUE(app_requests_time_scale_, kAppRequestsTimeScaleKey,
+                    kMainSection);
+
+  // Application HMI level NONE time scale maximum requests
+  ReadUIntValue(&app_hmi_level_none_time_scale_max_requests_,
+                kDefaultAppHmiLevelNoneTimeScaleMaxRequests,
+                kMainSection,
+                kAppHmiLevelNoneTimeScaleMaxRequestsKey);
+
+  LOG_UPDATED_VALUE(app_hmi_level_none_time_scale_max_requests_,
+                    kAppHmiLevelNoneTimeScaleMaxRequestsKey,
+                    kMainSection);
+
+  // Application HMI level NONE requests time scale
+  ReadUIntValue(&app_hmi_level_none_requests_time_scale_,
+                kDefaultAppHmiLevelNoneRequestsTimeScale,
+                kMainSection,
+                kAppHmiLevelNoneRequestsTimeScaleKey);
+
+  LOG_UPDATED_VALUE(app_hmi_level_none_requests_time_scale_,
+                    kAppHmiLevelNoneRequestsTimeScaleKey,
+                    kMainSection);
+
+  // Amount of pending requests
+  ReadUIntValue(&pending_requests_amount_, kDefaultPendingRequestsAmount,
+                kMainSection, kPendingRequestsAmoundKey);
+
+  if (pending_requests_amount_ <= 0) {
+    pending_requests_amount_ = kDefaultPendingRequestsAmount;
+  }
+
+  LOG_UPDATED_VALUE(pending_requests_amount_, kPendingRequestsAmoundKey,
+                    kMainSection);
+
+  // Supported diagnostic modes
+  supported_diag_modes_.clear();
+  std::string supported_diag_modes_value;
+  std::string correct_diag_modes;
+  if (ReadStringValue(&supported_diag_modes_value, "", kMainSection,
+                      kSupportedDiagModesKey)) {
+    char* str = NULL;
+    str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
+    while (str != NULL) {
+      uint32_t user_value = strtol(str, NULL, 16);
+      if (user_value && errno != ERANGE) {
+        correct_diag_modes += str;
+        correct_diag_modes += ",";
+        supported_diag_modes_.push_back(user_value);
       }
-    } else {
-      vr_help_command_value.clear();
-      LOG_UPDATED_VALUE(vr_help_command_value, kHelpCommandKey,
-                        kVrCommandsSection);
+      str = strtok(NULL, ",");
     }
+  }
 
-    // Application time scale maximum requests
-    ReadUIntValue(&app_time_scale_max_requests_,
-                  kDefaultAppTimeScaleMaxRequests,
-                  kMainSection,
-                  kAppTimeScaleMaxRequestsKey);
+  LOG_UPDATED_VALUE(correct_diag_modes, kSupportedDiagModesKey, kMainSection);
 
-    LOG_UPDATED_VALUE(app_time_scale_max_requests_, kAppTimeScaleMaxRequestsKey,
-                      kMainSection);
+  // System files path
+  ReadStringValue(&system_files_path_, kDefaultSystemFilesPath, kMainSection,
+                  kSystemFilesPathKey);
 
-    // Application time scale
-    ReadUIntValue(&app_requests_time_scale_, kDefaultAppRequestsTimeScale,
-                  kMainSection, kAppRequestsTimeScaleKey);
+  LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
 
-    LOG_UPDATED_VALUE(app_requests_time_scale_, kAppRequestsTimeScaleKey,
-                      kMainSection);
+  // Heartbeat timeout
+  ReadUIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout, kMainSection,
+                kHeartBeatTimeoutKey);
 
-    // Application HMI level NONE time scale maximum requests
-    ReadUIntValue(&app_hmi_level_none_time_scale_max_requests_,
-                  kDefaultAppHmiLevelNoneTimeScaleMaxRequests,
-                  kMainSection,
-                  kAppHmiLevelNoneTimeScaleMaxRequestsKey);
+  LOG_UPDATED_VALUE(heart_beat_timeout_, kHeartBeatTimeoutKey, kMainSection);
 
-    LOG_UPDATED_VALUE(app_hmi_level_none_time_scale_max_requests_,
-                      kAppHmiLevelNoneTimeScaleMaxRequestsKey,
-                      kMainSection);
+  // Use last state value
+  std::string last_state_value;
+  if (ReadValue(&last_state_value, kMainSection, kUseLastStateKey) &&
+      0 == strcmp("true", last_state_value.c_str())) {
+    use_last_state_ = true;
+  } else {
+    use_last_state_ = false;
+  }
 
-    // Application HMI level NONE requests time scale
-    ReadUIntValue(&app_hmi_level_none_requests_time_scale_,
-                  kDefaultAppHmiLevelNoneRequestsTimeScale,
-                  kMainSection,
-                  kAppHmiLevelNoneRequestsTimeScaleKey);
+  LOG_UPDATED_BOOL_VALUE(use_last_state_, kUseLastStateKey, kMainSection);
 
-    LOG_UPDATED_VALUE(app_hmi_level_none_requests_time_scale_,
-                      kAppHmiLevelNoneRequestsTimeScaleKey,
-                      kMainSection);
+  // Transport manager TCP port
+  ReadUIntValue(&transport_manager_tcp_adapter_port_,
+                kDefautTransportManagerTCPPort,
+                kTransportManagerSection,
+                kTCPAdapterPortKey);
 
-    // Amount of pending requests
-    ReadUIntValue(&pending_requests_amount_, kDefaultPendingRequestsAmount,
-                  kMainSection, kPendingRequestsAmoundKey);
+  LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_, kTCPAdapterPortKey,
+                    kTransportManagerSection);
 
-    if (pending_requests_amount_ <= 0) {
-        pending_requests_amount_ = kDefaultPendingRequestsAmount;
-    }
+  // Transport manager disconnect timeout
+  ReadUIntValue(&transport_manager_disconnect_timeout_,
+                kDefaultTransportManagerDisconnectTimeout,
+                kTransportManagerSection,
+                kTransportManagerDisconnectTimeoutKey);
 
-    LOG_UPDATED_VALUE(pending_requests_amount_, kPendingRequestsAmoundKey,
-                      kMainSection);
+  LOG_UPDATED_VALUE(transport_manager_disconnect_timeout_,
+                    kTransportManagerDisconnectTimeoutKey,
+                    kTransportManagerSection);
 
-    // Supported diagnostic modes
-    supported_diag_modes_.clear();
-    std::string supported_diag_modes_value;
-    std::string correct_diag_modes;
-    if (ReadStringValue(&supported_diag_modes_value, "", kMainSection,
-                    kSupportedDiagModesKey)) {
-      char* str = NULL;
-      str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
-      while (str != NULL) {
-          uint32_t user_value = strtol(str, NULL, 16);
-          if (user_value && errno != ERANGE) {
-            correct_diag_modes += str;
-            correct_diag_modes += ",";
-            supported_diag_modes_.push_back(user_value);
-          }
-          str = strtok(NULL, ",");
-      }
-    }
+  // Recording file
+  ReadStringValue(&recording_file_name_, kDefaultRecordingFileName,
+                  kMediaManagerSection, kRecordingFileNameKey);
 
-    LOG_UPDATED_VALUE(correct_diag_modes, kSupportedDiagModesKey, kMainSection);
+  LOG_UPDATED_VALUE(recording_file_name_, kRecordingFileNameKey, kMediaManagerSection);
 
-    // System files path
-    ReadStringValue(&system_files_path_, kDefaultSystemFilesPath, kMainSection,
-                    kSystemFilesPathKey);
+  // Recording file source
+  ReadStringValue(&recording_file_source_, kDefaultRecordingFileSourceName,
+                  kMediaManagerSection, kRecordingFileSourceKey);
 
-    LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
+  LOG_UPDATED_VALUE(recording_file_source_, kRecordingFileSourceKey,
+                    kMediaManagerSection);
 
-    // Heartbeat timeout
-    ReadUIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout, kMainSection,
-                 kHeartBeatTimeoutKey);
+  // Policy preloaded file
+  ReadStringValue(&preloaded_pt_file_,
+                  kDefaultPreloadedPTFileName,
+                  kPolicySection, kPreloadedPTKey);
 
-    LOG_UPDATED_VALUE(heart_beat_timeout_, kHeartBeatTimeoutKey, kMainSection);
+  preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
 
-    // Use last state value
-    std::string last_state_value;
-    if (ReadValue(&last_state_value, kMainSection, kUseLastStateKey) &&
-        0 == strcmp("true", last_state_value.c_str())) {
-        use_last_state_ = true;
-    } else {
-        use_last_state_ = false;
-    }
+  LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
 
-    LOG_UPDATED_BOOL_VALUE(use_last_state_, kUseLastStateKey, kMainSection);
+  // Policy snapshot file
+  ReadStringValue(&policy_snapshot_file_name_,
+                  kDefaultPoliciesSnapshotFileName,
+                  kPolicySection, kPathToSnapshotKey);
 
-    // Transport manager TCP port
-    ReadUIntValue(&transport_manager_tcp_adapter_port_,
-                  kDefautTransportManagerTCPPort,
-                  kTransportManagerSection,
-                  kTCPAdapterPortKey);
+  policy_snapshot_file_name_ = system_files_path_ +
+                               '/' + policy_snapshot_file_name_;
 
-    LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_, kTCPAdapterPortKey,
-                      kTransportManagerSection);
+  LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
+                    kPolicySection);
 
-    // Transport manager disconnect timeout
-    ReadUIntValue(&transport_manager_disconnect_timeout_,
-                  kDefaultTransportManagerDisconnectTimeout,
-                  kTransportManagerSection,
-                  kTransportManagerDisconnectTimeoutKey);
+  // Turn Policy Off?
+  std::string policy_off;
+  if (ReadValue(&policy_off, kPolicySection, kPolicyOffKey) &&
+      0 == strcmp("true", policy_off.c_str())) {
+    policy_turn_off_ = true;
+  } else {
+    policy_turn_off_ = false;
+  }
 
-    LOG_UPDATED_VALUE(transport_manager_disconnect_timeout_,
-                      kTransportManagerDisconnectTimeoutKey,
-                      kTransportManagerSection);
-
-    // Recording file
-    ReadStringValue(&recording_file_, kDefaultRecordingFileName,
-                    kMediaManagerSection, kSystemFilesPathKey);
-
-    LOG_UPDATED_VALUE(recording_file_, kRecordingFileKey, kMediaManagerSection);
+  LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
                         const char* const pKey) const {
-    bool ret = false;
+  bool ret = false;
 
-    char buf[INI_LINE_LEN + 1];
-    *buf = '\0';
-    if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
-            && ('\0' != *buf)) {
-        const int32_t tmpVal = atoi(buf);
-        if (0 == tmpVal) {
-            *value = false;
-        } else {
-            *value = true;
-        }
-
-        ret = true;
+  char buf[INI_LINE_LEN + 1];
+  *buf = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
+      && ('\0' != *buf)) {
+    const int32_t tmpVal = atoi(buf);
+    if (0 == tmpVal) {
+      *value = false;
+    } else {
+      *value = true;
     }
 
-    return ret;
+    ret = true;
+  }
+
+  return ret;
 }
 
 bool Profile::ReadValue(std::string* value, const char* const pSection,
                         const char* const pKey) const {
-    bool ret = false;
+  bool ret = false;
 
-    char buf[INI_LINE_LEN + 1];
-    *buf = '\0';
-    if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
-            && ('\0' != *buf)) {
-        *value = buf;
-        ret = true;
-    }
+  char buf[INI_LINE_LEN + 1];
+  *buf = '\0';
+  if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
+      && ('\0' != *buf)) {
+    *value = buf;
+    ret = true;
+  }
 
-    return ret;
+  return ret;
 }
 
 bool Profile::ReadStringValue(std::string* value, const char* default_value,
                               const char* const pSection,
                               const char* const pKey) const {
-    if (!ReadValue(value, pSection, pKey)) {
-        *value = default_value;
-        return false;
-    }
-    return true;
+  if (!ReadValue(value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  }
+  return true;
 }
 
 bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
                             const char* const pSection,
                             const char* const pKey) const {
-    std::string string_value;
-    if (!ReadValue(&string_value, pSection, pKey)) {
-        *value = default_value;
-        return false;
-    } else {
-        uint16_t user_value = strtoul(string_value.c_str(), NULL, 10);
-        if (!user_value || errno == ERANGE) {
-          *value = default_value;
-          return false;
-        }
-
-        *value = user_value;
-        return true;
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    uint16_t user_value = strtoul(string_value.c_str(), NULL, 10);
+    if (!user_value || errno == ERANGE) {
+      *value = default_value;
+      return false;
     }
+
+    *value = user_value;
+    return true;
+  }
 }
 
 bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
                             const char* const pSection,
                             const char* const pKey) const {
-    std::string string_value;
-    if (!ReadValue(&string_value, pSection, pKey)) {
-        *value = default_value;
-        return false;
-    } else {
-        uint32_t user_value = strtoul(string_value.c_str(), NULL, 10);
-        if (!user_value || errno == ERANGE) {
-          *value = default_value;
-          return false;
-        }
-
-        *value = user_value;
-        return true;
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    uint32_t user_value = strtoul(string_value.c_str(), NULL, 10);
+    if (!user_value || errno == ERANGE) {
+      *value = default_value;
+      return false;
     }
+
+    *value = user_value;
+    return true;
+  }
 }
 
 bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
                             const char* const pSection,
                             const char* const pKey) const {
-    std::string string_value;
-    if (!ReadValue(&string_value, pSection, pKey)) {
-        *value = default_value;
-        return false;
-    } else {
-        uint64_t user_value = strtoull(string_value.c_str(), NULL, 10);
-        if (!user_value || errno == ERANGE) {
-          *value = default_value;
-          return false;
-        }
-
-        *value = user_value;
-        return true;
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    uint64_t user_value = strtoull(string_value.c_str(), NULL, 10);
+    if (!user_value || errno == ERANGE) {
+      *value = default_value;
+      return false;
     }
+
+    *value = user_value;
+    return true;
+  }
 }
 
 }  //  namespace profile

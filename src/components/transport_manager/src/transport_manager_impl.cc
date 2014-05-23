@@ -76,8 +76,11 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
-      connection_id_counter_(0),
-      metric_observer_(NULL) {
+      connection_id_counter_(0)
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+{
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
   pthread_rwlock_init(&message_queue_rwlock_, NULL);
@@ -179,9 +182,10 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   if (messages_count > 0) {
     connection->messages_count = messages_count;
     connection->shutDown = true;
-    connection->timer->start(
-      profile::Profile::instance()->transport_manager_disconnect_timeout()
-    );
+
+    const uint32_t disconnect_timeout =
+        profile::Profile::instance()->transport_manager_disconnect_timeout();
+    if (disconnect_timeout > 0) connection->timer->start(disconnect_timeout);
   } else {
     connection->transport_adapter->Disconnect(connection->device,
                                               connection->application);
@@ -621,14 +625,21 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED
             : {
+          LOG4CXX_INFO(logger_, "Event ON_DEVICE_LIST_UPDATED");
           OnDeviceListUpdated(ta);
           break;
         }
+        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED:
+          LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
+          device_handle = converter_.UidToHandle(device_id);
+          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
+          break;
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
-          AddConnection(ConnectionInternal(this, ta, ++connection_id_counter_,
-                                           device_id, app_handle));
           device_handle = converter_.UidToHandle(device_id);
+          AddConnection(ConnectionInternal(this, ta, ++connection_id_counter_,
+                                           device_id, app_handle,
+                                           device_handle));
           RaiseEvent(
               &TransportManagerListener::OnConnectionEstablished,
               DeviceInfo(device_handle, device_id, ta->DeviceName(device_id)),
@@ -711,9 +722,11 @@ void TransportManagerImpl::EventListenerThread(void) {
             break;
           }
           data->set_connection_key(connection->id);
+#ifdef TIME_TESTER
           if (metric_observer_) {
             metric_observer_->StopRawMsg(data.get());
           }
+#endif  // TIME_TESTER
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }
@@ -767,9 +780,12 @@ void TransportManagerImpl::EventListenerThread(void) {
   LOG4CXX_INFO(logger_, "Event listener thread finished");
 }
 
+#ifdef TIME_TESTER
 void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
+
 void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   if (NULL != data) {
     static_cast<TransportManagerImpl*>(data)->MessageQueueThread();
@@ -863,11 +879,13 @@ void TransportManagerImpl::MessageQueueThread(void) {
 
 TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     TransportManagerImpl *transport_manager, TransportAdapter *transport_adapter,
-    const ConnectionUID &id, const DeviceUID &dev_id, const ApplicationHandle &app_id)
+    const ConnectionUID &id, const DeviceUID &dev_id, const ApplicationHandle &app_id,
+    const DeviceHandle& device_handle)
   : transport_manager(transport_manager),
     transport_adapter(transport_adapter),
     timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
     shutDown(false),
+    device_handle_(device_handle),
     messages_count(0) {
   Connection::id = id;
   Connection::device = dev_id;
@@ -877,8 +895,7 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
 void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_INFO(logger_, "Disconnection failed");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
-                                transport_manager->converter_.UidToHandle(device),
-                                DisconnectDeviceError());
+                                device_handle_, DisconnectDeviceError());
   shutDown = false;
   timer->stop();
 }

@@ -23,7 +23,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
 )
 
 set (SOURCES
@@ -49,11 +48,17 @@ set (POLICIES_MANAGER
 )
 
 if (EXTENDED_POLICY_FLAG)
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct_ext
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
     ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_impl.cc
   )
@@ -198,6 +203,9 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/sdl_activate_app_request.cc
 ./src/commands/hmi/mixing_audio_supported_request.cc
 ./src/commands/hmi/mixing_audio_supported_response.cc
+./src/commands/hmi/update_app_list_request.cc
+./src/commands/hmi/update_app_list_response.cc
+./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/update_device_list_request.cc
 ./src/commands/hmi/update_device_list_response.cc
 ./src/commands/hmi/on_sdl_consent_needed_notification.cc
@@ -354,6 +362,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_policy_update.cc
 ./src/commands/hmi/get_urls.cc
 ./src/commands/hmi/get_urls_response.cc
+./src/commands/hmi/on_device_state_changed_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

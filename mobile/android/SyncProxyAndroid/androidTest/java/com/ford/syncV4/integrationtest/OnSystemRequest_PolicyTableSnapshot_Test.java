@@ -201,7 +201,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         incomingPM0.setData(msgBytes);
         incomingPM0.setJsonSize(msgBytes.length);
         incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
+        incomingPM0.setServiceType(ServiceType.RPC);
         incomingPM0.setFunctionID(functionID);
         incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_RESPONSE);
         incomingPM0.setCorrID(correlationID);
@@ -217,7 +217,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         incomingPM0.setData(msgBytes);
         incomingPM0.setBulkData(notification.getBulkData());
         incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
+        incomingPM0.setServiceType(ServiceType.RPC);
         incomingPM0.setFunctionID(functionID);
         incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
         return incomingPM0;

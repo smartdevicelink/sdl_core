@@ -37,7 +37,10 @@
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
 #include "application_manager/commands/hmi/update_device_list_response.h"
+#include "application_manager/commands/hmi/on_update_device_list.h"
 #include "application_manager/commands/hmi/on_start_device_discovery.h"
+#include "application_manager/commands/hmi/update_app_list_request.h"
+#include "application_manager/commands/hmi/update_app_list_response.h"
 #include "application_manager/commands/hmi/on_find_applications.h"
 #include "application_manager/commands/hmi/allow_all_apps_request.h"
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
@@ -253,6 +256,7 @@
 #include "application_manager/commands/hmi/on_policy_update.h"
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/commands/hmi/get_urls_response.h"
+#include "application_manager/commands/hmi/on_device_state_changed_notification.h"
 
 namespace application_manager {
 
@@ -1100,6 +1104,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         new commands::hmi::OnDriverDistractionNotification(message));
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnUpdateDeviceList: {
+      command.reset(new commands::OnUpdateDeviceList(message));
+      break;
+    }
     case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered: {
       command.reset(new commands::OnAppRegisteredNotification(message));
       break;
@@ -1110,6 +1118,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnFindApplications: {
       command.reset(new commands::OnFindApplications(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_UpdateAppList: {
+      if (is_response) {
+        command.reset(new commands::UpdateAppListResponse(message));
+      } else {
+        command.reset(new commands::UpdateAppListRequest(message));
+      }
       break;
     }
     case hmi_apis::FunctionID::VR_Started: {
@@ -1999,6 +2015,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::SDL_OnPolicyUpdate: {
       command.reset(new commands::OnPolicyUpdate(message));
+      break;
+    }
+    case hmi_apis::FunctionID::SDL_OnDeviceStateChanged: {
+      command.reset(new commands::OnDeviceStateChangedNotification(message));
       break;
     }
   }

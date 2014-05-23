@@ -81,7 +81,6 @@ void DeleteCommandRequest::Run() {
   msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
   msg_params[strings::app_id] = application->app_id();
-  msg_params[strings::grammar_id] = application->get_grammar_id();
 
   // we should specify amount of required responses in the 1st request
   uint32_t chaining_counter = 0;
@@ -102,6 +101,9 @@ void DeleteCommandRequest::Run() {
   if ((*command).keyExists(strings::vr_commands)) {
     is_vr_send_ = true;
 
+    // VR params
+    msg_params[strings::grammar_id] = application->get_grammar_id();
+    msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params, true);
   }
 }

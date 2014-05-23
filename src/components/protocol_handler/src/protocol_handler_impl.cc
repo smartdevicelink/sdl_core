@@ -154,8 +154,12 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
-                                   threads::ThreadOptions(kStackSize)),
-      metric_observer_(NULL) {
+                                   threads::ThreadOptions(kStackSize))
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+
+{
   LOG4CXX_TRACE_ENTER(logger_);
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -187,11 +191,6 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
-  if (!observer) {
-    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
-    return;
-  }
-
   session_observer_ = observer;
 }
 
@@ -202,10 +201,20 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t service_type) {
   LOG4CXX_TRACE_ENTER(logger_);
 
+  uint8_t protocolVersion;
+
+  if (0 == profile::Profile::instance()->heart_beat_timeout()) {
+    protocolVersion = PROTOCOL_VERSION_2;
+    LOG4CXX_INFO(logger_, "Heart beat timeout == 0 => SET PROTOCOL_VERSION_2");
+  } else {
+    protocolVersion = PROTOCOL_VERSION_3;
+    LOG4CXX_INFO(logger_, "Heart beat timeout != 0 => SET PROTOCOL_VERSION_3");
+  }
+
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
-      service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
-      0, hash_code));
+    protocolVersion, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+    service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
+    0, hash_code));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
@@ -284,6 +293,25 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
+                                         uint8_t session_id) {
+  LOG4CXX_TRACE_ENTER(logger_);
+
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+      PROTOCOL_VERSION_3, COMPRESS_OFF, FRAME_TYPE_CONTROL,
+      SERVICE_TYPE_RPC, FRAME_DATA_END_SERVICE, session_id, 0,
+      session_observer_->KeyFromPair(connection_id, session_id)));
+
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+
+  LOG4CXX_INFO(logger_, "SendEndSession() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(SERVICE_TYPE_RPC)
+               << " session_id " << static_cast<int32_t>(session_id));
+
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
 RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
                                                   uint8_t session_id,
                                                   uint32_t message_id) {
@@ -302,7 +330,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
 }
 
 void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
-                                               uint8_t session_id) {
+                                        uint8_t session_id) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
@@ -405,9 +433,12 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
            protocol_frames.begin();
        it != protocol_frames.end(); ++it) {
     impl::RawFordMessageFromMobile msg(*it);
+#ifdef TIME_TESTER
     if (metric_observer_) {
       metric_observer_->StartMessageProcess(msg->message_id());
     }
+#endif  // TIME_TESTER
+
     raw_ford_messages_from_mobile_.PostMessage(msg);
   }
   LOG4CXX_TRACE_EXIT(logger_);
@@ -648,6 +679,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       RawMessagePtr raw_message(
           new RawMessage(connection_key, packet->protocol_version(), packet->data(),
                          packet->data_size(), packet->service_type()));
+#ifdef TIME_TESTER
       if (metric_observer_) {
         PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
         metric->message_id = packet->message_id();
@@ -655,6 +687,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
         metric->raw_msg = raw_message;
         metric_observer_->EndMessageProcess(metric);
       }
+#endif
       NotifySubscribers(raw_message);
       break;
     }
@@ -738,11 +771,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       RawMessagePtr rawMessage (new RawMessage(
           key, completePacket->protocol_version(), completePacket->data(),
           completePacket->total_data_bytes(), completePacket->service_type()));
+#ifdef TIME_TESTER
       if (metric_observer_) {
         PHMetricObserver::MessageMetric* metric = new PHMetricObserver::MessageMetric();
         metric->raw_msg = rawMessage;
         metric_observer_->EndMessageProcess(metric);
       }
+#endif // TIME_TESTER
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -836,7 +871,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    static_cast<int>(packet.protocol_version()));
 
   int32_t session_id = session_observer_->OnSessionStartedCallback(
-      connection_id, packet.session_id(), packet.protocol_version(),
+      connection_id, packet.session_id(),
       ServiceTypeFromByte(packet.service_type()));
 
   if (-1 != session_id) {
@@ -920,9 +955,12 @@ void ProtocolHandlerImpl::SendFramesNumber(int32_t connection_key,
         impl::RawFordMessageToMobile(ptr, false));
 }
 
+#ifdef TIME_TESTER
 void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
+
 
 std::string ConvertPacketDataToString(const uint8_t* data,
                                       const std::size_t data_size) {

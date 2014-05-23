@@ -137,15 +137,6 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
-  // wait till HMI started
-  while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
-    sleep(1);
-    // TODO(DK): timer_->StartWait(1);
-    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-                                                             correlation_id(),
-                                                             default_timeout());
-  }
-
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 
@@ -186,7 +177,7 @@ void RegisterAppInterfaceRequest::Run() {
     (*message_)[strings::msg_params];
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->RegisterApplication(message_);
+    ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Application " <<
@@ -203,7 +194,7 @@ void RegisterAppInterfaceRequest::Run() {
       app->set_hmi_application_id(resumer.GetHMIApplicationID(mobile_app_id));
     } else {
       app->set_hmi_application_id(
-          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+        ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
     }
 
     app->set_is_media_application(
@@ -239,14 +230,14 @@ void RegisterAppInterfaceRequest::Run() {
 
     // Add device to policy table and set device info, if any
     std::string device_mac_address =
-        application_manager::MessageHelper::GetDeviceMacAddressForHandle(app->device());
+      application_manager::MessageHelper::GetDeviceMacAddressForHandle(app->device());
     policy::DeviceInfo device_info;
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }
 
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
-                                                     device_info);
+        device_info);
 
     // Check policy update on ignition on, if it was not done before
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
@@ -254,12 +245,12 @@ void RegisterAppInterfaceRequest::Run() {
     // Check necessity of policy update for current application
     // TODO(KKolodiy): need remove policy_manager
     policy::PolicyManager* policy_manager =
-        policy::PolicyHandler::instance()->policy_manager();
+      policy::PolicyHandler::instance()->policy_manager();
     if (!policy_manager) {
       LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-      return;
+    } else {
+      policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
     }
-    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -467,7 +458,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
   MessageHelper::SendOnAppRegisteredNotificationToHMI(
-      *(application.get()), resumption);
+    *(application.get()), resumption);
 
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
@@ -610,14 +601,14 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
 
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
+    policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return mobile_apis::Result::REJECTED;
+    return mobile_apis::Result::DISALLOWED;
   }
   const bool init_result = policy_manager->GetInitialAppData(
-                       message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
-                       &app_hmi_types);
+                             message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
+                             &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_, "Error during initial application data check.");
@@ -776,10 +767,11 @@ RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
 
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsApplicationRegistered");
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::"
+               "IsApplicationWithSameAppIdRegistered");
 
-  int32_t mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
-                          .asInt();
+  const std::string mobile_app_id = (*message_)[strings::msg_params]
+                                    [strings::app_id].asString();
 
   const std::set<ApplicationSharedPtr>& applications =
     ApplicationManagerImpl::instance()->applications();
@@ -788,7 +780,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (mobile_app_id == (*it)->mobile_app_id()->asInt()) {
+    if (mobile_app_id == (*it)->mobile_app_id()->asString()) {
       return true;
     }
   }

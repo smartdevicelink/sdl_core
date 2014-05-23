@@ -2,6 +2,7 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.util.logger.Logger;
 
 /**
 * Created by Andrew Batutin on 8/21/13.
@@ -22,7 +23,7 @@ public class ProtocolMessageConverter {
         return mData;
     }
 
-    public ServiceType getSessionType() {
+    public ServiceType getServiceType() {
         return mServiceType;
     }
 

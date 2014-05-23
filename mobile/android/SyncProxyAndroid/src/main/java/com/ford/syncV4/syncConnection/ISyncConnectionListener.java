@@ -31,4 +31,12 @@ public interface ISyncConnectionListener {
     public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
 
     public void onStartServiceNackReceived(ServiceType serviceType);
+
+    /**
+     * Sends {@link com.ford.syncV4.protocol.ProtocolMessage} to the
+     * {@link com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher} queue
+     *
+     * @param protocolMessage {@link com.ford.syncV4.protocol.ProtocolMessage}
+     */
+    public void sendOutgoingMessage(ProtocolMessage protocolMessage);
 }

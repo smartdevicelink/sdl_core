@@ -40,7 +40,7 @@
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
-#include "metric.h"
+#include "metric_wrapper.h"
 #include "application_manager_observer.h"
 #include "application_manager/application_manager_impl.h"
 #include "transport_manager_observer.h"
@@ -56,18 +56,11 @@ class TimeManager {
   ~TimeManager();
   void Init(protocol_handler::ProtocolHandlerImpl* ph);
   void Stop();
-  void SendMetric(utils::SharedPtr<Metric> metric);
+  void SendMetric(utils::SharedPtr<MetricWrapper> metric);
  private:
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;
   ProtocolHandlerObserver ph_observer;
-
-  int16_t port_;
-  std::string ip_;
-  int32_t socket_fd_;
-  bool is_ready_;
-  threads::Thread* thread_;
-  MessageQueue<utils::SharedPtr<Metric> > messages_;
 
   class Streamer : public threads::ThreadDelegate {
    public:
@@ -79,13 +72,22 @@ class TimeManager {
     void Start();
     void Stop();
     bool Send(const std::string &msg);
+  volatile bool is_client_connected_;
   private:
     TimeManager* const server_;
-    int32_t new_socket_fd_;
-    volatile bool is_client_connected_;
+    int32_t new_socket_fd_;  
     volatile bool stop_flag_;
     DISALLOW_COPY_AND_ASSIGN(Streamer);
   };
+
+  int16_t port_;
+  std::string ip_;
+  int32_t socket_fd_;
+  bool is_ready_;
+  threads::Thread* thread_;
+  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
+  Streamer* streamer_;
+
   DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };
 }  // namespace time_manager

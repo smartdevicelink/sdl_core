@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 
-public class InternalProxyMessageComparitor implements Comparator<InternalProxyMessage> {
+public class InternalProxyMessageComparator implements Comparator<InternalProxyMessage> {
 
 	@Override
 	public int compare(InternalProxyMessage arg0, InternalProxyMessage arg1) {

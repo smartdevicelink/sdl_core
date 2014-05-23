@@ -56,7 +56,22 @@ void RegisterAppInterfaceResponse::Run() {
     }
   }
 
+
+  bool close_session = false;
+  if (last_message) {
+    if (1 < ApplicationManagerImpl::instance()->connection_handler()->GetConnectionSessionsCount(
+        (*message_)[strings::params][strings::connection_key].asUInt())) {
+      last_message = false;
+      close_session = true;
+    }
+  }
+
   SendResponse(success, mobile_apis::Result::INVALID_ENUM, last_message);
+
+  if (close_session) {
+    ApplicationManagerImpl::instance()->connection_handler()->CloseSession(
+        (*message_)[strings::params][strings::connection_key].asUInt());
+  }
 
   if (success) {
     ApplicationSharedPtr application =

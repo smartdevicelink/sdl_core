@@ -325,8 +325,9 @@ bool Array<T, minsize, maxsize>::is_valid() const {
   // All array elements must be valid
   for (typename ArrayType::const_iterator i = this->begin();
       i != this->end(); ++i) {
-    if (!i->is_valid())
+    if (!i->is_valid()) {
       return false;
+    }
   }
   return true;
 }
@@ -420,8 +421,9 @@ bool Map<T, minsize, maxsize>::is_valid() const {
   // All map elements must be valid
   for (typename Map::const_iterator i = this->begin();
       i != this->end(); ++i) {
-    if (!i->second.is_valid())
+    if (!i->second.is_valid()) {
       return false;
+    }
   }
   return true;
 }
@@ -565,6 +567,62 @@ void Optional<T>::ReportErrors(ValidationReport* report) const {
     // No error
   } else {
     value_.ReportErrors(report);
+  }
+}
+
+/*
+ * Stringifyable class
+ */
+template<typename T>
+Stringifyable<T>::Stringifyable()
+  : predefined_string_("") {
+}
+
+template<typename T>
+template<typename U>
+Stringifyable<T>::Stringifyable(const U& value)
+  : T(value),
+    predefined_string_("") {
+}
+
+template<typename T>
+template<typename U>
+Stringifyable<T>& Stringifyable<T>::operator=(const U& new_val) {
+  this->T::operator=(new_val);
+  return *this;
+}
+
+template<typename T>
+bool Stringifyable<T>::is_valid() const {
+  return is_string() || T::is_valid();
+}
+
+template<typename T>
+bool Stringifyable<T>::is_initialized() const {
+  return is_string() || T::is_initialized();
+}
+
+template<typename T>
+bool Stringifyable<T>::is_string() const {
+  return !predefined_string_.empty();
+}
+
+template<typename T>
+std::string Stringifyable<T>::get_string() const {
+  return predefined_string_;
+}
+
+template<typename T>
+void Stringifyable<T>::set_to_string(const std::string& input) {
+  predefined_string_ = input;
+}
+
+template<typename T>
+void Stringifyable<T>::ReportErrors(ValidationReport* report) const {
+  if (is_string()) {
+    // No error
+  } else {
+    T::ReportErrors(report);
   }
 }
 

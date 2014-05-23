@@ -85,7 +85,6 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
   int flags = O_RDONLY | O_CREAT;
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
   struct mq_attr attributes;
-#define MSGQ_MAX_MESSAGES 128
   attributes.mq_maxmsg = MSGQ_MAX_MESSAGES;
   attributes.mq_msgsize = MAX_QUEUE_MSG_SIZE;
   attributes.mq_flags = 0;

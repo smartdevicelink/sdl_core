@@ -37,6 +37,8 @@ namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
+const char *kMsgParams = "msg_params";
+
 CObjectSchemaItem::SMember::SMember()
     : mSchemaItem(CAlwaysFalseSchemaItem::create()),
       mIsMandatory(true) {
@@ -55,6 +57,7 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
 }
 
 Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
+  static bool is_valid = false;
   Errors::eType result = Errors::ERROR;
 
   if (SmartType_Map == Object.getType()) {
@@ -64,14 +67,25 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {
       if (objectKeys.end() != objectKeys.find(i->first)) {
+        if (kMsgParams == i->first) {
+          is_valid = false;
+        }
+
         result = i->second.mSchemaItem->validate(Object.getElement(i->first));
+
+        if (kMsgParams == i->first) {
+          if ((!is_valid) && ( 0 < (*i->second.mSchemaItem).GetMemberSize())) {
+            result = Errors::ERROR;
+          }
+        }
+
       } else {
         if (i->second.mIsMandatory) {
           result = Errors::MISSING_MANDATORY_PARAMETER;
         }
       }
 
-      if (Errors::OK != result) {
+      if ((Errors::OK != result) && (Errors::UNEXPECTED_PARAMETER != result)) {
         break;
       }
     }
@@ -81,12 +95,18 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
           k != objectKeys.end(); ++k) {
         if (mMembers.end() == mMembers.find(*k)) {
           result = Errors::UNEXPECTED_PARAMETER;
-          break;
+        } else {
+          is_valid = true;
         }
       }
     }
+
   } else {
     result = Errors::INVALID_VALUE;
+  }
+
+  if (Errors::OK == result) {
+    is_valid = true;
   }
 
   return result;
@@ -168,6 +188,10 @@ void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
       }
     }  // for
   }
+}
+
+uint32_t CObjectSchemaItem::GetMemberSize() {
+  return mMembers.size();
 }
 
 CObjectSchemaItem::CObjectSchemaItem(
