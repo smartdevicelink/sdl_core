@@ -749,8 +749,14 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
+void ApplicationManagerImpl::OnApplicationListUpdated(
+    const connection_handler::DeviceHandle& device_handle) {
+  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
+}
+
 void ApplicationManagerImpl::RemoveDevice(
-  const connection_handler::DeviceHandle& device_handle) {
+    const connection_handler::DeviceHandle& device_handle) {
+  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
 }
 
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) const {
@@ -1684,10 +1690,10 @@ void ApplicationManagerImpl::HeadUnitReset(
   mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET:
-      policy::PolicyHandler::instance()->InitPolicyTable();
+      policy::PolicyHandler::instance()->ResetPolicyTable();
       break;
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS:
-      policy::PolicyHandler::instance()->RevertPolicyTable();
+      policy::PolicyHandler::instance()->ClearUserConsent();
       break;
   }
 }

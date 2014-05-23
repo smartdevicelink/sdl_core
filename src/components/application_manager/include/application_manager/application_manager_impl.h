@@ -412,6 +412,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    //TODO (EZamakhov): fix all indentations in this file
+    void OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
   bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,

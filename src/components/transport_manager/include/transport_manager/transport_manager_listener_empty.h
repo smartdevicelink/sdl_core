@@ -63,8 +63,10 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   }
 
   /**
-  * @brief Reaction on event, when new application started it work on device and SDL found this application
-  * @param device_handle Unique ID of connected device
+  * @brief Reaction on event, when new applications are started on device
+  * and SDL found this application
+  *
+  * @param device_handle Unique ID of device with new application list
   */
   virtual void OnApplicationListUpdated(DeviceHandle device_handle){
   }

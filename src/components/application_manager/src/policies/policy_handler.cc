@@ -108,22 +108,34 @@ PolicyManager* PolicyHandler::CreateManager() {
 }
 
 bool PolicyHandler::InitPolicyTable() {
-  std::string preloaded_file =
-    profile::Profile::instance()->preloaded_pt_file();
+  LOG4CXX_TRACE(logger_, "Init policy table.");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  return policy_manager_->LoadPTFromFile(preloaded_file);
+  std::string preloaded_file =
+      profile::Profile::instance()->preloaded_pt_file();
+  return policy_manager_->InitPT(preloaded_file);
 }
 
-bool PolicyHandler::RevertPolicyTable() {
+bool PolicyHandler::ResetPolicyTable() {
+  LOG4CXX_TRACE(logger_, "Reset policy table.");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
+  std::string preloaded_file =
+      profile::Profile::instance()->preloaded_pt_file();
+  return policy_manager_->ResetPT(preloaded_file);
+}
+
+bool PolicyHandler::ClearUserConsent() {
   LOG4CXX_INFO(logger_, "Removing user consent records in policy table.");
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return false;
   }
-  return policy_manager()->ResetUserConsent();
+  return policy_manager_->ResetUserConsent();
 }
 
 uint32_t PolicyHandler::GetAppIdForSending() {

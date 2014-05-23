@@ -153,13 +153,13 @@ bool Resources::GetMemInfo(Resources::MemInfo &output) {
     LOG4CXX_ERROR(logger_, "Unable to access to " << proc);
     result = false;
     return result;
-  }
+  }  
   if (0 == (proc_entry = readdir(proc_dir))) {
     LOG4CXX_ERROR(logger_, "Unable to read : " << proc_dir);
     result = false;
     return result;
   }
-
+  closedir(proc_dir);
   if (-1 == stat(as_path.c_str(), &st) || 0 == st.st_size) {
      LOG4CXX_ERROR(logger_, "Unable to stat : " << as_path.c_str());
      result = false;
