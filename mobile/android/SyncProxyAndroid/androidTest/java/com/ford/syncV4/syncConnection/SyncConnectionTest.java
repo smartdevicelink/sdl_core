@@ -113,9 +113,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
-                                                 byte version, String correlationID) {
-                super.onProtocolServiceStarted(serviceType,sessionID, version, correlationID);
-                assertEquals("Correlation ID is empty string so far", "", correlationID);
+                                                 byte version) {
+                super.onProtocolServiceStarted(serviceType,sessionID, version);
+                assertEquals("Correlation ID is empty string so far", "");
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
                 assertEquals("Frame headers should be equal.", header.getSessionID(), sessionID);
                 assertEquals("Version should be equal.", header.getVersion(), version);
@@ -179,7 +179,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         connection.getIsConnected();
-        connection.onProtocolServiceEnded(ServiceType.RPC, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.RPC, SESSION_ID);
         verify(connection._transport, times(1)).stopReading();
     }
 
@@ -193,7 +193,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(config);
         connection.getIsConnected();
-        connection.onProtocolServiceEnded(ServiceType.Mobile_Nav, SESSION_ID, "");
+        connection.onProtocolServiceEnded(ServiceType.Mobile_Nav, SESSION_ID);
         verify(connection._transport, never()).stopReading();
 
     }
@@ -295,7 +295,6 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
     public void testOnCloseSessionAudioPacketizerStops() throws Exception {
         SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.setSessionId(SESSION_ID);
         connection.init(config);
         connection._protocol = mock(WiProProtocol.class);
         connection._transport = mock(SyncTransport.class);

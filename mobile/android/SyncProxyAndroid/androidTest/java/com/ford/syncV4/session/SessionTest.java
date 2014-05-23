@@ -51,7 +51,7 @@ public class SessionTest extends AndroidTestCase{
     public void testRemoveServiceRemovesService() throws Exception {
         Session session = Session.createSession(ServiceType.RPC, (byte) 0);
         Service service = new Service();
-        service.setSessionId(session);
+        service.setSessionId(Session.DEFAULT_SESSION_ID);
         service.setServiceType(ServiceType.RPC);
         assertTrue("service should be removed", session.removeService(service));
     }

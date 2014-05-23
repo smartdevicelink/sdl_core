@@ -395,27 +395,25 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version,
-                                                 String correlationID) {
+                                                 byte version) {
             }
 
             @Override
             public void onProtocolServiceEnded(ServiceType sessionType,
-                                               byte sessionID,
-                                               String correlationID) {
+                                               byte sessionID) {
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
             }
 
             @Override
-            public void onProtocolHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
 
             }
 
             @Override
-            public void onResetHeartbeatAck() {
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -424,7 +422,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
 
             }
 
@@ -434,17 +432,17 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeat(byte sessionId) {
 
             }
         };
@@ -526,28 +524,28 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(byte sessionId, byte version, String correlationID) {
+            public void onProtocolSessionStarted(byte sessionId, byte version) {
                 assertEquals("syncSession id should be SESSION_ID", SESSION_ID, sessionId);
                 passed[0] = true;
             }
 
             @Override
-            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID) {
 
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
 
             }
 
             @Override
-            public void onProtocolHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
 
             }
 
             @Override
-            public void onResetHeartbeatAck() {
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -557,7 +555,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
 
             }
 
@@ -567,22 +565,22 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeat(byte sessionId) {
 
             }
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID,
-                ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                ProtocolConstants.PROTOCOL_VERSION_THREE);
         assertTrue("test should pass", passed[0]);
     }
 
@@ -704,7 +702,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
-        verify(protocolListener).onResetHeartbeatAck();
+        verify(protocolListener).onResetHeartbeatAck(SESSION_ID);
     }
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {

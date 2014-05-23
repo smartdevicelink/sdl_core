@@ -105,6 +105,7 @@ public class Session {
         this.sessionId = sessionId;
     }
 
+    @Deprecated
     public byte getSessionId() {
         return sessionId;
     }

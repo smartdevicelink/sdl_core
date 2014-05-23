@@ -12,6 +12,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.SyncTransport;
@@ -33,10 +34,11 @@ import static org.mockito.Mockito.when;
  */
 public class SyncProxyALMTest extends InstrumentationTestCase {
 
-    public static final byte SESSION_ID = (byte) 48;
-    public static final byte VERSION = ProtocolConstants.PROTOCOL_VERSION_TWO;
+    private static final byte SESSION_ID = (byte) 48;
+    private static final byte VERSION = ProtocolConstants.PROTOCOL_VERSION_TWO;
 
     public SyncProxyALMTest() {
+
     }
 
     @Override
@@ -161,12 +163,12 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void startMobileNaviService(byte sessionID, String correlationID) {
-                super.startMobileNaviService(sessionID, correlationID);
+            protected void startMobileNaviService(byte sessionID) {
+                super.startMobileNaviService(sessionID);
                 assertEquals("Session ID should be equal", syncSession.getSessionId(), (byte) 48);
             }
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -286,13 +288,11 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         };
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID, "correlationID");
+        proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID);
         verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(),
-                sessionIdCaptor.capture(), correlationIdCaptor.capture());
+                sessionIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("correlationID", correlationIdCaptor.getValue());
     }
 
 
@@ -347,11 +347,11 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
         };
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, "correlationID");
-        verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        verify(listenerALM).onSessionStarted(appIdCaptor.capture(), sessionIdCaptor.capture());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("correlationID", correlationIdCaptor.getValue());
+        // TODO: Implement appId assertion
     }
 
     public void testHeartBeatIsSet() throws Exception {
@@ -421,7 +421,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                         false, null, null, null, null, null, null, false, false,
                         ProtocolConstants.PROTOCOL_VERSION_TWO, null, syncConnectionMock,
                         new TestConfig());
-        SyncConnection connection = new SyncConnection(proxy.getInterfaceBroker());
+        SyncConnection connection = new SyncConnection(new Session(), proxy.getInterfaceBroker());
         connection.init(null, mock(SyncTransport.class));
         proxy.setSyncConnection(connection);
         when(connection.getIsConnected()).thenReturn(true);

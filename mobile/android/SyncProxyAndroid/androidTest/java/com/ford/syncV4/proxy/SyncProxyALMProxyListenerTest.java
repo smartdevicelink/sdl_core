@@ -5,6 +5,7 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
@@ -44,7 +45,6 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         proxyListenerMock = mock(IProxyListenerALM.class);
         proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
-        //proxy.mWiproVersion = 2;
     }
 
     public void testOnSystemRequestResponseShouldBeCalledOnResponse()
@@ -61,6 +61,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
                 ArgumentCaptor.forClass(SystemRequestResponse.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onSystemRequestResponse(
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
                 responseCaptor.capture());
         assertThat(responseCaptor.getValue().getSuccess(), is(true));
         assertThat(responseCaptor.getValue().getResultCode(),
@@ -91,6 +92,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
                 ArgumentCaptor.forClass(OnSystemRequest.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onOnSystemRequest(
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
                 notificationCaptor.capture());
         final OnSystemRequest notification = notificationCaptor.getValue();
         assertThat(notification.getRequestType(), is(requestType));
@@ -111,7 +113,8 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
                 params, ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         ArgumentCaptor<OnHashChange> notificationCaptor = ArgumentCaptor.forClass(OnHashChange.class);
-        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).onHashChange(notificationCaptor.capture());
+        verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).onHashChange(
+                ProtocolConstants.PROTOCOL_VERSION_TWO, notificationCaptor.capture());
 
         final OnHashChange notification = notificationCaptor.getValue();
         assertThat(notification.getHashID(), is(hashId));

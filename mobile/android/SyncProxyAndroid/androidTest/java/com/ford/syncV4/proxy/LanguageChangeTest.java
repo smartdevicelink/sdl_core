@@ -6,6 +6,7 @@ import android.util.Log;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.verify;
  * Created by enikolsky on 2013-11-14.
  */
 public class LanguageChangeTest extends InstrumentationTestCase {
+
     private static final int CALLBACK_WAIT_TIMEOUT = 500;
 
     @Override
@@ -41,7 +43,6 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        //proxy.mWiproVersion = 2;
 
         // send OnLanguageChange first
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -66,6 +67,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
                 ArgumentCaptor.forClass(OnLanguageChange.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
                 argument.capture());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
@@ -100,6 +102,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT).never()).onAppUnregisteredAfterLanguageChange(
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
                 null);
     }
 
@@ -122,6 +125,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
                 null);
     }
 
@@ -163,10 +167,10 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         ArgumentCaptor<OnLanguageChange> argument =
                 ArgumentCaptor.forClass(OnLanguageChange.class);
         verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).
-                                                                         onAppUnregisteredAfterLanguageChange(
-                                                                                 argument.capture());
+                         onAppUnregisteredAfterLanguageChange(
+                                 ProtocolConstants.PROTOCOL_VERSION_TWO,
+                                 argument.capture());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }
-
 }

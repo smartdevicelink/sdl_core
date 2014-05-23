@@ -19,6 +19,7 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 
@@ -124,7 +125,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFilesDownloadRequest(
+        verify(handlerMock, times(1)).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(urls), eq(fileType));
     }
 
@@ -144,7 +145,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFilesDownloadRequest(
+        verify(handlerMock, never()).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
                 any(ISystemRequestProxy.class), anyListOf(String.class),
                 any(FileType.class));
     }
@@ -165,7 +166,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFilesDownloadRequest(
+        verify(handlerMock, times(1)).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(urls),
                 isNull(FileType.class));
     }
@@ -261,7 +262,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(
+        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(filename), eq(offset),
                 eq(length), eq(fileType));
     }
@@ -286,7 +287,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(
+        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -312,7 +313,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(
+        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -338,7 +339,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(
+        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -364,7 +365,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(
+        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(filename), eq(offset),
                 eq(length), isNull(FileType.class));
     }
@@ -472,7 +473,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(
+        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(filename0), eq(offset),
                 eq(length), eq(fileType));
     }
@@ -486,7 +487,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         final String filename = "file";
         final FileType fileType = FileType.GRAPHIC_JPEG;
-        proxy.putSystemFile(filename, data, fileType);
+        proxy.putSystemFile(Session.DEFAULT_SESSION_ID, filename, data, fileType);
 
         Thread.sleep(WAIT_TIMEOUT);
 
@@ -511,7 +512,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         final String filename = "file";
         final FileType fileType = FileType.GRAPHIC_JPEG;
         final int offset = 4000;
-        proxy.putSystemFile(filename, data, offset, fileType);
+        proxy.putSystemFile(Session.DEFAULT_SESSION_ID, filename, data, offset, fileType);
 
         Thread.sleep(WAIT_TIMEOUT);
 
@@ -548,7 +549,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 
@@ -571,7 +572,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(Session.DEFAULT_SESSION_ID,
                 notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 

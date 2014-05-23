@@ -18,7 +18,7 @@ public class ServiceTest extends AndroidTestCase {
     public void testServiceIdIsSet() throws Exception {
         Service service = new Service();
         Session session = new Session();
-        service.setSessionId(session);
+        service.setSessionId(Session.DEFAULT_SESSION_ID);
         assertEquals("service id should be 1", session, service.getSessionId());
     }
 
