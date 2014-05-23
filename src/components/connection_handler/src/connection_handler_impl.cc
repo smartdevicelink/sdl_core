@@ -88,6 +88,17 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 void ConnectionHandlerImpl::OnDeviceListUpdated(
   const std::vector<transport_manager::DeviceInfo>& device_info_list) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
+  }
+}
+
+void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
+  LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
+               << device_handle);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnApplicationListUpdated(device_handle);
+  }
 }
 
 void ConnectionHandlerImpl::OnDeviceFound(
