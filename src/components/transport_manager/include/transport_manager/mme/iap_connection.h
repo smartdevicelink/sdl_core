@@ -35,6 +35,8 @@
 
 #include <ipod/ipod.h>
 
+#include "utils/lock.h"
+
 #include "transport_manager/transport_adapter/connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
@@ -71,6 +73,7 @@ class IAPConnection : public Connection {
   uint8_t buffer_[kBufferSize];
 
   std::set<int> session_ids_;
+  sync_primitives::Lock session_ids_lock_;
 
   friend class IAPDevice;
 };

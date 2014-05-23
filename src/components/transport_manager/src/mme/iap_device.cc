@@ -88,6 +88,9 @@ ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnectio
   LOG4CXX_INFO(logger_, "iAP: registering new connection for application " << app_id);
   connections_.insert(std::make_pair(app_id, connection));
   connections_lock_.Release();
+
+// Some sessions could have been opened before connection object created
+// Such sessions shall be bound to the connection
   app_table_lock_.Acquire();
   for (AppTable::const_iterator i = app_table_.begin(); i != app_table_.end(); ++i) {
     if (i->second == app_id) {
@@ -97,6 +100,7 @@ ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnectio
     }
   }
   app_table_lock_.Release();
+
   return ipod_hdl_;
 }
 

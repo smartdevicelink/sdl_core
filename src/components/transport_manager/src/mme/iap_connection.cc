@@ -57,12 +57,18 @@ void IAPConnection::Init() {
 }
 
 TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
-  if (session_ids_.empty()) {
-    LOG4CXX_WARN(logger_, "iAP: no opened sessions");
-    return TransportAdapter::BAD_STATE;
-  }
+  int session_id;
+
+  { // auto_lock scope
+    sync_primitives::AutoLock auto_lock(session_ids_lock_);
+    if (session_ids_.empty()) {
+      LOG4CXX_WARN(logger_, "iAP: no opened sessions");
+      return TransportAdapter::BAD_STATE;
+    }
 // How is session for sending data chosen?
-  int session_id = *session_ids_.begin();
+    session_id = *session_ids_.begin();
+  } // auto_lock scope
+
   LOG4CXX_TRACE(logger_, "iAP: sending data");
   if (ipod_eaf_send(ipod_hdl_, session_id, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "iAP: data sent successfully");
@@ -97,14 +103,12 @@ void IAPConnection::ReceiveData(int session_id) {
 }
 
 void IAPConnection::OnSessionOpened(int session_id) {
-  bool firstSession = session_ids_.empty();
+  sync_primitives::AutoLock auto_lock(session_ids_lock_);
   session_ids_.insert(session_id);
-  if (firstSession) {
-    controller_->ConnectDone(device_uid_, app_handle_);
-  }
 }
 
 void IAPConnection::OnSessionClosed(int session_id) {
+  sync_primitives::AutoLock auto_lock(session_ids_lock_);
   session_ids_.erase(session_id);
 }
 
