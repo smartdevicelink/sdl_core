@@ -88,7 +88,6 @@ private:
     bool& attached
   );
 
-  static const char* qdb_name;
 #ifdef MME_MQ
   static const char* event_mq_name;
   static const char* ack_mq_name;

@@ -116,6 +116,7 @@ const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileKey = "RecordingFile";
 const char* kPolicyOffKey = "PolicySwitchOff";
+const char* kMmeDatabaseNameKey = "MMEDatabase";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -125,6 +126,7 @@ const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 const char* kDefaultRecordingFileName = "audio.8bit.wav";
+const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -398,6 +400,10 @@ const std::string& Profile::tts_delimiter() const {
 
 const std::string& Profile::recording_file() const {
   return recording_file_;
+}
+
+const std::string& Profile::mme_db_name() const {
+  return mme_db_name_;
 }
 
 void Profile::UpdateValues() {
@@ -851,6 +857,14 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_, kTCPAdapterPortKey,
                     kTransportManagerSection);
+
+  // MME database name
+  ReadStringValue(&mme_db_name_,
+                  kDefaultMmeDatabaseName,
+                  kTransportManagerSection,
+                  kMmeDatabaseNameKey);
+
+  LOG_UPDATED_VALUE(mme_db_name_, kMmeDatabaseNameKey, kTransportManagerSection);
 
   // Transport manager disconnect timeout
   ReadUIntValue(&transport_manager_disconnect_timeout_,

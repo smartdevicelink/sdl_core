@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "utils/logger.h"
+#include "config_profile/profile.h"
 
 #include "transport_manager/mme/mme_device_scanner.h"
 #include "transport_manager/mme/iap_device.h"
@@ -44,7 +45,6 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-const char* MmeDeviceScanner::qdb_name = "/dev/qdb/mediaservice_db";
 #ifdef MME_MQ
 const char* MmeDeviceScanner::event_mq_name = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* MmeDeviceScanner::ack_mq_name = "/dev/mqueue/FromSDLCoreUSBAdapter";
@@ -71,13 +71,14 @@ MmeDeviceScanner::~MmeDeviceScanner() {
 TransportAdapter::Error MmeDeviceScanner::Init() {
   TransportAdapter::Error error = TransportAdapter::OK;
 
-  LOG4CXX_TRACE(logger_, "Connecting to " << qdb_name);
-  qdb_hdl_ = qdb_connect(qdb_name, 0);
+  const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
+  LOG4CXX_TRACE(logger_, "Connecting to " << mme_db_name);
+  qdb_hdl_ = qdb_connect(mme_db_name.c_str(), 0);
   if (qdb_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "Connected to " << qdb_name);
+    LOG4CXX_DEBUG(logger_, "Connected to " << mme_db_name);
   }
   else {
-    LOG4CXX_ERROR(logger_, "Could not connect to " << qdb_name);
+    LOG4CXX_ERROR(logger_, "Could not connect to " << mme_db_name);
     error = TransportAdapter::FAIL;
   }
 
@@ -220,12 +221,13 @@ void MmeDeviceScanner::Terminate() {
   }
 #endif
 
-  LOG4CXX_TRACE(logger_, "Disconnecting from " << qdb_name);
+  const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
+  LOG4CXX_TRACE(logger_, "Disconnecting from " << mme_db_name);
   if (qdb_disconnect(qdb_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Disconnected from " << qdb_name);
+    LOG4CXX_DEBUG(logger_, "Disconnected from " << mme_db_name);
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not disconnect from " << qdb_name);
+    LOG4CXX_WARN(logger_, "Could not disconnect from " << mme_db_name);
   }
 }
 
@@ -303,7 +305,8 @@ void MmeDeviceScanner::NotifyDevicesUpdated() {
 
 bool MmeDeviceScanner::GetMmeList(MsidContainer& msids) {
   const char query[] = "SELECT msid FROM mediastores";
-  LOG4CXX_TRACE(logger_, "Querying " << qdb_name);
+  const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
+  LOG4CXX_TRACE(logger_, "Querying " << mme_db_name);
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query);
   if (res != 0) {
     LOG4CXX_DEBUG(logger_, "Parsing result");
@@ -318,7 +321,7 @@ bool MmeDeviceScanner::GetMmeList(MsidContainer& msids) {
     return true;
   }
   else {
-    LOG4CXX_ERROR(logger_, "Error querying " << qdb_name);
+    LOG4CXX_ERROR(logger_, "Error querying " << mme_db_name);
     return false;
   }
 }
@@ -334,7 +337,8 @@ bool MmeDeviceScanner::GetMmeInfo(
 ) {
 
   const char query[] = "SELECT mountpath, fs_type, serial, manufacturer, device_name, attached FROM mediastores WHERE msid=%lld";
-  LOG4CXX_TRACE(logger_, "Querying " << qdb_name);
+  const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
+  LOG4CXX_TRACE(logger_, "Querying " << mme_db_name);
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query, msid);
   if (res != 0) {
     LOG4CXX_DEBUG(logger_, "Parsing result");
@@ -382,7 +386,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     return true;
   }
   else {
-    LOG4CXX_ERROR(logger_, "Error querying " << qdb_name);
+    LOG4CXX_ERROR(logger_, "Error querying " << mme_db_name);
     return false;
   }
 }

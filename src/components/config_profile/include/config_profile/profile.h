@@ -312,6 +312,8 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& recording_file() const;
 
+    const std::string& mme_db_name() const;
+
   private:
     /**
      * Default constructor
@@ -446,6 +448,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
     std::string                     recording_file_;
+    std::string                     mme_db_name_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 
