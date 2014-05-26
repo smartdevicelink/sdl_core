@@ -38,6 +38,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <string>
+#include <map>
 
 #include "security_manager/crypto_manager.h"
 #include "security_manager/ssl_context.h"
@@ -60,7 +61,9 @@ namespace security_manager {
       virtual bool  IsInitCompleted() const;
       virtual size_t get_max_block_size(size_t mtu) const;
       virtual ~SSLContextImpl();
+
      private:
+      typedef size_t(*BlockSizeGetter)(size_t);
       DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);
       void EnsureBufferSizeEnough(size_t size);
       SSL *connection_;
@@ -68,8 +71,11 @@ namespace security_manager {
       BIO *bioOut_;
       BIO *bioFilter_;
       size_t buffer_size_;
+      BlockSizeGetter max_block_size_;
       uint8_t *buffer_;
       Mode mode_;
+      static std::map<std::string, BlockSizeGetter> max_block_sizes;
+      static std::map<std::string, BlockSizeGetter> create_max_block_sizes();
     };
 
    public:

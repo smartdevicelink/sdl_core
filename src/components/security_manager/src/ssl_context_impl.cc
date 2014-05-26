@@ -31,6 +31,7 @@
  */
 #include "security_manager/crypto_manager_impl.h"
 
+#include <map>
 #include <assert.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -72,6 +73,62 @@ StartHandshake(const uint8_t** const out_data, size_t* out_data_size) {
   return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
 
+namespace {
+  size_t aes128_gcm_sha256_max_block_size(size_t mtu) {
+    if (mtu < 29)
+      return 0;
+    return mtu - 29;
+  }
+  size_t rc4_md5_max_block_size(size_t mtu) {
+    if (mtu < 21)
+      return 0;
+    return mtu - 21;
+  }
+  size_t rc4_sha_max_block_size(size_t mtu) {
+    if (mtu < 25)
+      return 0;
+    return mtu - 25;
+  }
+  size_t seed_sha_max_block_size(size_t mtu) {
+    if (mtu < 53)
+      return 0;
+    return ((mtu - 37) & 0xfffffff0) - 5;
+  }
+  size_t aes128_sha256_max_block_size(size_t mtu) {
+    if (mtu < 69)
+      return 0;
+    return ((mtu - 53) & 0xfffffff0) - 1;
+  }
+  size_t des_cbc3_sha_max_block_size(size_t mtu) {
+    if (mtu < 37)
+      return 0;
+    return ((mtu - 29) & 0xfffffff8) - 5;
+  }
+}
+
+std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
+CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
+  std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter> rc;
+  rc.insert(std::make_pair("AES128-GCM-SHA256", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("AES128-SHA256",     aes128_sha256_max_block_size));
+  rc.insert(std::make_pair("AES128-SHA",        seed_sha_max_block_size));
+  rc.insert(std::make_pair("AES256-GCM-SHA384", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("AES256-SHA256",     aes128_sha256_max_block_size));
+  rc.insert(std::make_pair("AES256-SHA",        seed_sha_max_block_size));
+  rc.insert(std::make_pair("CAMELLIA128-SHA",   seed_sha_max_block_size));
+  rc.insert(std::make_pair("CAMELLIA256-SHA",   seed_sha_max_block_size));
+  rc.insert(std::make_pair("DES-CBC3-SHA",      des_cbc3_sha_max_block_size));
+  rc.insert(std::make_pair("DES-CBC-SHA",       des_cbc3_sha_max_block_size));
+  rc.insert(std::make_pair("RC4-MD5",           rc4_md5_max_block_size));
+  rc.insert(std::make_pair("RC4-SHA",           rc4_sha_max_block_size));
+  rc.insert(std::make_pair("SEED-SHA",          seed_sha_max_block_size));
+  return rc;
+}
+
+std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
+CryptoManagerImpl::SSLContextImpl::max_block_sizes =
+    CryptoManagerImpl::SSLContextImpl::create_max_block_sizes();
+
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
                 const uint8_t** const out_data, size_t* out_data_size) {
@@ -91,6 +148,9 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   if (handshake_result == 1) {
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
+
+    const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
+    max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
   } else if (handshake_result == 0) {
     return SSLContext::Handshake_Result_Fail;
   }
@@ -170,11 +230,12 @@ size_t CryptoManagerImpl::SSLContextImpl::
 get_max_block_size(size_t mtu) const {
   // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
   // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
-  return mtu - 200;
-/*
-  const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
-*/
+  if (!max_block_size_) {
+    return 0;
+  }
+  return max_block_size_(mtu);
 }
+
 
 CryptoManagerImpl::SSLContextImpl::
 ~SSLContextImpl() {
