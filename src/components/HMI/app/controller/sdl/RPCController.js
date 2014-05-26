@@ -78,7 +78,22 @@ SDL.RPCController = Em.Object
 
                 resultStruct: {},
 
-		/**
+                /**
+                 * Validate method for request UpdateAppList
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                UpdateAppList: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request UpdateDeviceList
                  * 
                  * @param {Object}
