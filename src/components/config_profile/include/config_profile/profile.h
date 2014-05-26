@@ -314,6 +314,12 @@ class Profile : public utils::Singleton<Profile> {
 
     const std::string& mme_db_name() const;
 
+    const std::string& event_mq_name() const;
+
+    const std::string& ack_mq_name() const;
+
+    const std::string& mme_sync_name() const;
+
   private:
     /**
      * Default constructor
@@ -449,6 +455,9 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     tts_delimiter_;
     std::string                     recording_file_;
     std::string                     mme_db_name_;
+    std::string                     event_mq_name_;
+    std::string                     ack_mq_name_;
+    std::string                     mme_sync_name_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

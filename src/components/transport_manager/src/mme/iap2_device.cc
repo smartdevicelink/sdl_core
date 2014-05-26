@@ -49,6 +49,7 @@ IAP2Device::IAP2Device(const std::string& mount_point,
                        const DeviceUID& unique_device_id,
                        TransportAdapterController* controller) :
   MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
+
   const IAP2Device::ProtocolNameContainer& protocol_names = ProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
     ::std::string protocol_name = *i;
@@ -104,7 +105,9 @@ const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
   std::ifstream system_config_file(system_config_file_name);
   std::string line;
   while (std::getline(system_config_file, line)) {
-    if ("[eap]" == line) { // start of EAP section
+    const size_t header_len = 5;
+    std::string head = line.substr(0, header_len); // drop comments in the end
+    if ("[eap]" == head) { // start of EAP section
       while (std::getline(system_config_file, line)) {
         if (line.empty()) { // end of EAP section
           break;
@@ -118,7 +121,7 @@ const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
           protocol_names.push_back(protocol_name);
         }
       }
-      break;
+      break; // nothing matters after EAP section
     }
   }
   system_config_file.close();
