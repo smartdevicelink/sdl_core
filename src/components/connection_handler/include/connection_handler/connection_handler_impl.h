@@ -83,9 +83,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void set_connection_handler_observer(
       ConnectionHandlerObserver* observer);
 
-    //!!!!!!!!!!!!
-    virtual void OnApplicationListUpdated(DeviceHandle device_handle);
-
     /**
      * \brief Sets pointer to TransportManager.
      * \param transportManager Pointer to TransportManager object.
@@ -103,6 +100,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
     virtual void OnDeviceListUpdated(
       const std::vector<transport_manager::DeviceInfo>&);
+
+    /**
+    * @brief Reaction on event, when new applications are started on device
+    * and SDL found this application
+    *
+    * @param device_handle Unique ID of device with new application list
+    */
+    virtual void OnApplicationListUpdated(DeviceHandle device_handle);
 
     /**
      * \brief Available devices list updated.
@@ -160,8 +165,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& session_id,
-      const uint8_t& protocol_version,
+      const uint8_t session_id,
       const protocol_handler::ServiceType& service_type);
 
     /**
@@ -175,7 +179,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& session_id, const uint32_t& hashCode,
+      const uint8_t session_id, const uint32_t& hashCode,
       const protocol_handler::ServiceType& service_type);
 
     /**
@@ -242,22 +246,39 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
     /*
+     * Close session associated with the key
+     */
+    virtual void CloseSession(uint32_t key);
+
+    /*
      * Function used by HearbeatMonitior to close session on HB timeout
      * \param connection_handle Connection handler within which session exists
      * \param session_id Identifier of the session to be ended
-     * \param ServiceList list of services which associated with session
      */
     virtual void CloseSession(ConnectionHandle connection_handle,
-                              uint8_t session_id,
-                              const ServiceList& service_list);
+                              uint8_t session_id);
 
     void SetProtocolHandler(protocol_handler::ProtocolHandler* handler);
+
+
+    /*
+     * \brief Return count of session for specified connection
+     * \param connection_key pair of connection handle and session id
+     */
+    virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key);
 
     /*
      * Send heartbeat message to mobile app
      */
     virtual void SendHeartBeat(ConnectionHandle connection_handle,
                                uint8_t session_id);
+
+    /*
+     * \brief Start heartbeat for specified session
+     *
+     * \param connection_key pair of connection and session id
+     */
+    virtual void StartSessionHeartBeat(uint32_t connection_key);
 
     /*
      * Keep connection associated with the key from being closed by heartbeat monitor

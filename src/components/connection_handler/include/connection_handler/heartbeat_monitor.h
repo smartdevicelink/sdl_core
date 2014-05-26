@@ -58,7 +58,12 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
    */
   virtual void threadMain();
 
-  void AddSession(uint8_t session_id);
+  /**
+    * \brief add new session
+    *
+    * \return true if first session with heartbeat added
+    */
+  bool AddSession(uint8_t session_id);
   void RemoveSession(uint8_t session_id);
 
   /*

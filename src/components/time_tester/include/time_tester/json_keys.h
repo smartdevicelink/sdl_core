@@ -44,8 +44,9 @@ namespace time_tester {
     const char session_id[] = "session_id";
     const char correlation_id[] = "correlation_id";
     const char connection_key[] = "connection_key";
-
-
+    const char stime[] = "stime";
+    const char utime[] = "utime";
+    const char memory[] = "RAM";
   }
 }
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_JSON_KEYS_H_

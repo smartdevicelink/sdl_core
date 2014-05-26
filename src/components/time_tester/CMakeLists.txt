@@ -16,6 +16,7 @@ include_directories (
 )
 
 set (SOURCES
+    ./src/metric_wrapper.cc
     ./src/time_manager.cc
     ./src/application_manager_observer.cc
     ./src/transport_manager_observer.cc

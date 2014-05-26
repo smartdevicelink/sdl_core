@@ -41,8 +41,9 @@ ApplicationManagerObserver::ApplicationManagerObserver(TimeManager* time_manager
 }
 
 void ApplicationManagerObserver::OnMessage(utils::SharedPtr<MessageMetric> metric) {
-  ApplicationManagerMetric* m = new ApplicationManagerMetric();
+  ApplicationManagerMetricWrapper* m = new ApplicationManagerMetricWrapper();
   m->message_metric = metric;
+  m->grabResources();
   time_manager_->SendMetric(m);
 }
 }  // namespace time_tester

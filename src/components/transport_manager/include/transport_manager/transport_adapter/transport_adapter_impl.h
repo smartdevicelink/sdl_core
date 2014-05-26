@@ -382,6 +382,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+#ifdef TIME_TESTER
   /**
    * @brief Setup observer for time metric.
    *
@@ -395,6 +396,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param return pointer to Time metric observer
    */
   virtual TMMetricObserver* GetTimeMetricObserver();
+#endif  // TIME_TESTER
 
  protected:
 
@@ -517,10 +519,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
+#ifdef TIME_TESTER
   /**
    * @brief Pointer to time metric observer
    */
   TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

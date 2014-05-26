@@ -308,9 +308,14 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& tts_delimiter() const;
 
     /**
+     * @brief Returns recording file source name
+     */
+    const std::string& recording_file_source() const;
+
+    /**
      * @brief Returns recording file name
      */
-    const std::string& recording_file() const;
+    const std::string& recording_file_name() const;
 
     const std::string& mme_db_name() const;
 
@@ -453,11 +458,12 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
-    std::string                     recording_file_;
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
     std::string                     mme_sync_name_;
+    std::string                     recording_file_source_;
+    std::string                     recording_file_name_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

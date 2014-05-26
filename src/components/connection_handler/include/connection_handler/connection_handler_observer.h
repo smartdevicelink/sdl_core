@@ -64,6 +64,15 @@ class ConnectionHandlerObserver {
       const connection_handler::DeviceList& device_list) = 0;
 
     /**
+    * @brief Reaction on event, when new applications are started on device
+    * and SDL found this application
+    *
+    * @param device_handle Unique ID of device with new application list
+    */
+    virtual void OnApplicationListUpdated(
+      const connection_handler::DeviceHandle& device_handle) = 0;
+
+    /**
      * \brief Removes device.
      *
      * Called when device has been removed from a list.

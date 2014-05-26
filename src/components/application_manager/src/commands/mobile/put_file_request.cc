@@ -104,7 +104,7 @@ void PutFileRequest::Run() {
                  &response_params);
     return;
   }
-
+  smart_objects::SmartType t = (*message_)[strings::msg_params][strings::system_file].getType();
   sync_file_name_ =
     (*message_)[strings::msg_params][strings::sync_file_name].asString();
   file_type_ =

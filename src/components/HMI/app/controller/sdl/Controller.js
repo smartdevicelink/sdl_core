@@ -48,7 +48,7 @@ SDL.SDLController = Em.Object
             if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.AudioPassThruPopUp.activate) {
+                || SDL.SDLModel.AudioPassThruState) {
 
                 return 'HMI_OBSCURED';
             }
@@ -65,6 +65,7 @@ SDL.SDLController = Em.Object
             }
         }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
+            'SDL.SDLModel.AudioPassThruState',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
             'SDL.States.info.nonMedia.active',
@@ -72,8 +73,7 @@ SDL.SDLController = Em.Object
             'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
-            'SDL.VRHelpListView.active',
-            'SDL.AudioPassThruPopUp.activate'),
+            'SDL.VRHelpListView.active'),
 
         /**
          * List of SDL application models
@@ -557,10 +557,24 @@ SDL.SDLController = Em.Object
                 "params": {
                     "menuParams":{
                         "parentID": 0,
-                        "menuName": "Exit",
+                        "menuName": "Exit 'DRIVER_DISTRACTION_VIOLATION'",
                         "position": 0
                     },
                     cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
+
+            exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit 'USER_EXIT'",
+                        "position": 0
+                    },
+                    cmdID: -2
                 }
             };
 

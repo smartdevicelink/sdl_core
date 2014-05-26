@@ -23,7 +23,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
 )
 
 set (SOURCES
@@ -49,11 +48,17 @@ set (POLICIES_MANAGER
 )
 
 if (EXTENDED_POLICY_FLAG)
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct_ext
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
     ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_impl.cc
   )

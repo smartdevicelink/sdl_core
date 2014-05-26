@@ -113,7 +113,7 @@ void ShowRequest::Run() {
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MAIN_FILED1);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField1);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_1];
     ++index;
@@ -121,7 +121,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MAIN_FILED2);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField2);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_2];
     ++index;
@@ -129,7 +129,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MAIN_FILED3);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField3);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_3];
     ++index;
@@ -137,7 +137,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MAIN_FILED4);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mainField4);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::main_field_4];
     ++index;
@@ -145,7 +145,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MEDIA_CLOCK);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mediaClock);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::media_clock];
     ++index;
@@ -153,7 +153,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::MEDIA_TRACK);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::mediaTrack);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::media_track];
     ++index;
@@ -161,7 +161,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
     msg_params[hmi_request::show_strings][index][hmi_request::field_name] =
-        static_cast<int32_t>(application_manager::TextFieldName::STATUS_BAR);
+        static_cast<int32_t>(hmi_apis::Common_TextFieldName::statusBar);
     msg_params[hmi_request::show_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::status_bar];
     ++index;

@@ -63,8 +63,7 @@ class SessionObserver {
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& sessionId,
-      const uint8_t& protocol_version,
+      const uint8_t sessionId,
       const ServiceType& service_type) = 0;
 
     /**
@@ -78,7 +77,7 @@ class SessionObserver {
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& sessionId,
+      const uint8_t sessionId,
       const uint32_t& hashCode,
       const ServiceType& service_type) = 0;
 

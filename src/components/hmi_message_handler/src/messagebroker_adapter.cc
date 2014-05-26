@@ -127,6 +127,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("SDL.OnSystemError");
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
+  MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
