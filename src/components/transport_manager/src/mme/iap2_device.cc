@@ -79,20 +79,17 @@ ApplicationList IAP2Device::GetApplicationList() const {
   return app_list;
 }
 
-iap2ea_hdl_t* IAP2Device::HandlerByAppId(ApplicationHandle app_id) const {
-  iap2ea_hdl_t* handler;
-  apps_lock_.Acquire();
+bool IAP2Device::RecordByAppId(ApplicationHandle app_id, AppRecord& record) const {
+  sync_primitives::AutoLock auto_lock(apps_lock_);
   AppContainer::const_iterator i = apps_.find(app_id);
   if (i != apps_.end()) {
-    AppRecord record = i->second;
-    handler = record.second;
+    record = i->second;
+    return true;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: no handler corresponding to application " << app_id);
-    handler = 0;
+    LOG4CXX_WARN(logger_, "iAP2: no record corresponding to application " << app_id);
+    return false;
   }
-  apps_lock_.Release();
-  return handler;
 }
 
 const IAP2Device::ProtocolNameContainer& IAP2Device::ProtocolNames() {

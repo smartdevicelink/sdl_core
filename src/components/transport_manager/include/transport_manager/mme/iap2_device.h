@@ -61,15 +61,19 @@ class IAP2Device : public MmeDevice {
     return IAP2;
   }
 
-  iap2ea_hdl_t* HandlerByAppId(ApplicationHandle app_id) const;
-
  protected:
   virtual ApplicationList GetApplicationList() const;
 
  private:
   typedef std::list<std::string> ProtocolNameContainer;
+  typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
+  typedef std::map<ApplicationHandle, AppRecord> AppContainer;
+  typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
+
   static const ProtocolNameContainer& ProtocolNames();
   static const ProtocolNameContainer ReadProtocolNames();
+
+  bool RecordByAppId(ApplicationHandle app_id, AppRecord& record) const;
 
   void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
   void OnDisconnect(ApplicationHandle app_id);
@@ -79,12 +83,9 @@ class IAP2Device : public MmeDevice {
   TransportAdapterController* controller_;
   int last_app_id_;
 
-  typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
-  typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   AppContainer apps_;
   mutable sync_primitives::Lock apps_lock_;
 
-  typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
   ThreadContainer connection_threads_;
 
   class IAP2ConnectThreadDelegate : public threads::ThreadDelegate {

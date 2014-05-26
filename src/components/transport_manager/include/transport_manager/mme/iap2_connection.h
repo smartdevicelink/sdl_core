@@ -69,6 +69,7 @@ class IAP2Connection : public Connection {
   TransportAdapterController* controller_;
   IAP2Device* parent_;
   iap2ea_hdl_t* iap2ea_hdl_;
+  std::string protocol_name_; // for logging purposes only
   uint8_t buffer_[kBufferSize];
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
