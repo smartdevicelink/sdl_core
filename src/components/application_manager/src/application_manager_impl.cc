@@ -928,7 +928,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO(logger_,
                "OnServiceStartedCallback " << type << " in session " << session_key);
-  OnApplicationListUpdated(device_handle);
   ApplicationSharedPtr app = application(session_key);
 
   switch (type) {
