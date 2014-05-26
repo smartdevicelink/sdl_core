@@ -1236,7 +1236,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (duration in params && typeof params.duration != 'number') {
+                    if ('duration' in params && typeof params.duration != 'number') {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],

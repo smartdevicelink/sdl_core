@@ -140,7 +140,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('content2', '');
         this.set('content3', '');
 
-        SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        if (this.timeout && this.softbuttons.buttons.childViews.length > 0) {
+            SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['ABORTED'], this.alertRequestId);
+        } else {
+            SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        }
 
         SDL.SDLController.onSystemContextChange();
     },
