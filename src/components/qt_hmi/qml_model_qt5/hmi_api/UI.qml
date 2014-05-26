@@ -61,7 +61,7 @@ Item {
         return fieldSubstrings
     }
 
-    function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
+    function alert (alertStrings, duration, softButtons, progressIndicator, alertType, appID) {
         var softButtonsLog = "",
             alertStringsLog = "";
         if (alertStrings) {
@@ -92,7 +92,7 @@ Item {
 	    .sort(function(a, b) { return a.fieldName - b.fieldName }) // sorting by fieldName
 	    .map(function(val) { return val.fieldText });              // mapping to array of strings
 
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, progressIndicator, softButtons, appID)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, softButtons, progressIndicator, alertType, appID)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
